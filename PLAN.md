@@ -42,8 +42,11 @@
 |--------|---------|
 | zod v4 + @hookform/resolvers | TypeScript 타입 추론 이슈 → `@hookform/resolvers ^5.2.2` 필수 |
 | Expo Router v7 | SDK 55와 함께 배포됨, `expo-router` 별도 버전 고정 불필요 |
-| TanStack Query (React Native) | `onlineManager`, `focusManager` React Native 설정 필요 |
+| TanStack Query (React Native) | `onlineManager`, `focusManager` 설정 + `query-async-storage-persister` 연동 필요 |
 | Zustand v5 | React 18 미만 미지원 (Expo SDK 55 = React 19.2 이므로 문제없음) |
+| @sentry/react-native | Expo plugin 등록 필수 (`app.json`의 `plugins` 배열) |
+| expo-notifications | iOS는 development build 필요 (Expo Go에서 일부 기능 미지원) |
+| expo-secure-store | iOS Keychain / Android Keystore 사용 — 디바이스 잠금 해제 필요 |
 
 ---
 
@@ -143,10 +146,16 @@ ylmc-front/
 │   │   └── usePrayerList.ts      # useQuery — 기도제목 목록
 │   │
 │   ├── lib/
-│   │   └── queryClient.ts        # QueryClient 인스턴스 및 기본 설정
+│   │   ├── queryClient.ts        # QueryClient 인스턴스 및 기본 설정
+│   │   ├── queryKeys.ts          # queryKey 컨벤션 중앙화 (도메인별)
+│   │   └── secureStore.ts        # expo-secure-store 토큰 저장 유틸
 │   │
-│   ├── types/                    # TypeScript 타입 정의
-│   │   └── index.ts
+│   ├── types/                    # TypeScript 타입 정의 (도메인별 분리)
+│   │   ├── common.ts             # Member, PaginatedResponse, Report
+│   │   ├── market.ts
+│   │   ├── group.ts
+│   │   ├── lifeStudy.ts
+│   │   └── prayer.ts
 │   │
 │   ├── constants/
 │   │   └── theme.ts              # 색상, spacing, 폰트 크기 등 디자인 토큰
@@ -159,8 +168,14 @@ ylmc-front/
 │       └── prayers.ts
 │
 ├── assets/                       # 이미지, 폰트, 아이콘
+├── docs/
+│   └── adr/                      # Architecture Decision Records (주요 의사결정 기록)
+├── .github/
+│   └── workflows/                # GitHub Actions (typecheck, lint, test)
 ├── PLAN.md                       # 이 파일 — 프로젝트 기준 문서
-├── app.json                      # Expo 설정
+├── README.md                     # 프로젝트 소개·세팅·실행 가이드
+├── app.config.ts                 # 환경별 동적 Expo 설정 (app.json 대체)
+├── eas.json                      # EAS Build profiles (dev/preview/production)
 ├── tsconfig.json
 └── package.json
 ```
@@ -176,6 +191,25 @@ interface Member {
   name: string;
   profileImage?: string;
   department?: string;    // 교구/구역
+  role: 'member' | 'staff' | 'admin';  // 'staff' = 교역자, 'admin' = 운영자
+}
+
+// 페이지네이션 응답 (모든 목록 API 공통)
+interface PaginatedResponse<T> {
+  items: T[];
+  nextCursor: string | null;
+  hasMore: boolean;
+}
+
+// 신고 — 장터·소모임·기도제목 공통
+interface Report {
+  id: string;
+  targetType: 'market' | 'group' | 'prayer';
+  targetId: string;
+  reporterId: string;
+  reason: 'inappropriate' | 'spam' | 'abuse' | 'other';
+  detail?: string;
+  createdAt: Date;
 }
 
 // ─── 나눔장터 ────────────────────────────────────────
@@ -267,9 +301,41 @@ interface PrayerRequest {
 |------|------|------|
 | 린팅 | ESLint | `expo` lint preset 사용 |
 | 포맷팅 | Prettier | 탭 너비 2, 세미콜론 없음 |
-| 빌드 | EAS Build | 로컬 개발은 Expo Go + Dev Client |
-| 환경변수 | `.env` + `expo-constants` | API 키 등 분리 관리 |
+| 빌드 | EAS Build | dev / preview / production profiles (`eas.json`) |
+| 환경변수 | `app.config.ts` + `expo-constants` | 환경별 API URL, 키 분리 |
 | Node.js | `^20.x` (LTS) | package.json에 `engines` 명시 |
+| 커밋 컨벤션 | Conventional Commits + commitlint | `feat / fix / docs / chore / refactor / test` |
+| 커밋 훅 | husky + lint-staged | 커밋 전 typecheck + lint + format 자동 실행 |
+| CI | GitHub Actions | PR마다 typecheck + lint + test 실행 |
+| 의존성 추적 | Renovate 또는 Dependabot | Expo SDK 메이저 업그레이드 추적 |
+
+---
+
+## 🌍 환경 분리
+
+`app.config.ts`로 동적 설정, `eas.json` profiles로 빌드 분리. 런타임 접근은 `expo-constants.expoConfig.extra.apiUrl`.
+
+| 환경 | 용도 | API URL | Bundle ID |
+|------|------|---------|----------|
+| development | 로컬 개발 | dev API | `com.ylmc.connect.dev` |
+| preview | 내부 테스트 (EAS Internal Distribution) | staging API | `com.ylmc.connect.preview` |
+| production | 스토어 배포 | prod API | `com.ylmc.connect` |
+
+```typescript
+// app.config.ts 패턴
+export default ({ config }: ConfigContext): ExpoConfig => {
+  const variant = process.env.APP_VARIANT ?? 'development';
+  return {
+    ...config,
+    name: variant === 'production' ? 'YLMC Connect' : `YLMC (${variant})`,
+    ios: { bundleIdentifier: bundleIds[variant] },
+    android: { package: bundleIds[variant] },
+    extra: { apiUrl: apiUrls[variant], variant },
+  };
+};
+```
+
+> 환경별로 동시에 설치 가능해야 하므로 Bundle ID를 분리합니다.
 
 ---
 
@@ -313,6 +379,66 @@ AppState.addEventListener('change', (status) =>
 
 ---
 
+## 🔑 queryKey 컨벤션
+
+queryKey 형식이 도메인별로 흩어지면 무효화·캐시 동기화가 깨집니다. **모든 queryKey는 `src/lib/queryKeys.ts`에서만 생성**합니다.
+
+```typescript
+// src/lib/queryKeys.ts
+export const queryKeys = {
+  market: {
+    all: ['market'] as const,
+    lists: () => [...queryKeys.market.all, 'list'] as const,
+    list: (filter: MarketCategory | 'all') => [...queryKeys.market.lists(), filter] as const,
+    detail: (id: string) => [...queryKeys.market.all, 'detail', id] as const,
+  },
+  group: {
+    all: ['group'] as const,
+    lists: () => [...queryKeys.group.all, 'list'] as const,
+    detail: (id: string) => [...queryKeys.group.all, 'detail', id] as const,
+  },
+  lifeStudy: {
+    all: ['lifeStudy'] as const,
+    courses: (status?: LifeStudyCourse['status']) => [...queryKeys.lifeStudy.all, 'courses', status] as const,
+    history: (memberId: string) => [...queryKeys.lifeStudy.all, 'history', memberId] as const,
+  },
+  prayer: {
+    all: ['prayer'] as const,
+    lists: () => [...queryKeys.prayer.all, 'list'] as const,
+    detail: (id: string) => [...queryKeys.prayer.all, 'detail', id] as const,
+  },
+} as const;
+```
+
+**무효화 패턴 통일**:
+```typescript
+queryClient.invalidateQueries({ queryKey: queryKeys.market.lists() });  // 목록만
+queryClient.invalidateQueries({ queryKey: queryKeys.market.all });       // 도메인 전체
+```
+
+---
+
+## 📦 영속 캐시 / 오프라인 지원
+
+성도 앱 특성상 지하/이동 중 사용 비율이 높아, 마지막 본 데이터를 항상 표시할 수 있어야 합니다.
+
+- **영속 캐시**: `@tanstack/query-async-storage-persister` + AsyncStorage로 캐시를 디스크에 저장
+- **오프라인 인디케이터**: 상단 배너로 `onlineManager.isOnline()` 상태 표시
+- **낙관적 업데이트 큐**: 기도하기·찜하기 등 가벼운 mutation은 오프라인 중에도 큐잉 → `mutationCache.resumePausedMutations()`로 네트워크 복구 시 자동 재시도
+- **stale 정책**: 목록 5분 / 상세 1분 / 사용자 정보 10분을 기본값으로
+
+```typescript
+// src/lib/queryClient.ts (확장)
+import { persistQueryClient } from '@tanstack/react-query-persist-client';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const persister = createAsyncStoragePersister({ storage: AsyncStorage });
+persistQueryClient({ queryClient, persister, maxAge: 1000 * 60 * 60 * 24 });  // 24시간
+```
+
+---
+
 ## 👤 Mock Auth 설계
 
 개발 초기에는 고정된 Mock 유저로 진행하고, Phase 7에서 실제 API 인증으로 교체합니다.
@@ -337,6 +463,42 @@ interface AuthState {
 
 **개발 시작 시** `authStore`의 초기값으로 `MOCK_USER`를 주입해 로그인된 상태로 시작합니다.  
 **Phase 7**에서 `login()` 함수를 실제 API 토큰 기반 인증으로 교체합니다.
+
+---
+
+## 🔐 보안 및 개인정보
+
+교회 성도 데이터(이름·교구·기도제목)는 민감 정보로 취급합니다. 스토어 심사도 이를 요구합니다.
+
+| 항목 | 정책 |
+|------|------|
+| 토큰 저장 | **`expo-secure-store`** 전용 (iOS Keychain / Android Keystore) — AsyncStorage 금지 |
+| 통신 | HTTPS 강제, `app.json`의 `usesCleartextTraffic: false` |
+| 토큰 갱신 | refresh token rotation, 만료 시 자동 재발급 → 실패 시 로그인 화면으로 |
+| 익명 기도제목 | 작성자 ID는 클라이언트 응답에 포함되지 않음 (서버 권한 검증 후 노출) |
+| 민감 데이터 로깅 | 기도제목 본문·사용자 PII는 Sentry `beforeSend`에서 제거 |
+| 약관 동의 | 개인정보 처리방침 / 이용약관 화면 — 회원가입 시 필수 (스토어 심사용) |
+| 사진 메타데이터 | 업로드 전 EXIF 제거 (`expo-image-manipulator`) |
+
+```typescript
+// src/lib/secureStore.ts — Phase 1에 만들어두고 Phase 7에서 사용
+import * as SecureStore from 'expo-secure-store';
+
+const ACCESS_TOKEN_KEY = 'ylmc.access_token';
+const REFRESH_TOKEN_KEY = 'ylmc.refresh_token';
+
+export const secureTokenStore = {
+  async getAccessToken() { return SecureStore.getItemAsync(ACCESS_TOKEN_KEY); },
+  async setTokens(access: string, refresh: string) {
+    await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, access);
+    await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refresh);
+  },
+  async clear() {
+    await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+    await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+  },
+};
+```
 
 ---
 
@@ -365,6 +527,42 @@ interface AuthState {
 | 전역 예외 | React 에러 바운더리 (`app/_layout.tsx`에 등록) |
 
 > Mock 단계에서는 에러를 시뮬레이션하는 Mock 함수로 UI 동작을 미리 검증합니다.
+
+---
+
+## 📊 에러 추적 및 분석
+
+| 항목 | 도구 | 사용처 |
+|------|------|--------|
+| 크래시·예외 추적 | `@sentry/react-native` | 에러 바운더리, TanStack Query `onError`, 전역 핸들러 |
+| 사용성 분석 | Firebase Analytics 또는 Amplitude | 핵심 funnel: 글쓰기 진입→등록 완료, 소모임 참여, 기도 참여 |
+| 개인정보 스크러빙 | Sentry `beforeSend` 훅 | 기도제목 본문, 사용자 이름, 토큰 자동 제거 |
+| Source map 업로드 | Sentry CLI + EAS Build hook | 프로덕션 스택트레이스 가독성 확보 |
+| Release 트래킹 | Sentry release | 어느 버전에서 발생한 에러인지 식별 |
+
+```typescript
+// 글로벌 에러 핸들링 패턴
+queryClient.setDefaultOptions({
+  queries: { onError: (error) => Sentry.captureException(error) },
+  mutations: { onError: (error) => Sentry.captureException(error) },
+});
+```
+
+---
+
+## 🧪 테스트 전략
+
+| 레이어 | 도구 | 범위 | 커버리지 목표 |
+|-------|------|------|------|
+| 단위 테스트 | Jest | `services/`, `hooks/`, `lib/` | 80%+ |
+| 컴포넌트 테스트 | React Native Testing Library | `components/ui/` 원자 + critical 화면 | critical path 100% |
+| E2E | Maestro | 로그인 → 각 탭 진입 → 글쓰기 골든 패스 | 핵심 플로우 |
+
+- 테스트 파일 위치: 대상 파일 옆 `__tests__/` 폴더에 co-location
+- Mock 데이터(`src/mocks/`)를 테스트 픽스처로 그대로 재사용
+- `@testing-library/react-hooks` 대신 RTL의 `renderHook` 사용 (RTL v13+에 통합)
+- TanStack Query 훅 테스트는 별도 `QueryClientProvider`로 wrap (각 테스트마다 새 인스턴스)
+- CI(GitHub Actions)에서 PR마다 자동 실행 + 커버리지 리포트
 
 ---
 
@@ -397,6 +595,72 @@ interface AuthState {
 
 ---
 
+## 🔔 푸시 알림 시나리오
+
+`expo-notifications` + 권한 플로우. 디바이스 토큰은 로그인 시 백엔드에 등록, 로그아웃 시 해제.
+
+| 트리거 | 대상 | 알림 메시지 예시 |
+|-------|------|----------|
+| 소모임 일정 24시간 전 | 참여 멤버 | "내일 [모임명] 일정이 있습니다" |
+| 기도제목 만료 임박 | 작성자 | "기도제목이 곧 만료됩니다" |
+| 장터 채팅 신규 메시지 | 수신자 | "[상품명]에 메시지가 도착했습니다" |
+| 삶공부 신청 결과 | 신청자 | "[과정명] 신청이 승인되었습니다" |
+| 새 기도제목 등록 (선택) | 구독자 | "새 기도제목: [제목]" |
+
+**Deep link**: 알림 탭 → 해당 화면으로 직진입. `app.config.ts`의 `scheme`, iOS `associatedDomains`, Android `intentFilters` 설정 필요.
+
+**알림 설정 화면**: 사용자가 카테고리별 ON/OFF를 직접 제어할 수 있도록 합니다 (장터/소모임/삶공부/기도 + 야간 방해금지 시간대).
+
+---
+
+## 🖼 이미지 업로드 파이프라인
+
+장터(최대 5장) · 소모임 cover(1장) · 프로필 사진(1장)에서 사용.
+
+| 단계 | 도구 | 비고 |
+|------|------|------|
+| 선택 | `expo-image-picker` | 다중 선택 지원, 권한 플로우 포함 |
+| EXIF 제거 + 압축 | `expo-image-manipulator` | 최대 1920px 리사이즈, JPEG 80% 품질 |
+| 업로드 | 백엔드 presigned URL 직접 PUT | 서버 부하 최소화 (Phase 7 결정) |
+| 진행률 | `XMLHttpRequest.upload.onprogress` | % 표시 |
+| 캐시 | `expo-image`의 `cachePolicy="memory-disk"` | 기본값 활용 |
+| 실패 처리 | 재시도 버튼 + 임시 로컬 보관 | 네트워크 끊김 시 |
+
+> 백엔드 스토리지(S3 / Cloudinary / Firebase Storage)는 Phase 7 시작 전에 결정하고 ADR로 기록합니다.
+
+---
+
+## 🚩 신고 / 차단 / 모더레이션
+
+성도 커뮤니티는 일반 SNS보다 신뢰도가 높지만, 스토어 심사·운영 안정성을 위해 필수입니다.
+
+- 모든 게시물(장터·소모임·기도제목)·댓글·채팅에 신고 버튼
+- 신고 사유: `inappropriate` / `spam` / `abuse` / `other`
+- 사용자 차단: 차단 후 해당 사용자의 모든 컨텐츠 클라이언트에서 자동 숨김
+- `Member.role`로 권한 구분:
+  - `member`: 일반 성도
+  - `staff`: 교역자 — 본인 영역 게시물 즉시 비공개 처리 가능
+  - `admin`: 운영자 — 전체 권한, 관리자 도구 사용
+- 신고 누적 임계치 시 자동 비공개 (백엔드 정책, 클라이언트는 `status` 필드 표시)
+- 관리자 도구: 별도 어드민 웹 또는 인앱 어드민 화면 — Phase 9에서 결정
+
+---
+
+## ♿ 접근성 (a11y)
+
+시니어 성도 비율을 고려해 적극적으로 설계합니다.
+
+- 모든 인터랙션 요소에 `accessibilityLabel`, `accessibilityRole`, `accessibilityHint`
+- 색상 대비 WCAG AA (4.5:1 이상) — `theme.ts` 색상 정의 시 검증
+- `PixelRatio.getFontScale()` 대응 — 시스템 글자 크기 2배까지 깨지지 않도록 레이아웃
+- VoiceOver / TalkBack 핵심 플로우 동작 확인 (로그인·글쓰기·기도하기)
+- 터치 타겟 최소 44×44pt (iOS HIG 기준)
+- 동적 폰트 크기는 `useWindowDimensions()`로 반응형 처리
+
+> Phase 10에서 전체 화면 audit을 수행합니다.
+
+---
+
 ## 🚀 개발 단계 (Phase)
 
 ### ✅ Phase 0 — 기획 및 문서화
@@ -413,9 +677,11 @@ interface AuthState {
 - [ ] `create-expo-app` 으로 프로젝트 생성 (`--template blank-typescript`)
 - [ ] 의존성 설치
   ```bash
-  # 서버 상태
+  # 서버 상태 + 영속 캐시
   npx expo install @tanstack/react-query
-  # 네트워크 상태 (TanStack Query React Native 필수)
+  npm install @tanstack/react-query-persist-client @tanstack/query-async-storage-persister
+  npx expo install @react-native-async-storage/async-storage
+  # 네트워크 상태
   npx expo install @react-native-community/netinfo
   # 클라이언트 상태
   npm install zustand
@@ -424,61 +690,116 @@ interface AuthState {
   # 날짜
   npm install date-fns
   # 이미지
-  npx expo install expo-image
+  npx expo install expo-image expo-image-picker expo-image-manipulator
+  # 보안 저장소
+  npx expo install expo-secure-store
+  # 알림 (Phase 7에서 본격 사용, 의존성만 선설치)
+  npx expo install expo-notifications expo-device expo-constants
+  # 모니터링
+  npx expo install @sentry/react-native
   # 개발 도구
   npm install -D eslint prettier
+  npm install -D jest @testing-library/react-native @types/jest jest-expo
+  npm install -D husky lint-staged @commitlint/cli @commitlint/config-conventional
   ```
-- [ ] 폴더 구조 생성 (app/, src/ 하위 전체)
-- [ ] `src/lib/queryClient.ts` — QueryClient 설정 + React Native onlineManager/focusManager 연동
-- [ ] Root layout에 `QueryClientProvider` + Zustand 연결
-- [ ] `src/mocks/auth.ts` — MOCK_USER 정의
+- [ ] 폴더 구조 생성 (app/, src/, docs/adr/, .github/workflows/ 전체)
+- [ ] `src/lib/queryClient.ts` — QueryClient + onlineManager/focusManager + AsyncStorage persister
+- [ ] `src/lib/queryKeys.ts` — 도메인별 queryKey 컨벤션 작성
+- [ ] `src/lib/secureStore.ts` — 토큰 저장 유틸 (Phase 6/7에서 사용)
+- [ ] `src/types/` — 도메인별 분리 (common / market / group / lifeStudy / prayer)
+- [ ] Root layout에 `QueryClientProvider` + Zustand + Sentry + 에러 바운더리 연결
+- [ ] Sentry 초기화 + `beforeSend` 스크러빙 (기도제목 본문·PII 제거)
+- [ ] `src/mocks/auth.ts` — MOCK_USER 정의 (`role: 'member'` 포함)
 - [ ] `src/store/authStore.ts` — Mock 유저 기본값 주입
-- [ ] `src/constants/theme.ts` — 디자인 토큰 (색상, spacing, typography)
-- [ ] 공통 UI 컴포넌트 (Button, Card, Badge, Avatar, Divider)
+- [ ] `src/constants/theme.ts` — 디자인 토큰 (색상 WCAG AA, spacing, typography)
+- [ ] 공통 UI 컴포넌트 (Button, Card, Badge, Avatar, Divider) — a11y 라벨 적용
 - [ ] Root layout + 5탭 네비게이션 뼈대 (MaterialIcons 적용)
-- [ ] `.env` 파일 + `app.json` extra 설정 (환경변수 기반)
+- [ ] `app.config.ts` 동적 설정 + `eas.json` profiles (dev/preview/production)
+- [ ] `.env` + `expo-constants.expoConfig.extra`로 환경변수 접근
+- [ ] husky + lint-staged + commitlint 설정 (커밋 전 typecheck/lint/format)
+- [ ] GitHub Actions 워크플로우 (typecheck + lint + test on PR)
+- [ ] Jest + React Native Testing Library 설정 + 샘플 테스트 1개
+- [ ] README.md 작성 (프로젝트 소개·세팅·실행 가이드)
+- [ ] `docs/adr/0001-tech-stack.md` — 기술 스택 결정 기록
 
 ### 🔲 Phase 2 — 나눔장터
 - [ ] `src/mocks/market.ts` — Mock 데이터 작성 (MarketCategory 전체 커버)
-- [ ] `src/services/marketService.ts` — fetchMarketItems(), fetchMarketItem(id) 구현
-- [ ] `src/hooks/useMarketItems.ts` — useQuery로 목록/상세 훅 작성
-- [ ] 목록 화면 (`app/(tabs)/market/index.tsx`) — 카테고리 필터 탭 + 검색바
-- [ ] 상세 화면 (`app/(tabs)/market/[id].tsx`) — 이미지 슬라이더, 판매자 정보, 거래 상태 배지
-- [ ] 글쓰기 모달 (`app/modal/market-new.tsx`) — react-hook-form + zod 적용
+- [ ] `src/services/marketService.ts` — fetchMarketItems(cursor), fetchMarketItem(id), reportMarketItem()
+- [ ] `src/hooks/useMarketItems.ts` — `useInfiniteQuery`로 목록 페이지네이션 + 상세 useQuery + 신고 useMutation
+- [ ] 목록 화면 (`app/(tabs)/market/index.tsx`) — 카테고리 필터 탭 + 검색바 + 무한 스크롤
+- [ ] 상세 화면 (`app/(tabs)/market/[id].tsx`) — 이미지 슬라이더, 판매자 정보, 거래 상태 배지, 신고 버튼
+- [ ] 글쓰기 모달 (`app/modal/market-new.tsx`) — react-hook-form + zod + 이미지 다중 선택/압축
+- [ ] 핵심 화면 테스트 (목록 렌더, 상세 진입, 등록 플로우, 신고 동작)
+- [ ] a11y 라벨 적용 (모든 인터랙션)
 
 ### 🔲 Phase 3 — 소모임
 - [ ] `src/mocks/groups.ts` — Mock 데이터 (GroupCategory 전체 커버, coverImage 포함)
-- [ ] `src/services/groupService.ts` — fetchGroups(), fetchGroup(id), joinGroup(), leaveGroup()
-- [ ] `src/hooks/useGroupList.ts` — useQuery + useMutation (참여/탈퇴)
-- [ ] 목록 화면 (`app/(tabs)/group/index.tsx`) — 카테고리 탭 + 인원 배지
-- [ ] 상세 화면 (`app/(tabs)/group/[id].tsx`) — 멤버 목록, 일정, 참여 버튼
-- [ ] 소모임 개설 모달 (`app/modal/group-new.tsx`) — react-hook-form + zod 적용
+- [ ] `src/services/groupService.ts` — fetchGroups(cursor), fetchGroup(id), joinGroup(), leaveGroup(), reportGroup()
+- [ ] `src/hooks/useGroupList.ts` — `useInfiniteQuery` + useMutation (참여/탈퇴/신고)
+- [ ] 목록 화면 (`app/(tabs)/group/index.tsx`) — 카테고리 탭 + 인원 배지 + 무한 스크롤
+- [ ] 상세 화면 (`app/(tabs)/group/[id].tsx`) — 멤버 목록, 일정, 참여 버튼, 신고 버튼
+- [ ] 소모임 개설 모달 (`app/modal/group-new.tsx`) — react-hook-form + zod + cover 이미지 업로드
+- [ ] 핵심 화면 테스트 + a11y 라벨
 
 ### 🔲 Phase 4 — 삶공부
 - [ ] `src/mocks/lifeStudy.ts` — Mock 과정 데이터 + 수강이력 (memberId 포함)
-- [ ] `src/services/lifeStudyService.ts` — fetchCourses(), fetchMyHistory(), enrollCourse()
+- [ ] `src/services/lifeStudyService.ts` — fetchCourses(), fetchMyHistory(), enrollCourse(), cancelEnrollment()
 - [ ] `src/hooks/useLifeStudyCourses.ts` — useQuery + useMutation (신청/취소)
 - [ ] 과정 목록 화면 (`app/(tabs)/life-study/index.tsx`) — 상태(upcoming/ongoing/completed) 탭
 - [ ] 과정 상세 화면 (`app/(tabs)/life-study/[id].tsx`) — 신청 폼
 - [ ] 내 이력 화면 — 수강 완료 과정 + 수료증 여부 표시
+- [ ] 핵심 화면 테스트 + a11y 라벨
 
 ### 🔲 Phase 5 — 중보기도
 - [ ] `src/mocks/prayers.ts` — Mock 기도제목 (익명 포함, 만료일 포함)
-- [ ] `src/services/prayerService.ts` — fetchPrayers(), prayForRequest(id)
-- [ ] `src/hooks/usePrayerList.ts` — useQuery + useMutation (기도하기)
-- [ ] 목록 화면 (`app/(tabs)/prayer/index.tsx`) — 만료 임박 배지, 기도 수 표시
-- [ ] 상세 화면 (`app/(tabs)/prayer/[id].tsx`) — 기도하기 버튼 (카운트 낙관적 업데이트)
+- [ ] `src/services/prayerService.ts` — fetchPrayers(cursor), prayForRequest(id), reportPrayer()
+- [ ] `src/hooks/usePrayerList.ts` — `useInfiniteQuery` + useMutation (기도하기/신고)
+- [ ] 목록 화면 (`app/(tabs)/prayer/index.tsx`) — 만료 임박 배지, 기도 수 표시, 무한 스크롤
+- [ ] 상세 화면 (`app/(tabs)/prayer/[id].tsx`) — 기도하기 버튼 (카운트 낙관적 업데이트), 신고 버튼
 - [ ] 기도제목 등록 모달 (`app/modal/prayer-new.tsx`) — 익명 옵션 + 만료일 선택
+- [ ] 핵심 화면 테스트 + a11y 라벨
+- [ ] 익명 기도제목 작성자 ID 노출 안 됨 검증
 
 ### 🔲 Phase 6 — 인증 (Auth)
 - [ ] 로그인 화면
-- [ ] 회원가입 화면
-- [ ] authStore 연결
+- [ ] 회원가입 화면 + 약관 동의 (개인정보 처리방침 / 이용약관)
+- [ ] `secureStore`로 토큰 저장 (Phase 1에서 만든 유틸 사용)
+- [ ] refresh token rotation — 만료 시 자동 재발급, 실패 시 로그인 화면 복귀
+- [ ] authStore 연결 (Mock 유저 → 실제 토큰 기반)
+- [ ] 로그아웃 시 secureStore + queryCache 초기화
 
 ### 🔲 Phase 7 — 백엔드 연결
-- [ ] services/ 레이어 실제 API로 교체
-- [ ] 에러 핸들링 / 로딩 상태 처리
-- [ ] Push 알림
+- [ ] services/ 레이어 실제 API로 교체 (Mock 함수 → fetch/axios)
+- [ ] zod 스키마로 API 응답 런타임 검증 (services 레이어)
+- [ ] 에러 핸들링 / 로딩 상태 처리 + Sentry 연동
+- [ ] 푸시 알림 (`expo-notifications`) 권한 플로우 + 디바이스 토큰 등록/해제
+- [ ] 알림 수신 시 Deep link로 해당 화면 직진입 (`scheme`, `intentFilters`, `associatedDomains`)
+- [ ] 알림 설정 화면 (카테고리별 ON/OFF + 야간 방해금지)
+- [ ] 이미지 업로드 파이프라인 — presigned URL + EXIF 제거 + 압축
+- [ ] 강제 업데이트 체크 (`expo-application` + 원격 config의 최소 버전)
+
+### 🔲 Phase 8 — 채팅 (장터 거래용)
+- [ ] 실시간 인프라 결정 (자체 WebSocket / Firebase Realtime / Stream Chat / Sendbird) — ADR로 기록
+- [ ] `app/chat/[roomId].tsx` 화면 + 채팅 목록 화면
+- [ ] 1:1 DM 데이터 모델 (`ChatRoom`, `ChatMessage`)
+- [ ] 장터 상세 "채팅하기" → 채팅방 생성 또는 기존 방 진입
+- [ ] 푸시 알림 연동 (Phase 7과 종속) — 신규 메시지 알림
+- [ ] 신고/차단된 사용자 메시지 자동 숨김
+- [ ] 이미지 메시지 (이미지 업로드 파이프라인 재사용)
+
+### 🔲 Phase 9 — 분석 / 모니터링 정착
+- [ ] Firebase Analytics 또는 Amplitude 통합 — 핵심 funnel 정의 및 추적
+- [ ] Sentry release 트래킹 (EAS Build hook으로 source map 업로드)
+- [ ] 성능 모니터링 (TanStack Query devtools, React Profiler 점검)
+- [ ] (선택) 관리자 도구 — 신고 누적 게시물 비공개 처리, 사용자 경고 기능
+
+### 🔲 Phase 10 — 접근성 / 성능 개선
+- [ ] a11y 전체 화면 audit (VoiceOver / TalkBack)
+- [ ] 색상 대비 WCAG AA 검증
+- [ ] 시스템 글자 크기 2배 시 레이아웃 깨짐 검증·수정
+- [ ] 번들 사이즈 최적화 (`expo export`로 분석)
+- [ ] 이미지 lazy loading 검증 (`expo-image` priority)
+- [ ] 시니어 친화 폰트 사이즈 옵션 (선택)
 
 ---
 
@@ -501,3 +822,4 @@ interface AuthState {
 | 2026-05-07 | Phase 0 완료 — 미결 사항 4개 확정, TanStack Query + MaterialIcons 추가, Mock Auth 설계, 소모임 카테고리 정의 |
 | 2026-05-07 | 버전 검토 — Expo SDK 55 / Expo Router v7 / RN 0.83 기준으로 버전 명시, New Architecture 전용 주의사항 추가, 네트워크 레이어 설계, TanStack Query React Native 설정 추가 |
 | 2026-05-07 | 2차 보완 — 핵심 기능별 화면 플로우 상세화, MaterialIcons 아이콘 이름 수정, 나눔장터 카테고리 정의, 데이터 타입 보완(MarketCategory·memberId·coverImage), 에러 처리 전략 추가, Phase 2~5 세부 태스크 구체화 |
+| 2026-05-07 | 3차 보완 — 유지보수 관점 인프라 항목 추가 (테스트 전략·Sentry·보안/개인정보·CI/CD·환경 분리·queryKey 컨벤션·영속 캐시·푸시 알림 시나리오·이미지 업로드 파이프라인·신고/모더레이션·접근성), Phase 1 의존성/세팅 보강, Phase 2~5 페이지네이션·신고·테스트·a11y 추가, Phase 8(채팅)·Phase 9(분석)·Phase 10(a11y/성능) 신설, 데이터 타입에 Member.role·PaginatedResponse·Report 추가, 폴더 구조에 queryKeys.ts·secureStore.ts·types 도메인 분리·docs/adr·README.md 반영 |

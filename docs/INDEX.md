@@ -1,6 +1,6 @@
 # YLMC Connect — 인덱스
 
-> 마지막 갱신: 2026-05-08 (문서 시스템 중복 제거 + 설계 변경 흐름 명문화) | 현재 Phase: 1 — 프로젝트 초기 세팅 (진입 직전)
+> 마지막 갱신: 2026-05-08 (NativeWind v4 채택 — PLAN/ADR 0001/TASKS 동기화, 의존성 묶음 D 신설) | 현재 Phase: 1 — 프로젝트 초기 세팅 (진입 직전)
 
 본 문서는 **작업자 5분용 진입점** 입니다. 외부인은 [README.md](../README.md) 부터, AI 작업 규칙은 [CLAUDE.md](../CLAUDE.md) 를 참고하세요.
 
@@ -61,7 +61,8 @@
 
 ## ADR
 
-(아직 없음. 첫 ADR 은 Phase 1 의 “0001-tech-stack” 작성 예정. 작성 시 여기에 한 줄씩 추가.)
+- [0001 — 기술 스택](adr/0001-tech-stack.md) — Expo SDK 55 / TanStack Query / Zustand / zod / NativeWind v4 등 채택 근거. (수락, 2026-05-08; 스타일 항목 갱신 2026-05-08)
+- [0002 — 백엔드 선택 보류 (Mock-first)](adr/0002-backend-tbd.md) — Phase 5 종료까지 백엔드 플랫폼 결정 보류, services/ 격리로 무관 진행. (수락, 2026-05-08)
 
 ---
 

@@ -24,7 +24,7 @@
 | 라우팅 | Expo Router | `^55.0.x` (v7) | 파일 기반 라우팅, SDK와 함께 설치됨 |
 | 서버 상태 | TanStack Query | `^5.100.x` | 비동기 페칭, 캐싱, 동기화 — React Native 공식 지원 |
 | 클라이언트 상태 | Zustand | `^5.0.x` | auth·UI 상태만 담당 (React 18+ 필요) |
-| 스타일 | StyleSheet (Custom Design System) | — | theme.ts 기반 디자인 토큰 |
+| 스타일 | NativeWind v4 + StyleSheet (예외) | `^4.1.x` | className 기반 Tailwind. 디자인 토큰은 `theme.ts` 단일 출처, `tailwind.config.js` 가 import |
 | 언어 | TypeScript | `~5.8.x` | strict 모드 |
 | 폼 유효성 | react-hook-form | `^7.71.x` | |
 | 스키마 검증 | zod | `^4.x` | @hookform/resolvers `^5.2.x` 함께 사용 |
@@ -47,6 +47,7 @@
 | @sentry/react-native | Expo plugin 등록 필수 (`app.json`의 `plugins` 배열) |
 | expo-notifications | iOS는 development build 필요 (Expo Go에서 일부 기능 미지원) |
 | expo-secure-store | iOS Keychain / Android Keystore 사용 — 디바이스 잠금 해제 필요 |
+| NativeWind v4 | Babel preset (`nativewind/babel`) + Metro 래퍼 (`withNativeWind`) + entry 의 `import './global.css'` + `nativewind-env.d.ts` 4가지가 모두 있어야 className 이 작동. 하나라도 빠지면 **에러 없이 className 이 무시** 되어 디버깅 어려움 |
 
 ---
 
@@ -158,7 +159,7 @@ ylmc-front/
 │   │   └── prayer.ts
 │   │
 │   ├── constants/
-│   │   └── theme.ts              # 색상, spacing, 폰트 크기 등 디자인 토큰
+│   │   └── theme.ts              # 색상, spacing, 폰트 크기 등 디자인 토큰 — tailwind.config.js 가 import 하는 단일 출처
 │   │
 │   └── mocks/                    # Mock 데이터 (services/ 내부에서 사용)
 │       ├── auth.ts               # MOCK_USER
@@ -176,6 +177,11 @@ ylmc-front/
 ├── README.md                     # 프로젝트 소개·세팅·실행 가이드
 ├── app.config.ts                 # 환경별 동적 Expo 설정 (app.json 대체)
 ├── eas.json                      # EAS Build profiles (dev/preview/production)
+├── babel.config.js               # nativewind/babel preset 등록
+├── metro.config.js               # withNativeWind 래퍼 + global.css 입력
+├── tailwind.config.js            # theme.ts 를 import 하여 토큰 동기화
+├── global.css                    # @tailwind base; @tailwind components; @tailwind utilities;
+├── nativewind-env.d.ts           # className prop 타입 선언 (RN 컴포넌트 확장)
 ├── tsconfig.json
 └── package.json
 ```
@@ -705,3 +711,4 @@ queryClient.setDefaultOptions({
 | 2026-05-07 | 버전 검토 — Expo SDK 55 / Expo Router v7 / RN 0.83 기준으로 버전 명시, New Architecture 전용 주의사항 추가, 네트워크 레이어 설계, TanStack Query React Native 설정 추가 |
 | 2026-05-07 | 2차 보완 — 핵심 기능별 화면 플로우 상세화, MaterialIcons 아이콘 이름 수정, 나눔장터 카테고리 정의, 데이터 타입 보완(MarketCategory·memberId·coverImage), 에러 처리 전략 추가, Phase 2~5 세부 태스크 구체화 |
 | 2026-05-07 | 3차 보완 — 유지보수 관점 인프라 항목 추가 (테스트 전략·Sentry·보안/개인정보·CI/CD·환경 분리·queryKey 컨벤션·영속 캐시·푸시 알림 시나리오·이미지 업로드 파이프라인·신고/모더레이션·접근성), Phase 1 의존성/세팅 보강, Phase 2~5 페이지네이션·신고·테스트·a11y 추가, Phase 8(채팅)·Phase 9(분석)·Phase 10(a11y/성능) 신설, 데이터 타입에 Member.role·PaginatedResponse·Report 추가, 폴더 구조에 queryKeys.ts·secureStore.ts·types 도메인 분리·docs/adr·README.md 반영 |
+| 2026-05-08 | 스타일 도구 변경 — NativeWind v4 채택 (StyleSheet 는 차트·동적 보간 등 className 으로 표현 곤란한 경계만). 디자인 토큰은 `src/constants/theme.ts` 단일 출처, `tailwind.config.js` 가 이를 import 해 동기화. ADR 0001 의 “고려했지만 채택하지 않은 대안” 에서 채택으로 이동. 호환성 표·폴더 구조에 babel/metro/global.css/nativewind-env.d.ts 반영 |

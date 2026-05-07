@@ -1,0 +1,57 @@
+# ─── 의존성 ──────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ─── Expo ────────────────────────────────────────────
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# ─── EAS Build ───────────────────────────────────────
+.easignore
+
+# ─── 네이티브 빌드 출력물 ─────────────────────────────
+android/
+ios/
+
+# ─── 환경변수 ─────────────────────────────────────────
+.env
+.env.local
+.env.development
+.env.staging
+.env.production
+
+# ─── 로그 ────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── 런타임 데이터 ───────────────────────────────────
+*.pid
+*.seed
+*.pid.lock
+
+# ─── OS ──────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+
+# ─── IDE ─────────────────────────────────────────────
+.idea/
+.vscode/
+.claude/
+*.swp
+*.swo
+
+# ─── TypeScript ──────────────────────────────────────
+*.tsbuildinfo
+
+# ─── 테스트 커버리지 ──────────────────────────────────
+coverage/

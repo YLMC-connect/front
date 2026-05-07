@@ -663,143 +663,23 @@ queryClient.setDefaultOptions({
 
 ## 🚀 개발 단계 (Phase)
 
-### ✅ Phase 0 — 기획 및 문서화
-- [x] 기능 정의
-- [x] 기술 스택 결정 (TanStack Query, MaterialIcons 추가)
-- [x] 폴더 구조 설계
-- [x] 데이터 타입 설계
-- [x] 디자인 방향 → `design.md` 파일로 분리 관리
-- [x] 삶공부 과정명 → API에서 동적으로 가져오는 방식으로 결정
-- [x] Mock Auth 방식 확정 (고정 Mock 유저 → Phase 7에서 실제 API 연결)
-- [x] 소모임 카테고리 확정
+> 본 섹션은 **Phase 단위 큰 그림과 범위** 만 정의합니다. 세부 작업 체크리스트와 진행 상태는 [docs/TASKS.md](docs/TASKS.md) 에서 단일 출처로 관리합니다.
 
-### 🔲 Phase 1 — 프로젝트 초기 세팅
-- [ ] `create-expo-app` 으로 프로젝트 생성 (`--template blank-typescript`)
-- [ ] 의존성 설치
-  ```bash
-  # 서버 상태 + 영속 캐시
-  npx expo install @tanstack/react-query
-  npm install @tanstack/react-query-persist-client @tanstack/query-async-storage-persister
-  npx expo install @react-native-async-storage/async-storage
-  # 네트워크 상태
-  npx expo install @react-native-community/netinfo
-  # 클라이언트 상태
-  npm install zustand
-  # 폼 + 검증
-  npm install react-hook-form zod @hookform/resolvers
-  # 날짜
-  npm install date-fns
-  # 이미지
-  npx expo install expo-image expo-image-picker expo-image-manipulator
-  # 보안 저장소
-  npx expo install expo-secure-store
-  # 알림 (Phase 7에서 본격 사용, 의존성만 선설치)
-  npx expo install expo-notifications expo-device expo-constants
-  # 모니터링
-  npx expo install @sentry/react-native
-  # 개발 도구
-  npm install -D eslint prettier
-  npm install -D jest @testing-library/react-native @types/jest jest-expo
-  npm install -D husky lint-staged @commitlint/cli @commitlint/config-conventional
-  ```
-- [ ] 폴더 구조 생성 (app/, src/, docs/adr/, .github/workflows/ 전체)
-- [ ] `src/lib/queryClient.ts` — QueryClient + onlineManager/focusManager + AsyncStorage persister
-- [ ] `src/lib/queryKeys.ts` — 도메인별 queryKey 컨벤션 작성
-- [ ] `src/lib/secureStore.ts` — 토큰 저장 유틸 (Phase 6/7에서 사용)
-- [ ] `src/types/` — 도메인별 분리 (common / market / group / lifeStudy / prayer)
-- [ ] Root layout에 `QueryClientProvider` + Zustand + Sentry + 에러 바운더리 연결
-- [ ] Sentry 초기화 + `beforeSend` 스크러빙 (기도제목 본문·PII 제거)
-- [ ] `src/mocks/auth.ts` — MOCK_USER 정의 (`role: 'member'` 포함)
-- [ ] `src/store/authStore.ts` — Mock 유저 기본값 주입
-- [ ] `src/constants/theme.ts` — 디자인 토큰 (색상 WCAG AA, spacing, typography)
-- [ ] 공통 UI 컴포넌트 (Button, Card, Badge, Avatar, Divider) — a11y 라벨 적용
-- [ ] Root layout + 5탭 네비게이션 뼈대 (MaterialIcons 적용)
-- [ ] `app.config.ts` 동적 설정 + `eas.json` profiles (dev/preview/production)
-- [ ] `.env` + `expo-constants.expoConfig.extra`로 환경변수 접근
-- [ ] husky + lint-staged + commitlint 설정 (커밋 전 typecheck/lint/format)
-- [ ] GitHub Actions 워크플로우 (typecheck + lint + test on PR)
-- [ ] Jest + React Native Testing Library 설정 + 샘플 테스트 1개
-- [ ] README.md 작성 (프로젝트 소개·세팅·실행 가이드)
-- [ ] `docs/adr/0001-tech-stack.md` — 기술 스택 결정 기록
+| Phase | 상태 | 핵심 산출물 / 범위 |
+|---|---|---|
+| Phase 0 — 기획·문서화 | ✅ 완료 | 기능 정의, 기술 스택, 폴더 구조, 데이터 타입, 디자인 방향, Mock Auth 설계, 소모임 카테고리 확정 |
+| Phase 1 — 프로젝트 초기 세팅 | ⬜ 예정 | Expo 프로젝트·의존성, `src/lib/`(queryClient·queryKeys·secureStore), `src/types/` 도메인 분리, `src/store/authStore`, `src/constants/theme`, Root layout(Provider·에러 바운더리·Sentry), 5탭 네비게이션, 공통 UI, `app.config.ts`·`eas.json`, husky·CI, ADR 0001 |
+| Phase 2 — 나눔장터 | ⬜ 예정 | `mocks·service·hook` (useInfiniteQuery + 신고 mutation) + 목록(카테고리·검색·무한스크롤)·상세(이미지 슬라이더)·글쓰기 모달(rhf+zod+이미지) + 테스트·a11y |
+| Phase 3 — 소모임 | ⬜ 예정 | `mocks·service·hook` (참여/탈퇴/신고) + 목록·상세(멤버·일정)·개설 모달(cover 이미지) + 테스트·a11y |
+| Phase 4 — 삶공부 | ⬜ 예정 | `mocks·service·hook` (신청/취소) + 과정 목록(상태 탭)·상세(신청 폼)·내 이력(수료증) + 테스트·a11y |
+| Phase 5 — 중보기도 | ⬜ 예정 | `mocks·service·hook` (기도하기/신고) + 목록(만료 배지)·상세(낙관적 카운트)·등록 모달(익명·만료일) + 익명 ID 미노출 검증 |
+| Phase 6 — 인증 (Auth) | ⬜ 예정 | 로그인·회원가입(약관) · `secureStore` 토큰 저장 · refresh token rotation · authStore 실 토큰 연결 · 로그아웃 시 cache 초기화 |
+| Phase 7 — 백엔드 연결 | ⬜ 예정 | services/ 실 API 교체 · zod 응답 검증 · 푸시 알림(권한·디바이스 토큰·Deep link·설정 화면) · 이미지 업로드 파이프라인(presigned URL·EXIF·압축) · 강제 업데이트 |
+| Phase 8 — 채팅 (장터) | ⬜ 예정 | 실시간 인프라 결정(ADR) · 1:1 DM 모델 · 채팅방·목록 화면 · 푸시 연동 · 차단/신고 숨김 · 이미지 메시지 |
+| Phase 9 — 분석/모니터링 | ⬜ 예정 | Analytics funnel 정의·추적 · Sentry release·source map · 성능 모니터링 · (선택) 관리자 도구 |
+| Phase 10 — 접근성/성능 | ⬜ 예정 | a11y audit (VoiceOver·TalkBack) · 색 대비 WCAG AA · 폰트 스케일 2배 검증 · 번들 최적화 · 이미지 lazy · 시니어 폰트 옵션 |
 
-### 🔲 Phase 2 — 나눔장터
-- [ ] `src/mocks/market.ts` — Mock 데이터 작성 (MarketCategory 전체 커버)
-- [ ] `src/services/marketService.ts` — fetchMarketItems(cursor), fetchMarketItem(id), reportMarketItem()
-- [ ] `src/hooks/useMarketItems.ts` — `useInfiniteQuery`로 목록 페이지네이션 + 상세 useQuery + 신고 useMutation
-- [ ] 목록 화면 (`app/(tabs)/market/index.tsx`) — 카테고리 필터 탭 + 검색바 + 무한 스크롤
-- [ ] 상세 화면 (`app/(tabs)/market/[id].tsx`) — 이미지 슬라이더, 판매자 정보, 거래 상태 배지, 신고 버튼
-- [ ] 글쓰기 모달 (`app/modal/market-new.tsx`) — react-hook-form + zod + 이미지 다중 선택/압축
-- [ ] 핵심 화면 테스트 (목록 렌더, 상세 진입, 등록 플로우, 신고 동작)
-- [ ] a11y 라벨 적용 (모든 인터랙션)
-
-### 🔲 Phase 3 — 소모임
-- [ ] `src/mocks/groups.ts` — Mock 데이터 (GroupCategory 전체 커버, coverImage 포함)
-- [ ] `src/services/groupService.ts` — fetchGroups(cursor), fetchGroup(id), joinGroup(), leaveGroup(), reportGroup()
-- [ ] `src/hooks/useGroupList.ts` — `useInfiniteQuery` + useMutation (참여/탈퇴/신고)
-- [ ] 목록 화면 (`app/(tabs)/group/index.tsx`) — 카테고리 탭 + 인원 배지 + 무한 스크롤
-- [ ] 상세 화면 (`app/(tabs)/group/[id].tsx`) — 멤버 목록, 일정, 참여 버튼, 신고 버튼
-- [ ] 소모임 개설 모달 (`app/modal/group-new.tsx`) — react-hook-form + zod + cover 이미지 업로드
-- [ ] 핵심 화면 테스트 + a11y 라벨
-
-### 🔲 Phase 4 — 삶공부
-- [ ] `src/mocks/lifeStudy.ts` — Mock 과정 데이터 + 수강이력 (memberId 포함)
-- [ ] `src/services/lifeStudyService.ts` — fetchCourses(), fetchMyHistory(), enrollCourse(), cancelEnrollment()
-- [ ] `src/hooks/useLifeStudyCourses.ts` — useQuery + useMutation (신청/취소)
-- [ ] 과정 목록 화면 (`app/(tabs)/life-study/index.tsx`) — 상태(upcoming/ongoing/completed) 탭
-- [ ] 과정 상세 화면 (`app/(tabs)/life-study/[id].tsx`) — 신청 폼
-- [ ] 내 이력 화면 — 수강 완료 과정 + 수료증 여부 표시
-- [ ] 핵심 화면 테스트 + a11y 라벨
-
-### 🔲 Phase 5 — 중보기도
-- [ ] `src/mocks/prayers.ts` — Mock 기도제목 (익명 포함, 만료일 포함)
-- [ ] `src/services/prayerService.ts` — fetchPrayers(cursor), prayForRequest(id), reportPrayer()
-- [ ] `src/hooks/usePrayerList.ts` — `useInfiniteQuery` + useMutation (기도하기/신고)
-- [ ] 목록 화면 (`app/(tabs)/prayer/index.tsx`) — 만료 임박 배지, 기도 수 표시, 무한 스크롤
-- [ ] 상세 화면 (`app/(tabs)/prayer/[id].tsx`) — 기도하기 버튼 (카운트 낙관적 업데이트), 신고 버튼
-- [ ] 기도제목 등록 모달 (`app/modal/prayer-new.tsx`) — 익명 옵션 + 만료일 선택
-- [ ] 핵심 화면 테스트 + a11y 라벨
-- [ ] 익명 기도제목 작성자 ID 노출 안 됨 검증
-
-### 🔲 Phase 6 — 인증 (Auth)
-- [ ] 로그인 화면
-- [ ] 회원가입 화면 + 약관 동의 (개인정보 처리방침 / 이용약관)
-- [ ] `secureStore`로 토큰 저장 (Phase 1에서 만든 유틸 사용)
-- [ ] refresh token rotation — 만료 시 자동 재발급, 실패 시 로그인 화면 복귀
-- [ ] authStore 연결 (Mock 유저 → 실제 토큰 기반)
-- [ ] 로그아웃 시 secureStore + queryCache 초기화
-
-### 🔲 Phase 7 — 백엔드 연결
-- [ ] services/ 레이어 실제 API로 교체 (Mock 함수 → fetch/axios)
-- [ ] zod 스키마로 API 응답 런타임 검증 (services 레이어)
-- [ ] 에러 핸들링 / 로딩 상태 처리 + Sentry 연동
-- [ ] 푸시 알림 (`expo-notifications`) 권한 플로우 + 디바이스 토큰 등록/해제
-- [ ] 알림 수신 시 Deep link로 해당 화면 직진입 (`scheme`, `intentFilters`, `associatedDomains`)
-- [ ] 알림 설정 화면 (카테고리별 ON/OFF + 야간 방해금지)
-- [ ] 이미지 업로드 파이프라인 — presigned URL + EXIF 제거 + 압축
-- [ ] 강제 업데이트 체크 (`expo-application` + 원격 config의 최소 버전)
-
-### 🔲 Phase 8 — 채팅 (장터 거래용)
-- [ ] 실시간 인프라 결정 (자체 WebSocket / Firebase Realtime / Stream Chat / Sendbird) — ADR로 기록
-- [ ] `app/chat/[roomId].tsx` 화면 + 채팅 목록 화면
-- [ ] 1:1 DM 데이터 모델 (`ChatRoom`, `ChatMessage`)
-- [ ] 장터 상세 "채팅하기" → 채팅방 생성 또는 기존 방 진입
-- [ ] 푸시 알림 연동 (Phase 7과 종속) — 신규 메시지 알림
-- [ ] 신고/차단된 사용자 메시지 자동 숨김
-- [ ] 이미지 메시지 (이미지 업로드 파이프라인 재사용)
-
-### 🔲 Phase 9 — 분석 / 모니터링 정착
-- [ ] Firebase Analytics 또는 Amplitude 통합 — 핵심 funnel 정의 및 추적
-- [ ] Sentry release 트래킹 (EAS Build hook으로 source map 업로드)
-- [ ] 성능 모니터링 (TanStack Query devtools, React Profiler 점검)
-- [ ] (선택) 관리자 도구 — 신고 누적 게시물 비공개 처리, 사용자 경고 기능
-
-### 🔲 Phase 10 — 접근성 / 성능 개선
-- [ ] a11y 전체 화면 audit (VoiceOver / TalkBack)
-- [ ] 색상 대비 WCAG AA 검증
-- [ ] 시스템 글자 크기 2배 시 레이아웃 깨짐 검증·수정
-- [ ] 번들 사이즈 최적화 (`expo export`로 분석)
-- [ ] 이미지 lazy loading 검증 (`expo-image` priority)
-- [ ] 시니어 친화 폰트 사이즈 옵션 (선택)
+> Phase 1 의 의존성 설치 명령(npm/expo install) 원본은 git 히스토리(`74af553`) 또는 [docs/TASKS.md](docs/TASKS.md) 의 P1 항목에서 확인 가능합니다. 본 표는 “무엇을 만드나” 의 큰 그림이고, “어떻게 / 무슨 명령으로” 의 세부 절차는 TASKS.md 와 ADR 의 영역입니다.
 
 ---
 
@@ -815,6 +695,8 @@ queryClient.setDefaultOptions({
 ---
 
 ## 📝 변경 이력
+
+> 본 섹션은 **명세 자체의 마일스톤** 만 기록합니다 (Phase 단위 완료, 큰 데이터 타입 변경, 정책 변경 등). 일상 작업 단위 기록은 [docs/LOG.md](docs/LOG.md) 가 단일 출처입니다.
 
 | 날짜 | 내용 |
 |------|------|

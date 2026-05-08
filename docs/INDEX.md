@@ -1,8 +1,8 @@
 # YLMC Connect — 인덱스
 
-> 마지막 갱신: 2026-05-08 (NativeWind v4 채택 — PLAN/ADR 0001/TASKS 동기화, 의존성 묶음 D 신설) | 현재 Phase: 1 — 프로젝트 초기 세팅 (진입 직전)
+> 마지막 갱신: 2026-05-08 ([MAINTENANCE.md](MAINTENANCE.md) §4.5 시나리오 삭제 — 시나리오 9→8 개) | 현재 Phase: 1 — 프로젝트 초기 세팅 (진입 직전)
 
-본 문서는 **작업자 5분용 진입점** 입니다. 외부인은 [README.md](../README.md) 부터, AI 작업 규칙은 [CLAUDE.md](../CLAUDE.md) 를 참고하세요.
+본 문서는 **작업자 5분용 진입점** 입니다. 외부인은 [README.md](../README.md) 부터, AI 작업 규칙은 [CLAUDE.md](../CLAUDE.md) 를 참고하세요. 문서 시스템이 어긋났을 때의 복구 절차는 [MAINTENANCE.md](MAINTENANCE.md).
 
 ---
 

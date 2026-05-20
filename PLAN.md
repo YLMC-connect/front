@@ -669,7 +669,7 @@ queryClient.setDefaultOptions({
 
 ## 🚀 개발 단계 (Phase)
 
-> 본 섹션은 **Phase 단위 큰 그림과 범위** 만 정의합니다. 세부 작업 체크리스트와 진행 상태는 [docs/TASKS.md](docs/TASKS.md) 에서 단일 출처로 관리합니다.
+> 본 섹션은 **Phase 단위 큰 그림과 범위** 만 정의합니다. 세부 작업 체크리스트와 진행 상태는 GitHub Issues (label = 도메인, milestone = Phase) 에서 단일 출처로 관리합니다 — `gh issue list --milestone "Phase N"`. 기존 TASKS.md 항목은 [docs/_archive/TASKS.md](docs/_archive/TASKS.md).
 
 | Phase | 상태 | 핵심 산출물 / 범위 |
 |---|---|---|
@@ -685,7 +685,7 @@ queryClient.setDefaultOptions({
 | Phase 9 — 분석/모니터링 | ⬜ 예정 | Analytics funnel 정의·추적 · Sentry release·source map · 성능 모니터링 · (선택) 관리자 도구 |
 | Phase 10 — 접근성/성능 | ⬜ 예정 | a11y audit (VoiceOver·TalkBack) · 색 대비 WCAG AA · 폰트 스케일 2배 검증 · 번들 최적화 · 이미지 lazy · 시니어 폰트 옵션 |
 
-> Phase 1 의 의존성 설치 명령(npm/expo install) 원본은 git 히스토리(`74af553`) 또는 [docs/TASKS.md](docs/TASKS.md) 의 P1 항목에서 확인 가능합니다. 본 표는 “무엇을 만드나” 의 큰 그림이고, “어떻게 / 무슨 명령으로” 의 세부 절차는 TASKS.md 와 ADR 의 영역입니다.
+> Phase 1 의 의존성 설치 명령(npm/expo install) 원본은 git 히스토리(`74af553`) 또는 [docs/_archive/TASKS.md](docs/_archive/TASKS.md) 의 P1 항목에서 확인 가능합니다. 본 표는 “무엇을 만드나” 의 큰 그림이고, “어떻게 / 무슨 명령으로” 의 세부 절차는 GitHub Issues 와 ADR 의 영역입니다.
 
 ---
 
@@ -702,7 +702,7 @@ queryClient.setDefaultOptions({
 
 ## 📝 변경 이력
 
-> 본 섹션은 **명세 자체의 마일스톤** 만 기록합니다 (Phase 단위 완료, 큰 데이터 타입 변경, 정책 변경 등). 일상 작업 단위 기록은 [docs/LOG.md](docs/LOG.md) 가 단일 출처입니다.
+> 본 섹션은 **명세 자체의 마일스톤** 만 기록합니다 (Phase 단위 완료, 큰 데이터 타입 변경, 정책 변경 등). 일상 작업 단위 기록은 머지된 PR description (`gh pr list --state merged`) 이 단일 출처입니다. 기존 LOG.md 는 [docs/_archive/LOG.md](docs/_archive/LOG.md) 에 보존.
 
 | 날짜 | 내용 |
 |------|------|

@@ -1,8 +1,8 @@
-# 작업 목록
+# 작업 목록 (이전됨)
 
-> 마지막 갱신: 2026-05-08
+> **2026-05-09**: 본 TASKS 는 GitHub Issues 로 이전되었습니다. 진행 작업은 `gh issue list --state open` (도메인 필터: `--label <도메인>`, 본인 작업: `--assignee @me`). 본 파일은 마이그레이션 이전 항목의 영구 보존본이며, 아래 미완료 작업들은 사용자 승인 후 `gh issue create` 로 이전 예정입니다.
 
-본 문서는 “지금 무엇을 해야 하는가” 의 단일 출처입니다. 큰 그림은 [../PLAN.md](../PLAN.md) 의 Phase 정의, 진행 상태는 [INDEX.md](INDEX.md) 의 도메인 상태표를 보세요.
+> 큰 그림은 [../../PLAN.md](../../PLAN.md) 의 Phase 정의 (milestone = Phase N), 도메인 상태는 [../INDEX.md](../INDEX.md) 의 자동생성 도메인 상태표.
 
 표기:
 - `[P1]` 우선순위 1 (즉시) / `[P2]` 다음 / `[P3]` 여유 시

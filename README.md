@@ -19,9 +19,10 @@ React Native + Expo (SDK 55, New Architecture) 기반, Mock 데이터로 시작�
 
 - 처음 보는 분: [docs/INDEX.md](docs/INDEX.md) 부터 — 5분에 전체 흐름 파악
 - 설계 기준 문서: [PLAN.md](PLAN.md) — 기술 스택, 데이터 타입, Phase 정의
-- 진행 작업: [docs/TASKS.md](docs/TASKS.md) — “지금 뭐 해야 함?” 단일 출처
-- 변경 이력: [docs/LOG.md](docs/LOG.md) — 작업 단위 감사 기록
+- 진행 작업: GitHub Issues — `gh issue list --state open` (label = 도메인). 기존 항목 보존: [docs/_archive/TASKS.md](docs/_archive/TASKS.md)
+- 변경 이력: 머지된 PR description — `gh pr list --state merged --limit 30`. 기존 항목 보존: [docs/_archive/LOG.md](docs/_archive/LOG.md)
 - AI 작업 규칙: [CLAUDE.md](CLAUDE.md) — Claude Code 동작 규약
+- 유지보수 / 드리프트 복구: [docs/MAINTENANCE.md](docs/MAINTENANCE.md)
 
 ## 기술 스택 (요약)
 

@@ -1,8 +1,18 @@
-# 변경 이력
+# 변경 이력 (이전됨)
 
-> 최신이 위. AI 는 작업 시작 시 **최상단 5~10건의 제목 + 결정 한 줄만** 얕게 스캔합니다. 본문 정독은 “과거 결정 추적” 트리거가 있을 때만.
+> **2026-05-09**: 본 LOG 시스템은 GitHub PR description 으로 이전되었습니다. 이후 작업 이력은 `gh pr list --state merged --limit 30` / `gh pr view <N>` 으로 조회. 본 파일은 마이그레이션 이전 항목의 영구 보존본입니다.
 >
-> 한 항목 = 한 작업 단위. 변경 / 결정 / 다음 / 관련 4줄 골격.
+> 이전 작성 규칙 (역사적 참고): 최신이 위. 한 항목 = 한 작업 단위. 변경 / 결정 / 다음 / 관련 4줄 골격.
+
+---
+
+## 2026-05-09
+
+### 협업 대비 외부 도구 마이그레이션 — TASKS→Issues / LOG→PR description / INDEX 도메인 상태표 자동생성
+- 변경: `.github/pull_request_template.md`(신규, 4섹션 자동), `.github/ISSUE_TEMPLATE/task.md`(신규), `.github/workflows/update-index.yml`(신규, main push + Issues 이벤트 트리거), `scripts/gen-index.sh`(신규, gh issue list 기반 도메인 상태표 자동생성, 마커 사이 영역 교체), `docs/INDEX.md`(도메인 상태표를 `<!-- AUTO-GENERATED-START/END -->` 마커로 감싸고 컬럼 구조 “상태/진행률” → “진행 중/완료” 로 변경, 작업 라우팅 섹션을 gh CLI 기반으로 재작성, “마지막 갱신” 갱신), `CLAUDE.md`(3단계 읽기 + 의무 4종 + 보고 양식 + 설계 변경 흐름 전체 재작성 — TASKS/LOG → Issues/PR description), `docs/MAINTENANCE.md`(SSOT 매트릭스 + §3.1 스캔 명령 + §4 시나리오 4.1~4.7 전체 재작성, 시나리오 4.6 “TASKS ✅완료 중복” 삭제 + 4.7 → 4.6, 보고 양식 갱신), `README.md`(문서 지도의 진행/이력 줄을 gh CLI + _archive 로 갱신, MAINTENANCE 진입점 추가), `PLAN.md`(Phase 표 위/아래 TASKS.md 참조 → Issues 참조, 변경 이력 위 LOG.md 참조 → PR description 참조), `docs/features/_template.md`(단일 출처 분리/✅완료/주요 파일 노트의 TASKS·LOG 참조 → Issues·PR description 참조), `docs/_archive/TASKS.md`(이전), `docs/_archive/LOG.md`(이전, 본 항목 포함)
+- 결정: ① 2인+ 협업 시 단일 마크다운 파일에 prepend/수정으로 인한 git merge 충돌이 구조적이라 외부 도구로 일부 SSOT 이전. ② 이전 대상은 진행 작업 추적(TASKS) + 변경 이력(LOG) + 도메인 상태표 자동생성, **그대로 유지** 는 features/PLAN/ADR. 도메인 컨텍스트는 마크다운이 적합하고 충돌 빈도도 낮음. ③ INDEX 의 도메인 상태표는 `<!-- AUTO-GENERATED-* -->` 마커 사이를 `gh issue list` 결과로 교체하는 방식 — Phase / ADR 영역은 손편집 유지. ④ PR template + auto-merge 자동화로 PR 절차 부담 완화. (선택) `.github/workflows/pr-check.yml` 로 description 4섹션 누락 시 머지 차단 — 본 마이그레이션에선 미적용, 필요 시 추가
+- 다음: ① 사용자가 `gh auth login` 실행 (현재 미인증). ② `gh label create common auth market group life-study prayer` 6개 라벨 생성. ③ `bash scripts/gen-index.sh` 로컬 실행하여 INDEX 자동영역이 정상 갱신되는지 검증. ④ `_archive/TASKS.md` 의 Phase 1 작업들을 `gh issue create --label common --milestone "Phase 1"` 로 이전 (사용자 승인 후). ⑤ Phase 1 P1 — `create-expo-app` 으로 프로젝트 생성 + 폴더 골격
+- 관련: 플랜 파일 `~/.claude/plans/rippling-wobbling-widget.md`, [CLAUDE.md](../CLAUDE.md), [MAINTENANCE.md](MAINTENANCE.md), [INDEX.md](INDEX.md)
 
 ---
 

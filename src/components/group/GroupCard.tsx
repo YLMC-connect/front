@@ -2,7 +2,7 @@ import { Link } from "expo-router";
 import { Image } from "expo-image";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Badge, Card } from "../ui";
+import { Badge, Card, VisualCover } from "../ui";
 import { theme } from "../../constants/theme";
 import type { Group } from "../../types/group";
 
@@ -19,12 +19,13 @@ export function GroupCard({ group }: { group: Group }) {
                 contentFit="cover"
               />
             ) : (
-              <MaterialIcons
-                name={
+              <VisualCover
+                height={88}
+                seed={Number(group.id) || 0}
+                icon={
                   group.category === "carpool" ? "directions-car" : "groups"
                 }
-                size={34}
-                color={theme.colors.primaryDeep}
+                style={styles.coverFill}
               />
             )}
           </View>
@@ -72,6 +73,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primaryTint,
   },
   coverImage: { width: "100%", height: "100%" },
+  coverFill: { width: "100%" },
   header: { flexDirection: "row", alignItems: "center", gap: 10 },
   title: { flex: 1, color: theme.colors.ink, fontSize: 17, fontWeight: "800" },
   desc: { color: theme.colors.inkSoft, fontSize: 14, lineHeight: 20 },

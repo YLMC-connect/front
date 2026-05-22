@@ -18,6 +18,7 @@
 - 전역 에러 바운더리와 CI(`validate`) 추가 — `app/_layout.tsx`, `.github/workflows/ci.yml`
 - 자동 테스트 게이트 추가 — `npm run validate`, Jest/RNTL smoke, Dev Client Metro smoke, Maestro v1 탭 E2E smoke
 - Android Emulator 기반 Maestro smoke 실제 검증 — `maestro 2.6.0`, `Medium_Phone_API_36.1`, `com.ylmc.connect.dev`
+- `열린문커넥트.zip` 디자인 번역 1차 반영 — 홈 화면, 6탭 floating tab bar, 공통 `VisualThumb`/`VisualCover`, 카드/버튼/입력/칩 터치 영역 조정
 
 ---
 
@@ -32,6 +33,8 @@
 | `scripts/gen-index.sh` | GitHub Issues 기반 도메인 상태표 재생성 |
 | `docs/features/common.md` | common 도메인 컨텍스트 |
 | `app/_layout.tsx` | QueryClient, SafeArea, Router Provider 루트 |
+| `app/(tabs)/_layout.tsx` | Expo Router 6탭 layout와 custom floating tab bar |
+| `app/(tabs)/index.tsx` | 디자인 번역 기반 홈 화면 |
 | `src/components/ui/index.tsx` | Button, Card, Badge, form, state, modal, image picker 등 공통 UI |
 | `src/constants/theme.ts` | `열린문커넥트.zip` 기준 디자인 토큰 |
 | `jest.setup.ts` | Jest mock 설정과 Expo Router/native module 테스트 어댑터 |
@@ -46,6 +49,8 @@
 [../../PLAN.md](../../PLAN.md) “🗃 데이터 타입 설계 > 공통” 참조.
 
 ## 결정 사항 (최신 위)
+- (2026-05-23) **디자인 ZIP은 RN 번역 기준으로 사용** — `열린문커넥트.zip`의 CSS/JSX를 직접 이식하지 않고, 색상·간격·카드·버튼·탭·폼 톤을 Expo React Native 컴포넌트로 번역합니다.
+- (2026-05-23) **탭 구조는 PLAN/Notion v1 기준 유지** — ZIP prototype은 `동행`으로 일부 기능을 묶은 5탭이지만, 현재 v1 범위는 홈/나눔/소모임/삶공부/중보기도/MY 6탭이므로 floating tab bar만 디자인 톤을 반영합니다.
 - (2026-05-22) **Codex 작업 규칙 SSOT** — Codex는 `AGENTS.md`를 기준으로 읽고, `CLAUDE.md`는 Claude Code 호환본으로 유지합니다. 문서 링크는 `AGENTS.md`를 우선 가리킵니다.
 - (2026-05-23) **PR 자동 검증 게이트** — `npm run validate`는 `typecheck`, `lint`, `format:check`, `test`를 묶고, GitHub Actions PR CI는 `npm ci` 후 `npm run validate`를 실행합니다.
 - (2026-05-23) **Jest/RNTL smoke 우선 적용** — v1 mock-first 범위에서는 공통 UI, 도메인 옵션, 핵심 탭 화면 렌더링을 먼저 자동화하고 실제 API/푸시/업로드 스토리지는 제외합니다.

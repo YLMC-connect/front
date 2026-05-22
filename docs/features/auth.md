@@ -9,6 +9,7 @@
 
 ## ✅ 완료
 - Mock 회원가입/로그인 화면 구현 — `app/(auth)/signup.tsx`, `app/(auth)/login.tsx`
+- 로그인 화면 1차 디자인 정렬 — ZIP prototype 기준 로고 hero, 카드 없는 폼, 큰 pill 버튼, 가입 CTA divider 적용
 - 인증 상태 저장소와 mock service 구현 — `src/store/authStore.ts`, `src/services/authService.ts`, `src/hooks/useAuth.ts`, `src/mocks/auth.ts`
 - 토큰 저장 유틸 골격 구현 — `src/lib/secureStore.ts`
 - Swagger 인증 API 연결을 위한 adapter 골격 구현 — `src/services/authAdapter.ts`
@@ -31,6 +32,7 @@
 `LoginInput`, `SignupInput`, `AuthSession`을 `src/types/auth.ts`에 정의합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-23) **로그인 화면은 카드 없는 단순 흐름** — ZIP prototype의 첫 진입 흐름에 맞춰 form을 큰 카드에 넣지 않고, 로고 hero와 primary CTA 중심으로 둡니다.
 - (2026-05-22) **MVP 인증은 Mock-first** — Swagger에서 `/api/signup`, `/api/auth/login`, `/api/auth/refresh`만 확인됐으므로 실제 API 연결은 Phase 6 이후로 분리합니다.
 - (2026-05-22) **실제 fetch는 adapter 뒤로 격리** — Swagger 응답 스키마 확정 전까지 `mockAuthAdapter`를 사용하고, `httpAuthAdapter`는 Phase 6에서 활성화합니다.
 - (2026-05-22) **가입코드와 비밀번호 찾기는 제외** — Notion 최신 MVP 기준에 따라 가입코드 입력/검증, 비밀번호 찾기는 MVP에서 만들지 않습니다.

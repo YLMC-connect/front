@@ -26,6 +26,7 @@ export default function MarketScreen() {
   const [category, setCategory] = useState<MarketCategory>("all");
   const [status, setStatus] = useState<StatusFilter>("sharing");
   const [keyword, setKeyword] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
   const { data = [], isLoading, isError } = useMarketItems(category);
   const normalizedKeyword = keyword.trim().toLowerCase();
   const list = data.filter((item) => {
@@ -47,13 +48,18 @@ export default function MarketScreen() {
       <TopBar
         testID="screen-market"
         title="나눔"
-        subtitle="성도 간 무료 나눔"
         right={
-          <Link href="/modal/market-new" asChild>
-            <Pressable style={styles.iconButton}>
-              <MaterialIcons name="add" size={24} color="#fff" />
-            </Pressable>
-          </Link>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setShowSearch((value) => !value)}
+            style={styles.headerIcon}
+          >
+            <MaterialIcons
+              name="search"
+              size={22}
+              color={theme.colors.inkSoft}
+            />
+          </Pressable>
         }
       />
       <View style={styles.segmentWrap}>
@@ -63,13 +69,15 @@ export default function MarketScreen() {
           onChange={setStatus}
         />
       </View>
-      <View style={styles.searchWrap}>
-        <TextField
-          value={keyword}
-          onChangeText={setKeyword}
-          placeholder="나눔 물품, 장소, 성도 이름 검색"
-        />
-      </View>
+      {showSearch ? (
+        <View style={styles.searchWrap}>
+          <TextField
+            value={keyword}
+            onChangeText={setKeyword}
+            placeholder="나눔 물품, 장소, 성도 이름 검색"
+          />
+        </View>
+      ) : null}
       <HorizontalChips
         items={MARKET_CATEGORIES}
         active={category}
@@ -90,21 +98,46 @@ export default function MarketScreen() {
           list.map((item) => <MarketItemCard key={item.id} item={item} />)
         )}
       </View>
+      <Link href="/modal/market-new" asChild>
+        <Pressable style={styles.fab}>
+          <MaterialIcons name="add" size={20} color="#fff" />
+          <Text style={styles.fabText}>글쓰기</Text>
+        </Pressable>
+      </Link>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  segmentWrap: { paddingHorizontal: 18, paddingBottom: 4 },
-  searchWrap: { paddingHorizontal: 18 },
-  list: { paddingHorizontal: 18, gap: 12 },
-  iconButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+  segmentWrap: { paddingHorizontal: 18, paddingBottom: 6 },
+  searchWrap: { paddingHorizontal: 18, paddingBottom: 6 },
+  list: { paddingHorizontal: 22 },
+  headerIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: theme.colors.primary,
   },
+  fab: {
+    position: "absolute",
+    right: 16,
+    bottom: 94,
+    zIndex: 20,
+    height: 52,
+    borderRadius: theme.radius.pill,
+    paddingLeft: 16,
+    paddingRight: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: theme.colors.primary,
+    shadowColor: "rgba(91,122,176,0.5)",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.24,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  fabText: { color: "#fff", fontSize: 14, fontWeight: "800" },
   loading: { color: theme.colors.inkMute, padding: 18 },
 });

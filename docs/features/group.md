@@ -13,6 +13,7 @@
 - 대표 이미지 선택/미리보기 연결 — `GroupInput.coverImage`를 카드/상세 cover에 표시
 - 참여, 탈퇴, 공지 작성, 멤버 목록 mock mutation 구현
 - 검색, 모집/참여/관심 필터, 관심 소모임, 정원 마감 제한, 소모임장 탈퇴 제한, 멤버 내보내기 mock 구현
+- 소모임 카드 cover fallback 디자인 정렬 — 대표 이미지가 없을 때 ZIP prototype 톤의 gradient cover placeholder 적용
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -32,6 +33,7 @@
 `Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-23) **대표 이미지 없음은 시각 placeholder로 처리** — 실제 cover 이미지가 없는 mock/초기 데이터도 목록에서 빈 박스로 보이지 않도록 공통 `VisualCover`를 사용합니다.
 - (2026-05-22) **카풀은 소모임 카테고리로 포함** — Notion MVP 정의에 따라 별도 도메인이 아니라 소모임 카테고리로 처리합니다.
 - (2026-05-22) **멤버 정책은 mock-first** — 최소 2명, 정원 초과 방지, 소모임장 탈퇴 제한을 mock service에서 먼저 검증합니다.
 - (2026-05-22) **공지/멤버 관리는 mock UI까지** — 운영자 권한과 실제 멤버 관리 API는 후속 Phase에서 확정합니다.

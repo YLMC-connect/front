@@ -2,7 +2,7 @@ import { Link } from "expo-router";
 import { Image } from "expo-image";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Badge, Card } from "../ui";
+import { Badge, VisualThumb } from "../ui";
 import { theme } from "../../constants/theme";
 import type { MarketItem } from "../../types/market";
 
@@ -16,7 +16,7 @@ export function MarketItemCard({ item }: { item: MarketItem }) {
   return (
     <Link href={{ pathname: "/market/[id]", params: { id: item.id } }} asChild>
       <Pressable>
-        <Card style={styles.card}>
+        <View style={styles.card}>
           <View style={styles.thumb}>
             {item.images[0] ? (
               <Image
@@ -25,14 +25,25 @@ export function MarketItemCard({ item }: { item: MarketItem }) {
                 contentFit="cover"
               />
             ) : (
-              <MaterialIcons
-                name="redeem"
-                size={30}
-                color={theme.colors.white}
-              />
+              <VisualThumb size={86} seed={Number(item.id) || 0} />
             )}
+            {item.status === "done" ? (
+              <View style={styles.doneOverlay}>
+                <Text style={styles.doneText}>나눔완료</Text>
+              </View>
+            ) : null}
+            {item.status === "reserved" ? (
+              <View style={styles.reservedBadge}>
+                <Text style={styles.reservedText}>예약중</Text>
+              </View>
+            ) : null}
           </View>
-          <View style={styles.body}>
+          <View
+            style={[
+              styles.body,
+              item.status === "done" ? styles.doneBody : null,
+            ]}
+          >
             <View style={styles.row}>
               <Text numberOfLines={2} style={styles.title}>
                 {item.title}
@@ -65,17 +76,23 @@ export function MarketItemCard({ item }: { item: MarketItem }) {
               ) : null}
             </View>
           </View>
-        </Card>
+        </View>
       </Pressable>
     </Link>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { flexDirection: "row", gap: 14, padding: 14 },
+  card: {
+    flexDirection: "row",
+    gap: 14,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
+  },
   thumb: {
-    width: 78,
-    height: 78,
+    width: 86,
+    height: 86,
     borderRadius: theme.radius.md,
     alignItems: "center",
     justifyContent: "center",
@@ -83,7 +100,25 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.sage,
   },
   thumbImage: { width: "100%", height: "100%" },
-  body: { flex: 1, minWidth: 0, gap: 7 },
+  doneOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(20,30,18,0.55)",
+  },
+  doneText: { color: "#fff", fontWeight: "900", fontSize: 14 },
+  reservedBadge: {
+    position: "absolute",
+    top: 6,
+    left: 6,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.amberSoft,
+  },
+  reservedText: { color: "#8A5A1F", fontWeight: "900", fontSize: 10 },
+  body: { flex: 1, minWidth: 0, gap: 7, justifyContent: "space-between" },
+  doneBody: { opacity: 0.58 },
   row: { flexDirection: "row", gap: 8, alignItems: "flex-start" },
   title: {
     flex: 1,

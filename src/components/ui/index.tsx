@@ -131,6 +131,105 @@ export function Avatar({ name, size = 40 }: { name: string; size?: number }) {
   );
 }
 
+export function VisualThumb({
+  size = 86,
+  seed = 0,
+  icon = "redeem",
+  style,
+}: {
+  size?: number;
+  seed?: number;
+  icon?: IconName;
+  style?: object;
+}) {
+  const palette = thumbPalettes[seed % thumbPalettes.length];
+
+  return (
+    <View
+      style={[
+        styles.visualThumb,
+        {
+          width: size,
+          height: size,
+          backgroundColor: palette.bg,
+        },
+        style,
+      ]}
+    >
+      <View
+        style={[
+          styles.visualOrbLarge,
+          {
+            backgroundColor: palette.fg,
+            left: 10 + ((seed * 11) % 24),
+            top: 8 + ((seed * 7) % 24),
+          },
+        ]}
+      />
+      <View
+        style={[
+          styles.visualOrbSmall,
+          {
+            backgroundColor: palette.fg,
+            right: 8 + ((seed * 5) % 18),
+            bottom: 10 + ((seed * 13) % 18),
+          },
+        ]}
+      />
+      <MaterialIcons
+        name={icon}
+        size={Math.max(22, size * 0.34)}
+        color="#fff"
+      />
+    </View>
+  );
+}
+
+export function VisualCover({
+  height = 88,
+  seed = 0,
+  icon = "groups",
+  label,
+  style,
+}: {
+  height?: number;
+  seed?: number;
+  icon?: IconName;
+  label?: string;
+  style?: object;
+}) {
+  const palette = coverPalettes[seed % coverPalettes.length];
+
+  return (
+    <View
+      style={[
+        styles.visualCover,
+        { height, backgroundColor: palette.bg },
+        style,
+      ]}
+    >
+      <View
+        style={[
+          styles.coverWave,
+          {
+            backgroundColor: palette.fg,
+            transform: [{ rotate: `${-8 + (seed % 4) * 4}deg` }],
+          },
+        ]}
+      />
+      <View style={[styles.coverCircle, { backgroundColor: palette.tint }]} />
+      {label ? (
+        <View style={styles.coverLabel}>
+          <MaterialIcons name={icon} size={16} color={palette.fg} />
+          <Text style={[styles.coverLabelText, { color: palette.fg }]}>
+            {label}
+          </Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 export function TextField({
   label,
   value,
@@ -556,11 +655,29 @@ export function HorizontalChips<T extends string>({
   );
 }
 
+const thumbPalettes = [
+  { bg: "#E6EBDB", fg: "#C9D6B2" },
+  { bg: "#F3E8D7", fg: "#DBC9A5" },
+  { bg: "#E0E9DE", fg: "#B7CCB3" },
+  { bg: "#F3DED7", fg: "#DCB1A6" },
+  { bg: "#E8E4D3", fg: "#C9C2A4" },
+  { bg: "#DDE8E4", fg: "#B0C9C0" },
+];
+
+const coverPalettes = [
+  { bg: "#DDE5CD", fg: "#8FA882", tint: "rgba(255,255,255,0.42)" },
+  { bg: "#EAE0CB", fg: "#C7B89D", tint: "rgba(255,255,255,0.36)" },
+  { bg: "#D4E1D1", fg: "#7E9C8E", tint: "rgba(255,255,255,0.38)" },
+  { bg: "#E7D2CB", fg: "#C97C6E", tint: "rgba(255,255,255,0.34)" },
+  { bg: "#DEE5D4", fg: "#A6B79A", tint: "rgba(255,255,255,0.36)" },
+  { bg: "#D8E5DD", fg: "#7BA194", tint: "rgba(255,255,255,0.38)" },
+];
+
 const styles = StyleSheet.create({
   button: {
-    minHeight: 48,
+    minHeight: 52,
     borderRadius: theme.radius.pill,
-    paddingHorizontal: 18,
+    paddingHorizontal: 20,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
@@ -580,6 +697,11 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: theme.colors.line,
+    shadowColor: "rgba(20,30,18,0.18)",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    elevation: 1,
   },
   badge: {
     alignSelf: "flex-start",
@@ -607,12 +729,12 @@ const styles = StyleSheet.create({
   field: { gap: 6 },
   fieldLabel: { color: theme.colors.inkSoft, fontWeight: "700", fontSize: 13 },
   input: {
-    minHeight: 48,
+    minHeight: 52,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.lineStrong,
+    borderColor: "rgba(30,41,32,0.12)",
     backgroundColor: theme.colors.surface,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     color: theme.colors.ink,
     fontSize: 15,
   },
@@ -620,8 +742,8 @@ const styles = StyleSheet.create({
   inputError: { borderColor: theme.colors.danger, backgroundColor: "#FDF4F1" },
   errorText: { color: theme.colors.danger, fontSize: 12 },
   chip: {
-    minHeight: 36,
-    paddingHorizontal: 13,
+    minHeight: 34,
+    paddingHorizontal: 12,
     borderRadius: theme.radius.pill,
     borderWidth: 1,
     borderColor: theme.colors.line,
@@ -644,7 +766,7 @@ const styles = StyleSheet.create({
   },
   segment: {
     flex: 1,
-    minHeight: 38,
+    minHeight: 36,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: theme.radius.pill,
@@ -653,7 +775,7 @@ const styles = StyleSheet.create({
   segmentText: { color: theme.colors.inkMute, fontWeight: "700" },
   segmentTextSelected: { color: theme.colors.ink },
   topBar: {
-    minHeight: 62,
+    minHeight: 58,
     paddingHorizontal: 18,
     paddingTop: 8,
     paddingBottom: 10,
@@ -663,7 +785,7 @@ const styles = StyleSheet.create({
   },
   topTitleWrap: { flexDirection: "row", alignItems: "center", flex: 1, gap: 6 },
   topTextWrap: { flex: 1 },
-  topTitle: { color: theme.colors.ink, fontWeight: "800", fontSize: 22 },
+  topTitle: { color: theme.colors.ink, fontWeight: "800", fontSize: 20 },
   topSubtitle: { color: theme.colors.inkMute, marginTop: 2, fontSize: 13 },
   backButton: {
     width: 40,
@@ -672,7 +794,63 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
   },
+  visualThumb: {
+    borderRadius: theme.radius.md,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    position: "relative",
+  },
+  visualOrbLarge: {
+    position: "absolute",
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    opacity: 0.34,
+  },
+  visualOrbSmall: {
+    position: "absolute",
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    opacity: 0.22,
+  },
+  visualCover: {
+    borderRadius: theme.radius.lg,
+    overflow: "hidden",
+    position: "relative",
+  },
+  coverWave: {
+    position: "absolute",
+    left: -18,
+    right: -18,
+    bottom: -34,
+    height: 76,
+    opacity: 0.32,
+    borderTopLeftRadius: 60,
+    borderTopRightRadius: 80,
+  },
+  coverCircle: {
+    position: "absolute",
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    right: 18,
+    top: 12,
+    opacity: 0.45,
+  },
+  coverLabel: {
+    position: "absolute",
+    left: 14,
+    bottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  coverLabelText: { fontSize: 13, fontWeight: "800" },
   state: {
     alignItems: "center",
     justifyContent: "center",

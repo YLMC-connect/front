@@ -12,7 +12,7 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<HomeScreen />);
 
     expect(screen.getByTestId("screen-home")).toBeTruthy();
-    expect(await screen.findByText("최근 나눔")).toBeTruthy();
+    expect(await screen.findByText("최근 나눔 물품")).toBeTruthy();
   });
 
   it("renders the market screen with the active sharing tab", async () => {

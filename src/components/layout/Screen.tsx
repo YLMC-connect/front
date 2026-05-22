@@ -55,7 +55,7 @@ export function Section({
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.colors.bg },
   fill: { flex: 1 },
-  content: { paddingBottom: 32 },
+  content: { paddingBottom: 112 },
   padded: { paddingHorizontal: 18, gap: 16 },
   section: { gap: 10 },
   sectionHeader: {

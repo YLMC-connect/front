@@ -4,7 +4,7 @@ import { Controller, useForm } from "react-hook-form";
 import { StyleSheet, Text, View } from "react-native";
 import { z } from "zod";
 import { Screen } from "../../src/components/layout/Screen";
-import { Button, Card, TextField } from "../../src/components/ui";
+import { Button, TextField } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { useAuth } from "../../src/hooks/useAuth";
 
@@ -44,7 +44,7 @@ export default function LoginScreen() {
         </Text>
       </View>
 
-      <Card style={styles.form}>
+      <View style={styles.form}>
         <Controller
           control={control}
           name="id"
@@ -76,33 +76,64 @@ export default function LoginScreen() {
         <Button onPress={onSubmit} loading={login.isPending}>
           로그인
         </Button>
-        <Link href="/signup" style={styles.signupLink}>
-          아직 계정이 없으신가요? 회원가입
+        <View style={styles.dividerRow}>
+          <View style={styles.divider} />
+          <Text style={styles.dividerText}>처음이신가요?</Text>
+          <View style={styles.divider} />
+        </View>
+        <Link href="/signup" style={styles.signupButton}>
+          회원가입
         </Link>
-      </Card>
+      </View>
+      <Text style={styles.copy}>© 열린문교회</Text>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  hero: { alignItems: "center", paddingTop: 54, paddingBottom: 12, gap: 10 },
+  hero: { alignItems: "center", paddingTop: 64, paddingBottom: 14, gap: 10 },
   logo: {
-    width: 72,
-    height: 72,
-    borderRadius: 24,
+    width: 76,
+    height: 76,
+    borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: theme.colors.primary,
+    shadowColor: "rgba(91,122,176,0.55)",
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.28,
+    shadowRadius: 18,
+    elevation: 6,
   },
-  logoText: { color: "#fff", fontWeight: "900", fontSize: 34 },
-  title: { color: theme.colors.ink, fontWeight: "900", fontSize: 28 },
-  subtitle: { color: theme.colors.inkMute, fontWeight: "600" },
-  form: { gap: 16 },
+  logoText: { color: "#fff", fontWeight: "900", fontSize: 36 },
+  title: { color: theme.colors.ink, fontWeight: "900", fontSize: 24 },
+  subtitle: { color: theme.colors.inkMute, fontWeight: "600", fontSize: 13 },
+  form: { gap: 14, marginTop: 18 },
   error: { color: theme.colors.danger, fontSize: 13 },
-  signupLink: {
+  dividerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 8,
+    marginBottom: 2,
+  },
+  divider: { flex: 1, height: 1, backgroundColor: theme.colors.line },
+  dividerText: { color: theme.colors.inkHint, fontSize: 12, fontWeight: "600" },
+  signupButton: {
     color: theme.colors.primaryDeep,
     textAlign: "center",
-    fontWeight: "700",
-    paddingVertical: 6,
+    fontWeight: "800",
+    paddingVertical: 15,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: theme.colors.lineStrong,
+    backgroundColor: theme.colors.surface,
+  },
+  copy: {
+    color: theme.colors.inkHint,
+    textAlign: "center",
+    fontSize: 11,
+    marginTop: "auto",
+    paddingBottom: 10,
   },
 });

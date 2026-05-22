@@ -1,17 +1,17 @@
 # YLMC Connect — 인덱스
 
-> 마지막 갱신: 2026-05-09 (협업 대비 외부 도구 마이그레이션 — TASKS→Issues / LOG→PR description / 도메인 상태표 자동생성) | 현재 Phase: 1 — 프로젝트 초기 세팅 (진입 직전)
+> 마지막 갱신: 2026-05-23 (자동 테스트 체계 및 Maestro smoke 반영) | 현재 Phase: 6 — API 연결 준비 (진행중)
 
-본 문서는 **작업자 5분용 진입점** 입니다. 외부인은 [README.md](../README.md) 부터, AI 작업 규칙은 [CLAUDE.md](../CLAUDE.md) 를 참고하세요. 문서 시스템이 어긋났을 때의 복구 절차는 [MAINTENANCE.md](MAINTENANCE.md).
+본 문서는 **작업자 5분용 진입점** 입니다. 외부인은 [README.md](../README.md) 부터, AI 작업 규칙은 [AGENTS.md](../AGENTS.md) 를 참고하세요. 문서 시스템이 어긋났을 때의 복구 절차는 [MAINTENANCE.md](MAINTENANCE.md).
 
 ---
 
 ## 프로젝트 흐름 한눈에
 
 ```
-[✅ Phase 0 기획·문서] → [⬜ Phase 1 세팅] → [⬜ Phase 2 장터] →
-[⬜ Phase 3 소모임] → [⬜ Phase 4 삶공부] → [⬜ Phase 5 기도] →
-[⬜ Phase 6 인증] → [⬜ Phase 7 백엔드] → [⬜ Phase 8 채팅] →
+[✅ Phase 0 기획·문서] → [✅ Phase 1 MVP 앱 기반] → [✅ Phase 2 장터] →
+[✅ Phase 3 소모임] → [✅ Phase 4 MY] → [✅ Phase 5 v1 기능] →
+[🔵 Phase 6 인증 API] → [⬜ Phase 7 백엔드] → [⬜ Phase 8 v2 실시간] →
 [⬜ Phase 9 분석] → [⬜ Phase 10 a11y/성능]
 ```
 
@@ -25,12 +25,13 @@
 
 | 도메인 | 진행 중 | 완료 | 마지막 갱신 | 상세 |
 |---|---|---|---|---|
-| common (공통 인프라) | 1 | 1 | 2026-05-22 | (미생성) |
-| auth (인증) | 1 | 1 | 2026-05-22 | (미생성) |
-| market (나눔장터) | 0 | 1 | 2026-05-22 | (미생성) |
-| group (소모임) | 0 | 1 | 2026-05-22 | (미생성) |
-| life-study (삶공부) | 0 | 1 | 2026-05-22 | (미생성) |
-| prayer (중보기도) | 0 | 1 | 2026-05-22 | (미생성) |
+| common (공통 인프라) | 1 | 1 | 2026-05-23 | [features/common.md](features/common.md) |
+| auth (인증) | 1 | 1 | 2026-05-23 | [features/auth.md](features/auth.md) |
+| market (나눔장터) | 0 | 1 | 2026-05-23 | [features/market.md](features/market.md) |
+| group (소모임) | 0 | 1 | 2026-05-23 | [features/group.md](features/group.md) |
+| mypage (MY) | 0 | 1 | 2026-05-23 | [features/mypage.md](features/mypage.md) |
+| life-study (삶공부) | 0 | 1 | 2026-05-23 | [features/life-study.md](features/life-study.md) |
+| prayer (중보기도) | 0 | 1 | 2026-05-23 | [features/prayer.md](features/prayer.md) |
 
 <!-- AUTO-GENERATED-END: domain-status -->
 
@@ -60,7 +61,7 @@
 | 다른 도메인과 의존성 | 해당 도메인 features 페이지 |
 | 완료된 결과물을 재사용 | 작업 도메인 features 의 `✅ 완료` 본문 |
 
-상세 규칙은 [../CLAUDE.md](../CLAUDE.md).
+상세 규칙은 [../AGENTS.md](../AGENTS.md).
 
 ---
 
@@ -68,9 +69,13 @@
 
 - [0001 — 기술 스택](adr/0001-tech-stack.md) — Expo SDK 55 / TanStack Query / Zustand / zod / NativeWind v4 등 채택 근거. (수락, 2026-05-08; 스타일 항목 갱신 2026-05-08)
 - [0002 — 백엔드 선택 보류 (Mock-first)](adr/0002-backend-tbd.md) — Phase 5 종료까지 백엔드 플랫폼 결정 보류, services/ 격리로 무관 진행. (수락, 2026-05-08)
+- [0003 — MVP 범위는 Notion 최신 정의 우선](adr/0003-mvp-scope-notion-first.md) — 인증·홈·나눔·소모임·MY·이미지 선택을 MVP로 확정하고 중보기도·삶공부는 v1로 분리. (수락, 2026-05-22)
+- [0004 — Notion v1 범위와 Expo Dev Client 기준](adr/0004-notion-v1-dev-client-scope.md) — 삶공부·중보기도를 v1 mock-first로 구현하고 Expo Go가 아닌 Dev Client를 검증 기준으로 확정. (수락, 2026-05-22)
+- [0005 — 모바일 E2E는 Maestro 우선](adr/0005-mobile-e2e-maestro-first.md) — Expo Dev Client development build 기준 v1 탭 진입 smoke를 Maestro로 관리. (수락, 2026-05-23)
 
 ---
 
 ## 외부 자료
 
-(Figma, Notion 등 추가 시 기재.)
+- Notion “열린문커넥트” 기획 문서 — MVP 범위와 IA의 최신 기준
+- `/Users/mingulee/Downloads/열린문커넥트.zip` — 앱 디자인 토큰과 화면 톤 참고

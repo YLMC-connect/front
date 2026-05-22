@@ -1,0 +1,39 @@
+jest.mock("expo-router", () => {
+  const React = require("react");
+
+  return {
+    Link: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+    router: {
+      back: jest.fn(),
+      push: jest.fn(),
+      replace: jest.fn(),
+    },
+    useLocalSearchParams: jest.fn(() => ({})),
+  };
+});
+
+jest.mock("@expo/vector-icons", () => {
+  const React = require("react");
+  const { Text } = require("react-native");
+
+  const MaterialIcons = ({ name }: { name: string }) =>
+    React.createElement(Text, null, name);
+  MaterialIcons.glyphMap = {};
+
+  return { MaterialIcons };
+});
+
+jest.mock("expo-image", () => {
+  const { Image } = require("react-native");
+
+  return { Image };
+});
+
+jest.mock("expo-image-picker", () => ({
+  MediaTypeOptions: {
+    Images: "Images",
+  },
+  launchImageLibraryAsync: jest.fn(),
+  requestMediaLibraryPermissionsAsync: jest.fn(),
+}));

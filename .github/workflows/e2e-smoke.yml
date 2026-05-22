@@ -1,0 +1,26 @@
+name: E2E Smoke
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+  schedule:
+    - cron: "0 18 * * *"
+
+jobs:
+  maestro-smoke:
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.E2E_SMOKE_ENABLED == 'true' }}
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.19.4
+          cache: npm
+
+      - run: npm ci
+      - run: npm run validate
+      - run: brew tap mobile-dev-inc/tap
+      - run: brew install mobile-dev-inc/tap/maestro
+      - run: npm run test:e2e:smoke

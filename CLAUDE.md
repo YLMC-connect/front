@@ -1,6 +1,7 @@
-# YLMC Connect — AI 작업 규칙
+# YLMC Connect — Claude Code 호환 작업 규칙
 
-본 문서는 매 응답 시작 시 시스템 컨텍스트로 자동 주입됩니다. **모든 작업에 강제력** 을 갖습니다.
+본 문서는 Claude Code 호환본입니다. Codex의 기준 작업 규칙은 [AGENTS.md](AGENTS.md) 입니다.
+규칙 변경 시 `AGENTS.md` 와 본 파일을 함께 동기화합니다. **모든 작업에 강제력** 을 갖습니다.
 
 ---
 

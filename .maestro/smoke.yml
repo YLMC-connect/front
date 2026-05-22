@@ -1,0 +1,29 @@
+appId: com.ylmc.connect.dev
+name: YLMC Connect v1 smoke
+tags:
+  - smoke
+---
+- launchApp:
+    clearState: false
+- assertVisible:
+    id: screen-home
+- tapOn:
+    id: tab-market
+- assertVisible:
+    id: screen-market
+- tapOn:
+    id: tab-group
+- assertVisible:
+    id: screen-group
+- tapOn:
+    id: tab-life-study
+- assertVisible:
+    id: screen-life-study
+- tapOn:
+    id: tab-prayer
+- assertVisible:
+    id: screen-prayer
+- tapOn:
+    id: tab-mypage
+- assertVisible:
+    id: screen-mypage

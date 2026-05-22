@@ -1,7 +1,7 @@
 # YLMC Connect — 프로젝트 기획 문서
 
 > 우리 교회(YLMC) 성도를 서로 이어주는 커뮤니티 앱  
-> 최종 수정: 2026-05-07
+> 최종 수정: 2026-05-23
 
 ---
 
@@ -21,6 +21,7 @@
 | 항목 | 선택 | 버전 | 비고 |
 |------|------|------|------|
 | Expo SDK | React Native + Expo | `^55.0.0` | React Native 0.83 · React 19.2 · New Architecture 기본 |
+| Dev Client | expo-dev-client | `~55.0.35` | Expo Go 대신 development build + `expo start --dev-client` 기준 |
 | 라우팅 | Expo Router | `^55.0.x` (v7) | 파일 기반 라우팅, SDK와 함께 설치됨 |
 | 서버 상태 | TanStack Query | `^5.100.x` | 비동기 페칭, 캐싱, 동기화 — React Native 공식 지원 |
 | 클라이언트 상태 | Zustand | `^5.0.x` | auth·UI 상태만 담당 (React 18+ 필요) |
@@ -53,14 +54,26 @@
 
 ## 🗂 핵심 기능
 
-### 🛒 나눔장터
-> 성도 간 중고 거래 / 무료 나눔 (당근마켓 참고)
+### 2026-05-22 Notion 최신 기준 적용
+
+Notion의 “열린문커넥트” 기획 정의와 `열린문커넥트.zip` 디자인 토큰을 우선 기준으로 삼습니다. 로컬 문서의 과거 Phase 정의와 충돌할 경우 Notion을 우선합니다.
+
+| 구분 | 포함 범위 | 제외 / TODO |
+|---|---|---|
+| MVP | 회원가입, 로그인, 교인 DB 대조/불일치 관리 흐름, 홈, 나눔, 소모임, MY, 신고·관리자 안전 처리, 이미지 선택/미리보기 | 비밀번호 찾기, 가입코드 입력/검증, 사용자 차단 |
+| v1 | 삶공부, 중보기도, 홈 주요 활동 확장 | 교회 공지·알림, 푸시, 실제 파일 업로드, 실제 관리자 도구 |
+| API 준비 | Swagger에서 확인된 인증 API adapter 구조, `secureStore` 토큰 저장 유틸 | 실제 API 응답 스키마 확정 전 fetch 활성화 금지 |
+
+현재 앱 라우팅은 홈 / 나눔 / 모임 / 삶공부 / 중보기도 / MY 6탭입니다. 서버성 데이터는 `screens -> hooks(TanStack Query) -> services -> mocks/API` 흐름을 따르고, Zustand는 인증·UI·임시 작성 상태에만 사용합니다.
+
+### 🛒 나눔
+> 성도 간 무료 나눔
 
 | 화면 | 설명 | 주요 액션 |
 |------|------|---------|
-| 목록 | 카테고리 필터 + 검색 | 카테고리 선택, 검색어 입력 |
-| 상세 | 이미지 슬라이더, 판매자 정보 | 채팅하기, 찜하기 |
-| 글쓰기 (모달) | 제목·가격·카테고리·사진 입력 | 등록하기 |
+| 목록 | 카테고리/상태 필터 + 검색 | 카테고리 선택, 검색어 입력 |
+| 상세 | 사진, 작성자, 상태, 댓글 | 관심, 댓글, 신고 |
+| 글쓰기 (모달) | 제목·설명·상태·장소·카테고리·사진 입력 | 등록하기 |
 | 내 글 관리 | 거래 상태 변경 | 예약중 / 거래완료 변경 |
 
 ### 👥 소모임
@@ -86,9 +99,9 @@
 
 | 화면 | 설명 | 주요 액션 |
 |------|------|---------|
-| 목록 | 최신순, 만료 임박 표시 | 스크롤 |
-| 상세 | 기도제목 내용 + 기도한 사람 수 | 기도하기 (카운트 +1) |
-| 등록 (모달) | 제목·내용·익명 여부·만료일 | 등록하기 |
+| 목록 | 요일별 기도방 + 내 기도방 | 요일 필터, 기도방 진입 |
+| 상세 | 기도제목 내용 + 기도한 사람 수 + 응답 기록 | 기도했어요, 응답 기록 |
+| 등록 (모달) | 제목·내용·익명 여부 | 등록하기 |
 
 ---
 
@@ -115,7 +128,7 @@ ylmc-front/
 │   │   │   ├── index.tsx         # 삶공부 목록
 │   │   │   └── [id].tsx          # 상세
 │   │   └── prayer/
-│   │       ├── index.tsx         # 기도제목 목록
+│   │       ├── index.tsx         # 기도방 목록
 │   │       └── [id].tsx          # 상세
 │   └── modal/                    # 전체화면 모달
 │       ├── market-new.tsx        # 장터 글쓰기
@@ -127,24 +140,27 @@ ylmc-front/
 │   │   ├── ui/                   # 기본 원자 단위 (Button, Card, Badge, Avatar...)
 │   │   ├── market/
 │   │   ├── group/
-│   │   ├── life-study/
+│   │   ├── lifeStudy/
 │   │   └── prayer/
 │   │
 │   ├── store/                    # Zustand — 클라이언트 상태만
 │   │   └── authStore.ts          # Mock 유저 / 로그인 상태
 │   │
 │   ├── services/                 # 데이터 페칭 함수 (현재 Mock → 추후 실제 API)
+│   │   ├── authAdapter.ts         # Mock/Auth API adapter 스위치 지점
 │   │   ├── marketService.ts
 │   │   ├── groupService.ts
 │   │   ├── lifeStudyService.ts
-│   │   └── prayerService.ts
+│   │   ├── prayerService.ts
+│   │   └── myPageService.ts
 │   │
 │   ├── hooks/                    # TanStack Query 훅 + 커스텀 훅
 │   │   ├── useAuth.ts            # Zustand authStore 래퍼
 │   │   ├── useMarketItems.ts     # useQuery — 장터 목록/상세
-│   │   ├── useGroupList.ts       # useQuery — 소모임 목록/상세
+│   │   ├── useGroups.ts          # useQuery — 소모임 목록/상세
 │   │   ├── useLifeStudyCourses.ts# useQuery — 삶공부 과정
-│   │   └── usePrayerList.ts      # useQuery — 기도제목 목록
+│   │   ├── usePrayers.ts         # useQuery — 기도방/기도제목
+│   │   └── useMyPage.ts          # useQuery — MY 활동 요약
 │   │
 │   ├── lib/
 │   │   ├── queryClient.ts        # QueryClient 인스턴스 및 기본 설정
@@ -156,10 +172,12 @@ ylmc-front/
 │   │   ├── market.ts
 │   │   ├── group.ts
 │   │   ├── lifeStudy.ts
-│   │   └── prayer.ts
+│   │   ├── prayer.ts
+│   │   └── mypage.ts
 │   │
 │   ├── constants/
-│   │   └── theme.ts              # 색상, spacing, 폰트 크기 등 디자인 토큰 — tailwind.config.js 가 import 하는 단일 출처
+│   │   ├── theme.ts              # 색상, spacing, 폰트 크기 등 디자인 토큰 — tailwind.config.js 가 import 하는 단일 출처
+│   │   └── domainOptions.ts      # 카테고리/탭/신고 사유 등 UI 옵션
 │   │
 │   └── mocks/                    # Mock 데이터 (services/ 내부에서 사용)
 │       ├── auth.ts               # MOCK_USER
@@ -197,7 +215,7 @@ interface Member {
   name: string;
   profileImage?: string;
   department?: string;    // 교구/구역
-  role: 'member' | 'staff' | 'admin';  // 'staff' = 교역자, 'admin' = 운영자
+  role: 'member' | 'leader' | 'staff' | 'admin';  // 'leader' = 소모임장, 'staff' = 교역자, 'admin' = 운영자
 }
 
 // 페이지네이션 응답 (모든 목록 API 공통)
@@ -213,43 +231,61 @@ interface Report {
   targetType: 'market' | 'group' | 'prayer';
   targetId: string;
   reporterId: string;
-  reason: 'inappropriate' | 'spam' | 'abuse' | 'other';
+  reason: 'inappropriate' | 'spam' | 'abuse' | 'no_show' | 'other';
   detail?: string;
-  createdAt: Date;
+  createdAt: string;
+}
+
+interface Comment {
+  id: string;
+  author: Member;
+  content: string;
+  createdAt: string;
 }
 
 // ─── 나눔장터 ────────────────────────────────────────
 type MarketCategory =
-  | '가전/디지털'
-  | '의류/잡화'
+  | '의류·잡화'
+  | '가전·가구'
   | '도서/문구'
-  | '식품'
-  | '유아용품'
-  | '스포츠/레저'
+  | '식품·생필품'
+  | '유아·아동용품'
+  | '스포츠·취미'
   | '기타';
 
 interface MarketItem {
   id: string;
   title: string;
-  price: number | 'free';
   description: string;
   images: string[];
-  status: 'available' | 'reserved' | 'sold';
-  seller: Member;
+  status: 'sharing' | 'reserved' | 'done';
+  owner: Member;
   category: MarketCategory;
-  createdAt: Date;
+  condition: string;
+  location: string;
+  createdAt: string;
+  liked: boolean;
+  comments: Comment[];
 }
 
 // ─── 소모임 ─────────────────────────────────────────
 type GroupCategory =
-  | '독서'
-  | '운동/스포츠'
-  | '찬양/음악'
+  | '성경공부·예배'
+  | '기도모임'
   | '봉사'
-  | '영어회화'
-  | '요리'
-  | '육아'
+  | '취미·문화'
+  | '운동·건강'
+  | '목장'
+  | '선교'
+  | '카풀'
   | '기타';
+
+interface GroupNotice {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+}
 
 interface Group {
   id: string;
@@ -263,6 +299,8 @@ interface Group {
   location: string;
   category: GroupCategory;
   isJoined: boolean;
+  isFavorite: boolean;
+  notices: GroupNotice[];
 }
 
 // ─── 삶공부 ─────────────────────────────────────────
@@ -271,31 +309,50 @@ interface LifeStudyCourse {
   title: string;          // API에서 가져옴
   description: string;
   sessions: number;       // 전체 회차 수
+  currentSession: number;
   instructor: Member;
   schedule: string;
+  location: string;
   status: 'upcoming' | 'ongoing' | 'completed';
+  capacity: number;
+  enrolledCount: number;
+  isEnrolled: boolean;
+  isCompleted: boolean;
+  curriculum: string[];
 }
 
 interface LifeStudyHistory {
   memberId: string;       // 수강자 ID (어느 유저의 이력인지 구분)
   courseId: string;
-  enrolledAt: Date;
+  enrolledAt: string;
   completedSessions: number;
-  completedAt?: Date;
+  completedAt?: string;
   certificateIssued: boolean;
 }
 
 // ─── 중보기도 ────────────────────────────────────────
+interface PrayerRoom {
+  id: string;
+  title: string;
+  weekday: 'mon' | 'tue' | 'wed' | 'thu' | 'fri';
+  description: string;
+  leader: Member;
+  memberCount: number;
+  isJoined: boolean;
+}
+
 interface PrayerRequest {
   id: string;
+  roomId: string;
   title: string;
   content: string;
   author: Member;
   isAnonymous: boolean;
   prayerCount: number;
   hasPrayed: boolean;     // 내가 기도했는지 여부
-  createdAt: Date;
-  expiresAt?: Date;
+  isAnswered: boolean;
+  answer?: string;
+  createdAt: string;
 }
 ```
 
@@ -308,11 +365,13 @@ interface PrayerRequest {
 | 린팅 | ESLint | `expo` lint preset 사용 |
 | 포맷팅 | Prettier | 탭 너비 2, 세미콜론 없음 |
 | 빌드 | EAS Build | dev / preview / production profiles (`eas.json`) |
+| 로컬 실행 | Expo Dev Client | `npm run start:dev-client`, development build는 `npm run ios:dev-client` 또는 `npm run android:dev-client` |
+| 자동 검증 | npm scripts + GitHub Actions + Maestro | `validate`(typecheck/lint/format/test), Dev Client Metro smoke, v1 탭 E2E smoke |
 | 환경변수 | `app.config.ts` + `expo-constants` | 환경별 API URL, 키 분리 |
-| Node.js | `^20.x` (LTS) | package.json에 `engines` 명시 |
+| Node.js | `>=20.19.4` (LTS) | React Native 0.83 / Metro 요구 버전에 맞춰 package.json `engines`와 CI Node 버전 명시 |
 | 커밋 컨벤션 | Conventional Commits + commitlint | `feat / fix / docs / chore / refactor / test` |
 | 커밋 훅 | husky + lint-staged | 커밋 전 typecheck + lint + format 자동 실행 |
-| CI | GitHub Actions | PR마다 typecheck + lint + test 실행 |
+| CI | GitHub Actions | PR마다 `npm ci` + `npm run validate` 실행 |
 | 의존성 추적 | Renovate 또는 Dependabot | Expo SDK 메이저 업그레이드 추적 |
 
 ---
@@ -401,17 +460,23 @@ export const queryKeys = {
   group: {
     all: ['group'] as const,
     lists: () => [...queryKeys.group.all, 'list'] as const,
+    list: (filter?: unknown) => [...queryKeys.group.lists(), filter ?? 'all'] as const,
     detail: (id: string) => [...queryKeys.group.all, 'detail', id] as const,
   },
   lifeStudy: {
     all: ['lifeStudy'] as const,
-    courses: (status?: LifeStudyCourse['status']) => [...queryKeys.lifeStudy.all, 'courses', status] as const,
-    history: (memberId: string) => [...queryKeys.lifeStudy.all, 'history', memberId] as const,
+    lists: () => [...queryKeys.lifeStudy.all, 'list'] as const,
+    list: (filter?: unknown) => [...queryKeys.lifeStudy.lists(), filter ?? 'all'] as const,
+    detail: (id: string) => [...queryKeys.lifeStudy.all, 'detail', id] as const,
+    history: () => [...queryKeys.lifeStudy.all, 'history'] as const,
   },
   prayer: {
     all: ['prayer'] as const,
     lists: () => [...queryKeys.prayer.all, 'list'] as const,
     detail: (id: string) => [...queryKeys.prayer.all, 'detail', id] as const,
+  },
+  mypage: {
+    all: ['mypage'] as const,
   },
 } as const;
 ```
@@ -564,11 +629,17 @@ queryClient.setDefaultOptions({
 | 컴포넌트 테스트 | React Native Testing Library | `components/ui/` 원자 + critical 화면 | critical path 100% |
 | E2E | Maestro | 로그인 → 각 탭 진입 → 글쓰기 골든 패스 | 핵심 플로우 |
 
+- 최소 로컬/PR 게이트: `npm run validate` (`typecheck` + `lint` + `format:check` + `test`)
+- 커버리지 확인: `npm run test:coverage`
+- Dev Client Metro smoke: `npm run test:dev-client:smoke` (`expo start --dev-client` 부팅 후 `/status` 확인)
+- v1 E2E smoke: `.maestro/smoke.yml`에서 React Native `testID` 기준으로 홈/나눔/소모임/삶공부/중보기도/MY 탭 진입 확인
+- 전체 수동-자동 통합 게이트: `npm run validate:full`
+- Maestro E2E 실행 전제: Maestro CLI, Java 17+, Xcode Command Line Tools 또는 Android Emulator, `com.ylmc.connect.dev` development build 설치
 - 테스트 파일 위치: 대상 파일 옆 `__tests__/` 폴더에 co-location
 - Mock 데이터(`src/mocks/`)를 테스트 픽스처로 그대로 재사용
 - `@testing-library/react-hooks` 대신 RTL의 `renderHook` 사용 (RTL v13+에 통합)
 - TanStack Query 훅 테스트는 별도 `QueryClientProvider`로 wrap (각 테스트마다 새 인스턴스)
-- CI(GitHub Actions)에서 PR마다 자동 실행 + 커버리지 리포트
+- CI(GitHub Actions)에서 PR마다 `npm ci`와 `npm run validate`를 자동 실행합니다. Dev Client/Simulator 기반 E2E는 일반 PR CI와 분리하고, 수동/release/nightly용 모바일 러너에서 실행합니다.
 
 ---
 
@@ -592,10 +663,11 @@ queryClient.setDefaultOptions({
 | 탭 순서 | 탭명 | 아이콘 (MaterialIcons) | 주요 화면 |
 |---------|------|----------------------|----------|
 | 1 | 홈 | `home` | 공지, 최신 피드 모아보기 |
-| 2 | 나눔장터 | `storefront` | 목록 / 상세 / 글쓰기 |
-| 3 | 소모임 | `people` | 목록 / 상세 / 신청 |
-| 4 | 삶공부 | `menu_book` | 과정 목록 / 신청 / 내 이력 |
-| 5 | 기도 | `favorite` | 기도제목 / 기도하기 |
+| 2 | 나눔 | `redeem` | 목록 / 상세 / 글쓰기 |
+| 3 | 모임 | `groups` | 목록 / 상세 / 신청 |
+| 4 | 공부 | `menu-book` | 삶공부 목록 / 상세 / 신청 |
+| 5 | 기도 | `volunteer-activism` | 기도방 / 기도제목 / 응답 기록 |
+| 6 | MY | `person` | 내 정보 / 내 활동 / 관심 목록 / 고객센터 |
 
 > MaterialIcons 기준 아이콘 이름 (`@expo/vector-icons`의 `MaterialIcons` 컴포넌트에 그대로 전달)
 
@@ -609,7 +681,6 @@ queryClient.setDefaultOptions({
 |-------|------|----------|
 | 소모임 일정 24시간 전 | 참여 멤버 | "내일 [모임명] 일정이 있습니다" |
 | 기도제목 만료 임박 | 작성자 | "기도제목이 곧 만료됩니다" |
-| 장터 채팅 신규 메시지 | 수신자 | "[상품명]에 메시지가 도착했습니다" |
 | 삶공부 신청 결과 | 신청자 | "[과정명] 신청이 승인되었습니다" |
 | 새 기도제목 등록 (선택) | 구독자 | "새 기도제목: [제목]" |
 
@@ -640,9 +711,9 @@ queryClient.setDefaultOptions({
 
 성도 커뮤니티는 일반 SNS보다 신뢰도가 높지만, 스토어 심사·운영 안정성을 위해 필수입니다.
 
-- 모든 게시물(장터·소모임·기도제목)·댓글·채팅에 신고 버튼
+- 모든 게시물(장터·소모임·기도제목)과 댓글에 신고 버튼
 - 신고 사유: `inappropriate` / `spam` / `abuse` / `other`
-- 사용자 차단: 차단 후 해당 사용자의 모든 컨텐츠 클라이언트에서 자동 숨김
+- 사용자 차단: Notion 최신 MVP/v1 범위에서 제외. 운영자 차단·신고 처리만 우선하고, 사용자 차단 UI는 후속 Phase TODO로 둠
 - `Member.role`로 권한 구분:
   - `member`: 일반 성도
   - `staff`: 교역자 — 본인 영역 게시물 즉시 비공개 처리 가능
@@ -674,14 +745,14 @@ queryClient.setDefaultOptions({
 | Phase | 상태 | 핵심 산출물 / 범위 |
 |---|---|---|
 | Phase 0 — 기획·문서화 | ✅ 완료 | 기능 정의, 기술 스택, 폴더 구조, 데이터 타입, 디자인 방향, Mock Auth 설계, 소모임 카테고리 확정 |
-| Phase 1 — 프로젝트 초기 세팅 | ⬜ 예정 | Expo 프로젝트·의존성, `src/lib/`(queryClient·queryKeys·secureStore), `src/types/` 도메인 분리, `src/store/authStore`, `src/constants/theme`, Root layout(Provider·에러 바운더리·Sentry), 5탭 네비게이션, 공통 UI, `app.config.ts`·`eas.json`, husky·CI, ADR 0001 |
-| Phase 2 — 나눔장터 | ⬜ 예정 | `mocks·service·hook` (useInfiniteQuery + 신고 mutation) + 목록(카테고리·검색·무한스크롤)·상세(이미지 슬라이더)·글쓰기 모달(rhf+zod+이미지) + 테스트·a11y |
-| Phase 3 — 소모임 | ⬜ 예정 | `mocks·service·hook` (참여/탈퇴/신고) + 목록·상세(멤버·일정)·개설 모달(cover 이미지) + 테스트·a11y |
-| Phase 4 — 삶공부 | ⬜ 예정 | `mocks·service·hook` (신청/취소) + 과정 목록(상태 탭)·상세(신청 폼)·내 이력(수료증) + 테스트·a11y |
-| Phase 5 — 중보기도 | ⬜ 예정 | `mocks·service·hook` (기도하기/신고) + 목록(만료 배지)·상세(낙관적 카운트)·등록 모달(익명·만료일) + 익명 ID 미노출 검증 |
-| Phase 6 — 인증 (Auth) | ⬜ 예정 | 로그인·회원가입(약관) · `secureStore` 토큰 저장 · refresh token rotation · authStore 실 토큰 연결 · 로그아웃 시 cache 초기화 |
+| Phase 1 — MVP 앱 기반 | ✅ 완료 | Expo SDK 55 + Dev Client, Provider, QueryClient, secureStore, theme, 에러 바운더리, CI(`validate`), Jest/RNTL smoke, Dev Client smoke, Maestro smoke 구조, 인증 mock, 공통 UI, 이미지 선택/미리보기 |
+| Phase 2 — 나눔장터 고도화 | ✅ 완료 | Notion MVP 기준 무료 나눔 목록/상세/작성, 검색, 상태/카테고리 필터, 관심, 댓글, 신고 사유, 활성 글 5개 제한 mock |
+| Phase 3 — 소모임 고도화 | ✅ 완료 | Notion MVP 기준 목록/상세/개설, 검색, 카테고리/모집 필터, 참여/탈퇴, 관심, 공지, 멤버 관리 mock |
+| Phase 4 — MY / 성도 프로필 | ✅ 완료 | 프로필 조회/수정 mock, 내 활동 탭, 관심 목록, FAQ/고객센터, 로그아웃, 탈퇴 요청 mock |
+| Phase 5 — v1 기능 확장 | ✅ 완료 | Notion v1 기준 삶공부 과정 목록/상세/신청/이력, 중보기도 요일방/기도제목/기도 체크/응답 기록 mock |
+| Phase 6 — 인증 (Auth) API 연결 준비 | 🔵 진행중 | Swagger 기준 `/api/signup`, `/api/auth/login`, `/api/auth/refresh` adapter 구조 준비. 실제 fetch 활성화는 응답 스키마 확정 후 |
 | Phase 7 — 백엔드 연결 | ⬜ 예정 | services/ 실 API 교체 · zod 응답 검증 · 푸시 알림(권한·디바이스 토큰·Deep link·설정 화면) · 이미지 업로드 파이프라인(presigned URL·EXIF·압축) · 강제 업데이트 |
-| Phase 8 — 채팅 (장터) | ⬜ 예정 | 실시간 인프라 결정(ADR) · 1:1 DM 모델 · 채팅방·목록 화면 · 푸시 연동 · 차단/신고 숨김 · 이미지 메시지 |
+| Phase 8 — v2 실시간 커뮤니케이션 | ⬜ 예정 | v2 범위. 실시간 인프라 결정(ADR) · 1:1 메시징 모델 · 푸시 연동 · 신고/숨김 정책 · 이미지 메시지 |
 | Phase 9 — 분석/모니터링 | ⬜ 예정 | Analytics funnel 정의·추적 · Sentry release·source map · 성능 모니터링 · (선택) 관리자 도구 |
 | Phase 10 — 접근성/성능 | ⬜ 예정 | a11y audit (VoiceOver·TalkBack) · 색 대비 WCAG AA · 폰트 스케일 2배 검증 · 번들 최적화 · 이미지 lazy · 시니어 폰트 옵션 |
 
@@ -710,5 +781,8 @@ queryClient.setDefaultOptions({
 | 2026-05-07 | Phase 0 완료 — 미결 사항 4개 확정, TanStack Query + MaterialIcons 추가, Mock Auth 설계, 소모임 카테고리 정의 |
 | 2026-05-07 | 버전 검토 — Expo SDK 55 / Expo Router v7 / RN 0.83 기준으로 버전 명시, New Architecture 전용 주의사항 추가, 네트워크 레이어 설계, TanStack Query React Native 설정 추가 |
 | 2026-05-07 | 2차 보완 — 핵심 기능별 화면 플로우 상세화, MaterialIcons 아이콘 이름 수정, 나눔장터 카테고리 정의, 데이터 타입 보완(MarketCategory·memberId·coverImage), 에러 처리 전략 추가, Phase 2~5 세부 태스크 구체화 |
-| 2026-05-07 | 3차 보완 — 유지보수 관점 인프라 항목 추가 (테스트 전략·Sentry·보안/개인정보·CI/CD·환경 분리·queryKey 컨벤션·영속 캐시·푸시 알림 시나리오·이미지 업로드 파이프라인·신고/모더레이션·접근성), Phase 1 의존성/세팅 보강, Phase 2~5 페이지네이션·신고·테스트·a11y 추가, Phase 8(채팅)·Phase 9(분석)·Phase 10(a11y/성능) 신설, 데이터 타입에 Member.role·PaginatedResponse·Report 추가, 폴더 구조에 queryKeys.ts·secureStore.ts·types 도메인 분리·docs/adr·README.md 반영 |
+| 2026-05-07 | 3차 보완 — 유지보수 관점 인프라 항목 추가 (테스트 전략·Sentry·보안/개인정보·CI/CD·환경 분리·queryKey 컨벤션·영속 캐시·푸시 알림 시나리오·이미지 업로드 파이프라인·신고/모더레이션·접근성), Phase 1 의존성/세팅 보강, Phase 2~5 페이지네이션·신고·테스트·a11y 추가, Phase 8(v2 실시간 커뮤니케이션)·Phase 9(분석)·Phase 10(a11y/성능) 신설, 데이터 타입에 Member.role·PaginatedResponse·Report 추가, 폴더 구조에 queryKeys.ts·secureStore.ts·types 도메인 분리·docs/adr·README.md 반영 |
 | 2026-05-08 | 스타일 도구 변경 — NativeWind v4 채택 (StyleSheet 는 차트·동적 보간 등 className 으로 표현 곤란한 경계만). 디자인 토큰은 `src/constants/theme.ts` 단일 출처, `tailwind.config.js` 가 이를 import 해 동기화. ADR 0001 의 “고려했지만 채택하지 않은 대안” 에서 채택으로 이동. 호환성 표·폴더 구조에 babel/metro/global.css/nativewind-env.d.ts 반영 |
+| 2026-05-22 | MVP 기준 재정의 — Notion 최신 기획을 우선해 MVP를 인증·홈·나눔·소모임·MY·이미지 선택으로 확정. 중보기도·삶공부는 MVP에서 분리하고 실제 API·푸시·차단은 후속 TODO로 이동. `열린문커넥트.zip` 디자인 토큰을 앱 theme 기준으로 반영 |
+| 2026-05-22 | v1 기준 반영 — Notion 기능 범위와 IA를 우선해 삶공부·중보기도를 v1 범위로 확정하고, Expo Dev Client 기반 실행/검증 및 인증 API adapter 준비를 Phase 6 기준으로 반영 |
+| 2026-05-23 | 자동 테스트 체계 반영 — `validate`에 typecheck/lint/format/test를 포함하고, Jest/RNTL smoke, Dev Client Metro smoke, Maestro v1 탭 E2E smoke, ADR 0005를 Phase 1 검증 기준에 포함 |

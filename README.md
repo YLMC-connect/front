@@ -4,16 +4,99 @@
 
 ## 무엇을 만드나
 
-**나눔장터 · 소모임 · 삶공부 · 중보기도** — 4개 핵심 기능을 한 앱에서.
-React Native + Expo (SDK 55, New Architecture) 기반, Mock 데이터로 시작해 백엔드 연결로 점진 전환합니다.
+Notion “열린문커넥트” 최신 기획을 기준으로 **MVP + v1 모바일 화면** 을 Expo Dev Client 기반으로 제공합니다.
+현재 범위는 회원가입/로그인 · 홈 · 나눔 · 소모임 · MY · 이미지 선택 · 삶공부 · 중보기도입니다. 실제 API가 없는 기능은 Mock-first 구조로 동작합니다.
 
 ## 진행 상태
 
 ```
-[✅ Phase 0 기획] → [⬜ Phase 1 세팅] → [⬜ Phase 2~10]
+[✅ Phase 0 기획] → [✅ Phase 1~5 MVP/v1 mock-first] → [🔵 Phase 6 API 연결 준비]
 ```
 
 자세한 진행 상태와 도메인별 상태표: [docs/INDEX.md](docs/INDEX.md)
+
+## 실행
+
+```bash
+npm install
+npm run start:dev-client
+```
+
+Expo Go가 아니라 **development build가 설치된 기기/시뮬레이터** 에서 실행합니다.
+
+Dev Client 빌드:
+
+```bash
+npm run ios:dev-client
+npm run android:dev-client
+```
+
+EAS development build:
+
+```bash
+npx eas build --profile development --platform ios
+npx eas build --profile development --platform android
+```
+
+Metro만 먼저 확인하려면:
+
+```bash
+npm run start:dev-client -- --port 8081 --localhost
+```
+
+Codex 기본 샌드박스에서는 위 명령이 `Starting project...` 이후 8081 포트에 바인딩되지 않을 수 있습니다. 샌드박스 밖 로컬 권한으로는 `npm run test:dev-client:smoke`가 `http://localhost:8081/status` 응답까지 확인했습니다. development build가 설치된 iOS/Android 기기에서는 같은 Metro에 연결해 실제 앱 실행을 확인합니다.
+
+검증 명령:
+
+```bash
+npm run validate
+```
+
+`validate`는 `typecheck`, `lint`, `format:check`, `test`를 순서대로 실행합니다. CI도 `npm ci` 후 `npm run validate`를 수행합니다.
+
+단위/컴포넌트 테스트:
+
+```bash
+npm run test
+npm run test:coverage
+```
+
+Jest + React Native Testing Library로 공통 UI, 도메인 옵션, 홈/나눔/소모임/삶공부/중보기도/MY 핵심 화면 렌더링을 mock-first 기준으로 확인합니다.
+
+Dev Client Metro smoke:
+
+```bash
+npm run test:dev-client:smoke
+```
+
+이 명령은 `expo start --dev-client --port 8081 --localhost`를 띄우고 `http://localhost:8081/status` 응답을 확인한 뒤 종료합니다.
+
+Maestro E2E smoke:
+
+```bash
+maestro test .maestro/smoke.yml
+npm run test:e2e:smoke
+```
+
+Maestro smoke는 `com.ylmc.connect.dev` development build가 설치된 iOS Simulator 또는 Android Emulator에서 실행합니다. 현재 flow는 React Native `testID` 기반으로 홈, 나눔, 소모임, 삶공부, 중보기도, MY 탭 진입을 확인합니다.
+
+현재 Codex 환경에서는 `maestro` CLI가 설치되어 있지 않아 `npm run test:e2e:smoke`가 `maestro: command not found`로 중단됩니다. macOS에서는 Java 17+와 Xcode Command Line Tools를 확인한 뒤 다음 중 하나로 Maestro를 설치합니다:
+
+```bash
+brew tap mobile-dev-inc/tap
+brew install mobile-dev-inc/tap/maestro
+maestro --version
+```
+
+전체 로컬 검증:
+
+```bash
+npm run validate:full
+```
+
+`validate:full`은 `validate`, Dev Client Metro smoke, Maestro smoke를 순서대로 실행합니다. 로컬에 Maestro CLI나 development build가 없으면 E2E 단계는 실패하므로, 먼저 `npm run ios:dev-client` 또는 `npm run android:dev-client`로 dev build를 설치합니다.
+
+무거운 모바일 E2E는 일반 PR CI와 분리되어 있으며, `.github/workflows/e2e-smoke.yml`에서 수동 실행을 기본값으로 둡니다. release/nightly 실행은 `E2E_SMOKE_ENABLED=true` repo variable과 Dev Client 설치가 가능한 전용 러너가 준비된 뒤 활성화합니다.
 
 ## 문서 지도
 
@@ -21,9 +104,9 @@ React Native + Expo (SDK 55, New Architecture) 기반, Mock 데이터로 시작�
 - 설계 기준 문서: [PLAN.md](PLAN.md) — 기술 스택, 데이터 타입, Phase 정의
 - 진행 작업: GitHub Issues — `gh issue list --state open` (label = 도메인). 기존 항목 보존: [docs/_archive/TASKS.md](docs/_archive/TASKS.md)
 - 변경 이력: 머지된 PR description — `gh pr list --state merged --limit 30`. 기존 항목 보존: [docs/_archive/LOG.md](docs/_archive/LOG.md)
-- AI 작업 규칙: [CLAUDE.md](CLAUDE.md) — Claude Code 동작 규약
+- AI 작업 규칙: [AGENTS.md](AGENTS.md) — Codex 동작 규약 (`CLAUDE.md` 는 Claude Code 호환본)
 - 유지보수 / 드리프트 복구: [docs/MAINTENANCE.md](docs/MAINTENANCE.md)
 
 ## 기술 스택 (요약)
 
-Expo SDK 55 · React Native 0.83 · TypeScript · Expo Router v7 · TanStack Query · Zustand · react-hook-form + zod · MaterialIcons · Sentry. 상세는 [PLAN.md](PLAN.md) 의 “🛠 기술 스택”.
+Expo SDK 55 · Expo Dev Client · React Native 0.83 · TypeScript · Expo Router SDK 55 계열 · TanStack Query · Zustand · react-hook-form + zod · MaterialIcons · NativeWind v4. 상세는 [PLAN.md](PLAN.md) 의 “🛠 기술 스택”.

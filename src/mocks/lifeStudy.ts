@@ -1,0 +1,71 @@
+import { MOCK_MEMBERS } from "./auth";
+import type { LifeStudyCourse, LifeStudyHistory } from "../types/lifeStudy";
+
+export const mockLifeStudyCourses: LifeStudyCourse[] = [
+  {
+    id: "life-001",
+    title: "생명의 삶",
+    description: "복음의 기초와 신앙생활의 핵심을 차근차근 배우는 과정입니다.",
+    instructor: MOCK_MEMBERS[3],
+    schedule: "매주 화요일 19:30",
+    location: "교육관 201호",
+    status: "ongoing",
+    sessions: 13,
+    currentSession: 5,
+    capacity: 18,
+    enrolledCount: 14,
+    isEnrolled: true,
+    isCompleted: false,
+    curriculum: [
+      "구원의 확신",
+      "하나님과의 교제",
+      "말씀과 기도",
+      "교회 공동체",
+      "섬김의 삶",
+    ],
+  },
+  {
+    id: "life-002",
+    title: "새로운 삶",
+    description: "가정과 일터에서 예수님을 따르는 삶의 방향을 나눕니다.",
+    instructor: MOCK_MEMBERS[4],
+    schedule: "매주 목요일 20:00",
+    location: "온라인 + 교육관 203호",
+    status: "upcoming",
+    sessions: 12,
+    currentSession: 0,
+    capacity: 16,
+    enrolledCount: 9,
+    isEnrolled: false,
+    isCompleted: false,
+    curriculum: ["정체성", "관계 회복", "시간과 재정", "영적 습관"],
+  },
+  {
+    id: "life-003",
+    title: "경건의 삶",
+    description: "매일의 묵상과 공동체 훈련을 통해 신앙의 리듬을 세웁니다.",
+    instructor: MOCK_MEMBERS[5],
+    schedule: "수료 과정",
+    location: "교육관",
+    status: "completed",
+    sessions: 10,
+    currentSession: 10,
+    capacity: 20,
+    enrolledCount: 18,
+    isEnrolled: false,
+    isCompleted: true,
+    curriculum: ["묵상 훈련", "기도 훈련", "공동체 나눔", "섬김 실천"],
+  },
+];
+
+export const mockLifeStudyHistory: LifeStudyHistory[] = [
+  {
+    id: "history-001",
+    courseId: "life-003",
+    title: "경건의 삶",
+    enrolledAt: "2026-02-04T10:00:00.000Z",
+    completedSessions: 10,
+    completedAt: "2026-04-16T10:00:00.000Z",
+    certificateIssued: true,
+  },
+];

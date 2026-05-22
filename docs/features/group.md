@@ -14,6 +14,7 @@
 - 참여, 탈퇴, 공지 작성, 멤버 목록 mock mutation 구현
 - 검색, 모집/참여/관심 필터, 관심 소모임, 정원 마감 제한, 소모임장 탈퇴 제한, 멤버 내보내기 mock 구현
 - 소모임 카드 cover fallback 디자인 정렬 — 대표 이미지가 없을 때 ZIP prototype 톤의 gradient cover placeholder 적용
+- 소모임 목록 1차 디자인 정렬 — ZIP prototype 기준 접힌 검색, 상태 segmented tabs, category chips, bottom-right 개설 FAB 적용
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -33,6 +34,7 @@
 `Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-23) **소모임 검색은 접힌 상태로 시작** — 나눔 목록과 같은 탐색 패턴을 유지하기 위해 검색 입력은 상단 아이콘으로 펼치고, 개설 액션은 floating FAB로 둡니다.
 - (2026-05-23) **대표 이미지 없음은 시각 placeholder로 처리** — 실제 cover 이미지가 없는 mock/초기 데이터도 목록에서 빈 박스로 보이지 않도록 공통 `VisualCover`를 사용합니다.
 - (2026-05-22) **카풀은 소모임 카테고리로 포함** — Notion MVP 정의에 따라 별도 도메인이 아니라 소모임 카테고리로 처리합니다.
 - (2026-05-22) **멤버 정책은 mock-first** — 최소 2명, 정원 초과 방지, 소모임장 탈퇴 제한을 mock service에서 먼저 검증합니다.

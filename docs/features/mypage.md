@@ -11,6 +11,7 @@
 - MY 화면 고도화 — `app/(tabs)/mypage/index.tsx`
 - MY mock service/hook/type 구현 — `src/types/mypage.ts`, `src/services/myPageService.ts`, `src/hooks/useMyPage.ts`
 - 프로필 수정 mock, 내 활동 탭, 관심 목록, FAQ accordion, 로그아웃 확인, 탈퇴 요청 mock 구현
+- MY 화면 1차 디자인 정렬 — ZIP prototype 기준 마이페이지 title, 프로필 카드의 수정 CTA, 활동 관리 섹션명 적용
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -25,6 +26,7 @@
 `MyPageData`는 나눔, 소모임, 삶공부, 기도방, 관심 제목, FAQ 목록을 묶어 반환합니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-23) **MY 첫 화면은 프로필 카드 중심** — 인라인 mock 기능은 유지하되, 첫 인상은 ZIP prototype처럼 프로필 카드와 관리 섹션이 먼저 읽히도록 조정합니다.
 - (2026-05-22) **MY도 service/hook 경유** — 화면에서 mock 파일을 직접 읽지 않고 `useMyPage -> myPageService -> mocks` 흐름을 따릅니다.
 - (2026-05-22) **회원 탈퇴는 mock 요청 상태** — 실제 soft delete와 관리자 처리 정책은 API 연결 후 확정합니다.
 

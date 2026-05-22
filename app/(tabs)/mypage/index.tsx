@@ -49,11 +49,7 @@ export default function MyPageScreen() {
 
   return (
     <Screen>
-      <TopBar
-        testID="screen-mypage"
-        title="MY"
-        subtitle="내 정보와 활동을 확인합니다"
-      />
+      <TopBar testID="screen-mypage" title="마이페이지" />
       <Card style={styles.profile}>
         <Avatar name={currentUser?.name ?? "?"} size={64} />
         <View style={styles.profileText}>
@@ -62,11 +58,9 @@ export default function MyPageScreen() {
             {currentUser?.department ?? "목장 정보 자동 매칭 예정"}
           </Text>
         </View>
-        <MaterialIcons
-          name="chevron-right"
-          size={24}
-          color={theme.colors.inkHint}
-        />
+        <Pressable accessibilityRole="button" style={styles.editLink}>
+          <Text style={styles.editLinkText}>프로필 수정</Text>
+        </Pressable>
       </Card>
 
       <View style={styles.summary}>
@@ -106,7 +100,7 @@ export default function MyPageScreen() {
         </Card>
       </Section>
 
-      <Section title="내 활동">
+      <Section title="활동 관리">
         <SegmentedTabs
           items={activityTabs}
           active={activityTab}
@@ -228,10 +222,16 @@ function MenuRow({
 }
 
 const styles = StyleSheet.create({
-  profile: { flexDirection: "row", alignItems: "center", gap: 14 },
+  profile: { flexDirection: "row", alignItems: "center", gap: 14, padding: 18 },
   profileText: { flex: 1 },
   name: { color: theme.colors.ink, fontSize: 20, fontWeight: "900" },
   meta: { color: theme.colors.inkMute, fontSize: 13, fontWeight: "600" },
+  editLink: { paddingVertical: 8, paddingHorizontal: 4 },
+  editLinkText: {
+    color: theme.colors.primaryDeep,
+    fontSize: 13,
+    fontWeight: "800",
+  },
   summary: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   summaryCard: { flex: 1, alignItems: "center", gap: 3, paddingVertical: 18 },
   summaryValue: {

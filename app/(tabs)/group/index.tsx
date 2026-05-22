@@ -26,6 +26,7 @@ export default function GroupScreen() {
   const [category, setCategory] = useState<GroupCategory>("all");
   const [status, setStatus] = useState<StatusFilter>("all");
   const [keyword, setKeyword] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
   const { data = [], isLoading, isError } = useGroups(category);
   const normalizedKeyword = keyword.trim().toLowerCase();
   const list = data.filter((group) => {
@@ -51,13 +52,18 @@ export default function GroupScreen() {
       <TopBar
         testID="screen-group"
         title="소모임"
-        subtitle="함께할 성도를 찾아요"
         right={
-          <Link href="/modal/group-new" asChild>
-            <Pressable style={styles.iconButton}>
-              <MaterialIcons name="add" size={24} color="#fff" />
-            </Pressable>
-          </Link>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setShowSearch((value) => !value)}
+            style={styles.headerIcon}
+          >
+            <MaterialIcons
+              name="search"
+              size={22}
+              color={theme.colors.inkSoft}
+            />
+          </Pressable>
         }
       />
       <View style={styles.segmentWrap}>
@@ -67,13 +73,15 @@ export default function GroupScreen() {
           onChange={setStatus}
         />
       </View>
-      <View style={styles.searchWrap}>
-        <TextField
-          value={keyword}
-          onChangeText={setKeyword}
-          placeholder="소모임명, 장소, 리더 이름 검색"
-        />
-      </View>
+      {showSearch ? (
+        <View style={styles.searchWrap}>
+          <TextField
+            value={keyword}
+            onChangeText={setKeyword}
+            placeholder="소모임명, 장소, 리더 이름 검색"
+          />
+        </View>
+      ) : null}
       <HorizontalChips
         items={GROUP_CATEGORIES}
         active={category}
@@ -94,21 +102,46 @@ export default function GroupScreen() {
           list.map((group) => <GroupCard key={group.id} group={group} />)
         )}
       </View>
+      <Link href="/modal/group-new" asChild>
+        <Pressable style={styles.fab}>
+          <MaterialIcons name="add" size={20} color="#fff" />
+          <Text style={styles.fabText}>개설</Text>
+        </Pressable>
+      </Link>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   segmentWrap: { paddingHorizontal: 18, paddingBottom: 4 },
-  searchWrap: { paddingHorizontal: 18 },
+  searchWrap: { paddingHorizontal: 18, paddingBottom: 6 },
   list: { paddingHorizontal: 18, gap: 12 },
   loading: { color: theme.colors.inkMute, padding: 18 },
-  iconButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+  headerIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: theme.colors.primary,
   },
+  fab: {
+    position: "absolute",
+    right: 16,
+    bottom: 94,
+    zIndex: 20,
+    height: 52,
+    borderRadius: theme.radius.pill,
+    paddingLeft: 16,
+    paddingRight: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: theme.colors.primary,
+    shadowColor: "rgba(91,122,176,0.5)",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.24,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  fabText: { color: "#fff", fontSize: 14, fontWeight: "800" },
 });

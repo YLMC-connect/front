@@ -33,20 +33,20 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<LifeStudyScreen />);
 
     expect(screen.getByTestId("screen-life-study")).toBeTruthy();
-    expect(await screen.findByText("과정 목록")).toBeTruthy();
+    expect(await screen.findByText("신청가능·진행중")).toBeTruthy();
   });
 
   it("renders the prayer screen with prayer room sections", async () => {
     renderWithClient(<PrayerScreen />);
 
     expect(screen.getByTestId("screen-prayer")).toBeTruthy();
-    expect(await screen.findByText("요일별 기도방")).toBeTruthy();
+    expect(await screen.findByText("다른 기도모임방")).toBeTruthy();
   });
 
   it("renders the my page screen with mock profile data", async () => {
     renderWithClient(<MyPageScreen />);
 
     expect(screen.getByTestId("screen-mypage")).toBeTruthy();
-    expect(await screen.findByText("내 활동")).toBeTruthy();
+    expect(await screen.findByText("활동 관리")).toBeTruthy();
   });
 });

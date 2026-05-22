@@ -11,6 +11,7 @@
 - 중보기도 목록/상세/등록 화면 구현 — `app/(tabs)/prayer/index.tsx`, `app/(tabs)/prayer/[id].tsx`, `app/modal/prayer-new.tsx`
 - 중보기도 타입, mock 데이터, service, TanStack Query hook 구현 — `src/types/prayer.ts`, `src/mocks/prayers.ts`, `src/services/prayerService.ts`, `src/hooks/usePrayers.ts`
 - 요일 필터, 기도방 참여/나가기, 기도제목 등록, 기도 체크, 응답 기록 mock mutation 구현
+- 중보기도 목록 1차 디자인 정렬 — ZIP prototype 기준 요일 색상 박스, 내 기도모임/다른 기도모임 분리, 기도제목 FAB 적용
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -30,6 +31,7 @@
 `PrayerRoom`은 `weekday`, `leader`, `memberCount`, `isJoined`를 포함합니다. `PrayerTopic`은 `isAnonymous`, `prayerCount`, `hasPrayed`, `isAnswered`, `answer`를 포함합니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-23) **기도방 list는 내 방과 참여 가능 방을 분리** — 동일한 요일 필터 안에서 가입 중인 방과 다른 기도모임방을 나눠 보여주며, 작성 액션은 floating FAB로 둡니다.
 - (2026-05-22) **중보기도는 Notion v1 범위** — MVP가 아니라 v1 mock-first 화면/서비스까지 구현합니다.
 - (2026-05-22) **비회원 기도 요청은 후속 처리** — Notion에는 비성도 요청/방 참여 신청이 있으나, 모바일 v1 mock에서는 성도 앱 내부 플로우를 먼저 구현합니다.
 

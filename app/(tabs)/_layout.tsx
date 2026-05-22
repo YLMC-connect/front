@@ -6,11 +6,11 @@ type IconName = keyof typeof MaterialIcons.glyphMap;
 
 const icons: Record<string, IconName> = {
   index: "home",
-  market: "redeem",
-  group: "groups",
-  "life-study": "menu-book",
-  prayer: "volunteer-activism",
-  mypage: "person",
+  "market/index": "redeem",
+  "group/index": "groups",
+  "life-study/index": "menu-book",
+  "prayer/index": "volunteer-activism",
+  "mypage/index": "person",
 };
 
 export default function TabsLayout() {
@@ -54,25 +54,29 @@ export default function TabsLayout() {
         options={{ title: "홈", tabBarButtonTestID: "tab-home" }}
       />
       <Tabs.Screen
-        name="market"
+        name="market/index"
         options={{ title: "나눔", tabBarButtonTestID: "tab-market" }}
       />
       <Tabs.Screen
-        name="group"
+        name="group/index"
         options={{ title: "모임", tabBarButtonTestID: "tab-group" }}
       />
       <Tabs.Screen
-        name="life-study"
+        name="life-study/index"
         options={{ title: "공부", tabBarButtonTestID: "tab-life-study" }}
       />
       <Tabs.Screen
-        name="prayer"
+        name="prayer/index"
         options={{ title: "기도", tabBarButtonTestID: "tab-prayer" }}
       />
       <Tabs.Screen
-        name="mypage"
+        name="mypage/index"
         options={{ title: "MY", tabBarButtonTestID: "tab-mypage" }}
       />
+      <Tabs.Screen name="market/[id]" options={{ href: null }} />
+      <Tabs.Screen name="group/[id]" options={{ href: null }} />
+      <Tabs.Screen name="life-study/[id]" options={{ href: null }} />
+      <Tabs.Screen name="prayer/[id]" options={{ href: null }} />
     </Tabs>
   );
 }

@@ -17,6 +17,7 @@
 - Expo Dev Client 기반 추가 — `expo-dev-client`, `npm run start:dev-client`, `ios:dev-client`, `android:dev-client`, `eas.json` development profile
 - 전역 에러 바운더리와 CI(`validate`) 추가 — `app/_layout.tsx`, `.github/workflows/ci.yml`
 - 자동 테스트 게이트 추가 — `npm run validate`, Jest/RNTL smoke, Dev Client Metro smoke, Maestro v1 탭 E2E smoke
+- Android Emulator 기반 Maestro smoke 실제 검증 — `maestro 2.6.0`, `Medium_Phone_API_36.1`, `com.ylmc.connect.dev`
 
 ---
 
@@ -38,6 +39,7 @@
 | `.github/workflows/ci.yml` | PR/push `npm ci` + `npm run validate` |
 | `.github/workflows/e2e-smoke.yml` | 수동/release/nightly용 Maestro smoke workflow 뼈대 |
 | `scripts/dev-client-smoke.mjs` | Expo Dev Client Metro 부팅과 `/status` 응답 확인 |
+| `scripts/maestro-smoke.mjs` | LAN Metro URL 기반 Dev Client deep link를 만든 뒤 Maestro smoke 실행 |
 | `.maestro/smoke.yml` | v1 핵심 탭 진입 `testID` 기반 E2E smoke |
 
 ## 데이터 타입
@@ -47,8 +49,10 @@
 - (2026-05-22) **Codex 작업 규칙 SSOT** — Codex는 `AGENTS.md`를 기준으로 읽고, `CLAUDE.md`는 Claude Code 호환본으로 유지합니다. 문서 링크는 `AGENTS.md`를 우선 가리킵니다.
 - (2026-05-23) **PR 자동 검증 게이트** — `npm run validate`는 `typecheck`, `lint`, `format:check`, `test`를 묶고, GitHub Actions PR CI는 `npm ci` 후 `npm run validate`를 실행합니다.
 - (2026-05-23) **Jest/RNTL smoke 우선 적용** — v1 mock-first 범위에서는 공통 UI, 도메인 옵션, 핵심 탭 화면 렌더링을 먼저 자동화하고 실제 API/푸시/업로드 스토리지는 제외합니다.
+- (2026-05-23) **NativeWind Babel 설정** — `nativewind/babel`은 Babel plugin 위치가 아니라 preset 위치에 둡니다. plugin 위치에 두면 Metro 번들링에서 `.plugins is not a valid Plugin property`로 실패합니다.
+- (2026-05-23) **Expo Router 탭 이름** — Expo Router v7 탭 screen name은 실제 route인 `market/index`, `group/index` 등을 사용하고 상세 route는 `href: null`로 탭에서 숨깁니다.
 - (2026-05-22) **Expo Dev Client 기준** — Expo Go가 아니라 development build와 `expo start --dev-client`를 검증 기준으로 둡니다.
-- (2026-05-23) **모바일 E2E는 Maestro 우선** — Expo Dev Client가 설치된 Simulator/Emulator에서 `.maestro/smoke.yml`로 v1 핵심 탭 진입을 `testID` 기준으로 확인합니다.
+- (2026-05-23) **모바일 E2E는 Maestro 우선** — Expo Dev Client가 설치된 Simulator/Emulator에서 `scripts/maestro-smoke.mjs`가 LAN Metro deep link를 열고, `.maestro/smoke.yml`로 v1 핵심 탭 진입을 `testID` 기준으로 확인합니다.
 - (2026-05-22) **Mock-first 앱 기반** — 실제 API가 없는 도메인은 TanStack Query hook과 service/mock 레이어를 먼저 만들고, 실제 API 연결 시 service만 교체합니다.
 - (2026-05-22) **이미지 선택은 MVP 포함** — 실제 업로드는 제외하지만 `expo-image-picker` 기반 로컬 선택/미리보기는 공통 UI로 제공합니다.
 
@@ -57,7 +61,7 @@
 - Sentry SDK 설치/초기화, husky/lint-staged는 후속 작업입니다.
 - Jest/RNTL은 smoke 범위부터 적용했습니다. 서비스 mutation, hook edge case, 상세/작성 화면 테스트는 Phase 6 이후 API adapter 범위와 함께 확장합니다.
 - Codex 기본 샌드박스에서는 `expo start --dev-client --port 8081 --localhost`가 `Starting project...` 이후 8081에 바인딩되지 않을 수 있습니다. 샌드박스 밖 로컬 권한에서는 `npm run test:dev-client:smoke`로 `/status` 응답을 확인했습니다.
-- Codex 환경에는 Maestro CLI가 없어 `npm run test:e2e:smoke`는 `maestro: command not found`로 중단됩니다. 로컬 macOS에서는 Java 17+와 Xcode Command Line Tools 확인 후 `brew install mobile-dev-inc/tap/maestro`로 설치합니다.
+- Maestro CLI `2.6.0`은 Homebrew tap(`mobile-dev-inc/tap`)으로 설치되어 있으며, Android Emulator `Medium_Phone_API_36.1`에서 `npm run test:e2e:smoke` 통과를 확인했습니다.
 
 ## 의존성
 - GitHub Issues / PR description 기반 작업 추적 규칙에 의존합니다.

@@ -18,7 +18,7 @@
     "test:coverage": "jest --coverage --watchAll=false",
     "validate": "npm run typecheck && npm run lint && npm run format:check && npm run test",
     "test:dev-client:smoke": "node scripts/dev-client-smoke.mjs",
-    "test:e2e:smoke": "maestro test .maestro/smoke.yml",
+    "test:e2e:smoke": "node scripts/maestro-smoke.mjs",
     "validate:full": "npm run validate && npm run test:dev-client:smoke && npm run test:e2e:smoke"
   },
   "dependencies": {

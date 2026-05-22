@@ -21,5 +21,5 @@ YLMC Connect v1은 Expo Dev Client 기반 모바일 앱이다. 수동 실행만�
 - `npm run validate`는 typecheck/lint/format/test를 묶는 빠른 로컬/CI 게이트로 둔다.
 - `npm run test`와 `npm run test:coverage`는 Jest/RNTL 기반 단위·컴포넌트 smoke를 실행한다.
 - `npm run test:dev-client:smoke`는 Metro 서버 부팅과 `/status` 응답을 확인한다.
-- `npm run test:e2e:smoke`는 Maestro CLI와 development build가 준비된 환경에서 실행한다.
+- `npm run test:e2e:smoke`는 LAN Metro URL 기반 Dev Client deep link를 열고 Maestro CLI와 development build가 준비된 환경에서 실행한다.
 - `npm run validate:full`은 로컬 전체 게이트로 `validate`, Dev Client smoke, Maestro smoke를 순서대로 실행한다.

@@ -18,7 +18,18 @@ export default function RootLayout() {
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(auth)" />
             <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+            <Stack.Screen
+              name="modal/market-new"
+              options={{ presentation: "modal" }}
+            />
+            <Stack.Screen
+              name="modal/group-new"
+              options={{ presentation: "modal" }}
+            />
+            <Stack.Screen
+              name="modal/prayer-new"
+              options={{ presentation: "modal" }}
+            />
           </Stack>
         </SafeAreaProvider>
       </QueryClientProvider>

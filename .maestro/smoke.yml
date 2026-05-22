@@ -3,8 +3,21 @@ name: YLMC Connect v1 smoke
 tags:
   - smoke
 ---
-- launchApp:
-    clearState: false
+- openLink: ${EXPO_DEV_CLIENT_URL}
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+- runFlow:
+    when:
+      visible: "Reload"
+    commands:
+      - tapOn: "Reload"
+- extendedWaitUntil:
+    visible:
+      id: screen-home
+    timeout: 60000
 - assertVisible:
     id: screen-home
 - tapOn:

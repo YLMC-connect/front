@@ -632,7 +632,7 @@ queryClient.setDefaultOptions({
 - 최소 로컬/PR 게이트: `npm run validate` (`typecheck` + `lint` + `format:check` + `test`)
 - 커버리지 확인: `npm run test:coverage`
 - Dev Client Metro smoke: `npm run test:dev-client:smoke` (`expo start --dev-client` 부팅 후 `/status` 확인)
-- v1 E2E smoke: `.maestro/smoke.yml`에서 React Native `testID` 기준으로 홈/나눔/소모임/삶공부/중보기도/MY 탭 진입 확인
+- v1 E2E smoke: `npm run test:e2e:smoke`가 LAN Metro deep link로 Dev Client를 열고, `.maestro/smoke.yml`에서 React Native `testID` 기준으로 홈/나눔/소모임/삶공부/중보기도/MY 탭 진입 확인
 - 전체 수동-자동 통합 게이트: `npm run validate:full`
 - Maestro E2E 실행 전제: Maestro CLI, Java 17+, Xcode Command Line Tools 또는 Android Emulator, `com.ylmc.connect.dev` development build 설치
 - 테스트 파일 위치: 대상 파일 옆 `__tests__/` 폴더에 co-location

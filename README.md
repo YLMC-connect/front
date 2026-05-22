@@ -74,11 +74,10 @@ npm run test:dev-client:smoke
 Maestro E2E smoke:
 
 ```bash
-npm run start:dev-client -- --port 8081 --host lan
 npm run test:e2e:smoke
 ```
 
-Maestro smoke는 `com.ylmc.connect.dev` development build가 설치된 iOS Simulator 또는 Android Emulator에서 실행합니다. `test:e2e:smoke`는 현재 LAN IP와 8081 포트를 기준으로 Dev Client deep link를 열고, React Native `testID` 기반으로 홈, 나눔, 소모임, 삶공부, 중보기도, MY 탭 진입을 확인합니다. 다른 host/port가 필요하면 `EXPO_DEV_CLIENT_HOST`, `EXPO_DEV_CLIENT_PORT`, `EXPO_DEV_CLIENT_METRO_URL`, `EXPO_DEV_CLIENT_URL` 환경변수로 덮어씁니다.
+Maestro smoke는 `com.ylmc.connect.dev` development build가 설치된 iOS Simulator 또는 Android Emulator에서 실행합니다. `test:e2e:smoke`는 현재 LAN IP와 8081 포트를 기준으로 Dev Client Metro가 없으면 먼저 띄우고, Dev Client deep link를 열어 React Native `testID` 기반으로 홈, 나눔, 소모임, 삶공부, 중보기도, MY 탭 진입을 확인합니다. 다른 host/port가 필요하면 `EXPO_DEV_CLIENT_HOST`, `EXPO_DEV_CLIENT_PORT`, `EXPO_DEV_CLIENT_METRO_URL`, `EXPO_DEV_CLIENT_URL` 환경변수로 덮어씁니다.
 
 현재 로컬 환경에는 Maestro CLI `2.6.0`을 Homebrew로 설치했고, Android Emulator `Medium_Phone_API_36.1`에서 `npm run test:e2e:smoke` 통과를 확인했습니다. 새 환경에서는 Java 17+와 Xcode Command Line Tools를 확인한 뒤 다음 중 하나로 Maestro를 설치합니다:
 

@@ -39,7 +39,7 @@
 | `.github/workflows/ci.yml` | PR/push `npm ci` + `npm run validate` |
 | `.github/workflows/e2e-smoke.yml` | 수동/release/nightly용 Maestro smoke workflow 뼈대 |
 | `scripts/dev-client-smoke.mjs` | Expo Dev Client Metro 부팅과 `/status` 응답 확인 |
-| `scripts/maestro-smoke.mjs` | LAN Metro URL 기반 Dev Client deep link를 만든 뒤 Maestro smoke 실행 |
+| `scripts/maestro-smoke.mjs` | LAN Metro 확인/부팅과 Dev Client deep link를 거쳐 Maestro smoke 실행 |
 | `.maestro/smoke.yml` | v1 핵심 탭 진입 `testID` 기반 E2E smoke |
 
 ## 데이터 타입
@@ -52,7 +52,7 @@
 - (2026-05-23) **NativeWind Babel 설정** — `nativewind/babel`은 Babel plugin 위치가 아니라 preset 위치에 둡니다. plugin 위치에 두면 Metro 번들링에서 `.plugins is not a valid Plugin property`로 실패합니다.
 - (2026-05-23) **Expo Router 탭 이름** — Expo Router v7 탭 screen name은 실제 route인 `market/index`, `group/index` 등을 사용하고 상세 route는 `href: null`로 탭에서 숨깁니다.
 - (2026-05-22) **Expo Dev Client 기준** — Expo Go가 아니라 development build와 `expo start --dev-client`를 검증 기준으로 둡니다.
-- (2026-05-23) **모바일 E2E는 Maestro 우선** — Expo Dev Client가 설치된 Simulator/Emulator에서 `scripts/maestro-smoke.mjs`가 LAN Metro deep link를 열고, `.maestro/smoke.yml`로 v1 핵심 탭 진입을 `testID` 기준으로 확인합니다.
+- (2026-05-23) **모바일 E2E는 Maestro 우선** — Expo Dev Client가 설치된 Simulator/Emulator에서 `scripts/maestro-smoke.mjs`가 LAN Metro를 확인/부팅하고 deep link를 열어, `.maestro/smoke.yml`로 v1 핵심 탭 진입을 `testID` 기준으로 확인합니다.
 - (2026-05-22) **Mock-first 앱 기반** — 실제 API가 없는 도메인은 TanStack Query hook과 service/mock 레이어를 먼저 만들고, 실제 API 연결 시 service만 교체합니다.
 - (2026-05-22) **이미지 선택은 MVP 포함** — 실제 업로드는 제외하지만 `expo-image-picker` 기반 로컬 선택/미리보기는 공통 UI로 제공합니다.
 

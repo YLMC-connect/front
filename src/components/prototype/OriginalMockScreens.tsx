@@ -1,12 +1,13 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Screen, Section } from "../layout/Screen";
 import {
   Avatar,
   Badge,
   Button,
   Card,
+  Chip,
   ConfirmDialog,
   EmptyState,
   ErrorState,
@@ -511,6 +512,8 @@ export function MarketDetailReferenceScreen({ variant }: { variant: string }) {
       : variant === "own-done"
         ? "done"
         : "sharing";
+  const isReserved = status === "reserved";
+  const isDone = status === "done";
   const isOwn =
     variant.startsWith("own") ||
     variant === "status" ||
@@ -518,53 +521,129 @@ export function MarketDetailReferenceScreen({ variant }: { variant: string }) {
   const showReport = variant === "report" || variant === "report-other-input";
 
   return (
-    <Screen>
-      <TopBar title="나눔 상세" back onBack={() => router.back()} />
-      <VisualCover height={210} seed={2} label="나눔 사진" />
-      <View style={styles.titleRow}>
-        <Text style={styles.titleText}>아이 장난감 정리하면서 나눔합니다</Text>
-        {status !== "sharing" ? (
-          <Badge tone={status === "reserved" ? "warn" : "mute"}>
-            {status === "reserved" ? "예약중" : "나눔완료"}
-          </Badge>
+    <Screen padded={false}>
+      <View style={styles.marketHero}>
+        <VisualCover height={360} seed={2} style={styles.marketHeroCover} />
+        <View style={styles.marketHeroScrim} />
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.back()}
+          style={styles.overlayBack}
+        >
+          <MaterialIcons
+            name="chevron-left"
+            size={21}
+            color={theme.colors.ink}
+          />
+          <Text style={styles.overlayBackText}>뒤로</Text>
+        </Pressable>
+        {isReserved || isDone ? (
+          <View
+            style={
+              isReserved
+                ? styles.marketHeroReservedCenter
+                : styles.marketHeroDoneCenter
+            }
+          >
+            <View
+              style={[
+                styles.marketHeroStatus,
+                isReserved ? styles.marketHeroReserved : styles.marketHeroDone,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.marketHeroStatusText,
+                  isReserved ? styles.marketHeroReservedText : null,
+                ]}
+              >
+                {isReserved ? "예약중" : "나눔완료"}
+              </Text>
+            </View>
+          </View>
         ) : null}
-      </View>
-      <Card style={styles.rowCard}>
-        <Avatar name={isOwn ? "김은혜" : "박정아"} />
-        <View style={styles.flex}>
-          <Text style={styles.cardTitle}>{isOwn ? "김은혜" : "박정아"}</Text>
-          <Text style={styles.metaText}>본당 1층 로비 · 사용감 적음</Text>
+        <View style={styles.heroPager}>
+          <View style={styles.heroPagerActive} />
+          <View style={styles.heroPagerDot} />
+          <View style={styles.heroPagerDot} />
         </View>
-      </Card>
-      <Text style={styles.bodyText}>
-        아이가 커서 사용하지 않는 블록과 인형을 정리합니다. 필요하신 분께
-        전달드리고 싶어요.
-      </Text>
-      <View style={styles.actions}>
-        {isOwn ? (
-          <Button variant="soft">상태 변경</Button>
-        ) : (
-          <Button>관심</Button>
-        )}
-        {isOwn ? (
-          <Button variant="ghost">수정</Button>
-        ) : (
-          <Button variant="ghost">신고</Button>
-        )}
       </View>
-      <Card style={styles.stack}>
-        <Text style={styles.cardTitle}>댓글 2</Text>
-        <Text style={styles.bodyText}>오늘 저녁 예배 후 받을 수 있을까요?</Text>
-        <Textarea
-          value={
-            variant === "composer-multiline"
-              ? "오늘 예배 후\n로비에서 뵙겠습니다."
-              : ""
-          }
-          placeholder="나눔 받을 수 있는 시간을 남겨주세요."
+
+      {isReserved ? (
+        <StatusBanner
+          icon="schedule"
+          tone="warn"
+          title="예약중인 나눔입니다"
+          description="다른 분과 수령 약속이 진행 중이에요"
         />
-        <Button>댓글 등록</Button>
-      </Card>
+      ) : null}
+      {isDone ? (
+        <StatusBanner
+          icon="check"
+          title="나눔이 완료되었습니다"
+          description="이 게시글은 더 이상 신청할 수 없어요"
+        />
+      ) : null}
+
+      <View style={isDone ? styles.faded : null}>
+        <View style={styles.marketAuthorBlock}>
+          <Avatar name={isOwn ? "김은혜" : "박정아"} />
+          <View style={styles.flex}>
+            <Text style={styles.cardTitle}>{isOwn ? "김은혜" : "박정아"}</Text>
+            <Text style={styles.metaText}>1시간 전</Text>
+          </View>
+        </View>
+        <View style={styles.marketDetailContent}>
+          <View style={styles.inlineMeta}>
+            <Chip label="유아·아동용품" selected />
+            <Chip label="사용감 있음" />
+          </View>
+          <Text style={styles.titleText}>
+            아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)
+          </Text>
+        </View>
+        <Text style={styles.marketBody}>
+          아이가 커서 더 이상 쓰지 않는 장난감 정리해요.{"\n"}
+          대부분 깨끗하게 사용한 것들이고, 블록류 20점 + 인형류 10점 정도
+          됩니다.{"\n"}
+          필요하신 분께 무료로 드려요!{"\n\n"}
+          수령은 토요일 오후 교회 1층 로비에서 가능합니다.{"\n"}한 분께 일괄로
+          드리려고 합니다.
+        </Text>
+        <Card style={styles.detailActionCard}>
+          {isOwn && !isDone ? (
+            <>
+              <DetailAction icon="edit" label="수정" />
+              <DetailAction icon="delete-outline" label="삭제" danger />
+              <DetailAction icon="sync" label="상태 변경" />
+            </>
+          ) : null}
+          {isOwn && isDone ? (
+            <DetailAction icon="delete-outline" label="삭제" danger full />
+          ) : null}
+          {!isOwn ? (
+            <>
+              <DetailAction icon="flag" label="신고" />
+              <DetailAction icon="block" label="차단" danger />
+            </>
+          ) : null}
+        </Card>
+        <Card style={styles.stack}>
+          <Text style={styles.cardTitle}>댓글 2</Text>
+          <Text style={styles.bodyText}>
+            오늘 저녁 예배 후 받을 수 있을까요?
+          </Text>
+          <Textarea
+            value={
+              variant === "composer-multiline"
+                ? "오늘 예배 후\n로비에서 뵙겠습니다."
+                : ""
+            }
+            placeholder="나눔 받을 수 있는 시간을 남겨주세요."
+          />
+          <Button>댓글 등록</Button>
+        </Card>
+      </View>
       <RadioSheet
         visible={variant === "status"}
         title="상태 변경"
@@ -735,54 +814,115 @@ export function GroupDetailReferenceScreen({ variant }: { variant: string }) {
     variant === "delete-confirm";
   const isClosed = variant === "leader-closed" || variant === "non-closed";
   const isMember = variant === "member" || variant === "leave-confirm";
+  const members = [
+    isLeader ? "김은혜" : "한지수",
+    "박정아",
+    "이수진",
+    "김지영",
+    "정혜진",
+    "조미경",
+  ];
 
   return (
-    <Screen>
-      <TopBar title="소모임 상세" back onBack={() => router.back()} />
-      <VisualCover height={190} seed={4} label="토요 산악회" />
-      <View style={styles.titleRow}>
-        <Text style={styles.titleText}>토요 산악회</Text>
-        <Badge tone={isClosed ? "mute" : "success"}>
-          {isClosed ? "모집완료" : "모집중"}
-        </Badge>
+    <Screen padded={false}>
+      <View style={styles.detailTopPad}>
+        <TopBar title="소모임" back onBack={() => router.back()} />
       </View>
-      <Text style={styles.bodyText}>
-        매주 토요일 함께 산을 오르며 자연을 느끼고 신앙을 나누는 모임입니다.
-      </Text>
-      <Card style={styles.stack}>
-        <InfoRow label="일정" value="매주 토요일 오전 7시" />
-        <InfoRow label="장소" value="교회 정문 출발" />
-        <InfoRow label="인원" value={`${isClosed ? 25 : 18} / 25명`} />
-      </Card>
-      <View style={styles.actions}>
-        {isLeader ? (
-          <>
-            <Button variant="soft">수정</Button>
-            <Button variant="ghost">멤버 관리</Button>
-          </>
-        ) : isMember ? (
-          <Button variant="soft">탈퇴하기</Button>
-        ) : (
-          <Button disabled={isClosed}>참여 신청</Button>
-        )}
-        <Button variant="ghost">관심</Button>
-      </View>
-      <Card style={styles.stack}>
-        <Text style={styles.cardTitle}>공지사항</Text>
-        <Text style={styles.bodyText}>
-          이번 주는 북한산 도선사 코스로 갑니다.
+      <View style={styles.groupDetailHeader}>
+        <View style={styles.inlineMeta}>
+          <Chip label="운동" selected />
+          <Badge tone={isClosed ? "mute" : "success"}>
+            {isClosed ? "모집완료" : "모집중"}
+          </Badge>
+        </View>
+        <Text style={styles.groupDetailTitle}>토요 산악회</Text>
+        <Text style={styles.groupMetaText}>
+          현재 <Text style={styles.primaryText}>{isClosed ? 25 : 18}</Text> /
+          최대 25
         </Text>
-      </Card>
+        <Text style={styles.bodyText}>
+          매주 토요일 함께 산을 오르며 자연을 느끼고 신앙을 나누는 모임입니다.
+          {"\n"}
+          등산 초보도 환영해요. 등산화·물·간식만 챙겨오시면 돼요.{"\n"}
+          모임 일정과 코스는 매주 화요일 공지로 안내드립니다.
+        </Text>
+        <Card style={styles.groupLeaderCard}>
+          <Avatar name={isLeader ? "김은혜" : "한지수"} />
+          <View style={styles.flex}>
+            <Text style={styles.metaText}>소모임장</Text>
+            <Text style={styles.cardTitle}>
+              {isLeader ? "김은혜" : "한지수"}
+            </Text>
+          </View>
+          <Badge>소모임장</Badge>
+        </Card>
+      </View>
+      <View style={styles.groupActionWrap}>
+        {isLeader ? (
+          <Card style={styles.detailActionCard}>
+            <DetailAction icon="edit" label="수정" />
+            <DetailAction icon="campaign" label="공지" />
+            <DetailAction icon="groups" label="멤버" />
+            <DetailAction icon="delete-outline" label="삭제" danger />
+          </Card>
+        ) : isMember ? (
+          <Button variant="ghost">탈퇴하기</Button>
+        ) : (
+          <Button disabled={isClosed}>
+            {isClosed ? "모집이 마감됐어요" : "참여 신청하기"}
+          </Button>
+        )}
+      </View>
+      <Section title={`멤버 ${members.length}명`}>
+        <View style={styles.memberRail}>
+          {members.map((member, index) => (
+            <View key={member} style={styles.memberMini}>
+              <View style={styles.memberAvatarWrap}>
+                <Avatar name={member} />
+                {index === 0 ? (
+                  <View style={styles.memberLeaderMark}>
+                    <MaterialIcons name="star" size={10} color="#fff" />
+                  </View>
+                ) : null}
+              </View>
+              <Text numberOfLines={1} style={styles.memberMiniName}>
+                {member}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </Section>
+      <Section title="공지사항">
+        <View style={styles.groupNoticeList}>
+          <Card style={styles.stack}>
+            <Text style={styles.cardTitle}>5월 18일 토요일 모임 안내</Text>
+            <Text style={styles.bodyText}>
+              이번 주 토요일은 북한산 도선사 코스로 갑니다. 오전 7시 교회 앞에서
+              모입니다.
+            </Text>
+            <Text style={styles.metaText}>2일 전</Text>
+          </Card>
+          <Card style={styles.stack}>
+            <Text style={styles.cardTitle}>신규 멤버 환영합니다</Text>
+            <Text style={styles.bodyText}>
+              이번 달에 새로 합류해주신 분들 진심으로 환영해요.
+            </Text>
+            <Text style={styles.metaText}>1주 전 · 수정됨</Text>
+          </Card>
+        </View>
+      </Section>
       <ConfirmDialog
         visible={variant === "apply-confirm"}
-        title="소모임에 참여할까요?"
+        title="참여 신청하시겠습니까?"
+        message="신청 즉시 소모임에 가입됩니다."
         confirmText="신청"
         onCancel={() => undefined}
         onConfirm={() => undefined}
       />
       <ConfirmDialog
         visible={variant === "leave-confirm"}
-        title="소모임에서 나갈까요?"
+        title="탈퇴하시겠습니까?"
+        message="다시 참여하려면 신청을 새로 해야 해요."
         confirmText="탈퇴"
         danger
         onCancel={() => undefined}
@@ -790,8 +930,10 @@ export function GroupDetailReferenceScreen({ variant }: { variant: string }) {
       />
       <ConfirmDialog
         visible={variant === "delete-confirm"}
-        title="소모임을 삭제할까요?"
-        message="삭제된 소모임은 복구할 수 없습니다."
+        title="소모임을 삭제하시겠습니까?"
+        message={
+          "소모임을 삭제하면 모든 멤버가 퇴장됩니다.\n이 작업은 되돌릴 수 없어요."
+        }
         confirmText="삭제"
         danger
         onCancel={() => undefined}
@@ -890,45 +1032,124 @@ export function GroupNoticeReferenceScreen({ variant }: { variant: string }) {
 }
 
 export function GroupMembersReferenceScreen({ variant }: { variant: string }) {
+  const isTransfer = variant === "transfer" || variant === "transfer-confirm";
+  const members = [
+    { name: "김은혜", leader: true, joined: "2024.03.12", me: true },
+    { name: "박정아", joined: "2024.04.02" },
+    { name: "이수진", joined: "2024.05.18" },
+    { name: "김지영", joined: "2024.07.21" },
+    { name: "정혜진", joined: "2024.09.04" },
+    { name: "조미경", joined: "2024.11.10" },
+    { name: "한유라", joined: "2025.01.22" },
+    { name: "강민서", joined: "2025.03.05" },
+  ];
+
   return (
-    <Screen>
-      <TopBar title="멤버 관리" back onBack={() => router.back()} />
-      <Card style={styles.summaryBanner}>
-        <Text style={styles.cardTitle}>토요 산악회</Text>
-        <Text style={styles.bodyText}>현재 18명 / 최대 25명</Text>
-      </Card>
-      <View style={styles.stack}>
-        {["김은혜", "박정아", "이수진", "김지영", "정혜진"].map(
-          (name, index) => (
-            <Card key={name} style={styles.rowCard}>
-              <Avatar name={name} size={42} />
-              <View style={styles.flex}>
-                <Text style={styles.cardTitle}>{name}</Text>
-                <Text style={styles.metaText}>
-                  {index === 0 ? "소모임장" : "멤버"}
-                </Text>
-              </View>
-              <Badge tone={index === 0 ? "primary" : "mute"}>
-                {index === 0 ? "리더" : "관리"}
-              </Badge>
-            </Card>
-          ),
-        )}
+    <Screen padded={false}>
+      <View style={styles.detailTopPad}>
+        <TopBar
+          title={isTransfer ? "소모임장 이관" : "멤버 관리"}
+          back
+          onBack={() => router.back()}
+        />
       </View>
-      {variant === "transfer" ? <Button>소모임장 이관</Button> : null}
+      {isTransfer ? (
+        <View style={styles.transferWarning}>
+          <MaterialIcons name="warning-amber" size={17} color="#A8643F" />
+          <Text style={styles.transferWarningText}>
+            이관 후에는 일반 멤버로 변경되며 권한이 즉시 사라집니다.
+          </Text>
+        </View>
+      ) : (
+        <Text style={styles.memberCountText}>전체 {members.length}명</Text>
+      )}
+      <View style={styles.memberList}>
+        {members.map((member, index) => (
+          <GroupMemberRow
+            key={member.name}
+            member={member}
+            transferMode={isTransfer}
+            selected={isTransfer && member.name === "박정아"}
+            last={index === members.length - 1}
+          />
+        ))}
+      </View>
+      {isTransfer ? (
+        <View style={styles.fixedBottomAction}>
+          <Button>이관하기</Button>
+        </View>
+      ) : null}
       <ConfirmDialog
         visible={variant === "kick-confirm" || variant === "transfer-confirm"}
         title={
           variant === "transfer-confirm"
-            ? "소모임장을 이관할까요?"
-            : "멤버를 내보낼까요?"
+            ? "박정아님께 소모임장을 이관할까요?"
+            : "이수진님을 강퇴하시겠습니까?"
         }
-        confirmText={variant === "transfer-confirm" ? "이관" : "내보내기"}
+        message={
+          variant === "transfer-confirm"
+            ? "이관 즉시 본인은 일반 멤버로 변경되며 되돌릴 수 없습니다."
+            : "강퇴된 멤버는 다시 신청할 수 없어요."
+        }
+        confirmText={variant === "transfer-confirm" ? "이관" : "강퇴"}
+        danger={variant === "kick-confirm"}
         onCancel={() => undefined}
         onConfirm={() => undefined}
       />
-      <Toast message={variant === "kick-toast" ? "멤버를 내보냈습니다." : ""} />
+      <Toast
+        message={variant === "kick-toast" ? "이수진님이 강퇴되었습니다" : ""}
+      />
     </Screen>
+  );
+}
+
+function GroupMemberRow({
+  member,
+  transferMode,
+  selected,
+  last,
+}: {
+  member: { name: string; joined: string; leader?: boolean; me?: boolean };
+  transferMode: boolean;
+  selected: boolean;
+  last: boolean;
+}) {
+  const selectable = transferMode && !member.leader;
+  return (
+    <View
+      style={[
+        styles.groupMemberRow,
+        selected ? styles.groupMemberRowSelected : null,
+        transferMode && member.leader ? styles.groupMemberRowDisabled : null,
+        last ? styles.noBorder : null,
+      ]}
+    >
+      {selectable ? (
+        <View
+          style={[
+            styles.memberRadioMark,
+            selected ? styles.memberRadioMarkSelected : null,
+          ]}
+        >
+          {selected ? <View style={styles.memberRadioDot} /> : null}
+        </View>
+      ) : null}
+      <Avatar name={member.name} size={42} />
+      <View style={styles.flex}>
+        <View style={styles.memberNameRow}>
+          <Text style={styles.cardTitle}>{member.name}</Text>
+          {member.me ? <Text style={styles.memberMeText}>(나)</Text> : null}
+          {member.leader ? <Badge>소모임장</Badge> : null}
+        </View>
+        <Text style={styles.metaText}>{member.joined} 가입</Text>
+      </View>
+      {!transferMode && !member.leader ? (
+        <View style={styles.kickPill}>
+          <MaterialIcons name="close" size={12} color={theme.colors.danger} />
+          <Text style={styles.kickPillText}>강퇴</Text>
+        </View>
+      ) : null}
+    </View>
   );
 }
 
@@ -1669,8 +1890,9 @@ export function BlockedReferenceScreen({ variant }: { variant: string }) {
       )}
       <ConfirmDialog
         visible={variant === "confirm"}
-        title="차단을 해제할까요?"
-        confirmText="해제"
+        title="이모씨님의 차단을 해제할까요?"
+        message="해제 후에는 상대의 게시글과 댓글이 다시 보이며, 상대도 회원님의 활동을 볼 수 있게 됩니다."
+        confirmText="차단 해제"
         onCancel={() => undefined}
         onConfirm={() => undefined}
       />
@@ -1757,8 +1979,9 @@ export function WithdrawReferenceScreen({
       <Card style={styles.warningCard}>
         {[
           "작성한 나눔 게시글·댓글은 익명으로 남습니다",
-          "탈퇴 후 기존 데이터는 복구할 수 없습니다",
-          "소모임장인 경우 먼저 가입한 멤버에게 자동 이관됩니다",
+          "탈퇴 후 재가입해도 기존 데이터는 복구할 수 없습니다",
+          "탈퇴 즉시 개인정보가 파기됩니다",
+          "소모임장인 경우 가장 먼저 가입한 멤버에게 자동 이관됩니다",
         ].map((item) => (
           <Text key={item} style={styles.warningText}>
             • {item}
@@ -1769,7 +1992,7 @@ export function WithdrawReferenceScreen({
       <ConfirmDialog
         visible={confirm}
         title="정말 탈퇴하시겠습니까?"
-        message="이 작업은 되돌릴 수 없습니다."
+        message="이 작업은 되돌릴 수 없으며, 모든 데이터가 즉시 삭제됩니다."
         confirmText="탈퇴"
         danger
         onCancel={() => undefined}
@@ -1812,7 +2035,8 @@ export function UserProfileReferenceScreen({ variant }: { variant: string }) {
       {variant !== "withdrawn" ? <Button variant="soft">차단</Button> : null}
       <ConfirmDialog
         visible={variant === "block-confirm"}
-        title="사용자를 차단할까요?"
+        title="박정아님을 차단할까요?"
+        message="차단한 사용자의 게시글과 댓글은 보이지 않으며, 상대도 회원님의 활동을 볼 수 없어요."
         confirmText="차단"
         danger
         onCancel={() => undefined}
@@ -1855,6 +2079,68 @@ function InfoRow({ label, value }: { label: string; value: string }) {
     <View style={styles.infoRow}>
       <Text style={styles.metaText}>{label}</Text>
       <Text style={styles.cardTitle}>{value}</Text>
+    </View>
+  );
+}
+
+function StatusBanner({
+  icon,
+  title,
+  description,
+  tone = "done",
+}: {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  title: string;
+  description: string;
+  tone?: "done" | "warn";
+}) {
+  const warn = tone === "warn";
+  return (
+    <View style={[styles.statusBanner, warn ? styles.statusBannerWarn : null]}>
+      <View style={[styles.statusIcon, warn ? styles.statusIconWarn : null]}>
+        <MaterialIcons name={icon} size={16} color="#fff" />
+      </View>
+      <View style={styles.flex}>
+        <Text style={styles.statusBannerTitle}>{title}</Text>
+        <Text style={styles.statusBannerText}>{description}</Text>
+      </View>
+    </View>
+  );
+}
+
+function DetailAction({
+  icon,
+  label,
+  danger,
+  full,
+}: {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  label: string;
+  danger?: boolean;
+  full?: boolean;
+}) {
+  return (
+    <View style={[styles.detailAction, full ? styles.detailActionFull : null]}>
+      <View
+        style={[
+          styles.detailActionIcon,
+          danger ? styles.detailActionDangerIcon : null,
+        ]}
+      >
+        <MaterialIcons
+          name={icon}
+          size={18}
+          color={danger ? theme.colors.danger : theme.colors.primaryDeep}
+        />
+      </View>
+      <Text
+        style={[
+          styles.detailActionText,
+          danger ? styles.detailActionDangerText : null,
+        ]}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
@@ -2050,6 +2336,367 @@ const styles = StyleSheet.create({
   segmentWrap: { paddingHorizontal: 18, paddingBottom: 8 },
   routeList: { gap: 12, paddingHorizontal: 18 },
   rowCard: { flexDirection: "row", alignItems: "center", gap: 12 },
+  marketHero: {
+    position: "relative",
+    height: 360,
+    overflow: "hidden",
+    backgroundColor: "#E2DED3",
+  },
+  marketHeroCover: {
+    height: 360,
+    borderRadius: 0,
+  },
+  marketHeroScrim: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    height: 130,
+    backgroundColor: "rgba(20,30,18,0.22)",
+  },
+  overlayBack: {
+    position: "absolute",
+    top: 20,
+    left: 16,
+    minHeight: 34,
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 1,
+    backgroundColor: "rgba(255,255,255,0.92)",
+  },
+  overlayBackText: {
+    color: theme.colors.ink,
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  marketHeroDoneCenter: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(20,30,18,0.45)",
+  },
+  marketHeroReservedCenter: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 158,
+    alignItems: "center",
+  },
+  marketHeroStatus: {
+    minWidth: 96,
+    minHeight: 48,
+    borderRadius: theme.radius.sm,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 18,
+  },
+  marketHeroReserved: {
+    backgroundColor: "#E89A3C",
+    shadowColor: "rgba(20,30,18,0.35)",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 18,
+  },
+  marketHeroDone: {
+    backgroundColor: "transparent",
+  },
+  marketHeroStatusText: {
+    color: "#fff",
+    fontSize: 32,
+    fontWeight: "900",
+  },
+  marketHeroReservedText: {
+    fontSize: 20,
+  },
+  heroPager: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 12,
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 6,
+  },
+  heroPagerActive: {
+    width: 18,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#fff",
+  },
+  heroPagerDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "rgba(255,255,255,0.6)",
+  },
+  statusBanner: {
+    marginHorizontal: 16,
+    marginTop: 14,
+    borderRadius: theme.radius.md,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: theme.colors.surface2,
+  },
+  statusBannerWarn: {
+    borderWidth: 1,
+    borderColor: "rgba(232,154,60,0.32)",
+    backgroundColor: "rgba(232,154,60,0.12)",
+  },
+  statusIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(20,30,18,0.85)",
+  },
+  statusIconWarn: {
+    backgroundColor: "#E89A3C",
+  },
+  statusBannerTitle: {
+    color: theme.colors.ink,
+    fontSize: 14,
+    fontWeight: "800",
+  },
+  statusBannerText: {
+    marginTop: 2,
+    color: theme.colors.inkMute,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  marketAuthorBlock: {
+    paddingHorizontal: 22,
+    paddingTop: 16,
+    paddingBottom: 6,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  marketDetailContent: {
+    paddingHorizontal: 22,
+    paddingTop: 8,
+    paddingBottom: 4,
+    gap: 10,
+  },
+  marketBody: {
+    paddingHorizontal: 22,
+    paddingTop: 16,
+    paddingBottom: 22,
+    color: theme.colors.inkSoft,
+    fontSize: 14,
+    lineHeight: 24,
+  },
+  detailActionCard: {
+    marginHorizontal: 16,
+    marginBottom: 22,
+    padding: 4,
+    flexDirection: "row",
+  },
+  detailAction: {
+    flex: 1,
+    minHeight: 76,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    borderRadius: theme.radius.md,
+  },
+  detailActionFull: {
+    flexDirection: "row",
+    minHeight: 54,
+  },
+  detailActionIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.primaryTint,
+  },
+  detailActionDangerIcon: {
+    backgroundColor: "rgba(201,124,110,0.14)",
+  },
+  detailActionText: {
+    color: theme.colors.inkSoft,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  detailActionDangerText: {
+    color: theme.colors.danger,
+  },
+  detailTopPad: {
+    paddingHorizontal: 18,
+  },
+  groupDetailHeader: {
+    paddingHorizontal: 22,
+    paddingTop: 4,
+    paddingBottom: 18,
+    gap: 12,
+  },
+  groupDetailTitle: {
+    color: theme.colors.ink,
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: "900",
+  },
+  groupMetaText: {
+    color: theme.colors.inkSoft,
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  groupLeaderCard: {
+    marginTop: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: theme.colors.surface2,
+  },
+  groupActionWrap: {
+    paddingHorizontal: 16,
+    paddingBottom: 22,
+  },
+  memberRail: {
+    paddingHorizontal: 22,
+    paddingBottom: 12,
+    flexDirection: "row",
+    gap: 16,
+  },
+  memberMini: {
+    width: 56,
+    alignItems: "center",
+    gap: 6,
+  },
+  memberAvatarWrap: {
+    position: "relative",
+  },
+  memberLeaderMark: {
+    position: "absolute",
+    right: -2,
+    bottom: -2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
+    borderColor: theme.colors.bg,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.primary,
+  },
+  memberMiniName: {
+    maxWidth: 56,
+    color: theme.colors.inkSoft,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  groupNoticeList: {
+    paddingHorizontal: 22,
+    paddingBottom: 16,
+    gap: 10,
+  },
+  transferWarning: {
+    marginHorizontal: 18,
+    marginTop: 4,
+    marginBottom: 14,
+    borderRadius: theme.radius.md,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    flexDirection: "row",
+    gap: 10,
+    backgroundColor: "rgba(217,131,92,0.10)",
+  },
+  transferWarningText: {
+    flex: 1,
+    color: "#A8643F",
+    fontSize: 13,
+    lineHeight: 20,
+    fontWeight: "600",
+  },
+  memberCountText: {
+    paddingHorizontal: 22,
+    paddingTop: 8,
+    paddingBottom: 6,
+    color: theme.colors.inkMute,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  memberList: {
+    paddingBottom: 96,
+  },
+  groupMemberRow: {
+    minHeight: 70,
+    paddingHorizontal: 22,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  groupMemberRowSelected: {
+    backgroundColor: theme.colors.primarySoft,
+  },
+  groupMemberRowDisabled: {
+    opacity: 0.42,
+  },
+  memberRadioMark: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    borderColor: theme.colors.lineStrong,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  memberRadioMarkSelected: {
+    borderWidth: 0,
+    backgroundColor: theme.colors.primary,
+  },
+  memberRadioDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#fff",
+  },
+  memberNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  memberMeText: {
+    color: theme.colors.primaryDeep,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  kickPill: {
+    minHeight: 32,
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "rgba(201,124,110,0.10)",
+  },
+  kickPillText: {
+    color: theme.colors.danger,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  fixedBottomAction: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 18,
+    paddingTop: 12,
+    paddingBottom: 18,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.line,
+    backgroundColor: "rgba(246,247,242,0.94)",
+  },
   marketRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   thumbWrap: { position: "relative" },
   thumbBadge: {

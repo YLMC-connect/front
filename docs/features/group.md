@@ -17,6 +17,7 @@
 - 소모임 목록 1차 디자인 정렬 — ZIP prototype 기준 접힌 검색, 상태 segmented tabs, category chips, bottom-right 개설 FAB 적용
 - ZIP 원본 소모임 화면 29개 상태 매핑 — 목록/상세/개설/공지/멤버 관리 variant reference 라우트 연결
 - ZIP 110개 visual inventory 재검증에 포함 — 소모임 reference 화면을 Dev Client capture/compare 대상에 유지
+- 소모임 상세/멤버 관리 원본 시각 정렬 — ZIP JSX 기준 상세 header, 리더 카드, 멤버 rail, 공지 list, 강퇴/소모임장 이관 list와 확인 문구를 reference 화면에 반영
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -38,6 +39,8 @@
 `Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-23) **소모임 상세는 cover hero 없이 정보 header를 우선한다** — ZIP 원본은 소모임 상세에서 대표 cover보다 카테고리/모집 상태/인원/설명/리더 정보를 먼저 보여주므로 reference 화면도 같은 구조를 따릅니다.
+- (2026-05-23) **소모임장 이관은 별도 list mode로 검증한다** — 멤버 관리는 기본 강퇴 모드와 이관 모드를 분리하고, 이관 모드에서는 경고 배너, radio 선택, 하단 고정 이관 버튼을 표시합니다.
 - (2026-05-23) **소모임 원본 상태는 `variant` 라우트로 검증** — ZIP의 공지/멤버 관리 포함 29개 화면 상태를 모두 접근 가능하게 두고, 실제 권한/API 정책은 mock-first로 유지합니다.
 - (2026-05-23) **소모임 검색은 접힌 상태로 시작** — 나눔 목록과 같은 탐색 패턴을 유지하기 위해 검색 입력은 상단 아이콘으로 펼치고, 개설 액션은 floating FAB로 둡니다.
 - (2026-05-23) **대표 이미지 없음은 시각 placeholder로 처리** — 실제 cover 이미지가 없는 mock/초기 데이터도 목록에서 빈 박스로 보이지 않도록 공통 `VisualCover`를 사용합니다.

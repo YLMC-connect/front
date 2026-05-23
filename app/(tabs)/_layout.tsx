@@ -1,5 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { Tabs, useRouter } from "expo-router";
+import { Tabs, usePathname, useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { theme } from "../../src/constants/theme";
 
@@ -25,6 +25,8 @@ const tabHrefs: Record<
   "prayer/index": "/prayer",
   "mypage/index": "/mypage",
 };
+
+const rootTabPaths = new Set<string>(Object.values(tabHrefs));
 
 export default function TabsLayout() {
   return (
@@ -98,11 +100,12 @@ export default function TabsLayout() {
 }
 
 function AppTabBar({ state, descriptors, navigation }: any) {
+  const pathname = usePathname();
   const router = useRouter();
   const currentRoute = state.routes[state.index];
   const currentOptions = descriptors[currentRoute.key]?.options;
 
-  if (!currentOptions?.tabBarButtonTestID) {
+  if (!rootTabPaths.has(pathname) || !currentOptions?.tabBarButtonTestID) {
     return null;
   }
 

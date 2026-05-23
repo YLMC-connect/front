@@ -1,7 +1,17 @@
 import type { ReactNode } from "react";
+import { usePathname } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "../../constants/theme";
+
+const rootTabPaths = new Set([
+  "/",
+  "/market",
+  "/group",
+  "/life-study",
+  "/prayer",
+  "/mypage",
+]);
 
 export function Screen({
   children,
@@ -12,14 +22,16 @@ export function Screen({
   scroll?: boolean;
   padded?: boolean;
 }) {
+  const pathname = usePathname();
+  const contentStyle = rootTabPaths.has(pathname)
+    ? styles.contentWithTab
+    : styles.content;
+
   return (
     <SafeAreaView style={styles.safe}>
       {scroll ? (
         <ScrollView
-          contentContainerStyle={[
-            styles.content,
-            padded ? styles.padded : null,
-          ]}
+          contentContainerStyle={[contentStyle, padded ? styles.padded : null]}
         >
           {children}
         </ScrollView>
@@ -55,7 +67,8 @@ export function Section({
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.colors.bg },
   fill: { flex: 1 },
-  content: { paddingBottom: 112 },
+  content: { paddingBottom: 28 },
+  contentWithTab: { paddingBottom: 112 },
   padded: { paddingHorizontal: 18, gap: 16 },
   section: { gap: 10 },
   sectionHeader: {

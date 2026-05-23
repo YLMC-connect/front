@@ -84,6 +84,14 @@ export default function TabsLayout() {
       <Tabs.Screen name="mypage/privacy" options={{ href: null }} />
       <Tabs.Screen name="mypage/withdraw" options={{ href: null }} />
       <Tabs.Screen name="mypage/user/[id]" options={{ href: null }} />
+      <Tabs.Screen name="mypage/wishlist" options={{ href: null }} />
+      <Tabs.Screen
+        name="mypage/notification-settings"
+        options={{ href: null }}
+      />
+      <Tabs.Screen name="mypage/support" options={{ href: null }} />
+      <Tabs.Screen name="mypage/inquiry" options={{ href: null }} />
+      <Tabs.Screen name="mypage/account" options={{ href: null }} />
       <Tabs.Screen name="profile/[id]" options={{ href: null }} />
     </Tabs>
   );

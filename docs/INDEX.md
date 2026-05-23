@@ -1,6 +1,6 @@
 # YLMC Connect — 인덱스
 
-> 마지막 갱신: 2026-05-23 (Maestro Dev Client smoke 안정화 반영) | 현재 Phase: 6 — API 연결 준비 (진행중)
+> 마지막 갱신: 2026-05-23 (디자인 110화면 Dev Client 캡처/비교 및 Maestro smoke 반영) | 현재 Phase: 6 — API 연결 준비 (진행중)
 
 본 문서는 **작업자 5분용 진입점** 입니다. 외부인은 [README.md](../README.md) 부터, AI 작업 규칙은 [AGENTS.md](../AGENTS.md) 를 참고하세요. 문서 시스템이 어긋났을 때의 복구 절차는 [MAINTENANCE.md](MAINTENANCE.md).
 
@@ -78,4 +78,4 @@
 ## 외부 자료
 
 - Notion “열린문커넥트” 기획 문서 — MVP 범위와 IA의 최신 기준
-- `/Users/mingulee/Downloads/열린문커넥트.zip` — 앱 디자인 토큰과 화면 톤 참고
+- `/Users/mingulee/Downloads/열린문커넥트.zip` — 앱 디자인 토큰과 110개 JSX 화면 기준

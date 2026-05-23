@@ -48,6 +48,6 @@ describe("v1 tab smoke screens", () => {
 
     expect(screen.getByTestId("screen-mypage")).toBeTruthy();
     expect(await screen.findByText("내 활동")).toBeTruthy();
-    expect(await screen.findByText("회원 탈퇴")).toBeTruthy();
+    expect(await screen.findByText("회원탈퇴")).toBeTruthy();
   });
 });

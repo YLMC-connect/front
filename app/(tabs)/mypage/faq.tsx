@@ -1,33 +1,11 @@
+import { useLocalSearchParams } from "expo-router";
 import {
-  EmptyPanel,
-  NoticeItem,
-  PrototypeScreen,
-  usePrototypeVariant,
-} from "../../../src/components/design/PrototypeScaffold";
-import { useMyPage } from "../../../src/hooks/useMyPage";
+  FaqReferenceScreen,
+  variantOf,
+} from "../../../src/components/prototype/OriginalMockScreens";
 
 export default function FaqScreen() {
-  const variant = usePrototypeVariant();
-  const { data } = useMyPage();
-  const faqs = data?.faqs ?? [];
+  const params = useLocalSearchParams<{ variant?: string }>();
 
-  return (
-    <PrototypeScreen title="FAQ" testID="screen-mypage-faq">
-      {variant === "empty" ? (
-        <EmptyPanel
-          icon="help-outline"
-          title="등록된 FAQ가 없습니다"
-          body="자주 묻는 질문은 관리자 등록 후 표시됩니다."
-        />
-      ) : (
-        faqs.map((faq) => (
-          <NoticeItem
-            key={faq.question}
-            title={faq.question}
-            body={faq.answer}
-          />
-        ))
-      )}
-    </PrototypeScreen>
-  );
+  return <FaqReferenceScreen empty={variantOf(params.variant) === "empty"} />;
 }

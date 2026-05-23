@@ -67,6 +67,7 @@ export function PrototypeScreen({
           title={dialog.title}
           message={dialog.message}
           confirmText={dialog.confirmText}
+          danger={dialog.danger}
           onCancel={() => router.back()}
           onConfirm={() => router.back()}
         />

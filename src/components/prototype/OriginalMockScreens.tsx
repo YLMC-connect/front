@@ -5,13 +5,14 @@ import { Screen, Section } from "../layout/Screen";
 import {
   Avatar,
   Badge,
-  BottomSheet,
   Button,
   Card,
   ConfirmDialog,
   EmptyState,
   ErrorState,
+  FloatingActionButton,
   HorizontalChips,
+  RadioSheet,
   SegmentedTabs,
   TextField,
   Textarea,
@@ -256,6 +257,161 @@ export function NotificationsReferenceScreen() {
   );
 }
 
+export function HomeReferenceScreen() {
+  const myGroups = [
+    {
+      name: "청년 1부 큐티모임",
+      last: "오늘 09:14",
+      msg: "마가복음 8장 함께 묵상해요",
+    },
+    {
+      name: "토요 산악회",
+      last: "어제 18:02",
+      msg: "이번 주 청계산 사진 올렸어요",
+    },
+    {
+      name: "주방 봉사팀",
+      last: "2일 전",
+      msg: "다음 주 메뉴 회의 잡았어요",
+    },
+  ];
+  const newGroups = [
+    { name: "사진 동아리", cat: "문화", n: 8 },
+    { name: "성가대 신입", cat: "봉사", n: 5 },
+    { name: "아빠와 산책", cat: "가족", n: 12 },
+  ];
+  const market = [
+    { title: "유아용 그림책 30권", price: "무료" },
+    { title: "에어프라이어", price: "25,000원" },
+    { title: "유모차", price: "무료" },
+    { title: "캠핑 의자 2개", price: "15,000원" },
+  ];
+
+  return (
+    <Screen padded={false}>
+      <View testID="screen-home" style={styles.homeHeader}>
+        <View style={styles.brandRow}>
+          <View style={styles.logoMark}>
+            <MaterialIcons name="door-front" size={19} color="#fff" />
+          </View>
+          <Text style={styles.brandTitle}>열린문 커넥트</Text>
+        </View>
+        <View style={styles.headerActions}>
+          <MaterialIcons name="search" size={22} color={theme.colors.inkSoft} />
+          <MaterialIcons
+            name="notifications-none"
+            size={22}
+            color={theme.colors.inkSoft}
+          />
+          <View style={styles.noticeDot} />
+        </View>
+      </View>
+
+      <View style={styles.contentPad}>
+        <Card style={styles.noticeBanner}>
+          <View style={styles.noticeIcon}>
+            <MaterialIcons name="event" size={23} color="#fff" />
+          </View>
+          <View style={styles.flex}>
+            <Text style={styles.noticeEyebrow}>이번 주 공지</Text>
+            <Text style={styles.noticeHeadline}>
+              주일 2부 예배 시간 변경 안내
+            </Text>
+          </View>
+          <View style={styles.noticePagers}>
+            <View style={[styles.noticePager, styles.noticePagerActive]} />
+            <View style={styles.noticePager} />
+            <View style={styles.noticePager} />
+          </View>
+        </Card>
+      </View>
+
+      <Section
+        title="내 소모임 활동"
+        trailing={<Text style={styles.moreText}>전체보기 ›</Text>}
+      >
+        <View style={styles.rail}>
+          {myGroups.map((group, index) => (
+            <Card key={group.name} style={styles.homeGroupCard}>
+              <VisualCover height={84} seed={index} />
+              <Text numberOfLines={1} style={styles.cardTitle}>
+                {group.name}
+              </Text>
+              <Text numberOfLines={1} style={styles.metaText}>
+                {group.msg}
+              </Text>
+              <Text style={styles.metaText}>{group.last}</Text>
+            </Card>
+          ))}
+        </View>
+      </Section>
+
+      <View style={styles.statsGrid}>
+        <Card style={styles.statPanel}>
+          <Text style={styles.metaText}>오늘 기도제목</Text>
+          <Text style={styles.statNumber}>
+            12 <Text style={styles.statUnit}>개</Text>
+          </Text>
+          <Text style={styles.metaText}>월요 새벽기도방</Text>
+        </Card>
+        <Card style={[styles.statPanel, styles.statWarm]}>
+          <Text style={[styles.metaText, styles.warmText]}>
+            이번 주 기도응답
+          </Text>
+          <Text style={[styles.statNumber, styles.warmText]}>
+            7 <Text style={styles.statUnit}>건</Text>
+          </Text>
+          <Text style={[styles.metaText, styles.warmText]}>지난주 대비 +3</Text>
+        </Card>
+      </View>
+
+      <Section
+        title="새로 생긴 소모임"
+        trailing={<Text style={styles.moreText}>더보기 ›</Text>}
+      >
+        <View style={styles.smallRail}>
+          {newGroups.map((group, index) => (
+            <View key={group.name} style={styles.newGroupTile}>
+              <VisualCover height={150} seed={index + 2} />
+              <Text numberOfLines={1} style={styles.cardTitle}>
+                {group.name}
+              </Text>
+              <View style={styles.inlineMeta}>
+                <Badge>{group.cat}</Badge>
+                <Text style={styles.metaText}>멤버 {group.n}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      </Section>
+
+      <Section
+        title="최근 나눔 물품"
+        trailing={<Text style={styles.moreText}>전체보기 ›</Text>}
+      >
+        <View style={styles.marketGrid}>
+          {market.map((item, index) => (
+            <View key={item.title}>
+              <VisualThumb size={150} seed={index} />
+              <Text numberOfLines={1} style={styles.cardTitle}>
+                {item.title}
+              </Text>
+              <Text
+                style={[
+                  styles.priceText,
+                  item.price === "무료" ? styles.primaryText : null,
+                ]}
+              >
+                {item.price}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </Section>
+    </Screen>
+  );
+}
+
 export function MarketListReferenceScreen({ variant }: { variant: string }) {
   const active =
     variant === "tab-all"
@@ -326,10 +482,7 @@ export function MarketListReferenceScreen({ variant }: { variant: string }) {
           ))
         )}
       </View>
-      <View style={styles.floatButton}>
-        <MaterialIcons name="add" size={20} color="#fff" />
-        <Text style={styles.floatButtonText}>글쓰기</Text>
-      </View>
+      <FloatingActionButton label="글쓰기" />
     </Screen>
   );
 }
@@ -412,36 +565,45 @@ export function MarketDetailReferenceScreen({ variant }: { variant: string }) {
         />
         <Button>댓글 등록</Button>
       </Card>
-      <BottomSheet
+      <RadioSheet
         visible={variant === "status"}
-        title="나눔 상태 변경"
+        title="상태 변경"
+        value="sharing"
+        options={[
+          { value: "sharing", label: "나눔중", disabled: true },
+          { value: "reserved", label: "예약중" },
+          { value: "done", label: "나눔완료" },
+        ]}
+        hint="상태는 되돌릴 수 없습니다 (나눔중 → 예약중 → 나눔완료)"
         onClose={() => undefined}
-      >
-        <View style={styles.stack}>
-          <Button variant="soft">나눔중</Button>
-          <Button variant="soft">예약중</Button>
-          <Button>나눔완료</Button>
-        </View>
-      </BottomSheet>
-      <BottomSheet
+        onConfirm={() => undefined}
+      />
+      <RadioSheet
         visible={showReport}
-        title="신고 사유 선택"
+        title="신고"
+        value={variant === "report-other-input" ? "기타" : "허위 물품 정보"}
+        options={marketReportReasons.map((reason) => ({
+          value: reason,
+          label: reason,
+        }))}
+        confirmText="신고하기"
+        danger
+        hint="허위·악의적 신고 시 이용이 제한될 수 있습니다."
         onClose={() => undefined}
+        onConfirm={() => undefined}
       >
-        <View style={styles.stack}>
-          <Button variant="soft">상업성 게시글</Button>
-          <Button variant="soft">부적절한 내용</Button>
-          <Button variant="soft">기타</Button>
-          {variant === "report-other-input" ? (
-            <Textarea value="직접 거래를 유도합니다." />
-          ) : null}
-        </View>
-      </BottomSheet>
+        {variant === "report-other-input" ? (
+          <View style={styles.sheetField}>
+            <Textarea value="홍보성 글 같아요. 같은 사진을 여러 번 올리는 것 같습니다." />
+          </View>
+        ) : null}
+      </RadioSheet>
       <ConfirmDialog
         visible={variant === "delete-confirm"}
-        title="나눔 글을 삭제할까요?"
-        message="삭제된 게시글은 다시 복구할 수 없습니다."
+        title="게시글을 삭제하시겠습니까?"
+        message="삭제하면 댓글을 포함한 모든 내용이 사라지며 복구할 수 없어요."
         confirmText="삭제"
+        danger
         onCancel={() => undefined}
         onConfirm={() => undefined}
       />
@@ -548,10 +710,7 @@ export function GroupListReferenceScreen({ variant }: { variant: string }) {
           ))
         )}
       </View>
-      <View style={styles.floatButton}>
-        <MaterialIcons name="add" size={20} color="#fff" />
-        <Text style={styles.floatButtonText}>개설</Text>
-      </View>
+      <FloatingActionButton label="개설" />
     </Screen>
   );
 }
@@ -625,6 +784,7 @@ export function GroupDetailReferenceScreen({ variant }: { variant: string }) {
         visible={variant === "leave-confirm"}
         title="소모임에서 나갈까요?"
         confirmText="탈퇴"
+        danger
         onCancel={() => undefined}
         onConfirm={() => undefined}
       />
@@ -633,6 +793,7 @@ export function GroupDetailReferenceScreen({ variant }: { variant: string }) {
         title="소모임을 삭제할까요?"
         message="삭제된 소모임은 복구할 수 없습니다."
         confirmText="삭제"
+        danger
         onCancel={() => undefined}
         onConfirm={() => undefined}
       />
@@ -720,6 +881,7 @@ export function GroupNoticeReferenceScreen({ variant }: { variant: string }) {
         title="공지를 삭제할까요?"
         message="삭제된 공지는 다시 복구할 수 없습니다."
         confirmText="삭제"
+        danger
         onCancel={() => undefined}
         onConfirm={() => undefined}
       />
@@ -770,6 +932,161 @@ export function GroupMembersReferenceScreen({ variant }: { variant: string }) {
   );
 }
 
+const prayerRooms = [
+  { day: "월", name: "월요 새벽기도방", n: 12, role: "리더" },
+  { day: "수", name: "수요 가정 중보팀", n: 7, role: "멤버" },
+  { day: "화", name: "화요 자녀 중보방", n: 24 },
+  { day: "목", name: "목요 직장 중보팀", n: 18 },
+] as const;
+
+export function PrayerListReferenceScreen() {
+  return (
+    <Screen padded={false}>
+      <TopBar
+        testID="screen-prayer"
+        title="동행"
+        subtitle="기도로 동행하고, 말씀으로 자라가요"
+        right={
+          <MaterialIcons name="search" size={22} color={theme.colors.inkSoft} />
+        }
+      />
+      <View style={styles.segmentWrap}>
+        <SegmentedTabs
+          items={[
+            { key: "pray", label: "중보기도" },
+            { key: "study", label: "삶공부" },
+          ]}
+          active="pray"
+          onChange={() => undefined}
+        />
+      </View>
+      <View style={styles.contentPad}>
+        <Section title="내 기도모임방">
+          <View style={styles.stack}>
+            {prayerRooms.slice(0, 2).map((room, index) => (
+              <Card key={room.name} style={styles.prayerRoomCard}>
+                <View style={[styles.dayBox, dayBoxStyle(index)]}>
+                  <Text style={[styles.dayText, dayTextStyle(index)]}>
+                    {room.day}
+                  </Text>
+                </View>
+                <View style={styles.flex}>
+                  <View style={styles.inlineMeta}>
+                    <Text style={styles.cardTitle}>{room.name}</Text>
+                    {"role" in room && room.role === "리더" ? (
+                      <Badge tone="warn">리더</Badge>
+                    ) : null}
+                  </View>
+                  <Text style={styles.metaText}>
+                    오늘 새 기도제목 {room.n}개
+                  </Text>
+                </View>
+                <Badge>{room.n}</Badge>
+              </Card>
+            ))}
+          </View>
+        </Section>
+        <Section title="다른 기도모임방">
+          <Card style={styles.menuCard}>
+            {prayerRooms.slice(2).map((room, index) => (
+              <View key={room.name} style={styles.menuRow}>
+                <View style={[styles.smallDayBox, dayBoxStyle(index + 2)]}>
+                  <Text style={[styles.smallDayText, dayTextStyle(index + 2)]}>
+                    {room.day}
+                  </Text>
+                </View>
+                <View style={styles.flex}>
+                  <Text style={styles.menuTitle}>{room.name}</Text>
+                  <Text style={styles.metaText}>멤버 {room.n}명</Text>
+                </View>
+                <Button variant="soft">참여</Button>
+              </View>
+            ))}
+          </Card>
+        </Section>
+      </View>
+      <FloatingActionButton compact icon="add" />
+    </Screen>
+  );
+}
+
+export function PrayerDetailReferenceScreen() {
+  const names = ["박은정", "김도현", "이수민", "정혜린", "한지영"];
+  const live = [
+    "어머니 수술이 잘 끝나도록, 회복도 빠르도록 기도 부탁드려요.",
+    "팀 안에서 갈등이 있어요. 지혜로 풀어가게 해주세요.",
+    "아이 학교 적응을 위해 함께 기도해요.",
+  ];
+  const done = [
+    "면접 결과 합격했어요! 함께 기도해주셔서 감사해요.",
+    "건강검진 결과 깨끗하게 나왔습니다.",
+  ];
+
+  return (
+    <Screen padded={false}>
+      <TopBar
+        title="월요 새벽기도방"
+        back
+        onBack={() => router.back()}
+        right={
+          <MaterialIcons
+            name="notifications-none"
+            size={22}
+            color={theme.colors.inkSoft}
+          />
+        }
+      />
+      <View style={styles.detailMetaRow}>
+        <Badge tone="warn">매주 월</Badge>
+        <Text style={styles.metaText}>멤버 12 · 오늘 새 기도제목 3개</Text>
+      </View>
+      <View style={styles.segmentWrap}>
+        <SegmentedTabs
+          items={[
+            { key: "live", label: "기도중 3" },
+            { key: "done", label: "응답 2" },
+          ]}
+          active="live"
+          onChange={() => undefined}
+        />
+      </View>
+      <View style={styles.contentPad}>
+        {[...live, ...done].map((message, index) => {
+          const answered = index >= live.length;
+
+          return (
+            <Card
+              key={message}
+              style={[styles.prayerCard, answered ? styles.faded : null]}
+            >
+              <View style={styles.authorRow}>
+                <Avatar name={names[index]} size={30} />
+                <View style={styles.flex}>
+                  <Text style={styles.menuTitle}>{names[index]}</Text>
+                  <Text style={styles.metaText}>
+                    {index < 2 ? "오늘" : "어제"}
+                  </Text>
+                </View>
+                <Badge tone={answered ? "mute" : "primary"}>
+                  {answered ? "응답" : "기도중"}
+                </Badge>
+              </View>
+              <Text style={styles.bodyText}>{message}</Text>
+              <View style={styles.inlineMeta}>
+                <Button variant="soft" icon="favorite-border">
+                  함께 기도 {answered ? 22 : 14}
+                </Button>
+                {!answered ? <Button variant="ghost">응답완료</Button> : null}
+              </View>
+            </Card>
+          );
+        })}
+      </View>
+      <FloatingActionButton compact icon="add" />
+    </Screen>
+  );
+}
+
 export function PrayerApplyReferenceScreen() {
   return (
     <Screen>
@@ -800,6 +1117,214 @@ export function PrayerRequestReferenceScreen() {
         />
         <Button>기도 요청 보내기</Button>
       </Card>
+    </Screen>
+  );
+}
+
+const studyOpenCourses = [
+  {
+    name: "새가족반",
+    status: "신청가능",
+    term: "2025.05 ~ 06 · 6주",
+    desc: "교회 첫걸음, 함께 시작해요",
+  },
+  {
+    name: "제자훈련 1단계",
+    status: "진행중",
+    term: "2025.03 ~ 08 · 진도 4/12",
+    desc: "예수님의 제자로 살아가기",
+    progress: 33,
+  },
+  {
+    name: "성경통독 6개월 코스",
+    status: "신청가능",
+    term: "2025.06 ~ 11 · 6개월",
+    desc: "창세기부터 요한계시록까지",
+  },
+] as const;
+
+export function StudyListReferenceScreen() {
+  return (
+    <Screen padded={false}>
+      <TopBar
+        testID="screen-life-study"
+        title="동행"
+        subtitle="기도로 동행하고, 말씀으로 자라가요"
+        right={
+          <MaterialIcons name="search" size={22} color={theme.colors.inkSoft} />
+        }
+      />
+      <View style={styles.segmentWrap}>
+        <SegmentedTabs
+          items={[
+            { key: "pray", label: "중보기도" },
+            { key: "study", label: "삶공부" },
+          ]}
+          active="study"
+          onChange={() => undefined}
+        />
+      </View>
+      <View style={styles.contentPad}>
+        <Section title="신청가능·진행중">
+          <View style={styles.stack}>
+            {studyOpenCourses.map((course, index) => (
+              <Card key={course.name} style={styles.studyCourseCard}>
+                <View style={[styles.studyOrb, dayBoxStyle(index)]} />
+                <View style={styles.inlineMeta}>
+                  <Badge tone={course.status === "진행중" ? "primary" : "warn"}>
+                    {course.status}
+                  </Badge>
+                  <Text style={styles.metaText}>{course.term}</Text>
+                </View>
+                <Text style={styles.titleText}>{course.name}</Text>
+                <Text style={styles.bodyText}>{course.desc}</Text>
+                {"progress" in course ? (
+                  <View style={styles.progressRow}>
+                    <View style={styles.progressTrack}>
+                      <View
+                        style={[
+                          styles.progressBar,
+                          { width: `${course.progress}%` },
+                        ]}
+                      />
+                    </View>
+                    <Text style={styles.primaryText}>{course.progress}%</Text>
+                  </View>
+                ) : null}
+              </Card>
+            ))}
+          </View>
+        </Section>
+        <Section title="마감·수료">
+          <Card style={styles.menuCard}>
+            {["알파코스 봄학기", "결혼예비학교 봄", "양육반 2024-가을"].map(
+              (title, index) => (
+                <View key={title} style={styles.menuRow}>
+                  <View style={styles.softIcon}>
+                    <MaterialIcons
+                      name="menu-book"
+                      size={22}
+                      color={theme.colors.inkMute}
+                    />
+                  </View>
+                  <View style={styles.flex}>
+                    <Text style={styles.menuTitle}>{title}</Text>
+                    <Text style={styles.metaText}>2025.03 ~ 05 · 종료</Text>
+                  </View>
+                  <Badge tone={index === 0 ? "mute" : "primary"}>
+                    {index === 0 ? "마감" : "수료"}
+                  </Badge>
+                </View>
+              ),
+            )}
+          </Card>
+        </Section>
+      </View>
+    </Screen>
+  );
+}
+
+export function StudyDetailReferenceScreen() {
+  const curriculum = [
+    "그리스도인의 정체성",
+    "기도의 능력",
+    "말씀과 묵상",
+    "예배의 의미",
+    "성령의 인도하심",
+    "전도와 증인의 삶",
+  ];
+
+  return (
+    <Screen>
+      <TopBar
+        title=""
+        back
+        onBack={() => router.back()}
+        right={
+          <MaterialIcons
+            name="ios-share"
+            size={22}
+            color={theme.colors.inkSoft}
+          />
+        }
+      />
+      <View style={styles.inlineMeta}>
+        <Badge>진행중</Badge>
+        <Text style={styles.metaText}>2025.03 ~ 08 · 매주 수요일 19:30</Text>
+      </View>
+      <Text style={styles.displayTitle}>제자훈련 1단계</Text>
+      <Text style={styles.bodyText}>
+        예수님을 따르는 제자로 자라가는 12주 과정입니다. 매주 말씀 묵상, 적용
+        나눔, 함께하는 기도로 구성됩니다.
+      </Text>
+      <Card style={styles.rowCard}>
+        <Avatar name="이" size={36} />
+        <View style={styles.flex}>
+          <Text style={styles.cardTitle}>이정민 목사</Text>
+          <Text style={styles.metaText}>담당 양육자</Text>
+        </View>
+      </Card>
+      <Section title="내 수강 현황">
+        <Card style={styles.progressCard}>
+          <View style={styles.spreadRow}>
+            <Text style={styles.primaryText}>진도율</Text>
+            <Text style={styles.statValue}>4 / 12 주차</Text>
+          </View>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressBar, { width: "33%" }]} />
+          </View>
+          <View style={styles.statsGrid}>
+            <Card style={styles.miniStat}>
+              <Text style={styles.metaText}>제출한 과제</Text>
+              <Text style={styles.cardTitle}>3 / 4</Text>
+            </Card>
+            <Card style={styles.miniStat}>
+              <Text style={styles.metaText}>출석</Text>
+              <Text style={styles.cardTitle}>4 / 4</Text>
+            </Card>
+          </View>
+        </Card>
+      </Section>
+      <Section title="커리큘럼">
+        <Card style={styles.menuCard}>
+          {curriculum.map((title, index) => {
+            const current = index === 3;
+            const done = index < 4;
+
+            return (
+              <View key={title} style={styles.menuRow}>
+                <View
+                  style={[
+                    styles.stepCircle,
+                    done ? styles.stepDone : null,
+                    current ? styles.stepCurrent : null,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.stepText,
+                      current ? styles.stepTextCurrent : null,
+                    ]}
+                  >
+                    {done && !current ? "✓" : index + 1}
+                  </Text>
+                </View>
+                <View style={styles.flex}>
+                  <Text style={styles.metaText}>WEEK {index + 1}</Text>
+                  <Text style={styles.menuTitle}>{title}</Text>
+                </View>
+                {current ? <Badge>이번주</Badge> : null}
+              </View>
+            );
+          })}
+        </Card>
+      </Section>
+      <View style={styles.bottomActions}>
+        <Button variant="soft" icon="favorite-border">
+          관심
+        </Button>
+        <Button>이번 주 과제 제출</Button>
+      </View>
     </Screen>
   );
 }
@@ -845,6 +1370,186 @@ export function StudyHistoryReferenceScreen() {
           ),
         )}
       </View>
+    </Screen>
+  );
+}
+
+export function MyPageReferenceScreen({ variant }: { variant: string }) {
+  return (
+    <Screen padded={false}>
+      <TopBar title="마이페이지" testID="screen-mypage" />
+      <View style={styles.contentPad}>
+        <Card style={styles.myProfileCard}>
+          <Avatar name="김은혜" size={60} />
+          <View style={styles.flex}>
+            <Text style={styles.profileName}>김은혜</Text>
+            <Text style={styles.metaText}>열린문교회</Text>
+          </View>
+          <Button variant="ghost">프로필 수정</Button>
+        </Card>
+        <SectionLabelText>활동 관리</SectionLabelText>
+        <Card style={styles.menuCard}>
+          <MenuRow icon="history" title="내 활동" value="" />
+          <MenuRow icon="favorite-border" title="관심목록" value="" />
+          <MenuRow icon="block" title="차단 관리" value="" last />
+        </Card>
+        <SectionLabelText>고객센터</SectionLabelText>
+        <Card style={styles.menuCard}>
+          <MenuRow icon="notifications-none" title="알림 설정" value="" />
+          <MenuRow icon="support-agent" title="고객센터" value="" />
+          <MenuRow icon="help-outline" title="FAQ" value="" />
+          <MenuRow icon="description" title="약관" value="" />
+          <MenuRow icon="privacy-tip" title="개인정보 처리방침" value="" last />
+        </Card>
+        <SectionLabelText>계정</SectionLabelText>
+        <Card style={styles.menuCard}>
+          <MenuRow icon="manage-accounts" title="계정 관리" value="" />
+          <MenuRow icon="logout" title="로그아웃" value="" last />
+        </Card>
+        <SectionLabelText>계정 관리</SectionLabelText>
+        <Card style={styles.menuCard}>
+          <MenuRow icon="person-remove" title="회원탈퇴" value="" last />
+        </Card>
+        <Text style={styles.versionText}>v 1.0.2 · 열린문 커넥트</Text>
+      </View>
+      <ConfirmDialog
+        visible={variant === "logout-confirm"}
+        title="로그아웃 하시겠습니까?"
+        confirmText="로그아웃"
+        onCancel={() => undefined}
+        onConfirm={() => undefined}
+      />
+    </Screen>
+  );
+}
+
+export function MyWishlistReferenceScreen() {
+  return (
+    <Screen>
+      <TopBar title="관심목록" back onBack={() => router.back()} />
+      <View style={styles.stack}>
+        {marketPosts.map((post, index) => (
+          <Card key={post.title} style={styles.marketRow}>
+            <VisualThumb size={70} seed={index} />
+            <View style={styles.flex}>
+              <Text style={styles.cardTitle}>{post.title}</Text>
+              <Text style={styles.metaText}>
+                {post.author} · {post.when}
+              </Text>
+            </View>
+            <MaterialIcons
+              name="favorite"
+              size={22}
+              color={theme.colors.danger}
+            />
+          </Card>
+        ))}
+      </View>
+    </Screen>
+  );
+}
+
+export function NotificationSettingsReferenceScreen() {
+  const rows = [
+    { title: "공지 알림", desc: "교회 공지와 앱 안내" },
+    { title: "나눔 댓글", desc: "내 나눔 게시글 댓글" },
+    { title: "소모임 공지", desc: "참여 중인 소모임 새 공지" },
+    { title: "기도방 알림", desc: "새 기도제목과 응답" },
+  ];
+
+  return (
+    <Screen>
+      <TopBar title="알림 설정" back onBack={() => router.back()} />
+      <Card style={styles.menuCard}>
+        {rows.map((row, index) => (
+          <View key={row.title} style={styles.settingRow}>
+            <View style={styles.flex}>
+              <Text style={styles.menuTitle}>{row.title}</Text>
+              <Text style={styles.metaText}>{row.desc}</Text>
+            </View>
+            <View
+              style={[
+                styles.switchTrack,
+                index === 1 ? styles.switchOff : null,
+              ]}
+            >
+              <View
+                style={[
+                  styles.switchKnob,
+                  index === 1 ? styles.switchKnobOff : null,
+                ]}
+              />
+            </View>
+          </View>
+        ))}
+      </Card>
+      <Card style={styles.warningCard}>
+        <Text style={styles.warningText}>
+          거래 채팅 알림은 chat/v2 범위라 v1에서는 표시하지 않습니다.
+        </Text>
+      </Card>
+    </Screen>
+  );
+}
+
+export function SupportReferenceScreen() {
+  return (
+    <Screen>
+      <TopBar title="고객센터" back onBack={() => router.back()} />
+      <Card style={styles.supportHero}>
+        <MaterialIcons
+          name="support-agent"
+          size={44}
+          color={theme.colors.primaryDeep}
+        />
+        <Text style={styles.displayTitle}>무엇을 도와드릴까요?</Text>
+        <Text style={styles.bodyText}>
+          앱 이용 중 불편한 점이나 문의사항을 남겨주세요.
+        </Text>
+      </Card>
+      <Card style={styles.menuCard}>
+        <MenuRow icon="help-outline" title="자주 묻는 질문" value="" />
+        <MenuRow icon="mail-outline" title="1:1 문의" value="" />
+        <MenuRow icon="description" title="이용약관" value="" last />
+      </Card>
+    </Screen>
+  );
+}
+
+export function InquiryReferenceScreen() {
+  return (
+    <Screen>
+      <TopBar title="1:1 문의" back onBack={() => router.back()} />
+      <Card style={styles.stack}>
+        <TextField label="제목" value="앱 사용 문의" />
+        <TextField label="이메일" value="eunhye@example.com" />
+        <Textarea
+          label="문의 내용"
+          value="알림을 받지 못하고 있어 확인 부탁드립니다."
+        />
+        <Button>문의 보내기</Button>
+      </Card>
+    </Screen>
+  );
+}
+
+export function AccountReferenceScreen() {
+  return (
+    <Screen>
+      <TopBar title="계정 관리" back onBack={() => router.back()} />
+      <Card style={styles.rowCard}>
+        <Avatar name="김은혜" size={54} />
+        <View style={styles.flex}>
+          <Text style={styles.cardTitle}>김은혜</Text>
+          <Text style={styles.metaText}>ylmc2026 · 010-2345-6789</Text>
+        </View>
+      </Card>
+      <Card style={styles.menuCard}>
+        <MenuRow icon="lock-outline" title="비밀번호 변경" value="" />
+        <MenuRow icon="phone-iphone" title="연락처 변경" value="" />
+        <MenuRow icon="logout" title="로그아웃" value="" />
+        <MenuRow icon="person-remove" title="회원 탈퇴" value="" last />
+      </Card>
     </Screen>
   );
 }
@@ -1066,6 +1771,7 @@ export function WithdrawReferenceScreen({
         title="정말 탈퇴하시겠습니까?"
         message="이 작업은 되돌릴 수 없습니다."
         confirmText="탈퇴"
+        danger
         onCancel={() => undefined}
         onConfirm={() => undefined}
       />
@@ -1108,6 +1814,7 @@ export function UserProfileReferenceScreen({ variant }: { variant: string }) {
         visible={variant === "block-confirm"}
         title="사용자를 차단할까요?"
         confirmText="차단"
+        danger
         onCancel={() => undefined}
         onConfirm={() => undefined}
       />
@@ -1152,6 +1859,32 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+function SectionLabelText({ children }: { children: string }) {
+  return <Text style={styles.sectionLabelText}>{children}</Text>;
+}
+
+function dayBoxStyle(index: number) {
+  const colors = [
+    { backgroundColor: "#E0E9DE" },
+    { backgroundColor: "#F3E8D7" },
+    { backgroundColor: "#DDE5CD" },
+    { backgroundColor: "#E7D2CB" },
+  ];
+
+  return colors[index % colors.length];
+}
+
+function dayTextStyle(index: number) {
+  const colors = [
+    { color: "#6B8260" },
+    { color: "#9A7A3D" },
+    { color: "#506B47" },
+    { color: "#883C2D" },
+  ];
+
+  return colors[index % colors.length];
+}
+
 const legalParagraphs = [
   "열린문 커넥트는 성도 간 안전한 소통과 공동체 활동을 돕기 위한 서비스입니다.",
   "서비스 이용 중 타인을 배려하지 않는 게시글이나 활동은 제한될 수 있습니다.",
@@ -1171,6 +1904,17 @@ const marketCategories = [
   { key: "home", label: "가전·가구" },
   { key: "book", label: "도서·문구" },
   { key: "cloth", label: "의류·잡화" },
+] as const;
+
+const marketReportReasons = [
+  "금지 품목 게시",
+  "허위 물품 정보",
+  "금전 요구·암묵적 거래 유도",
+  "동일 물품 중복 게시",
+  "타인 사진 무단 도용",
+  "나눔을 빙자한 홍보·광고",
+  "욕설·혐오 표현",
+  "기타",
 ] as const;
 
 const marketPosts = [
@@ -1302,6 +2046,7 @@ const styles = StyleSheet.create({
   errorText: { color: theme.colors.danger, fontSize: 13, fontWeight: "700" },
   metaText: { color: theme.colors.inkMute, fontSize: 12, fontWeight: "700" },
   stack: { gap: 12 },
+  sheetField: { marginTop: 14 },
   segmentWrap: { paddingHorizontal: 18, paddingBottom: 8 },
   routeList: { gap: 12, paddingHorizontal: 18 },
   rowCard: { flexDirection: "row", alignItems: "center", gap: 12 },
@@ -1336,21 +2081,6 @@ const styles = StyleSheet.create({
     lineHeight: 30,
   },
   actions: { flexDirection: "row", gap: 8 },
-  floatButton: {
-    position: "absolute",
-    right: 16,
-    bottom: 94,
-    zIndex: 20,
-    height: 52,
-    borderRadius: theme.radius.pill,
-    paddingLeft: 16,
-    paddingRight: 18,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: theme.colors.primary,
-  },
-  floatButtonText: { color: "#fff", fontSize: 14, fontWeight: "900" },
   menuCard: { paddingVertical: 2 },
   menuRow: {
     minHeight: 58,
@@ -1389,4 +2119,219 @@ const styles = StyleSheet.create({
   },
   warningText: { color: "#7B3A2D", fontSize: 13, lineHeight: 20 },
   profileHero: { alignItems: "center", gap: 8, paddingVertical: 28 },
+  homeHeader: {
+    paddingHorizontal: 18,
+    paddingTop: 8,
+    paddingBottom: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  brandRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  logoMark: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.primary,
+  },
+  brandTitle: { color: theme.colors.ink, fontSize: 16, fontWeight: "900" },
+  headerActions: { flexDirection: "row", alignItems: "center", gap: 12 },
+  noticeDot: {
+    position: "absolute",
+    right: -1,
+    top: 2,
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: theme.colors.danger,
+  },
+  contentPad: { paddingHorizontal: 18, gap: 16 },
+  noticeBanner: {
+    minHeight: 76,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    backgroundColor: theme.colors.sage,
+    borderColor: "rgba(255,255,255,0.35)",
+  },
+  noticeIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.2)",
+  },
+  noticeEyebrow: {
+    color: "rgba(255,255,255,0.86)",
+    fontSize: 11,
+    fontWeight: "800",
+  },
+  noticeHeadline: { color: "#fff", fontSize: 15, fontWeight: "900" },
+  noticePagers: { flexDirection: "row", gap: 4 },
+  noticePager: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "rgba(255,255,255,0.42)",
+  },
+  noticePagerActive: { backgroundColor: "#fff" },
+  moreText: { color: theme.colors.inkMute, fontSize: 12, fontWeight: "700" },
+  rail: { flexDirection: "row", gap: 12, paddingHorizontal: 18 },
+  homeGroupCard: { width: 220, gap: 8 },
+  statsGrid: { flexDirection: "row", gap: 10, paddingHorizontal: 18 },
+  statPanel: { flex: 1, minHeight: 118, overflow: "hidden" },
+  statWarm: { backgroundColor: theme.colors.amberSoft },
+  statNumber: {
+    marginTop: 6,
+    color: theme.colors.primaryDeep,
+    fontSize: 28,
+    fontWeight: "900",
+  },
+  statUnit: { fontSize: 12, fontWeight: "800" },
+  warmText: { color: "#7A5E2C" },
+  smallRail: { flexDirection: "row", gap: 12, paddingHorizontal: 18 },
+  newGroupTile: { width: 150, gap: 8 },
+  inlineMeta: { flexDirection: "row", alignItems: "center", gap: 8 },
+  marketGrid: {
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  priceText: { marginTop: 2, color: theme.colors.ink, fontWeight: "900" },
+  primaryText: { color: theme.colors.primaryDeep, fontWeight: "900" },
+  prayerRoomCard: { flexDirection: "row", alignItems: "center", gap: 14 },
+  dayBox: {
+    width: 56,
+    height: 56,
+    borderRadius: theme.radius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dayText: { fontSize: 20, fontWeight: "900" },
+  smallDayBox: {
+    width: 44,
+    height: 44,
+    borderRadius: theme.radius.sm,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  smallDayText: { fontSize: 17, fontWeight: "900" },
+  detailMetaRow: {
+    paddingHorizontal: 18,
+    paddingBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  prayerCard: { gap: 12 },
+  faded: { opacity: 0.58 },
+  authorRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  studyCourseCard: { gap: 8, overflow: "hidden" },
+  studyOrb: {
+    position: "absolute",
+    right: -10,
+    top: -10,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    opacity: 0.72,
+  },
+  progressRow: {
+    marginTop: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  progressTrack: {
+    flex: 1,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "rgba(30,41,32,0.08)",
+    overflow: "hidden",
+  },
+  progressBar: {
+    height: "100%",
+    borderRadius: 4,
+    backgroundColor: theme.colors.primary,
+  },
+  progressCard: {
+    gap: 12,
+    backgroundColor: "#F4F8EE",
+    borderColor: "rgba(91,122,176,0.12)",
+  },
+  spreadRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  statValue: {
+    color: theme.colors.primaryDeep,
+    fontSize: 20,
+    fontWeight: "900",
+  },
+  miniStat: { flex: 1, backgroundColor: "rgba(255,255,255,0.65)" },
+  stepCircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(30,41,32,0.05)",
+  },
+  stepDone: { backgroundColor: theme.colors.primarySoft },
+  stepCurrent: { backgroundColor: theme.colors.primary },
+  stepText: {
+    color: theme.colors.primaryDeep,
+    fontSize: 11,
+    fontWeight: "900",
+  },
+  stepTextCurrent: { color: "#fff" },
+  bottomActions: { flexDirection: "row", gap: 8 },
+  myProfileCard: { flexDirection: "row", alignItems: "center", gap: 16 },
+  profileName: { color: theme.colors.ink, fontSize: 17, fontWeight: "900" },
+  sectionLabelText: {
+    marginTop: 6,
+    color: theme.colors.inkMute,
+    fontSize: 12,
+    fontWeight: "900",
+  },
+  versionText: {
+    paddingVertical: 20,
+    textAlign: "center",
+    color: theme.colors.inkHint,
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  settingRow: {
+    minHeight: 70,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
+  },
+  switchTrack: {
+    width: 46,
+    height: 28,
+    borderRadius: 14,
+    padding: 3,
+    alignItems: "flex-end",
+    backgroundColor: theme.colors.primary,
+  },
+  switchOff: {
+    alignItems: "flex-start",
+    backgroundColor: "rgba(30,41,32,0.12)",
+  },
+  switchKnob: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "#fff",
+  },
+  switchKnobOff: { backgroundColor: theme.colors.surface },
+  supportHero: { alignItems: "center", gap: 10, paddingVertical: 28 },
 });

@@ -77,7 +77,7 @@ Maestro E2E smoke:
 npm run test:e2e:smoke
 ```
 
-Maestro smoke는 `com.ylmc.connect.dev` development build가 설치된 iOS Simulator 또는 Android Emulator에서 실행합니다. `test:e2e:smoke`는 Android Emulator 감지 시 로컬 Metro는 `http://localhost:8081/status`, Dev Client URL은 `http://127.0.0.1:8081` + `adb reverse` 기준으로 확인합니다. 그 외 기기는 LAN host를 사용합니다. Dev Client deep link를 열고 React Native `testID` 기반으로 홈, 나눔, 소모임, 삶공부, 중보기도, MY 탭 진입을 확인합니다. 다른 host/port가 필요하면 `EXPO_DEV_CLIENT_HOST`, `EXPO_DEV_CLIENT_PORT`, `EXPO_DEV_CLIENT_METRO_URL`, `EXPO_DEV_CLIENT_TARGET_METRO_URL`, `EXPO_DEV_CLIENT_URL` 환경변수로 덮어씁니다.
+Maestro smoke는 `com.ylmc.connect.dev` development build가 설치된 iOS Simulator 또는 Android Emulator에서 실행합니다. `test:e2e:smoke`는 Android Emulator 감지 시 로컬 Metro는 `http://localhost:8081/status`, Dev Client URL은 `http://127.0.0.1:8081` + `adb reverse` 기준으로 확인합니다. 그 외 기기는 LAN host를 사용합니다. Android Emulator에서는 스크립트가 ADB로 Dev Client deep link를 먼저 열고, Maestro 플로우가 Dev Client 안내 메뉴를 닫은 뒤 React Native `testID` 기반으로 홈, 나눔, 소모임, 삶공부, 중보기도, MY 탭 진입을 확인합니다. 다른 host/port가 필요하면 `EXPO_DEV_CLIENT_HOST`, `EXPO_DEV_CLIENT_PORT`, `EXPO_DEV_CLIENT_METRO_URL`, `EXPO_DEV_CLIENT_TARGET_METRO_URL`, `EXPO_DEV_CLIENT_URL` 환경변수로 덮어씁니다.
 
 현재 로컬 환경에는 Maestro CLI `2.6.0`을 Homebrew로 설치했고, Android Emulator `Medium_Phone_API_36.1`에서 `npm run test:e2e:smoke` 통과를 확인했습니다. 새 환경에서는 Java 17+와 Xcode Command Line Tools를 확인한 뒤 다음 중 하나로 Maestro를 설치합니다:
 
@@ -96,6 +96,15 @@ npm run validate:full
 `validate:full`은 `validate`, Dev Client Metro smoke, Maestro smoke를 순서대로 실행합니다. 로컬에 Maestro CLI나 development build가 없으면 E2E 단계는 실패하므로, 먼저 `npm run ios:dev-client` 또는 `npm run android:dev-client`로 dev build를 설치합니다.
 
 무거운 모바일 E2E는 일반 PR CI와 분리되어 있으며, `.github/workflows/e2e-smoke.yml`에서 수동 실행을 기본값으로 둡니다. release/nightly 실행은 `E2E_SMOKE_ENABLED=true` repo variable과 Dev Client 설치가 가능한 전용 러너가 준비된 뒤 활성화합니다.
+
+디자인 캡처/비교:
+
+```bash
+npm run test:visual:capture
+npm run test:visual:compare
+```
+
+`test:visual:capture`는 `/Users/mingulee/Downloads/열린문커넥트.zip`에서 정리한 110개 JSX 화면 inventory를 Android Dev Client route로 열어 앱 스크린샷을 저장합니다. 일부 화면만 다시 찍을 때는 `YLMC_CAPTURE_INDEXES=29,30`처럼 지정할 수 있고, stale route를 줄이려면 `YLMC_CAPTURE_RESET_EACH_ROUTE=1 YLMC_CAPTURE_ROUTE_OPEN_REPEATS=2`를 함께 사용합니다. `test:visual:compare`는 원본 PNG와 앱 PNG를 비교하되, 원본 PNG가 단색 빈 화면이면 report에 `originalFlat=yes`로 표시합니다. 이런 항목은 pixel diff보다 JSX 소스와 앱 캡처를 직접 비교합니다.
 
 ## 문서 지도
 

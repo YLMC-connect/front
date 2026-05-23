@@ -56,6 +56,8 @@ function prepareAndroidEmulatorNetwork() {
     return;
   }
 
+  console.log("Preparing Android emulator network.");
+
   try {
     execFileSync("adb", ["reverse", `tcp:${port}`, `tcp:${port}`], {
       stdio: "ignore",
@@ -70,6 +72,8 @@ function prepareAndroidAppState() {
     return;
   }
 
+  console.log(`Preparing Android app state: ${packageName}`);
+
   for (const args of [
     ["shell", "input", "keyevent", "KEYCODE_WAKEUP"],
     ["shell", "wm", "dismiss-keyguard"],
@@ -82,6 +86,31 @@ function prepareAndroidAppState() {
       // Device preparation should not hide Maestro's own diagnostics.
     }
   }
+}
+
+async function launchAndroidDevClient() {
+  if (!hasAndroidEmulator) {
+    return;
+  }
+
+  console.log("Launching Expo Dev Client with ADB.");
+
+  execFileSync(
+    "adb",
+    [
+      "shell",
+      "am",
+      "start",
+      "-W",
+      "-a",
+      "android.intent.action.VIEW",
+      "-d",
+      devClientUrl,
+      packageName,
+    ],
+    { stdio: "ignore" },
+  );
+  await delay(1000);
 }
 
 async function isMetroRunning() {
@@ -204,6 +233,8 @@ async function main() {
     metro = spawnMetro();
     await waitForMetro();
   }
+
+  await launchAndroidDevClient();
 
   try {
     process.exitCode = await runMaestro();

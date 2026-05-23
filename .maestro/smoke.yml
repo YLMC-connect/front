@@ -3,19 +3,17 @@ name: YLMC Connect v1 smoke
 tags:
   - smoke
 ---
-- openLink: ${EXPO_DEV_CLIENT_URL}
+- extendedWaitUntil:
+    visible: Continue
+    timeout: 60000
+- tapOn: Continue
+- extendedWaitUntil:
+    visible: Reload
+    timeout: 60000
+- tapOn:
+    point: "90%,45%"
 - waitForAnimationToEnd:
     timeout: 5000
-- tapOn:
-    point: "50%,91%"
-- waitForAnimationToEnd:
-    timeout: 5000
-- tapOn:
-    point: "25%,54%"
-- waitForAnimationToEnd:
-    timeout: 5000
-- tapOn:
-    point: "50%,91%"
 - extendedWaitUntil:
     visible:
       id: tab-home

@@ -8,6 +8,7 @@ import {
   type DimensionValue,
   Modal,
   Pressable,
+  type PressableProps,
   ScrollView,
   StyleSheet,
   Text,
@@ -92,6 +93,34 @@ export function Card({
   style?: object;
 }) {
   return <View style={[styles.card, style]}>{children}</View>;
+}
+
+export function FloatingActionButton({
+  label,
+  icon = "add",
+  compact = false,
+  style,
+  ...pressableProps
+}: PressableProps & {
+  label?: string;
+  icon?: IconName;
+  compact?: boolean;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      {...pressableProps}
+      style={({ pressed }) => [
+        styles.fab,
+        compact ? styles.fabCompact : null,
+        pressed ? styles.pressed : null,
+        typeof style === "function" ? style({ pressed }) : style,
+      ]}
+    >
+      <MaterialIcons name={icon} size={20} color="#fff" />
+      {label ? <Text style={styles.fabText}>{label}</Text> : null}
+    </Pressable>
+  );
 }
 
 export function Badge({
@@ -461,6 +490,7 @@ export function ConfirmDialog({
   onCancel,
   onConfirm,
   confirmText = "확인",
+  danger = false,
 }: {
   visible: boolean;
   title: string;
@@ -468,6 +498,7 @@ export function ConfirmDialog({
   onCancel: () => void;
   onConfirm: () => void;
   confirmText?: string;
+  danger?: boolean;
 }) {
   return (
     <Modal
@@ -481,10 +512,23 @@ export function ConfirmDialog({
           <Text style={styles.dialogTitle}>{title}</Text>
           {message ? <Text style={styles.dialogText}>{message}</Text> : null}
           <View style={styles.dialogActions}>
-            <Button variant="soft" onPress={onCancel}>
-              취소
-            </Button>
-            <Button onPress={onConfirm}>{confirmText}</Button>
+            <Pressable
+              accessibilityRole="button"
+              onPress={onCancel}
+              style={[styles.dialogButton, styles.dialogCancelButton]}
+            >
+              <Text style={styles.dialogCancelText}>취소</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={onConfirm}
+              style={[
+                styles.dialogButton,
+                danger ? styles.dialogDangerButton : styles.dialogConfirmButton,
+              ]}
+            >
+              <Text style={styles.dialogConfirmText}>{confirmText}</Text>
+            </Pressable>
           </View>
         </View>
       </View>
@@ -496,11 +540,13 @@ export function BottomSheet({
   visible,
   title,
   children,
+  footer,
   onClose,
 }: {
   visible: boolean;
   title: string;
   children: ReactNode;
+  footer?: ReactNode;
   onClose: () => void;
 }) {
   return (
@@ -515,10 +561,120 @@ export function BottomSheet({
         <View style={styles.sheet}>
           <View style={styles.sheetHandle} />
           <Text style={styles.sheetTitle}>{title}</Text>
-          {children}
+          <View style={styles.sheetContent}>{children}</View>
+          {footer ? <View style={styles.sheetFooter}>{footer}</View> : null}
         </View>
       </View>
     </Modal>
+  );
+}
+
+export function RadioSheet({
+  visible,
+  title,
+  options,
+  value,
+  hint,
+  confirmText = "확인",
+  danger = false,
+  children,
+  onClose,
+  onConfirm,
+}: {
+  visible: boolean;
+  title: string;
+  options: readonly {
+    value: string;
+    label: string;
+    description?: string;
+    disabled?: boolean;
+  }[];
+  value: string;
+  hint?: string;
+  confirmText?: string;
+  danger?: boolean;
+  children?: ReactNode;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <BottomSheet
+      visible={visible}
+      title={title}
+      onClose={onClose}
+      footer={
+        <>
+          <View style={styles.sheetAction}>
+            <Button variant="soft" onPress={onClose}>
+              취소
+            </Button>
+          </View>
+          <View style={styles.sheetAction}>
+            <Button variant={danger ? "danger" : "primary"} onPress={onConfirm}>
+              {confirmText}
+            </Button>
+          </View>
+        </>
+      }
+    >
+      <View style={styles.radioList}>
+        {options.map((option, index) => {
+          const selected = option.value === value;
+          return (
+            <View
+              key={option.value}
+              style={[
+                styles.radioOption,
+                index === options.length - 1 ? styles.radioOptionLast : null,
+                option.disabled ? styles.radioOptionDisabled : null,
+              ]}
+            >
+              <View
+                style={[
+                  styles.radioMark,
+                  selected ? styles.radioMarkSelected : null,
+                ]}
+              >
+                {selected ? <View style={styles.radioDot} /> : null}
+              </View>
+              <View style={styles.radioTextWrap}>
+                <Text
+                  style={[
+                    styles.radioLabel,
+                    selected ? styles.radioLabelSelected : null,
+                  ]}
+                >
+                  {option.label}
+                </Text>
+                {option.description ? (
+                  <Text style={styles.radioDescription}>
+                    {option.description}
+                  </Text>
+                ) : null}
+              </View>
+              {option.disabled ? (
+                <Text style={styles.radioMeta}>현재 상태</Text>
+              ) : null}
+            </View>
+          );
+        })}
+      </View>
+      {children}
+      {hint ? (
+        <View
+          style={[styles.radioHint, danger ? styles.radioHintDanger : null]}
+        >
+          <Text
+            style={[
+              styles.radioHintText,
+              danger ? styles.radioHintDangerText : null,
+            ]}
+          >
+            {hint}
+          </Text>
+        </View>
+      ) : null}
+    </BottomSheet>
   );
 }
 
@@ -703,6 +859,33 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
+  fab: {
+    position: "absolute",
+    right: 16,
+    bottom: 94,
+    zIndex: 20,
+    minWidth: 54,
+    height: 52,
+    borderRadius: theme.radius.pill,
+    paddingLeft: 16,
+    paddingRight: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: theme.colors.primary,
+    shadowColor: "rgba(91,122,176,0.5)",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.24,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  fabCompact: {
+    width: 54,
+    paddingLeft: 0,
+    paddingRight: 0,
+  },
+  fabText: { color: "#fff", fontSize: 14, fontWeight: "800" },
   badge: {
     alignSelf: "flex-start",
     borderRadius: theme.radius.pill,
@@ -896,30 +1079,56 @@ const styles = StyleSheet.create({
   toastText: { color: "#fff", fontWeight: "700", flex: 1 },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(20,22,28,0.45)",
+    backgroundColor: "rgba(20,22,28,0.50)",
     alignItems: "center",
     justifyContent: "center",
     padding: 28,
   },
   dialog: {
     width: "100%",
-    borderRadius: theme.radius.lg,
-    padding: 22,
+    maxWidth: 280,
+    borderRadius: 18,
+    paddingTop: 24,
+    paddingHorizontal: 22,
+    paddingBottom: 16,
     backgroundColor: theme.colors.surface,
-    gap: 14,
   },
   dialogTitle: {
     textAlign: "center",
     color: theme.colors.ink,
-    fontWeight: "800",
-    fontSize: 17,
+    fontWeight: "700",
+    fontSize: 16,
+    lineHeight: 22,
   },
   dialogText: {
+    marginTop: 8,
     textAlign: "center",
     color: theme.colors.inkSoft,
-    lineHeight: 20,
+    fontSize: 14,
+    lineHeight: 21,
   },
-  dialogActions: { flexDirection: "row", gap: 8 },
+  dialogActions: {
+    alignSelf: "stretch",
+    marginTop: 22,
+    flexDirection: "row",
+    gap: 8,
+  },
+  dialogButton: {
+    flex: 1,
+    height: 44,
+    borderRadius: theme.radius.sm,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dialogCancelButton: { backgroundColor: theme.colors.surface2 },
+  dialogConfirmButton: { backgroundColor: theme.colors.primary },
+  dialogDangerButton: { backgroundColor: theme.colors.danger },
+  dialogCancelText: {
+    color: theme.colors.inkSoft,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  dialogConfirmText: { color: "#fff", fontSize: 14, fontWeight: "700" },
   sheetOverlay: {
     flex: 1,
     justifyContent: "flex-end",
@@ -940,6 +1149,68 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   sheetTitle: { fontSize: 18, fontWeight: "800", color: theme.colors.ink },
+  sheetContent: { gap: 12 },
+  sheetFooter: {
+    paddingTop: 4,
+    flexDirection: "row",
+    gap: 8,
+  },
+  sheetAction: { flex: 1 },
+  radioList: {},
+  radioOption: {
+    minHeight: 48,
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  radioOptionLast: { borderBottomWidth: 0 },
+  radioOptionDisabled: { opacity: 0.45 },
+  radioMark: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    borderColor: theme.colors.lineStrong,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioMarkSelected: {
+    borderWidth: 0,
+    backgroundColor: theme.colors.primary,
+  },
+  radioDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#fff",
+  },
+  radioTextWrap: { flex: 1, minWidth: 0 },
+  radioLabel: { color: theme.colors.ink, fontSize: 15, fontWeight: "600" },
+  radioLabelSelected: { fontWeight: "800" },
+  radioDescription: { color: theme.colors.inkMute, marginTop: 2, fontSize: 12 },
+  radioMeta: { color: theme.colors.inkMute, fontSize: 12 },
+  radioHint: {
+    marginTop: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.surface,
+  },
+  radioHintText: {
+    color: theme.colors.inkMute,
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  radioHintDanger: {
+    backgroundColor: "rgba(217,131,92,0.10)",
+  },
+  radioHintDangerText: {
+    color: "#A8643F",
+  },
   imagePickerWrap: { gap: 10 },
   imagePicker: {
     minHeight: 104,

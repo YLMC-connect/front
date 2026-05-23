@@ -12,6 +12,7 @@
 - 삶공부 타입, mock 데이터, service, TanStack Query hook 구현 — `src/types/lifeStudy.ts`, `src/mocks/lifeStudy.ts`, `src/services/lifeStudyService.ts`, `src/hooks/useLifeStudyCourses.ts`
 - 과정 상태 필터, 신청/취소 mutation, 진도/커리큘럼/수강 이력 UI 구현
 - 삶공부 목록 1차 디자인 정렬 — ZIP prototype 기준 신청가능·진행중 카드, progress bar, 마감·수료 row list 적용
+- ZIP 원본 삶공부 신청/수강 내역 reference 라우트 추가 — `app/(tabs)/life-study/apply.tsx`, `app/(tabs)/life-study/history.tsx`
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -19,6 +20,8 @@
 |---|---|
 | `app/(tabs)/life-study/index.tsx` | 삶공부 목록, 상태 필터, 내 수강 이력 |
 | `app/(tabs)/life-study/[id].tsx` | 삶공부 상세, 신청/취소, 진도/커리큘럼 |
+| `app/(tabs)/life-study/apply.tsx` | ZIP 원본 수강 신청 reference 화면 |
+| `app/(tabs)/life-study/history.tsx` | ZIP 원본 수강 내역 reference 화면 |
 | `src/components/lifeStudy/LifeStudyCourseCard.tsx` | 삶공부 과정 카드 |
 | `src/services/lifeStudyService.ts` | 삶공부 mock service |
 | `src/hooks/useLifeStudyCourses.ts` | 삶공부 query/mutation hook |
@@ -30,6 +33,7 @@
 `LifeStudyCourse`는 `status`, `sessions`, `currentSession`, `capacity`, `enrolledCount`, `isEnrolled`, `isCompleted`, `curriculum`을 포함합니다. `LifeStudyHistory`는 수강 회차와 수료증 발급 여부를 포함합니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-23) **ZIP 삶공부 보조 화면도 route-accessible** — 목록/상세 외 신청 확인과 수강 내역 화면을 별도 reference 라우트로 둡니다.
 - (2026-05-23) **삶공부 list는 진행 카드와 이력 row로 분리** — 상태 필터는 유지하되, 진행/신청 과정은 강조 카드로, 마감·수료 이력은 compact row로 보여줍니다.
 - (2026-05-22) **삶공부는 Notion v1 범위** — MVP가 아니라 v1 mock-first 화면/서비스까지 구현합니다.
 - (2026-05-22) **실제 과정명은 mock/API 데이터** — 문서에 고정하지 않고 service 데이터로 표시합니다.

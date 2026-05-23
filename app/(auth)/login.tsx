@@ -1,10 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, router } from "expo-router";
+import { Link, router, useLocalSearchParams } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { StyleSheet, Text, View } from "react-native";
 import { z } from "zod";
 import { Screen } from "../../src/components/layout/Screen";
-import { Button, TextField } from "../../src/components/ui";
+import { Button, TextField, Toast } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { useAuth } from "../../src/hooks/useAuth";
 
@@ -16,6 +16,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function LoginScreen() {
+  const params = useLocalSearchParams<{ variant?: string }>();
   const { login } = useAuth();
   const {
     control,
@@ -70,10 +71,15 @@ export default function LoginScreen() {
             />
           )}
         />
-        {login.error ? (
-          <Text style={styles.error}>{login.error.message}</Text>
+        {login.error || params.variant === "error" ? (
+          <Text style={styles.error}>
+            {login.error?.message ?? "아이디 또는 비밀번호를 확인해주세요."}
+          </Text>
         ) : null}
-        <Button onPress={onSubmit} loading={login.isPending}>
+        <Button
+          onPress={onSubmit}
+          loading={login.isPending || params.variant === "loading"}
+        >
           로그인
         </Button>
         <View style={styles.dividerRow}>
@@ -85,6 +91,13 @@ export default function LoginScreen() {
           회원가입
         </Link>
       </View>
+      <Toast
+        message={
+          params.variant === "toast"
+            ? "네트워크가 불안정합니다. 잠시 후 다시 시도해주세요."
+            : ""
+        }
+      />
       <Text style={styles.copy}>© 열린문교회</Text>
     </Screen>
   );

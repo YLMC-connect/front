@@ -19,6 +19,7 @@
 - 자동 테스트 게이트 추가 — `npm run validate`, Jest/RNTL smoke, Dev Client Metro smoke, Maestro v1 탭 E2E smoke
 - Android Emulator 기반 Maestro smoke 실제 검증 — `maestro 2.6.0`, `Medium_Phone_API_36.1`, `com.ylmc.connect.dev`
 - `열린문커넥트.zip` 디자인 번역 1차 반영 — 홈 화면, 6탭 floating tab bar, 주요 v1 탭 목록 화면, 공통 `VisualThumb`/`VisualCover`, 카드/버튼/입력/칩 터치 영역 조정
+- `열린문커넥트.zip` 원본 화면 105개 라우트 매핑 — `variant` 기반 reference 화면으로 auth/home/market/group/prayer/study/me 전체 접근 경로 확보
 
 ---
 
@@ -36,6 +37,7 @@
 | `app/(tabs)/_layout.tsx` | Expo Router 6탭 layout와 custom floating tab bar |
 | `app/(tabs)/index.tsx` | 디자인 번역 기반 홈 화면 |
 | `src/components/ui/index.tsx` | Button, Card, Badge, form, state, modal, image picker 등 공통 UI |
+| `src/components/prototype/OriginalMockScreens.tsx` | ZIP 원본 화면 상태를 Expo RN에서 확인하기 위한 mock-first reference 화면 묶음 |
 | `src/constants/theme.ts` | `열린문커넥트.zip` 기준 디자인 토큰 |
 | `jest.setup.ts` | Jest mock 설정과 Expo Router/native module 테스트 어댑터 |
 | `src/test/renderWithClient.tsx` | TanStack Query 화면 테스트용 test wrapper |
@@ -49,6 +51,7 @@
 [../../PLAN.md](../../PLAN.md) “🗃 데이터 타입 설계 > 공통” 참조.
 
 ## 결정 사항 (최신 위)
+- (2026-05-23) **ZIP에 있는 화면은 모두 구현 대상으로 본다** — 제품 기본 플로우와 별개로, `/Users/mingulee/Downloads/열린문커넥트.zip`의 105개 화면/상태는 `variant` 라우트로 접근 가능해야 하며 누락 화면을 임의 제외하지 않습니다.
 - (2026-05-23) **디자인 ZIP은 RN 번역 기준으로 사용** — `열린문커넥트.zip`의 CSS/JSX를 직접 이식하지 않고, 색상·간격·카드·버튼·탭·폼 톤을 Expo React Native 컴포넌트로 번역합니다.
 - (2026-05-23) **탭 구조는 PLAN/Notion v1 기준 유지** — ZIP prototype은 `동행`으로 일부 기능을 묶은 5탭이지만, 현재 v1 범위는 홈/나눔/소모임/삶공부/중보기도/MY 6탭이므로 floating tab bar만 디자인 톤을 반영합니다.
 - (2026-05-22) **Codex 작업 규칙 SSOT** — Codex는 `AGENTS.md`를 기준으로 읽고, `CLAUDE.md`는 Claude Code 호환본으로 유지합니다. 문서 링크는 `AGENTS.md`를 우선 가리킵니다.

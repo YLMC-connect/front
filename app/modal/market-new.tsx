@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { StyleSheet, View } from "react-native";
 import { z } from "zod";
@@ -15,6 +15,10 @@ import {
 } from "../../src/components/ui";
 import { MARKET_CATEGORIES } from "../../src/constants/domainOptions";
 import { useCreateMarketItem } from "../../src/hooks/useMarketItems";
+import {
+  MarketCreateReferenceScreen,
+  variantOf,
+} from "../../src/components/prototype/OriginalMockScreens";
 import type { MarketCategory } from "../../src/types/market";
 
 const categories = MARKET_CATEGORIES.filter((item) => item.key !== "all") as {
@@ -34,6 +38,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function MarketNewModal() {
+  const params = useLocalSearchParams<{ variant?: string }>();
   const createMarketItem = useCreateMarketItem();
   const {
     control,
@@ -60,6 +65,10 @@ export default function MarketNewModal() {
         router.replace({ pathname: "/market/[id]", params: { id: item.id } }),
     });
   });
+
+  if (params.variant) {
+    return <MarketCreateReferenceScreen variant={variantOf(params.variant)} />;
+  }
 
   return (
     <Screen>

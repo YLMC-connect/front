@@ -18,6 +18,10 @@ import {
 import { MARKET_REPORT_REASONS } from "../../../src/constants/domainOptions";
 import { theme } from "../../../src/constants/theme";
 import {
+  MarketDetailReferenceScreen,
+  variantOf,
+} from "../../../src/components/prototype/OriginalMockScreens";
+import {
   useAddMarketComment,
   useMarketItem,
   useReportMarketItem,
@@ -27,7 +31,10 @@ import {
 import type { MarketStatus } from "../../../src/types/market";
 
 export default function MarketDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, variant } = useLocalSearchParams<{
+    id: string;
+    variant?: string;
+  }>();
   const itemId = id ?? "";
   const { data: item, isError } = useMarketItem(itemId);
   const updateStatus = useUpdateMarketStatus(itemId);
@@ -47,6 +54,10 @@ export default function MarketDetailScreen() {
         ? "mute"
         : "primary";
   }, [item]);
+
+  if (variant) {
+    return <MarketDetailReferenceScreen variant={variantOf(variant)} />;
+  }
 
   if (isError) {
     return (

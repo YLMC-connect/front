@@ -1,4 +1,4 @@
-import { Link } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -18,11 +18,16 @@ import {
 } from "../../../src/constants/domainOptions";
 import { theme } from "../../../src/constants/theme";
 import { useMarketItems } from "../../../src/hooks/useMarketItems";
+import {
+  MarketListReferenceScreen,
+  variantOf,
+} from "../../../src/components/prototype/OriginalMockScreens";
 import type { MarketCategory, MarketStatus } from "../../../src/types/market";
 
 type StatusFilter = MarketStatus | "all";
 
 export default function MarketScreen() {
+  const params = useLocalSearchParams<{ variant?: string }>();
   const [category, setCategory] = useState<MarketCategory>("all");
   const [status, setStatus] = useState<StatusFilter>("sharing");
   const [keyword, setKeyword] = useState("");
@@ -42,6 +47,10 @@ export default function MarketScreen() {
       ].some((value) => value.toLowerCase().includes(normalizedKeyword));
     return matchesStatus && matchesKeyword;
   });
+
+  if (params.variant) {
+    return <MarketListReferenceScreen variant={variantOf(params.variant)} />;
+  }
 
   return (
     <Screen padded={false}>

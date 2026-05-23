@@ -1,4 +1,4 @@
-import { Link } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -18,11 +18,16 @@ import {
 } from "../../../src/constants/domainOptions";
 import { theme } from "../../../src/constants/theme";
 import { useGroups } from "../../../src/hooks/useGroups";
+import {
+  GroupListReferenceScreen,
+  variantOf,
+} from "../../../src/components/prototype/OriginalMockScreens";
 import type { GroupCategory } from "../../../src/types/group";
 
 type StatusFilter = "all" | "open" | "joined" | "favorite";
 
 export default function GroupScreen() {
+  const params = useLocalSearchParams<{ variant?: string }>();
   const [category, setCategory] = useState<GroupCategory>("all");
   const [status, setStatus] = useState<StatusFilter>("all");
   const [keyword, setKeyword] = useState("");
@@ -46,6 +51,10 @@ export default function GroupScreen() {
       ].some((value) => value.toLowerCase().includes(normalizedKeyword));
     return matchesStatus && matchesKeyword;
   });
+
+  if (params.variant) {
+    return <GroupListReferenceScreen variant={variantOf(params.variant)} />;
+  }
 
   return (
     <Screen padded={false}>

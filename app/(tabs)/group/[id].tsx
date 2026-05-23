@@ -17,6 +17,10 @@ import {
   TopBar,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import {
+  GroupDetailReferenceScreen,
+  variantOf,
+} from "../../../src/components/prototype/OriginalMockScreens";
 import { useAuth } from "../../../src/hooks/useAuth";
 import {
   useAddGroupNotice,
@@ -28,7 +32,10 @@ import {
 } from "../../../src/hooks/useGroups";
 
 export default function GroupDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, variant } = useLocalSearchParams<{
+    id: string;
+    variant?: string;
+  }>();
   const groupId = id ?? "";
   const { currentUser } = useAuth();
   const { data: group, isError } = useGroup(groupId);
@@ -41,6 +48,10 @@ export default function GroupDetailScreen() {
   const [noticeTitle, setNoticeTitle] = useState("");
   const [noticeContent, setNoticeContent] = useState("");
   const [toast, setToast] = useState("");
+
+  if (variant) {
+    return <GroupDetailReferenceScreen variant={variantOf(variant)} />;
+  }
 
   if (isError)
     return (

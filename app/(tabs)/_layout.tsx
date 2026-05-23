@@ -55,8 +55,24 @@ export default function TabsLayout() {
       />
       <Tabs.Screen name="market/[id]" options={{ href: null }} />
       <Tabs.Screen name="group/[id]" options={{ href: null }} />
+      <Tabs.Screen name="group/notices" options={{ href: null }} />
+      <Tabs.Screen name="group/members" options={{ href: null }} />
       <Tabs.Screen name="life-study/[id]" options={{ href: null }} />
+      <Tabs.Screen name="life-study/apply" options={{ href: null }} />
+      <Tabs.Screen name="life-study/history" options={{ href: null }} />
       <Tabs.Screen name="prayer/[id]" options={{ href: null }} />
+      <Tabs.Screen name="prayer/apply" options={{ href: null }} />
+      <Tabs.Screen name="prayer/request" options={{ href: null }} />
+      <Tabs.Screen name="notifications" options={{ href: null }} />
+      <Tabs.Screen name="mypage/edit" options={{ href: null }} />
+      <Tabs.Screen name="mypage/activity" options={{ href: null }} />
+      <Tabs.Screen name="mypage/blocked" options={{ href: null }} />
+      <Tabs.Screen name="mypage/faq" options={{ href: null }} />
+      <Tabs.Screen name="mypage/terms" options={{ href: null }} />
+      <Tabs.Screen name="mypage/privacy" options={{ href: null }} />
+      <Tabs.Screen name="mypage/withdraw" options={{ href: null }} />
+      <Tabs.Screen name="mypage/user/[id]" options={{ href: null }} />
+      <Tabs.Screen name="profile/[id]" options={{ href: null }} />
     </Tabs>
   );
 }

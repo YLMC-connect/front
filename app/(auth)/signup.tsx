@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { StyleSheet, Text } from "react-native";
 import { z } from "zod";
@@ -23,7 +23,9 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function SignupScreen() {
+  const params = useLocalSearchParams<{ variant?: string }>();
   const { signup } = useAuth();
+  const variant = params.variant;
   const {
     control,
     handleSubmit,
@@ -56,7 +58,12 @@ export default function SignupScreen() {
               label="아이디"
               value={field.value}
               onChangeText={field.onChange}
-              error={errors.id?.message}
+              error={
+                errors.id?.message ??
+                (variant === "id-dup"
+                  ? "이미 사용 중인 아이디입니다."
+                  : undefined)
+              }
             />
           )}
         />
@@ -69,7 +76,12 @@ export default function SignupScreen() {
               value={field.value}
               onChangeText={field.onChange}
               secureTextEntry
-              error={errors.password?.message}
+              error={
+                errors.password?.message ??
+                (variant === "pw-error"
+                  ? "비밀번호는 8자 이상이며 영문/숫자를 포함해야 합니다."
+                  : undefined)
+              }
             />
           )}
         />
@@ -94,7 +106,14 @@ export default function SignupScreen() {
               value={field.value}
               onChangeText={field.onChange}
               keyboardType="phone-pad"
-              error={errors.phone?.message}
+              error={
+                errors.phone?.message ??
+                (variant === "phone-error"
+                  ? "연락처 형식이 올바르지 않습니다."
+                  : variant === "phone-dup"
+                    ? "이미 등록된 연락처입니다."
+                    : undefined)
+              }
             />
           )}
         />
@@ -114,7 +133,10 @@ export default function SignupScreen() {
         {signup.error ? (
           <Text style={styles.error}>{signup.error.message}</Text>
         ) : null}
-        <Button onPress={onSubmit} loading={signup.isPending}>
+        <Button
+          onPress={onSubmit}
+          loading={signup.isPending || variant === "loading"}
+        >
           가입 완료
         </Button>
       </Card>

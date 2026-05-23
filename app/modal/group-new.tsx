@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { StyleSheet, View } from "react-native";
 import { z } from "zod";
@@ -15,6 +15,10 @@ import {
 } from "../../src/components/ui";
 import { GROUP_CATEGORIES } from "../../src/constants/domainOptions";
 import { useCreateGroup } from "../../src/hooks/useGroups";
+import {
+  GroupCreateReferenceScreen,
+  variantOf,
+} from "../../src/components/prototype/OriginalMockScreens";
 import type { GroupCategory } from "../../src/types/group";
 
 const categories = GROUP_CATEGORIES.filter((item) => item.key !== "all") as {
@@ -48,6 +52,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function GroupNewModal() {
+  const params = useLocalSearchParams<{ variant?: string }>();
   const createGroup = useCreateGroup();
   const {
     control,
@@ -75,6 +80,10 @@ export default function GroupNewModal() {
         router.replace({ pathname: "/group/[id]", params: { id: group.id } }),
     });
   });
+
+  if (params.variant) {
+    return <GroupCreateReferenceScreen variant={variantOf(params.variant)} />;
+  }
 
   return (
     <Screen>

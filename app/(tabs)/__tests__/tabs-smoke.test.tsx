@@ -47,6 +47,7 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<MyPageScreen />);
 
     expect(screen.getByTestId("screen-mypage")).toBeTruthy();
-    expect(await screen.findByText("활동 관리")).toBeTruthy();
+    expect(await screen.findByText("내 활동")).toBeTruthy();
+    expect(await screen.findByText("회원 탈퇴")).toBeTruthy();
   });
 });

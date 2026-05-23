@@ -41,16 +41,18 @@ export default function HomeScreen() {
               color={theme.colors.inkSoft}
             />
           </Pressable>
-          <Pressable accessibilityRole="button" style={styles.headerIcon}>
-            <MaterialIcons
-              name="notifications-none"
-              size={22}
-              color={theme.colors.inkSoft}
-            />
-            {(data?.notificationCount ?? 0) > 0 ? (
-              <View style={styles.noticeDot} />
-            ) : null}
-          </Pressable>
+          <Link href="/notifications" asChild>
+            <Pressable accessibilityRole="button" style={styles.headerIcon}>
+              <MaterialIcons
+                name="notifications-none"
+                size={22}
+                color={theme.colors.inkSoft}
+              />
+              {(data?.notificationCount ?? 0) > 0 ? (
+                <View style={styles.noticeDot} />
+              ) : null}
+            </Pressable>
+          </Link>
         </View>
       </View>
 

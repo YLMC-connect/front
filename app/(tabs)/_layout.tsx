@@ -99,6 +99,13 @@ export default function TabsLayout() {
 
 function AppTabBar({ state, descriptors, navigation }: any) {
   const router = useRouter();
+  const currentRoute = state.routes[state.index];
+  const currentOptions = descriptors[currentRoute.key]?.options;
+
+  if (!currentOptions?.tabBarButtonTestID) {
+    return null;
+  }
+
   const routes = state.routes.filter((route: any) => {
     const options = descriptors[route.key]?.options;
     return options?.tabBarButtonTestID;

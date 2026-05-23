@@ -9,6 +9,10 @@ const withVariant = (path, variant) =>
   variant ? `${path}?variant=${encodeURIComponent(variant)}` : path;
 
 const routeFor = (screen) => {
+  if (screen.currentRoute || screen.routeProposal) {
+    return screen.currentRoute || screen.routeProposal;
+  }
+
   const { component, variant } = screen;
 
   switch (component) {

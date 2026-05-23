@@ -11,6 +11,7 @@
 - Mock 회원가입/로그인 화면 구현 — `app/(auth)/signup.tsx`, `app/(auth)/login.tsx`
 - ZIP 원본 auth 화면 라우트 보강 — splash, 가입 코드, 약관 동의/전문, 로그인/회원가입 상태 variant
 - 로그인 화면 1차 디자인 정렬 — ZIP prototype 기준 로고 hero, 카드 없는 폼, 큰 pill 버튼, 가입 CTA divider 적용
+- ZIP 110개 visual inventory 재검증에 포함 — auth reference 화면을 Dev Client capture/compare 대상에 유지
 - 인증 상태 저장소와 mock service 구현 — `src/store/authStore.ts`, `src/services/authService.ts`, `src/hooks/useAuth.ts`, `src/mocks/auth.ts`
 - 토큰 저장 유틸 골격 구현 — `src/lib/secureStore.ts`
 - Swagger 인증 API 연결을 위한 adapter 골격 구현 — `src/services/authAdapter.ts`

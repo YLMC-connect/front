@@ -16,6 +16,7 @@
 - 소모임 카드 cover fallback 디자인 정렬 — 대표 이미지가 없을 때 ZIP prototype 톤의 gradient cover placeholder 적용
 - 소모임 목록 1차 디자인 정렬 — ZIP prototype 기준 접힌 검색, 상태 segmented tabs, category chips, bottom-right 개설 FAB 적용
 - ZIP 원본 소모임 화면 29개 상태 매핑 — 목록/상세/개설/공지/멤버 관리 variant reference 라우트 연결
+- ZIP 110개 visual inventory 재검증에 포함 — 소모임 reference 화면을 Dev Client capture/compare 대상에 유지
 
 ## 주요 파일 (도메인 파일 지도)
 

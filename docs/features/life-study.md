@@ -13,6 +13,7 @@
 - 과정 상태 필터, 신청/취소 mutation, 진도/커리큘럼/수강 이력 UI 구현
 - 삶공부 목록 1차 디자인 정렬 — ZIP prototype 기준 신청가능·진행중 카드, progress bar, 마감·수료 row list 적용
 - ZIP 원본 삶공부 신청/수강 내역 reference 라우트 추가 — `app/(tabs)/life-study/apply.tsx`, `app/(tabs)/life-study/history.tsx`
+- ZIP 110개 visual inventory 재검증에 포함 — 삶공부 reference 화면을 Dev Client capture/compare 대상에 유지
 
 ## 주요 파일 (도메인 파일 지도)
 

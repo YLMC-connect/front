@@ -13,6 +13,7 @@
 - 요일 필터, 기도방 참여/나가기, 기도제목 등록, 기도 체크, 응답 기록 mock mutation 구현
 - 중보기도 목록 1차 디자인 정렬 — ZIP prototype 기준 요일 색상 박스, 내 기도모임/다른 기도모임 분리, 기도제목 FAB 적용
 - ZIP 원본 기도방 신청/기도요청 reference 라우트 추가 — `app/(tabs)/prayer/apply.tsx`, `app/(tabs)/prayer/request.tsx`
+- ZIP 110개 visual inventory 재검증에 포함 — 중보기도 reference 화면을 Dev Client capture/compare 대상에 유지
 
 ## 주요 파일 (도메인 파일 지도)
 

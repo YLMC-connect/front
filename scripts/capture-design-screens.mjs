@@ -130,6 +130,7 @@ const openUrl = (device, url) => {
     "android.intent.action.VIEW",
     "-d",
     url,
+    appId,
   ]);
 };
 

@@ -1,5 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { theme } from "../../src/constants/theme";
 
@@ -12,6 +12,18 @@ const icons: Record<string, IconName> = {
   "life-study/index": "menu-book",
   "prayer/index": "volunteer-activism",
   "mypage/index": "person",
+};
+
+const tabHrefs: Record<
+  string,
+  "/" | "/market" | "/group" | "/life-study" | "/prayer" | "/mypage"
+> = {
+  index: "/",
+  "market/index": "/market",
+  "group/index": "/group",
+  "life-study/index": "/life-study",
+  "prayer/index": "/prayer",
+  "mypage/index": "/mypage",
 };
 
 export default function TabsLayout() {
@@ -78,6 +90,7 @@ export default function TabsLayout() {
 }
 
 function AppTabBar({ state, descriptors, navigation }: any) {
+  const router = useRouter();
   const routes = state.routes.filter((route: any) => {
     const options = descriptors[route.key]?.options;
     return options?.tabBarButtonTestID;
@@ -100,7 +113,15 @@ function AppTabBar({ state, descriptors, navigation }: any) {
             accessibilityRole="tab"
             accessibilityState={focused ? { selected: true } : {}}
             testID={options.tabBarButtonTestID}
-            onPress={() => navigation.navigate(route.name)}
+            onPress={() => {
+              const href = tabHrefs[route.name];
+              if (href) {
+                router.replace(href);
+                return;
+              }
+
+              navigation.navigate(route.name);
+            }}
             style={[styles.tabItem, focused ? styles.tabItemActive : null]}
           >
             <MaterialIcons

@@ -632,7 +632,7 @@ queryClient.setDefaultOptions({
 - 최소 로컬/PR 게이트: `npm run validate` (`typecheck` + `lint` + `format:check` + `test`)
 - 커버리지 확인: `npm run test:coverage`
 - Dev Client Metro smoke: `npm run test:dev-client:smoke` (`expo start --dev-client` 부팅 후 `/status` 확인)
-- v1 E2E smoke: `npm run test:e2e:smoke`가 LAN Metro를 확인/부팅하고 deep link로 Dev Client를 열어, `.maestro/smoke.yml`에서 React Native `testID` 기준으로 홈/나눔/소모임/삶공부/중보기도/MY 탭 진입 확인
+- v1 E2E smoke: `npm run test:e2e:smoke`가 Metro를 확인/부팅하고 deep link로 Dev Client를 열어, `.maestro/smoke.yml`에서 React Native `testID` 기준으로 홈/나눔/소모임/삶공부/중보기도/MY 탭 진입 확인. Android Emulator에서는 host `localhost:8081` 상태 확인과 device `127.0.0.1:8081` + `adb reverse`를 기본값으로 사용
 - 전체 수동-자동 통합 게이트: `npm run validate:full`
 - Maestro E2E 실행 전제: Maestro CLI, Java 17+, Xcode Command Line Tools 또는 Android Emulator, `com.ylmc.connect.dev` development build 설치
 - 테스트 파일 위치: 대상 파일 옆 `__tests__/` 폴더에 co-location
@@ -786,3 +786,4 @@ queryClient.setDefaultOptions({
 | 2026-05-22 | MVP 기준 재정의 — Notion 최신 기획을 우선해 MVP를 인증·홈·나눔·소모임·MY·이미지 선택으로 확정. 중보기도·삶공부는 MVP에서 분리하고 실제 API·푸시·차단은 후속 TODO로 이동. `열린문커넥트.zip` 디자인 토큰을 앱 theme 기준으로 반영 |
 | 2026-05-22 | v1 기준 반영 — Notion 기능 범위와 IA를 우선해 삶공부·중보기도를 v1 범위로 확정하고, Expo Dev Client 기반 실행/검증 및 인증 API adapter 준비를 Phase 6 기준으로 반영 |
 | 2026-05-23 | 자동 테스트 체계 반영 — `validate`에 typecheck/lint/format/test를 포함하고, Jest/RNTL smoke, Dev Client Metro smoke, Maestro v1 탭 E2E smoke, ADR 0005를 Phase 1 검증 기준에 포함 |
+| 2026-05-23 | Maestro E2E 안정화 — Android Emulator에서는 Metro 상태 확인 URL과 Dev Client 전달 URL을 분리하고, Dev Client welcome sheet를 넘긴 뒤 v1 6탭 smoke를 `testID` 기준으로 검증 |

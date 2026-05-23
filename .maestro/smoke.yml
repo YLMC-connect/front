@@ -4,16 +4,18 @@ tags:
   - smoke
 ---
 - openLink: ${EXPO_DEV_CLIENT_URL}
-- runFlow:
-    when:
-      visible: "Continue"
-    commands:
-      - tapOn: "Continue"
-- runFlow:
-    when:
-      visible: "Reload"
-    commands:
-      - tapOn: "Reload"
+- waitForAnimationToEnd:
+    timeout: 5000
+- tapOn:
+    point: "50%,91%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- tapOn:
+    point: "25%,54%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- tapOn:
+    point: "50%,91%"
 - extendedWaitUntil:
     visible:
       id: tab-home

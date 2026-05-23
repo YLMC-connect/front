@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { networkInterfaces } from "node:os";
 import { resolve } from "node:path";
 
@@ -21,13 +22,67 @@ function getLanHost() {
 }
 
 const port = process.env.EXPO_DEV_CLIENT_PORT ?? "8081";
+const packageName = process.env.YLMC_ANDROID_PACKAGE ?? "com.ylmc.connect.dev";
+const hasAndroidEmulator = (() => {
+  if (process.env.EXPO_DEV_CLIENT_URL) {
+    return false;
+  }
+
+  try {
+    const output = execFileSync("adb", ["devices"], { encoding: "utf8" });
+    return output
+      .split("\n")
+      .some((line) => line.startsWith("emulator-") && line.includes("device"));
+  } catch {
+    return false;
+  }
+})();
 const metroUrl =
-  process.env.EXPO_DEV_CLIENT_METRO_URL ?? `http://${getLanHost()}:${port}`;
+  process.env.EXPO_DEV_CLIENT_METRO_URL ??
+  (hasAndroidEmulator
+    ? `http://localhost:${port}`
+    : `http://${getLanHost()}:${port}`);
+const devClientMetroUrl =
+  process.env.EXPO_DEV_CLIENT_TARGET_METRO_URL ??
+  (hasAndroidEmulator ? `http://127.0.0.1:${port}` : metroUrl);
 const devClientUrl =
   process.env.EXPO_DEV_CLIENT_URL ??
   `exp+ylmc-connect://expo-development-client/?url=${encodeURIComponent(
-    metroUrl,
+    devClientMetroUrl,
   )}`;
+
+function prepareAndroidEmulatorNetwork() {
+  if (!hasAndroidEmulator) {
+    return;
+  }
+
+  try {
+    execFileSync("adb", ["reverse", `tcp:${port}`, `tcp:${port}`], {
+      stdio: "ignore",
+    });
+  } catch {
+    // Physical devices use LAN URL; emulator reverse is a best-effort helper.
+  }
+}
+
+function prepareAndroidAppState() {
+  if (!hasAndroidEmulator) {
+    return;
+  }
+
+  for (const args of [
+    ["shell", "input", "keyevent", "KEYCODE_WAKEUP"],
+    ["shell", "wm", "dismiss-keyguard"],
+    ["shell", "am", "force-stop", packageName],
+    ["shell", "pm", "clear", packageName],
+  ]) {
+    try {
+      execFileSync("adb", args, { stdio: "ignore" });
+    } catch {
+      // Device preparation should not hide Maestro's own diagnostics.
+    }
+  }
+}
 
 async function isMetroRunning() {
   try {
@@ -73,14 +128,21 @@ function spawnMetro() {
 function runMaestro() {
   console.log(`Maestro smoke using Metro URL: ${metroUrl}`);
 
-  const maestro = spawn("maestro", ["test", ".maestro/smoke.yml"], {
-    stdio: "inherit",
-    env: {
-      ...process.env,
-      EXPO_DEV_CLIENT_METRO_URL: metroUrl,
-      EXPO_DEV_CLIENT_URL: devClientUrl,
+  const maestro = spawn(
+    "maestro",
+    [
+      "test",
+      "-e",
+      `EXPO_DEV_CLIENT_METRO_URL=${metroUrl}`,
+      "-e",
+      `EXPO_DEV_CLIENT_URL=${devClientUrl}`,
+      ".maestro/smoke.yml",
+    ],
+    {
+      stdio: "inherit",
+      env: process.env,
     },
-  });
+  );
 
   return new Promise((resolve, reject) => {
     maestro.on("error", reject);
@@ -135,6 +197,8 @@ async function stopMetro(metro) {
 
 async function main() {
   let metro;
+  prepareAndroidEmulatorNetwork();
+  prepareAndroidAppState();
 
   if (!(await isMetroRunning())) {
     metro = spawnMetro();

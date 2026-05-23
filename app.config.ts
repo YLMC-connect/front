@@ -40,7 +40,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     web: {
       bundler: "metro",
     },
-    plugins: ["expo-router", "expo-secure-store", "expo-dev-client"],
+    plugins: [
+      "expo-router",
+      "expo-secure-store",
+      ["expo-dev-client", { toolsButton: false }],
+    ],
     extra: {
       apiUrl: apiUrls[resolvedVariant],
       variant: resolvedVariant,

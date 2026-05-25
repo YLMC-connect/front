@@ -45,6 +45,7 @@ export function Button({
   const textStyle = [
     styles.buttonText,
     (variant === "soft" || variant === "ghost") && styles.buttonTextSoft,
+    variant === "danger" && styles.buttonTextInverse,
   ];
 
   return (
@@ -283,7 +284,7 @@ export function TextField({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={theme.colors.inkHint}
+        placeholderTextColor={theme.colors.inkMute}
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         style={[styles.input, error ? styles.inputError : null]}
@@ -314,7 +315,7 @@ export function Textarea({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={theme.colors.inkHint}
+        placeholderTextColor={theme.colors.inkMute}
         style={[
           styles.input,
           styles.textarea,
@@ -473,10 +474,16 @@ export function Skeleton({
   return <View style={[styles.skeleton, { height, width }]} />;
 }
 
-export function Toast({ message }: { message?: string }) {
+export function Toast({
+  message,
+  offset = 28,
+}: {
+  message?: string;
+  offset?: number;
+}) {
   if (!message) return null;
   return (
-    <View style={styles.toast}>
+    <View style={[styles.toast, { bottom: offset }]}>
       <MaterialIcons name="check" size={18} color="#fff" />
       <Text style={styles.toastText}>{message}</Text>
     </View>
@@ -490,6 +497,7 @@ export function ConfirmDialog({
   onCancel,
   onConfirm,
   confirmText = "확인",
+  cancelText = "취소",
   danger = false,
 }: {
   visible: boolean;
@@ -498,6 +506,7 @@ export function ConfirmDialog({
   onCancel: () => void;
   onConfirm: () => void;
   confirmText?: string;
+  cancelText?: string;
   danger?: boolean;
 }) {
   return (
@@ -517,7 +526,7 @@ export function ConfirmDialog({
               onPress={onCancel}
               style={[styles.dialogButton, styles.dialogCancelButton]}
             >
-              <Text style={styles.dialogCancelText}>취소</Text>
+              <Text style={styles.dialogCancelText}>{cancelText}</Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
@@ -833,18 +842,26 @@ const styles = StyleSheet.create({
   button: {
     minHeight: 52,
     borderRadius: theme.radius.pill,
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
     gap: 8,
   },
-  buttonPrimary: { backgroundColor: theme.colors.primary },
+  buttonPrimary: {
+    backgroundColor: theme.colors.primary,
+    ...theme.shadow.primary,
+  },
   buttonSoft: { backgroundColor: theme.colors.primarySoft },
   buttonGhost: { backgroundColor: "transparent" },
   buttonDanger: { backgroundColor: theme.colors.danger },
-  buttonText: { color: "#fff", fontWeight: "800", fontSize: 15 },
+  buttonText: {
+    color: theme.colors.white,
+    fontWeight: theme.fontWeight.bold,
+    fontSize: theme.fontSize.base,
+  },
   buttonTextSoft: { color: theme.colors.primaryDeep },
+  buttonTextInverse: { color: theme.colors.white },
   disabled: { opacity: 0.45 },
   pressed: { opacity: 0.75 },
   card: {
@@ -852,20 +869,16 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.lg,
     padding: 16,
     borderWidth: 1,
-    borderColor: theme.colors.line,
-    shadowColor: "rgba(20,30,18,0.18)",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
-    shadowRadius: 2,
-    elevation: 1,
+    borderColor: theme.colors.ring,
+    ...theme.shadow.card,
   },
   fab: {
     position: "absolute",
-    right: 16,
-    bottom: 94,
+    right: 18,
+    bottom: 86,
     zIndex: 20,
-    minWidth: 54,
-    height: 52,
+    minWidth: 56,
+    height: 56,
     borderRadius: theme.radius.pill,
     paddingLeft: 16,
     paddingRight: 18,
@@ -874,23 +887,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     backgroundColor: theme.colors.primary,
-    shadowColor: "rgba(91,122,176,0.5)",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.24,
-    shadowRadius: 16,
-    elevation: 8,
+    ...theme.shadow.fab,
   },
   fabCompact: {
-    width: 54,
+    width: 56,
     paddingLeft: 0,
     paddingRight: 0,
   },
-  fabText: { color: "#fff", fontSize: 14, fontWeight: "800" },
+  fabText: {
+    color: theme.colors.white,
+    fontSize: theme.fontSize.md,
+    fontWeight: theme.fontWeight.bold,
+  },
   badge: {
     alignSelf: "flex-start",
     borderRadius: theme.radius.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
   },
   badge_primary: { backgroundColor: theme.colors.primarySoft },
   badge_mute: { backgroundColor: theme.colors.surface2 },
@@ -899,27 +912,37 @@ const styles = StyleSheet.create({
   badge_success: { backgroundColor: "#EFF7EC" },
   badgeText: {
     color: theme.colors.primaryDeep,
-    fontSize: 12,
-    fontWeight: "800",
+    fontSize: theme.fontSize.xs,
+    fontWeight: theme.fontWeight.semibold,
+    lineHeight: theme.lineHeight.xs,
   },
   badgeTextMute: { color: theme.colors.inkMute },
   avatar: {
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: theme.colors.sage,
+    shadowColor: "rgba(20,30,18,0.10)",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.16,
+    shadowRadius: 2,
+    elevation: 1,
   },
-  avatarText: { color: "#fff", fontWeight: "800" },
+  avatarText: { color: theme.colors.white, fontWeight: theme.fontWeight.bold },
   field: { gap: 6 },
-  fieldLabel: { color: theme.colors.inkSoft, fontWeight: "700", fontSize: 13 },
+  fieldLabel: {
+    color: theme.colors.inkSoft,
+    fontWeight: theme.fontWeight.semibold,
+    fontSize: theme.fontSize.sm,
+  },
   input: {
-    minHeight: 52,
+    minHeight: 48,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: "rgba(30,41,32,0.12)",
-    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface2,
     paddingHorizontal: 16,
     color: theme.colors.ink,
-    fontSize: 15,
+    fontSize: theme.fontSize.md,
   },
   textarea: { minHeight: 120, paddingTop: 14 },
   inputError: { borderColor: theme.colors.danger, backgroundColor: "#FDF4F1" },
@@ -938,8 +961,12 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     borderColor: theme.colors.primary,
   },
-  chipText: { color: theme.colors.inkSoft, fontWeight: "700", fontSize: 13 },
-  chipTextSelected: { color: "#fff" },
+  chipText: {
+    color: theme.colors.inkSoft,
+    fontWeight: theme.fontWeight.semibold,
+    fontSize: theme.fontSize.sm,
+  },
+  chipTextSelected: { color: theme.colors.white },
   segmented: {
     flexDirection: "row",
     gap: 4,
@@ -954,9 +981,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: theme.radius.pill,
   },
-  segmentSelected: { backgroundColor: theme.colors.surface },
-  segmentText: { color: theme.colors.inkMute, fontWeight: "700" },
-  segmentTextSelected: { color: theme.colors.ink },
+  segmentSelected: {
+    backgroundColor: theme.colors.surface,
+    ...theme.shadow.card,
+  },
+  segmentText: {
+    color: theme.colors.inkMute,
+    fontWeight: theme.fontWeight.semibold,
+    fontSize: 13,
+  },
+  segmentTextSelected: {
+    color: theme.colors.ink,
+    fontWeight: theme.fontWeight.bold,
+  },
   topBar: {
     minHeight: 58,
     paddingHorizontal: 18,
@@ -968,17 +1005,24 @@ const styles = StyleSheet.create({
   },
   topTitleWrap: { flexDirection: "row", alignItems: "center", flex: 1, gap: 6 },
   topTextWrap: { flex: 1 },
-  topTitle: { color: theme.colors.ink, fontWeight: "800", fontSize: 20 },
-  topSubtitle: { color: theme.colors.inkMute, marginTop: 2, fontSize: 13 },
+  topTitle: {
+    color: theme.colors.ink,
+    fontWeight: theme.fontWeight.bold,
+    fontSize: 20,
+  },
+  topSubtitle: {
+    color: theme.colors.inkMute,
+    marginTop: 2,
+    fontSize: theme.fontSize.sm,
+    lineHeight: theme.lineHeight.sm,
+  },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: theme.colors.surface,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
+    backgroundColor: "rgba(20,30,18,0.05)",
   },
   visualThumb: {
     borderRadius: theme.radius.md,
@@ -1068,18 +1112,24 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 16,
     right: 16,
-    bottom: 24,
     flexDirection: "row",
     gap: 10,
     alignItems: "center",
-    backgroundColor: "rgba(28,38,30,0.94)",
+    backgroundColor: theme.colors.toast,
     borderRadius: theme.radius.md,
-    padding: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    ...theme.shadow.toast,
   },
-  toastText: { color: "#fff", fontWeight: "700", flex: 1 },
+  toastText: {
+    color: theme.colors.white,
+    fontWeight: theme.fontWeight.semibold,
+    flex: 1,
+    lineHeight: theme.lineHeight.sm,
+  },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(20,22,28,0.50)",
+    backgroundColor: theme.colors.overlay,
     alignItems: "center",
     justifyContent: "center",
     padding: 28,
@@ -1092,20 +1142,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingBottom: 16,
     backgroundColor: theme.colors.surface,
+    ...theme.shadow.dialog,
   },
   dialogTitle: {
     textAlign: "center",
     color: theme.colors.ink,
-    fontWeight: "700",
-    fontSize: 16,
-    lineHeight: 22,
+    fontWeight: theme.fontWeight.bold,
+    fontSize: theme.fontSize.lg,
+    lineHeight: theme.lineHeight.lg,
   },
   dialogText: {
     marginTop: 8,
     textAlign: "center",
     color: theme.colors.inkSoft,
-    fontSize: 14,
-    lineHeight: 21,
+    fontSize: theme.fontSize.sm,
+    lineHeight: theme.lineHeight.body,
   },
   dialogActions: {
     alignSelf: "stretch",
@@ -1125,21 +1176,28 @@ const styles = StyleSheet.create({
   dialogDangerButton: { backgroundColor: theme.colors.danger },
   dialogCancelText: {
     color: theme.colors.inkSoft,
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: theme.fontSize.md,
+    fontWeight: theme.fontWeight.semibold,
   },
-  dialogConfirmText: { color: "#fff", fontSize: 14, fontWeight: "700" },
+  dialogConfirmText: {
+    color: theme.colors.white,
+    fontSize: theme.fontSize.md,
+    fontWeight: theme.fontWeight.bold,
+  },
   sheetOverlay: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(20,22,28,0.35)",
+    backgroundColor: theme.colors.sheetOverlay,
   },
   sheet: {
     backgroundColor: theme.colors.bg,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    padding: 20,
-    gap: 14,
+    maxHeight: "85%",
+    paddingTop: 10,
+    paddingHorizontal: 0,
+    paddingBottom: 0,
+    ...theme.shadow.sheet,
   },
   sheetHandle: {
     width: 40,
@@ -1148,10 +1206,19 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.lineStrong,
     alignSelf: "center",
   },
-  sheetTitle: { fontSize: 18, fontWeight: "800", color: theme.colors.ink },
-  sheetContent: { gap: 12 },
+  sheetTitle: {
+    paddingHorizontal: 22,
+    paddingTop: 8,
+    paddingBottom: 16,
+    fontSize: 17,
+    fontWeight: theme.fontWeight.extrabold,
+    color: theme.colors.ink,
+  },
+  sheetContent: { gap: 12, paddingHorizontal: 22, paddingBottom: 8 },
   sheetFooter: {
-    paddingTop: 4,
+    paddingTop: 12,
+    paddingHorizontal: 16,
+    paddingBottom: 22,
     flexDirection: "row",
     gap: 8,
   },
@@ -1159,7 +1226,7 @@ const styles = StyleSheet.create({
   radioList: {},
   radioOption: {
     minHeight: 48,
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 4,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.line,
@@ -1189,8 +1256,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   radioTextWrap: { flex: 1, minWidth: 0 },
-  radioLabel: { color: theme.colors.ink, fontSize: 15, fontWeight: "600" },
-  radioLabelSelected: { fontWeight: "800" },
+  radioLabel: {
+    color: theme.colors.ink,
+    fontSize: 14.5,
+    fontWeight: theme.fontWeight.medium,
+  },
+  radioLabelSelected: { fontWeight: theme.fontWeight.bold },
   radioDescription: { color: theme.colors.inkMute, marginTop: 2, fontSize: 12 },
   radioMeta: { color: theme.colors.inkMute, fontSize: 12 },
   radioHint: {

@@ -7,7 +7,7 @@ type IconName = keyof typeof MaterialIcons.glyphMap;
 
 const icons: Record<string, IconName> = {
   index: "home",
-  "market/index": "redeem",
+  "market/index": "shopping-bag",
   "group/index": "groups",
   "faith/index": "favorite",
   "mypage/index": "person",
@@ -140,7 +140,7 @@ function AppTabBar({ state, descriptors, navigation }: any) {
           >
             <MaterialIcons
               name={icons[route.name] ?? "circle"}
-              size={focused ? 25 : 24}
+              size={20}
               color={color}
             />
             <Text style={[styles.tabLabel, { color }]}>{label}</Text>
@@ -160,16 +160,12 @@ const styles = StyleSheet.create({
     minHeight: 70,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.72)",
-    backgroundColor: "rgba(255,255,255,0.92)",
+    borderColor: theme.colors.glassBorder,
+    backgroundColor: theme.colors.glass,
     paddingHorizontal: 6,
     paddingVertical: 7,
     flexDirection: "row",
-    shadowColor: "rgba(20,30,18,0.22)",
-    shadowOffset: { width: 0, height: 14 },
-    shadowOpacity: 0.18,
-    shadowRadius: 18,
-    elevation: 8,
+    ...theme.shadow.float,
   },
   tabItem: {
     flex: 1,
@@ -182,14 +178,14 @@ const styles = StyleSheet.create({
   },
   tabItemActive: {
     backgroundColor: theme.colors.primary,
-    shadowColor: "rgba(91,122,176,0.55)",
+    shadowColor: "rgba(107,130,96,0.55)",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.22,
-    shadowRadius: 12,
+    shadowRadius: 10,
     elevation: 4,
   },
   tabLabel: {
-    fontSize: 11,
-    fontWeight: "800",
+    fontSize: 10,
+    fontWeight: "700",
   },
 });

@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.colors.bg },
   fill: { flex: 1 },
   content: { paddingBottom: 28 },
-  contentWithTab: { paddingBottom: 112 },
+  contentWithTab: { paddingBottom: 100 },
   padded: { paddingHorizontal: 18, gap: 16 },
   section: { gap: 10 },
   sectionHeader: {
@@ -69,5 +69,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  sectionTitle: { color: theme.colors.ink, fontWeight: "800", fontSize: 17 },
+  sectionTitle: {
+    color: theme.colors.ink,
+    fontWeight: theme.fontWeight.bold,
+    fontSize: 15,
+  },
 });

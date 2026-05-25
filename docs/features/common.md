@@ -25,6 +25,7 @@
 - Dev Client Maestro smoke 시작 상태 고정 — Dev Client 안내 메뉴는 조건부로 닫고 `ylmc-connect:///` 루트 딥링크를 연 뒤 v1 탭 smoke를 실행해 이전 캡처 route/dialog 상태에 영향받지 않도록 함
 - 숨김 상세 route 시각 기준 정렬 — 실제 pathname 기준으로 루트 탭에서만 floating tab bar를 표시하고, 상세/모달/확인 화면은 원본 ZIP처럼 하단 탭 여백을 제거
 - ZIP 5탭 정보구조 재정렬 — 루트 탭을 홈/나눔/소모임/동행/MY로 맞추고, 중보기도·삶공부 목록은 `동행` 탭의 segmented view로 배치
+- ZIP 공통 디자인 토큰/컴포넌트 정렬 — `app-tokens.css`, `halo-tokens.css`, 공통 JSX의 button/card/tab/form/dialog/sheet/toast 패턴을 `theme.ts`, 공통 UI, Screen, custom tab bar에 React Native 방식으로 반영
 
 ---
 
@@ -39,12 +40,12 @@
 | `scripts/gen-index.sh` | GitHub Issues 기반 도메인 상태표 재생성 |
 | `docs/features/common.md` | common 도메인 컨텍스트 |
 | `app/_layout.tsx` | QueryClient, SafeArea, Router Provider 루트 |
-| `app/(tabs)/_layout.tsx` | Expo Router 5탭 layout와 custom floating tab bar |
+| `app/(tabs)/_layout.tsx` | ZIP 기준 5탭 layout와 glass custom floating tab bar |
 | `app/(tabs)/faith/index.tsx` | ZIP 기준 `동행` 루트 탭. 중보기도/삶공부 segmented view를 전환 |
 | `app/(tabs)/index.tsx` | 디자인 번역 기반 홈 화면 |
-| `src/components/ui/index.tsx` | Button, Card, Badge, form, state, modal, image picker 등 공통 UI |
+| `src/components/ui/index.tsx` | ZIP 토큰 기준 Button, Card, Badge, Chip, form, modal/dialog, sheet, toast, FAB 등 공통 UI |
 | `src/components/prototype/OriginalMockScreens.tsx` | ZIP 원본 화면 상태를 Expo RN에서 확인하기 위한 mock-first reference 화면 묶음 |
-| `src/constants/theme.ts` | `열린문커넥트.zip` 기준 디자인 토큰 |
+| `src/constants/theme.ts` | `열린문커넥트.zip` 기준 color, radius, font, lineHeight, weight, shadow 디자인 토큰 |
 | `jest.setup.ts` | Jest mock 설정과 Expo Router/native module 테스트 어댑터 |
 | `src/test/renderWithClient.tsx` | TanStack Query 화면 테스트용 test wrapper |
 | `.github/workflows/ci.yml` | PR/push `npm ci` + `npm run validate` |
@@ -60,6 +61,7 @@
 [../../PLAN.md](../../PLAN.md) “🗃 데이터 타입 설계 > 공통” 참조.
 
 ## 결정 사항 (최신 위)
+- (2026-05-25) **공통 UI 토큰은 ZIP app-level tokens를 우선 번역한다** — `app-tokens.css`의 primary/surface/ink/line/radius/shadow/type, `halo-tokens.css`의 glass/elevation/type 기준을 `theme.ts`에 반영하고, Button/Card/Badge/Chip/SegmentedTabs/TopBar/Dialog/Sheet/Toast/FAB/Input은 화면별 땜질보다 공통 컴포넌트에서 먼저 맞춥니다. RN에서 직접 표현이 어려운 CSS blur/box-shadow는 `borderColor`, `shadow*`, `elevation` 조합으로 번역합니다.
 - (2026-05-25) **탭 구조는 ZIP 5탭 기준으로 한다** — 루트 탭은 홈/나눔/소모임/동행/MY이며, 중보기도와 삶공부는 ZIP처럼 `동행` 탭의 segmented view로 묶습니다. 기존 `/prayer`, `/life-study` route는 상세/딥링크/기존 캡처 호환을 위해 숨김 route로 유지합니다.
 - (2026-05-23) **시각 검증은 JSX + Dev Client 캡처를 함께 본다** — ZIP의 JSX를 화면 구조/컴포넌트 원천으로 보고, 스크린샷은 실제 렌더링 확인용으로 사용합니다. 원본 PNG가 단색 빈 화면이면 `compare` report의 `originalFlat`를 근거로 pixel diff를 품질 판단에서 제외하고 JSX 소스를 우선합니다.
 - (2026-05-23) **루트 탭과 숨김 route의 하단 여백을 분리한다** — Expo Router tabs state는 상세 route에서도 루트 탭을 유지할 수 있으므로, floating tab bar와 `Screen` 하단 padding은 `usePathname()`의 실제 path 기준으로 적용합니다.
@@ -86,6 +88,7 @@
 - Codex 기본 샌드박스에서는 `expo start --dev-client --port 8081 --localhost`가 `Starting project...` 이후 8081에 바인딩되지 않을 수 있습니다. 샌드박스 밖 로컬 권한에서는 `npm run test:dev-client:smoke`로 `/status` 응답을 확인했습니다.
 - Maestro CLI `2.6.0`은 Homebrew tap(`mobile-dev-inc/tap`)으로 설치되어 있으며, Android Emulator `Medium_Phone_API_36.1`에서 `npm run test:e2e:smoke` 통과를 확인했습니다. 현재 smoke는 ADB로 Dev Client deep link를 먼저 열고, Maestro가 Dev Client 메뉴를 닫은 뒤 홈/나눔/소모임/동행/MY 탭과 동행 내부 삶공부 segment 진입을 검증합니다.
 - 제공 ZIP 110개 화면은 Dev Client capture/compare까지 실행했고 현재 비교 리포트 기준 `missing=0`, `originalFlat=0`입니다. 남은 residual diff는 원본 캡처 프레임/디바이스 비율, 상태바/SafeArea, React Native 폰트·모달 번역 차이와 실제 UI 차이를 분리해 추적합니다.
+- 2026-05-25 공통 토큰 정렬 후 비교 리포트의 상위 residual은 `group-members`, 나눔 상세 상태/삭제/토스트, 소모임 신청/삭제/이관 확인, MY 탈퇴/로그아웃 confirm 계열입니다. 우선순위는 공통 modal/sheet/list geometry와 상세 화면 구조 차이 분리입니다.
 
 ## 의존성
 - GitHub Issues / PR description 기반 작업 추적 규칙에 의존합니다.

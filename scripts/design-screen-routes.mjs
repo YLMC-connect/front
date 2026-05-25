@@ -9,6 +9,14 @@ const withVariant = (path, variant) =>
   variant ? `${path}?variant=${encodeURIComponent(variant)}` : path;
 
 const routeFor = (screen) => {
+  if (screen.component === "ScreenPrayerList") {
+    return "/faith";
+  }
+
+  if (screen.component === "ScreenStudyList") {
+    return "/faith?section=study";
+  }
+
   if (screen.currentRoute || screen.routeProposal) {
     return screen.currentRoute || screen.routeProposal;
   }
@@ -49,7 +57,7 @@ const routeFor = (screen) => {
     case "ScreenGroupMembers":
       return withVariant("/group/members", variant);
     case "ScreenPrayerList":
-      return "/prayer";
+      return "/faith";
     case "ScreenPrayerDetail":
       return "/prayer/1";
     case "ScreenPrayerApply":
@@ -59,7 +67,7 @@ const routeFor = (screen) => {
     case "ScreenPrayerWrite":
       return "/modal/prayer-new";
     case "ScreenStudyList":
-      return "/life-study";
+      return "/faith?section=study";
     case "ScreenStudyDetail":
       return "/life-study/1";
     case "ScreenStudyApply":

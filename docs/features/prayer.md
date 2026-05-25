@@ -1,6 +1,6 @@
 # prayer (중보기도)
 
-> 마지막 갱신: 2026-05-23 | 담당 Phase: P5 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-05-25 | 담당 Phase: P5 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 성도가 요일별 기도방에 참여하고 기도제목을 등록/확인/응답 기록합니다.
@@ -14,12 +14,14 @@
 - 중보기도 목록 1차 디자인 정렬 — ZIP prototype 기준 요일 색상 박스, 내 기도모임/다른 기도모임 분리, 기도제목 FAB 적용
 - ZIP 원본 기도방 신청/기도요청 reference 라우트 추가 — `app/(tabs)/prayer/apply.tsx`, `app/(tabs)/prayer/request.tsx`
 - ZIP 110개 visual inventory 재검증에 포함 — 중보기도 reference 화면을 Dev Client capture/compare 대상에 유지
+- ZIP 5탭 정보구조 반영 — 중보기도 목록은 `app/(tabs)/faith/index.tsx`의 `동행` 탭 기본 segment로 진입
 
 ## 주요 파일 (도메인 파일 지도)
 
 | 경로 | 역할 |
 |---|---|
-| `app/(tabs)/prayer/index.tsx` | 중보기도 요일방 목록 |
+| `app/(tabs)/faith/index.tsx` | ZIP 기준 `동행` 탭에서 중보기도 기본 segment 제공 |
+| `app/(tabs)/prayer/index.tsx` | 숨김 direct route. 중보기도 요일방 reference 화면 |
 | `app/(tabs)/prayer/[id].tsx` | 기도방 상세, 기도제목, 응답 기록 |
 | `app/(tabs)/prayer/apply.tsx` | ZIP 원본 기도방 신청 reference 화면 |
 | `app/(tabs)/prayer/request.tsx` | ZIP 원본 기도요청 reference 화면 |
@@ -35,6 +37,7 @@
 `PrayerRoom`은 `weekday`, `leader`, `memberCount`, `isJoined`를 포함합니다. `PrayerTopic`은 `isAnonymous`, `prayerCount`, `hasPrayed`, `isAnswered`, `answer`를 포함합니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-25) **중보기도 루트 진입은 동행 탭 기본 segment로 둔다** — ZIP 기준 5탭 구조를 우선해 중보기도는 독립 하단 탭이 아니라 `동행` 탭의 기본 segment로 진입합니다. 기존 `/prayer` route는 상세/딥링크/캡처 호환용 숨김 route로 유지합니다.
 - (2026-05-23) **ZIP 중보기도 보조 화면도 route-accessible** — 기도방 신청과 기도요청 화면을 mock-first reference 라우트로 두고, 실제 승인/비성도 정책은 후속 API 결정에 맡깁니다.
 - (2026-05-23) **기도방 list는 내 방과 참여 가능 방을 분리** — 동일한 요일 필터 안에서 가입 중인 방과 다른 기도모임방을 나눠 보여주며, 작성 액션은 floating FAB로 둡니다.
 - (2026-05-22) **중보기도는 Notion v1 범위** — MVP가 아니라 v1 mock-first 화면/서비스까지 구현합니다.

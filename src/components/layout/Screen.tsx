@@ -4,14 +4,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "../../constants/theme";
 
-const rootTabPaths = new Set([
-  "/",
-  "/market",
-  "/group",
-  "/life-study",
-  "/prayer",
-  "/mypage",
-]);
+const rootTabPaths = new Set(["/", "/market", "/group", "/faith", "/mypage"]);
 
 export function Screen({
   children,

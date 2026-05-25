@@ -43,13 +43,15 @@ tags:
 - assertVisible:
     id: screen-group
 - tapOn:
-    id: tab-life-study
+    id: tab-faith
 - assertVisible:
-    id: screen-life-study
+    id: screen-faith
+- assertVisible: 중보기도
+- assertVisible: 삶공부
 - tapOn:
-    id: tab-prayer
+    text: 삶공부
 - assertVisible:
-    id: screen-prayer
+    text: 신청가능·진행중
 - tapOn:
     id: tab-mypage
 - assertVisible:

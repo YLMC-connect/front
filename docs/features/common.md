@@ -1,6 +1,6 @@
 # common (공통 인프라)
 
-> 마지막 갱신: 2026-05-23 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-05-25 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 프로젝트 전반에서 공유하는 협업 규칙, 문서 체계, 공통 런타임/타입/설정의 기준을 관리합니다.
@@ -19,11 +19,12 @@
 - 자동 테스트 게이트 추가 — `npm run validate`, Jest/RNTL smoke, Dev Client Metro smoke, Maestro v1 탭 E2E smoke
 - Android Emulator 기반 Maestro smoke 실제 검증 — `maestro 2.6.0`, `Medium_Phone_API_36.1`, `com.ylmc.connect.dev`
 - Android Emulator Maestro smoke 안정화 — emulator 감지 시 Metro 상태 확인은 `localhost`, Dev Client deep link는 `127.0.0.1` + `adb reverse`를 사용하고, Dev Client 안내 메뉴는 `.maestro/smoke.yml`에서 `Continue`/닫기 처리 후 앱 탭 검증으로 넘김
-- `열린문커넥트.zip` 디자인 번역 1차 반영 — 홈 화면, 6탭 floating tab bar, 주요 v1 탭 목록 화면, 공통 `VisualThumb`/`VisualCover`, 카드/버튼/입력/칩 터치 영역 조정
+- `열린문커넥트.zip` 디자인 번역 1차 반영 — 홈 화면, floating tab bar, 주요 v1 탭 목록 화면, 공통 `VisualThumb`/`VisualCover`, 카드/버튼/입력/칩 터치 영역 조정
 - `열린문커넥트.zip` 원본 화면 105개 라우트 매핑 — `variant` 기반 reference 화면으로 auth/home/market/group/prayer/study/me 전체 접근 경로 확보
 - `열린문커넥트.zip` 원본 화면 110개 기준 갱신 — JSX inventory를 기준으로 `my-wishlist`, `notif-settings`, `support`, `inquiry`, `account`까지 포함하고 Dev Client 앱 캡처/비교 스크립트를 추가
 - Dev Client Maestro smoke 시작 상태 고정 — Dev Client 안내 메뉴는 조건부로 닫고 `ylmc-connect:///` 루트 딥링크를 연 뒤 v1 탭 smoke를 실행해 이전 캡처 route/dialog 상태에 영향받지 않도록 함
-- 숨김 상세 route 시각 기준 정렬 — 실제 pathname 기준으로 루트 6탭에서만 floating tab bar를 표시하고, 상세/모달/확인 화면은 원본 ZIP처럼 하단 탭 여백을 제거
+- 숨김 상세 route 시각 기준 정렬 — 실제 pathname 기준으로 루트 탭에서만 floating tab bar를 표시하고, 상세/모달/확인 화면은 원본 ZIP처럼 하단 탭 여백을 제거
+- ZIP 5탭 정보구조 재정렬 — 루트 탭을 홈/나눔/소모임/동행/MY로 맞추고, 중보기도·삶공부 목록은 `동행` 탭의 segmented view로 배치
 
 ---
 
@@ -38,7 +39,8 @@
 | `scripts/gen-index.sh` | GitHub Issues 기반 도메인 상태표 재생성 |
 | `docs/features/common.md` | common 도메인 컨텍스트 |
 | `app/_layout.tsx` | QueryClient, SafeArea, Router Provider 루트 |
-| `app/(tabs)/_layout.tsx` | Expo Router 6탭 layout와 custom floating tab bar |
+| `app/(tabs)/_layout.tsx` | Expo Router 5탭 layout와 custom floating tab bar |
+| `app/(tabs)/faith/index.tsx` | ZIP 기준 `동행` 루트 탭. 중보기도/삶공부 segmented view를 전환 |
 | `app/(tabs)/index.tsx` | 디자인 번역 기반 홈 화면 |
 | `src/components/ui/index.tsx` | Button, Card, Badge, form, state, modal, image picker 등 공통 UI |
 | `src/components/prototype/OriginalMockScreens.tsx` | ZIP 원본 화면 상태를 Expo RN에서 확인하기 위한 mock-first reference 화면 묶음 |
@@ -58,6 +60,7 @@
 [../../PLAN.md](../../PLAN.md) “🗃 데이터 타입 설계 > 공통” 참조.
 
 ## 결정 사항 (최신 위)
+- (2026-05-25) **탭 구조는 ZIP 5탭 기준으로 한다** — 루트 탭은 홈/나눔/소모임/동행/MY이며, 중보기도와 삶공부는 ZIP처럼 `동행` 탭의 segmented view로 묶습니다. 기존 `/prayer`, `/life-study` route는 상세/딥링크/기존 캡처 호환을 위해 숨김 route로 유지합니다.
 - (2026-05-23) **시각 검증은 JSX + Dev Client 캡처를 함께 본다** — ZIP의 JSX를 화면 구조/컴포넌트 원천으로 보고, 스크린샷은 실제 렌더링 확인용으로 사용합니다. 원본 PNG가 단색 빈 화면이면 `compare` report의 `originalFlat`를 근거로 pixel diff를 품질 판단에서 제외하고 JSX 소스를 우선합니다.
 - (2026-05-23) **루트 탭과 숨김 route의 하단 여백을 분리한다** — Expo Router tabs state는 상세 route에서도 루트 탭을 유지할 수 있으므로, floating tab bar와 `Screen` 하단 padding은 `usePathname()`의 실제 path 기준으로 적용합니다.
 - (2026-05-23) **Maestro smoke는 루트 route에서 시작한다** — Dev Client가 이전 deep link route나 confirm dialog를 복원할 수 있으므로, smoke flow는 안내 메뉴를 조건부로 닫은 뒤 `ylmc-connect:///`를 열어 홈 탭부터 검증합니다.
@@ -65,7 +68,7 @@
 - (2026-05-23) **ZIP에 있는 화면은 모두 구현 대상으로 본다** — 제품 기본 플로우와 별개로, `/Users/mingulee/Downloads/열린문커넥트.zip`의 110개 화면/상태는 `variant` 라우트로 접근 가능해야 하며 누락 화면을 임의 제외하지 않습니다.
 - (2026-05-23) **Android Emulator E2E URL 분리** — Maestro smoke에서 Android Emulator가 감지되면 Metro 상태 확인은 host의 `localhost:8081`을 보고, Dev Client 앱에는 `adb reverse`가 동작하는 `127.0.0.1:8081` URL을 전달합니다. Dev Client 안내 메뉴는 앱 기능 검증 대상이 아니므로 `.maestro/smoke.yml`에서 `Continue`와 닫기 동작만 처리한 뒤 v1 탭 `testID` 검증으로 넘어갑니다.
 - (2026-05-23) **디자인 ZIP은 RN 번역 기준으로 사용** — `열린문커넥트.zip`의 CSS/JSX를 직접 이식하지 않고, 색상·간격·카드·버튼·탭·폼 톤을 Expo React Native 컴포넌트로 번역합니다.
-- (2026-05-23) **탭 구조는 PLAN/Notion v1 기준 유지** — ZIP prototype은 `동행`으로 일부 기능을 묶은 5탭이지만, 현재 v1 범위는 홈/나눔/소모임/삶공부/중보기도/MY 6탭이므로 floating tab bar만 디자인 톤을 반영합니다.
+- (2026-05-23, 2026-05-25 폐기) **탭 구조는 PLAN/Notion v1 기준 유지** — ZIP prototype의 5탭보다 6탭을 우선하던 결정은 제공 디자인 산출물을 최우선 기준으로 재정의하면서 폐기했습니다.
 - (2026-05-22) **Codex 작업 규칙 SSOT** — Codex는 `AGENTS.md`를 기준으로 읽고, `CLAUDE.md`는 Claude Code 호환본으로 유지합니다. 문서 링크는 `AGENTS.md`를 우선 가리킵니다.
 - (2026-05-23) **PR 자동 검증 게이트** — `npm run validate`는 `typecheck`, `lint`, `format:check`, `test`를 묶고, GitHub Actions PR CI는 `npm ci` 후 `npm run validate`를 실행합니다.
 - (2026-05-23) **Jest/RNTL smoke 우선 적용** — v1 mock-first 범위에서는 공통 UI, 도메인 옵션, 핵심 탭 화면 렌더링을 먼저 자동화하고 실제 API/푸시/업로드 스토리지는 제외합니다.
@@ -81,7 +84,7 @@
 - Sentry SDK 설치/초기화, husky/lint-staged는 후속 작업입니다.
 - Jest/RNTL은 smoke 범위부터 적용했습니다. 서비스 mutation, hook edge case, 상세/작성 화면 테스트는 Phase 6 이후 API adapter 범위와 함께 확장합니다.
 - Codex 기본 샌드박스에서는 `expo start --dev-client --port 8081 --localhost`가 `Starting project...` 이후 8081에 바인딩되지 않을 수 있습니다. 샌드박스 밖 로컬 권한에서는 `npm run test:dev-client:smoke`로 `/status` 응답을 확인했습니다.
-- Maestro CLI `2.6.0`은 Homebrew tap(`mobile-dev-inc/tap`)으로 설치되어 있으며, Android Emulator `Medium_Phone_API_36.1`에서 `npm run test:e2e:smoke` 통과를 확인했습니다. 현재 smoke는 ADB로 Dev Client deep link를 먼저 열고, Maestro가 Dev Client 메뉴를 닫은 뒤 홈/나눔/모임/공부/기도/MY 탭 진입을 검증합니다.
+- Maestro CLI `2.6.0`은 Homebrew tap(`mobile-dev-inc/tap`)으로 설치되어 있으며, Android Emulator `Medium_Phone_API_36.1`에서 `npm run test:e2e:smoke` 통과를 확인했습니다. 현재 smoke는 ADB로 Dev Client deep link를 먼저 열고, Maestro가 Dev Client 메뉴를 닫은 뒤 홈/나눔/소모임/동행/MY 탭과 동행 내부 삶공부 segment 진입을 검증합니다.
 - 제공 ZIP 110개 화면은 Dev Client capture/compare까지 실행했고 현재 비교 리포트 기준 `missing=0`, `originalFlat=0`입니다. 남은 residual diff는 원본 캡처 프레임/디바이스 비율, 상태바/SafeArea, React Native 폰트·모달 번역 차이와 실제 UI 차이를 분리해 추적합니다.
 
 ## 의존성

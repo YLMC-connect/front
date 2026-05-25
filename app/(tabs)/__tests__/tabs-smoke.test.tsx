@@ -1,10 +1,9 @@
 import { screen } from "@testing-library/react-native";
+import FaithScreen from "../faith";
 import GroupScreen from "../group";
 import HomeScreen from "../index";
-import LifeStudyScreen from "../life-study";
 import MarketScreen from "../market";
 import MyPageScreen from "../mypage";
-import PrayerScreen from "../prayer";
 import { renderWithClient } from "../../../src/test/renderWithClient";
 
 describe("v1 tab smoke screens", () => {
@@ -29,17 +28,12 @@ describe("v1 tab smoke screens", () => {
     expect(await screen.findByText("소모임")).toBeTruthy();
   });
 
-  it("renders the life study screen with course sections", async () => {
-    renderWithClient(<LifeStudyScreen />);
+  it("renders the faith tab with prayer and study segments", async () => {
+    renderWithClient(<FaithScreen />);
 
-    expect(screen.getByTestId("screen-life-study")).toBeTruthy();
-    expect(await screen.findByText("신청가능·진행중")).toBeTruthy();
-  });
-
-  it("renders the prayer screen with prayer room sections", async () => {
-    renderWithClient(<PrayerScreen />);
-
-    expect(screen.getByTestId("screen-prayer")).toBeTruthy();
+    expect(screen.getByTestId("screen-faith")).toBeTruthy();
+    expect(await screen.findByText("중보기도")).toBeTruthy();
+    expect(await screen.findByText("삶공부")).toBeTruthy();
     expect(await screen.findByText("다른 기도모임방")).toBeTruthy();
   });
 

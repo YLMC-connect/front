@@ -1160,11 +1160,24 @@ const prayerRooms = [
   { day: "목", name: "목요 직장 중보팀", n: 18 },
 ] as const;
 
-export function PrayerListReferenceScreen() {
+type FaithSection = "pray" | "study";
+
+const faithSegmentItems = [
+  { key: "pray", label: "중보기도" },
+  { key: "study", label: "삶공부" },
+] as const;
+
+export function PrayerListReferenceScreen({
+  testID = "screen-prayer",
+  onSectionChange,
+}: {
+  testID?: string;
+  onSectionChange?: (section: FaithSection) => void;
+} = {}) {
   return (
     <Screen padded={false}>
       <TopBar
-        testID="screen-prayer"
+        testID={testID}
         title="동행"
         subtitle="기도로 동행하고, 말씀으로 자라가요"
         right={
@@ -1173,12 +1186,9 @@ export function PrayerListReferenceScreen() {
       />
       <View style={styles.segmentWrap}>
         <SegmentedTabs
-          items={[
-            { key: "pray", label: "중보기도" },
-            { key: "study", label: "삶공부" },
-          ]}
+          items={faithSegmentItems}
           active="pray"
-          onChange={() => undefined}
+          onChange={onSectionChange ?? (() => undefined)}
         />
       </View>
       <View style={styles.contentPad}>
@@ -1364,11 +1374,17 @@ const studyOpenCourses = [
   },
 ] as const;
 
-export function StudyListReferenceScreen() {
+export function StudyListReferenceScreen({
+  testID = "screen-life-study",
+  onSectionChange,
+}: {
+  testID?: string;
+  onSectionChange?: (section: FaithSection) => void;
+} = {}) {
   return (
     <Screen padded={false}>
       <TopBar
-        testID="screen-life-study"
+        testID={testID}
         title="동행"
         subtitle="기도로 동행하고, 말씀으로 자라가요"
         right={
@@ -1377,12 +1393,9 @@ export function StudyListReferenceScreen() {
       />
       <View style={styles.segmentWrap}>
         <SegmentedTabs
-          items={[
-            { key: "pray", label: "중보기도" },
-            { key: "study", label: "삶공부" },
-          ]}
+          items={faithSegmentItems}
           active="study"
-          onChange={() => undefined}
+          onChange={onSectionChange ?? (() => undefined)}
         />
       </View>
       <View style={styles.contentPad}>

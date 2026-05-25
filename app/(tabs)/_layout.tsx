@@ -9,20 +9,18 @@ const icons: Record<string, IconName> = {
   index: "home",
   "market/index": "redeem",
   "group/index": "groups",
-  "life-study/index": "menu-book",
-  "prayer/index": "volunteer-activism",
+  "faith/index": "favorite",
   "mypage/index": "person",
 };
 
 const tabHrefs: Record<
   string,
-  "/" | "/market" | "/group" | "/life-study" | "/prayer" | "/mypage"
+  "/" | "/market" | "/group" | "/faith" | "/mypage"
 > = {
   index: "/",
   "market/index": "/market",
   "group/index": "/group",
-  "life-study/index": "/life-study",
-  "prayer/index": "/prayer",
+  "faith/index": "/faith",
   "mypage/index": "/mypage",
 };
 
@@ -53,15 +51,11 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="group/index"
-        options={{ title: "모임", tabBarButtonTestID: "tab-group" }}
+        options={{ title: "소모임", tabBarButtonTestID: "tab-group" }}
       />
       <Tabs.Screen
-        name="life-study/index"
-        options={{ title: "공부", tabBarButtonTestID: "tab-life-study" }}
-      />
-      <Tabs.Screen
-        name="prayer/index"
-        options={{ title: "기도", tabBarButtonTestID: "tab-prayer" }}
+        name="faith/index"
+        options={{ title: "동행", tabBarButtonTestID: "tab-faith" }}
       />
       <Tabs.Screen
         name="mypage/index"
@@ -71,9 +65,11 @@ export default function TabsLayout() {
       <Tabs.Screen name="group/[id]" options={{ href: null }} />
       <Tabs.Screen name="group/notices" options={{ href: null }} />
       <Tabs.Screen name="group/members" options={{ href: null }} />
+      <Tabs.Screen name="life-study/index" options={{ href: null }} />
       <Tabs.Screen name="life-study/[id]" options={{ href: null }} />
       <Tabs.Screen name="life-study/apply" options={{ href: null }} />
       <Tabs.Screen name="life-study/history" options={{ href: null }} />
+      <Tabs.Screen name="prayer/index" options={{ href: null }} />
       <Tabs.Screen name="prayer/[id]" options={{ href: null }} />
       <Tabs.Screen name="prayer/apply" options={{ href: null }} />
       <Tabs.Screen name="prayer/request" options={{ href: null }} />

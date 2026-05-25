@@ -26,6 +26,7 @@
 - 숨김 상세 route 시각 기준 정렬 — 실제 pathname 기준으로 루트 탭에서만 floating tab bar를 표시하고, 상세/모달/확인 화면은 원본 ZIP처럼 하단 탭 여백을 제거
 - ZIP 5탭 정보구조 재정렬 — 루트 탭을 홈/나눔/소모임/동행/MY로 맞추고, 중보기도·삶공부 목록은 `동행` 탭의 segmented view로 배치
 - ZIP 공통 디자인 토큰/컴포넌트 정렬 — `app-tokens.css`, `halo-tokens.css`, 공통 JSX의 button/card/tab/form/dialog/sheet/toast 패턴을 `theme.ts`, 공통 UI, Screen, custom tab bar에 React Native 방식으로 반영
+- ZIP TopBar/Avatar 공통 패턴 정렬 — 상세 화면 back pill은 `뒤로` label을 포함하고, Avatar는 ZIP `gradFor` 해시 팔레트와 같은 색상 기준을 사용
 
 ---
 
@@ -62,6 +63,7 @@
 
 ## 결정 사항 (최신 위)
 - (2026-05-25) **공통 UI 토큰은 ZIP app-level tokens를 우선 번역한다** — `app-tokens.css`의 primary/surface/ink/line/radius/shadow/type, `halo-tokens.css`의 glass/elevation/type 기준을 `theme.ts`에 반영하고, Button/Card/Badge/Chip/SegmentedTabs/TopBar/Dialog/Sheet/Toast/FAB/Input은 화면별 땜질보다 공통 컴포넌트에서 먼저 맞춥니다. RN에서 직접 표현이 어려운 CSS blur/box-shadow는 `borderColor`, `shadow*`, `elevation` 조합으로 번역합니다.
+- (2026-05-25) **상세 TopBar와 Avatar는 ZIP 공통 JSX를 따른다** — `TopBar` back affordance는 원형 아이콘이 아니라 `뒤로` text pill이며, `Avatar` 색상은 이름/seed 해시 기반 ZIP 팔레트를 사용합니다. gradient는 새 라이브러리 없이 solid swatch로 번역합니다.
 - (2026-05-25) **탭 구조는 ZIP 5탭 기준으로 한다** — 루트 탭은 홈/나눔/소모임/동행/MY이며, 중보기도와 삶공부는 ZIP처럼 `동행` 탭의 segmented view로 묶습니다. 기존 `/prayer`, `/life-study` route는 상세/딥링크/기존 캡처 호환을 위해 숨김 route로 유지합니다.
 - (2026-05-23) **시각 검증은 JSX + Dev Client 캡처를 함께 본다** — ZIP의 JSX를 화면 구조/컴포넌트 원천으로 보고, 스크린샷은 실제 렌더링 확인용으로 사용합니다. 원본 PNG가 단색 빈 화면이면 `compare` report의 `originalFlat`를 근거로 pixel diff를 품질 판단에서 제외하고 JSX 소스를 우선합니다.
 - (2026-05-23) **루트 탭과 숨김 route의 하단 여백을 분리한다** — Expo Router tabs state는 상세 route에서도 루트 탭을 유지할 수 있으므로, floating tab bar와 `Screen` 하단 padding은 `usePathname()`의 실제 path 기준으로 적용합니다.

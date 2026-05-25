@@ -19,6 +19,29 @@ import { theme } from "../../constants/theme";
 
 type IconName = ComponentProps<typeof MaterialIcons>["name"];
 
+const avatarPalettes = [
+  "#8FA882",
+  "#C7B89D",
+  "#9FBFA0",
+  "#C97C6E",
+  "#A6B79A",
+  "#B79F8C",
+  "#7E9C8E",
+] as const;
+
+function avatarColorFor(seed: string | number) {
+  if (typeof seed === "number") {
+    return avatarPalettes[seed % avatarPalettes.length];
+  }
+
+  let hash = 0;
+  for (let index = 0; index < seed.length; index += 1) {
+    hash = (hash * 31 + seed.charCodeAt(index)) >>> 0;
+  }
+
+  return avatarPalettes[hash % avatarPalettes.length];
+}
+
 export function Button({
   children,
   onPress,
@@ -145,13 +168,22 @@ export function Badge({
   );
 }
 
-export function Avatar({ name, size = 40 }: { name: string; size?: number }) {
+export function Avatar({
+  name,
+  size = 40,
+  seed,
+}: {
+  name: string;
+  size?: number;
+  seed?: string | number;
+}) {
   const initial = name.trim().slice(0, 1) || "?";
+  const backgroundColor = avatarColorFor(seed ?? name);
   return (
     <View
       style={[
         styles.avatar,
-        { width: size, height: size, borderRadius: size / 2 },
+        { width: size, height: size, borderRadius: size / 2, backgroundColor },
       ]}
     >
       <Text style={[styles.avatarText, { fontSize: size * 0.42 }]}>
@@ -389,6 +421,7 @@ export function TopBar({
   title,
   subtitle,
   back,
+  backLabel = "뒤로",
   right,
   onBack,
   testID,
@@ -396,6 +429,7 @@ export function TopBar({
   title: string;
   subtitle?: string;
   back?: boolean;
+  backLabel?: string;
   right?: ReactNode;
   onBack?: () => void;
   testID?: string;
@@ -411,13 +445,16 @@ export function TopBar({
           >
             <MaterialIcons
               name="chevron-left"
-              size={26}
+              size={22}
               color={theme.colors.inkSoft}
             />
+            <Text style={styles.backButtonText}>{backLabel}</Text>
           </Pressable>
         ) : null}
         <View style={styles.topTextWrap}>
-          <Text style={styles.topTitle}>{title}</Text>
+          <Text numberOfLines={1} style={styles.topTitle}>
+            {title}
+          </Text>
           {subtitle ? <Text style={styles.topSubtitle}>{subtitle}</Text> : null}
         </View>
       </View>
@@ -1003,8 +1040,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  topTitleWrap: { flexDirection: "row", alignItems: "center", flex: 1, gap: 6 },
-  topTextWrap: { flex: 1 },
+  topTitleWrap: { flexDirection: "row", alignItems: "center", flex: 1, gap: 4 },
+  topTextWrap: { flex: 1, minWidth: 0 },
   topTitle: {
     color: theme.colors.ink,
     fontWeight: theme.fontWeight.bold,
@@ -1017,12 +1054,20 @@ const styles = StyleSheet.create({
     lineHeight: theme.lineHeight.sm,
   },
   backButton: {
-    width: 36,
     height: 36,
+    paddingLeft: 8,
+    paddingRight: 14,
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
+    flexDirection: "row",
+    gap: 2,
     backgroundColor: "rgba(20,30,18,0.05)",
+  },
+  backButtonText: {
+    color: theme.colors.inkSoft,
+    fontSize: 14.5,
+    fontWeight: theme.fontWeight.semibold,
   },
   visualThumb: {
     borderRadius: theme.radius.md,

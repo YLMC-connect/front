@@ -2542,7 +2542,7 @@ const styles = StyleSheet.create({
     color: theme.colors.danger,
   },
   detailTopPad: {
-    paddingHorizontal: 18,
+    paddingHorizontal: 0,
   },
   groupDetailHeader: {
     paddingHorizontal: 22,

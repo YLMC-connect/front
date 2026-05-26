@@ -196,7 +196,7 @@ export function Avatar({
 export function VisualThumb({
   size = 86,
   seed = 0,
-  icon = "redeem",
+  icon,
   style,
 }: {
   size?: number;
@@ -238,11 +238,13 @@ export function VisualThumb({
           },
         ]}
       />
-      <MaterialIcons
-        name={icon}
-        size={Math.max(22, size * 0.34)}
-        color="#fff"
-      />
+      {icon ? (
+        <MaterialIcons
+          name={icon}
+          size={Math.max(22, size * 0.34)}
+          color="#fff"
+        />
+      ) : null}
     </View>
   );
 }

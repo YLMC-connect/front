@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen, Section } from "../layout/Screen";
 import {
   Avatar,
@@ -521,129 +521,129 @@ export function MarketDetailReferenceScreen({ variant }: { variant: string }) {
   const showReport = variant === "report" || variant === "report-other-input";
 
   return (
-    <Screen padded={false}>
-      <View style={styles.marketHero}>
-        <VisualCover height={360} seed={2} style={styles.marketHeroCover} />
-        <View style={styles.marketHeroScrim} />
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.back()}
-          style={styles.overlayBack}
-        >
-          <MaterialIcons
-            name="chevron-left"
-            size={21}
-            color={theme.colors.ink}
-          />
-          <Text style={styles.overlayBackText}>뒤로</Text>
-        </Pressable>
-        {isReserved || isDone ? (
-          <View
-            style={
-              isReserved
-                ? styles.marketHeroReservedCenter
-                : styles.marketHeroDoneCenter
-            }
+    <Screen padded={false} scroll={false}>
+      <ScrollView contentContainerStyle={styles.marketDetailScroll}>
+        <View style={styles.marketHero}>
+          <VisualThumb size={360} seed={0} style={styles.marketHeroCover} />
+          <View style={styles.marketHeroScrim} />
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.back()}
+            style={styles.overlayBack}
           >
+            <MaterialIcons
+              name="chevron-left"
+              size={21}
+              color={theme.colors.ink}
+            />
+            <Text style={styles.overlayBackText}>뒤로</Text>
+          </Pressable>
+          {isReserved || isDone ? (
             <View
-              style={[
-                styles.marketHeroStatus,
-                isReserved ? styles.marketHeroReserved : styles.marketHeroDone,
-              ]}
+              style={
+                isReserved
+                  ? styles.marketHeroReservedCenter
+                  : styles.marketHeroDoneCenter
+              }
             >
-              <Text
+              <View
                 style={[
-                  styles.marketHeroStatusText,
-                  isReserved ? styles.marketHeroReservedText : null,
+                  styles.marketHeroStatus,
+                  isReserved
+                    ? styles.marketHeroReserved
+                    : styles.marketHeroDone,
                 ]}
               >
-                {isReserved ? "예약중" : "나눔완료"}
+                <Text
+                  style={[
+                    styles.marketHeroStatusText,
+                    isReserved ? styles.marketHeroReservedText : null,
+                  ]}
+                >
+                  {isReserved ? "예약중" : "나눔완료"}
+                </Text>
+              </View>
+            </View>
+          ) : null}
+          <View style={styles.heroPager}>
+            <View style={styles.heroPagerActive} />
+            <View style={styles.heroPagerDot} />
+            <View style={styles.heroPagerDot} />
+          </View>
+        </View>
+
+        {isReserved ? (
+          <StatusBanner
+            icon="schedule"
+            tone="warn"
+            title="예약중인 나눔입니다"
+            description="다른 분과 수령 약속이 진행 중이에요"
+          />
+        ) : null}
+        {isDone ? (
+          <StatusBanner
+            icon="check"
+            title="나눔이 완료되었습니다"
+            description="이 게시글은 더 이상 신청할 수 없어요"
+          />
+        ) : null}
+
+        <View style={isDone ? styles.faded : null}>
+          <View style={styles.marketAuthorBlock}>
+            <Avatar name="박정아" seed="박정아" />
+            <View style={styles.flex}>
+              <Text style={styles.cardTitle}>
+                {isOwn ? "김은혜" : "박정아"}
               </Text>
+              <Text style={styles.metaText}>1시간 전</Text>
             </View>
           </View>
-        ) : null}
-        <View style={styles.heroPager}>
-          <View style={styles.heroPagerActive} />
-          <View style={styles.heroPagerDot} />
-          <View style={styles.heroPagerDot} />
-        </View>
-      </View>
-
-      {isReserved ? (
-        <StatusBanner
-          icon="schedule"
-          tone="warn"
-          title="예약중인 나눔입니다"
-          description="다른 분과 수령 약속이 진행 중이에요"
-        />
-      ) : null}
-      {isDone ? (
-        <StatusBanner
-          icon="check"
-          title="나눔이 완료되었습니다"
-          description="이 게시글은 더 이상 신청할 수 없어요"
-        />
-      ) : null}
-
-      <View style={isDone ? styles.faded : null}>
-        <View style={styles.marketAuthorBlock}>
-          <Avatar name={isOwn ? "김은혜" : "박정아"} />
-          <View style={styles.flex}>
-            <Text style={styles.cardTitle}>{isOwn ? "김은혜" : "박정아"}</Text>
-            <Text style={styles.metaText}>1시간 전</Text>
+          <View style={styles.marketDetailContent}>
+            <View style={styles.inlineMeta}>
+              <Chip label="유아·아동용품" selected />
+              <Chip label="사용감 있음" />
+            </View>
+            <Text style={styles.titleText}>
+              아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)
+            </Text>
           </View>
-        </View>
-        <View style={styles.marketDetailContent}>
-          <View style={styles.inlineMeta}>
-            <Chip label="유아·아동용품" selected />
-            <Chip label="사용감 있음" />
-          </View>
-          <Text style={styles.titleText}>
-            아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)
+          <Text style={styles.marketBody}>
+            아이가 커서 더 이상 쓰지 않는 장난감 정리해요.{"\n"}
+            대부분 깨끗하게 사용한 것들이고, 블록류 20점 + 인형류 10점 정도
+            됩니다.{"\n"}
+            필요하신 분께 무료로 드려요!{"\n\n"}
+            수령은 토요일 오후 교회 1층 로비에서 가능합니다.{"\n"}한 분께 일괄로
+            드리려고 합니다.
           </Text>
+          <Card style={styles.detailActionCard}>
+            {isOwn && !isDone ? (
+              <>
+                <DetailAction icon="edit" label="수정" />
+                <DetailAction icon="delete-outline" label="삭제" danger />
+                <DetailAction icon="sync" label="상태 변경" />
+              </>
+            ) : null}
+            {isOwn && isDone ? (
+              <DetailAction icon="delete-outline" label="삭제" danger full />
+            ) : null}
+            {!isOwn ? (
+              <>
+                <DetailAction icon="flag" label="신고" />
+                <DetailAction icon="block" label="차단" danger />
+              </>
+            ) : null}
+          </Card>
+          <MarketCommentsSection isOwn={isOwn} />
         </View>
-        <Text style={styles.marketBody}>
-          아이가 커서 더 이상 쓰지 않는 장난감 정리해요.{"\n"}
-          대부분 깨끗하게 사용한 것들이고, 블록류 20점 + 인형류 10점 정도
-          됩니다.{"\n"}
-          필요하신 분께 무료로 드려요!{"\n\n"}
-          수령은 토요일 오후 교회 1층 로비에서 가능합니다.{"\n"}한 분께 일괄로
-          드리려고 합니다.
-        </Text>
-        <Card style={styles.detailActionCard}>
-          {isOwn && !isDone ? (
-            <>
-              <DetailAction icon="edit" label="수정" />
-              <DetailAction icon="delete-outline" label="삭제" danger />
-              <DetailAction icon="sync" label="상태 변경" />
-            </>
-          ) : null}
-          {isOwn && isDone ? (
-            <DetailAction icon="delete-outline" label="삭제" danger full />
-          ) : null}
-          {!isOwn ? (
-            <>
-              <DetailAction icon="flag" label="신고" />
-              <DetailAction icon="block" label="차단" danger />
-            </>
-          ) : null}
-        </Card>
-        <Card style={styles.stack}>
-          <Text style={styles.cardTitle}>댓글 2</Text>
-          <Text style={styles.bodyText}>
-            오늘 저녁 예배 후 받을 수 있을까요?
-          </Text>
-          <Textarea
-            value={
-              variant === "composer-multiline"
-                ? "오늘 예배 후\n로비에서 뵙겠습니다."
-                : ""
-            }
-            placeholder="나눔 받을 수 있는 시간을 남겨주세요."
-          />
-          <Button>댓글 등록</Button>
-        </Card>
-      </View>
+      </ScrollView>
+      <MarketCommentComposer
+        multiline={variant === "composer-multiline"}
+        value={
+          variant === "composer-multiline"
+            ? "혹시 토요일 외에 다른 요일도 가능할까요?\n저희가 토요일은 봉사 일정이 있어서요.\n가능한 시간 알려주시면 맞춰서 찾아뵐게요!"
+            : ""
+        }
+      />
       <RadioSheet
         visible={variant === "status"}
         title="상태 변경"
@@ -692,6 +692,162 @@ export function MarketDetailReferenceScreen({ variant }: { variant: string }) {
         }
       />
     </Screen>
+  );
+}
+
+function MarketCommentsSection({ isOwn }: { isOwn: boolean }) {
+  const comments = [
+    {
+      author: "이수진",
+      when: "30분 전",
+      text: "필요해요! 토요일에 들를게요. 연락드릴게요 :)",
+      self: !isOwn,
+    },
+    {
+      author: "김지영",
+      when: "25분 전",
+      text: "좋은 나눔 감사해요. 저도 비슷한 시기에 정리했는데 도움이 많이 됐어요!",
+      edited: true,
+    },
+    { author: "정혜진", when: "20분 전", text: "", deleted: true },
+    {
+      author: "한유라",
+      when: "10분 전",
+      text: "아직 남아있을까요? 늦었지만 가능하면 부탁드려요",
+      self: isOwn,
+    },
+  ];
+  const activeCount = comments.filter((comment) => !comment.deleted).length;
+
+  return (
+    <View style={styles.marketComments}>
+      <Text style={styles.marketCommentsTitle}>댓글 {activeCount}개</Text>
+      {comments.map((comment, index) => (
+        <View
+          key={`${comment.author}-${comment.when}`}
+          style={[
+            styles.marketCommentRow,
+            index === comments.length - 1 ? styles.noBorder : null,
+          ]}
+        >
+          <Avatar name={comment.author} seed={comment.author} size={32} />
+          <View style={styles.flex}>
+            <View style={styles.commentMetaRow}>
+              <Text style={styles.commentAuthor}>{comment.author}</Text>
+              <Text style={styles.metaText}>{comment.when}</Text>
+              {comment.edited ? (
+                <Text style={styles.commentEdited}>· 수정됨</Text>
+              ) : null}
+            </View>
+            {comment.deleted ? (
+              <Text style={styles.commentDeleted}>삭제된 댓글입니다</Text>
+            ) : (
+              <>
+                <Text style={styles.commentBody}>{comment.text}</Text>
+                <View style={styles.commentActions}>
+                  {comment.self ? (
+                    <>
+                      <MarketCommentMiniAction icon="edit" label="수정" />
+                      <MarketCommentMiniAction
+                        icon="delete-outline"
+                        label="삭제"
+                        danger
+                      />
+                    </>
+                  ) : (
+                    <MarketCommentMiniAction icon="flag" label="신고" />
+                  )}
+                </View>
+              </>
+            )}
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function MarketCommentMiniAction({
+  icon,
+  label,
+  danger,
+}: {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  label: string;
+  danger?: boolean;
+}) {
+  return (
+    <View style={styles.commentMiniAction}>
+      <MaterialIcons
+        name={icon}
+        size={14}
+        color={danger ? theme.colors.danger : theme.colors.inkMute}
+      />
+      <Text
+        style={[
+          styles.commentMiniActionText,
+          danger ? styles.commentMiniActionDanger : null,
+        ]}
+      >
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+function MarketCommentComposer({
+  value = "",
+  multiline = false,
+}: {
+  value?: string;
+  multiline?: boolean;
+}) {
+  const hasText = value.length > 0;
+  const preview = value.replace(/\n+/g, " · ");
+
+  return (
+    <>
+      {hasText && multiline ? (
+        <View style={styles.marketComposerPreview}>
+          <Text style={styles.marketComposerPreviewText}>{value}</Text>
+          <Text style={styles.marketComposerPreviewCount}>
+            {value.length}/300
+          </Text>
+          <View style={styles.marketComposerPreviewTail} />
+        </View>
+      ) : null}
+      <View style={styles.marketComposerBar}>
+        <View style={styles.marketComposerInput}>
+          <Text
+            numberOfLines={1}
+            style={[
+              styles.marketComposerText,
+              !hasText ? styles.marketComposerPlaceholder : null,
+            ]}
+          >
+            {hasText && multiline ? preview : "댓글을 입력해주세요"}
+          </Text>
+          {hasText && multiline ? (
+            <Text style={styles.marketComposerCount}>{value.length}/300</Text>
+          ) : null}
+        </View>
+        <View
+          style={[
+            styles.marketComposerButton,
+            hasText ? styles.marketComposerButtonActive : null,
+          ]}
+        >
+          <Text
+            style={[
+              styles.marketComposerButtonText,
+              hasText ? styles.marketComposerButtonTextActive : null,
+            ]}
+          >
+            등록
+          </Text>
+        </View>
+      </View>
+    </>
   );
 }
 
@@ -2349,14 +2505,19 @@ const styles = StyleSheet.create({
   segmentWrap: { paddingHorizontal: 18, paddingBottom: 8 },
   routeList: { gap: 12, paddingHorizontal: 18 },
   rowCard: { flexDirection: "row", alignItems: "center", gap: 12 },
+  marketDetailScroll: {
+    paddingBottom: 100,
+  },
   marketHero: {
     position: "relative",
-    height: 360,
+    width: "100%",
+    aspectRatio: 1,
     overflow: "hidden",
     backgroundColor: "#E2DED3",
   },
   marketHeroCover: {
-    height: 360,
+    width: "100%",
+    height: "100%",
     borderRadius: 0,
   },
   marketHeroScrim: {
@@ -2540,6 +2701,172 @@ const styles = StyleSheet.create({
   },
   detailActionDangerText: {
     color: theme.colors.danger,
+  },
+  marketComments: {
+    paddingHorizontal: 22,
+    paddingTop: 4,
+    paddingBottom: 12,
+  },
+  marketCommentsTitle: {
+    paddingVertical: 8,
+    marginBottom: 4,
+    color: theme.colors.inkMute,
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  marketCommentRow: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
+    flexDirection: "row",
+    gap: 10,
+  },
+  commentMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  commentAuthor: {
+    color: theme.colors.ink,
+    fontSize: 13.5,
+    fontWeight: "800",
+  },
+  commentEdited: {
+    color: theme.colors.inkHint,
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  commentDeleted: {
+    marginTop: 4,
+    color: theme.colors.inkHint,
+    fontSize: 13.5,
+    fontStyle: "italic",
+  },
+  commentBody: {
+    marginTop: 4,
+    color: theme.colors.ink,
+    fontSize: 13.5,
+    lineHeight: 20,
+  },
+  commentActions: {
+    marginTop: 6,
+    flexDirection: "row",
+    gap: 12,
+  },
+  commentMiniAction: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  commentMiniActionText: {
+    color: theme.colors.inkMute,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  commentMiniActionDanger: {
+    color: theme.colors.danger,
+  },
+  marketComposerPreview: {
+    position: "absolute",
+    left: 14,
+    right: 14,
+    bottom: 84,
+    zIndex: 29,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    borderRadius: theme.radius.md,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 24,
+    backgroundColor: "rgba(255,255,255,0.96)",
+    ...theme.shadow.float,
+  },
+  marketComposerPreviewText: {
+    color: theme.colors.ink,
+    fontSize: 14,
+    lineHeight: 22,
+  },
+  marketComposerPreviewCount: {
+    position: "absolute",
+    right: 14,
+    bottom: 8,
+    color: theme.colors.inkHint,
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  marketComposerPreviewTail: {
+    position: "absolute",
+    left: 24,
+    bottom: -6,
+    width: 12,
+    height: 12,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: "rgba(255,255,255,0.96)",
+    transform: [{ rotate: "45deg" }],
+  },
+  marketComposerBar: {
+    position: "absolute",
+    left: 14,
+    right: 14,
+    bottom: 14,
+    zIndex: 30,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
+    borderRadius: theme.radius.pill,
+    padding: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: theme.colors.glass,
+    ...theme.shadow.float,
+  },
+  marketComposerInput: {
+    flex: 1,
+    minWidth: 0,
+    height: 44,
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(20,30,18,0.05)",
+  },
+  marketComposerText: {
+    flex: 1,
+    minWidth: 0,
+    color: theme.colors.inkSoft,
+    fontSize: 14,
+  },
+  marketComposerPlaceholder: {
+    color: theme.colors.inkMute,
+  },
+  marketComposerCount: {
+    marginLeft: 8,
+    color: theme.colors.inkHint,
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  marketComposerButton: {
+    height: 48,
+    minWidth: 64,
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(20,30,18,0.05)",
+  },
+  marketComposerButtonActive: {
+    backgroundColor: theme.colors.primary,
+    ...theme.shadow.primary,
+  },
+  marketComposerButtonText: {
+    color: theme.colors.inkMute,
+    fontSize: 14,
+    fontWeight: "800",
+  },
+  marketComposerButtonTextActive: {
+    color: theme.colors.white,
   },
   detailTopPad: {
     paddingHorizontal: 0,

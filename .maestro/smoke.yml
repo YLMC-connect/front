@@ -19,6 +19,17 @@ tags:
     commands:
       - tapOn:
           point: "90%,45%"
+- runFlow:
+    when:
+      visible: DEVELOPMENT SERVERS
+    commands:
+      - tapOn:
+          point: "50%,24%"
+      - extendedWaitUntil:
+          visible: Reload
+          timeout: 60000
+      - tapOn:
+          point: "90%,45%"
 - openLink: ylmc-connect:///
 - waitForAnimationToEnd:
     timeout: 5000

@@ -33,6 +33,22 @@ tags:
 - openLink: ylmc-connect:///
 - waitForAnimationToEnd:
     timeout: 5000
+- runFlow:
+    when:
+      visible: Continue
+    commands:
+      - tapOn: Continue
+      - extendedWaitUntil:
+          visible: Reload
+          timeout: 60000
+      - tapOn:
+          point: "90%,45%"
+- runFlow:
+    when:
+      visible: Reload
+    commands:
+      - tapOn:
+          point: "90%,45%"
 - extendedWaitUntil:
     visible:
       id: tab-home

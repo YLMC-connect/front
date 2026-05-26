@@ -2021,104 +2021,164 @@ export function StudyListReferenceScreen({
 
 export function StudyDetailReferenceScreen() {
   const curriculum = [
-    "그리스도인의 정체성",
-    "기도의 능력",
-    "말씀과 묵상",
-    "예배의 의미",
-    "성령의 인도하심",
-    "전도와 증인의 삶",
+    { week: 1, title: "그리스도인의 정체성", done: true },
+    { week: 2, title: "기도의 능력", done: true },
+    { week: 3, title: "말씀과 묵상", done: true },
+    { week: 4, title: "예배의 의미", done: true, current: true },
+    { week: 5, title: "성령의 인도하심", done: false },
+    { week: 6, title: "전도와 증인의 삶", done: false },
+    { week: 7, title: "공동체와 교제", done: false },
+    { week: 8, title: "섬김의 삶", done: false },
   ];
 
   return (
-    <Screen>
-      <TopBar
-        title=""
-        back
-        onBack={() => router.back()}
-        right={
-          <MaterialIcons
-            name="ios-share"
-            size={22}
-            color={theme.colors.inkSoft}
-          />
-        }
-      />
-      <View style={styles.inlineMeta}>
-        <Badge>진행중</Badge>
-        <Text style={styles.metaText}>2025.03 ~ 08 · 매주 수요일 19:30</Text>
-      </View>
-      <Text style={styles.displayTitle}>제자훈련 1단계</Text>
-      <Text style={styles.bodyText}>
-        예수님을 따르는 제자로 자라가는 12주 과정입니다. 매주 말씀 묵상, 적용
-        나눔, 함께하는 기도로 구성됩니다.
-      </Text>
-      <Card style={styles.rowCard}>
-        <Avatar name="이" size={36} />
-        <View style={styles.flex}>
-          <Text style={styles.cardTitle}>이정민 목사</Text>
-          <Text style={styles.metaText}>담당 양육자</Text>
-        </View>
-      </Card>
-      <Section title="내 수강 현황">
-        <Card style={styles.progressCard}>
-          <View style={styles.spreadRow}>
-            <Text style={styles.primaryText}>진도율</Text>
-            <Text style={styles.statValue}>4 / 12 주차</Text>
-          </View>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressBar, { width: "33%" }]} />
-          </View>
-          <View style={styles.statsGrid}>
-            <Card style={styles.miniStat}>
-              <Text style={styles.metaText}>제출한 과제</Text>
-              <Text style={styles.cardTitle}>3 / 4</Text>
-            </Card>
-            <Card style={styles.miniStat}>
-              <Text style={styles.metaText}>출석</Text>
-              <Text style={styles.cardTitle}>4 / 4</Text>
-            </Card>
-          </View>
-        </Card>
-      </Section>
-      <Section title="커리큘럼">
-        <Card style={styles.menuCard}>
-          {curriculum.map((title, index) => {
-            const current = index === 3;
-            const done = index < 4;
+    <Screen scroll={false} padded={false}>
+      <View style={styles.studyDetailRoot}>
+        <TopBar
+          title=""
+          back
+          onBack={() => router.back()}
+          right={
+            <View style={styles.studyShareButton}>
+              <MaterialIcons
+                name="share"
+                size={20}
+                color={theme.colors.inkSoft}
+              />
+            </View>
+          }
+        />
 
-            return (
-              <View key={title} style={styles.menuRow}>
+        <ScrollView
+          style={styles.studyDetailScroll}
+          contentContainerStyle={styles.studyDetailContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.studyDetailIntro}>
+            <View style={styles.studyDetailMetaRow}>
+              <View style={styles.studyDetailBadge}>
+                <Text style={styles.studyDetailBadgeText}>진행중</Text>
+              </View>
+              <Text style={styles.studyDetailMeta}>
+                2025.03 ~ 08 · 매주 수요일 19:30
+              </Text>
+            </View>
+            <Text style={styles.studyDetailTitle}>제자훈련 1단계</Text>
+            <Text style={styles.studyDetailDescription}>
+              예수님을 따르는 제자로 자라가는 12주 과정입니다. 매주 말씀 묵상,
+              적용 나눔, 함께하는 기도로 구성됩니다.
+            </Text>
+
+            <View style={styles.studyMentorBox}>
+              <View style={styles.studyMentorAvatar}>
+                <Text style={styles.studyMentorInitial}>이</Text>
+              </View>
+              <View style={styles.flex}>
+                <Text style={styles.studyMentorName}>이정민 목사</Text>
+                <Text style={styles.studyMentorRole}>담당 양육자</Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.studyDivider} />
+
+          <View style={styles.studyStatusSection}>
+            <Text style={styles.studySectionTitle}>내 수강 현황</Text>
+            <View style={styles.studyProgressPanel}>
+              <View style={styles.studyProgressHeader}>
+                <Text style={styles.studyProgressLabel}>진도율</Text>
+                <Text style={styles.studyProgressValue}>
+                  4 / 12 <Text style={styles.studyProgressUnit}>주차</Text>
+                </Text>
+              </View>
+              <View style={styles.studyProgressTrack}>
+                <View style={styles.studyProgressBar} />
+              </View>
+              <View style={styles.studyStatsRow}>
+                <View style={styles.studyMiniStat}>
+                  <Text style={styles.studyMiniLabel}>제출한 과제</Text>
+                  <Text style={styles.studyMiniValue}>3 / 4</Text>
+                </View>
+                <View style={styles.studyMiniStat}>
+                  <Text style={styles.studyMiniLabel}>출석</Text>
+                  <Text style={styles.studyMiniValue}>4 / 4</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.studyCurriculumSection}>
+            <Text style={styles.studySectionTitle}>커리큘럼</Text>
+            <View style={styles.studyCurriculumList}>
+              {curriculum.map((item, index) => (
                 <View
+                  key={item.week}
                   style={[
-                    styles.stepCircle,
-                    done ? styles.stepDone : null,
-                    current ? styles.stepCurrent : null,
+                    styles.studyWeekRow,
+                    index === curriculum.length - 1 ? styles.noBorder : null,
                   ]}
                 >
-                  <Text
+                  <View
                     style={[
-                      styles.stepText,
-                      current ? styles.stepTextCurrent : null,
+                      styles.studyWeekBadge,
+                      item.done ? styles.studyWeekDone : null,
+                      item.current ? styles.studyWeekCurrent : null,
                     ]}
                   >
-                    {done && !current ? "✓" : index + 1}
-                  </Text>
+                    {item.done && !item.current ? (
+                      <MaterialIcons
+                        name="check"
+                        size={14}
+                        color={theme.colors.primaryDeep}
+                      />
+                    ) : (
+                      <Text
+                        style={[
+                          styles.studyWeekNumber,
+                          item.current ? styles.studyWeekNumberCurrent : null,
+                        ]}
+                      >
+                        {item.week}
+                      </Text>
+                    )}
+                  </View>
+                  <View style={styles.flex}>
+                    <Text style={styles.studyWeekLabel}>WEEK {item.week}</Text>
+                    <Text
+                      style={[
+                        styles.studyWeekTitle,
+                        item.done && !item.current
+                          ? styles.studyWeekTitleDone
+                          : null,
+                        item.current ? styles.studyWeekTitleCurrent : null,
+                      ]}
+                    >
+                      {item.title}
+                    </Text>
+                  </View>
+                  {item.current ? (
+                    <View style={styles.studyCurrentPill}>
+                      <Text style={styles.studyCurrentPillText}>이번주</Text>
+                    </View>
+                  ) : null}
                 </View>
-                <View style={styles.flex}>
-                  <Text style={styles.metaText}>WEEK {index + 1}</Text>
-                  <Text style={styles.menuTitle}>{title}</Text>
-                </View>
-                {current ? <Badge>이번주</Badge> : null}
-              </View>
-            );
-          })}
-        </Card>
-      </Section>
-      <View style={styles.bottomActions}>
-        <Button variant="soft" icon="favorite-border">
-          관심
-        </Button>
-        <Button>이번 주 과제 제출</Button>
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+
+        <View style={styles.studyBottomBar}>
+          <View style={styles.studyBottomSoftButton}>
+            <MaterialIcons
+              name="favorite-border"
+              size={20}
+              color={theme.colors.primaryDeep}
+            />
+          </View>
+          <View style={styles.studyBottomPrimaryButton}>
+            <Text style={styles.studyBottomPrimaryText}>이번 주 과제 제출</Text>
+          </View>
+        </View>
       </View>
     </Screen>
   );
@@ -4551,6 +4611,257 @@ const styles = StyleSheet.create({
     height: "100%",
     borderRadius: 4,
     backgroundColor: theme.colors.primary,
+  },
+  studyDetailRoot: { flex: 1, position: "relative" },
+  studyShareButton: {
+    width: 36,
+    height: 36,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  studyDetailScroll: { flex: 1 },
+  studyDetailContent: { paddingBottom: 112 },
+  studyDetailIntro: { paddingHorizontal: 18, paddingBottom: 18 },
+  studyDetailMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  studyDetailBadge: {
+    minHeight: 20,
+    paddingHorizontal: 8,
+    borderRadius: theme.radius.pill,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.primarySoft,
+  },
+  studyDetailBadgeText: {
+    color: theme.colors.primaryDeep,
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  studyDetailMeta: {
+    color: theme.colors.inkMute,
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: theme.fontWeight.medium,
+  },
+  studyDetailTitle: {
+    marginTop: 10,
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.display,
+    lineHeight: theme.lineHeight.display,
+    fontWeight: "900",
+  },
+  studyDetailDescription: {
+    marginTop: 12,
+    color: theme.colors.inkSoft,
+    fontSize: theme.fontSize.md,
+    lineHeight: 21,
+  },
+  studyMentorBox: {
+    marginTop: 16,
+    borderRadius: theme.radius.md,
+    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: theme.colors.primarySoft,
+  },
+  studyMentorAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#E2D6BD",
+  },
+  studyMentorInitial: {
+    color: theme.colors.white,
+    fontSize: theme.fontSize.base,
+    fontWeight: "900",
+  },
+  studyMentorName: {
+    color: theme.colors.primaryDeep,
+    fontSize: theme.fontSize.sm + 1,
+    fontWeight: theme.fontWeight.bold,
+  },
+  studyMentorRole: {
+    marginTop: 2,
+    color: theme.colors.inkMute,
+    fontSize: theme.fontSize.xs,
+    lineHeight: theme.lineHeight.xs,
+  },
+  studyDivider: {
+    height: 8,
+    backgroundColor: "rgba(30,41,32,0.05)",
+  },
+  studyStatusSection: { padding: 18 },
+  studySectionTitle: {
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.lg,
+    lineHeight: theme.lineHeight.lg,
+    fontWeight: "900",
+  },
+  studyProgressPanel: {
+    marginTop: 12,
+    borderRadius: theme.radius.md,
+    padding: 16,
+    backgroundColor: "#F4F8EE",
+  },
+  studyProgressHeader: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "space-between",
+  },
+  studyProgressLabel: {
+    color: theme.colors.primaryDeep,
+    fontSize: theme.fontSize.sm + 1,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  studyProgressValue: {
+    color: theme.colors.primaryDeep,
+    fontSize: 20,
+    lineHeight: 24,
+    fontWeight: "900",
+  },
+  studyProgressUnit: {
+    fontSize: theme.fontSize.sm + 1,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  studyProgressTrack: {
+    marginTop: 10,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "rgba(255,255,255,0.55)",
+    overflow: "hidden",
+  },
+  studyProgressBar: {
+    width: "33%",
+    height: "100%",
+    borderRadius: 3,
+    backgroundColor: theme.colors.primary,
+  },
+  studyStatsRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 14,
+  },
+  studyMiniStat: {
+    flex: 1,
+    borderRadius: theme.radius.sm,
+    padding: 10,
+    backgroundColor: "rgba(255,255,255,0.65)",
+  },
+  studyMiniLabel: {
+    color: theme.colors.inkMute,
+    fontSize: theme.fontSize.xs,
+    lineHeight: theme.lineHeight.xs,
+  },
+  studyMiniValue: {
+    marginTop: 2,
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.lg,
+    fontWeight: "900",
+  },
+  studyCurriculumSection: {
+    paddingHorizontal: 18,
+    paddingBottom: 18,
+  },
+  studyCurriculumList: { marginTop: 12 },
+  studyWeekRow: {
+    minHeight: 54,
+    paddingHorizontal: 4,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  studyWeekBadge: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(30,41,32,0.05)",
+  },
+  studyWeekDone: { backgroundColor: theme.colors.primarySoft },
+  studyWeekCurrent: { backgroundColor: theme.colors.primary },
+  studyWeekNumber: {
+    color: theme.colors.inkMute,
+    fontSize: theme.fontSize.xs,
+    fontWeight: "900",
+  },
+  studyWeekNumberCurrent: { color: theme.colors.white },
+  studyWeekLabel: {
+    color: theme.colors.inkMute,
+    fontSize: theme.fontSize.xs,
+    lineHeight: theme.lineHeight.xs,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  studyWeekTitle: {
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.md,
+    lineHeight: theme.lineHeight.md,
+    fontWeight: theme.fontWeight.medium,
+  },
+  studyWeekTitleDone: { color: theme.colors.inkMute },
+  studyWeekTitleCurrent: {
+    color: theme.colors.ink,
+    fontWeight: theme.fontWeight.bold,
+  },
+  studyCurrentPill: {
+    paddingHorizontal: 8,
+    minHeight: 20,
+    borderRadius: theme.radius.pill,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.primarySoft,
+  },
+  studyCurrentPillText: {
+    color: theme.colors.primaryDeep,
+    fontSize: 11,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  studyBottomBar: {
+    position: "absolute",
+    left: 14,
+    right: 14,
+    bottom: 14,
+    zIndex: 30,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
+    padding: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: theme.colors.glass,
+    ...theme.shadow.float,
+  },
+  studyBottomSoftButton: {
+    width: 48,
+    height: 48,
+    borderRadius: theme.radius.pill,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(20,30,18,0.05)",
+  },
+  studyBottomPrimaryButton: {
+    flex: 1,
+    height: 48,
+    borderRadius: theme.radius.pill,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.primary,
+  },
+  studyBottomPrimaryText: {
+    color: theme.colors.white,
+    fontSize: theme.fontSize.base,
+    fontWeight: theme.fontWeight.bold,
   },
   progressCard: {
     gap: 12,

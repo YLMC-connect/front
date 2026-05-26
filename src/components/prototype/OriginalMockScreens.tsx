@@ -73,11 +73,7 @@ export function LoginReferenceScreen({ variant }: { variant: string }) {
         <Button variant="soft">회원가입</Button>
       </Card>
       <Toast
-        message={
-          variant === "toast"
-            ? "네트워크가 불안정합니다. 잠시 후 다시 시도해주세요."
-            : ""
-        }
+        message={variant === "toast" ? "네트워크 연결을 확인해주세요" : ""}
       />
     </Screen>
   );
@@ -106,11 +102,8 @@ export function InviteCodeReferenceScreen({ variant }: { variant: string }) {
         <Button loading={variant === "loading"}>확인</Button>
       </Card>
       <Toast
-        message={
-          variant === "toast"
-            ? "네트워크가 불안정합니다. 잠시 후 다시 시도해주세요."
-            : ""
-        }
+        message={variant === "toast" ? "네트워크 연결을 확인해주세요" : ""}
+        offset={variant === "toast" ? 106 : 28}
       />
     </Screen>
   );
@@ -688,8 +681,9 @@ export function MarketDetailReferenceScreen({ variant }: { variant: string }) {
       />
       <Toast
         message={
-          variant === "report-dup-toast" ? "이미 신고한 게시글입니다." : ""
+          variant === "report-dup-toast" ? "이미 신고한 게시글입니다" : ""
         }
+        offset={variant === "report-dup-toast" ? 106 : 28}
       />
     </Screen>
   );
@@ -885,7 +879,7 @@ export function MarketCreateReferenceScreen({ variant }: { variant: string }) {
       <Toast
         message={
           variant === "limit-toast"
-            ? "사진은 최대 5장까지 등록할 수 있습니다."
+            ? "하루에 나눔은 5개까지 등록할 수 있어요"
             : ""
         }
       />
@@ -1098,9 +1092,9 @@ export function GroupDetailReferenceScreen({ variant }: { variant: string }) {
       <Toast
         message={
           variant === "full-toast"
-            ? "정원이 가득 찬 소모임입니다."
+            ? "인원이 꽉 찼습니다"
             : variant === "leader-leave-toast"
-              ? "소모임장은 바로 탈퇴할 수 없습니다."
+              ? "소모임장은 탈퇴할 수 없어요. 먼저 이관해주세요"
               : ""
         }
       />
@@ -2065,7 +2059,7 @@ export function BlockedReferenceScreen({ variant }: { variant: string }) {
         onCancel={() => undefined}
         onConfirm={() => undefined}
       />
-      <Toast message={variant === "toast" ? "차단을 해제했습니다." : ""} />
+      <Toast message={variant === "toast" ? "차단이 해제되었습니다" : ""} />
     </Screen>
   );
 }
@@ -2211,9 +2205,7 @@ export function UserProfileReferenceScreen({ variant }: { variant: string }) {
         onCancel={() => undefined}
         onConfirm={() => undefined}
       />
-      <Toast
-        message={variant === "block-toast" ? "사용자를 차단했습니다." : ""}
-      />
+      <Toast message={variant === "block-toast" ? "차단되었습니다" : ""} />
     </Screen>
   );
 }

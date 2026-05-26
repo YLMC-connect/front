@@ -18,6 +18,17 @@ const resetEachRoute = process.env.YLMC_CAPTURE_RESET_EACH_ROUTE === "1";
 const routeOpenRepeats = Number(
   process.env.YLMC_CAPTURE_ROUTE_OPEN_REPEATS ?? "1",
 );
+const matchDesignViewport =
+  process.env.YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT === "1";
+const designViewportWidth = Number(
+  process.env.YLMC_CAPTURE_DEVICE_WIDTH ?? "1080",
+);
+const designViewportHeight = Number(
+  process.env.YLMC_CAPTURE_DEVICE_HEIGHT ?? "2160",
+);
+const designViewportDensity = Number(
+  process.env.YLMC_CAPTURE_DEVICE_DENSITY ?? "480",
+);
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -107,6 +118,64 @@ const getDeviceSize = (device) => {
   }
 
   return { width: Number(match[1]), height: Number(match[2]) };
+};
+
+const getWindowManagerState = (device) => {
+  const output = adb(device, ["shell", "wm", "size"]);
+  const densityOutput = adb(device, ["shell", "wm", "density"]);
+
+  return {
+    overrideSize: output.match(/Override size:\s*(\d+x\d+)/)?.[1] ?? "",
+    overrideDensity:
+      densityOutput.match(/Override density:\s*(\d+)/)?.[1] ?? "",
+  };
+};
+
+const applyDesignViewport = async (device) => {
+  if (!matchDesignViewport) {
+    return () => {};
+  }
+
+  if (
+    !Number.isFinite(designViewportWidth) ||
+    !Number.isFinite(designViewportHeight) ||
+    !Number.isFinite(designViewportDensity)
+  ) {
+    throw new Error("Invalid design viewport width/height/density.");
+  }
+
+  const originalWindowState = getWindowManagerState(device);
+
+  console.log(
+    `Applying design viewport ${designViewportWidth}x${designViewportHeight}@${designViewportDensity}`,
+  );
+  adb(device, [
+    "shell",
+    "wm",
+    "size",
+    `${designViewportWidth}x${designViewportHeight}`,
+  ]);
+  adb(device, ["shell", "wm", "density", String(designViewportDensity)]);
+  await sleep(1000);
+
+  return () => {
+    if (originalWindowState.overrideSize) {
+      adb(device, ["shell", "wm", "size", originalWindowState.overrideSize]);
+    } else {
+      adb(device, ["shell", "wm", "size", "reset"]);
+    }
+
+    if (originalWindowState.overrideDensity) {
+      adb(device, [
+        "shell",
+        "wm",
+        "density",
+        originalWindowState.overrideDensity,
+      ]);
+    } else {
+      adb(device, ["shell", "wm", "density", "reset"]);
+    }
+  };
 };
 
 const tapPercent = (device, xRatio, yRatio) => {
@@ -249,50 +318,59 @@ const main = async () => {
 
   await ensureMetro();
   const device = pickAndroidDevice();
-  await prepareDevClient(device);
+  const restoreViewport = await applyDesignViewport(device);
 
-  const capturedRows = [];
+  try {
+    await prepareDevClient(device);
 
-  for (const row of selectedRows) {
-    console.log(`${row.index}/${rows.length} ${row.id} -> ${row.route}`);
+    const capturedRows = [];
 
-    if (resetEachRoute && row.route !== "/") {
-      openRoute(device, "/");
-      await sleep(routeDelayMs);
+    for (const row of selectedRows) {
+      console.log(`${row.index}/${rows.length} ${row.id} -> ${row.route}`);
+
+      if (resetEachRoute && row.route !== "/") {
+        openRoute(device, "/");
+        await sleep(routeDelayMs);
+      }
+
+      for (let attempt = 0; attempt < routeOpenRepeats; attempt += 1) {
+        openRoute(device, row.route);
+        await sleep(routeDelayMs);
+      }
+
+      const appScreenshot = path.join(outputPngDir, row.screenshotName);
+      captureScreenshot(device, appScreenshot);
+      capturedRows.push({ ...row, appScreenshot });
     }
 
-    for (let attempt = 0; attempt < routeOpenRepeats; attempt += 1) {
-      openRoute(device, row.route);
-      await sleep(routeDelayMs);
-    }
+    const tsv = [
+      "section\tid\tcomponent\tvariant\troute\tappScreenshot",
+      ...capturedRows.map((row) =>
+        [
+          row.section,
+          row.id,
+          row.component,
+          row.variant,
+          row.route,
+          row.appScreenshot,
+        ].join("\t"),
+      ),
+    ].join("\n");
 
-    const appScreenshot = path.join(outputPngDir, row.screenshotName);
-    captureScreenshot(device, appScreenshot);
-    capturedRows.push({ ...row, appScreenshot });
+    writeFileSync(
+      path.join(outputRoot, "route-capture-results.json"),
+      `${JSON.stringify(capturedRows, null, 2)}\n`,
+    );
+    writeFileSync(
+      path.join(outputRoot, "route-capture-results.tsv"),
+      `${tsv}\n`,
+    );
+
+    console.log(`captured=${capturedRows.length}`);
+    console.log(`output=${outputRoot}`);
+  } finally {
+    restoreViewport();
   }
-
-  const tsv = [
-    "section\tid\tcomponent\tvariant\troute\tappScreenshot",
-    ...capturedRows.map((row) =>
-      [
-        row.section,
-        row.id,
-        row.component,
-        row.variant,
-        row.route,
-        row.appScreenshot,
-      ].join("\t"),
-    ),
-  ].join("\n");
-
-  writeFileSync(
-    path.join(outputRoot, "route-capture-results.json"),
-    `${JSON.stringify(capturedRows, null, 2)}\n`,
-  );
-  writeFileSync(path.join(outputRoot, "route-capture-results.tsv"), `${tsv}\n`);
-
-  console.log(`captured=${capturedRows.length}`);
-  console.log(`output=${outputRoot}`);
 };
 
 main().catch((error) => {

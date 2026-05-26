@@ -93,9 +93,7 @@ export default function LoginScreen() {
       </View>
       <Toast
         message={
-          params.variant === "toast"
-            ? "네트워크가 불안정합니다. 잠시 후 다시 시도해주세요."
-            : ""
+          params.variant === "toast" ? "네트워크 연결을 확인해주세요" : ""
         }
       />
       <Text style={styles.copy}>© 열린문교회</Text>

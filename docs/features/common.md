@@ -29,6 +29,7 @@
 - ZIP TopBar/Avatar 공통 패턴 정렬 — 상세 화면 back pill은 `뒤로` label을 포함하고, Avatar는 ZIP `gradFor` 해시 팔레트와 같은 색상 기준을 사용
 - ZIP `Thumb` 공통 패턴 정렬 — `VisualThumb`는 ZIP JSX처럼 icon prop이 있을 때만 아이콘을 렌더링하고, 기본 썸네일은 추상 도형만 표시
 - Dev Client Maestro smoke 서버 선택 보강 — Dev Client가 `DEVELOPMENT SERVERS` 화면에 머물면 `.maestro/smoke.yml`에서 개발 서버를 먼저 선택한 뒤 v1 탭 smoke를 실행
+- 디자인 viewport 기반 부분 캡처 옵션 추가 — `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT=1` 사용 시 Android Emulator를 1080x2160@480으로 임시 조정해 ZIP 360x720 논리 viewport에 맞춰 캡처하고, 캡처 후 원래 size/density로 복원
 
 ---
 
@@ -56,7 +57,7 @@
 | `scripts/dev-client-smoke.mjs` | Expo Dev Client Metro 부팅과 `/status` 응답 확인 |
 | `scripts/maestro-smoke.mjs` | Metro 확인/부팅과 Dev Client deep link를 거쳐 Maestro smoke 실행. Android Emulator는 `localhost`/`127.0.0.1` + `adb reverse` 기준이며 ADB로 Dev Client를 먼저 연 뒤 `.maestro/smoke.yml`이 메뉴/탭 검증을 담당 |
 | `scripts/design-screen-routes.mjs` | ZIP JSX inventory 110개 화면을 Expo Router route와 screenshot filename으로 매핑 |
-| `scripts/capture-design-screens.mjs` | Android Dev Client에서 design route 스크린샷 캡처. `YLMC_CAPTURE_INDEXES`, `YLMC_CAPTURE_RESET_EACH_ROUTE`, `YLMC_CAPTURE_ROUTE_OPEN_REPEATS`로 부분 재캡처 가능 |
+| `scripts/capture-design-screens.mjs` | Android Dev Client에서 design route 스크린샷 캡처. `YLMC_CAPTURE_INDEXES`, `YLMC_CAPTURE_RESET_EACH_ROUTE`, `YLMC_CAPTURE_ROUTE_OPEN_REPEATS`, `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT`로 부분 재캡처 가능 |
 | `scripts/compare-design-screens.mjs` | 원본/앱 스크린샷 normalized diff 생성. 원본 PNG가 단색 빈 화면이면 `originalFlat`로 표시해 JSX 기준 검토 대상으로 분리 |
 | `.maestro/smoke.yml` | v1 핵심 탭 진입 `testID` 기반 E2E smoke |
 
@@ -64,6 +65,7 @@
 [../../PLAN.md](../../PLAN.md) “🗃 데이터 타입 설계 > 공통” 참조.
 
 ## 결정 사항 (최신 위)
+- (2026-05-26) **visual capture는 필요 시 ZIP 논리 viewport에 맞춘다** — Android Emulator 기본 해상도(1080x2400@420)는 ZIP 원본 360x720과 논리 viewport가 달라 layout diff를 키우므로, 부분 visual compare에서는 `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT=1`로 1080x2160@480을 임시 적용해 360x720dp 기준에 맞춥니다. 스크립트는 캡처 후 원래 `wm size/density`를 복원합니다.
 - (2026-05-26) **`VisualThumb` 기본형은 ZIP `Thumb`처럼 icon-less** — ZIP 공통 JSX의 `Thumb`는 `icon`을 넘긴 경우에만 아이콘을 표시하므로, RN `VisualThumb`도 기본 `redeem` 아이콘을 제거하고 호출부가 명시적으로 요청할 때만 아이콘을 렌더링합니다.
 - (2026-05-26) **Dev Client smoke는 서버 선택 화면도 조건부 처리한다** — Android Emulator에서 앱 상태를 clear하면 Expo Dev Client가 `DEVELOPMENT SERVERS` 화면에 남을 수 있으므로, `.maestro/smoke.yml`은 해당 화면이 보일 때 개발 서버 row를 탭하고 `Reload` 메뉴를 닫은 뒤 앱 루트 딥링크 검증을 진행합니다.
 - (2026-05-25) **공통 UI 토큰은 ZIP app-level tokens를 우선 번역한다** — `app-tokens.css`의 primary/surface/ink/line/radius/shadow/type, `halo-tokens.css`의 glass/elevation/type 기준을 `theme.ts`에 반영하고, Button/Card/Badge/Chip/SegmentedTabs/TopBar/Dialog/Sheet/Toast/FAB/Input은 화면별 땜질보다 공통 컴포넌트에서 먼저 맞춥니다. RN에서 직접 표현이 어려운 CSS blur/box-shadow는 `borderColor`, `shadow*`, `elevation` 조합으로 번역합니다.

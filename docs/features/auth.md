@@ -1,6 +1,6 @@
 # auth (인증)
 
-> 마지막 갱신: 2026-05-23 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-05-26 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 성도가 앱에 들어오기 위한 회원가입/로그인 흐름과 인증 상태를 관리합니다.
@@ -15,6 +15,7 @@
 - 인증 상태 저장소와 mock service 구현 — `src/store/authStore.ts`, `src/services/authService.ts`, `src/hooks/useAuth.ts`, `src/mocks/auth.ts`
 - 토큰 저장 유틸 골격 구현 — `src/lib/secureStore.ts`
 - Swagger 인증 API 연결을 위한 adapter 골격 구현 — `src/services/authAdapter.ts`
+- ZIP auth toast 문구 정렬 — 로그인/가입 코드 네트워크 toast를 원본 문구 `네트워크 연결을 확인해주세요` 기준으로 맞춤
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -38,6 +39,7 @@
 `LoginInput`, `SignupInput`, `AuthSession`을 `src/types/auth.ts`에 정의합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-26) **auth toast 문구는 ZIP 원본을 따른다** — 로그인/가입 코드 네트워크 오류 reference 상태는 앱 내부 설명형 문구가 아니라 ZIP JSX의 짧은 안내 문구 `네트워크 연결을 확인해주세요`를 기준으로 합니다.
 - (2026-05-23) **ZIP auth 화면은 variant reference로 보강** — 가입 코드/약관처럼 Notion MVP 정책 확정이 필요한 화면도 ZIP에 존재하면 캡처·검증 가능한 mock-first 라우트로 둡니다.
 - (2026-05-23) **로그인 화면은 카드 없는 단순 흐름** — ZIP prototype의 첫 진입 흐름에 맞춰 form을 큰 카드에 넣지 않고, 로고 hero와 primary CTA 중심으로 둡니다.
 - (2026-05-22) **MVP 인증은 Mock-first** — Swagger에서 `/api/signup`, `/api/auth/login`, `/api/auth/refresh`만 확인됐으므로 실제 API 연결은 Phase 6 이후로 분리합니다.

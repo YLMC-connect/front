@@ -104,7 +104,7 @@ npm run test:visual:capture
 npm run test:visual:compare
 ```
 
-`test:visual:capture`는 `/Users/mingulee/Downloads/열린문커넥트.zip`에서 정리한 110개 JSX 화면 inventory를 Android Dev Client route로 열어 앱 스크린샷을 저장합니다. 일부 화면만 다시 찍을 때는 `YLMC_CAPTURE_INDEXES=29,30`처럼 지정할 수 있고, stale route를 줄이려면 `YLMC_CAPTURE_RESET_EACH_ROUTE=1 YLMC_CAPTURE_ROUTE_OPEN_REPEATS=2`를 함께 사용합니다. `test:visual:compare`는 원본 PNG와 앱 PNG를 비교하되, 원본 PNG가 단색 빈 화면이면 report에 `originalFlat=yes`로 표시합니다. 이런 항목은 pixel diff보다 JSX 소스와 앱 캡처를 직접 비교합니다.
+`test:visual:capture`는 `/Users/mingulee/Downloads/열린문커넥트.zip`에서 정리한 110개 JSX 화면 inventory를 Android Dev Client route로 열어 앱 스크린샷을 저장합니다. 일부 화면만 다시 찍을 때는 `YLMC_CAPTURE_INDEXES=29,30`처럼 지정할 수 있고, stale route를 줄이려면 `YLMC_CAPTURE_RESET_EACH_ROUTE=1 YLMC_CAPTURE_ROUTE_OPEN_REPEATS=2`를 함께 사용합니다. ZIP 원본 360x720 논리 viewport에 맞춰 비교할 때는 `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT=1`을 추가합니다. 이 옵션은 캡처 중 Android Emulator를 1080x2160@480으로 임시 조정하고 완료 후 원래 size/density로 복원합니다. `test:visual:compare`는 원본 PNG와 앱 PNG를 비교하되, 원본 PNG가 단색 빈 화면이면 report에 `originalFlat=yes`로 표시합니다. 이런 항목은 pixel diff보다 JSX 소스와 앱 캡처를 직접 비교합니다.
 
 ## 문서 지도
 

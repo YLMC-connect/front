@@ -1490,8 +1490,8 @@ export function GroupDetailReferenceScreen({ variant }: { variant: string }) {
           <View style={styles.groupLeaderCard}>
             <Avatar name={isLeader ? "김은혜" : "한지수"} size={36} />
             <View style={styles.flex}>
-              <Text style={styles.metaText}>소모임장</Text>
-              <Text style={styles.cardTitle}>
+              <Text style={styles.groupLeaderKicker}>소모임장</Text>
+              <Text style={styles.groupLeaderName}>
                 {isLeader ? "김은혜" : "한지수"}
               </Text>
             </View>
@@ -4366,7 +4366,7 @@ const styles = StyleSheet.create({
     color: theme.colors.ink,
     fontSize: 24,
     lineHeight: 30,
-    fontWeight: "900",
+    fontWeight: "800",
   },
   groupMetaRow: {
     flexDirection: "row",
@@ -4384,12 +4384,12 @@ const styles = StyleSheet.create({
   groupCategoryChipText: {
     color: theme.colors.primaryDeep,
     fontSize: 11.5,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   groupMetaText: {
     color: theme.colors.inkSoft,
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "600",
   },
   groupLeaderCard: {
     marginTop: 4,
@@ -4401,6 +4401,17 @@ const styles = StyleSheet.create({
     gap: 12,
     backgroundColor: theme.colors.surface2,
   },
+  groupLeaderKicker: {
+    color: theme.colors.inkMute,
+    fontSize: 11,
+    fontWeight: "500",
+  },
+  groupLeaderName: {
+    marginTop: 2,
+    color: theme.colors.ink,
+    fontSize: 14.5,
+    fontWeight: "700",
+  },
   groupLeaderBadge: {
     borderRadius: theme.radius.pill,
     paddingHorizontal: 10,
@@ -4410,7 +4421,7 @@ const styles = StyleSheet.create({
   groupLeaderBadgeText: {
     color: theme.colors.white,
     fontSize: 10.5,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   groupActionWrap: {
     paddingHorizontal: 16,
@@ -4461,7 +4472,7 @@ const styles = StyleSheet.create({
   groupSectionTitle: {
     color: theme.colors.ink,
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   memberRail: {
     paddingHorizontal: 22,
@@ -4492,8 +4503,8 @@ const styles = StyleSheet.create({
   memberMiniName: {
     maxWidth: 56,
     color: theme.colors.inkSoft,
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: 11.5,
+    fontWeight: "600",
   },
   groupNoticeList: {
     paddingHorizontal: 22,
@@ -4513,7 +4524,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     color: theme.colors.ink,
     fontSize: 14.5,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   groupNoticeEdited: {
     color: theme.colors.inkHint,

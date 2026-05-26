@@ -17,6 +17,7 @@
 - Swagger 인증 API 연결을 위한 adapter 골격 구현 — `src/services/authAdapter.ts`
 - ZIP auth toast 문구 정렬 — 로그인/가입 코드 네트워크 toast를 원본 문구 `네트워크 연결을 확인해주세요` 기준으로 맞춤
 - ZIP auth 화면 residual 정렬 — 실제 로그인 route와 가입 코드/약관 reference 화면을 ZIP `ScreenLogin`, `ScreenInviteCode`, `ScreenTermsSheet` 구조 기준으로 재정렬하고 auth 2-11번 화면 partial capture/compare를 갱신
+- ZIP 회원가입 화면 구조 정렬 — 실제 `/signup` route를 ZIP `ScreenSignup`의 카드 없는 구조, 자동 아바타 미리보기, field stack, 안내 박스, bottom-flat 가입 버튼 기준으로 재구성하고 auth 12-17번 화면 partial capture/compare를 갱신
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -40,6 +41,7 @@
 `LoginInput`, `SignupInput`, `AuthSession`을 `src/types/auth.ts`에 정의합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-27) **회원가입 실제 route는 ZIP `ScreenSignup` 구조를 따른다** — 기존 `Card`/공통 `TextField` 묶음은 ZIP 구조와 맞지 않아 제거하고, `/signup` route 자체를 `정보를 입력해주세요` display, 자동 아바타, 아이디 중복확인 row, 비밀번호 확인 field, 하단 고정 primary CTA로 번역합니다. 실제 submit은 기존 `useAuth` mock-first 흐름을 유지합니다.
 - (2026-05-27) **auth 화면 구조는 ZIP `screens-auth.jsx`를 우선한다** — 로그인 실제 route는 서비스 기능을 유지하되 ZIP의 카드 없는 hero/form/divider/toast 구조를 따른다. 가입 코드와 약관 전문 reference는 `variant` 캡처 화면이므로 ZIP JSX의 화면 구조를 RN으로 직접 번역합니다.
 - (2026-05-26) **auth toast 문구는 ZIP 원본을 따른다** — 로그인/가입 코드 네트워크 오류 reference 상태는 앱 내부 설명형 문구가 아니라 ZIP JSX의 짧은 안내 문구 `네트워크 연결을 확인해주세요`를 기준으로 합니다.
 - (2026-05-23) **ZIP auth 화면은 variant reference로 보강** — 가입 코드/약관처럼 Notion MVP 정책 확정이 필요한 화면도 ZIP에 존재하면 캡처·검증 가능한 mock-first 라우트로 둡니다.
@@ -51,7 +53,7 @@
 ## 미결 / 추적
 - 실제 로그인 API의 응답 스키마와 refresh token rotation 정책 확인 필요.
 - 약관/개인정보 동의 화면의 필수 여부와 문구 확정 필요.
-- signup variant residual은 아직 ZIP `ScreenSignup`과 실제 구현 차이가 남아 후속 auth 정렬 대상입니다.
+- signup variant residual은 `ScreenSignup` 구조 정렬 후 `signup-pw-error 21.74→10.14`, `signup-id-dup 20.65→9.18`, `signup default 12.50→7.76`까지 낮췄습니다. 남은 차이는 RN status bar/time, secure input glyph/font metrics, CSS gradient/shadow 번역 차이 중심으로 후속 공통 정렬에서 추적합니다.
 
 ## 의존성
 - common 도메인의 `Member`, `secureStore`, `queryClient`에 의존합니다.

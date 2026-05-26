@@ -1474,7 +1474,9 @@ export function GroupDetailReferenceScreen({ variant }: { variant: string }) {
         </View>
         <View style={styles.groupActionWrap}>
           {isLeader ? (
-            <Card style={styles.detailActionCard}>
+            <Card
+              style={[styles.detailActionCard, styles.groupDetailActionCard]}
+            >
               <DetailAction icon="edit" label="수정" />
               <DetailAction icon="campaign" label="공지" />
               <DetailAction icon="groups" label="멤버" />
@@ -2967,18 +2969,11 @@ function DetailAction({
 }) {
   return (
     <View style={[styles.detailAction, full ? styles.detailActionFull : null]}>
-      <View
-        style={[
-          styles.detailActionIcon,
-          danger ? styles.detailActionDangerIcon : null,
-        ]}
-      >
-        <MaterialIcons
-          name={icon}
-          size={18}
-          color={danger ? theme.colors.danger : theme.colors.primaryDeep}
-        />
-      </View>
+      <MaterialIcons
+        name={icon}
+        size={18}
+        color={danger ? theme.colors.danger : theme.colors.ink}
+      />
       <Text
         style={[
           styles.detailActionText,
@@ -3662,31 +3657,22 @@ const styles = StyleSheet.create({
   },
   detailAction: {
     flex: 1,
-    minHeight: 76,
+    minHeight: 44,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
     borderRadius: theme.radius.md,
   },
   detailActionFull: {
-    flexDirection: "row",
-    minHeight: 54,
-  },
-  detailActionIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: theme.colors.primaryTint,
-  },
-  detailActionDangerIcon: {
-    backgroundColor: "rgba(201,124,110,0.14)",
+    flex: 0,
+    width: "100%",
+    minHeight: 44,
   },
   detailActionText: {
-    color: theme.colors.inkSoft,
-    fontSize: 12,
-    fontWeight: "800",
+    color: theme.colors.ink,
+    fontSize: 13.5,
+    fontWeight: "600",
   },
   detailActionDangerText: {
     color: theme.colors.danger,
@@ -4173,15 +4159,12 @@ const styles = StyleSheet.create({
   groupLeaderCard: {
     marginTop: 4,
     borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.ring,
     paddingHorizontal: 14,
     paddingVertical: 12,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
     backgroundColor: theme.colors.surface2,
-    ...theme.shadow.card,
   },
   groupLeaderBadge: {
     borderRadius: theme.radius.pill,
@@ -4197,6 +4180,10 @@ const styles = StyleSheet.create({
   groupActionWrap: {
     paddingHorizontal: 16,
     paddingBottom: 22,
+  },
+  groupDetailActionCard: {
+    marginHorizontal: 0,
+    marginBottom: 0,
   },
   groupPrimaryAction: {
     height: 52,

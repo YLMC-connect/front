@@ -25,6 +25,7 @@
 - 나눔 작성 partial visual compare 개선 — `market-create*` 5개 상태를 Android Dev Client에서 재캡처해 `missing=0` 확인, 대표 residual은 `limit-toast 32.50→15.21`, `create 12.56→12.04`, `back-warn 8.76→7.63`, `create-filled/edit 14.21→14.11`로 감소
 - 나눔 목록 ZIP compact row 재정렬 — ZIP `ScreenMarketList` 기준으로 카드 wrapper를 제거하고 full-width row, 86px `Thumb`, divider, 예약/완료 overlay, 8개 카테고리 chip 순서를 reference 화면에 반영
 - 나눔 목록 partial visual compare 개선 — `market-list*` 6개 상태를 Android Dev Client에서 재캡처해 `missing=0` 확인, 대표 residual은 `market-list-all 20.56→15.44`, `market-list 14.24→12.27`, `market-list-reserved 10.80→8.31`, `market-list-done 12.35→7.77`로 감소
+- 나눔 상세 action compact 정렬 재검증 — ZIP `ActionBtn` inline 구조를 공통 reference action에 반영한 뒤 `market-detail*` 정상 상태 10개를 재캡처해 `missing=0` 확인
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -46,6 +47,7 @@
 
 ## 결정 사항 (최신 위)
 - (2026-05-27) **나눔 목록은 ZIP full-width row를 따른다** — `ScreenMarketList` 원본은 카드형 리스트가 아니라 `padding 14/22`, 86px thumb, row divider, status overlay를 쓰는 compact row 구조이므로 reference 목록에서는 공통 `Card` wrapper를 사용하지 않습니다.
+- (2026-05-27) **나눔 상세 action은 ZIP `ActionBtn` inline 구조를 따른다** — 수정/삭제/상태 변경/신고/차단 action은 큰 원형 icon tile이 아니라 ZIP `screens-market.jsx`의 44px transparent inline icon+label button으로 번역합니다.
 - (2026-05-27) **나눔 작성은 ZIP section form 구조를 따른다** — 작성/수정 reference는 카드형 폼이 아니라 ZIP 원본의 상단 `닫기`/등록 action, horizontal photo rail, 8px divider section, 7개 카테고리 chip, 상태 segmented button, 안내 박스를 기준으로 번역합니다.
 - (2026-05-26) **나눔 상세 geometry는 ZIP phone frame 기준으로 본다** — Android native safe-area를 그대로 쓰는 대신 ZIP `phone-status` 44px와 bottom fixed composer 위치를 기준으로 맞춰야 원본 상세의 hero, 작성자, composer 위치가 일치합니다.
 - (2026-05-26) **나눔 상세 toast는 ZIP `CheckToast offset={106}`을 따른다** — 하단 comment composer가 있는 나눔 상세의 중복 신고 toast는 기본 offset이 아니라 ZIP 원본처럼 bottom action area 위에 뜨도록 `offset=106`을 적용하고, 문구도 `이미 신고한 게시글입니다`로 맞춥니다.

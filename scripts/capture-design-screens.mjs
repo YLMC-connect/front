@@ -111,7 +111,9 @@ const ensureMetro = async () => {
 
 const getDeviceSize = (device) => {
   const output = adb(device, ["shell", "wm", "size"]);
-  const match = output.match(/Physical size:\s*(\d+)x(\d+)/);
+  const match =
+    output.match(/Override size:\s*(\d+)x(\d+)/) ??
+    output.match(/Physical size:\s*(\d+)x(\d+)/);
 
   if (!match) {
     return { width: 1080, height: 2400 };
@@ -208,13 +210,13 @@ const openRoute = (device, route) => {
   openUrl(device, deepLink);
 };
 
-const dismissDevMenu = async (device) => {
-  for (let attempt = 0; attempt < 8; attempt += 1) {
-    console.log(`dismiss dev menu ${attempt + 1}/8`);
-    tapPercent(device, 0.5, 0.895);
-    await sleep(1200);
-    tapPercent(device, 0.9, 0.46);
-    await sleep(1200);
+const dismissDevMenu = async (device, attempts = 8) => {
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    console.log(`dismiss dev menu ${attempt + 1}/${attempts}`);
+    tapPercent(device, 0.5, 0.855);
+    await sleep(800);
+    tapPercent(device, 0.84, 0.575);
+    await sleep(800);
   }
 };
 
@@ -337,6 +339,9 @@ const main = async () => {
         openRoute(device, row.route);
         await sleep(routeDelayMs);
       }
+
+      await dismissDevMenu(device, 2);
+      await sleep(600);
 
       const appScreenshot = path.join(outputPngDir, row.screenshotName);
       captureScreenshot(device, appScreenshot);

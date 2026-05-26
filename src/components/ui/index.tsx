@@ -868,6 +868,7 @@ export function HorizontalChips<T extends string>({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
+      style={styles.horizontalChipsScroll}
       contentContainerStyle={styles.horizontalChips}
     >
       {items.map((item) => (
@@ -1430,6 +1431,7 @@ const styles = StyleSheet.create({
   },
   formSection: { gap: 12 },
   formTitle: { color: theme.colors.ink, fontSize: 17, fontWeight: "800" },
+  horizontalChipsScroll: { flexGrow: 0 },
   horizontalChips: { gap: 8, paddingHorizontal: 18, paddingVertical: 6 },
 });
 

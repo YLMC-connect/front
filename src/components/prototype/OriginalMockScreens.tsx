@@ -523,7 +523,7 @@ export function MarketListReferenceScreen({ variant }: { variant: string }) {
         : marketPosts.filter((post) => post.status === active);
 
   return (
-    <Screen padded={false}>
+    <Screen padded={false} scroll={false}>
       <TopBar testID="screen-market" title="나눔" />
       <View style={styles.segmentWrap}>
         <SegmentedTabs
@@ -537,7 +537,11 @@ export function MarketListReferenceScreen({ variant }: { variant: string }) {
         active="all"
         onChange={() => undefined}
       />
-      <View style={styles.routeList}>
+      <ScrollView
+        style={styles.marketListScroll}
+        contentContainerStyle={styles.marketListBody}
+        showsVerticalScrollIndicator={false}
+      >
         {isError ? (
           <ErrorState />
         ) : list.length === 0 ? (
@@ -553,30 +557,62 @@ export function MarketListReferenceScreen({ variant }: { variant: string }) {
             icon="redeem"
           />
         ) : (
-          list.map((post, index) => (
-            <Card key={post.title} style={styles.marketRow}>
-              <View style={styles.thumbWrap}>
-                <VisualThumb size={86} seed={index} />
-                {post.status !== "sharing" ? (
-                  <View style={styles.thumbBadge}>
-                    <Text style={styles.thumbBadgeText}>
-                      {post.status === "reserved" ? "예약중" : "나눔완료"}
-                    </Text>
-                  </View>
-                ) : null}
-              </View>
-              <View style={styles.flex}>
-                <Text style={styles.cardTitle}>{post.title}</Text>
-                <Text style={styles.metaText}>
-                  {post.author} · {post.when}
-                </Text>
-              </View>
-            </Card>
-          ))
+          <View>
+            {list.map((post, index) => (
+              <MarketListRow
+                key={post.title}
+                post={post}
+                index={index}
+                last={index === list.length - 1}
+              />
+            ))}
+          </View>
         )}
-      </View>
+      </ScrollView>
       <FloatingActionButton label="글쓰기" />
     </Screen>
+  );
+}
+
+function MarketListRow({
+  post,
+  index,
+  last,
+}: {
+  post: (typeof marketPosts)[number];
+  index: number;
+  last: boolean;
+}) {
+  const isDone = post.status === "done";
+  const isReserved = post.status === "reserved";
+
+  return (
+    <Pressable style={[styles.marketListRow, last ? styles.noBorder : null]}>
+      <View style={styles.marketListThumbWrap}>
+        <VisualThumb size={86} seed={index} />
+        {isDone ? (
+          <>
+            <View style={styles.marketListDoneOverlay} />
+            <View style={styles.marketListDoneLabelWrap}>
+              <Text style={styles.marketListDoneLabel}>나눔완료</Text>
+            </View>
+          </>
+        ) : null}
+        {isReserved ? (
+          <View style={styles.marketListReservedBadge}>
+            <Text style={styles.marketListReservedText}>예약중</Text>
+          </View>
+        ) : null}
+      </View>
+      <View style={[styles.marketListTextWrap, isDone ? styles.faded : null]}>
+        <Text numberOfLines={2} style={styles.marketListTitle}>
+          {post.title}
+        </Text>
+        <Text style={styles.marketListMeta}>
+          {post.author} · {post.when}
+        </Text>
+      </View>
+    </Pressable>
   );
 }
 
@@ -2925,10 +2961,13 @@ const marketStatusTabs = [
 
 const marketCategories = [
   { key: "all", label: "전체" },
-  { key: "baby", label: "유아·아동용품" },
+  { key: "cloth", label: "의류·잡화" },
   { key: "home", label: "가전·가구" },
   { key: "book", label: "도서·문구" },
-  { key: "cloth", label: "의류·잡화" },
+  { key: "food", label: "식품·생필품" },
+  { key: "baby", label: "유아·아동용품" },
+  { key: "sport", label: "스포츠·취미" },
+  { key: "etc", label: "기타" },
 ] as const;
 
 const marketCreateCategories = [
@@ -3309,6 +3348,8 @@ const styles = StyleSheet.create({
   sheetField: { marginTop: 14 },
   segmentWrap: { paddingHorizontal: 18, paddingBottom: 8 },
   routeList: { gap: 12, paddingHorizontal: 18 },
+  marketListScroll: { flex: 1 },
+  marketListBody: { paddingTop: 0, paddingBottom: 112 },
   rowCard: { flexDirection: "row", alignItems: "center", gap: 12 },
   marketDetailScroll: {
     paddingBottom: 100,
@@ -4229,6 +4270,67 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(246,247,242,0.94)",
   },
   marketRow: { flexDirection: "row", alignItems: "center", gap: 14 },
+  marketListRow: {
+    flexDirection: "row",
+    gap: 14,
+    paddingHorizontal: 22,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
+  },
+  marketListThumbWrap: {
+    position: "relative",
+    width: 86,
+    height: 86,
+    flexShrink: 0,
+    overflow: "hidden",
+    borderRadius: theme.radius.md,
+  },
+  marketListDoneOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(20,30,18,0.55)",
+  },
+  marketListDoneLabelWrap: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  marketListDoneLabel: {
+    color: theme.colors.white,
+    fontSize: 14,
+    fontWeight: "900",
+  },
+  marketListReservedBadge: {
+    position: "absolute",
+    left: 6,
+    top: 6,
+    borderRadius: 6,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    backgroundColor: "#E89A3C",
+  },
+  marketListReservedText: {
+    color: theme.colors.white,
+    fontSize: 11.5,
+    fontWeight: "900",
+  },
+  marketListTextWrap: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: "space-between",
+  },
+  marketListTitle: {
+    color: theme.colors.ink,
+    fontSize: 14.5,
+    fontWeight: "600",
+    lineHeight: 20.3,
+  },
+  marketListMeta: {
+    marginTop: 6,
+    color: theme.colors.inkMute,
+    fontSize: 12,
+    fontWeight: "500",
+  },
   thumbWrap: { position: "relative" },
   thumbBadge: {
     position: "absolute",

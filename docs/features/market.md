@@ -23,6 +23,8 @@
 - 나눔 상세 safe-area/sheet geometry 정렬 — ZIP 44px status frame과 bottom action 위치 기준으로 `Screen`을 조정하고 긴 `RadioSheet` compact row를 적용해 `missing=0`, `report 18.50→11.50`, `report-dup-toast 28.92→15.73`, `done 20.54→11.17`, `status 13.29→7.51`로 감소
 - 나눔 작성 원본 구조 정렬 — ZIP `ScreenMarketCreate` 기준으로 close/action topbar, 사진 레일, 7개 카테고리 chip, 제목/물품상태/상세설명 section, 안내 박스, 작성 중단 dialog, 5개 제한 toast를 reference 화면에 반영
 - 나눔 작성 partial visual compare 개선 — `market-create*` 5개 상태를 Android Dev Client에서 재캡처해 `missing=0` 확인, 대표 residual은 `limit-toast 32.50→15.21`, `create 12.56→12.04`, `back-warn 8.76→7.63`, `create-filled/edit 14.21→14.11`로 감소
+- 나눔 목록 ZIP compact row 재정렬 — ZIP `ScreenMarketList` 기준으로 카드 wrapper를 제거하고 full-width row, 86px `Thumb`, divider, 예약/완료 overlay, 8개 카테고리 chip 순서를 reference 화면에 반영
+- 나눔 목록 partial visual compare 개선 — `market-list*` 6개 상태를 Android Dev Client에서 재캡처해 `missing=0` 확인, 대표 residual은 `market-list-all 20.56→15.44`, `market-list 14.24→12.27`, `market-list-reserved 10.80→8.31`, `market-list-done 12.35→7.77`로 감소
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -43,6 +45,7 @@
 `MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-27) **나눔 목록은 ZIP full-width row를 따른다** — `ScreenMarketList` 원본은 카드형 리스트가 아니라 `padding 14/22`, 86px thumb, row divider, status overlay를 쓰는 compact row 구조이므로 reference 목록에서는 공통 `Card` wrapper를 사용하지 않습니다.
 - (2026-05-27) **나눔 작성은 ZIP section form 구조를 따른다** — 작성/수정 reference는 카드형 폼이 아니라 ZIP 원본의 상단 `닫기`/등록 action, horizontal photo rail, 8px divider section, 7개 카테고리 chip, 상태 segmented button, 안내 박스를 기준으로 번역합니다.
 - (2026-05-26) **나눔 상세 geometry는 ZIP phone frame 기준으로 본다** — Android native safe-area를 그대로 쓰는 대신 ZIP `phone-status` 44px와 bottom fixed composer 위치를 기준으로 맞춰야 원본 상세의 hero, 작성자, composer 위치가 일치합니다.
 - (2026-05-26) **나눔 상세 toast는 ZIP `CheckToast offset={106}`을 따른다** — 하단 comment composer가 있는 나눔 상세의 중복 신고 toast는 기본 offset이 아니라 ZIP 원본처럼 bottom action area 위에 뜨도록 `offset=106`을 적용하고, 문구도 `이미 신고한 게시글입니다`로 맞춥니다.
@@ -59,7 +62,8 @@
 ## 미결 / 추적
 - 실제 나눔 API 스키마, 이미지 업로드 방식, 페이지네이션 방식 확인 필요.
 - 신고 처리 후 블라인드/관리자 큐 정책은 API/운영 정책 확정 후 반영.
-- 나눔 상세 residual은 safe-area/sheet 정렬 후 추가로 줄었지만 기본/타인/예약/토스트 계열은 RN font metrics, hero 내부 추상 shape 위치, blur/shadow 번역 차이가 남아 후속 시각 정렬 대상입니다. 최신 부분 비교 리포트는 `/private/tmp/ylmc-golden-screens/market-detail/compare-current`입니다.
+- 나눔 목록 residual은 카드형 구조 차이를 제거해 낮췄지만 `market-list-all mean=15.44`는 native status bar/time, RN font metrics, tab bar/FAB 위치 차이가 남아 후속 공통 geometry 정렬 대상입니다.
+- 나눔 상세 residual은 safe-area/sheet 정렬 후 추가로 줄었지만 기본/타인/예약/토스트 계열은 RN font metrics, hero 내부 추상 shape 위치, blur/shadow 번역 차이가 남아 후속 시각 정렬 대상입니다. 최신 전체 비교 리포트는 `/private/tmp/ylmc-golden-screens/2026-05-23/compare/visual-compare-report.tsv`입니다.
 
 ## 의존성
 - common 도메인의 UI, `queryKeys`, `queryClient`, 이미지 선택 컴포넌트에 의존합니다.

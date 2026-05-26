@@ -19,6 +19,7 @@
     "validate": "npm run typecheck && npm run lint && npm run format:check && npm run test",
     "test:dev-client:smoke": "node scripts/dev-client-smoke.mjs",
     "test:e2e:smoke": "node scripts/maestro-smoke.mjs",
+    "test:visual:prepare": "node scripts/prepare-design-artifacts.mjs",
     "test:visual:capture": "node scripts/capture-design-screens.mjs",
     "test:visual:compare": "node scripts/compare-design-screens.mjs",
     "validate:full": "npm run validate && npm run test:dev-client:smoke && npm run test:e2e:smoke"

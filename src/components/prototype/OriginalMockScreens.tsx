@@ -2444,24 +2444,75 @@ export function ActivityReferenceScreen({ variant }: { variant: string }) {
 
 export function BlockedReferenceScreen({ variant }: { variant: string }) {
   const empty = variant === "empty";
+  const blockedUsers = empty
+    ? []
+    : [
+        { name: "이모씨", when: "2025.11.20", seed: 1 },
+        { name: "박모씨", when: "2025.09.04", seed: 3 },
+        { name: "정모씨", when: "2025.06.15", seed: 5 },
+      ];
+  const visibleUsers =
+    variant === "toast" ? blockedUsers.slice(1) : blockedUsers;
+
   return (
-    <Screen>
+    <Screen scroll={false} padded={false}>
       <TopBar title="차단 사용자" back onBack={() => router.back()} />
-      {empty ? (
-        <Card style={styles.emptyCard}>
-          <MaterialIcons name="block" size={42} color={theme.colors.inkHint} />
-          <Text style={styles.bodyText}>차단한 사용자가 없습니다.</Text>
-        </Card>
-      ) : (
-        <Card style={styles.rowCard}>
-          <Avatar name="박정아" size={44} />
-          <View style={styles.flex}>
-            <Text style={styles.cardTitle}>박정아</Text>
-            <Text style={styles.metaText}>2026.05.22 차단</Text>
+      <ScrollView
+        contentContainerStyle={styles.blockedBody}
+        showsVerticalScrollIndicator={false}
+      >
+        {!empty ? (
+          <View style={styles.blockedNotice}>
+            <Text style={styles.blockedNoticeText}>
+              차단된 사용자의 게시글과 댓글은 보이지 않으며, 상대도 회원님의
+              활동을 볼 수 없습니다.
+            </Text>
           </View>
-          <Button variant="soft">해제</Button>
-        </Card>
-      )}
+        ) : null}
+        <View style={styles.blockedList}>
+          {visibleUsers.length === 0 ? (
+            <View style={styles.blockedEmpty}>
+              <View style={styles.blockedEmptyIcon}>
+                <MaterialIcons
+                  name="block"
+                  size={38}
+                  color={theme.colors.inkHint}
+                />
+              </View>
+              <Text style={styles.blockedEmptyTitle}>
+                차단한 사용자가 없습니다
+              </Text>
+              <Text style={styles.blockedEmptyText}>
+                프로필 화면에서 언제든지{"\n"}상대를 차단할 수 있어요.
+              </Text>
+            </View>
+          ) : (
+            visibleUsers.map((user, index) => (
+              <View
+                key={user.name}
+                style={[
+                  styles.blockedRow,
+                  index === visibleUsers.length - 1 ? styles.noBorder : null,
+                ]}
+              >
+                <Avatar name={user.name} size={42} seed={user.seed} />
+                <View style={styles.flex}>
+                  <Text style={styles.blockedName}>{user.name}</Text>
+                  <Text style={styles.blockedDate}>{user.when} 차단</Text>
+                </View>
+                <View style={styles.blockedReleaseButton}>
+                  <MaterialIcons
+                    name="check"
+                    size={14}
+                    color={theme.colors.primaryDeep}
+                  />
+                  <Text style={styles.blockedReleaseText}>차단 해제</Text>
+                </View>
+              </View>
+            ))
+          )}
+        </View>
+      </ScrollView>
       <ConfirmDialog
         visible={variant === "confirm"}
         title="이모씨님의 차단을 해제할까요?"
@@ -2579,34 +2630,73 @@ export function WithdrawReferenceScreen({
 export function UserProfileReferenceScreen({ variant }: { variant: string }) {
   if (variant === "blocked") {
     return (
-      <Screen>
+      <Screen scroll={false} padded={false}>
         <TopBar title="프로필" back onBack={() => router.back()} />
-        <Card style={styles.emptyCard}>
-          <MaterialIcons name="block" size={54} color={theme.colors.inkHint} />
-          <Text style={styles.cardTitle}>확인할 수 없는 프로필입니다</Text>
-          <Text style={styles.bodyText}>
-            차단한 사용자의 프로필은 볼 수 없어요.
+        <View style={styles.userBlockedBody}>
+          <View style={styles.userBlockedIcon}>
+            <MaterialIcons
+              name="block"
+              size={38}
+              color={theme.colors.inkHint}
+            />
+          </View>
+          <Text style={styles.userBlockedTitle}>
+            확인할 수 없는 프로필입니다
           </Text>
-        </Card>
+          <Text style={styles.userBlockedText}>
+            차단한 사용자의 프로필은 볼 수 없어요.{"\n"}마이페이지 &gt; 차단
+            사용자 관리에서 해제할 수 있어요.
+          </Text>
+        </View>
       </Screen>
     );
   }
 
+  const withdrawn = variant === "withdrawn";
+
   return (
-    <Screen>
+    <Screen scroll={false} padded={false}>
       <TopBar title="프로필" back onBack={() => router.back()} />
-      <Card style={styles.profileHero}>
-        <Avatar name={variant === "withdrawn" ? "?" : "박정아"} size={82} />
-        <Text style={styles.displayTitle}>
-          {variant === "withdrawn" ? "알 수 없음" : "박정아"}
+      <View style={styles.userProfileBody}>
+        <View
+          style={[
+            styles.userProfileAvatar,
+            withdrawn ? styles.userProfileAvatarWithdrawn : null,
+          ]}
+        >
+          <Text
+            style={[
+              styles.userProfileInitial,
+              withdrawn ? styles.userProfileInitialWithdrawn : null,
+            ]}
+          >
+            {withdrawn ? "?" : "정아"}
+          </Text>
+        </View>
+        <Text
+          style={[
+            styles.userProfileName,
+            withdrawn ? styles.userProfileNameWithdrawn : null,
+          ]}
+        >
+          {withdrawn ? "알 수 없음" : "박정아"}
         </Text>
-        <Text style={styles.bodyText}>
-          {variant === "withdrawn"
-            ? "탈퇴한 사용자입니다."
-            : "열린문교회 · 청년 2부"}
-        </Text>
-      </Card>
-      {variant !== "withdrawn" ? <Button variant="soft">차단</Button> : null}
+        {withdrawn ? (
+          <Text style={styles.userProfileSub}>탈퇴한 사용자</Text>
+        ) : null}
+      </View>
+      {!withdrawn ? (
+        <View style={styles.userProfileActionWrap}>
+          <View style={styles.userProfileBlockButton}>
+            <MaterialIcons
+              name="block"
+              size={18}
+              color={theme.colors.inkSoft}
+            />
+            <Text style={styles.userProfileBlockText}>차단</Text>
+          </View>
+        </View>
+      ) : null}
       <ConfirmDialog
         visible={variant === "block-confirm"}
         title="박정아님을 차단할까요?"
@@ -4147,6 +4237,182 @@ const styles = StyleSheet.create({
   },
   warningText: { color: "#7B3A2D", fontSize: 13, lineHeight: 20 },
   profileHero: { alignItems: "center", gap: 8, paddingVertical: 28 },
+  blockedBody: {
+    paddingBottom: 28,
+  },
+  blockedNotice: {
+    marginHorizontal: 18,
+    marginTop: 8,
+    marginBottom: 14,
+    borderRadius: theme.radius.md,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    backgroundColor: "rgba(91,122,176,0.10)",
+  },
+  blockedNoticeText: {
+    color: theme.colors.primaryDeep,
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  blockedList: {
+    paddingHorizontal: 18,
+  },
+  blockedRow: {
+    minHeight: 70,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
+    paddingVertical: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  blockedName: {
+    color: theme.colors.ink,
+    fontSize: 14.5,
+    fontWeight: "800",
+  },
+  blockedDate: {
+    marginTop: 2,
+    color: theme.colors.inkMute,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  blockedReleaseButton: {
+    height: 34,
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: theme.colors.primarySoft,
+  },
+  blockedReleaseText: {
+    color: theme.colors.primaryDeep,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  blockedEmpty: {
+    paddingHorizontal: 24,
+    paddingTop: 80,
+    paddingBottom: 60,
+    alignItems: "center",
+  },
+  blockedEmptyIcon: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    marginBottom: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.surface2,
+  },
+  blockedEmptyTitle: {
+    color: theme.colors.inkSoft,
+    fontSize: 15,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+  blockedEmptyText: {
+    marginTop: 8,
+    color: theme.colors.inkMute,
+    fontSize: 13,
+    lineHeight: 20,
+    textAlign: "center",
+  },
+  userBlockedBody: {
+    flex: 1,
+    paddingHorizontal: 32,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  userBlockedIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 1.5,
+    borderColor: theme.colors.lineStrong,
+    marginBottom: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.surface2,
+  },
+  userBlockedTitle: {
+    color: theme.colors.ink,
+    fontSize: 17,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+  userBlockedText: {
+    marginTop: 10,
+    color: theme.colors.inkMute,
+    fontSize: 13,
+    lineHeight: 21,
+    textAlign: "center",
+  },
+  userProfileBody: {
+    paddingHorizontal: 24,
+    paddingTop: 40,
+    paddingBottom: 32,
+    alignItems: "center",
+  },
+  userProfileAvatar: {
+    width: 104,
+    height: 104,
+    borderRadius: 52,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.primary,
+    ...theme.shadow.primary,
+  },
+  userProfileAvatarWithdrawn: {
+    borderWidth: 1.5,
+    borderColor: theme.colors.lineStrong,
+    backgroundColor: theme.colors.surface2,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  userProfileInitial: {
+    color: theme.colors.white,
+    fontSize: 36,
+    fontWeight: "900",
+  },
+  userProfileInitialWithdrawn: {
+    color: theme.colors.inkHint,
+  },
+  userProfileName: {
+    marginTop: 18,
+    color: theme.colors.ink,
+    fontSize: 22,
+    lineHeight: 28,
+    fontWeight: "900",
+  },
+  userProfileNameWithdrawn: {
+    color: theme.colors.inkMute,
+  },
+  userProfileSub: {
+    marginTop: 6,
+    color: theme.colors.inkMute,
+    fontSize: 13,
+  },
+  userProfileActionWrap: {
+    paddingHorizontal: 24,
+  },
+  userProfileBlockButton: {
+    height: 52,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: theme.colors.lineStrong,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "transparent",
+  },
+  userProfileBlockText: {
+    color: theme.colors.inkSoft,
+    fontSize: 14,
+    fontWeight: "700",
+  },
   homeHeader: {
     paddingHorizontal: 18,
     paddingTop: 8,

@@ -105,7 +105,7 @@
 - Codex 기본 샌드박스에서는 `expo start --dev-client --port 8081 --localhost`가 `Starting project...` 이후 8081에 바인딩되지 않을 수 있습니다. 샌드박스 밖 로컬 권한에서는 `npm run test:dev-client:smoke`로 `/status` 응답을 확인했습니다.
 - Maestro CLI `2.6.0`은 Homebrew tap(`mobile-dev-inc/tap`)으로 설치되어 있으며, Android Emulator `Medium_Phone_API_36.1`에서 `npm run test:e2e:smoke` 통과를 확인했습니다. 현재 smoke는 ADB로 Dev Client deep link를 먼저 열고, Maestro가 Dev Client 메뉴를 닫은 뒤 홈/나눔/소모임/동행/MY 탭과 동행 내부 삶공부 segment 진입을 검증합니다.
 - 제공 ZIP 110개 화면은 `test:visual:prepare` → Dev Client full capture/partial recapture → `test:visual:compare`로 검증하며 현재 비교 리포트 기준 `screens=110`, `missing=0`, `originalFlat=0`입니다. 남은 residual diff는 상태바/SafeArea, React Native 폰트·모달 번역 차이와 실제 UI 차이를 분리해 추적합니다.
-- 2026-05-27 나눔 작성 정렬 후 비교 리포트의 상위 residual은 `group-detail-full`, MY/소모임 toast 계열, signup/study/market-list 계열입니다. `market-create-limit`는 ZIP 작성 section form 구조로 재번역해 `32.50→15.21`까지 낮췄으며, 다음 우선순위는 소모임 상세 full-toast와 MY toast geometry 분리입니다.
+- 2026-05-27 소모임 상세 정렬 후 비교 리포트의 상위 residual은 MY toast 계열, signup/study/market-list 계열, 소모임 상세 일부입니다. `group-detail-full`은 ZIP overlay/section 구조로 재번역해 `31.63→20.76`까지 낮췄으며, 다음 우선순위는 MY 사용자 프로필/차단 toast와 signup variant 정렬입니다.
 
 ## 의존성
 - GitHub Issues / PR description 기반 작업 추적 규칙에 의존합니다.

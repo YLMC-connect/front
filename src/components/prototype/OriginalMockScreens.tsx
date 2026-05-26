@@ -1286,7 +1286,10 @@ export function GroupDetailReferenceScreen({ variant }: { variant: string }) {
     variant === "leader-closed" ||
     variant === "delete-confirm";
   const isClosed = variant === "leader-closed" || variant === "non-closed";
-  const isMember = variant === "member" || variant === "leave-confirm";
+  const isMember =
+    variant === "member" ||
+    variant === "leave-confirm" ||
+    variant === "leader-leave-toast";
   const members = [
     isLeader ? "김은혜" : "한지수",
     "박정아",
@@ -1297,61 +1300,90 @@ export function GroupDetailReferenceScreen({ variant }: { variant: string }) {
   ];
 
   return (
-    <Screen padded={false}>
+    <Screen padded={false} scroll={false}>
       <View style={styles.detailTopPad}>
         <TopBar title="소모임" back onBack={() => router.back()} />
       </View>
-      <View style={styles.groupDetailHeader}>
-        <View style={styles.inlineMeta}>
-          <Chip label="운동" selected />
-          <Badge tone={isClosed ? "mute" : "success"}>
-            {isClosed ? "모집완료" : "모집중"}
-          </Badge>
-        </View>
-        <Text style={styles.groupDetailTitle}>토요 산악회</Text>
-        <Text style={styles.groupMetaText}>
-          현재 <Text style={styles.primaryText}>{isClosed ? 25 : 18}</Text> /
-          최대 25
-        </Text>
-        <Text style={styles.bodyText}>
-          매주 토요일 함께 산을 오르며 자연을 느끼고 신앙을 나누는 모임입니다.
-          {"\n"}
-          등산 초보도 환영해요. 등산화·물·간식만 챙겨오시면 돼요.{"\n"}
-          모임 일정과 코스는 매주 화요일 공지로 안내드립니다.
-        </Text>
-        <Card style={styles.groupLeaderCard}>
-          <Avatar name={isLeader ? "김은혜" : "한지수"} />
-          <View style={styles.flex}>
-            <Text style={styles.metaText}>소모임장</Text>
-            <Text style={styles.cardTitle}>
-              {isLeader ? "김은혜" : "한지수"}
+      <ScrollView
+        contentContainerStyle={styles.groupDetailScroll}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.groupDetailHeader}>
+          <View style={styles.inlineMeta}>
+            <View style={styles.groupCategoryChip}>
+              <Text style={styles.groupCategoryChipText}>운동·건강</Text>
+            </View>
+            <Badge tone={isClosed ? "mute" : "success"}>
+              {isClosed ? "모집완료" : "모집중"}
+            </Badge>
+          </View>
+          <Text style={styles.groupDetailTitle}>토요 산악회</Text>
+          <View style={styles.groupMetaRow}>
+            <MaterialIcons
+              name="groups"
+              size={14}
+              color={theme.colors.inkSoft}
+            />
+            <Text style={styles.groupMetaText}>
+              현재 <Text style={styles.primaryText}>{isClosed ? 25 : 18}</Text>{" "}
+              / 최대 25
             </Text>
           </View>
-          <Badge>소모임장</Badge>
-        </Card>
-      </View>
-      <View style={styles.groupActionWrap}>
-        {isLeader ? (
-          <Card style={styles.detailActionCard}>
-            <DetailAction icon="edit" label="수정" />
-            <DetailAction icon="campaign" label="공지" />
-            <DetailAction icon="groups" label="멤버" />
-            <DetailAction icon="delete-outline" label="삭제" danger />
-          </Card>
-        ) : isMember ? (
-          <Button variant="ghost">탈퇴하기</Button>
-        ) : (
-          <Button disabled={isClosed}>
-            {isClosed ? "모집이 마감됐어요" : "참여 신청하기"}
-          </Button>
-        )}
-      </View>
-      <Section title={`멤버 ${members.length}명`}>
-        <View style={styles.memberRail}>
+          <Text style={styles.bodyText}>
+            매주 토요일 함께 산을 오르며 자연을 느끼고 신앙을 나누는 모임입니다.
+            {"\n"}
+            등산 초보도 환영해요. 등산화·물·간식만 챙겨오시면 돼요.{"\n"}
+            모임 일정과 코스는 매주 화요일 공지로 안내드립니다.
+          </Text>
+          <View style={styles.groupLeaderCard}>
+            <Avatar name={isLeader ? "김은혜" : "한지수"} size={36} />
+            <View style={styles.flex}>
+              <Text style={styles.metaText}>소모임장</Text>
+              <Text style={styles.cardTitle}>
+                {isLeader ? "김은혜" : "한지수"}
+              </Text>
+            </View>
+            <View style={styles.groupLeaderBadge}>
+              <Text style={styles.groupLeaderBadgeText}>소모임장</Text>
+            </View>
+          </View>
+        </View>
+        <View style={styles.groupActionWrap}>
+          {isLeader ? (
+            <Card style={styles.detailActionCard}>
+              <DetailAction icon="edit" label="수정" />
+              <DetailAction icon="campaign" label="공지" />
+              <DetailAction icon="groups" label="멤버" />
+              <DetailAction icon="delete-outline" label="삭제" danger />
+            </Card>
+          ) : isMember ? (
+            <View style={styles.groupOutlineAction}>
+              <Text style={styles.groupOutlineActionText}>탈퇴하기</Text>
+            </View>
+          ) : (
+            <View
+              style={[
+                styles.groupPrimaryAction,
+                isClosed ? styles.groupPrimaryActionDisabled : null,
+              ]}
+            >
+              <Text style={styles.groupPrimaryActionText}>
+                {isClosed ? "모집이 마감됐어요" : "참여 신청하기"}
+              </Text>
+            </View>
+          )}
+        </View>
+
+        <GroupDetailSectionHeader title={`멤버 ${members.length}명`} />
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.memberRail}
+        >
           {members.map((member, index) => (
             <View key={member} style={styles.memberMini}>
               <View style={styles.memberAvatarWrap}>
-                <Avatar name={member} />
+                <Avatar name={member} size={48} />
                 {index === 0 ? (
                   <View style={styles.memberLeaderMark}>
                     <MaterialIcons name="star" size={10} color="#fff" />
@@ -1363,27 +1395,25 @@ export function GroupDetailReferenceScreen({ variant }: { variant: string }) {
               </Text>
             </View>
           ))}
-        </View>
-      </Section>
-      <Section title="공지사항">
+        </ScrollView>
+
+        <GroupDetailSectionHeader title="공지사항" />
         <View style={styles.groupNoticeList}>
-          <Card style={styles.stack}>
-            <Text style={styles.cardTitle}>5월 18일 토요일 모임 안내</Text>
-            <Text style={styles.bodyText}>
-              이번 주 토요일은 북한산 도선사 코스로 갑니다. 오전 7시 교회 앞에서
-              모입니다.
-            </Text>
-            <Text style={styles.metaText}>2일 전</Text>
-          </Card>
-          <Card style={styles.stack}>
-            <Text style={styles.cardTitle}>신규 멤버 환영합니다</Text>
-            <Text style={styles.bodyText}>
-              이번 달에 새로 합류해주신 분들 진심으로 환영해요.
-            </Text>
-            <Text style={styles.metaText}>1주 전 · 수정됨</Text>
-          </Card>
+          <GroupNoticeCard
+            title="5월 18일 토요일 모임 안내"
+            preview="이번 주 토요일은 북한산 도선사 코스로 갑니다. 오전 7시 교회 앞에서 모입니다."
+            when="2일 전"
+            leader={isLeader}
+          />
+          <GroupNoticeCard
+            title="신규 멤버 환영합니다"
+            preview="이번 달에 새로 합류해주신 분들 진심으로 환영해요. 다음 모임 때 소개 시간이 있을 예정입니다."
+            when="1주 전"
+            edited
+            leader={isLeader}
+          />
         </View>
-      </Section>
+      </ScrollView>
       <ConfirmDialog
         visible={variant === "apply-confirm"}
         title="참여 신청하시겠습니까?"
@@ -1422,6 +1452,64 @@ export function GroupDetailReferenceScreen({ variant }: { variant: string }) {
         }
       />
     </Screen>
+  );
+}
+
+function GroupDetailSectionHeader({ title }: { title: string }) {
+  return (
+    <View style={styles.groupSectionHeader}>
+      <Text style={styles.groupSectionTitle}>{title}</Text>
+    </View>
+  );
+}
+
+function GroupNoticeCard({
+  title,
+  preview,
+  when,
+  edited,
+  leader,
+}: {
+  title: string;
+  preview: string;
+  when: string;
+  edited?: boolean;
+  leader?: boolean;
+}) {
+  return (
+    <Card style={styles.groupNoticeCard}>
+      <View style={styles.groupNoticeTitleRow}>
+        <Text style={styles.groupNoticeTitle}>{title}</Text>
+        {edited ? <Text style={styles.groupNoticeEdited}>수정됨</Text> : null}
+      </View>
+      <Text numberOfLines={2} style={styles.groupNoticePreview}>
+        {preview}
+      </Text>
+      <Text style={styles.metaText}>{when}</Text>
+      {leader ? (
+        <View style={styles.groupNoticeActions}>
+          <View style={styles.commentMiniAction}>
+            <MaterialIcons name="edit" size={14} color={theme.colors.inkMute} />
+            <Text style={styles.commentMiniActionText}>수정</Text>
+          </View>
+          <View style={styles.commentMiniAction}>
+            <MaterialIcons
+              name="delete-outline"
+              size={14}
+              color={theme.colors.danger}
+            />
+            <Text
+              style={[
+                styles.commentMiniActionText,
+                styles.commentMiniActionDanger,
+              ]}
+            >
+              삭제
+            </Text>
+          </View>
+        </View>
+      ) : null}
+    </Card>
   );
 }
 
@@ -3710,6 +3798,9 @@ const styles = StyleSheet.create({
   detailTopPad: {
     paddingHorizontal: 0,
   },
+  groupDetailScroll: {
+    paddingBottom: 16,
+  },
   groupDetailHeader: {
     paddingHorizontal: 22,
     paddingTop: 4,
@@ -3722,6 +3813,24 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     fontWeight: "900",
   },
+  groupMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  groupCategoryChip: {
+    minHeight: 26,
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    justifyContent: "center",
+    backgroundColor: theme.colors.primaryTint,
+  },
+  groupCategoryChipText: {
+    color: theme.colors.primaryDeep,
+    fontSize: 11.5,
+    fontWeight: "800",
+  },
   groupMetaText: {
     color: theme.colors.inkSoft,
     fontSize: 14,
@@ -3729,19 +3838,78 @@ const styles = StyleSheet.create({
   },
   groupLeaderCard: {
     marginTop: 4,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.ring,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
     backgroundColor: theme.colors.surface2,
+    ...theme.shadow.card,
+  },
+  groupLeaderBadge: {
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: theme.colors.primary,
+  },
+  groupLeaderBadgeText: {
+    color: theme.colors.white,
+    fontSize: 10.5,
+    fontWeight: "800",
   },
   groupActionWrap: {
     paddingHorizontal: 16,
     paddingBottom: 22,
   },
+  groupPrimaryAction: {
+    height: 52,
+    borderRadius: theme.radius.pill,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.primary,
+    ...theme.shadow.primary,
+  },
+  groupPrimaryActionDisabled: {
+    opacity: 0.6,
+    backgroundColor: theme.colors.lineStrong,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  groupPrimaryActionText: {
+    color: theme.colors.white,
+    fontSize: 15,
+    fontWeight: "800",
+  },
+  groupOutlineAction: {
+    height: 52,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: theme.colors.lineStrong,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+  },
+  groupOutlineActionText: {
+    color: theme.colors.inkSoft,
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  groupSectionHeader: {
+    paddingHorizontal: 22,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  groupSectionTitle: {
+    color: theme.colors.ink,
+    fontSize: 15,
+    fontWeight: "800",
+  },
   memberRail: {
     paddingHorizontal: 22,
     paddingBottom: 12,
-    flexDirection: "row",
     gap: 16,
   },
   memberMini: {
@@ -3775,6 +3943,40 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingBottom: 16,
     gap: 10,
+  },
+  groupNoticeCard: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  groupNoticeTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  groupNoticeTitle: {
+    flexShrink: 1,
+    color: theme.colors.ink,
+    fontSize: 14.5,
+    fontWeight: "800",
+  },
+  groupNoticeEdited: {
+    color: theme.colors.inkHint,
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  groupNoticePreview: {
+    marginTop: 6,
+    color: theme.colors.inkSoft,
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  groupNoticeActions: {
+    marginTop: 8,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.line,
+    flexDirection: "row",
+    gap: 14,
   },
   transferWarning: {
     marginHorizontal: 18,

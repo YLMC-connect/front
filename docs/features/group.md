@@ -1,6 +1,6 @@
 # group (소모임)
 
-> 마지막 갱신: 2026-05-26 | 담당 Phase: P1/P3 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-05-27 | 담당 Phase: P1/P3 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 성도가 소모임을 탐색하고 참여하거나 새 모임을 개설할 수 있게 합니다.
@@ -20,6 +20,8 @@
 - 소모임 상세/멤버 관리 원본 시각 정렬 — ZIP JSX 기준 상세 header, 리더 카드, 멤버 rail, 공지 list, 강퇴/소모임장 이관 list와 확인 문구를 reference 화면에 반영
 - 소모임 멤버 관리 residual 개선 — ZIP `ScreenGroupMembers` 기준 `뒤로` pill TopBar와 이름 해시 Avatar 팔레트를 반영해 기본 멤버 관리 diff를 `mean=73.43`에서 `13.39`로 낮춤
 - ZIP 소모임 toast 문구 정렬 — 인원 초과/소모임장 탈퇴 제한 toast를 원본 JSX의 짧은 문구로 맞춤
+- 소모임 상세 overlay/section geometry 정렬 — ZIP `ScreenGroupDetail`처럼 body는 내부 ScrollView로 두고 toast/dialog를 fixed overlay로 분리, soft category chip·멤버 horizontal rail·공지 카드·primary/outline action pill을 reference 화면에 반영
+- 소모임 상세 partial visual compare 개선 — `group-detail*` 10개 상태를 Android Dev Client에서 재캡처해 `missing=0` 확인, 대표 residual은 `full-toast 31.63→20.76`, `non-member 23.19→20.81`, `leader 18.72→18.07`, `leader-closed 18.71→18.09`로 감소
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -41,6 +43,8 @@
 `Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-27) **소모임 상세 toast/dialog는 ZIP overlay 구조를 따른다** — `Screen` 기본 ScrollView 안에 toast를 두면 원본처럼 fixed bottom overlay로 캡처되지 않으므로, 상세 body만 내부 ScrollView로 두고 toast/dialog는 `Phone` root overlay처럼 분리합니다.
+- (2026-05-27) **소모임 상세 CTA는 화면 전용 pill geometry를 사용한다** — 비멤버 참여 신청과 멤버 탈퇴 버튼은 ZIP의 52px full-width pill을 기준으로 하며, 공통 Button 번역 차이가 큰 곳은 화면 전용 style로 맞춥니다.
 - (2026-05-26) **소모임 toast 문구는 ZIP 원본을 따른다** — `full-toast`는 `인원이 꽉 찼습니다`, `leader-leave-toast`는 `소모임장은 탈퇴할 수 없어요. 먼저 이관해주세요`를 기준으로 합니다.
 - (2026-05-25) **멤버 관리 화면은 ZIP flat list 기준으로 유지한다** — 멤버 관리는 카드 묶음이 아니라 full-width row list, 오른쪽 강퇴 pill, 이관 모드 radio row, 하단 fixed action 구조를 따릅니다. 남은 confirm 계열 diff는 list 자체보다 modal overlay와 원본 캡처 프레임 차이로 분리 추적합니다.
 - (2026-05-23) **소모임 상세는 cover hero 없이 정보 header를 우선한다** — ZIP 원본은 소모임 상세에서 대표 cover보다 카테고리/모집 상태/인원/설명/리더 정보를 먼저 보여주므로 reference 화면도 같은 구조를 따릅니다.

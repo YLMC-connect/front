@@ -37,6 +37,7 @@
 - Dev Client Maestro smoke 후행 메뉴 처리 보강 — 루트 딥링크 이후 늦게 표시되는 `Continue`/`Reload` developer menu도 조건부로 닫고 탭 검증을 진행
 - Dev Client visual capture 메뉴 처리 보강 — design viewport override 시 입력 좌표는 `Override size`를 우선 사용하고, route 캡처 직전에 Expo Dev Client first-run menu를 짧게 dismiss해 overlay가 스크린샷에 섞이지 않도록 함
 - HorizontalChips fixed row 보강 — non-scroll root screen에서도 ZIP chip row처럼 고정 높이를 유지하도록 horizontal ScrollView에 `flexGrow: 0`을 적용
+- ZIP `ScreenNotifications` 구조 정렬 — 알림 reference 화면을 카드 목록이 아니라 ZIP의 `오늘`/`지난 알림` section label, unread soft row, circular icon, unread dot, `모두 읽음` top action 구조로 재구성
 
 ---
 
@@ -75,6 +76,7 @@
 ## 결정 사항 (최신 위)
 - (2026-05-27) **visual capture 입력 좌표는 override viewport 기준을 우선한다** — `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT=1`은 Android `wm size` override를 적용하므로, tap helper가 Physical size만 읽으면 Dev Client `Continue` 버튼 아래를 누르게 됩니다. 캡처 스크립트는 `Override size`를 우선 읽고 route 캡처 직전에도 짧게 Dev Client 메뉴를 닫습니다.
 - (2026-05-27) **horizontal chip row는 non-scroll 화면에서도 높이를 고정한다** — `HorizontalChips`가 non-scroll `Screen`에서 남는 flex height를 먹으면 ZIP의 얇은 chip row가 세로로 늘어나므로, 공통 ScrollView에 `flexGrow: 0`을 둡니다.
+- (2026-05-27) **알림 화면은 ZIP sectioned flat list를 우선한다** — 현재 앱의 카드형 알림 목록은 기준이 아니며, `screens-extra-home.jsx`의 `ScreenNotifications`처럼 `오늘`/`지난 알림` section과 unread row 배경, 38px circular icon, 6px unread dot, `모두 읽음` text action을 RN reference 화면에 번역합니다.
 - (2026-05-27) **Maestro smoke는 루트 딥링크 이후 Dev Client 메뉴도 닫는다** — Expo Dev Client developer menu가 앱 루트 로딩 뒤 늦게 표시되면 `tab-home`을 가려 false negative가 발생하므로, `.maestro/smoke.yml`은 `openLink` 이후에도 `Continue`/`Reload`를 한 번 더 조건부 처리합니다.
 - (2026-05-27) **ZIP 원본 캡처는 animation settle 이후 저장한다** — `BottomSheet`, `TermsSheet`, toast처럼 ZIP JSX가 CSS animation을 쓰는 화면은 렌더 직후 2 rAF만 기다리면 중간 프레임이 원본 PNG로 저장됩니다. `test:visual:prepare`는 기본 320ms settle 이후 캡처하며, 필요 시 `YLMC_PREPARE_RENDER_SETTLE_MS`로 조정합니다.
 - (2026-05-26) **visual compare 원본은 ZIP에서 재생성한다** — `/private/tmp` 산출물이 정리되면 기본 `npm run test:visual:compare`가 inventory 없이 실패하므로, `test:visual:prepare`가 ZIP `app.jsx` artboard 105개와 extra MY 5개를 합쳐 110개 inventory/manifest를 만들고, standalone HTML을 headless Chrome으로 렌더링해 원본 PNG를 재생성합니다.
@@ -111,7 +113,7 @@
 - Codex 기본 샌드박스에서는 `expo start --dev-client --port 8081 --localhost`가 `Starting project...` 이후 8081에 바인딩되지 않을 수 있습니다. 샌드박스 밖 로컬 권한에서는 `npm run test:dev-client:smoke`로 `/status` 응답을 확인했습니다.
 - Maestro CLI `2.6.0`은 Homebrew tap(`mobile-dev-inc/tap`)으로 설치되어 있으며, Android Emulator `Medium_Phone_API_36.1`에서 `npm run test:e2e:smoke` 통과를 확인했습니다. 현재 smoke는 ADB로 Dev Client deep link를 먼저 열고, Maestro가 Dev Client 메뉴를 닫은 뒤 홈/나눔/소모임/동행/MY 탭과 동행 내부 삶공부 segment 진입을 검증합니다.
 - 제공 ZIP 110개 화면은 `test:visual:prepare` → Dev Client full capture/partial recapture → `test:visual:compare`로 검증하며 현재 비교 리포트 기준 `screens=110`, `missing=0`, `originalFlat=0`입니다. 남은 residual diff는 상태바/SafeArea, React Native 폰트·모달 번역 차이와 실제 UI 차이를 분리해 추적합니다.
-- 2026-05-27 나눔 목록 정렬 후 비교 리포트의 상위 residual은 소모임 상세 일부, notifications, auth sheet/toast, home 계열입니다. `market-list-all`은 ZIP `ScreenMarketList` compact row 구조 반영으로 `20.56→15.44`까지 낮췄으며, 다음 우선순위는 group-detail 잔여 variant 또는 notifications/auth overlay 정렬입니다.
+- 2026-05-27 알림 화면 정렬 후 비교 리포트의 상위 residual은 소모임 상세 일부, auth sheet/toast, home/MY 계열입니다. `notifications`는 ZIP `ScreenNotifications` sectioned flat list 구조 반영으로 `18.01→13.85`까지 낮췄으며, 다음 우선순위는 group-detail 잔여 variant 또는 auth/home 계열 정렬입니다.
 
 ## 의존성
 - GitHub Issues / PR description 기반 작업 추적 규칙에 의존합니다.

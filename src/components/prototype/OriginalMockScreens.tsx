@@ -306,47 +306,135 @@ export function SignupReferenceScreen({ variant }: { variant: string }) {
 }
 
 export function NotificationsReferenceScreen() {
+  const today = [
+    {
+      icon: "groups",
+      who: "화요 자녀 중보방",
+      what: "에 새 멤버가 가입했어요",
+      ago: "10분 전",
+      unread: true,
+    },
+    {
+      icon: "favorite-border",
+      who: "김은혜 집사님",
+      what: "이 기도제목에 응원을 남겼어요",
+      ago: "1시간 전",
+      unread: true,
+    },
+    {
+      icon: "shopping-bag",
+      who: "유아용 카시트",
+      what: " 게시글에 댓글이 달렸어요",
+      ago: "2시간 전",
+      unread: true,
+    },
+  ] as const;
+  const earlier = [
+    {
+      icon: "menu-book",
+      who: "제자훈련 1단계",
+      what: "의 새 자료가 등록되었어요",
+      ago: "어제",
+    },
+    {
+      icon: "groups",
+      who: "토요 산악회",
+      what: "의 새 공지가 올라왔어요",
+      ago: "어제",
+    },
+    {
+      icon: "favorite-border",
+      who: "박은혜 권사님",
+      what: "의 기도제목이 응답되었어요",
+      ago: "2일 전",
+    },
+    {
+      icon: "notifications-none",
+      who: "운영자",
+      what: "서비스 점검 안내",
+      ago: "3일 전",
+    },
+    {
+      icon: "shopping-bag",
+      who: "전기밥솥 나눔",
+      what: " 거래가 완료되었어요",
+      ago: "5일 전",
+    },
+  ] as const;
+
   return (
-    <Screen>
-      <TopBar title="알림" back onBack={() => router.back()} />
-      <View style={styles.stack}>
-        {[
-          [
-            "event-note",
-            "이번 주 공지",
-            "주일 2부 예배 시간이 변경되었습니다.",
-            "방금",
-          ],
-          [
-            "redeem",
-            "나눔 댓글",
-            "아이 장난감 나눔에 새 댓글이 달렸습니다.",
-            "12분 전",
-          ],
-          [
-            "groups",
-            "소모임 공지",
-            "토요 산악회 장소가 업데이트되었습니다.",
-            "1시간 전",
-          ],
-        ].map(([icon, title, body, time]) => (
-          <Card key={title} style={styles.rowCard}>
-            <View style={styles.softIcon}>
-              <MaterialIcons
-                name={icon as keyof typeof MaterialIcons.glyphMap}
-                size={22}
-                color={theme.colors.primaryDeep}
-              />
-            </View>
-            <View style={styles.flex}>
-              <Text style={styles.cardTitle}>{title}</Text>
-              <Text style={styles.bodyText}>{body}</Text>
-              <Text style={styles.metaText}>{time}</Text>
-            </View>
-          </Card>
+    <Screen padded={false}>
+      <TopBar
+        title="알림"
+        back
+        onBack={() => router.back()}
+        right={<Text style={styles.notificationReadAll}>모두 읽음</Text>}
+      />
+      <View style={styles.notificationList}>
+        <Text style={styles.notificationSectionLabel}>오늘</Text>
+        {today.map((notification) => (
+          <NotificationRow
+            key={`${notification.who}-${notification.ago}`}
+            notification={notification}
+          />
+        ))}
+        <Text
+          style={[styles.notificationSectionLabel, styles.notificationPast]}
+        >
+          지난 알림
+        </Text>
+        {earlier.map((notification) => (
+          <NotificationRow
+            key={`${notification.who}-${notification.ago}`}
+            notification={notification}
+          />
         ))}
       </View>
     </Screen>
+  );
+}
+
+function NotificationRow({
+  notification,
+}: {
+  notification: {
+    icon: keyof typeof MaterialIcons.glyphMap;
+    who: string;
+    what: string;
+    ago: string;
+    unread?: boolean;
+  };
+}) {
+  return (
+    <View
+      style={[
+        styles.notificationRow,
+        notification.unread ? styles.notificationUnread : null,
+      ]}
+    >
+      <View
+        style={[
+          styles.notificationIcon,
+          notification.unread ? styles.notificationIconUnread : null,
+        ]}
+      >
+        <MaterialIcons
+          name={notification.icon}
+          size={18}
+          color={
+            notification.unread ? theme.colors.white : theme.colors.inkMute
+          }
+        />
+      </View>
+      <View style={styles.flex}>
+        <Text style={styles.notificationText}>
+          <Text style={styles.notificationStrong}>{notification.who}</Text>
+          {notification.what}
+        </Text>
+        <Text style={styles.notificationAgo}>{notification.ago}</Text>
+      </View>
+      {notification.unread ? <View style={styles.notificationDot} /> : null}
+    </View>
   );
 }
 
@@ -3343,6 +3431,61 @@ const styles = StyleSheet.create({
     color: theme.colors.inkSoft,
     fontSize: 13.5,
     lineHeight: 23.5,
+  },
+  notificationReadAll: {
+    color: theme.colors.inkMute,
+    fontSize: 13,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  notificationList: { paddingBottom: 28 },
+  notificationSectionLabel: {
+    paddingTop: 10,
+    paddingRight: 18,
+    paddingBottom: 6,
+    paddingLeft: 18,
+    color: theme.colors.inkMute,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  notificationPast: { paddingTop: 14 },
+  notificationRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    backgroundColor: "transparent",
+  },
+  notificationUnread: { backgroundColor: theme.colors.primarySoft },
+  notificationIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    backgroundColor: theme.colors.line,
+  },
+  notificationIconUnread: { backgroundColor: theme.colors.primary },
+  notificationText: {
+    color: theme.colors.ink,
+    fontSize: 14,
+    lineHeight: 20.3,
+  },
+  notificationStrong: { fontWeight: "700" },
+  notificationAgo: {
+    marginTop: 4,
+    color: theme.colors.inkMute,
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: "500",
+  },
+  notificationDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginTop: 6,
+    backgroundColor: theme.colors.primary,
   },
   stack: { gap: 12 },
   sheetField: { marginTop: 14 },

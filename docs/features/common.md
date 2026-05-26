@@ -39,6 +39,7 @@
 - HorizontalChips fixed row 보강 — non-scroll root screen에서도 ZIP chip row처럼 고정 높이를 유지하도록 horizontal ScrollView에 `flexGrow: 0`을 적용
 - ZIP `ScreenNotifications` 구조 정렬 — 알림 reference 화면을 카드 목록이 아니라 ZIP의 `오늘`/`지난 알림` section label, unread soft row, circular icon, unread dot, `모두 읽음` top action 구조로 재구성
 - ZIP `ActionBtn` compact action 정렬 — 나눔/소모임 상세 reference의 action button을 큰 원형 아이콘 카드가 아니라 ZIP의 44px inline icon+label button으로 재구성
+- ZIP root overlay 패턴 정렬 — 멤버 관리처럼 list body와 Toast가 같이 있는 reference 화면은 `Screen` 기본 ScrollView에 Toast를 넣지 않고, 내부 ScrollView와 root fixed Toast layer로 분리
 
 ---
 
@@ -79,6 +80,7 @@
 - (2026-05-27) **horizontal chip row는 non-scroll 화면에서도 높이를 고정한다** — `HorizontalChips`가 non-scroll `Screen`에서 남는 flex height를 먹으면 ZIP의 얇은 chip row가 세로로 늘어나므로, 공통 ScrollView에 `flexGrow: 0`을 둡니다.
 - (2026-05-27) **알림 화면은 ZIP sectioned flat list를 우선한다** — 현재 앱의 카드형 알림 목록은 기준이 아니며, `screens-extra-home.jsx`의 `ScreenNotifications`처럼 `오늘`/`지난 알림` section과 unread row 배경, 38px circular icon, 6px unread dot, `모두 읽음` text action을 RN reference 화면에 번역합니다.
 - (2026-05-27) **상세 action은 ZIP `ActionBtn` inline 구조를 따른다** — 나눔/소모임 상세 action은 별도 원형 icon tile이 아니라 `screens-market.jsx`/`screens-group.jsx`의 `ActionBtn`처럼 44px 높이, transparent background, icon+label inline button으로 번역합니다.
+- (2026-05-27) **Toast overlay는 ZIP `Phone` root layer에 맞춘다** — `Screen` 기본 ScrollView 안에 `Toast`를 넣으면 긴 list 화면에서 toast가 viewport 밖으로 밀리므로, ZIP `CheckToast`처럼 root fixed layer에 놓이도록 화면 body를 내부 ScrollView로 분리합니다.
 - (2026-05-27) **Maestro smoke는 루트 딥링크 이후 Dev Client 메뉴도 닫는다** — Expo Dev Client developer menu가 앱 루트 로딩 뒤 늦게 표시되면 `tab-home`을 가려 false negative가 발생하므로, `.maestro/smoke.yml`은 `openLink` 이후에도 `Continue`/`Reload`를 한 번 더 조건부 처리합니다.
 - (2026-05-27) **ZIP 원본 캡처는 animation settle 이후 저장한다** — `BottomSheet`, `TermsSheet`, toast처럼 ZIP JSX가 CSS animation을 쓰는 화면은 렌더 직후 2 rAF만 기다리면 중간 프레임이 원본 PNG로 저장됩니다. `test:visual:prepare`는 기본 320ms settle 이후 캡처하며, 필요 시 `YLMC_PREPARE_RENDER_SETTLE_MS`로 조정합니다.
 - (2026-05-26) **visual compare 원본은 ZIP에서 재생성한다** — `/private/tmp` 산출물이 정리되면 기본 `npm run test:visual:compare`가 inventory 없이 실패하므로, `test:visual:prepare`가 ZIP `app.jsx` artboard 105개와 extra MY 5개를 합쳐 110개 inventory/manifest를 만들고, standalone HTML을 headless Chrome으로 렌더링해 원본 PNG를 재생성합니다.
@@ -115,7 +117,7 @@
 - Codex 기본 샌드박스에서는 `expo start --dev-client --port 8081 --localhost`가 `Starting project...` 이후 8081에 바인딩되지 않을 수 있습니다. 샌드박스 밖 로컬 권한에서는 `npm run test:dev-client:smoke`로 `/status` 응답을 확인했습니다.
 - Maestro CLI `2.6.0`은 Homebrew tap(`mobile-dev-inc/tap`)으로 설치되어 있으며, Android Emulator `Medium_Phone_API_36.1`에서 `npm run test:e2e:smoke` 통과를 확인했습니다. 현재 smoke는 ADB로 Dev Client deep link를 먼저 열고, Maestro가 Dev Client 메뉴를 닫은 뒤 홈/나눔/소모임/동행/MY 탭과 동행 내부 삶공부 segment 진입을 검증합니다.
 - 제공 ZIP 110개 화면은 `test:visual:prepare` → Dev Client full capture/partial recapture → `test:visual:compare`로 검증하며 현재 비교 리포트 기준 `screens=110`, `missing=0`, `originalFlat=0`입니다. 남은 residual diff는 상태바/SafeArea, React Native 폰트·모달 번역 차이와 실제 UI 차이를 분리해 추적합니다.
-- 2026-05-27 상세 action 정렬 후 비교 리포트의 상위 residual은 소모임 상세 일부, group-members toast, auth sheet/toast, home/MY 계열입니다. 소모임 leader action은 ZIP `ActionBtn` compact 구조 반영으로 `group-detail-leader 18.07→16.34`, `group-detail-closed 18.09→16.35`까지 낮췄습니다.
+- 2026-05-27 멤버 관리 Toast overlay 정렬 후 비교 리포트의 상위 residual은 소모임 상세 일부, auth sheet/toast, home/MY 계열입니다. `group-members-kickts`는 ZIP root fixed toast 구조 반영으로 `17.86→9.39`까지 낮췄습니다.
 
 ## 의존성
 - GitHub Issues / PR description 기반 작업 추적 규칙에 의존합니다.

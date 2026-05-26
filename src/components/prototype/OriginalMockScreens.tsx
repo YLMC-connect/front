@@ -1732,7 +1732,7 @@ export function GroupMembersReferenceScreen({ variant }: { variant: string }) {
   ];
 
   return (
-    <Screen padded={false}>
+    <Screen padded={false} scroll={false}>
       <View style={styles.detailTopPad}>
         <TopBar
           title={isTransfer ? "소모임장 이관" : "멤버 관리"}
@@ -1740,27 +1740,35 @@ export function GroupMembersReferenceScreen({ variant }: { variant: string }) {
           onBack={() => router.back()}
         />
       </View>
-      {isTransfer ? (
-        <View style={styles.transferWarning}>
-          <MaterialIcons name="warning-amber" size={17} color="#A8643F" />
-          <Text style={styles.transferWarningText}>
-            이관 후에는 일반 멤버로 변경되며 권한이 즉시 사라집니다.
-          </Text>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[
+          styles.groupMembersBody,
+          isTransfer ? styles.groupMembersBodyWithAction : null,
+        ]}
+      >
+        {isTransfer ? (
+          <View style={styles.transferWarning}>
+            <MaterialIcons name="warning-amber" size={17} color="#A8643F" />
+            <Text style={styles.transferWarningText}>
+              이관 후에는 일반 멤버로 변경되며 권한이 즉시 사라집니다.
+            </Text>
+          </View>
+        ) : (
+          <Text style={styles.memberCountText}>전체 {members.length}명</Text>
+        )}
+        <View style={styles.memberList}>
+          {members.map((member, index) => (
+            <GroupMemberRow
+              key={member.name}
+              member={member}
+              transferMode={isTransfer}
+              selected={isTransfer && member.name === "박정아"}
+              last={index === members.length - 1}
+            />
+          ))}
         </View>
-      ) : (
-        <Text style={styles.memberCountText}>전체 {members.length}명</Text>
-      )}
-      <View style={styles.memberList}>
-        {members.map((member, index) => (
-          <GroupMemberRow
-            key={member.name}
-            member={member}
-            transferMode={isTransfer}
-            selected={isTransfer && member.name === "박정아"}
-            last={index === members.length - 1}
-          />
-        ))}
-      </View>
+      </ScrollView>
       {isTransfer ? (
         <View style={styles.fixedBottomAction}>
           <Button>이관하기</Button>
@@ -4325,9 +4333,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "800",
   },
-  memberList: {
+  groupMembersBody: {
+    paddingBottom: 0,
+  },
+  groupMembersBodyWithAction: {
     paddingBottom: 96,
   },
+  memberList: {},
   groupMemberRow: {
     minHeight: 70,
     paddingHorizontal: 22,

@@ -23,6 +23,7 @@
 - 소모임 상세 overlay/section geometry 정렬 — ZIP `ScreenGroupDetail`처럼 body는 내부 ScrollView로 두고 toast/dialog를 fixed overlay로 분리, soft category chip·멤버 horizontal rail·공지 카드·primary/outline action pill을 reference 화면에 반영
 - 소모임 상세 partial visual compare 개선 — `group-detail*` 10개 상태를 Android Dev Client에서 재캡처해 `missing=0` 확인, 대표 residual은 `full-toast 31.63→20.76`, `non-member 23.19→20.81`, `leader 18.72→18.07`, `leader-closed 18.71→18.09`로 감소
 - 소모임 상세 action compact 정렬 — ZIP `ScreenGroupDetail`의 44px inline `ActionBtn` 구조를 반영하고 소모임장 카드 shadow/border를 제거해 `group-detail*` 10개 상태를 재캡처, `missing=0` 확인
+- 소모임 멤버 관리 Toast overlay 정렬 — ZIP `ScreenGroupMembers`처럼 list body와 fixed overlay를 분리해 강퇴 toast가 화면 하단에 표시되도록 재구성, `group-members-kickts 17.86→9.39`로 감소
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -45,6 +46,7 @@
 
 ## 결정 사항 (최신 위)
 - (2026-05-27) **소모임 상세 toast/dialog는 ZIP overlay 구조를 따른다** — `Screen` 기본 ScrollView 안에 toast를 두면 원본처럼 fixed bottom overlay로 캡처되지 않으므로, 상세 body만 내부 ScrollView로 두고 toast/dialog는 `Phone` root overlay처럼 분리합니다.
+- (2026-05-27) **멤버 관리 Toast는 list ScrollView 밖 fixed layer에 둔다** — ZIP `ScreenGroupMembers`는 `phone-body` list와 `CheckToast` overlay를 분리하므로, RN reference도 `Screen scroll={false}` + 내부 ScrollView + root Toast 구조로 맞춥니다.
 - (2026-05-27) **소모임장 action card는 compact inline 버튼을 사용한다** — ZIP `ScreenGroupDetail`의 leader action card는 큰 원형 icon tile이 아니라 44px 높이의 inline icon+label `ActionBtn` grid이므로 reference 화면도 같은 구조로 맞춥니다.
 - (2026-05-27) **소모임 상세 CTA는 화면 전용 pill geometry를 사용한다** — 비멤버 참여 신청과 멤버 탈퇴 버튼은 ZIP의 52px full-width pill을 기준으로 하며, 공통 Button 번역 차이가 큰 곳은 화면 전용 style로 맞춥니다.
 - (2026-05-26) **소모임 toast 문구는 ZIP 원본을 따른다** — `full-toast`는 `인원이 꽉 찼습니다`, `leader-leave-toast`는 `소모임장은 탈퇴할 수 없어요. 먼저 이관해주세요`를 기준으로 합니다.

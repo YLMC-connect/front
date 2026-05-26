@@ -1941,9 +1941,9 @@ export function PrayerListReferenceScreen({
           </View>
         </Section>
         <Section title="다른 기도모임방">
-          <Card style={styles.menuCard}>
+          <View style={styles.prayerOtherList}>
             {prayerRooms.slice(2).map((room, index) => (
-              <View key={room.name} style={styles.menuRow}>
+              <View key={room.name} style={styles.prayerOtherRow}>
                 <View style={[styles.smallDayBox, dayBoxStyle(index + 2)]}>
                   <Text style={[styles.smallDayText, dayTextStyle(index + 2)]}>
                     {room.day}
@@ -1953,10 +1953,12 @@ export function PrayerListReferenceScreen({
                   <Text style={styles.menuTitle}>{room.name}</Text>
                   <Text style={styles.metaText}>멤버 {room.n}명</Text>
                 </View>
-                <Button variant="soft">참여</Button>
+                <View style={styles.prayerJoinPill}>
+                  <Text style={styles.prayerJoinText}>참여</Text>
+                </View>
               </View>
             ))}
-          </Card>
+          </View>
         </Section>
       </View>
       <FloatingActionButton compact icon="add" />
@@ -1965,15 +1967,39 @@ export function PrayerListReferenceScreen({
 }
 
 export function PrayerDetailReferenceScreen() {
-  const names = ["박은정", "김도현", "이수민", "정혜린", "한지영"];
   const live = [
-    "어머니 수술이 잘 끝나도록, 회복도 빠르도록 기도 부탁드려요.",
-    "팀 안에서 갈등이 있어요. 지혜로 풀어가게 해주세요.",
-    "아이 학교 적응을 위해 함께 기도해요.",
+    {
+      name: "박은정",
+      when: "오늘 06:22",
+      message: "어머니 수술이 잘 끝나도록, 회복도 빠르도록 기도 부탁드려요.",
+      amen: 14,
+    },
+    {
+      name: "김도현",
+      when: "오늘 05:48",
+      message: "팀 안에서 갈등이 있어요. 지혜로 풀어가게 해주세요.",
+      amen: 7,
+    },
+    {
+      name: "이수민",
+      when: "어제",
+      message: "아이 학교 적응을 위해 함께 기도해요.",
+      amen: 9,
+    },
   ];
   const done = [
-    "면접 결과 합격했어요! 함께 기도해주셔서 감사해요.",
-    "건강검진 결과 깨끗하게 나왔습니다.",
+    {
+      name: "정혜린",
+      when: "3일 전",
+      message: "면접 결과 합격했어요! 함께 기도해주셔서 감사해요.",
+      amen: 22,
+    },
+    {
+      name: "한지영",
+      when: "5일 전",
+      message: "건강검진 결과 깨끗하게 나왔습니다.",
+      amen: 11,
+    },
   ];
 
   return (
@@ -1994,50 +2020,67 @@ export function PrayerDetailReferenceScreen() {
         <Badge tone="warn">매주 월</Badge>
         <Text style={styles.metaText}>멤버 12 · 오늘 새 기도제목 3개</Text>
       </View>
-      <View style={styles.segmentWrap}>
-        <SegmentedTabs
-          items={[
-            { key: "live", label: "기도중 3" },
-            { key: "done", label: "응답 2" },
-          ]}
-          active="live"
-          onChange={() => undefined}
-        />
+      <View style={styles.prayerUnderlineTabs}>
+        <View style={[styles.prayerUnderlineTab, styles.prayerUnderlineActive]}>
+          <Text style={styles.prayerUnderlineTextActive}>기도중 3</Text>
+        </View>
+        <View style={styles.prayerUnderlineTab}>
+          <Text style={styles.prayerUnderlineText}>응답 2</Text>
+        </View>
       </View>
       <View style={styles.contentPad}>
-        {[...live, ...done].map((message, index) => {
-          const answered = index >= live.length;
-
-          return (
-            <Card
-              key={message}
-              style={[styles.prayerCard, answered ? styles.faded : null]}
-            >
-              <View style={styles.authorRow}>
-                <Avatar name={names[index]} size={30} />
-                <View style={styles.flex}>
-                  <Text style={styles.menuTitle}>{names[index]}</Text>
-                  <Text style={styles.metaText}>
-                    {index < 2 ? "오늘" : "어제"}
-                  </Text>
-                </View>
-                <Badge tone={answered ? "mute" : "primary"}>
-                  {answered ? "응답" : "기도중"}
-                </Badge>
-              </View>
-              <Text style={styles.bodyText}>{message}</Text>
-              <View style={styles.inlineMeta}>
-                <Button variant="soft" icon="favorite-border">
-                  함께 기도 {answered ? 22 : 14}
-                </Button>
-                {!answered ? <Button variant="ghost">응답완료</Button> : null}
-              </View>
-            </Card>
-          );
-        })}
+        {live.map((prayer) => (
+          <PrayerTopicCard key={prayer.name} prayer={prayer} />
+        ))}
+        <View style={styles.prayerAnsweredDivider}>
+          <View style={styles.prayerDividerLine} />
+          <Text style={styles.metaText}>응답된 기도제목</Text>
+          <View style={styles.prayerDividerLine} />
+        </View>
+        {done.map((prayer) => (
+          <PrayerTopicCard key={prayer.name} prayer={prayer} answered />
+        ))}
       </View>
       <FloatingActionButton compact icon="add" />
     </Screen>
+  );
+}
+
+function PrayerTopicCard({
+  prayer,
+  answered = false,
+}: {
+  prayer: { name: string; when: string; message: string; amen: number };
+  answered?: boolean;
+}) {
+  return (
+    <Card style={[styles.prayerCard, answered ? styles.faded : null]}>
+      <View style={styles.authorRow}>
+        <Avatar name={prayer.name} size={30} />
+        <View style={styles.flex}>
+          <Text style={styles.menuTitle}>{prayer.name}</Text>
+          <Text style={styles.metaText}>{prayer.when}</Text>
+        </View>
+        <Badge tone={answered ? "mute" : "primary"}>
+          {answered ? "응답" : "기도중"}
+        </Badge>
+      </View>
+      <Text
+        style={[styles.bodyText, answered ? styles.prayerAnsweredText : null]}
+      >
+        {prayer.message}
+      </Text>
+      <View style={styles.prayerActionRow}>
+        <View style={styles.prayerAmenPill}>
+          <Text style={styles.prayerAmenText}>🙏 함께 기도 {prayer.amen}</Text>
+        </View>
+        {!answered ? (
+          <View style={styles.prayerCompletePill}>
+            <Text style={styles.prayerCompleteText}>응답완료</Text>
+          </View>
+        ) : null}
+      </View>
+    </Card>
   );
 }
 
@@ -2059,18 +2102,96 @@ export function PrayerApplyReferenceScreen() {
 }
 
 export function PrayerRequestReferenceScreen() {
+  const requests = [
+    {
+      name: "김은혜",
+      when: "10분 전",
+      topic: "가정 회복",
+      text: "남편의 건강 회복을 위해 함께 기도해주세요. 다음 주 검사 결과를 기다리고 있습니다.",
+      cheers: 12,
+    },
+    {
+      name: "박정아",
+      when: "1시간 전",
+      topic: "자녀",
+      text: "고등학생 아들이 학업과 신앙 사이에서 흔들리고 있어요. 지혜를 구합니다.",
+      cheers: 8,
+    },
+    {
+      name: "이수민",
+      when: "어제",
+      topic: "직장",
+      text: "새로운 직장에서의 적응을 위해 기도 부탁드립니다.",
+      cheers: 24,
+      answered: true,
+      mine: true,
+    },
+    {
+      name: "정현우",
+      when: "2일 전",
+      topic: "교회",
+      text: "12월 부흥회를 위해 함께 기도해주세요.",
+      cheers: 31,
+    },
+  ];
+
   return (
-    <Screen>
+    <Screen padded={false}>
       <TopBar title="기도요청" back onBack={() => router.back()} />
-      <Card style={styles.stack}>
-        <TextField label="이름" value="김은혜" />
-        <TextField label="연락처" value="010-1234-5678" />
-        <Textarea
-          label="기도 제목"
-          value="어머니 수술과 회복을 위해 기도 부탁드립니다."
+      <View style={styles.segmentWrap}>
+        <SegmentedTabs
+          items={[
+            { key: "all", label: "전체" },
+            { key: "mine", label: "내 요청" },
+            { key: "answered", label: "응답됨" },
+          ]}
+          active="all"
+          onChange={() => undefined}
         />
-        <Button>기도 요청 보내기</Button>
-      </Card>
+      </View>
+      <View style={styles.prayerRequestList}>
+        {requests.map((request) => (
+          <Card
+            key={request.name}
+            style={[
+              styles.prayerRequestCard,
+              request.mine ? styles.prayerRequestMine : null,
+            ]}
+          >
+            <View style={styles.authorRow}>
+              <Avatar name={request.name} size={36} />
+              <View style={styles.flex}>
+                <Text style={styles.menuTitle}>{request.name}</Text>
+                <Text style={styles.metaText}>{request.when}</Text>
+              </View>
+              {request.answered ? <Badge>응답됨</Badge> : null}
+            </View>
+            <View style={styles.prayerTopicTag}>
+              <Text style={styles.prayerTopicTagText}>#{request.topic}</Text>
+            </View>
+            <Text style={styles.bodyText}>{request.text}</Text>
+            <View style={styles.prayerRequestFooter}>
+              <View style={styles.inlineMeta}>
+                <MaterialIcons
+                  name="favorite-border"
+                  size={16}
+                  color={theme.colors.inkMute}
+                />
+                <Text style={styles.metaText}>{request.cheers}</Text>
+              </View>
+              <View style={styles.inlineMeta}>
+                <MaterialIcons
+                  name="chat-bubble-outline"
+                  size={16}
+                  color={theme.colors.inkMute}
+                />
+                <Text style={styles.metaText}>함께 기도</Text>
+              </View>
+            </View>
+          </Card>
+        ))}
+      </View>
+      <FloatingActionButton compact icon="add" />
     </Screen>
   );
 }
@@ -5010,6 +5131,29 @@ const styles = StyleSheet.create({
   priceText: { marginTop: 2, color: theme.colors.ink, fontWeight: "900" },
   primaryText: { color: theme.colors.primaryDeep, fontWeight: "900" },
   prayerRoomCard: { flexDirection: "row", alignItems: "center", gap: 14 },
+  prayerOtherList: {
+    paddingBottom: 2,
+  },
+  prayerOtherRow: {
+    minHeight: 68,
+    paddingVertical: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  prayerJoinPill: {
+    minHeight: 36,
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.primarySoft,
+  },
+  prayerJoinText: {
+    color: theme.colors.primaryDeep,
+    fontSize: 13,
+    fontWeight: "800",
+  },
   dayBox: {
     width: 56,
     height: 56,
@@ -5033,9 +5177,117 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
   },
+  prayerUnderlineTabs: {
+    minHeight: 48,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
+    flexDirection: "row",
+    alignItems: "flex-end",
+  },
+  prayerUnderlineTab: {
+    flex: 1,
+    minHeight: 48,
+    alignItems: "center",
+    justifyContent: "center",
+    borderBottomWidth: 2,
+    borderBottomColor: "transparent",
+  },
+  prayerUnderlineActive: {
+    borderBottomColor: theme.colors.primary,
+  },
+  prayerUnderlineText: {
+    color: theme.colors.inkMute,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  prayerUnderlineTextActive: {
+    color: theme.colors.ink,
+    fontSize: 15,
+    fontWeight: "800",
+  },
   prayerCard: { gap: 12 },
   faded: { opacity: 0.58 },
   authorRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  prayerAnsweredText: {
+    color: theme.colors.inkMute,
+    textDecorationLine: "line-through",
+  },
+  prayerActionRow: {
+    marginTop: 2,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  prayerAmenPill: {
+    minHeight: 32,
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 12,
+    justifyContent: "center",
+    backgroundColor: theme.colors.primarySoft,
+  },
+  prayerAmenText: {
+    color: theme.colors.primaryDeep,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  prayerCompletePill: {
+    minHeight: 32,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: theme.colors.lineStrong,
+    paddingHorizontal: 12,
+    justifyContent: "center",
+  },
+  prayerCompleteText: {
+    color: theme.colors.inkSoft,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  prayerAnsweredDivider: {
+    paddingHorizontal: 6,
+    paddingVertical: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  prayerDividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: theme.colors.line,
+  },
+  prayerRequestList: {
+    paddingHorizontal: 18,
+    paddingBottom: 96,
+    gap: 12,
+  },
+  prayerRequestCard: {
+    gap: 10,
+  },
+  prayerRequestMine: {
+    backgroundColor: theme.colors.primarySoft,
+  },
+  prayerTopicTag: {
+    alignSelf: "flex-start",
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    backgroundColor: "rgba(143,168,130,0.18)",
+  },
+  prayerTopicTagText: {
+    color: theme.colors.primaryDeep,
+    fontSize: 11,
+    fontWeight: "800",
+  },
+  prayerRequestFooter: {
+    marginTop: 2,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.line,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
   studyCourseCard: { gap: 8, overflow: "hidden" },
   studyOrb: {
     position: "absolute",

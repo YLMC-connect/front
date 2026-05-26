@@ -15,6 +15,9 @@ const manifestPath = path.join(originalRoot, "manifest.json");
 const renderOriginals = process.env.YLMC_PREPARE_ORIGINALS !== "0";
 const width = 360;
 const height = 720;
+const renderSettleMs = Number(
+  process.env.YLMC_PREPARE_RENDER_SETTLE_MS ?? "320",
+);
 
 const extraScreens = [
   {
@@ -271,6 +274,7 @@ const renderOriginalScreens = async (rows, manifest, standaloneHtmlPath) => {
             window.__ylmcRoot = ReactDOM.createRoot(root);
             window.__ylmcRoot.render(React.createElement(Component, ${props}));
             await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            await new Promise((resolve) => setTimeout(resolve, ${renderSettleMs}));
             return true;
           })()
         `;

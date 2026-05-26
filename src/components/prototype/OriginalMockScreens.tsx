@@ -80,27 +80,64 @@ export function LoginReferenceScreen({ variant }: { variant: string }) {
 }
 
 export function InviteCodeReferenceScreen({ variant }: { variant: string }) {
+  const code = variant === "default" ? "" : "A1B2C";
+  const isError = variant === "error";
+  const isLoading = variant === "loading";
+  const filled = code.length > 0;
+
   return (
-    <Screen>
-      <TopBar title="가입 코드" back onBack={() => router.back()} />
-      <View style={styles.displayBlock}>
-        <Text style={styles.displayTitle}>
-          교회에서 받은 코드를 입력해주세요
-        </Text>
-        <Text style={styles.bodyText}>
-          열린문교회 성도 확인 후 회원가입을 이어갑니다.
-        </Text>
+    <Screen scroll={false} padded={false}>
+      <View style={styles.inviteRoot}>
+        <TopBar title="가입 코드" back onBack={() => router.back()} />
+        <View style={styles.inviteBody}>
+          <View style={styles.inviteIntro}>
+            <Text style={styles.inviteDisplay}>가입 코드를 입력해주세요</Text>
+            <Text style={styles.inviteDescription}>
+              교회에서 발급받은 가입 코드를 입력하면 회원가입을 시작할 수
+              있어요.
+            </Text>
+          </View>
+
+          <View style={styles.inviteFieldBlock}>
+            <Text style={styles.inviteLabel}>가입 코드</Text>
+            <View
+              style={[
+                styles.inviteInput,
+                isError ? styles.inviteInputError : null,
+              ]}
+            >
+              <Text style={styles.inviteInputText}>{code || "예) A1B2C"}</Text>
+            </View>
+            {isError ? (
+              <Text style={styles.inviteError}>
+                유효하지 않은 가입 코드입니다
+              </Text>
+            ) : (
+              <Text style={styles.inviteHint}>
+                5자리 코드를 정확히 입력해주세요
+              </Text>
+            )}
+          </View>
+
+          <View style={styles.inviteHelpCard}>
+            <MaterialIcons name="info" size={18} color={theme.colors.inkHint} />
+            <Text style={styles.inviteHelpText}>
+              가입 코드 관련 문의는 열린문교회로 연락해주세요. 코드는 1회만 사용
+              가능합니다.
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.inviteSpacer} />
+        <View style={styles.inviteBottomFlat}>
+          <Button
+            loading={isLoading}
+            disabled={!filled && variant === "default"}
+          >
+            확인
+          </Button>
+        </View>
       </View>
-      <Card style={styles.stack}>
-        <TextField
-          label="가입 코드"
-          value={variant === "error" ? "YLMC-0000" : "YLMC-2026"}
-          error={
-            variant === "error" ? "유효하지 않은 가입 코드입니다" : undefined
-          }
-        />
-        <Button loading={variant === "loading"}>확인</Button>
-      </Card>
       <Toast
         message={variant === "toast" ? "네트워크 연결을 확인해주세요" : ""}
         offset={variant === "toast" ? 106 : 28}
@@ -110,50 +147,111 @@ export function InviteCodeReferenceScreen({ variant }: { variant: string }) {
 }
 
 export function TermsReferenceScreen({ sheet = false }: { sheet?: boolean }) {
+  const terms = [
+    { key: "tos", label: "서비스 이용약관", required: true },
+    { key: "privacy", label: "개인정보 처리방침", required: true },
+    { key: "loc", label: "위치 기반 서비스 이용약관", required: false },
+    { key: "mkt", label: "마케팅 정보 수신 동의", required: false },
+  ] as const;
+
   return (
-    <Screen>
-      <TopBar
-        title={sheet ? "약관 전문" : "약관 동의"}
-        back
-        onBack={() => router.back()}
-      />
-      <View style={styles.displayBlock}>
-        <Text style={styles.displayTitle}>
-          {sheet ? "서비스 이용약관" : "이용 전 약관에 동의해주세요"}
-        </Text>
-        <Text style={styles.bodyText}>
-          성도 간 안전한 연결을 위해 필수 약관과 개인정보 처리방침을 확인합니다.
-        </Text>
-      </View>
-      {sheet ? (
-        <Card style={styles.stack}>
-          {legalParagraphs.map((text) => (
-            <Text key={text} style={styles.bodyText}>
-              {text}
+    <Screen padded={false} scroll={false}>
+      <View style={styles.termsRoot}>
+        <View style={styles.termsBase}>
+          <TopBar title="서비스 이용 동의" back onBack={() => router.back()} />
+          <View style={styles.termsBody}>
+            <Text
+              style={[
+                styles.termsDisplay,
+                sheet ? styles.termsDimmedContent : null,
+              ]}
+            >
+              약관에 동의해주세요
             </Text>
-          ))}
-        </Card>
-      ) : (
-        <Card style={styles.menuCard}>
-          <MenuRow
-            icon="check-circle"
-            title="서비스 이용약관 동의"
-            value="필수"
-          />
-          <MenuRow
-            icon="verified-user"
-            title="개인정보 처리방침 동의"
-            value="필수"
-          />
-          <MenuRow
-            icon="campaign"
-            title="교회 소식 수신 동의"
-            value="선택"
-            last
-          />
-        </Card>
-      )}
-      {!sheet ? <Button>동의하고 계속</Button> : null}
+            <Text
+              style={[
+                styles.termsDescription,
+                sheet ? styles.termsDimmedContent : null,
+              ]}
+            >
+              서비스 이용을 위해 약관 동의가 필요해요.
+            </Text>
+
+            <View
+              style={[
+                styles.termsAgreeAll,
+                sheet ? styles.termsDimmedContent : null,
+              ]}
+            >
+              <View style={styles.termsCheckLarge} />
+              <Text style={styles.termsAgreeAllText}>전체 동의하기</Text>
+            </View>
+
+            {!sheet ? (
+              <View style={styles.termsList}>
+                {terms.map((term) => (
+                  <View key={term.key} style={styles.termsRow}>
+                    <View style={styles.termsCheck} />
+                    <View style={styles.termsRowTextWrap}>
+                      <Text style={styles.termsRowText}>
+                        <Text style={styles.termsRequired}>
+                          [{term.required ? "필수" : "선택"}]{" "}
+                        </Text>
+                        {term.label}
+                      </Text>
+                    </View>
+                    <View style={styles.termsViewFull}>
+                      <Text style={styles.termsViewFullText}>전문 보기</Text>
+                      <MaterialIcons
+                        name="chevron-right"
+                        size={14}
+                        color={theme.colors.inkSoft}
+                      />
+                    </View>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+          </View>
+          {!sheet ? (
+            <View style={styles.termsBottomFlat}>
+              <View style={styles.termsNextButton}>
+                <Text style={styles.termsNextText}>다음</Text>
+              </View>
+            </View>
+          ) : null}
+        </View>
+
+        {sheet ? (
+          <View style={styles.termsSheetOverlay}>
+            <View style={styles.termsSheetBackdrop} />
+            <View style={styles.termsSheetPanel}>
+              <View style={styles.termsSheetHandleWrap}>
+                <View style={styles.termsSheetHandle} />
+              </View>
+              <View style={styles.termsSheetHeader}>
+                <Text style={styles.termsSheetTitle}>서비스 이용약관</Text>
+                <View style={styles.termsSheetClose}>
+                  <MaterialIcons
+                    name="close"
+                    size={17}
+                    color={theme.colors.inkSoft}
+                  />
+                </View>
+              </View>
+              <ScrollView
+                style={styles.termsSheetScroll}
+                contentContainerStyle={styles.termsSheetContent}
+              >
+                <Text style={styles.termsSheetDate}>
+                  시행일자: 2026년 1월 1일
+                </Text>
+                <Text style={styles.termsSheetText}>{legalText}</Text>
+              </ScrollView>
+            </View>
+          </View>
+        ) : null}
+      </View>
     </Screen>
   );
 }
@@ -2338,6 +2436,23 @@ const legalParagraphs = [
   "개인정보는 교회 공동체 운영 목적 안에서 필요한 범위로만 사용됩니다.",
 ];
 
+const legalText = `제1조 (목적)
+본 약관은 열린문커넥트(이하 "서비스")가 제공하는 모바일 애플리케이션 및 관련 제반 서비스의 이용과 관련하여 회사와 회원의 권리·의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
+
+제2조 (정의)
+1. "회원"이란 본 약관에 동의하고 회사가 제공하는 서비스를 이용하는 자를 말합니다.
+2. "콘텐츠"란 회원이 서비스에 게시한 글, 사진, 댓글 등을 의미합니다.
+3. "교회 커뮤니티"란 동일 교회 소속 회원으로 구성된 폐쇄형 그룹을 말합니다.
+
+제3조 (약관의 효력 및 변경)
+본 약관은 서비스 화면에 게시하거나 기타의 방법으로 회원에게 공지함으로써 효력이 발생합니다. 회사는 관련 법령을 위배하지 않는 범위에서 본 약관을 개정할 수 있습니다.
+
+제4조 (회원가입)
+회원이 되고자 하는 자는 회사가 정한 양식에 따라 회원정보를 기입한 후 본 약관에 동의한다는 의사표시를 함으로써 회원가입을 신청합니다.
+
+제5조 (서비스의 제공 및 변경)
+회사는 교회 내 나눔 플랫폼, 소모임 개설 및 참여, 중보기도 모임, 삶공부 과정 안내 및 수강 신청을 제공합니다.`;
+
 const marketStatusTabs = [
   { key: "all", label: "전체" },
   { key: "sharing", label: "나눔중" },
@@ -2492,6 +2607,231 @@ const styles = StyleSheet.create({
   bodyText: { color: theme.colors.inkSoft, fontSize: 14, lineHeight: 21 },
   errorText: { color: theme.colors.danger, fontSize: 13, fontWeight: "700" },
   metaText: { color: theme.colors.inkMute, fontSize: 12, fontWeight: "700" },
+  inviteRoot: { flex: 1 },
+  inviteBody: { paddingHorizontal: 24 },
+  inviteIntro: { marginTop: 6 },
+  inviteDisplay: {
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.display,
+    lineHeight: theme.lineHeight.display,
+    fontWeight: "900",
+  },
+  inviteDescription: {
+    marginTop: 10,
+    color: theme.colors.inkSoft,
+    fontSize: 14,
+    lineHeight: 21,
+  },
+  inviteFieldBlock: { marginTop: 32 },
+  inviteLabel: {
+    marginBottom: 6,
+    color: theme.colors.inkSoft,
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  inviteInput: {
+    height: 48,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface2,
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  inviteInputError: {
+    borderColor: theme.colors.danger,
+    backgroundColor: "#FDF4F1",
+  },
+  inviteInputText: {
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.md,
+  },
+  inviteHint: {
+    marginTop: 6,
+    color: theme.colors.inkMute,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  inviteError: {
+    marginTop: 6,
+    color: theme.colors.danger,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  inviteHelpCard: {
+    marginTop: 28,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    flexDirection: "row",
+    gap: 10,
+  },
+  inviteHelpText: {
+    flex: 1,
+    color: theme.colors.inkSoft,
+    fontSize: theme.fontSize.sm,
+    lineHeight: 19,
+  },
+  inviteSpacer: { flex: 1 },
+  inviteBottomFlat: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 30,
+  },
+  termsRoot: { flex: 1, position: "relative", overflow: "hidden" },
+  termsBase: { flex: 1 },
+  termsDimmedContent: { opacity: 0.5 },
+  termsBody: { paddingHorizontal: 24 },
+  termsDisplay: {
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.display,
+    lineHeight: theme.lineHeight.display,
+    fontWeight: "900",
+  },
+  termsDescription: {
+    marginTop: 10,
+    color: theme.colors.inkSoft,
+    fontSize: 14,
+    lineHeight: 21,
+  },
+  termsAgreeAll: {
+    marginTop: 28,
+    minHeight: 60,
+    borderRadius: theme.radius.lg,
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    backgroundColor: theme.colors.surface,
+  },
+  termsCheckLarge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: theme.colors.lineStrong,
+  },
+  termsAgreeAllText: {
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.lg,
+    fontWeight: theme.fontWeight.bold,
+  },
+  termsList: { marginTop: 8, paddingHorizontal: 4, paddingVertical: 4 },
+  termsRow: {
+    minHeight: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  termsCheck: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: theme.colors.lineStrong,
+  },
+  termsRowTextWrap: { flex: 1, minWidth: 0 },
+  termsRowText: { color: theme.colors.ink, fontSize: 14, lineHeight: 20 },
+  termsRequired: {
+    color: theme.colors.primaryDeep,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  termsViewFull: { flexDirection: "row", alignItems: "center", gap: 2 },
+  termsViewFullText: {
+    color: theme.colors.inkSoft,
+    fontSize: theme.fontSize.sm,
+    textDecorationLine: "underline",
+  },
+  termsBottomFlat: {
+    marginTop: "auto",
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 30,
+  },
+  termsNextButton: {
+    height: 52,
+    borderRadius: theme.radius.pill,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.primary,
+    opacity: 0.4,
+  },
+  termsNextText: {
+    color: theme.colors.white,
+    fontSize: theme.fontSize.base,
+    fontWeight: theme.fontWeight.bold,
+  },
+  termsSheetOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 50,
+    justifyContent: "flex-end",
+  },
+  termsSheetBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: theme.colors.sheetOverlay,
+  },
+  termsSheetPanel: {
+    height: "85%",
+    borderTopLeftRadius: theme.radius.xl,
+    borderTopRightRadius: theme.radius.xl,
+    overflow: "hidden",
+    backgroundColor: theme.colors.bg,
+    ...theme.shadow.sheet,
+  },
+  termsSheetHandleWrap: {
+    alignItems: "center",
+    paddingTop: 10,
+    paddingBottom: 4,
+  },
+  termsSheetHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: theme.colors.lineStrong,
+  },
+  termsSheetHeader: {
+    paddingHorizontal: 18,
+    paddingTop: 8,
+    paddingBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  termsSheetTitle: {
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.lg,
+    fontWeight: "900",
+  },
+  termsSheetClose: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.surface,
+  },
+  termsSheetScroll: { flexShrink: 1 },
+  termsSheetContent: {
+    paddingHorizontal: 20,
+    paddingTop: 4,
+    paddingBottom: 28,
+  },
+  termsSheetDate: {
+    marginBottom: 10,
+    color: theme.colors.inkMute,
+    fontSize: theme.fontSize.sm,
+    lineHeight: theme.lineHeight.sm,
+  },
+  termsSheetText: {
+    color: theme.colors.inkSoft,
+    fontSize: 13.5,
+    lineHeight: 23.5,
+  },
   stack: { gap: 12 },
   sheetField: { marginTop: 14 },
   segmentWrap: { paddingHorizontal: 18, paddingBottom: 8 },

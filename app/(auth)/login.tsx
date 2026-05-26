@@ -1,12 +1,20 @@
+import { MaterialIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
-import { StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput as NativeTextInput,
+  View,
+} from "react-native";
 import { z } from "zod";
 import { Screen } from "../../src/components/layout/Screen";
-import { Button, TextField, Toast } from "../../src/components/ui";
+import { Button, Toast } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { useAuth } from "../../src/hooks/useAuth";
+import { variantOf } from "../../src/components/prototype/OriginalMockScreens";
 
 const schema = z.object({
   id: z.string().min(1, "아이디를 입력해주세요."),
@@ -17,15 +25,26 @@ type FormValues = z.infer<typeof schema>;
 
 export default function LoginScreen() {
   const params = useLocalSearchParams<{ variant?: string }>();
+  const variant = variantOf(params.variant);
+  const isDefault = variant === "default";
+  const isError = variant === "error";
+  const isLoading = variant === "loading";
+  const isToast = variant === "toast";
   const { login } = useAuth();
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { id: "ylmc", password: "password" },
+    defaultValues: {
+      id: isDefault ? "" : "gracekim",
+      password: isDefault ? "" : "password",
+    },
   });
+  const values = watch();
+  const isFilled = values.id.length > 0 && values.password.length > 0;
 
   const onSubmit = handleSubmit((values) => {
     login.mutate(values, {
@@ -34,75 +53,127 @@ export default function LoginScreen() {
   });
 
   return (
-    <Screen>
-      <View style={styles.hero}>
-        <View style={styles.logo}>
-          <Text style={styles.logoText}>열</Text>
+    <Screen scroll={false} padded={false}>
+      <View style={styles.root}>
+        <View style={styles.hero}>
+          <View style={styles.logo}>
+            <MaterialIcons name="door-front" size={38} color="#fff" />
+          </View>
+          <Text style={styles.title}>열린문 커넥트</Text>
+          <Text style={styles.subtitle}>교회 가족과 함께하는 일상</Text>
         </View>
-        <Text style={styles.title}>열린문 커넥트</Text>
-        <Text style={styles.subtitle}>
-          성도와 성도를 이어주는 교회 커뮤니티
-        </Text>
-      </View>
 
-      <View style={styles.form}>
-        <Controller
-          control={control}
-          name="id"
-          render={({ field }) => (
-            <TextField
-              label="아이디"
-              value={field.value}
-              onChangeText={field.onChange}
-              error={errors.id?.message}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="password"
-          render={({ field }) => (
-            <TextField
-              label="비밀번호"
-              value={field.value}
-              onChangeText={field.onChange}
-              secureTextEntry
-              error={errors.password?.message}
-            />
-          )}
-        />
-        {login.error || params.variant === "error" ? (
-          <Text style={styles.error}>
-            {login.error?.message ?? "아이디 또는 비밀번호를 확인해주세요."}
-          </Text>
-        ) : null}
-        <Button
-          onPress={onSubmit}
-          loading={login.isPending || params.variant === "loading"}
-        >
-          로그인
-        </Button>
-        <View style={styles.dividerRow}>
-          <View style={styles.divider} />
-          <Text style={styles.dividerText}>처음이신가요?</Text>
-          <View style={styles.divider} />
+        <View style={styles.form}>
+          <Controller
+            control={control}
+            name="id"
+            render={({ field }) => (
+              <AuthField
+                label="아이디"
+                value={field.value}
+                onChangeText={field.onChange}
+                placeholder="아이디를 입력해주세요"
+                error={errors.id?.message}
+                hasError={isError}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="password"
+            render={({ field }) => (
+              <AuthField
+                label="비밀번호"
+                value={field.value}
+                onChangeText={field.onChange}
+                placeholder="비밀번호를 입력해주세요"
+                secureTextEntry
+                error={errors.password?.message}
+                hasError={isError}
+                trailingIcon="visibility-off"
+              />
+            )}
+          />
+          {login.error || isError ? (
+            <Text style={styles.error}>
+              {login.error?.message ??
+                "아이디 또는 비밀번호가 올바르지 않습니다"}
+            </Text>
+          ) : null}
+          <Button
+            onPress={onSubmit}
+            loading={login.isPending || isLoading}
+            disabled={!isFilled && isDefault}
+          >
+            로그인
+          </Button>
+          <Pressable style={styles.findPassword}>
+            <Text style={styles.findPasswordText}>비밀번호 찾기</Text>
+          </Pressable>
+          <View style={styles.dividerRow}>
+            <View style={styles.divider} />
+            <Text style={styles.dividerText}>처음이신가요?</Text>
+            <View style={styles.divider} />
+          </View>
+          <Link href="/signup" style={styles.signupButton}>
+            회원가입
+          </Link>
         </View>
-        <Link href="/signup" style={styles.signupButton}>
-          회원가입
-        </Link>
+        <View style={styles.spacer} />
+        <Text style={styles.copy}>© 열린문교회</Text>
       </View>
-      <Toast
-        message={
-          params.variant === "toast" ? "네트워크 연결을 확인해주세요" : ""
-        }
-      />
-      <Text style={styles.copy}>© 열린문교회</Text>
+      <Toast message={isToast ? "네트워크 연결을 확인해주세요" : ""} />
     </Screen>
   );
 }
 
+function AuthField({
+  label,
+  value,
+  onChangeText,
+  placeholder,
+  secureTextEntry = false,
+  error,
+  hasError = false,
+  trailingIcon,
+}: {
+  label: string;
+  value: string;
+  onChangeText: (value: string) => void;
+  placeholder?: string;
+  secureTextEntry?: boolean;
+  error?: string;
+  hasError?: boolean;
+  trailingIcon?: keyof typeof MaterialIcons.glyphMap;
+}) {
+  return (
+    <View>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      <View style={[styles.inputBox, hasError ? styles.inputBoxError : null]}>
+        <NativeTextInput
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
+          placeholderTextColor={theme.colors.inkMute}
+          secureTextEntry={secureTextEntry}
+          style={styles.input}
+        />
+        {trailingIcon ? (
+          <MaterialIcons
+            name={trailingIcon}
+            size={20}
+            color={theme.colors.inkMute}
+          />
+        ) : null}
+      </View>
+      {error ? <Text style={styles.fieldError}>{error}</Text> : null}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  hero: { alignItems: "center", paddingTop: 64, paddingBottom: 14, gap: 10 },
+  root: { flex: 1, paddingHorizontal: 24, paddingTop: 20 },
+  hero: { alignItems: "center", marginTop: 28 },
   logo: {
     width: 76,
     height: 76,
@@ -116,16 +187,54 @@ const styles = StyleSheet.create({
     shadowRadius: 18,
     elevation: 6,
   },
-  logoText: { color: "#fff", fontWeight: "900", fontSize: 36 },
-  title: { color: theme.colors.ink, fontWeight: "900", fontSize: 24 },
+  title: {
+    color: theme.colors.ink,
+    fontWeight: "900",
+    fontSize: 22,
+    marginTop: 16,
+  },
   subtitle: { color: theme.colors.inkMute, fontWeight: "600", fontSize: 13 },
-  form: { gap: 14, marginTop: 18 },
+  form: { gap: 14, marginTop: 36 },
+  fieldLabel: {
+    marginBottom: 6,
+    color: theme.colors.inkSoft,
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  inputBox: {
+    minHeight: 48,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface2,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  inputBoxError: {
+    borderColor: theme.colors.danger,
+    backgroundColor: "#FDF4F1",
+  },
+  input: {
+    flex: 1,
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.md,
+    padding: 0,
+  },
   error: { color: theme.colors.danger, fontSize: 13 },
+  fieldError: { marginTop: 6, color: theme.colors.danger, fontSize: 12 },
+  findPassword: {
+    alignSelf: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  findPasswordText: { color: theme.colors.inkMute, fontSize: 13 },
   dividerRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    marginTop: 8,
+    marginTop: 4,
     marginBottom: 2,
   },
   divider: { flex: 1, height: 1, backgroundColor: theme.colors.line },
@@ -140,11 +249,12 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.lineStrong,
     backgroundColor: theme.colors.surface,
   },
+  spacer: { flex: 1 },
   copy: {
     color: theme.colors.inkHint,
     textAlign: "center",
     fontSize: 11,
-    marginTop: "auto",
-    paddingBottom: 10,
+    paddingVertical: 12,
+    paddingBottom: 28,
   },
 });

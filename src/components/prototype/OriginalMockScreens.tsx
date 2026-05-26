@@ -509,7 +509,7 @@ export function HomeReferenceScreen() {
         </Card>
       </View>
 
-      <Section
+      <HomeSection
         title="내 소모임 활동"
         trailing={<Text style={styles.moreText}>전체보기 ›</Text>}
       >
@@ -527,7 +527,7 @@ export function HomeReferenceScreen() {
             </Card>
           ))}
         </View>
-      </Section>
+      </HomeSection>
 
       <View style={styles.statsGrid}>
         <Card style={styles.statPanel}>
@@ -548,7 +548,7 @@ export function HomeReferenceScreen() {
         </Card>
       </View>
 
-      <Section
+      <HomeSection
         title="새로 생긴 소모임"
         trailing={<Text style={styles.moreText}>더보기 ›</Text>}
       >
@@ -566,9 +566,9 @@ export function HomeReferenceScreen() {
             </View>
           ))}
         </View>
-      </Section>
+      </HomeSection>
 
-      <Section
+      <HomeSection
         title="최근 나눔 물품"
         trailing={<Text style={styles.moreText}>전체보기 ›</Text>}
       >
@@ -590,8 +590,28 @@ export function HomeReferenceScreen() {
             </View>
           ))}
         </View>
-      </Section>
+      </HomeSection>
     </Screen>
+  );
+}
+
+function HomeSection({
+  title,
+  children,
+  trailing,
+}: {
+  title: string;
+  children: ReactNode;
+  trailing?: ReactNode;
+}) {
+  return (
+    <View style={styles.homeSection}>
+      <View style={styles.homeSectionHeader}>
+        <Text style={styles.homeSectionTitle}>{title}</Text>
+        {trailing}
+      </View>
+      {children}
+    </View>
   );
 }
 
@@ -4750,6 +4770,7 @@ const styles = StyleSheet.create({
   contentPad: { paddingHorizontal: 18, gap: 16 },
   noticeBanner: {
     minHeight: 76,
+    paddingHorizontal: 18,
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
@@ -4779,8 +4800,23 @@ const styles = StyleSheet.create({
   },
   noticePagerActive: { backgroundColor: "#fff" },
   moreText: { color: theme.colors.inkMute, fontSize: 12, fontWeight: "700" },
+  homeSection: {},
+  homeSectionHeader: {
+    paddingTop: 16,
+    paddingRight: 18,
+    paddingBottom: 8,
+    paddingLeft: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  homeSectionTitle: {
+    color: theme.colors.ink,
+    fontSize: 15,
+    fontWeight: "800",
+  },
   rail: { flexDirection: "row", gap: 12, paddingHorizontal: 18 },
-  homeGroupCard: { width: 220, gap: 8 },
+  homeGroupCard: { width: 220, gap: 8, padding: 14 },
   statsGrid: { flexDirection: "row", gap: 10, paddingHorizontal: 18 },
   statPanel: { flex: 1, minHeight: 118, overflow: "hidden" },
   statWarm: { backgroundColor: theme.colors.amberSoft },

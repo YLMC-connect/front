@@ -645,6 +645,8 @@ export function RadioSheet({
   onClose: () => void;
   onConfirm: () => void;
 }) {
+  const compact = options.length > 5;
+
   return (
     <BottomSheet
       visible={visible}
@@ -653,14 +655,25 @@ export function RadioSheet({
       footer={
         <>
           <View style={styles.sheetAction}>
-            <Button variant="soft" onPress={onClose}>
-              취소
-            </Button>
+            <Pressable
+              accessibilityRole="button"
+              onPress={onClose}
+              style={[styles.sheetFooterButton, styles.sheetCancelButton]}
+            >
+              <Text style={styles.sheetCancelText}>취소</Text>
+            </Pressable>
           </View>
           <View style={styles.sheetAction}>
-            <Button variant={danger ? "danger" : "primary"} onPress={onConfirm}>
-              {confirmText}
-            </Button>
+            <Pressable
+              accessibilityRole="button"
+              onPress={onConfirm}
+              style={[
+                styles.sheetFooterButton,
+                danger ? styles.sheetDangerButton : styles.sheetConfirmButton,
+              ]}
+            >
+              <Text style={styles.sheetConfirmText}>{confirmText}</Text>
+            </Pressable>
           </View>
         </>
       }
@@ -673,6 +686,7 @@ export function RadioSheet({
               key={option.value}
               style={[
                 styles.radioOption,
+                compact ? styles.radioOptionCompact : null,
                 index === options.length - 1 ? styles.radioOptionLast : null,
                 option.disabled ? styles.radioOptionDisabled : null,
               ]}
@@ -680,15 +694,24 @@ export function RadioSheet({
               <View
                 style={[
                   styles.radioMark,
+                  compact ? styles.radioMarkCompact : null,
                   selected ? styles.radioMarkSelected : null,
                 ]}
               >
-                {selected ? <View style={styles.radioDot} /> : null}
+                {selected ? (
+                  <View
+                    style={[
+                      styles.radioDot,
+                      compact ? styles.radioDotCompact : null,
+                    ]}
+                  />
+                ) : null}
               </View>
               <View style={styles.radioTextWrap}>
                 <Text
                   style={[
                     styles.radioLabel,
+                    compact ? styles.radioLabelCompact : null,
                     selected ? styles.radioLabelSelected : null,
                   ]}
                 >
@@ -1270,6 +1293,31 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   sheetAction: { flex: 1 },
+  sheetFooterButton: {
+    height: 48,
+    borderRadius: theme.radius.pill,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sheetCancelButton: {
+    backgroundColor: theme.colors.surface,
+  },
+  sheetConfirmButton: {
+    backgroundColor: theme.colors.primary,
+  },
+  sheetDangerButton: {
+    backgroundColor: theme.colors.danger,
+  },
+  sheetCancelText: {
+    color: theme.colors.inkSoft,
+    fontSize: theme.fontSize.md,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  sheetConfirmText: {
+    color: theme.colors.white,
+    fontSize: theme.fontSize.md,
+    fontWeight: theme.fontWeight.bold,
+  },
   radioList: {},
   radioOption: {
     minHeight: 48,
@@ -1280,6 +1328,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+  },
+  radioOptionCompact: {
+    minHeight: 44,
+    paddingVertical: 12,
   },
   radioOptionLast: { borderBottomWidth: 0 },
   radioOptionDisabled: { opacity: 0.45 },
@@ -1292,6 +1344,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  radioMarkCompact: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+  },
   radioMarkSelected: {
     borderWidth: 0,
     backgroundColor: theme.colors.primary,
@@ -1302,11 +1359,19 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: "#fff",
   },
+  radioDotCompact: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+  },
   radioTextWrap: { flex: 1, minWidth: 0 },
   radioLabel: {
     color: theme.colors.ink,
     fontSize: 14.5,
     fontWeight: theme.fontWeight.medium,
+  },
+  radioLabelCompact: {
+    fontSize: theme.fontSize.md,
   },
   radioLabelSelected: { fontWeight: theme.fontWeight.bold },
   radioDescription: { color: theme.colors.inkMute, marginTop: 2, fontSize: 12 },

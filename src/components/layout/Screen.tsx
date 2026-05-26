@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
 import { usePathname } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { theme } from "../../constants/theme";
 
 const rootTabPaths = new Set(["/", "/market", "/group", "/faith", "/mypage"]);
+const designStatusBarHeight = 44;
 
 export function Screen({
   children,
@@ -16,12 +17,18 @@ export function Screen({
   padded?: boolean;
 }) {
   const pathname = usePathname();
+  const insets = useSafeAreaInsets();
   const contentStyle = rootTabPaths.has(pathname)
     ? styles.contentWithTab
     : styles.content;
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View
+      style={[
+        styles.safe,
+        { paddingTop: Math.max(insets.top, designStatusBarHeight) },
+      ]}
+    >
       {scroll ? (
         <ScrollView
           contentContainerStyle={[contentStyle, padded ? styles.padded : null]}
@@ -33,7 +40,7 @@ export function Screen({
           {children}
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 

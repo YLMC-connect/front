@@ -20,6 +20,7 @@
 - 나눔 상세 댓글/고정 composer 정렬 — ZIP `ScreenMarketDetail` 기준 댓글 리스트, 수정/삭제/신고 mini action, 하단 glass comment composer, 멀티라인 preview card를 reference 화면에 반영
 - 나눔 상세 partial visual compare 개선 — `market-detail-*` 10개 원본/앱 캡처를 재생성해 `missing=0` 확인, 대표 residual은 `done 42.63→30.38`, `status 35.99→26.25`, `delete 41.43→17.34`, `report-dup-toast 34.04→32.72`로 감소
 - 나눔 상세 toast/viewport 정렬 — ZIP toast 문구와 `offset=106`을 맞추고 디자인 viewport 캡처로 재검증해 `missing=0`, `report-dup-toast 32.72→28.92`, `status 26.25→13.29`, `delete 17.34→11.62`, `done 30.38→20.54`로 감소
+- 나눔 상세 safe-area/sheet geometry 정렬 — ZIP 44px status frame과 bottom action 위치 기준으로 `Screen`을 조정하고 긴 `RadioSheet` compact row를 적용해 `missing=0`, `report 18.50→11.50`, `report-dup-toast 28.92→15.73`, `done 20.54→11.17`, `status 13.29→7.51`로 감소
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -40,6 +41,7 @@
 `MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-26) **나눔 상세 geometry는 ZIP phone frame 기준으로 본다** — Android native safe-area를 그대로 쓰는 대신 ZIP `phone-status` 44px와 bottom fixed composer 위치를 기준으로 맞춰야 원본 상세의 hero, 작성자, composer 위치가 일치합니다.
 - (2026-05-26) **나눔 상세 toast는 ZIP `CheckToast offset={106}`을 따른다** — 하단 comment composer가 있는 나눔 상세의 중복 신고 toast는 기본 offset이 아니라 ZIP 원본처럼 bottom action area 위에 뜨도록 `offset=106`을 적용하고, 문구도 `이미 신고한 게시글입니다`로 맞춥니다.
 - (2026-05-26) **나눔 상세 reference는 ZIP 고정 comment composer를 따른다** — 상세 화면의 댓글 입력은 카드형 textarea가 아니라 ZIP 원본의 하단 glass `bottom-bar` composer이며, 멀티라인 입력 상태는 composer 위 preview card로 표현합니다.
 - (2026-05-26) **나눔 상세 hero는 ZIP `Thumb`를 직접 번역한다** — `VisualCover` 기반 wide cover 대신 ZIP의 정사각 `Thumb size=360 seed=0` 구조를 사용하고, 기본 `Thumb`에는 아이콘을 표시하지 않습니다.
@@ -54,7 +56,7 @@
 ## 미결 / 추적
 - 실제 나눔 API 스키마, 이미지 업로드 방식, 페이지네이션 방식 확인 필요.
 - 신고 처리 후 블라인드/관리자 큐 정책은 API/운영 정책 확정 후 반영.
-- 나눔 상세 residual은 viewport 정렬 후 추가로 줄었지만 `report-dup-toast`, `done/reserved`, 기본 상세 계열은 Android status bar, RN font metrics, blur/shadow 번역, hero 내부 추상 shape 위치 차이가 남아 후속 공통 geometry 정렬에서 추가 축소 대상입니다. 최신 부분 비교 리포트는 `/private/tmp/ylmc-golden-screens/market-detail/compare-vp2`입니다.
+- 나눔 상세 residual은 safe-area/sheet 정렬 후 추가로 줄었지만 기본/타인/예약/토스트 계열은 RN font metrics, hero 내부 추상 shape 위치, blur/shadow 번역 차이가 남아 후속 시각 정렬 대상입니다. 최신 부분 비교 리포트는 `/private/tmp/ylmc-golden-screens/market-detail/compare-current`입니다.
 
 ## 의존성
 - common 도메인의 UI, `queryKeys`, `queryClient`, 이미지 선택 컴포넌트에 의존합니다.

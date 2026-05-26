@@ -30,6 +30,8 @@
 - ZIP `Thumb` 공통 패턴 정렬 — `VisualThumb`는 ZIP JSX처럼 icon prop이 있을 때만 아이콘을 렌더링하고, 기본 썸네일은 추상 도형만 표시
 - Dev Client Maestro smoke 서버 선택 보강 — Dev Client가 `DEVELOPMENT SERVERS` 화면에 머물면 `.maestro/smoke.yml`에서 개발 서버를 먼저 선택한 뒤 v1 탭 smoke를 실행
 - 디자인 viewport 기반 부분 캡처 옵션 추가 — `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT=1` 사용 시 Android Emulator를 1080x2160@480으로 임시 조정해 ZIP 360x720 논리 viewport에 맞춰 캡처하고, 캡처 후 원래 size/density로 복원
+- ZIP frame safe-area 정렬 — `Screen`은 ZIP `phone-status` 44px frame을 기준으로 top offset을 맞추고, 하단 fixed action/tab 계열은 ZIP처럼 bottom inset 위로 과도하게 뜨지 않도록 bottom safe-area padding을 제거
+- ZIP RadioSheet compact/footer 정렬 — 긴 radio 목록은 ZIP 신고 sheet처럼 20px radio mark와 12px row padding을 사용하고, sheet footer는 48px pill 버튼으로 맞춤
 
 ---
 
@@ -65,6 +67,8 @@
 [../../PLAN.md](../../PLAN.md) “🗃 데이터 타입 설계 > 공통” 참조.
 
 ## 결정 사항 (최신 위)
+- (2026-05-26) **`Screen` safe-area는 ZIP phone frame을 기준으로 번역한다** — Android native status inset(약 24dp)을 그대로 쓰면 ZIP의 44px `phone-status`보다 콘텐츠가 위로 붙고, bottom inset을 적용하면 comment composer가 ZIP보다 위로 뜹니다. `Screen`은 top을 최소 44dp로 보정하고 bottom inset은 fixed action geometry에 포함하지 않습니다.
+- (2026-05-26) **긴 `RadioSheet`는 compact row를 사용한다** — 신고처럼 항목이 많은 bottom sheet는 ZIP `ReportSheet`와 같이 20px radio mark, 12px row padding, 48px footer pill 버튼을 사용합니다. 짧은 상태 변경 sheet는 기존 generic rhythm을 유지합니다.
 - (2026-05-26) **visual capture는 필요 시 ZIP 논리 viewport에 맞춘다** — Android Emulator 기본 해상도(1080x2400@420)는 ZIP 원본 360x720과 논리 viewport가 달라 layout diff를 키우므로, 부분 visual compare에서는 `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT=1`로 1080x2160@480을 임시 적용해 360x720dp 기준에 맞춥니다. 스크립트는 캡처 후 원래 `wm size/density`를 복원합니다.
 - (2026-05-26) **`VisualThumb` 기본형은 ZIP `Thumb`처럼 icon-less** — ZIP 공통 JSX의 `Thumb`는 `icon`을 넘긴 경우에만 아이콘을 표시하므로, RN `VisualThumb`도 기본 `redeem` 아이콘을 제거하고 호출부가 명시적으로 요청할 때만 아이콘을 렌더링합니다.
 - (2026-05-26) **Dev Client smoke는 서버 선택 화면도 조건부 처리한다** — Android Emulator에서 앱 상태를 clear하면 Expo Dev Client가 `DEVELOPMENT SERVERS` 화면에 남을 수 있으므로, `.maestro/smoke.yml`은 해당 화면이 보일 때 개발 서버 row를 탭하고 `Reload` 메뉴를 닫은 뒤 앱 루트 딥링크 검증을 진행합니다.

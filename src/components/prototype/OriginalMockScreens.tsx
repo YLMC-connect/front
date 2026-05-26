@@ -2808,28 +2808,52 @@ export function WithdrawReferenceScreen({
 }: {
   confirm?: boolean;
 }) {
+  const cautions = [
+    "작성한 나눔 게시글·댓글은 익명으로 남습니다",
+    "탈퇴 후 재가입해도 기존 데이터는 복구할 수 없습니다",
+    "탈퇴 즉시 개인정보가 파기됩니다",
+    "소모임장인 경우 가장 먼저 가입한 멤버에게 자동 이관됩니다",
+  ];
+
   return (
-    <Screen>
+    <Screen padded={false} scroll={false}>
       <TopBar title="회원 탈퇴" back onBack={() => router.back()} />
-      <View style={styles.displayBlock}>
-        <Text style={styles.displayTitle}>정말 떠나시나요?</Text>
-        <Text style={styles.bodyText}>
-          탈퇴 전에 아래 안내를 꼭 확인해주세요.
-        </Text>
-      </View>
-      <Card style={styles.warningCard}>
-        {[
-          "작성한 나눔 게시글·댓글은 익명으로 남습니다",
-          "탈퇴 후 재가입해도 기존 데이터는 복구할 수 없습니다",
-          "탈퇴 즉시 개인정보가 파기됩니다",
-          "소모임장인 경우 가장 먼저 가입한 멤버에게 자동 이관됩니다",
-        ].map((item) => (
-          <Text key={item} style={styles.warningText}>
-            • {item}
+      <View style={styles.withdrawBody}>
+        <View style={styles.withdrawIntro}>
+          <Text style={styles.withdrawTitle}>정말 떠나시나요?</Text>
+          <Text style={styles.bodyText}>
+            탈퇴 전에 아래 안내를 꼭 확인해주세요.
           </Text>
-        ))}
-      </Card>
-      <Button variant="danger">탈퇴하기</Button>
+        </View>
+        <View style={styles.withdrawWarningCard}>
+          <View style={styles.withdrawWarningHeader}>
+            <MaterialIcons
+              name="report-problem"
+              size={16}
+              color={theme.colors.danger}
+            />
+            <Text style={styles.withdrawWarningTitle}>탈퇴 전 안내사항</Text>
+          </View>
+          <View style={styles.withdrawWarningList}>
+            {cautions.map((item) => (
+              <View key={item} style={styles.withdrawWarningRow}>
+                <View style={styles.withdrawBullet} />
+                <Text style={styles.withdrawWarningText}>{item}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+        <View style={styles.withdrawInfoCard}>
+          <Text style={styles.withdrawInfoText}>
+            계정과 모든 활동 내역이 영구적으로 삭제됩니다. 신중히 결정해주세요.
+          </Text>
+        </View>
+      </View>
+      <View style={styles.withdrawBottomFlat}>
+        <View style={styles.withdrawDangerButton}>
+          <Text style={styles.withdrawDangerButtonText}>탈퇴하기</Text>
+        </View>
+      </View>
       <ConfirmDialog
         visible={confirm}
         title="정말 탈퇴하시겠습니까?"
@@ -4562,6 +4586,92 @@ const styles = StyleSheet.create({
     borderColor: "rgba(201,124,110,0.20)",
   },
   warningText: { color: "#7B3A2D", fontSize: 13, lineHeight: 20 },
+  withdrawBody: {
+    flex: 1,
+    paddingHorizontal: 18,
+  },
+  withdrawIntro: {
+    paddingTop: 4,
+    paddingBottom: 18,
+    gap: 10,
+  },
+  withdrawTitle: {
+    color: theme.colors.ink,
+    fontSize: 20,
+    lineHeight: 27,
+    fontWeight: "800",
+  },
+  withdrawWarningCard: {
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: "rgba(201,124,110,0.20)",
+    padding: 16,
+    backgroundColor: "rgba(201,124,110,0.10)",
+  },
+  withdrawWarningHeader: {
+    marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  withdrawWarningTitle: {
+    color: theme.colors.danger,
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  withdrawWarningList: {
+    gap: 10,
+  },
+  withdrawWarningRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+  },
+  withdrawBullet: {
+    marginTop: 8,
+    width: 5,
+    height: 5,
+    borderRadius: 3,
+    flexShrink: 0,
+    backgroundColor: theme.colors.danger,
+  },
+  withdrawWarningText: {
+    flex: 1,
+    color: "#7B3A2D",
+    fontSize: 13.5,
+    lineHeight: 21,
+  },
+  withdrawInfoCard: {
+    marginTop: 18,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    padding: 14,
+    backgroundColor: theme.colors.surface,
+  },
+  withdrawInfoText: {
+    color: theme.colors.inkSoft,
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  withdrawBottomFlat: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 30,
+  },
+  withdrawDangerButton: {
+    height: 52,
+    borderRadius: theme.radius.pill,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.danger,
+    ...theme.shadow.primary,
+  },
+  withdrawDangerButtonText: {
+    color: theme.colors.white,
+    fontSize: 15,
+    fontWeight: "800",
+  },
   profileHero: { alignItems: "center", gap: 8, paddingVertical: 28 },
   blockedBody: {
     paddingBottom: 28,

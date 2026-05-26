@@ -57,14 +57,14 @@ export function Button({
   loading?: boolean;
   icon?: IconName;
 }) {
-  const style = [
+  const buttonStyle = StyleSheet.flatten([
     styles.button,
     variant === "primary" && styles.buttonPrimary,
     variant === "soft" && styles.buttonSoft,
     variant === "ghost" && styles.buttonGhost,
     variant === "danger" && styles.buttonDanger,
     disabled && styles.disabled,
-  ];
+  ]);
   const textStyle = [
     styles.buttonText,
     (variant === "soft" || variant === "ghost") && styles.buttonTextSoft,
@@ -76,10 +76,7 @@ export function Button({
       accessibilityRole="button"
       disabled={disabled || loading}
       onPress={onPress}
-      style={({ pressed }) => [
-        style,
-        pressed && !disabled ? styles.pressed : null,
-      ]}
+      style={buttonStyle}
     >
       {loading ? (
         <ActivityIndicator
@@ -516,14 +513,16 @@ export function Skeleton({
 export function Toast({
   message,
   offset = 28,
+  icon = "check",
 }: {
   message?: string;
   offset?: number;
+  icon?: IconName;
 }) {
   if (!message) return null;
   return (
     <View style={[styles.toast, { bottom: offset }]}>
-      <MaterialIcons name="check" size={18} color="#fff" />
+      <MaterialIcons name={icon} size={18} color="#fff" />
       <Text style={styles.toastText}>{message}</Text>
     </View>
   );
@@ -1183,6 +1182,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 16,
     right: 16,
+    zIndex: 40,
     flexDirection: "row",
     gap: 10,
     alignItems: "center",
@@ -1195,8 +1195,9 @@ const styles = StyleSheet.create({
   toastText: {
     color: theme.colors.white,
     fontWeight: theme.fontWeight.semibold,
+    fontSize: 13,
     flex: 1,
-    lineHeight: theme.lineHeight.sm,
+    lineHeight: 18,
   },
   modalOverlay: {
     flex: 1,

@@ -75,6 +75,7 @@ export function LoginReferenceScreen({ variant }: { variant: string }) {
       </Card>
       <Toast
         message={variant === "toast" ? "네트워크 연결을 확인해주세요" : ""}
+        icon="sync"
       />
     </Screen>
   );
@@ -142,6 +143,7 @@ export function InviteCodeReferenceScreen({ variant }: { variant: string }) {
       <Toast
         message={variant === "toast" ? "네트워크 연결을 확인해주세요" : ""}
         offset={variant === "toast" ? 106 : 28}
+        icon="sync"
       />
     </Screen>
   );

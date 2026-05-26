@@ -40,6 +40,8 @@
 - ZIP `ScreenNotifications` 구조 정렬 — 알림 reference 화면을 카드 목록이 아니라 ZIP의 `오늘`/`지난 알림` section label, unread soft row, circular icon, unread dot, `모두 읽음` top action 구조로 재구성
 - ZIP `ActionBtn` compact action 정렬 — 나눔/소모임 상세 reference의 action button을 큰 원형 아이콘 카드가 아니라 ZIP의 44px inline icon+label button으로 재구성
 - ZIP root overlay 패턴 정렬 — 멤버 관리처럼 list body와 Toast가 같이 있는 reference 화면은 `Screen` 기본 ScrollView에 Toast를 넣지 않고, 내부 ScrollView와 root fixed Toast layer로 분리
+- ZIP bottom CTA surface 정렬 — 공통 `Button`의 Pressable style을 정적 surface로 확정해 Android Dev Client에서 배경/크기 없이 text만 보이던 bottom-flat CTA를 ZIP pill 버튼으로 복구
+- auth/input 화면 부분 캡처 안정화 — route 진입 후 Dev Client dismiss 탭이 로그인/가입 버튼을 누르지 않도록 `YLMC_CAPTURE_DISMISS_AFTER_ROUTE=0` 옵션을 추가
 
 ---
 
@@ -68,7 +70,7 @@
 | `scripts/maestro-smoke.mjs` | Metro 확인/부팅과 Dev Client deep link를 거쳐 Maestro smoke 실행. Android Emulator는 `localhost`/`127.0.0.1` + `adb reverse` 기준이며 ADB로 Dev Client를 먼저 연 뒤 `.maestro/smoke.yml`이 메뉴/탭 검증을 담당 |
 | `scripts/design-screen-routes.mjs` | ZIP JSX inventory 110개 화면을 Expo Router route와 screenshot filename으로 매핑 |
 | `scripts/prepare-design-artifacts.mjs` | ZIP에서 110개 visual inventory와 원본 PNG를 재생성. 기본 출력은 `/private/tmp/ylmc-golden-screens/2026-05-23` |
-| `scripts/capture-design-screens.mjs` | Android Dev Client에서 design route 스크린샷 캡처. `YLMC_CAPTURE_INDEXES`, `YLMC_CAPTURE_RESET_EACH_ROUTE`, `YLMC_CAPTURE_ROUTE_OPEN_REPEATS`, `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT`로 부분 재캡처 가능 |
+| `scripts/capture-design-screens.mjs` | Android Dev Client에서 design route 스크린샷 캡처. `YLMC_CAPTURE_INDEXES`, `YLMC_CAPTURE_RESET_EACH_ROUTE`, `YLMC_CAPTURE_ROUTE_OPEN_REPEATS`, `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT`, `YLMC_CAPTURE_DISMISS_AFTER_ROUTE`로 부분 재캡처 가능 |
 | `scripts/compare-design-screens.mjs` | 원본/앱 스크린샷 normalized diff 생성. 원본 PNG가 단색 빈 화면이면 `originalFlat`로 표시해 JSX 기준 검토 대상으로 분리 |
 | `.maestro/smoke.yml` | v1 핵심 탭 진입 `testID` 기반 E2E smoke |
 
@@ -76,6 +78,8 @@
 [../../PLAN.md](../../PLAN.md) “🗃 데이터 타입 설계 > 공통” 참조.
 
 ## 결정 사항 (최신 위)
+- (2026-05-27) **공통 Button은 정적 Pressable surface로 렌더링한다** — Android Dev Client에서 Pressable style callback이 bottom-flat CTA의 배경/크기 surface를 누락시키는 캡처가 확인되어, ZIP pill 버튼 재현을 우선해 `Button`은 정적 style로 렌더링합니다. pressed opacity보다 ZIP의 button surface 유지가 우선입니다.
+- (2026-05-27) **auth/input visual capture는 route 이후 dismiss 탭을 끌 수 있다** — 로그인 화면처럼 fixed 좌표 dismiss가 화면 CTA를 누를 수 있는 route는 `YLMC_CAPTURE_DISMISS_AFTER_ROUTE=0`으로 route 진입 후 dismiss 탭을 생략합니다. 기본값은 기존처럼 dismiss를 수행해 Dev Client overlay 혼입을 막습니다.
 - (2026-05-27) **visual capture 입력 좌표는 override viewport 기준을 우선한다** — `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT=1`은 Android `wm size` override를 적용하므로, tap helper가 Physical size만 읽으면 Dev Client `Continue` 버튼 아래를 누르게 됩니다. 캡처 스크립트는 `Override size`를 우선 읽고 route 캡처 직전에도 짧게 Dev Client 메뉴를 닫습니다.
 - (2026-05-27) **horizontal chip row는 non-scroll 화면에서도 높이를 고정한다** — `HorizontalChips`가 non-scroll `Screen`에서 남는 flex height를 먹으면 ZIP의 얇은 chip row가 세로로 늘어나므로, 공통 ScrollView에 `flexGrow: 0`을 둡니다.
 - (2026-05-27) **알림 화면은 ZIP sectioned flat list를 우선한다** — 현재 앱의 카드형 알림 목록은 기준이 아니며, `screens-extra-home.jsx`의 `ScreenNotifications`처럼 `오늘`/`지난 알림` section과 unread row 배경, 38px circular icon, 6px unread dot, `모두 읽음` text action을 RN reference 화면에 번역합니다.
@@ -117,7 +121,7 @@
 - Codex 기본 샌드박스에서는 `expo start --dev-client --port 8081 --localhost`가 `Starting project...` 이후 8081에 바인딩되지 않을 수 있습니다. 샌드박스 밖 로컬 권한에서는 `npm run test:dev-client:smoke`로 `/status` 응답을 확인했습니다.
 - Maestro CLI `2.6.0`은 Homebrew tap(`mobile-dev-inc/tap`)으로 설치되어 있으며, Android Emulator `Medium_Phone_API_36.1`에서 `npm run test:e2e:smoke` 통과를 확인했습니다. 현재 smoke는 ADB로 Dev Client deep link를 먼저 열고, Maestro가 Dev Client 메뉴를 닫은 뒤 홈/나눔/소모임/동행/MY 탭과 동행 내부 삶공부 segment 진입을 검증합니다.
 - 제공 ZIP 110개 화면은 `test:visual:prepare` → Dev Client full capture/partial recapture → `test:visual:compare`로 검증하며 현재 비교 리포트 기준 `screens=110`, `missing=0`, `originalFlat=0`입니다. 남은 residual diff는 상태바/SafeArea, React Native 폰트·모달 번역 차이와 실제 UI 차이를 분리해 추적합니다.
-- 2026-05-27 멤버 관리 Toast overlay 정렬 후 비교 리포트의 상위 residual은 소모임 상세 일부, auth sheet/toast, home/MY 계열입니다. `group-members-kickts`는 ZIP root fixed toast 구조 반영으로 `17.86→9.39`까지 낮췄습니다.
+- 2026-05-27 auth bottom CTA/toast 정렬 후 비교 리포트의 상위 residual은 소모임 상세 일부, auth `terms-sheet`, home/MY 계열입니다. `code-toast`는 공통 Button surface와 auth toast icon 반영으로 `17.39→10.10`까지 낮췄습니다.
 
 ## 의존성
 - GitHub Issues / PR description 기반 작업 추적 규칙에 의존합니다.

@@ -18,6 +18,7 @@ const resetEachRoute = process.env.YLMC_CAPTURE_RESET_EACH_ROUTE === "1";
 const routeOpenRepeats = Number(
   process.env.YLMC_CAPTURE_ROUTE_OPEN_REPEATS ?? "1",
 );
+const dismissAfterRoute = process.env.YLMC_CAPTURE_DISMISS_AFTER_ROUTE !== "0";
 const matchDesignViewport =
   process.env.YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT === "1";
 const designViewportWidth = Number(
@@ -340,8 +341,10 @@ const main = async () => {
         await sleep(routeDelayMs);
       }
 
-      await dismissDevMenu(device, 2);
-      await sleep(600);
+      if (dismissAfterRoute) {
+        await dismissDevMenu(device, 2);
+        await sleep(600);
+      }
 
       const appScreenshot = path.join(outputPngDir, row.screenshotName);
       captureScreenshot(device, appScreenshot);

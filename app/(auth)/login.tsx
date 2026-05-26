@@ -122,7 +122,10 @@ export default function LoginScreen() {
         <View style={styles.spacer} />
         <Text style={styles.copy}>© 열린문교회</Text>
       </View>
-      <Toast message={isToast ? "네트워크 연결을 확인해주세요" : ""} />
+      <Toast
+        message={isToast ? "네트워크 연결을 확인해주세요" : ""}
+        icon="sync"
+      />
     </Screen>
   );
 }

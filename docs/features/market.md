@@ -1,6 +1,6 @@
 # market (나눔)
 
-> 마지막 갱신: 2026-05-26 | 담당 Phase: P1/P2 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-05-27 | 담당 Phase: P1/P2 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 성도 간 무료 나눔 글을 등록하고 상태/댓글/신고를 관리합니다.
@@ -21,6 +21,8 @@
 - 나눔 상세 partial visual compare 개선 — `market-detail-*` 10개 원본/앱 캡처를 재생성해 `missing=0` 확인, 대표 residual은 `done 42.63→30.38`, `status 35.99→26.25`, `delete 41.43→17.34`, `report-dup-toast 34.04→32.72`로 감소
 - 나눔 상세 toast/viewport 정렬 — ZIP toast 문구와 `offset=106`을 맞추고 디자인 viewport 캡처로 재검증해 `missing=0`, `report-dup-toast 32.72→28.92`, `status 26.25→13.29`, `delete 17.34→11.62`, `done 30.38→20.54`로 감소
 - 나눔 상세 safe-area/sheet geometry 정렬 — ZIP 44px status frame과 bottom action 위치 기준으로 `Screen`을 조정하고 긴 `RadioSheet` compact row를 적용해 `missing=0`, `report 18.50→11.50`, `report-dup-toast 28.92→15.73`, `done 20.54→11.17`, `status 13.29→7.51`로 감소
+- 나눔 작성 원본 구조 정렬 — ZIP `ScreenMarketCreate` 기준으로 close/action topbar, 사진 레일, 7개 카테고리 chip, 제목/물품상태/상세설명 section, 안내 박스, 작성 중단 dialog, 5개 제한 toast를 reference 화면에 반영
+- 나눔 작성 partial visual compare 개선 — `market-create*` 5개 상태를 Android Dev Client에서 재캡처해 `missing=0` 확인, 대표 residual은 `limit-toast 32.50→15.21`, `create 12.56→12.04`, `back-warn 8.76→7.63`, `create-filled/edit 14.21→14.11`로 감소
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -41,6 +43,7 @@
 `MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-27) **나눔 작성은 ZIP section form 구조를 따른다** — 작성/수정 reference는 카드형 폼이 아니라 ZIP 원본의 상단 `닫기`/등록 action, horizontal photo rail, 8px divider section, 7개 카테고리 chip, 상태 segmented button, 안내 박스를 기준으로 번역합니다.
 - (2026-05-26) **나눔 상세 geometry는 ZIP phone frame 기준으로 본다** — Android native safe-area를 그대로 쓰는 대신 ZIP `phone-status` 44px와 bottom fixed composer 위치를 기준으로 맞춰야 원본 상세의 hero, 작성자, composer 위치가 일치합니다.
 - (2026-05-26) **나눔 상세 toast는 ZIP `CheckToast offset={106}`을 따른다** — 하단 comment composer가 있는 나눔 상세의 중복 신고 toast는 기본 offset이 아니라 ZIP 원본처럼 bottom action area 위에 뜨도록 `offset=106`을 적용하고, 문구도 `이미 신고한 게시글입니다`로 맞춥니다.
 - (2026-05-26) **나눔 상세 reference는 ZIP 고정 comment composer를 따른다** — 상세 화면의 댓글 입력은 카드형 textarea가 아니라 ZIP 원본의 하단 glass `bottom-bar` composer이며, 멀티라인 입력 상태는 composer 위 preview card로 표현합니다.

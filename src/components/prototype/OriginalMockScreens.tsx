@@ -1,5 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import type { ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen, Section } from "../layout/Screen";
 import {
@@ -944,33 +945,228 @@ function MarketCommentComposer({
 }
 
 export function MarketCreateReferenceScreen({ variant }: { variant: string }) {
-  const filled = variant === "create-filled" || variant === "edit";
+  const isEdit = variant === "edit";
+  const filled =
+    isEdit ||
+    variant === "create-filled" ||
+    variant === "back-warn" ||
+    variant === "limit-toast";
+  const title = filled
+    ? "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)"
+    : "";
+  const description = filled
+    ? `아이가 커서 더 이상 쓰지 않는 장난감 정리해요.
+대부분 깨끗하게 사용한 것들이고, 블록류 20점 + 인형류 10점 정도 됩니다.
+필요하신 분께 무료로 드려요!
+
+수령은 토요일 오후 교회 1층 로비에서 가능합니다.`
+    : "";
+  const photos = filled ? [0, 1, 2] : [];
+  const selectedCategory = filled ? "baby" : "";
+  const selectedCondition = filled ? "used" : "";
+
   return (
-    <Screen>
-      <TopBar
-        title={variant === "edit" ? "나눔 글 수정" : "나눔 글쓰기"}
-        subtitle="무료 나눔만 등록할 수 있습니다"
-        back
-        onBack={() => router.back()}
-      />
-      <Card style={styles.stack}>
-        <TextField
-          label="제목"
-          value={filled ? "아이 장난감 정리하면서 나눔합니다" : ""}
-        />
-        <Textarea
-          label="설명"
-          value={filled ? "블록과 인형 30점을 한 번에 나눔합니다." : ""}
-        />
-        <TextField label="물품 상태" value={filled ? "사용감 적음" : ""} />
-        <TextField label="전달 장소" value="본당 1층 로비" />
-        <Button>{variant === "edit" ? "수정" : "등록"}</Button>
-      </Card>
+    <Screen scroll={false} padded={false}>
+      <View style={styles.marketCreateRoot}>
+        <View style={styles.marketCreateTopBar}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.back()}
+            style={styles.marketCreateClose}
+          >
+            <MaterialIcons
+              name="close"
+              size={22}
+              color={theme.colors.inkSoft}
+            />
+            <Text style={styles.marketCreateCloseText}>닫기</Text>
+          </Pressable>
+          <Text numberOfLines={1} style={styles.marketCreateTopTitle}>
+            {isEdit ? "나눔 수정" : "나눔 등록"}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            disabled={!filled}
+            style={styles.marketCreateTopAction}
+          >
+            <Text
+              style={[
+                styles.marketCreateTopActionText,
+                filled ? styles.marketCreateTopActionTextEnabled : null,
+              ]}
+            >
+              {isEdit ? "저장" : "등록"}
+            </Text>
+          </Pressable>
+        </View>
+
+        <ScrollView
+          style={styles.marketCreateScroll}
+          contentContainerStyle={styles.marketCreateScrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.marketCreatePhotoSection}>
+            <ScrollView
+              horizontal
+              contentContainerStyle={styles.marketCreatePhotoRail}
+              showsHorizontalScrollIndicator={false}
+            >
+              <View style={styles.marketCreatePhotoAdd}>
+                <MaterialIcons
+                  name="photo-camera"
+                  size={22}
+                  color={theme.colors.inkMute}
+                />
+                <Text style={styles.marketCreatePhotoAddText}>
+                  사진 {photos.length}/5
+                </Text>
+              </View>
+              {photos.map((photo, index) => (
+                <View key={photo} style={styles.marketCreatePhotoThumbWrap}>
+                  <VisualThumb
+                    size={90}
+                    seed={photo}
+                    style={styles.marketCreatePhotoThumb}
+                  />
+                  {index === 0 ? (
+                    <View style={styles.marketCreateRepBadge}>
+                      <Text style={styles.marketCreateRepText}>대표</Text>
+                    </View>
+                  ) : null}
+                  <View style={styles.marketCreatePhotoRemove}>
+                    <MaterialIcons name="close" size={12} color="#fff" />
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+            <Text style={styles.marketCreatePhotoHint}>
+              최대 5장, JPG/PNG/WEBP, 5MB 이하
+            </Text>
+          </View>
+
+          <MarketCreateDivider />
+
+          <MarketCreateSection label="카테고리" required>
+            <View style={styles.marketCreateChipWrap}>
+              {marketCreateCategories.map((category) => {
+                const active = category.key === selectedCategory;
+                return (
+                  <View
+                    key={category.key}
+                    style={[
+                      styles.marketCreateChip,
+                      active ? styles.marketCreateChipActive : null,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.marketCreateChipText,
+                        active ? styles.marketCreateChipTextActive : null,
+                      ]}
+                    >
+                      {category.label}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          </MarketCreateSection>
+
+          <MarketCreateDivider />
+
+          <MarketCreateSection
+            label="제목"
+            required
+            hint={`${title.length}/30`}
+          >
+            <View style={styles.marketCreateInput}>
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="clip"
+                style={[
+                  styles.marketCreateInputText,
+                  !title ? styles.marketCreatePlaceholder : null,
+                ]}
+              >
+                {title || "제목을 입력해주세요 (최대 30자)"}
+              </Text>
+            </View>
+          </MarketCreateSection>
+
+          <MarketCreateDivider />
+
+          <MarketCreateSection label="물품 상태" required>
+            <View style={styles.marketCreateConditionRow}>
+              {[
+                { value: "new", label: "새것" },
+                { value: "used", label: "사용감 있음" },
+                { value: "damaged", label: "파손 있음" },
+              ].map((condition) => {
+                const active = condition.value === selectedCondition;
+                return (
+                  <View
+                    key={condition.value}
+                    style={[
+                      styles.marketCreateCondition,
+                      active ? styles.marketCreateConditionActive : null,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.marketCreateConditionText,
+                        active ? styles.marketCreateConditionTextActive : null,
+                      ]}
+                    >
+                      {condition.label}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          </MarketCreateSection>
+
+          <MarketCreateDivider />
+
+          <MarketCreateSection
+            label="상세 설명"
+            required
+            hint={`${description.length}/500`}
+          >
+            <View style={styles.marketCreateTextarea}>
+              <Text
+                style={[
+                  styles.marketCreateTextareaText,
+                  !description ? styles.marketCreatePlaceholder : null,
+                ]}
+              >
+                {description ||
+                  "물품 상태, 수령 방법, 일정 등을 자세히 적어주세요"}
+              </Text>
+            </View>
+          </MarketCreateSection>
+
+          <View style={styles.marketCreateInfoBox}>
+            <View style={styles.marketCreateInfoIcon}>
+              <MaterialIcons
+                name="info"
+                size={16}
+                color={theme.colors.primaryDeep}
+              />
+            </View>
+            <Text style={styles.marketCreateInfoText}>
+              직거래 시 안전한 장소(교회 로비 등)에서 만나주세요.
+            </Text>
+          </View>
+        </ScrollView>
+      </View>
+
       <ConfirmDialog
         visible={variant === "back-warn"}
-        title="작성을 그만할까요?"
-        message="입력한 내용이 저장되지 않습니다."
+        title="작성을 중단하시겠습니까?"
+        message="작성 중인 내용이 사라지며 복구할 수 없어요."
+        cancelText="계속 작성"
         confirmText="나가기"
+        danger
         onCancel={() => undefined}
         onConfirm={() => undefined}
       />
@@ -982,6 +1178,35 @@ export function MarketCreateReferenceScreen({ variant }: { variant: string }) {
         }
       />
     </Screen>
+  );
+}
+
+function MarketCreateDivider() {
+  return <View style={styles.marketCreateDivider} />;
+}
+
+function MarketCreateSection({
+  label,
+  required,
+  hint,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  hint?: string;
+  children: ReactNode;
+}) {
+  return (
+    <View style={styles.marketCreateSection}>
+      <View style={styles.marketCreateSectionHeader}>
+        <View style={styles.marketCreateSectionLabelRow}>
+          <Text style={styles.marketCreateSectionLabel}>{label}</Text>
+          {required ? <Text style={styles.marketCreateRequired}>*</Text> : null}
+        </View>
+        {hint ? <Text style={styles.marketCreateHint}>{hint}</Text> : null}
+      </View>
+      {children}
+    </View>
   );
 }
 
@@ -2468,6 +2693,16 @@ const marketCategories = [
   { key: "cloth", label: "의류·잡화" },
 ] as const;
 
+const marketCreateCategories = [
+  { key: "cloth", label: "의류·잡화" },
+  { key: "home", label: "가전·가구" },
+  { key: "book", label: "도서·문구" },
+  { key: "life", label: "식품·생활품" },
+  { key: "baby", label: "유아·아동용품" },
+  { key: "sport", label: "스포츠·취미" },
+  { key: "etc", label: "기타" },
+] as const;
+
 const marketReportReasons = [
   "금지 품목 게시",
   "허위 물품 정보",
@@ -3199,6 +3434,278 @@ const styles = StyleSheet.create({
   },
   marketComposerButtonTextActive: {
     color: theme.colors.white,
+  },
+  marketCreateRoot: {
+    flex: 1,
+    backgroundColor: theme.colors.surface,
+  },
+  marketCreateTopBar: {
+    minHeight: 52,
+    paddingHorizontal: 18,
+    paddingBottom: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: theme.colors.surface,
+  },
+  marketCreateClose: {
+    minWidth: 72,
+    minHeight: 36,
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    backgroundColor: "rgba(20,30,18,0.05)",
+  },
+  marketCreateCloseText: {
+    color: theme.colors.inkSoft,
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  marketCreateTopTitle: {
+    flex: 1,
+    minWidth: 0,
+    textAlign: "center",
+    color: theme.colors.ink,
+    fontSize: 16,
+    fontWeight: "800",
+  },
+  marketCreateTopAction: {
+    minWidth: 72,
+    minHeight: 36,
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
+  marketCreateTopActionText: {
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    color: theme.colors.inkHint,
+    fontSize: 14,
+    fontWeight: "800",
+  },
+  marketCreateTopActionTextEnabled: {
+    color: theme.colors.primary,
+  },
+  marketCreateScroll: {
+    flex: 1,
+    backgroundColor: theme.colors.surface,
+  },
+  marketCreateScrollContent: {
+    paddingBottom: 22,
+  },
+  marketCreatePhotoSection: {
+    paddingTop: 6,
+    paddingBottom: 18,
+  },
+  marketCreatePhotoRail: {
+    paddingHorizontal: 22,
+    paddingVertical: 4,
+    gap: 10,
+  },
+  marketCreatePhotoAdd: {
+    width: 90,
+    height: 90,
+    flexShrink: 0,
+    borderRadius: theme.radius.md,
+    borderWidth: 1.5,
+    borderStyle: "dashed",
+    borderColor: theme.colors.lineStrong,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+    backgroundColor: theme.colors.surface2,
+  },
+  marketCreatePhotoAddText: {
+    color: theme.colors.inkMute,
+    fontSize: 11,
+    fontWeight: "800",
+  },
+  marketCreatePhotoThumbWrap: {
+    position: "relative",
+    width: 90,
+    height: 90,
+    flexShrink: 0,
+  },
+  marketCreatePhotoThumb: {
+    borderRadius: theme.radius.md,
+  },
+  marketCreateRepBadge: {
+    position: "absolute",
+    left: 6,
+    bottom: 6,
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    backgroundColor: theme.colors.primary,
+  },
+  marketCreateRepText: {
+    color: theme.colors.white,
+    fontSize: 10,
+    fontWeight: "800",
+  },
+  marketCreatePhotoRemove: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(20,30,18,0.70)",
+  },
+  marketCreatePhotoHint: {
+    paddingHorizontal: 22,
+    paddingTop: 8,
+    color: theme.colors.inkHint,
+    fontSize: 11.5,
+    lineHeight: 16,
+  },
+  marketCreateDivider: {
+    height: 8,
+    backgroundColor: theme.colors.bg,
+  },
+  marketCreateSection: {
+    paddingVertical: 14,
+  },
+  marketCreateSectionHeader: {
+    paddingHorizontal: 22,
+    paddingBottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  marketCreateSectionLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  marketCreateSectionLabel: {
+    color: theme.colors.ink,
+    fontSize: 13.5,
+    fontWeight: "800",
+  },
+  marketCreateRequired: {
+    color: theme.colors.primary,
+    fontSize: 13.5,
+    fontWeight: "800",
+  },
+  marketCreateHint: {
+    color: theme.colors.inkHint,
+    fontSize: 11.5,
+    fontWeight: "700",
+  },
+  marketCreateChipWrap: {
+    paddingHorizontal: 22,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  marketCreateChip: {
+    minHeight: 34,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    paddingHorizontal: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.surface,
+  },
+  marketCreateChipActive: {
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primarySoft,
+  },
+  marketCreateChipText: {
+    color: theme.colors.inkSoft,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  marketCreateChipTextActive: {
+    color: theme.colors.primaryDeep,
+    fontWeight: "800",
+  },
+  marketCreateInput: {
+    height: 48,
+    marginHorizontal: 22,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    paddingHorizontal: 14,
+    justifyContent: "center",
+    backgroundColor: theme.colors.surface2,
+  },
+  marketCreateInputText: {
+    color: theme.colors.ink,
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  marketCreatePlaceholder: {
+    color: theme.colors.inkHint,
+  },
+  marketCreateConditionRow: {
+    paddingHorizontal: 22,
+    flexDirection: "row",
+    gap: 8,
+  },
+  marketCreateCondition: {
+    flex: 1,
+    height: 42,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.surface,
+  },
+  marketCreateConditionActive: {
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primarySoft,
+  },
+  marketCreateConditionText: {
+    color: theme.colors.inkSoft,
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  marketCreateConditionTextActive: {
+    color: theme.colors.primaryDeep,
+    fontWeight: "800",
+  },
+  marketCreateTextarea: {
+    minHeight: 154,
+    marginHorizontal: 22,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    backgroundColor: theme.colors.surface2,
+  },
+  marketCreateTextareaText: {
+    color: theme.colors.ink,
+    fontSize: 14,
+    lineHeight: 22.4,
+  },
+  marketCreateInfoBox: {
+    marginHorizontal: 22,
+    marginTop: 16,
+    marginBottom: 22,
+    borderRadius: theme.radius.md,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    flexDirection: "row",
+    gap: 10,
+    backgroundColor: theme.colors.primarySoft,
+  },
+  marketCreateInfoIcon: {
+    marginTop: 2,
+  },
+  marketCreateInfoText: {
+    flex: 1,
+    color: theme.colors.primaryDeep,
+    fontSize: 13,
+    lineHeight: 19.5,
   },
   detailTopPad: {
     paddingHorizontal: 0,

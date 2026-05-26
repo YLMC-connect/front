@@ -19,6 +19,7 @@
 - ZIP auth 화면 residual 정렬 — 실제 로그인 route와 가입 코드/약관 reference 화면을 ZIP `ScreenLogin`, `ScreenInviteCode`, `ScreenTermsSheet` 구조 기준으로 재정렬하고 auth 2-11번 화면 partial capture/compare를 갱신
 - ZIP 회원가입 화면 구조 정렬 — 실제 `/signup` route를 ZIP `ScreenSignup`의 카드 없는 구조, 자동 아바타 미리보기, field stack, 안내 박스, bottom-flat 가입 버튼 기준으로 재구성하고 auth 12-17번 화면 partial capture/compare를 갱신
 - ZIP auth bottom CTA/toast 렌더 정렬 — 공통 `Button` surface가 Android Pressable에서 빠지던 문제를 고쳐 로그인/가입 코드 bottom-flat CTA를 ZIP pill 버튼으로 복구하고, auth toast icon을 ZIP 네트워크 toast 계열에 맞춤
+- ZIP splash 로고/status 정렬 — ZIP `ScreenSplash`처럼 splash 전용 light status bar와 도어 glyph를 사용해 `splash mean=15.82→15.69`로 낮춤
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -42,6 +43,7 @@
 `LoginInput`, `SignupInput`, `AuthSession`을 `src/types/auth.ts`에 정의합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-27) **Splash는 ZIP `ScreenSplash`의 status/logo 톤을 따른다** — root status bar 기본 dark 설정을 그대로 쓰지 않고 splash reference 화면 안에서 light status bar를 적용합니다. 로고는 Material icon glyph가 아니라 ZIP door SVG에 가까운 RN View 조합으로 번역합니다.
 - (2026-05-27) **auth network toast는 ZIP auth 전용 icon을 따른다** — 로그인/가입 코드의 `네트워크 연결을 확인해주세요` toast는 공통 성공 toast check icon이 아니라 ZIP `screens-auth.jsx`의 네트워크 안내 icon 톤에 맞춰 `sync` icon을 사용합니다.
 - (2026-05-27) **회원가입 실제 route는 ZIP `ScreenSignup` 구조를 따른다** — 기존 `Card`/공통 `TextField` 묶음은 ZIP 구조와 맞지 않아 제거하고, `/signup` route 자체를 `정보를 입력해주세요` display, 자동 아바타, 아이디 중복확인 row, 비밀번호 확인 field, 하단 고정 primary CTA로 번역합니다. 실제 submit은 기존 `useAuth` mock-first 흐름을 유지합니다.
 - (2026-05-27) **auth 화면 구조는 ZIP `screens-auth.jsx`를 우선한다** — 로그인 실제 route는 서비스 기능을 유지하되 ZIP의 카드 없는 hero/form/divider/toast 구조를 따른다. 가입 코드와 약관 전문 reference는 `variant` 캡처 화면이므로 ZIP JSX의 화면 구조를 RN으로 직접 번역합니다.

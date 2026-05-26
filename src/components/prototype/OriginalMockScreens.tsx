@@ -1,4 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 import type { ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -34,10 +35,15 @@ export function variantOf(value: VariantValue, fallback = "default") {
 export function SplashReferenceScreen() {
   return (
     <View style={styles.splash}>
+      <StatusBar style="light" />
       <View style={styles.splashOrbTop} />
       <View style={styles.splashOrbBottom} />
       <View style={styles.splashLogo}>
-        <MaterialIcons name="door-front" size={58} color="#fff" />
+        <View style={styles.splashDoorGlyph}>
+          <View style={styles.splashDoorMain} />
+          <View style={styles.splashDoorSide} />
+          <View style={styles.splashDoorKnob} />
+        </View>
       </View>
       <Text style={styles.splashTitle}>열린문 커넥트</Text>
       <Text style={styles.splashSub}>성도와 성도, 마음과 마음을 이어요</Text>
@@ -2782,23 +2788,26 @@ export function LegalReferenceScreen({
 }: {
   privacy?: boolean;
 }) {
+  const sections = legalSections(
+    privacy ? "제1조 (수집하는 개인정보 항목)" : "제1조 (목적)",
+  );
+
   return (
-    <Screen>
+    <Screen padded={false}>
       <TopBar
         title={privacy ? "개인정보처리방침" : "이용약관"}
         back
         onBack={() => router.back()}
       />
-      <Card style={styles.stack}>
-        <Text style={styles.cardTitle}>
-          {privacy ? "제1조 (수집하는 개인정보 항목)" : "제1조 (목적)"}
-        </Text>
-        {legalParagraphs.map((text) => (
-          <Text key={text} style={styles.bodyText}>
-            {text}
-          </Text>
+      <View style={styles.legalBody}>
+        <Text style={styles.legalEffective}>시행일자: 2026년 1월 1일</Text>
+        {sections.map((section) => (
+          <View key={section.title} style={styles.legalSection}>
+            <Text style={styles.legalSectionTitle}>{section.title}</Text>
+            <Text style={styles.legalParagraph}>{section.body}</Text>
+          </View>
         ))}
-      </Card>
+      </View>
     </Screen>
   );
 }
@@ -3066,11 +3075,30 @@ function dayTextStyle(index: number) {
   return colors[index % colors.length];
 }
 
-const legalParagraphs = [
-  "열린문 커넥트는 성도 간 안전한 소통과 공동체 활동을 돕기 위한 서비스입니다.",
-  "서비스 이용 중 타인을 배려하지 않는 게시글이나 활동은 제한될 수 있습니다.",
-  "개인정보는 교회 공동체 운영 목적 안에서 필요한 범위로만 사용됩니다.",
-];
+function legalSections(primary: string) {
+  return [
+    {
+      title: primary,
+      body: '본 약관은 열린문커넥트(이하 "서비스")가 제공하는 모바일 애플리케이션 및 관련 제반 서비스의 이용과 관련하여 회사와 회원의 권리·의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.',
+    },
+    {
+      title: "제2조 (정의)",
+      body: '1. "회원"이란 본 약관에 동의하고 회사가 제공하는 서비스를 이용하는 자를 말합니다.\n2. "콘텐츠"란 회원이 서비스에 게시한 글, 사진, 댓글 등을 의미합니다.\n3. "교회 커뮤니티"란 동일 교회 소속 회원으로 구성된 폐쇄형 그룹을 말합니다.',
+    },
+    {
+      title: "제3조 (약관의 효력 및 변경)",
+      body: "본 약관은 서비스 화면에 게시하거나 기타의 방법으로 회원에게 공지함으로써 효력이 발생합니다. 회사는 관련 법령을 위배하지 않는 범위에서 본 약관을 개정할 수 있습니다.",
+    },
+    {
+      title: "제4조 (회원가입)",
+      body: "회원이 되고자 하는 자는 회사가 정한 양식에 따라 회원정보를 기입한 후 본 약관에 동의한다는 의사표시를 함으로써 회원가입을 신청합니다.",
+    },
+    {
+      title: "제5조 (서비스의 제공 및 변경)",
+      body: "회사는 다음과 같은 서비스를 제공합니다.\n- 교회 내 중고거래 및 나눔 플랫폼\n- 소모임 개설 및 참여\n- 중보기도 모임\n- 삶공부 과정 안내 및 수강 신청",
+    },
+  ];
+}
 
 const legalText = `제1조 (목적)
 본 약관은 열린문커넥트(이하 "서비스")가 제공하는 모바일 애플리케이션 및 관련 제반 서비스의 이용과 관련하여 회사와 회원의 권리·의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
@@ -3222,6 +3250,38 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(255,255,255,0.16)",
+  },
+  splashDoorGlyph: {
+    width: 56,
+    height: 56,
+    position: "relative",
+  },
+  splashDoorMain: {
+    position: "absolute",
+    left: 12,
+    top: 8,
+    width: 23,
+    height: 40,
+    backgroundColor: "#fff",
+    transform: [{ skewY: "-9deg" }],
+  },
+  splashDoorSide: {
+    position: "absolute",
+    left: 34,
+    top: 10,
+    width: 12,
+    height: 36,
+    backgroundColor: "rgba(255,255,255,0.7)",
+    transform: [{ skewY: "10deg" }],
+  },
+  splashDoorKnob: {
+    position: "absolute",
+    left: 28,
+    top: 27,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: theme.colors.primaryDeep,
   },
   splashTitle: {
     marginTop: 22,
@@ -5217,6 +5277,32 @@ const styles = StyleSheet.create({
     color: theme.colors.primaryDeep,
     fontSize: 11,
     fontWeight: theme.fontWeight.semibold,
+  },
+  legalBody: {
+    paddingHorizontal: 18,
+    paddingTop: 4,
+    paddingBottom: 24,
+  },
+  legalEffective: {
+    marginBottom: 18,
+    color: theme.colors.inkMute,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  legalSection: {
+    marginBottom: 22,
+  },
+  legalSectionTitle: {
+    marginBottom: 8,
+    color: theme.colors.ink,
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: "800",
+  },
+  legalParagraph: {
+    color: theme.colors.inkSoft,
+    fontSize: 13.5,
+    lineHeight: 23.6,
   },
   studyBottomBar: {
     position: "absolute",

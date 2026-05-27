@@ -4182,19 +4182,21 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
   },
   marketCreateTopBar: {
-    minHeight: 52,
+    height: 56,
     paddingHorizontal: 18,
-    paddingBottom: 8,
+    paddingTop: 8,
+    paddingBottom: 12,
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
     backgroundColor: theme.colors.surface,
   },
   marketCreateClose: {
-    minWidth: 72,
-    minHeight: 36,
+    minWidth: 76,
+    height: 36,
     borderRadius: theme.radius.pill,
-    paddingHorizontal: 10,
+    paddingLeft: 10,
+    paddingRight: 14,
     flexDirection: "row",
     alignItems: "center",
     gap: 2,
@@ -4202,8 +4204,8 @@ const styles = StyleSheet.create({
   },
   marketCreateCloseText: {
     color: theme.colors.inkSoft,
-    fontSize: 13,
-    fontWeight: "800",
+    fontSize: 14.5,
+    fontWeight: theme.fontWeight.semibold,
   },
   marketCreateTopTitle: {
     flex: 1,
@@ -4211,11 +4213,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: theme.colors.ink,
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: theme.fontWeight.bold,
   },
   marketCreateTopAction: {
-    minWidth: 72,
-    minHeight: 36,
+    minWidth: 60,
+    height: 36,
     alignItems: "flex-end",
     justifyContent: "center",
   },
@@ -4224,7 +4226,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     color: theme.colors.inkHint,
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: theme.fontWeight.bold,
   },
   marketCreateTopActionTextEnabled: {
     color: theme.colors.primary,
@@ -4261,7 +4263,7 @@ const styles = StyleSheet.create({
   marketCreatePhotoAddText: {
     color: theme.colors.inkMute,
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: theme.fontWeight.bold,
   },
   marketCreatePhotoThumbWrap: {
     position: "relative",
@@ -4284,7 +4286,7 @@ const styles = StyleSheet.create({
   marketCreateRepText: {
     color: theme.colors.white,
     fontSize: 10,
-    fontWeight: "800",
+    fontWeight: theme.fontWeight.bold,
   },
   marketCreatePhotoRemove: {
     position: "absolute",
@@ -4327,17 +4329,17 @@ const styles = StyleSheet.create({
   marketCreateSectionLabel: {
     color: theme.colors.ink,
     fontSize: 13.5,
-    fontWeight: "800",
+    fontWeight: theme.fontWeight.bold,
   },
   marketCreateRequired: {
     color: theme.colors.primary,
     fontSize: 13.5,
-    fontWeight: "800",
+    fontWeight: theme.fontWeight.bold,
   },
   marketCreateHint: {
     color: theme.colors.inkHint,
     fontSize: 11.5,
-    fontWeight: "700",
+    fontWeight: theme.fontWeight.semibold,
   },
   marketCreateChipWrap: {
     paddingHorizontal: 22,
@@ -4350,7 +4352,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.pill,
     borderWidth: 1,
     borderColor: theme.colors.line,
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: theme.colors.surface,
@@ -4361,12 +4363,12 @@ const styles = StyleSheet.create({
   },
   marketCreateChipText: {
     color: theme.colors.inkSoft,
-    fontSize: 13,
-    fontWeight: "700",
+    fontSize: 12,
+    fontWeight: theme.fontWeight.semibold,
   },
   marketCreateChipTextActive: {
     color: theme.colors.primaryDeep,
-    fontWeight: "800",
+    fontWeight: theme.fontWeight.bold,
   },
   marketCreateInput: {
     height: 48,
@@ -4408,11 +4410,11 @@ const styles = StyleSheet.create({
   marketCreateConditionText: {
     color: theme.colors.inkSoft,
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: theme.fontWeight.medium,
   },
   marketCreateConditionTextActive: {
     color: theme.colors.primaryDeep,
-    fontWeight: "800",
+    fontWeight: theme.fontWeight.bold,
   },
   marketCreateTextarea: {
     minHeight: 154,

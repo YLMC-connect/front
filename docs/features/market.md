@@ -29,6 +29,7 @@
 - ZIP `Thumb` proportional geometry 재검증 — 공통 `VisualThumb`을 ZIP `Thumb` SVG circle 수식에 맞춘 뒤 나눔 목록/상세/작성/관심 목록 영향 화면을 Android Dev Client에서 재캡처하고 `missing=0` 확인
 - 나눔 목록 FAB root overlay 정렬 — 공통 FAB를 ZIP pill surface로 복구하고 목록 20-25번을 재캡처해 `market-list-all 15.27→13.75`, `market-list 12.15→10.64`, `reserved 8.36→6.79`, `done 7.83→6.31`로 낮춤
 - 나눔 상세 typography/chip/scrim 정렬 — ZIP `ScreenMarketDetail` 기준으로 overlay back, hero scrim, 작성자명, soft chip, 제목/본문 text metric, 예약 배너 색상을 맞추고 26-35번을 재캡처해 `own 14.53→9.31`, `reserved 14.15→9.36`, `other 14.46→9.34`, `composer-multiline 12.75→9.47`, `report-dup-toast 14.76→10.00`로 낮춤
+- 나눔 작성 topbar/chip/control typography 정렬 — ZIP `ScreenMarketCreate` 기준으로 56px topbar rhythm, close pill, action width, chip padding/font, section label/hint/control weight를 맞추고 38-42번을 재캡처해 `limit-toast 14.99→14.62`, `create-filled 14.01→13.69`, `edit 14.01→13.70`으로 낮춤
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -49,6 +50,7 @@
 `MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-27) **나눔 작성 topbar/control은 ZIP `ScreenMarketCreate` metric을 따른다** — 작성/수정 reference는 ZIP `phone-topbar`의 56px rhythm과 700/600/500 weight 체계를 따르고, chip은 ZIP `.chip`의 12px semibold metric으로 번역합니다.
 - (2026-05-27) **나눔 상세 text/chip은 ZIP 전용 metric을 따른다** — 상세 제목은 공용 `titleText`가 아니라 ZIP `20px/700/1.35`에 맞춘 전용 style을 쓰고, 카테고리/상태 chip도 dark selected chip이 아닌 ZIP `chip soft` 톤으로 렌더링합니다.
 - (2026-05-27) **나눔 목록 FAB는 ZIP fixed root layer를 따른다** — `ScreenMarketList`의 글쓰기 FAB는 list ScrollView 안 요소가 아니라 ZIP `Phone` root의 absolute pill button으로 관리합니다. 공통 `FloatingActionButton`은 정적 surface를 사용해 Android 캡처에서 pill 배경과 위치가 유지되도록 합니다.
 - (2026-05-27) **나눔 thumbnail은 ZIP `Thumb` proportional geometry를 따른다** — 목록 86px thumb, 상세 360px hero, 작성/관심 목록 thumb 모두 같은 공통 `VisualThumb`를 쓰므로, circle 위치/크기/opacity는 ZIP `lib.jsx`의 `Thumb` SVG viewBox 수식을 size 비례로 번역합니다.
@@ -70,6 +72,7 @@
 ## 미결 / 추적
 - 실제 나눔 API 스키마, 이미지 업로드 방식, 페이지네이션 방식 확인 필요.
 - 신고 처리 후 블라인드/관리자 큐 정책은 API/운영 정책 확정 후 반영.
+- 나눔 작성 residual은 topbar/chip/control typography 정렬 후 `market-create-limit mean=14.62`, `market-create-fill mean=13.69`, `market-edit mean=13.70`, `market-create mean=12.22`, `market-create-back mean=7.72`입니다. 빈 작성/뒤로가기 화면은 status bar/time, RN font metrics, confirm overlay geometry 차이로 소폭 상승했지만 화면군 합계는 감소했습니다.
 - 나눔 목록 residual은 FAB root overlay 정렬 후 `market-list-all mean=13.75`, `market-list mean=10.64`, `market-list-reserved mean=6.79`, `market-list-done mean=6.31`입니다. 남은 차이는 native status bar/time, RN font metrics, tab bar geometry와 목록 row text metric 차이로 추적합니다.
 - 나눔 상세 residual은 typography/chip/scrim 정렬 후 `market-detail-own mean=9.31`, `market-detail-resv mean=9.36`, `market-detail-other mean=9.34`, `market-detail-rep2 mean=10.51`, `market-detail-repts mean=10.00`입니다. 남은 차이는 RN font metrics, native shadow/blur 번역, sheet/input capture 조건으로 추적합니다. 전체 비교 리포트는 `/private/tmp/ylmc-golden-screens/2026-05-23/compare/visual-compare-report.tsv`입니다.
 

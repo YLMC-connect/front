@@ -1,6 +1,6 @@
 # YLMC Connect — 인덱스
 
-> 마지막 갱신: 2026-05-27 (ZIP 나눔 상세 typography 정렬) | 현재 Phase: 6 — API 연결 준비 (진행중)
+> 마지막 갱신: 2026-05-27 (ZIP 나눔 작성 typography 정렬) | 현재 Phase: 6 — API 연결 준비 (진행중)
 
 본 문서는 **작업자 5분용 진입점** 입니다. 외부인은 [README.md](../README.md) 부터, AI 작업 규칙은 [AGENTS.md](../AGENTS.md) 를 참고하세요. 문서 시스템이 어긋났을 때의 복구 절차는 [MAINTENANCE.md](MAINTENANCE.md).
 

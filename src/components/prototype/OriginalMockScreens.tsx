@@ -9,7 +9,6 @@ import {
   Badge,
   Button,
   Card,
-  Chip,
   ConfirmDialog,
   EmptyState,
   ErrorState,
@@ -769,7 +768,9 @@ export function MarketDetailReferenceScreen({ variant }: { variant: string }) {
       <ScrollView contentContainerStyle={styles.marketDetailScroll}>
         <View style={styles.marketHero}>
           <VisualThumb size={360} seed={0} style={styles.marketHeroCover} />
-          <View style={styles.marketHeroScrim} />
+          <View style={styles.marketHeroScrimTop} />
+          <View style={styles.marketHeroScrimMid} />
+          <View style={styles.marketHeroScrimBottom} />
           <Pressable
             accessibilityRole="button"
             onPress={() => router.back()}
@@ -836,18 +837,22 @@ export function MarketDetailReferenceScreen({ variant }: { variant: string }) {
           <View style={styles.marketAuthorBlock}>
             <Avatar name="박정아" seed="박정아" />
             <View style={styles.flex}>
-              <Text style={styles.cardTitle}>
+              <Text style={styles.marketDetailAuthorName}>
                 {isOwn ? "김은혜" : "박정아"}
               </Text>
               <Text style={styles.metaText}>1시간 전</Text>
             </View>
           </View>
           <View style={styles.marketDetailContent}>
-            <View style={styles.inlineMeta}>
-              <Chip label="유아·아동용품" selected />
-              <Chip label="사용감 있음" />
+            <View style={styles.marketDetailChipRow}>
+              <View style={styles.marketDetailChip}>
+                <Text style={styles.marketDetailChipText}>유아·아동용품</Text>
+              </View>
+              <View style={styles.marketDetailChip}>
+                <Text style={styles.marketDetailChipText}>사용감 있음</Text>
+              </View>
             </View>
-            <Text style={styles.titleText}>
+            <Text style={styles.marketDetailTitle}>
               아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)
             </Text>
           </View>
@@ -3149,8 +3154,22 @@ function StatusBanner({
         <MaterialIcons name={icon} size={16} color="#fff" />
       </View>
       <View style={styles.flex}>
-        <Text style={styles.statusBannerTitle}>{title}</Text>
-        <Text style={styles.statusBannerText}>{description}</Text>
+        <Text
+          style={[
+            styles.statusBannerTitle,
+            warn ? styles.statusBannerTitleWarn : null,
+          ]}
+        >
+          {title}
+        </Text>
+        <Text
+          style={[
+            styles.statusBannerText,
+            warn ? styles.statusBannerTextWarn : null,
+          ]}
+        >
+          {description}
+        </Text>
       </View>
     </View>
   );
@@ -3760,30 +3779,52 @@ const styles = StyleSheet.create({
     height: "100%",
     borderRadius: 0,
   },
-  marketHeroScrim: {
+  marketHeroScrimTop: {
     position: "absolute",
     left: 0,
     right: 0,
     top: 0,
-    height: 130,
-    backgroundColor: "rgba(20,30,18,0.22)",
+    height: 44,
+    backgroundColor: "rgba(20,30,18,0.42)",
+  },
+  marketHeroScrimMid: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 44,
+    height: 48,
+    backgroundColor: "rgba(20,30,18,0.18)",
+  },
+  marketHeroScrimBottom: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 92,
+    height: 38,
+    backgroundColor: "rgba(20,30,18,0.04)",
   },
   overlayBack: {
     position: "absolute",
     top: 20,
-    left: 16,
-    minHeight: 34,
+    left: 18,
+    height: 36,
     borderRadius: theme.radius.pill,
-    paddingHorizontal: 10,
+    paddingLeft: 8,
+    paddingRight: 14,
     flexDirection: "row",
     alignItems: "center",
-    gap: 1,
+    gap: 2,
     backgroundColor: "rgba(255,255,255,0.92)",
+    shadowColor: "rgba(20,30,18,0.18)",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 2,
   },
   overlayBackText: {
     color: theme.colors.ink,
-    fontSize: 13,
-    fontWeight: "800",
+    fontSize: 14.5,
+    fontWeight: theme.fontWeight.semibold,
   },
   marketHeroDoneCenter: {
     ...StyleSheet.absoluteFillObject,
@@ -3792,11 +3833,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(20,30,18,0.45)",
   },
   marketHeroReservedCenter: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 158,
+    ...StyleSheet.absoluteFillObject,
     alignItems: "center",
+    justifyContent: "center",
   },
   marketHeroStatus: {
     minWidth: 96,
@@ -3818,11 +3857,16 @@ const styles = StyleSheet.create({
   },
   marketHeroStatusText: {
     color: "#fff",
-    fontSize: 32,
-    fontWeight: "900",
+    fontSize: 34,
+    fontWeight: theme.fontWeight.extrabold,
+    textShadowColor: "rgba(0,0,0,0.35)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
   },
   marketHeroReservedText: {
     fontSize: 20,
+    textShadowColor: "transparent",
+    textShadowRadius: 0,
   },
   heroPager: {
     position: "absolute",
@@ -3874,14 +3918,19 @@ const styles = StyleSheet.create({
   },
   statusBannerTitle: {
     color: theme.colors.ink,
-    fontSize: 14,
-    fontWeight: "800",
+    fontSize: 13.5,
+    fontWeight: theme.fontWeight.bold,
+  },
+  statusBannerTitleWarn: {
+    color: "#8A5A1F",
   },
   statusBannerText: {
     marginTop: 2,
     color: theme.colors.inkMute,
     fontSize: 12,
-    fontWeight: "600",
+  },
+  statusBannerTextWarn: {
+    color: "#A87B3A",
   },
   marketAuthorBlock: {
     paddingHorizontal: 22,
@@ -3891,19 +3940,48 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
   },
+  marketDetailAuthorName: {
+    color: theme.colors.ink,
+    fontSize: 15,
+    fontWeight: theme.fontWeight.bold,
+  },
   marketDetailContent: {
     paddingHorizontal: 22,
     paddingTop: 8,
     paddingBottom: 4,
-    gap: 10,
+  },
+  marketDetailChipRow: {
+    marginBottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  marketDetailChip: {
+    minHeight: 32,
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.primarySoft,
+  },
+  marketDetailChipText: {
+    color: theme.colors.primaryDeep,
+    fontSize: 12,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  marketDetailTitle: {
+    color: theme.colors.ink,
+    fontSize: 20,
+    fontWeight: theme.fontWeight.bold,
+    lineHeight: 27,
   },
   marketBody: {
     paddingHorizontal: 22,
     paddingTop: 16,
     paddingBottom: 22,
     color: theme.colors.inkSoft,
-    fontSize: 14,
-    lineHeight: 24,
+    fontSize: 14.5,
+    lineHeight: 24.65,
   },
   detailActionCard: {
     marginHorizontal: 16,

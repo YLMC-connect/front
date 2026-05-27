@@ -243,7 +243,7 @@ export function TermsReferenceScreen({ sheet = false }: { sheet?: boolean }) {
                 <View style={styles.termsSheetClose}>
                   <MaterialIcons
                     name="close"
-                    size={17}
+                    size={16}
                     color={theme.colors.inkSoft}
                   />
                 </View>
@@ -3236,7 +3236,11 @@ const legalText = `제1조 (목적)
 회원이 되고자 하는 자는 회사가 정한 양식에 따라 회원정보를 기입한 후 본 약관에 동의한다는 의사표시를 함으로써 회원가입을 신청합니다.
 
 제5조 (서비스의 제공 및 변경)
-회사는 교회 내 나눔 플랫폼, 소모임 개설 및 참여, 중보기도 모임, 삶공부 과정 안내 및 수강 신청을 제공합니다.`;
+회사는 다음과 같은 서비스를 제공합니다.
+- 교회 내 중고거래 및 나눔 플랫폼
+- 소모임 개설 및 참여
+- 중보기도 모임
+- 삶공부 과정 안내 및 수강 신청`;
 
 const marketStatusTabs = [
   { key: "all", label: "전체" },
@@ -3511,7 +3515,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 30,
   },
-  termsRoot: { flex: 1, position: "relative", overflow: "hidden" },
+  termsRoot: { flex: 1, position: "relative" },
   termsBase: { flex: 1 },
   termsDimmedContent: { opacity: 0.5 },
   termsBody: { paddingHorizontal: 24 },
@@ -3598,6 +3602,7 @@ const styles = StyleSheet.create({
   },
   termsSheetOverlay: {
     ...StyleSheet.absoluteFillObject,
+    top: -44,
     zIndex: 50,
     justifyContent: "flex-end",
   },
@@ -3606,7 +3611,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.sheetOverlay,
   },
   termsSheetPanel: {
-    height: "85%",
+    height: "80%",
     borderTopLeftRadius: theme.radius.xl,
     borderTopRightRadius: theme.radius.xl,
     overflow: "hidden",
@@ -3635,7 +3640,7 @@ const styles = StyleSheet.create({
   termsSheetTitle: {
     color: theme.colors.ink,
     fontSize: theme.fontSize.lg,
-    fontWeight: "900",
+    fontWeight: theme.fontWeight.extrabold,
   },
   termsSheetClose: {
     width: 32,

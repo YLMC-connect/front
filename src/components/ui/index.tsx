@@ -202,6 +202,12 @@ export function VisualThumb({
   style?: object;
 }) {
   const palette = thumbPalettes[seed % thumbPalettes.length];
+  const largeSize = size * 0.64;
+  const largeCenterX = 20 + ((seed * 17) % 60);
+  const largeCenterY = 20 + ((seed * 11) % 60);
+  const smallSize = size * 0.44;
+  const smallCenterX = 60 + ((seed * 7) % 30);
+  const smallCenterY = 70 - ((seed * 13) % 30);
 
   return (
     <View
@@ -219,9 +225,12 @@ export function VisualThumb({
         style={[
           styles.visualOrbLarge,
           {
+            width: largeSize,
+            height: largeSize,
+            borderRadius: largeSize / 2,
             backgroundColor: palette.fg,
-            left: 10 + ((seed * 11) % 24),
-            top: 8 + ((seed * 7) % 24),
+            left: size * ((largeCenterX - 32) / 100),
+            top: size * ((largeCenterY - 32) / 100),
           },
         ]}
       />
@@ -229,9 +238,12 @@ export function VisualThumb({
         style={[
           styles.visualOrbSmall,
           {
+            width: smallSize,
+            height: smallSize,
+            borderRadius: smallSize / 2,
             backgroundColor: palette.fg,
-            right: 8 + ((seed * 5) % 18),
-            bottom: 10 + ((seed * 13) % 18),
+            left: size * ((smallCenterX - 22) / 100),
+            top: size * ((smallCenterY - 22) / 100),
           },
         ]}
       />
@@ -1103,16 +1115,10 @@ const styles = StyleSheet.create({
   },
   visualOrbLarge: {
     position: "absolute",
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    opacity: 0.34,
+    opacity: 0.35,
   },
   visualOrbSmall: {
     position: "absolute",
-    width: 38,
-    height: 38,
-    borderRadius: 19,
     opacity: 0.22,
   },
   visualCover: {

@@ -1,16 +1,16 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs, usePathname, useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { theme } from "../../src/constants/theme";
 
-type IconName = keyof typeof MaterialIcons.glyphMap;
+type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
-const icons: Record<string, IconName> = {
-  index: "home",
-  "market/index": "shopping-bag",
-  "group/index": "groups",
-  "faith/index": "favorite",
-  "mypage/index": "person",
+const tabIcons: Record<string, { off: IconName; on: IconName }> = {
+  index: { off: "home-outline", on: "home" },
+  "market/index": { off: "shopping-outline", on: "shopping" },
+  "group/index": { off: "account-group-outline", on: "account-group" },
+  "faith/index": { off: "heart-outline", on: "heart" },
+  "mypage/index": { off: "account-outline", on: "account" },
 };
 
 const tabHrefs: Record<
@@ -33,8 +33,8 @@ export default function TabsLayout() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarIcon: ({ color, size }) => (
-          <MaterialIcons
-            name={icons[route.name] ?? "circle"}
+          <MaterialCommunityIcons
+            name={tabIcons[route.name]?.off ?? "circle-outline"}
             size={size}
             color={color}
           />
@@ -138,8 +138,12 @@ function AppTabBar({ state, descriptors, navigation }: any) {
             }}
             style={[styles.tabItem, focused ? styles.tabItemActive : null]}
           >
-            <MaterialIcons
-              name={icons[route.name] ?? "circle"}
+            <MaterialCommunityIcons
+              name={
+                focused
+                  ? (tabIcons[route.name]?.on ?? "circle")
+                  : (tabIcons[route.name]?.off ?? "circle-outline")
+              }
               size={20}
               color={color}
             />

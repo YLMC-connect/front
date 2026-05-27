@@ -5,6 +5,11 @@ tags:
 ---
 - runFlow:
     when:
+      visible: Process system isn't responding
+    commands:
+      - tapOn: Wait
+- runFlow:
+    when:
       visible: Continue
     commands:
       - tapOn: Continue
@@ -33,6 +38,11 @@ tags:
 - openLink: ylmc-connect:///
 - waitForAnimationToEnd:
     timeout: 5000
+- runFlow:
+    when:
+      visible: Process system isn't responding
+    commands:
+      - tapOn: Wait
 - runFlow:
     when:
       visible: Continue

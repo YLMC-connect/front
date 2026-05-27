@@ -1481,7 +1481,7 @@ export function GroupDetailReferenceScreen({ variant }: { variant: string }) {
               / 최대 25
             </Text>
           </View>
-          <Text style={styles.bodyText}>
+          <Text style={styles.groupDetailDescription}>
             매주 토요일 함께 산을 오르며 자연을 느끼고 신앙을 나누는 모임입니다.
             {"\n"}
             등산 초보도 환영해요. 등산화·물·간식만 챙겨오시면 돼요.{"\n"}
@@ -4390,6 +4390,11 @@ const styles = StyleSheet.create({
     color: theme.colors.inkSoft,
     fontSize: 14,
     fontWeight: "600",
+  },
+  groupDetailDescription: {
+    color: theme.colors.inkSoft,
+    fontSize: 13,
+    lineHeight: 22,
   },
   groupLeaderCard: {
     marginTop: 4,

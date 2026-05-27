@@ -25,6 +25,7 @@
 - 소모임 상세 action compact 정렬 — ZIP `ScreenGroupDetail`의 44px inline `ActionBtn` 구조를 반영하고 소모임장 카드 shadow/border를 제거해 `group-detail*` 10개 상태를 재캡처, `missing=0` 확인
 - 소모임 멤버 관리 Toast overlay 정렬 — ZIP `ScreenGroupMembers`처럼 list body와 fixed overlay를 분리해 강퇴 toast가 화면 하단에 표시되도록 재구성, `group-members-kickts 17.86→9.39`로 감소
 - 소모임 상세 typography 정렬 — ZIP `ScreenGroupDetail` inline style 기준으로 title, meta, leader card, member rail, notice title weight를 화면 전용 스타일로 낮춰 `group-detail*` 10개 상태를 재캡처, `missing=0` 확인
+- 소모임 상세 설명문 wrap 정렬 — ZIP `ScreenGroupDetail`의 설명문 줄 감김에 맞춰 화면 전용 description style을 적용하고 47-57 전체를 재캡처, `missing=0` 확인. 대표 residual은 `non-member 19.56→10.18`, `full-toast 19.44→10.38`, `leader 15.96→10.79`, `leader-closed 16.03→10.81`로 감소
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -46,6 +47,7 @@
 `Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-27) **소모임 상세 설명문은 화면 전용 text metric을 사용한다** — Android RN 폰트 폭이 ZIP web/Pretendard 렌더보다 넓어 공통 `bodyText`를 쓰면 설명문이 한 줄 더 감기고 리더 카드/CTA/멤버 rail이 아래로 밀립니다. 공통 typography를 흔들지 않고 `ScreenGroupDetail` 설명문에만 `fontSize: 13`, `lineHeight: 22`를 적용해 ZIP 줄 감김과 vertical rhythm을 맞춥니다.
 - (2026-05-27) **소모임 상세 typography는 화면 전용 ZIP weight를 우선한다** — 공통 `cardTitle`/`metaText`는 다른 reference 화면에서도 쓰이므로 변경하지 않고, `ScreenGroupDetail`의 title 800, meta 600, leader name 700, member label 600, notice title 700 weight를 별도 스타일로 번역합니다.
 - (2026-05-27) **소모임 상세 toast/dialog는 ZIP overlay 구조를 따른다** — `Screen` 기본 ScrollView 안에 toast를 두면 원본처럼 fixed bottom overlay로 캡처되지 않으므로, 상세 body만 내부 ScrollView로 두고 toast/dialog는 `Phone` root overlay처럼 분리합니다.
 - (2026-05-27) **멤버 관리 Toast는 list ScrollView 밖 fixed layer에 둔다** — ZIP `ScreenGroupMembers`는 `phone-body` list와 `CheckToast` overlay를 분리하므로, RN reference도 `Screen scroll={false}` + 내부 ScrollView + root Toast 구조로 맞춥니다.
@@ -66,7 +68,7 @@
 - 참여 신청이 즉시 참여인지 승인 대기인지 운영 정책 확인 필요.
 - 공지 작성 권한과 소모임장/관리자 권한 모델 확인 필요.
 - 강제 내보내기 이의 제기/복구 플로우는 실제 API와 운영 정책 확정 후 반영.
-- 소모임 상세 residual은 typography 정렬 후에도 `non-member/full-toast`가 19대 중반으로 남아 있습니다. 주 원인은 Android native status bar/time, RN font metrics, bottom gesture/home indicator, toast/scroll capture frame 차이로 분리 추적합니다. 최신 전체 비교 리포트는 `/private/tmp/ylmc-golden-screens/2026-05-23/compare/visual-compare-report.tsv`입니다.
+- 소모임 상세 residual은 설명문 wrap 정렬 후 47-57 전체가 10대 초반 이하로 내려갔습니다. 남은 차이는 Android native status bar/time, RN font metrics, Avatar gradient 미적용, Toast/check icon glyph 차이로 분리 추적합니다. 최신 주요 residual은 `leader-closed mean=10.81`, `leader mean=10.79`, `leader-leave-toast mean=10.71`, `full-toast mean=10.38`, `non-member mean=10.18`이며 전체 비교 리포트는 `/private/tmp/ylmc-golden-screens/2026-05-23/compare/visual-compare-report.tsv`입니다.
 
 ## 의존성
 - common 도메인의 UI, `queryKeys`, `queryClient`, 이미지 선택 컴포넌트에 의존합니다.

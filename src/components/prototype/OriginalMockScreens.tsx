@@ -1373,7 +1373,7 @@ export function GroupListReferenceScreen({ variant }: { variant: string }) {
         : groupItems;
 
   return (
-    <Screen padded={false}>
+    <Screen padded={false} scroll={false}>
       <TopBar testID="screen-group" title="소모임" />
       <View style={styles.segmentWrap}>
         <SegmentedTabs
@@ -1387,7 +1387,11 @@ export function GroupListReferenceScreen({ variant }: { variant: string }) {
         active="all"
         onChange={() => undefined}
       />
-      <View style={styles.routeList}>
+      <ScrollView
+        style={styles.marketListScroll}
+        contentContainerStyle={styles.routeListBody}
+        showsVerticalScrollIndicator={false}
+      >
         {isError ? (
           <ErrorState />
         ) : list.length === 0 ? (
@@ -1413,7 +1417,7 @@ export function GroupListReferenceScreen({ variant }: { variant: string }) {
             </Card>
           ))
         )}
-      </View>
+      </ScrollView>
       <FloatingActionButton label="개설" />
     </Screen>
   );
@@ -1898,7 +1902,7 @@ export function PrayerListReferenceScreen({
   onSectionChange?: (section: FaithSection) => void;
 } = {}) {
   return (
-    <Screen padded={false}>
+    <Screen padded={false} scroll={false}>
       <TopBar
         testID={testID}
         title="동행"
@@ -1914,7 +1918,11 @@ export function PrayerListReferenceScreen({
           onChange={onSectionChange ?? (() => undefined)}
         />
       </View>
-      <View style={styles.contentPad}>
+      <ScrollView
+        style={styles.marketListScroll}
+        contentContainerStyle={[styles.contentPad, styles.fabScrollContent]}
+        showsVerticalScrollIndicator={false}
+      >
         <Section title="내 기도모임방">
           <View style={styles.stack}>
             {prayerRooms.slice(0, 2).map((room, index) => (
@@ -1960,7 +1968,7 @@ export function PrayerListReferenceScreen({
             ))}
           </View>
         </Section>
-      </View>
+      </ScrollView>
       <FloatingActionButton compact icon="add" />
     </Screen>
   );
@@ -2003,7 +2011,7 @@ export function PrayerDetailReferenceScreen() {
   ];
 
   return (
-    <Screen padded={false}>
+    <Screen padded={false} scroll={false}>
       <TopBar
         title="월요 새벽기도방"
         back
@@ -2028,7 +2036,11 @@ export function PrayerDetailReferenceScreen() {
           <Text style={styles.prayerUnderlineText}>응답 2</Text>
         </View>
       </View>
-      <View style={styles.contentPad}>
+      <ScrollView
+        style={styles.marketListScroll}
+        contentContainerStyle={[styles.contentPad, styles.fabScrollContent]}
+        showsVerticalScrollIndicator={false}
+      >
         {live.map((prayer) => (
           <PrayerTopicCard key={prayer.name} prayer={prayer} />
         ))}
@@ -2040,7 +2052,7 @@ export function PrayerDetailReferenceScreen() {
         {done.map((prayer) => (
           <PrayerTopicCard key={prayer.name} prayer={prayer} answered />
         ))}
-      </View>
+      </ScrollView>
       <FloatingActionButton compact icon="add" />
     </Screen>
   );
@@ -2136,7 +2148,7 @@ export function PrayerRequestReferenceScreen() {
   ];
 
   return (
-    <Screen padded={false}>
+    <Screen padded={false} scroll={false}>
       <TopBar title="기도요청" back onBack={() => router.back()} />
       <View style={styles.segmentWrap}>
         <SegmentedTabs
@@ -2149,7 +2161,11 @@ export function PrayerRequestReferenceScreen() {
           onChange={() => undefined}
         />
       </View>
-      <View style={styles.prayerRequestList}>
+      <ScrollView
+        style={styles.marketListScroll}
+        contentContainerStyle={styles.prayerRequestList}
+        showsVerticalScrollIndicator={false}
+      >
         {requests.map((request) => (
           <Card
             key={request.name}
@@ -2190,7 +2206,7 @@ export function PrayerRequestReferenceScreen() {
             </View>
           </Card>
         ))}
-      </View>
+      </ScrollView>
       <FloatingActionButton compact icon="add" />
     </Screen>
   );
@@ -3725,7 +3741,7 @@ const styles = StyleSheet.create({
   stack: { gap: 12 },
   sheetField: { marginTop: 14 },
   segmentWrap: { paddingHorizontal: 18, paddingBottom: 8 },
-  routeList: { gap: 12, paddingHorizontal: 18 },
+  routeListBody: { gap: 12, paddingHorizontal: 18, paddingBottom: 112 },
   marketListScroll: { flex: 1 },
   marketListBody: { paddingTop: 0, paddingBottom: 112 },
   rowCard: { flexDirection: "row", alignItems: "center", gap: 12 },
@@ -5080,6 +5096,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.danger,
   },
   contentPad: { paddingHorizontal: 18, gap: 16 },
+  fabScrollContent: { paddingBottom: 112 },
   noticeBanner: {
     minHeight: 76,
     paddingHorizontal: 18,
@@ -5570,7 +5587,7 @@ const styles = StyleSheet.create({
     color: theme.colors.ink,
     fontSize: 15,
     lineHeight: 20,
-    fontWeight: "800",
+    fontWeight: theme.fontWeight.bold,
   },
   legalParagraph: {
     color: theme.colors.inkSoft,

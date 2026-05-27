@@ -19,6 +19,7 @@
 - MY 차단/프로필 partial visual compare 개선 — `me-blocked*`, `user*` 8개 상태를 Android Dev Client에서 재캡처해 `missing=0` 확인, 대표 residual은 `user-ts 29.61→4.97`, `me-blocked-ts 26.57→6.13`, `user 3.60`, `user-blocked 3.71`, `me-blocked-em 3.25`로 정렬
 - MY 회원 탈퇴 ZIP 구조 정렬 — ZIP `ScreenWithdraw` 기준 안내 제목/주의사항 header/별도 정보 카드/fixed danger CTA를 reference 화면에 반영하고 `me-withdraw 16.74→8.48`, `me-withdraw-cf 9.08→5.46`으로 낮춤
 - MY 법적 문서 ZIP 구조 정렬 — ZIP `ScreenLegal` 기준 이용약관/개인정보처리방침을 카드 요약이 아니라 시행일자와 조항별 전문 텍스트 화면으로 재구성
+- MY 법적 문서 heading weight 정렬 — ZIP `ScreenLegal`의 조항 제목 weight 700을 반영하고 97/98번을 재캡처해 `me-terms 14.41→14.38`, `me-privacy 15.65→15.61`로 소폭 낮춤
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -46,6 +47,7 @@
 `MyPageData`는 나눔, 소모임, 삶공부, 기도방, 관심 제목, FAQ 목록을 묶어 반환합니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-27) **법적 문서 조항 제목 weight는 ZIP 700을 따른다** — `ScreenLegal`의 section heading은 800이 아니라 700 weight를 사용하므로, RN reference도 `theme.fontWeight.bold`로 맞춥니다.
 - (2026-05-27) **법적 문서 화면은 ZIP 전문 구조를 따른다** — 이용약관/개인정보처리방침은 현재 앱의 단일 카드 요약이 아니라 ZIP `ScreenLegal`처럼 `TopBar` 아래 시행일자, 조항 제목, 조항 본문을 full document 형태로 렌더링합니다. Pixel residual은 RN/웹 한글 font metric과 실제 status bar 차이를 별도 원인으로 분리합니다.
 - (2026-05-27) **회원 탈퇴는 ZIP bottom-flat CTA 구조를 따른다** — 탈퇴 화면은 일반 `Screen` scroll content 안의 버튼이 아니라 ZIP `ScreenWithdraw`처럼 body 안내 영역과 하단 `bottom-flat` danger CTA를 분리합니다. 주의사항 카드도 icon title, bullet row, 별도 정보 카드를 유지합니다.
 - (2026-05-27) **MY toast 화면은 ZIP fixed overlay 구조를 따른다** — 차단 완료/차단 해제 toast는 화면 ScrollView 내부 요소가 아니라 `Phone` root의 fixed bottom overlay로 두어야 ZIP 하단 위치와 일치합니다.

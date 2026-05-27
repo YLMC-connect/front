@@ -127,17 +127,14 @@ export function FloatingActionButton({
   icon?: IconName;
   compact?: boolean;
 }) {
+  const fabStyle = StyleSheet.flatten([
+    styles.fab,
+    compact ? styles.fabCompact : null,
+    typeof style === "function" ? undefined : style,
+  ]);
+
   return (
-    <Pressable
-      accessibilityRole="button"
-      {...pressableProps}
-      style={({ pressed }) => [
-        styles.fab,
-        compact ? styles.fabCompact : null,
-        pressed ? styles.pressed : null,
-        typeof style === "function" ? style({ pressed }) : style,
-      ]}
-    >
+    <Pressable accessibilityRole="button" {...pressableProps} style={fabStyle}>
       <MaterialIcons name={icon} size={20} color="#fff" />
       {label ? <Text style={styles.fabText}>{label}</Text> : null}
     </Pressable>

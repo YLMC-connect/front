@@ -16,6 +16,7 @@
 - ZIP 110개 visual inventory 재검증에 포함 — 중보기도 reference 화면을 Dev Client capture/compare 대상에 유지
 - ZIP 5탭 정보구조 반영 — 중보기도 목록은 `app/(tabs)/faith/index.tsx`의 `동행` 탭 기본 segment로 진입
 - ZIP 중보기도 화면 구조 정렬 — ZIP `ScreenPrayerList`, `ScreenPrayerDetail`, `ScreenPrayerRequest` 기준으로 다른 기도모임방 flat row, 상세 underline tab/action pill, 기도요청 목록 카드를 reference 화면에 반영하고 `pray-list 15.12→13.35`, `pray-detail 14.60→12.91`, `pray-request 14.31→10.17`로 낮춤
+- ZIP 중보기도 FAB root overlay 정렬 — 기도 목록/상세/요청 화면의 body ScrollView와 root FAB를 분리하고 72/73/75번을 재캡처해 `pray-list 13.32→12.28`, `pray-detail 12.91→11.84`, `pray-request 10.17→9.34`로 낮춤
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -38,6 +39,7 @@
 `PrayerRoom`은 `weekday`, `leader`, `memberCount`, `isJoined`를 포함합니다. `PrayerTopic`은 `isAnonymous`, `prayerCount`, `hasPrayed`, `isAnswered`, `answer`를 포함합니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-27) **중보기도 FAB는 ZIP root fixed action으로 둔다** — 기도방 목록/상세/요청의 작성 FAB는 스크롤 본문 안에 포함하지 않고 ZIP `Phone` root layer 기준으로 둡니다. 본문은 내부 ScrollView로 두어 FAB 위치가 tab bar와 독립적으로 유지되게 합니다.
 - (2026-05-27) **기도요청은 ZIP 목록 화면을 따른다** — `/prayer/request` reference는 입력 폼이 아니라 ZIP `ScreenPrayerRequest`처럼 전체/내 요청/응답됨 segmented tabs와 기도 요청 카드 목록, FAB를 표시합니다. 기도 제목 작성 폼은 별도 작성 화면 패턴으로 분리합니다.
 - (2026-05-27) **기도방 상세 tab은 underline 구조를 따른다** — `ScreenPrayerDetail`은 공통 segmented pill이 아니라 ZIP `UnderlineTabs`처럼 하단 선으로 현재 tab을 표시합니다. 카드 안의 `함께 기도`와 `응답완료`도 full button이 아닌 compact pill action으로 둡니다.
 - (2026-05-27) **다른 기도모임방은 flat row list로 둔다** — 중보기도 목록의 미가입 방은 하나의 카드로 묶지 않고 ZIP처럼 full-width flat row와 soft 참여 pill을 사용합니다.
@@ -50,7 +52,7 @@
 ## 미결 / 추적
 - 비성도 기도 요청, 기도방 참여 승인, 익명 작성자의 서버 응답 필드 정책 확인 필요.
 - 푸시 알림과 기도 통계는 후속 Phase입니다.
-- 2026-05-27 ZIP 구조 정렬 후 중보기도 residual은 `pray-list mean=13.35`, `pray-detail mean=12.91`, `pray-request mean=10.17`입니다. 남은 차이는 Android native status bar/time, RN 한글 font metrics, 실제 tab/FAB 그림자 번역 차이로 분리 추적합니다.
+- 2026-05-27 ZIP FAB root overlay 정렬 후 중보기도 residual은 `pray-list mean=12.28`, `pray-detail mean=11.84`, `pray-request mean=9.34`입니다. 남은 차이는 Android native status bar/time, RN 한글 font metrics, tab/FAB shadow 번역 차이로 분리 추적합니다.
 
 ## 의존성
 - common 도메인의 UI, `queryKeys`, `queryClient`에 의존합니다.

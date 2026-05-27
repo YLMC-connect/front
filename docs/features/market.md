@@ -27,6 +27,7 @@
 - 나눔 목록 partial visual compare 개선 — `market-list*` 6개 상태를 Android Dev Client에서 재캡처해 `missing=0` 확인, 대표 residual은 `market-list-all 20.56→15.44`, `market-list 14.24→12.27`, `market-list-reserved 10.80→8.31`, `market-list-done 12.35→7.77`로 감소
 - 나눔 상세 action compact 정렬 재검증 — ZIP `ActionBtn` inline 구조를 공통 reference action에 반영한 뒤 `market-detail*` 정상 상태 10개를 재캡처해 `missing=0` 확인
 - ZIP `Thumb` proportional geometry 재검증 — 공통 `VisualThumb`을 ZIP `Thumb` SVG circle 수식에 맞춘 뒤 나눔 목록/상세/작성/관심 목록 영향 화면을 Android Dev Client에서 재캡처하고 `missing=0` 확인
+- 나눔 목록 FAB root overlay 정렬 — 공통 FAB를 ZIP pill surface로 복구하고 목록 20-25번을 재캡처해 `market-list-all 15.27→13.75`, `market-list 12.15→10.64`, `reserved 8.36→6.79`, `done 7.83→6.31`로 낮춤
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -47,6 +48,7 @@
 `MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-27) **나눔 목록 FAB는 ZIP fixed root layer를 따른다** — `ScreenMarketList`의 글쓰기 FAB는 list ScrollView 안 요소가 아니라 ZIP `Phone` root의 absolute pill button으로 관리합니다. 공통 `FloatingActionButton`은 정적 surface를 사용해 Android 캡처에서 pill 배경과 위치가 유지되도록 합니다.
 - (2026-05-27) **나눔 thumbnail은 ZIP `Thumb` proportional geometry를 따른다** — 목록 86px thumb, 상세 360px hero, 작성/관심 목록 thumb 모두 같은 공통 `VisualThumb`를 쓰므로, circle 위치/크기/opacity는 ZIP `lib.jsx`의 `Thumb` SVG viewBox 수식을 size 비례로 번역합니다.
 - (2026-05-27) **나눔 목록은 ZIP full-width row를 따른다** — `ScreenMarketList` 원본은 카드형 리스트가 아니라 `padding 14/22`, 86px thumb, row divider, status overlay를 쓰는 compact row 구조이므로 reference 목록에서는 공통 `Card` wrapper를 사용하지 않습니다.
 - (2026-05-27) **나눔 상세 action은 ZIP `ActionBtn` inline 구조를 따른다** — 수정/삭제/상태 변경/신고/차단 action은 큰 원형 icon tile이 아니라 ZIP `screens-market.jsx`의 44px transparent inline icon+label button으로 번역합니다.
@@ -66,7 +68,7 @@
 ## 미결 / 추적
 - 실제 나눔 API 스키마, 이미지 업로드 방식, 페이지네이션 방식 확인 필요.
 - 신고 처리 후 블라인드/관리자 큐 정책은 API/운영 정책 확정 후 반영.
-- 나눔 목록 residual은 카드형 구조와 thumb geometry 차이를 줄였지만 `market-list-all mean=15.27`는 native status bar/time, RN font metrics, tab bar/FAB 위치 차이가 남아 후속 공통 geometry 정렬 대상입니다.
+- 나눔 목록 residual은 FAB root overlay 정렬 후 `market-list-all mean=13.75`, `market-list mean=10.64`, `market-list-reserved mean=6.79`, `market-list-done mean=6.31`입니다. 남은 차이는 native status bar/time, RN font metrics, tab bar geometry와 목록 row text metric 차이로 추적합니다.
 - 나눔 상세 residual은 safe-area/sheet/thumb 정렬 후 추가로 줄었지만 기본/타인/예약/토스트 계열은 RN font metrics, blur/shadow 번역 차이가 남아 후속 시각 정렬 대상입니다. 최신 주요 residual은 `market-detail-repts mean=14.76`, `market-detail-own mean=14.53`, `market-detail-other mean=14.46`이며 전체 비교 리포트는 `/private/tmp/ylmc-golden-screens/2026-05-23/compare/visual-compare-report.tsv`입니다.
 
 ## 의존성

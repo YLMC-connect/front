@@ -26,6 +26,7 @@
 - 소모임 멤버 관리 Toast overlay 정렬 — ZIP `ScreenGroupMembers`처럼 list body와 fixed overlay를 분리해 강퇴 toast가 화면 하단에 표시되도록 재구성, `group-members-kickts 17.86→9.39`로 감소
 - 소모임 상세 typography 정렬 — ZIP `ScreenGroupDetail` inline style 기준으로 title, meta, leader card, member rail, notice title weight를 화면 전용 스타일로 낮춰 `group-detail*` 10개 상태를 재캡처, `missing=0` 확인
 - 소모임 상세 설명문 wrap 정렬 — ZIP `ScreenGroupDetail`의 설명문 줄 감김에 맞춰 화면 전용 description style을 적용하고 47-57 전체를 재캡처, `missing=0` 확인. 대표 residual은 `non-member 19.56→10.18`, `full-toast 19.44→10.38`, `leader 15.96→10.79`, `leader-closed 16.03→10.81`로 감소
+- 소모임 목록 FAB root overlay 정렬 — ZIP fixed FAB 구조에 맞춰 list body ScrollView와 root FAB를 분리하고 43-46번을 재캡처, `group-list 11.61→10.21`, `group-list-mine 11.70→10.28`, empty/error 계열은 6점대까지 낮춤
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -47,6 +48,7 @@
 `Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-27) **소모임 목록 FAB는 ScrollView 밖 root layer에 둔다** — ZIP `ScreenGroupList`는 list body와 `+ 개설` FAB가 같은 scroll content가 아니라 `Phone` root 기준 absolute layer이므로, reference 화면도 `Screen scroll={false}`와 내부 ScrollView로 분리합니다.
 - (2026-05-27) **소모임 상세 설명문은 화면 전용 text metric을 사용한다** — Android RN 폰트 폭이 ZIP web/Pretendard 렌더보다 넓어 공통 `bodyText`를 쓰면 설명문이 한 줄 더 감기고 리더 카드/CTA/멤버 rail이 아래로 밀립니다. 공통 typography를 흔들지 않고 `ScreenGroupDetail` 설명문에만 `fontSize: 13`, `lineHeight: 22`를 적용해 ZIP 줄 감김과 vertical rhythm을 맞춥니다.
 - (2026-05-27) **소모임 상세 typography는 화면 전용 ZIP weight를 우선한다** — 공통 `cardTitle`/`metaText`는 다른 reference 화면에서도 쓰이므로 변경하지 않고, `ScreenGroupDetail`의 title 800, meta 600, leader name 700, member label 600, notice title 700 weight를 별도 스타일로 번역합니다.
 - (2026-05-27) **소모임 상세 toast/dialog는 ZIP overlay 구조를 따른다** — `Screen` 기본 ScrollView 안에 toast를 두면 원본처럼 fixed bottom overlay로 캡처되지 않으므로, 상세 body만 내부 ScrollView로 두고 toast/dialog는 `Phone` root overlay처럼 분리합니다.

@@ -46,6 +46,7 @@
 - ZIP 5탭 icon state 정렬 — 하단 탭을 ZIP `TABS` 순서(홈/나눔/소모임/동행/MY)와 outline/filled state에 맞추고, `동행`은 ZIP의 실제 heart glyph 기준으로 정렬
 - ZIP `Thumb` proportional geometry 정렬 — 공통 `VisualThumb`의 추상 circle 위치/크기/opacity를 ZIP `Thumb` SVG 수식 기준으로 번역
 - Maestro smoke ANR overlay 처리 보강 — Android Emulator가 일시적으로 `Process system isn't responding` dialog를 띄우면 `Wait`를 누른 뒤 Dev Client menu 처리와 5탭 smoke를 이어가도록 `.maestro/smoke.yml` 보강
+- ZIP FAB root overlay 정렬 — 공통 `FloatingActionButton`도 정적 pill surface로 렌더링하고, FAB 사용 목록 화면은 body ScrollView와 root FAB layer를 분리해 ZIP `Phone` 구조에 맞춤
 
 ---
 
@@ -82,6 +83,7 @@
 [../../PLAN.md](../../PLAN.md) “🗃 데이터 타입 설계 > 공통” 참조.
 
 ## 결정 사항 (최신 위)
+- (2026-05-27) **FAB도 ZIP root overlay surface로 관리한다** — `FloatingActionButton`은 공통 `Button`과 같이 정적 Pressable surface를 사용해 Android Dev Client 캡처에서 배경/크기 누락을 막습니다. `Screen` scroll content 안에 FAB를 두면 ZIP `Phone`의 fixed root layer와 달라지므로 FAB가 있는 reference 화면은 `Screen scroll={false}` + 내부 ScrollView + root FAB 구조로 둡니다.
 - (2026-05-27) **탭 아이콘은 ZIP `TABS`의 실제 glyph state를 따른다** — ZIP `lib.jsx`의 `Icon.hands` 이름은 `hands`지만 실제 path는 heart glyph이므로, RN `동행` 탭은 hand icon이 아니라 `heart-outline`/`heart` state로 번역합니다. 하단 탭은 홈/나눔/소모임/동행/MY 5개만 노출하고 삶공부·중보기도는 `동행` 내부 segment로 둡니다.
 - (2026-05-27) **`VisualThumb` circle geometry는 ZIP SVG 수식을 비율로 번역한다** — ZIP `Thumb`는 100x100 viewBox에서 큰 circle `r=32 opacity=.35`, 작은 circle `r=22 opacity=.22`를 seed 기반 center로 배치합니다. RN `VisualThumb`도 size prop에 비례해 같은 center/diameter/opacity를 계산하고, fixed 58/38px orb는 사용하지 않습니다.
 - (2026-05-27) **Maestro smoke는 Android 시스템 ANR dialog를 환경 overlay로 처리한다** — Dev Client가 정상 앱 화면을 띄운 뒤에도 Emulator가 `Process system isn't responding` dialog를 일시 표시할 수 있으므로, smoke flow는 해당 dialog에서 `Wait`를 누르고 기존 Dev Client `Continue`/`Reload` 처리로 복귀합니다. 이 처리는 앱 기능 검증 대상이 아니라 테스트 환경 안정화입니다.
@@ -129,7 +131,7 @@
 - Codex 기본 샌드박스에서는 `expo start --dev-client --port 8081 --localhost`가 `Starting project...` 이후 8081에 바인딩되지 않을 수 있습니다. 샌드박스 밖 로컬 권한에서는 `npm run test:dev-client:smoke`로 `/status` 응답을 확인했습니다.
 - Maestro CLI `2.6.0`은 Homebrew tap(`mobile-dev-inc/tap`)으로 설치되어 있으며, Android Emulator `Medium_Phone_API_36.1`에서 `npm run test:e2e:smoke` 통과를 확인했습니다. 현재 smoke는 ADB로 Dev Client deep link를 먼저 열고, Maestro가 Dev Client 메뉴를 닫은 뒤 홈/나눔/소모임/동행/MY 탭과 동행 내부 삶공부 segment 진입을 검증합니다.
 - 제공 ZIP 110개 화면은 `test:visual:prepare` → Dev Client full capture/partial recapture → `test:visual:compare`로 검증하며 현재 비교 리포트 기준 `screens=110`, `missing=0`, `originalFlat=0`입니다. 남은 residual diff는 상태바/SafeArea, React Native 폰트·모달 번역 차이와 실제 UI 차이를 분리해 추적합니다.
-- 2026-05-27 ZIP 5탭 icon/`VisualThumb` 정렬 후 비교 리포트의 상위 residual은 소모임 상세 일부, auth `terms-sheet`, MY/market/prayer 계열입니다. `home`은 `16.96→15.39`, `study-list`는 `14.34→14.30`, `code-toast`는 공통 Button surface와 auth toast icon 반영으로 `17.39→10.10`까지 낮췄습니다.
+- 2026-05-27 ZIP FAB root overlay 정렬 후 비교 리포트는 `screens=110`, `missing=0`입니다. 대표 residual은 `market-list-all 15.27→13.75`, `group-list 11.61→10.21`, `pray-list 13.32→12.28`, `pray-request 10.17→9.34`로 낮췄습니다. 남은 상위 residual은 `splash`, `me-privacy`, `home`, market detail/create 계열입니다.
 
 ## 의존성
 - GitHub Issues / PR description 기반 작업 추적 규칙에 의존합니다.

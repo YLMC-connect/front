@@ -2609,45 +2609,105 @@ export function MyWishlistReferenceScreen() {
 }
 
 export function NotificationSettingsReferenceScreen() {
-  const rows = [
-    { title: "공지 알림", desc: "교회 공지와 앱 안내" },
-    { title: "나눔 댓글", desc: "내 나눔 게시글 댓글" },
-    { title: "소모임 공지", desc: "참여 중인 소모임 새 공지" },
-    { title: "기도방 알림", desc: "새 기도제목과 응답" },
+  const sections = [
+    {
+      title: "전체",
+      items: [
+        { title: "알림 받기", desc: "모든 푸시 알림을 켜고 끕니다", on: true },
+      ],
+    },
+    {
+      title: "중고·나눔",
+      items: [
+        { title: "새 댓글", on: true },
+        { title: "관심 글의 상태 변경", on: true },
+      ],
+    },
+    {
+      title: "소모임",
+      items: [
+        { title: "공지사항", on: true },
+        { title: "새 가입 신청 (리더)", on: true },
+        { title: "정기 모임 리마인드", on: false },
+      ],
+    },
+    {
+      title: "중보기도",
+      items: [
+        { title: "새 기도제목", on: true },
+        { title: "기도 응원", on: true },
+        { title: "기도 응답", on: true },
+      ],
+    },
+    {
+      title: "삶공부",
+      items: [
+        { title: "수업 알림", on: true },
+        { title: "과제 마감", on: false },
+      ],
+    },
   ];
 
   return (
-    <Screen>
+    <Screen scroll={false} padded={false}>
       <TopBar title="알림 설정" back onBack={() => router.back()} />
-      <Card style={styles.menuCard}>
-        {rows.map((row, index) => (
-          <View key={row.title} style={styles.settingRow}>
-            <View style={styles.flex}>
-              <Text style={styles.menuTitle}>{row.title}</Text>
-              <Text style={styles.metaText}>{row.desc}</Text>
-            </View>
-            <View
-              style={[
-                styles.switchTrack,
-                index === 1 ? styles.switchOff : null,
-              ]}
-            >
+      <ScrollView
+        style={styles.notifSettingsBody}
+        contentContainerStyle={styles.notifSettingsContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {sections.map((section) => (
+          <NotificationSection key={section.title} title={section.title}>
+            {section.items.map((item, index) => (
               <View
+                key={item.title}
                 style={[
-                  styles.switchKnob,
-                  index === 1 ? styles.switchKnobOff : null,
+                  styles.settingRow,
+                  index === section.items.length - 1 ? styles.noBorder : null,
                 ]}
-              />
-            </View>
-          </View>
+              >
+                <View style={styles.settingTextWrap}>
+                  <Text style={styles.settingTitle}>{item.title}</Text>
+                  {"desc" in item && item.desc ? (
+                    <Text style={styles.settingDesc}>{item.desc}</Text>
+                  ) : null}
+                </View>
+                <View
+                  style={[
+                    styles.switchTrack,
+                    !item.on ? styles.switchOff : null,
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.switchKnob,
+                      !item.on ? styles.switchKnobOff : null,
+                    ]}
+                  />
+                </View>
+              </View>
+            ))}
+          </NotificationSection>
         ))}
-      </Card>
-      <Card style={styles.warningCard}>
-        <Text style={styles.warningText}>
-          거래 채팅 알림은 chat/v2 범위라 v1에서는 표시하지 않습니다.
-        </Text>
-      </Card>
+      </ScrollView>
     </Screen>
+  );
+}
+
+function NotificationSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <View style={styles.notifSection}>
+      <View style={styles.notifSectionHeader}>
+        <Text style={styles.notifSectionTitle}>{title}</Text>
+      </View>
+      <Card style={styles.notifSettingsCard}>{children}</Card>
+    </View>
   );
 }
 
@@ -5759,30 +5819,71 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "700",
   },
-  settingRow: {
-    minHeight: 70,
+  notifSettingsBody: {
+    flex: 1,
+  },
+  notifSettingsContent: {
+    paddingBottom: 28,
+  },
+  notifSection: {},
+  notifSectionHeader: {
+    paddingTop: 16,
+    paddingHorizontal: 18,
+    paddingBottom: 8,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+  },
+  notifSectionTitle: {
+    color: theme.colors.ink,
+    fontSize: 15,
+    fontWeight: theme.fontWeight.bold,
+  },
+  notifSettingsCard: {
+    marginHorizontal: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+  },
+  settingRow: {
+    paddingVertical: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     gap: 12,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.line,
   },
+  settingTextWrap: {
+    flex: 1,
+    minWidth: 0,
+  },
+  settingTitle: {
+    color: theme.colors.ink,
+    fontSize: 14.5,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  settingDesc: {
+    marginTop: 2,
+    color: theme.colors.inkMute,
+    fontSize: 12,
+    lineHeight: 16.8,
+  },
   switchTrack: {
-    width: 46,
-    height: 28,
-    borderRadius: 14,
-    padding: 3,
+    width: 40,
+    height: 24,
+    borderRadius: 12,
+    padding: 2,
     alignItems: "flex-end",
     backgroundColor: theme.colors.primary,
   },
   switchOff: {
     alignItems: "flex-start",
-    backgroundColor: "rgba(30,41,32,0.12)",
+    backgroundColor: theme.colors.lineStrong,
   },
   switchKnob: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     backgroundColor: "#fff",
   },
   switchKnobOff: { backgroundColor: theme.colors.surface },

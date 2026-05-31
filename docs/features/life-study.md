@@ -1,6 +1,6 @@
 # life-study (삶공부)
 
-> 마지막 갱신: 2026-05-27 | 담당 Phase: P5 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-05-31 | 담당 Phase: P5 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 성도가 삶공부 과정을 확인하고 신청/취소하며 수강 이력을 확인합니다.
@@ -16,6 +16,7 @@
 - ZIP 110개 visual inventory 재검증에 포함 — 삶공부 reference 화면을 Dev Client capture/compare 대상에 유지
 - ZIP 5탭 정보구조 반영 — 삶공부 목록은 루트 탭이 아니라 `app/(tabs)/faith/index.tsx`의 `동행` 탭 내부 segmented view로 진입
 - ZIP 삶공부 상세 구조 정렬 — `ScreenStudyDetail` 기준으로 상세 intro, 담당 양육자 soft box, 내 수강 현황, flat curriculum rows, fixed bottom action bar를 재구성
+- ZIP 삶공부 목록 구조 정렬 — `ScreenStudyList` 기준으로 신청가능/진행중 과정 제목·설명 typography를 조정하고, 마감·수료 영역을 카드 wrapper 없는 flat row list로 바꿔 `study-list mean=14.33→11.76`으로 낮춤
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -37,6 +38,7 @@
 `LifeStudyCourse`는 `status`, `sessions`, `currentSession`, `capacity`, `enrolledCount`, `isEnrolled`, `isCompleted`, `curriculum`을 포함합니다. `LifeStudyHistory`는 수강 회차와 수료증 발급 여부를 포함합니다.
 
 ## 결정 사항 (최신 위)
+- (2026-05-31) **삶공부 목록 마감·수료 영역은 flat row list를 따른다** — ZIP `ScreenStudyList`는 `마감·수료` 섹션을 별도 카드로 감싸지 않고 icon + title/status + term row를 반복하므로, RN reference도 `Card/menuCard` wrapper 대신 화면 전용 flat row style을 사용합니다.
 - (2026-05-27) **삶공부 상세는 ZIP `ScreenStudyDetail` 구조를 따른다** — 공통 `Card`/`Section`으로 감싼 기존 reference 구조 대신 ZIP의 내부 `phone-body` scroll, 8px divider, soft progress panel, flat curriculum rows, glass bottom action bar를 RN 방식으로 번역합니다.
 - (2026-05-25) **삶공부 루트 진입은 동행 탭 안에 둔다** — ZIP 기준 5탭 구조를 우선해 삶공부는 독립 하단 탭이 아니라 `동행` 탭의 `삶공부` segment로 진입합니다. 기존 `/life-study` route는 상세/딥링크/캡처 호환용 숨김 route로 유지합니다.
 - (2026-05-23) **ZIP 삶공부 보조 화면도 route-accessible** — 목록/상세 외 신청 확인과 수강 내역 화면을 별도 reference 라우트로 둡니다.
@@ -47,6 +49,7 @@
 ## 미결 / 추적
 - 실제 삶공부 API 스키마, 신청 승인 방식, 수료증 표시 방식 확인 필요.
 - 관리자 과정 개설/수정은 모바일 v1 범위가 아니며 후속 Phase입니다.
+- `study-list` residual은 ZIP 목록 구조 정렬 후 `mean=11.76`입니다. 남은 차이는 Android status bar/time, RN font metrics, SegmentedTabs/Badge antialiasing, native shadow 번역 차이 중심으로 추적합니다.
 - `study-detail` residual은 ZIP 구조 정렬 후 `20.90→9.39`까지 낮췄습니다. 남은 차이는 RN status bar/time, font metrics, blur/shadow, native bottom home indicator 번역 차이 중심으로 추적합니다.
 
 ## 의존성

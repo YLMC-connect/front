@@ -2239,6 +2239,24 @@ const studyOpenCourses = [
   },
 ] as const;
 
+const studyClosedCourses = [
+  {
+    name: "알파코스 봄학기",
+    status: "마감",
+    term: "2025.03 ~ 05 · 종료",
+  },
+  {
+    name: "결혼예비학교 봄",
+    status: "수료",
+    term: "2024.04 ~ 06 · 완료",
+  },
+  {
+    name: "양육반 2024-가을",
+    status: "수료",
+    term: "2024.09 ~ 12 · 완료",
+  },
+] as const;
+
 export function StudyListReferenceScreen({
   testID = "screen-life-study",
   onSectionChange,
@@ -2275,8 +2293,8 @@ export function StudyListReferenceScreen({
                   </Badge>
                   <Text style={styles.metaText}>{course.term}</Text>
                 </View>
-                <Text style={styles.titleText}>{course.name}</Text>
-                <Text style={styles.bodyText}>{course.desc}</Text>
+                <Text style={styles.studyCourseTitle}>{course.name}</Text>
+                <Text style={styles.studyCourseDesc}>{course.desc}</Text>
                 {"progress" in course ? (
                   <View style={styles.progressRow}>
                     <View style={styles.progressTrack}>
@@ -2295,28 +2313,28 @@ export function StudyListReferenceScreen({
           </View>
         </Section>
         <Section title="마감·수료">
-          <Card style={styles.menuCard}>
-            {["알파코스 봄학기", "결혼예비학교 봄", "양육반 2024-가을"].map(
-              (title, index) => (
-                <View key={title} style={styles.menuRow}>
-                  <View style={styles.softIcon}>
-                    <MaterialIcons
-                      name="menu-book"
-                      size={22}
-                      color={theme.colors.inkMute}
-                    />
-                  </View>
-                  <View style={styles.flex}>
-                    <Text style={styles.menuTitle}>{title}</Text>
-                    <Text style={styles.metaText}>2025.03 ~ 05 · 종료</Text>
-                  </View>
-                  <Badge tone={index === 0 ? "mute" : "primary"}>
-                    {index === 0 ? "마감" : "수료"}
-                  </Badge>
+          <View style={styles.studyClosedList}>
+            {studyClosedCourses.map((course) => (
+              <View key={course.name} style={styles.studyClosedRow}>
+                <View style={styles.studyClosedIcon}>
+                  <MaterialIcons
+                    name="menu-book"
+                    size={22}
+                    color={theme.colors.inkMute}
+                  />
                 </View>
-              ),
-            )}
-          </Card>
+                <View style={styles.studyClosedText}>
+                  <View style={styles.studyClosedTitleRow}>
+                    <Text style={styles.studyClosedTitle}>{course.name}</Text>
+                    <Badge tone={course.status === "수료" ? "primary" : "mute"}>
+                      {course.status}
+                    </Badge>
+                  </View>
+                  <Text style={styles.studyClosedTerm}>{course.term}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
         </Section>
       </View>
     </Screen>
@@ -5467,6 +5485,17 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   studyCourseCard: { gap: 8, overflow: "hidden" },
+  studyCourseTitle: {
+    color: theme.colors.ink,
+    fontSize: 18,
+    lineHeight: 24,
+    fontWeight: theme.fontWeight.bold,
+  },
+  studyCourseDesc: {
+    color: theme.colors.inkMute,
+    fontSize: 12,
+    lineHeight: 17,
+  },
   studyOrb: {
     position: "absolute",
     right: -10,
@@ -5493,6 +5522,46 @@ const styles = StyleSheet.create({
     height: "100%",
     borderRadius: 4,
     backgroundColor: theme.colors.primary,
+  },
+  studyClosedList: {
+    paddingHorizontal: 18,
+    gap: 2,
+  },
+  studyClosedRow: {
+    minHeight: 72,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    opacity: 0.7,
+  },
+  studyClosedIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: theme.radius.sm,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(30,41,32,0.04)",
+  },
+  studyClosedText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  studyClosedTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  studyClosedTitle: {
+    color: theme.colors.ink,
+    fontSize: 14,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  studyClosedTerm: {
+    marginTop: 2,
+    color: theme.colors.inkMute,
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: theme.fontWeight.medium,
   },
   studyDetailRoot: { flex: 1, position: "relative" },
   studyShareButton: {

@@ -1,6 +1,6 @@
 # YLMC Connect — 인덱스
 
-> 마지막 갱신: 2026-06-27 (루트 주요 탭, auth, 알림, 나눔/소모임/소모임공지·멤버/MY 프로필수정·활동내역·타성도프로필·FAQ·법적문서·차단·탈퇴/기도목록·기도신청·기도요청·기도상세/삶공부목록·삶공부신청·삶공부내역·삶공부상세 실제 화면 복구, 원본 없는 reference route 제거) | 현재 Phase: 6 — API 연결 준비 (진행중)
+> 마지막 갱신: 2026-06-27 (Downloads preview 기준 하단 탭 홈/나눔/동행/기도/삶공부 재정렬, 동행 내부 소모임/봉사 segment 반영, MY 홈 진입 전환) | 현재 Phase: 6 — API 연결 준비 (진행중)
 
 본 문서는 **작업자 5분용 진입점** 입니다. 외부인은 [README.md](../README.md) 부터, AI 작업 규칙은 [AGENTS.md](../AGENTS.md) 를 참고하세요. 문서 시스템이 어긋났을 때의 복구 절차는 [MAINTENANCE.md](MAINTENANCE.md).
 
@@ -73,7 +73,7 @@
 - [0002 — 백엔드 선택 보류 (Mock-first)](adr/0002-backend-tbd.md) — Phase 5 종료까지 백엔드 플랫폼 결정 보류, services/ 격리로 무관 진행. (수락, 2026-05-08)
 - [0003 — MVP 범위는 Notion 최신 정의 우선](adr/0003-mvp-scope-notion-first.md) — 인증·홈·나눔·소모임·MY·이미지 선택을 MVP로 확정하고 중보기도·삶공부는 v1로 분리. (수락, 2026-05-22)
 - [0004 — Notion v1 범위와 Expo Dev Client 기준](adr/0004-notion-v1-dev-client-scope.md) — 삶공부·중보기도를 v1 mock-first로 구현하고 Expo Go가 아닌 Dev Client를 검증 기준으로 확정. (수락, 2026-05-22)
-- [0005 — 모바일 E2E는 Maestro 우선](adr/0005-mobile-e2e-maestro-first.md) — Expo Dev Client development build 기준 v1 탭 진입 smoke를 Maestro로 관리. (수락, 2026-05-23)
+- [0005 — 모바일 E2E는 Maestro 우선](adr/0005-mobile-e2e-maestro-first.md) — Expo Dev Client development build 기준 v1 탭 진입 smoke를 Maestro로 관리. (수락, 2026-05-23; 탭 smoke 대상 갱신 2026-06-27)
 
 ---
 

@@ -3,9 +3,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
+  Badge,
+  Card,
   ErrorState,
   FloatingActionButton,
   VisualCover,
+  VisualThumb,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 
@@ -19,6 +22,11 @@ const categories = [
   { key: "cell", label: "목장" },
   { key: "mission", label: "선교" },
   { key: "etc", label: "기타" },
+] as const;
+
+const sections = [
+  { key: "groups", label: "소모임" },
+  { key: "service", label: "봉사" },
 ] as const;
 
 const groups = [
@@ -84,12 +92,46 @@ const groups = [
   },
 ] as const;
 
+const serviceItems = [
+  {
+    id: "service-1",
+    name: "주방 봉사팀",
+    desc: "주일 점심 준비와 정리를 함께 섬깁니다.",
+    schedule: "주일 10:30",
+    cur: 18,
+    max: 24,
+    status: "모집중",
+    seed: 2,
+  },
+  {
+    id: "service-2",
+    name: "성가대 신입 모집",
+    desc: "찬양으로 예배를 섬길 성도를 기다립니다.",
+    schedule: "주일 08:40",
+    cur: 5,
+    max: 10,
+    status: "모집중",
+    seed: 5,
+  },
+  {
+    id: "service-3",
+    name: "어르신 돌봄 봉사",
+    desc: "월 2회 인근 요양원을 방문해 교제합니다.",
+    schedule: "둘째·넷째 토요일",
+    cur: 8,
+    max: 12,
+    status: "모집중",
+    seed: 4,
+  },
+] as const;
+
 export default function GroupScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ variant?: string }>();
   const variant = Array.isArray(params.variant)
     ? params.variant[0]
     : params.variant;
+  const section = variant === "service" ? "service" : "groups";
   const isMyFull = variant === "my-full";
   const isError = variant === "network-error";
   const myGroups = isError
@@ -121,7 +163,7 @@ export default function GroupScreen() {
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
         <View style={styles.topBar}>
-          <Text style={styles.title}>소모임</Text>
+          <Text style={styles.title}>동행</Text>
           <View style={styles.searchButton}>
             <MaterialIcons
               name="search"
@@ -131,9 +173,77 @@ export default function GroupScreen() {
           </View>
         </View>
 
+        <View style={styles.segmented}>
+          {sections.map((item) => {
+            const selected = item.key === section;
+            return (
+              <Pressable
+                key={item.key}
+                accessibilityRole="tab"
+                accessibilityState={selected ? { selected: true } : {}}
+                onPress={() =>
+                  router.replace(
+                    item.key === "service"
+                      ? "/group?variant=service"
+                      : "/group",
+                  )
+                }
+                style={[styles.segment, selected ? styles.segmentOn : null]}
+              >
+                <Text
+                  style={[
+                    styles.segmentText,
+                    selected ? styles.segmentTextOn : null,
+                  ]}
+                >
+                  {item.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
         <ScrollView contentContainerStyle={styles.body}>
           {isError ? (
             <ErrorState message="네트워크 연결을 확인하고 다시 시도해주세요." />
+          ) : section === "service" ? (
+            <View style={styles.serviceList}>
+              {serviceItems.map((item) => (
+                <Pressable
+                  key={item.id}
+                  accessibilityRole="button"
+                  onPress={() => router.push("/group/5")}
+                >
+                  <Card style={styles.serviceCard}>
+                    <View style={styles.serviceRow}>
+                      <VisualThumb
+                        size={62}
+                        seed={item.seed}
+                        icon="volunteer-activism"
+                      />
+                      <View style={styles.serviceBody}>
+                        <View style={styles.serviceMetaRow}>
+                          <Badge>{item.status}</Badge>
+                          <Text style={styles.serviceSchedule}>
+                            {item.schedule}
+                          </Text>
+                        </View>
+                        <Text style={styles.serviceTitle}>{item.name}</Text>
+                        <Text style={styles.serviceDesc}>{item.desc}</Text>
+                        <Text style={styles.serviceCount}>
+                          참여 {item.cur}/{item.max}명
+                        </Text>
+                      </View>
+                      <MaterialIcons
+                        name="chevron-right"
+                        size={20}
+                        color={theme.colors.inkMute}
+                      />
+                    </View>
+                  </Card>
+                </Pressable>
+              ))}
+            </View>
           ) : (
             <>
               <View style={styles.section}>
@@ -292,6 +402,34 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  segmented: {
+    marginHorizontal: 18,
+    marginBottom: 10,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.ring,
+    padding: 4,
+    flexDirection: "row",
+  },
+  segment: {
+    flex: 1,
+    minHeight: 38,
+    borderRadius: theme.radius.pill,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  segmentOn: {
+    backgroundColor: theme.colors.surface,
+    ...theme.shadow.card,
+  },
+  segmentText: {
+    color: theme.colors.inkMute,
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  segmentTextOn: {
+    color: theme.colors.ink,
+    fontWeight: theme.fontWeight.bold,
+  },
   body: {
     paddingBottom: 100,
   },
@@ -389,6 +527,51 @@ const styles = StyleSheet.create({
     paddingTop: 6,
     paddingBottom: 12,
     gap: 12,
+  },
+  serviceList: {
+    marginHorizontal: 18,
+    paddingTop: 6,
+    paddingBottom: 12,
+    gap: 12,
+  },
+  serviceCard: {
+    padding: 16,
+  },
+  serviceRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  serviceBody: {
+    flex: 1,
+    minWidth: 0,
+  },
+  serviceMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 6,
+  },
+  serviceSchedule: {
+    color: theme.colors.inkMute,
+    fontSize: theme.fontSize.xs,
+  },
+  serviceTitle: {
+    marginTop: 7,
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.lg,
+    fontWeight: "800",
+  },
+  serviceDesc: {
+    marginTop: 5,
+    color: theme.colors.inkSoft,
+    fontSize: theme.fontSize.sm,
+    lineHeight: theme.lineHeight.sm,
+  },
+  serviceCount: {
+    marginTop: 8,
+    color: theme.colors.inkMute,
+    fontSize: theme.fontSize.xs,
   },
   fullList: {
     paddingHorizontal: 18,

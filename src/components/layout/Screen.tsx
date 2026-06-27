@@ -4,7 +4,13 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { theme } from "../../constants/theme";
 
-const rootTabPaths = new Set(["/", "/market", "/group", "/faith", "/mypage"]);
+const rootTabPaths = new Set([
+  "/",
+  "/market",
+  "/group",
+  "/prayer",
+  "/life-study",
+]);
 const designStatusBarHeight = 44;
 
 export function Screen({

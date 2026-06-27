@@ -80,16 +80,12 @@ tags:
 - assertVisible:
     id: screen-group
 - tapOn:
-    id: tab-faith
+    id: tab-prayer
 - assertVisible:
     id: screen-faith
-- assertVisible: 중보기도
-- assertVisible: 삶공부
 - tapOn:
-    text: 삶공부
+    id: tab-life-study
+- assertVisible:
+    id: screen-faith
 - assertVisible:
     text: 신청가능·진행중
-- tapOn:
-    id: tab-mypage
-- assertVisible:
-    id: screen-mypage

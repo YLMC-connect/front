@@ -34,12 +34,13 @@
 - 소모임 개설 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupCreate`의 close/action topbar, 카테고리 chip, 소모임명/설명/최대인원 section, 안내 박스를 `modal/group-new` route에 RN으로 직접 반영
 - 소모임 공지 작성/수정 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupNotices`의 close topbar, 삭제/등록 action, 공개 안내, 제목/내용 입력 section, 삭제 confirm을 `/group/notices` route에 RN으로 직접 반영
 - 소모임 멤버 관리 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupMembers`의 flat row list, 강퇴 pill, 이관 경고/선택 row, 하단 이관 action, confirm/toast variant를 `/group/members` route에 RN으로 직접 반영
+- 동행 탭 구조 반영 — Downloads `ScreenGroupList`/`ScreenServiceList` 기준으로 `/group`을 `동행` 루트로 두고 내부 `소모임/봉사` segment와 봉사 전용 card list를 추가
 
 ## 주요 파일 (도메인 파일 지도)
 
 | 경로                             | 역할                               |
 | -------------------------------- | ---------------------------------- |
-| `app/(tabs)/group/index.tsx`     | 소모임 목록, 카테고리 필터         |
+| `app/(tabs)/group/index.tsx`     | 동행 탭 루트, 소모임/봉사 segment  |
 | `app/(tabs)/group/[id].tsx`      | 소모임 상세, 참여/탈퇴, 공지, 멤버 |
 | `app/(tabs)/group/notices.tsx`   | 소모임 공지 작성/수정              |
 | `app/(tabs)/group/members.tsx`   | 소모임 멤버 관리와 소모임장 이관   |
@@ -54,8 +55,9 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-06-27) **동행 탭은 소모임/봉사 segment를 가진다** — Downloads `ScreenGroupList`와 `ScreenServiceList`를 기준으로 `/group`은 하단 `동행` 탭 루트가 되고, 내부에서 `소모임` 목록과 `봉사` 전용 리스트를 전환합니다.
 - (2026-06-27) **미사용 service/hook/card 레이어는 제거한다** — 현재 소모임 화면은 Downloads 원본을 기준으로 다시 구현할 예정이고 `GroupCard`, `groupService`, `useGroups` 호출처가 없어, 실제 API 연결 시 필요한 표면만 다시 만든다.
-- (2026-06-27) **소모임 목록은 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenGroupList` 구조를 `/group` route에 직접 반영하되, 원본의 `동행/봉사` 탭 구조는 현재 앱 IA와 다르므로 복사하지 않습니다. 별도 service/hook은 실제 API 스키마 확정 전까지 만들지 않습니다.
+- (2026-06-27) **소모임 목록은 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenGroupList` 구조를 `/group` route에 직접 반영합니다. 별도 service/hook은 실제 API 스키마 확정 전까지 만들지 않습니다.
 - (2026-06-27) **소모임 상세는 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenGroupDetail`의 기본 leader/member/non-member 구조를 `/group/[id]` route에 직접 반영합니다. 삭제/탈퇴/신청 confirm과 toast variant는 실제 필요 시 작은 overlay로 추가합니다.
 - (2026-06-27) **소모임 개설은 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenGroupCreate`의 기본 create/create-filled/edit/error 구조를 `modal/group-new` route에 직접 반영합니다. 실제 저장 API는 스키마 확정 전까지 붙이지 않습니다.
 - (2026-06-27) **소모임 공지는 실제 RN 화면으로 렌더링한다** — Downloads `ScreenGroupNotices` 구조를 `/group/notices` route에 직접 반영합니다. 실제 공지 저장/삭제 API는 권한 정책 확정 후 붙입니다.

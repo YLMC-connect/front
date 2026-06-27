@@ -1,15 +1,17 @@
 # market (나눔)
 
-> 마지막 갱신: 2026-05-27 | 담당 Phase: P1/P2 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-06-27 | 담당 Phase: P1/P2 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
+
 성도 간 무료 나눔 글을 등록하고 상태/댓글/신고를 관리합니다.
 
 ---
 
 ## ✅ 완료
+
 - 나눔 목록/상세/작성 화면 구현 — `app/(tabs)/market/index.tsx`, `app/(tabs)/market/[id].tsx`, `app/modal/market-new.tsx`
-- 나눔 타입, mock 데이터, service, TanStack Query hook 구현 — `src/types/market.ts`, `src/mocks/market.ts`, `src/services/marketService.ts`, `src/hooks/useMarketItems.ts`
+- 나눔 타입과 mock 데이터 구현 — `src/types/market.ts`, `src/mocks/market.ts`
 - 이미지 선택/미리보기 연결 — `ImagePickerField`에서 선택한 URI를 `MarketInput.images`로 저장하고 목록/상세 썸네일에 표시
 - 상태 변경, 댓글 등록, 신고 접수 mock mutation 구현
 - 검색, 관심 목록, 신고 사유 선택, 활성 나눔 5개 제한, 사진 필수 검증 구현
@@ -30,26 +32,31 @@
 - 나눔 목록 FAB root overlay 정렬 — 공통 FAB를 ZIP pill surface로 복구하고 목록 20-25번을 재캡처해 `market-list-all 15.27→13.75`, `market-list 12.15→10.64`, `reserved 8.36→6.79`, `done 7.83→6.31`로 낮춤
 - 나눔 상세 typography/chip/scrim 정렬 — ZIP `ScreenMarketDetail` 기준으로 overlay back, hero scrim, 작성자명, soft chip, 제목/본문 text metric, 예약 배너 색상을 맞추고 26-35번을 재캡처해 `own 14.53→9.31`, `reserved 14.15→9.36`, `other 14.46→9.34`, `composer-multiline 12.75→9.47`, `report-dup-toast 14.76→10.00`로 낮춤
 - 나눔 작성 topbar/chip/control typography 정렬 — ZIP `ScreenMarketCreate` 기준으로 56px topbar rhythm, close pill, action width, chip padding/font, section label/hint/control weight를 맞추고 38-42번을 재캡처해 `limit-toast 14.99→14.62`, `create-filled 14.01→13.69`, `edit 14.01→13.70`으로 낮춤
+- 나눔 목록 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenMarketList`의 상태 탭, 카테고리 칩, 86px thumb row, 예약/완료 overlay, fixed FAB 구조를 `/market` route에 RN으로 직접 반영
+- 나눔 상세 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenMarketDetail`의 정사각형 hero, 상태 overlay/banner, 작성자/칩/본문, 액션 row, 댓글, 하단 composer 구조를 `/market/[id]` route에 RN으로 직접 반영
+- 나눔 작성 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenMarketCreate`의 close/action topbar, 사진 레일, 카테고리 chip, 제목/물품상태/상세설명 section, 안내 박스를 `modal/market-new` route에 RN으로 직접 반영
 
 ## 주요 파일 (도메인 파일 지도)
 
-| 경로 | 역할 |
-|---|---|
-| `app/(tabs)/market/index.tsx` | 나눔 목록, 상태/카테고리 필터 |
-| `app/(tabs)/market/[id].tsx` | 나눔 상세, 상태 변경, 댓글, 신고 |
-| `app/modal/market-new.tsx` | 나눔 작성 모달 |
-| `src/components/market/MarketItemCard.tsx` | 나눔 카드 |
-| `src/services/marketService.ts` | 나눔 mock service |
-| `src/hooks/useMarketItems.ts` | 나눔 query/mutation hook |
-| `src/mocks/market.ts` | 나눔 mock 데이터 |
+| 경로                             | 역할                              |
+| -------------------------------- | --------------------------------- |
+| `app/(tabs)/market/index.tsx`    | 나눔 목록, 상태/카테고리 필터     |
+| `app/(tabs)/market/[id].tsx`     | 나눔 상세, 상태 변경, 댓글, 신고  |
+| `app/modal/market-new.tsx`       | 나눔 작성 모달                    |
+| `src/mocks/market.ts`            | 나눔 mock 데이터                  |
 | `src/constants/domainOptions.ts` | 나눔 카테고리/상태/신고 사유 옵션 |
-| `src/types/market.ts` | 나눔 타입 |
-| `src/components/prototype/OriginalMockScreens.tsx` | ZIP 나눔 목록/상세/작성 reference variant 화면 |
+| `src/types/market.ts`            | 나눔 타입                         |
 
 ## 데이터 타입
+
 `MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-06-27) **미사용 service/hook/card 레이어는 제거한다** — 현재 나눔 화면은 Downloads 원본을 기준으로 다시 구현할 예정이고 `MarketItemCard`, `marketService`, `useMarketItems` 호출처가 없어, 실제 API 연결 시 필요한 표면만 다시 만든다.
+- (2026-06-27) **나눔 목록은 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenMarketList` 구조를 `/market` route에 직접 반영하고, 상태별 variant는 query parameter에서 필요한 범위만 해석합니다. 별도 service/hook은 실제 API 스키마 확정 전까지 만들지 않습니다.
+- (2026-06-27) **나눔 상세는 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenMarketDetail`의 기본 상세 구조를 `/market/[id]` route에 직접 반영합니다. 신고/상태 변경 sheet 같은 예외 variant는 실제 필요 시 작은 overlay로 추가합니다.
+- (2026-06-27) **나눔 작성은 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenMarketCreate`의 기본 작성/입력 완료/edit/limit-toast 구조를 `modal/market-new` route에 직접 반영합니다. 실제 저장 API는 스키마 확정 전까지 붙이지 않습니다.
 - (2026-05-27) **나눔 작성 topbar/control은 ZIP `ScreenMarketCreate` metric을 따른다** — 작성/수정 reference는 ZIP `phone-topbar`의 56px rhythm과 700/600/500 weight 체계를 따르고, chip은 ZIP `.chip`의 12px semibold metric으로 번역합니다.
 - (2026-05-27) **나눔 상세 text/chip은 ZIP 전용 metric을 따른다** — 상세 제목은 공용 `titleText`가 아니라 ZIP `20px/700/1.35`에 맞춘 전용 style을 쓰고, 카테고리/상태 chip도 dark selected chip이 아닌 ZIP `chip soft` 톤으로 렌더링합니다.
 - (2026-05-27) **나눔 목록 FAB는 ZIP fixed root layer를 따른다** — `ScreenMarketList`의 글쓰기 FAB는 list ScrollView 안 요소가 아니라 ZIP `Phone` root의 absolute pill button으로 관리합니다. 공통 `FloatingActionButton`은 정적 surface를 사용해 Android 캡처에서 pill 배경과 위치가 유지되도록 합니다.
@@ -70,6 +77,7 @@
 - (2026-05-22) **이미지는 로컬 URI 우선** — 실제 업로드 API가 없으므로 `expo-image-picker` URI를 mock 데이터에 저장해 UI 흐름을 검증합니다.
 
 ## 미결 / 추적
+
 - 실제 나눔 API 스키마, 이미지 업로드 방식, 페이지네이션 방식 확인 필요.
 - 신고 처리 후 블라인드/관리자 큐 정책은 API/운영 정책 확정 후 반영.
 - 나눔 작성 residual은 topbar/chip/control typography 정렬 후 `market-create-limit mean=14.62`, `market-create-fill mean=13.69`, `market-edit mean=13.70`, `market-create mean=12.22`, `market-create-back mean=7.72`입니다. 빈 작성/뒤로가기 화면은 status bar/time, RN font metrics, confirm overlay geometry 차이로 소폭 상승했지만 화면군 합계는 감소했습니다.
@@ -77,10 +85,12 @@
 - 나눔 상세 residual은 typography/chip/scrim 정렬 후 `market-detail-own mean=9.31`, `market-detail-resv mean=9.36`, `market-detail-other mean=9.34`, `market-detail-rep2 mean=10.51`, `market-detail-repts mean=10.00`입니다. 남은 차이는 RN font metrics, native shadow/blur 번역, sheet/input capture 조건으로 추적합니다. 전체 비교 리포트는 `/private/tmp/ylmc-golden-screens/2026-05-23/compare/visual-compare-report.tsv`입니다.
 
 ## 의존성
-- common 도메인의 UI, `queryKeys`, `queryClient`, 이미지 선택 컴포넌트에 의존합니다.
+
+- common 도메인의 UI와 이미지 선택 컴포넌트에 의존합니다.
 - auth 도메인의 mock 현재 사용자에 의존합니다.
 
 ## 관련 ADR
+
 - [ADR 0002 — 백엔드 선택 보류 (Mock-first)](../adr/0002-backend-tbd.md)
 - [ADR 0003 — MVP 범위는 Notion 최신 정의 우선](../adr/0003-mvp-scope-notion-first.md)
 - [ADR 0004 — Notion v1 범위와 Expo Dev Client 기준](../adr/0004-notion-v1-dev-client-scope.md)

@@ -1,8 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useLocalSearchParams } from "expo-router";
-import { Controller, useForm } from "react-hook-form";
+import { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { z } from "zod";
 import { Screen } from "../../src/components/layout/Screen";
 import {
   Button,
@@ -19,34 +17,40 @@ const visibilityTabs = [
   { key: "anonymous", label: "익명" },
 ] as const;
 
-const schema = z.object({
-  title: z.string().min(2, "기도제목 제목을 입력해주세요."),
-  content: z.string().min(5, "기도 내용을 입력해주세요."),
-  visibility: z.enum(["named", "anonymous"]),
-});
+type FormValues = {
+  title: string;
+  content: string;
+  visibility: (typeof visibilityTabs)[number]["key"];
+};
 
-type FormValues = z.infer<typeof schema>;
+type FormErrors = Partial<Record<"title" | "content", string>>;
+
+function validatePrayerTopic(values: FormValues) {
+  const errors: FormErrors = {};
+  if (values.title.trim().length < 2) {
+    errors.title = "기도제목 제목을 입력해주세요.";
+  }
+  if (values.content.trim().length < 5) {
+    errors.content = "기도 내용을 입력해주세요.";
+  }
+  return errors;
+}
 
 export default function PrayerNewModal() {
   const { roomId = "" } = useLocalSearchParams<{ roomId: string }>();
   const createPrayerTopic = useCreatePrayerTopic(roomId);
-  const {
-    control,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      title: "",
-      content: "",
-      visibility: "named",
-    },
+  const [values, setValues] = useState<FormValues>({
+    title: "",
+    content: "",
+    visibility: "named",
   });
+  const [errors, setErrors] = useState<FormErrors>({});
 
-  const visibility = watch("visibility");
-  const onSubmit = handleSubmit((values) => {
+  const onSubmit = () => {
+    const nextErrors = validatePrayerTopic(values);
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
     createPrayerTopic.mutate(
       {
         title: values.title,
@@ -58,7 +62,7 @@ export default function PrayerNewModal() {
           router.replace({ pathname: "/prayer/[id]", params: { id: roomId } }),
       },
     );
-  });
+  };
 
   return (
     <Screen>
@@ -69,36 +73,30 @@ export default function PrayerNewModal() {
         onBack={() => router.back()}
       />
       <FormSection title="기도제목">
-        <Controller
-          control={control}
-          name="title"
-          render={({ field }) => (
-            <TextField
-              label="제목"
-              value={field.value}
-              onChangeText={field.onChange}
-              error={errors.title?.message}
-            />
-          )}
+        <TextField
+          label="제목"
+          value={values.title}
+          onChangeText={(title) =>
+            setValues((current) => ({ ...current, title }))
+          }
+          error={errors.title}
         />
-        <Controller
-          control={control}
-          name="content"
-          render={({ field }) => (
-            <Textarea
-              label="내용"
-              value={field.value}
-              onChangeText={field.onChange}
-              error={errors.content?.message}
-            />
-          )}
+        <Textarea
+          label="내용"
+          value={values.content}
+          onChangeText={(content) =>
+            setValues((current) => ({ ...current, content }))
+          }
+          error={errors.content}
         />
       </FormSection>
       <FormSection title="작성자 표시">
         <SegmentedTabs
           items={visibilityTabs}
-          active={visibility}
-          onChange={(key) => setValue("visibility", key)}
+          active={values.visibility}
+          onChange={(visibility) =>
+            setValues((current) => ({ ...current, visibility }))
+          }
         />
       </FormSection>
       <View style={styles.actions}>

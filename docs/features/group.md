@@ -1,15 +1,17 @@
 # group (소모임)
 
-> 마지막 갱신: 2026-05-27 | 담당 Phase: P1/P3 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-06-27 | 담당 Phase: P1/P3 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
+
 성도가 소모임을 탐색하고 참여하거나 새 모임을 개설할 수 있게 합니다.
 
 ---
 
 ## ✅ 완료
+
 - 소모임 목록/상세/개설 화면 구현 — `app/(tabs)/group/index.tsx`, `app/(tabs)/group/[id].tsx`, `app/modal/group-new.tsx`
-- 소모임 타입, mock 데이터, service, TanStack Query hook 구현 — `src/types/group.ts`, `src/mocks/groups.ts`, `src/services/groupService.ts`, `src/hooks/useGroups.ts`
+- 소모임 타입과 mock 데이터 구현 — `src/types/group.ts`, `src/mocks/groups.ts`
 - 대표 이미지 선택/미리보기 연결 — `GroupInput.coverImage`를 카드/상세 cover에 표시
 - 참여, 탈퇴, 공지 작성, 멤버 목록 mock mutation 구현
 - 검색, 모집/참여/관심 필터, 관심 소모임, 정원 마감 제한, 소모임장 탈퇴 제한, 멤버 내보내기 mock 구현
@@ -27,27 +29,37 @@
 - 소모임 상세 typography 정렬 — ZIP `ScreenGroupDetail` inline style 기준으로 title, meta, leader card, member rail, notice title weight를 화면 전용 스타일로 낮춰 `group-detail*` 10개 상태를 재캡처, `missing=0` 확인
 - 소모임 상세 설명문 wrap 정렬 — ZIP `ScreenGroupDetail`의 설명문 줄 감김에 맞춰 화면 전용 description style을 적용하고 47-57 전체를 재캡처, `missing=0` 확인. 대표 residual은 `non-member 19.56→10.18`, `full-toast 19.44→10.38`, `leader 15.96→10.79`, `leader-closed 16.03→10.81`로 감소
 - 소모임 목록 FAB root overlay 정렬 — ZIP fixed FAB 구조에 맞춰 list body ScrollView와 root FAB를 분리하고 43-46번을 재캡처, `group-list 11.61→10.21`, `group-list-mine 11.70→10.28`, empty/error 계열은 6점대까지 낮춤
+- 소모임 목록 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupList`의 내 소모임 가로 카드, 전체 모임 category chip, 모집 상태 카드, root FAB 구조를 `/group` route에 RN으로 직접 반영
+- 소모임 상세 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupDetail`의 정보 header, 리더 카드, 권한별 action, 멤버 rail, 공지 카드 구조를 `/group/[id]` route에 RN으로 직접 반영
+- 소모임 개설 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupCreate`의 close/action topbar, 카테고리 chip, 소모임명/설명/최대인원 section, 안내 박스를 `modal/group-new` route에 RN으로 직접 반영
+- 소모임 공지 작성/수정 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupNotices`의 close topbar, 삭제/등록 action, 공개 안내, 제목/내용 입력 section, 삭제 confirm을 `/group/notices` route에 RN으로 직접 반영
+- 소모임 멤버 관리 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupMembers`의 flat row list, 강퇴 pill, 이관 경고/선택 row, 하단 이관 action, confirm/toast variant를 `/group/members` route에 RN으로 직접 반영
 
 ## 주요 파일 (도메인 파일 지도)
 
-| 경로 | 역할 |
-|---|---|
-| `app/(tabs)/group/index.tsx` | 소모임 목록, 카테고리 필터 |
-| `app/(tabs)/group/[id].tsx` | 소모임 상세, 참여/탈퇴, 공지, 멤버 |
-| `app/(tabs)/group/notices.tsx` | ZIP 원본 공지 작성/수정 reference 화면 |
-| `app/(tabs)/group/members.tsx` | ZIP 원본 멤버 관리 reference 화면 |
-| `app/modal/group-new.tsx` | 소모임 개설 모달 |
-| `src/components/group/GroupCard.tsx` | 소모임 카드 |
-| `src/services/groupService.ts` | 소모임 mock service |
-| `src/hooks/useGroups.ts` | 소모임 query/mutation hook |
-| `src/mocks/groups.ts` | 소모임 mock 데이터 |
-| `src/constants/domainOptions.ts` | 소모임 카테고리/상태 필터 옵션 |
-| `src/types/group.ts` | 소모임 타입 |
+| 경로                             | 역할                               |
+| -------------------------------- | ---------------------------------- |
+| `app/(tabs)/group/index.tsx`     | 소모임 목록, 카테고리 필터         |
+| `app/(tabs)/group/[id].tsx`      | 소모임 상세, 참여/탈퇴, 공지, 멤버 |
+| `app/(tabs)/group/notices.tsx`   | 소모임 공지 작성/수정              |
+| `app/(tabs)/group/members.tsx`   | 소모임 멤버 관리와 소모임장 이관   |
+| `app/modal/group-new.tsx`        | 소모임 개설 모달                   |
+| `src/mocks/groups.ts`            | 소모임 mock 데이터                 |
+| `src/constants/domainOptions.ts` | 소모임 카테고리/상태 필터 옵션     |
+| `src/types/group.ts`             | 소모임 타입                        |
 
 ## 데이터 타입
+
 `Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-06-27) **미사용 service/hook/card 레이어는 제거한다** — 현재 소모임 화면은 Downloads 원본을 기준으로 다시 구현할 예정이고 `GroupCard`, `groupService`, `useGroups` 호출처가 없어, 실제 API 연결 시 필요한 표면만 다시 만든다.
+- (2026-06-27) **소모임 목록은 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenGroupList` 구조를 `/group` route에 직접 반영하되, 원본의 `동행/봉사` 탭 구조는 현재 앱 IA와 다르므로 복사하지 않습니다. 별도 service/hook은 실제 API 스키마 확정 전까지 만들지 않습니다.
+- (2026-06-27) **소모임 상세는 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenGroupDetail`의 기본 leader/member/non-member 구조를 `/group/[id]` route에 직접 반영합니다. 삭제/탈퇴/신청 confirm과 toast variant는 실제 필요 시 작은 overlay로 추가합니다.
+- (2026-06-27) **소모임 개설은 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenGroupCreate`의 기본 create/create-filled/edit/error 구조를 `modal/group-new` route에 직접 반영합니다. 실제 저장 API는 스키마 확정 전까지 붙이지 않습니다.
+- (2026-06-27) **소모임 공지는 실제 RN 화면으로 렌더링한다** — Downloads `ScreenGroupNotices` 구조를 `/group/notices` route에 직접 반영합니다. 실제 공지 저장/삭제 API는 권한 정책 확정 후 붙입니다.
+- (2026-06-27) **소모임 멤버 관리는 실제 RN 화면으로 렌더링한다** — Downloads `ScreenGroupMembers` 구조를 `/group/members` route에 직접 반영합니다. 강퇴/이관 API는 운영 정책 확정 후 연결합니다.
 - (2026-05-27) **소모임 목록 FAB는 ScrollView 밖 root layer에 둔다** — ZIP `ScreenGroupList`는 list body와 `+ 개설` FAB가 같은 scroll content가 아니라 `Phone` root 기준 absolute layer이므로, reference 화면도 `Screen scroll={false}`와 내부 ScrollView로 분리합니다.
 - (2026-05-27) **소모임 상세 설명문은 화면 전용 text metric을 사용한다** — Android RN 폰트 폭이 ZIP web/Pretendard 렌더보다 넓어 공통 `bodyText`를 쓰면 설명문이 한 줄 더 감기고 리더 카드/CTA/멤버 rail이 아래로 밀립니다. 공통 typography를 흔들지 않고 `ScreenGroupDetail` 설명문에만 `fontSize: 13`, `lineHeight: 22`를 적용해 ZIP 줄 감김과 vertical rhythm을 맞춥니다.
 - (2026-05-27) **소모임 상세 typography는 화면 전용 ZIP weight를 우선한다** — 공통 `cardTitle`/`metaText`는 다른 reference 화면에서도 쓰이므로 변경하지 않고, `ScreenGroupDetail`의 title 800, meta 600, leader name 700, member label 600, notice title 700 weight를 별도 스타일로 번역합니다.
@@ -67,16 +79,19 @@
 - (2026-05-22) **공지/멤버 관리는 mock UI까지** — 운영자 권한과 실제 멤버 관리 API는 후속 Phase에서 확정합니다.
 
 ## 미결 / 추적
+
 - 참여 신청이 즉시 참여인지 승인 대기인지 운영 정책 확인 필요.
 - 공지 작성 권한과 소모임장/관리자 권한 모델 확인 필요.
 - 강제 내보내기 이의 제기/복구 플로우는 실제 API와 운영 정책 확정 후 반영.
 - 소모임 상세 residual은 설명문 wrap 정렬 후 47-57 전체가 10대 초반 이하로 내려갔습니다. 남은 차이는 Android native status bar/time, RN font metrics, Avatar gradient 미적용, Toast/check icon glyph 차이로 분리 추적합니다. 최신 주요 residual은 `leader-closed mean=10.81`, `leader mean=10.79`, `leader-leave-toast mean=10.71`, `full-toast mean=10.38`, `non-member mean=10.18`이며 전체 비교 리포트는 `/private/tmp/ylmc-golden-screens/2026-05-23/compare/visual-compare-report.tsv`입니다.
 
 ## 의존성
+
 - common 도메인의 UI, `queryKeys`, `queryClient`, 이미지 선택 컴포넌트에 의존합니다.
 - auth 도메인의 mock 현재 사용자에 의존합니다.
 
 ## 관련 ADR
+
 - [ADR 0002 — 백엔드 선택 보류 (Mock-first)](../adr/0002-backend-tbd.md)
 - [ADR 0003 — MVP 범위는 Notion 최신 정의 우선](../adr/0003-mvp-scope-notion-first.md)
 - [ADR 0004 — Notion v1 범위와 Expo Dev Client 기준](../adr/0004-notion-v1-dev-client-scope.md)

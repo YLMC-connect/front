@@ -1,5 +1,5 @@
-import { StudyListReferenceScreen } from "../../../src/components/prototype/OriginalMockScreens";
+import FaithScreen from "../faith";
 
 export default function LifeStudyScreen() {
-  return <StudyListReferenceScreen />;
+  return <FaithScreen forcedSection="study" />;
 }

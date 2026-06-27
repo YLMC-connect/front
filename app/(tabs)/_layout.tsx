@@ -8,7 +8,7 @@ type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 const tabIcons: Record<string, { off: IconName; on: IconName }> = {
   index: { off: "home-outline", on: "home" },
   "market/index": { off: "shopping-outline", on: "shopping" },
-  "group/index": { off: "account-group-outline", on: "account-group" },
+  "group/index": { off: "account-multiple-outline", on: "account-multiple" },
   "faith/index": { off: "heart-outline", on: "heart" },
   "mypage/index": { off: "account-outline", on: "account" },
 };
@@ -82,15 +82,6 @@ export default function TabsLayout() {
       <Tabs.Screen name="mypage/privacy" options={{ href: null }} />
       <Tabs.Screen name="mypage/withdraw" options={{ href: null }} />
       <Tabs.Screen name="mypage/user/[id]" options={{ href: null }} />
-      <Tabs.Screen name="mypage/wishlist" options={{ href: null }} />
-      <Tabs.Screen
-        name="mypage/notification-settings"
-        options={{ href: null }}
-      />
-      <Tabs.Screen name="mypage/support" options={{ href: null }} />
-      <Tabs.Screen name="mypage/inquiry" options={{ href: null }} />
-      <Tabs.Screen name="mypage/account" options={{ href: null }} />
-      <Tabs.Screen name="profile/[id]" options={{ href: null }} />
     </Tabs>
   );
 }
@@ -161,11 +152,11 @@ const styles = StyleSheet.create({
     left: 14,
     right: 14,
     bottom: 14,
-    minHeight: 70,
+    minHeight: 64,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: theme.colors.glassBorder,
-    backgroundColor: theme.colors.glass,
+    borderColor: "rgba(255,255,255,0.72)",
+    backgroundColor: "rgba(255,255,255,0.90)",
     paddingHorizontal: 6,
     paddingVertical: 7,
     flexDirection: "row",
@@ -178,14 +169,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 2,
-    paddingHorizontal: 2,
+    paddingHorizontal: 4,
+    paddingVertical: 6,
   },
   tabItemActive: {
     backgroundColor: theme.colors.primary,
-    shadowColor: "rgba(107,130,96,0.55)",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.22,
-    shadowRadius: 10,
+    shadowColor: "rgba(91, 122, 176, 0.74)",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.28,
+    shadowRadius: 18,
     elevation: 4,
   },
   tabLabel: {

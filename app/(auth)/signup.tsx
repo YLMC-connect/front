@@ -1,8 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useLocalSearchParams } from "expo-router";
-import type { ReactNode } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { type ReactNode, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -12,31 +10,48 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { z } from "zod";
 import { Screen } from "../../src/components/layout/Screen";
 import { TopBar } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { useAuth } from "../../src/hooks/useAuth";
 
-const schema = z
-  .object({
-    id: z.string().min(3, "아이디는 3자 이상 입력해주세요."),
-    password: z.string().min(8, "비밀번호는 8자 이상 입력해주세요."),
-    passwordConfirm: z.string().min(1, "비밀번호를 한 번 더 입력해주세요."),
-    userName: z.string().min(2, "이름을 입력해주세요."),
-    phone: z.string().min(10, "연락처를 입력해주세요."),
-    email: z
-      .string()
-      .email("이메일 형식이 올바르지 않습니다.")
-      .optional()
-      .or(z.literal("")),
-  })
-  .refine((value) => value.password === value.passwordConfirm, {
-    path: ["passwordConfirm"],
-    message: "비밀번호가 일치하지 않습니다",
-  });
+type FormValues = {
+  id: string;
+  password: string;
+  passwordConfirm: string;
+  userName: string;
+  phone: string;
+  email: string;
+};
 
-type FormValues = z.infer<typeof schema>;
+type FormErrors = Partial<Record<keyof FormValues, string>>;
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateSignup(values: FormValues) {
+  const errors: FormErrors = {};
+  if (values.id.trim().length < 3) {
+    errors.id = "아이디는 3자 이상 입력해주세요.";
+  }
+  if (values.password.length < 8) {
+    errors.password = "비밀번호는 8자 이상 입력해주세요.";
+  }
+  if (!values.passwordConfirm) {
+    errors.passwordConfirm = "비밀번호를 한 번 더 입력해주세요.";
+  } else if (values.password !== values.passwordConfirm) {
+    errors.passwordConfirm = "비밀번호가 일치하지 않습니다";
+  }
+  if (values.userName.trim().length < 2) {
+    errors.userName = "이름을 입력해주세요.";
+  }
+  if (values.phone.trim().length < 10) {
+    errors.phone = "연락처를 입력해주세요.";
+  }
+  if (values.email && !emailPattern.test(values.email)) {
+    errors.email = "이메일 형식이 올바르지 않습니다.";
+  }
+  return errors;
+}
 
 export default function SignupScreen() {
   const params = useLocalSearchParams<{ variant?: string }>();
@@ -47,14 +62,8 @@ export default function SignupScreen() {
   const isPhoneError = variant === "phone-error";
   const isPhoneDup = variant === "phone-dup";
   const isLoading = variant === "loading";
-  const {
-    control,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: isDefault
+  const [values, setValues] = useState<FormValues>(
+    isDefault
       ? {
           id: "",
           password: "",
@@ -71,16 +80,26 @@ export default function SignupScreen() {
           phone: isPhoneError ? "010-2222" : "010-2345-6789",
           email: "",
         },
-  });
+  );
+  const [errors, setErrors] = useState<FormErrors>({});
 
-  const onSubmit = handleSubmit((values) => {
+  const setField =
+    (field: keyof FormValues) =>
+    (value: string): void => {
+      setValues((current) => ({ ...current, [field]: value }));
+    };
+
+  const onSubmit = () => {
+    const nextErrors = validateSignup(values);
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
     const { passwordConfirm: _passwordConfirm, ...signupInput } = values;
 
     signup.mutate(signupInput, {
       onSuccess: () => router.replace("/"),
     });
-  });
-  const values = watch();
+  };
   const allFilled = Boolean(
     values.id &&
     values.password &&
@@ -111,128 +130,96 @@ export default function SignupScreen() {
           </View>
 
           <View style={styles.form}>
-            <Controller
-              control={control}
-              name="id"
-              render={({ field }) => (
-                <Field label="아이디">
-                  <View style={styles.idRow}>
-                    <View style={styles.idInputWrap}>
-                      <SignupInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        placeholder="아이디"
-                        hasError={variant === "id-dup" || Boolean(errors.id)}
-                      />
-                    </View>
-                    <View style={styles.checkButton}>
-                      <Text style={styles.checkButtonText}>중복 확인</Text>
-                    </View>
-                  </View>
-                  <InlineError>
-                    {errors.id?.message ??
-                      (variant === "id-dup"
-                        ? "이미 사용 중인 아이디입니다"
-                        : undefined)}
-                  </InlineError>
-                </Field>
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="password"
-              render={({ field }) => (
-                <Field label="비밀번호">
+            <Field label="아이디">
+              <View style={styles.idRow}>
+                <View style={styles.idInputWrap}>
                   <SignupInput
-                    value={field.value}
-                    onChangeText={field.onChange}
-                    placeholder="비밀번호"
-                    secureTextEntry
-                    hasError={isPwError || Boolean(errors.password)}
+                    value={values.id}
+                    onChangeText={setField("id")}
+                    placeholder="아이디"
+                    hasError={variant === "id-dup" || Boolean(errors.id)}
                   />
-                  {isPwError || errors.password ? (
-                    <InlineError>
-                      {isPwError
-                        ? "비밀번호는 8자 이상, 영문·숫자를 모두 포함해야 합니다"
-                        : errors.password?.message}
-                    </InlineError>
-                  ) : (
-                    <FieldHint>8자 이상, 영문·숫자 조합</FieldHint>
-                  )}
-                </Field>
-              )}
-            />
+                </View>
+                <View style={styles.checkButton}>
+                  <Text style={styles.checkButtonText}>중복 확인</Text>
+                </View>
+              </View>
+              <InlineError>
+                {errors.id ??
+                  (variant === "id-dup"
+                    ? "이미 사용 중인 아이디입니다"
+                    : undefined)}
+              </InlineError>
+            </Field>
 
-            <Controller
-              control={control}
-              name="passwordConfirm"
-              render={({ field }) => (
-                <Field label="비밀번호 확인">
-                  <SignupInput
-                    value={field.value}
-                    onChangeText={field.onChange}
-                    placeholder="비밀번호 확인"
-                    secureTextEntry
-                    hasError={isPwError || Boolean(errors.passwordConfirm)}
-                  />
-                  <InlineError>
-                    {isPwError
-                      ? "비밀번호가 일치하지 않습니다"
-                      : errors.passwordConfirm?.message}
-                  </InlineError>
-                </Field>
+            <Field label="비밀번호">
+              <SignupInput
+                value={values.password}
+                onChangeText={setField("password")}
+                placeholder="비밀번호"
+                secureTextEntry
+                hasError={isPwError || Boolean(errors.password)}
+              />
+              {isPwError || errors.password ? (
+                <InlineError>
+                  {isPwError
+                    ? "비밀번호는 8자 이상, 영문·숫자를 모두 포함해야 합니다"
+                    : errors.password}
+                </InlineError>
+              ) : (
+                <FieldHint>8자 이상, 영문·숫자 조합</FieldHint>
               )}
-            />
+            </Field>
 
-            <Controller
-              control={control}
-              name="userName"
-              render={({ field }) => (
-                <Field label="이름">
-                  <SignupInput
-                    value={field.value}
-                    onChangeText={field.onChange}
-                    placeholder="실명을 입력해주세요"
-                    hasError={Boolean(errors.userName)}
-                  />
-                  <InlineError>{errors.userName?.message}</InlineError>
-                  {!errors.userName ? (
-                    <FieldHint>2~10자, 특수문자는 사용할 수 없어요</FieldHint>
-                  ) : null}
-                </Field>
-              )}
-            />
+            <Field label="비밀번호 확인">
+              <SignupInput
+                value={values.passwordConfirm}
+                onChangeText={setField("passwordConfirm")}
+                placeholder="비밀번호 확인"
+                secureTextEntry
+                hasError={isPwError || Boolean(errors.passwordConfirm)}
+              />
+              <InlineError>
+                {isPwError
+                  ? "비밀번호가 일치하지 않습니다"
+                  : errors.passwordConfirm}
+              </InlineError>
+            </Field>
 
-            <Controller
-              control={control}
-              name="phone"
-              render={({ field }) => (
-                <Field label="연락처">
-                  <SignupInput
-                    value={field.value}
-                    onChangeText={field.onChange}
-                    placeholder="010-XXXX-XXXX"
-                    keyboardType="phone-pad"
-                    hasError={
-                      isPhoneError || isPhoneDup || Boolean(errors.phone)
-                    }
-                  />
-                  <InlineError>
-                    {isPhoneError
-                      ? "연락처는 010-XXXX-XXXX 형식으로 입력해주세요"
-                      : isPhoneDup
-                        ? "이미 가입된 연락처입니다"
-                        : errors.phone?.message}
-                  </InlineError>
-                  {!isPhoneError && !isPhoneDup && !errors.phone ? (
-                    <FieldHint>
-                      숫자만 입력하면 자동으로 하이픈이 추가돼요
-                    </FieldHint>
-                  ) : null}
-                </Field>
-              )}
-            />
+            <Field label="이름">
+              <SignupInput
+                value={values.userName}
+                onChangeText={setField("userName")}
+                placeholder="실명을 입력해주세요"
+                hasError={Boolean(errors.userName)}
+              />
+              <InlineError>{errors.userName}</InlineError>
+              {!errors.userName ? (
+                <FieldHint>2~10자, 특수문자는 사용할 수 없어요</FieldHint>
+              ) : null}
+            </Field>
+
+            <Field label="연락처">
+              <SignupInput
+                value={values.phone}
+                onChangeText={setField("phone")}
+                placeholder="010-XXXX-XXXX"
+                keyboardType="phone-pad"
+                hasError={isPhoneError || isPhoneDup || Boolean(errors.phone)}
+              />
+              <InlineError>
+                {isPhoneError
+                  ? "연락처는 010-XXXX-XXXX 형식으로 입력해주세요"
+                  : isPhoneDup
+                    ? "이미 가입된 연락처입니다"
+                    : errors.phone}
+              </InlineError>
+              {!isPhoneError && !isPhoneDup && !errors.phone ? (
+                <FieldHint>
+                  숫자만 입력하면 자동으로 하이픈이 추가돼요
+                </FieldHint>
+              ) : null}
+            </Field>
           </View>
 
           <View style={styles.infoBox}>

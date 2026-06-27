@@ -5,7 +5,6 @@ import type { ComponentProps, ReactNode } from "react";
 import {
   ActivityIndicator,
   Alert,
-  type DimensionValue,
   Modal,
   Pressable,
   type PressableProps,
@@ -471,10 +470,6 @@ export function TopBar({
   );
 }
 
-export function TabBar() {
-  return null;
-}
-
 export function EmptyState({
   title,
   description,
@@ -507,16 +502,6 @@ export function ErrorState({
       icon="error-outline"
     />
   );
-}
-
-export function Skeleton({
-  height = 18,
-  width = "100%",
-}: {
-  height?: number;
-  width?: DimensionValue;
-}) {
-  return <View style={[styles.skeleton, { height, width }]} />;
 }
 
 export function Toast({

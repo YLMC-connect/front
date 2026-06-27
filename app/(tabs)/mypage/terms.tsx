@@ -1,5 +1,5 @@
-import { LegalReferenceScreen } from "../../../src/components/prototype/OriginalMockScreens";
+import { LegalDocumentScreen } from "../../../src/components/mypage/LegalDocumentScreen";
 
 export default function MyPageTermsScreen() {
-  return <LegalReferenceScreen />;
+  return <LegalDocumentScreen title="이용약관" />;
 }

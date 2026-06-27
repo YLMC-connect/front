@@ -1,5 +1,5 @@
-import { TermsReferenceScreen } from "../../src/components/prototype/OriginalMockScreens";
+import { TermsAgreementScreen } from "../../src/components/auth/TermsAgreementScreen";
 
 export default function TermsSheetScreenRoute() {
-  return <TermsReferenceScreen sheet />;
+  return <TermsAgreementScreen initialSheet="tos" />;
 }

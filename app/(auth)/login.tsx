@@ -1,7 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, router, useLocalSearchParams } from "expo-router";
-import { Controller, useForm } from "react-hook-form";
+import { useState } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -9,19 +8,29 @@ import {
   TextInput as NativeTextInput,
   View,
 } from "react-native";
-import { z } from "zod";
 import { Screen } from "../../src/components/layout/Screen";
 import { Button, Toast } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { useAuth } from "../../src/hooks/useAuth";
-import { variantOf } from "../../src/components/prototype/OriginalMockScreens";
 
-const schema = z.object({
-  id: z.string().min(1, "아이디를 입력해주세요."),
-  password: z.string().min(1, "비밀번호를 입력해주세요."),
-});
+type FormValues = {
+  id: string;
+  password: string;
+};
 
-type FormValues = z.infer<typeof schema>;
+type FormErrors = Partial<Record<keyof FormValues, string>>;
+type VariantValue = string | string[] | undefined;
+
+function variantOf(value: VariantValue, fallback = "default") {
+  return Array.isArray(value) ? (value[0] ?? fallback) : (value ?? fallback);
+}
+
+function validateLogin(values: FormValues) {
+  const errors: FormErrors = {};
+  if (!values.id.trim()) errors.id = "아이디를 입력해주세요.";
+  if (!values.password.trim()) errors.password = "비밀번호를 입력해주세요.";
+  return errors;
+}
 
 export default function LoginScreen() {
   const params = useLocalSearchParams<{ variant?: string }>();
@@ -31,26 +40,22 @@ export default function LoginScreen() {
   const isLoading = variant === "loading";
   const isToast = variant === "toast";
   const { login } = useAuth();
-  const {
-    control,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      id: isDefault ? "" : "gracekim",
-      password: isDefault ? "" : "password",
-    },
+  const [values, setValues] = useState<FormValues>({
+    id: isDefault ? "" : "gracekim",
+    password: isDefault ? "" : "password",
   });
-  const values = watch();
+  const [errors, setErrors] = useState<FormErrors>({});
   const isFilled = values.id.length > 0 && values.password.length > 0;
 
-  const onSubmit = handleSubmit((values) => {
+  const onSubmit = () => {
+    const nextErrors = validateLogin(values);
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
     login.mutate(values, {
       onSuccess: () => router.replace("/"),
     });
-  });
+  };
 
   return (
     <Screen scroll={false} padded={false}>
@@ -64,35 +69,25 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.form}>
-          <Controller
-            control={control}
-            name="id"
-            render={({ field }) => (
-              <AuthField
-                label="아이디"
-                value={field.value}
-                onChangeText={field.onChange}
-                placeholder="아이디를 입력해주세요"
-                error={errors.id?.message}
-                hasError={isError}
-              />
-            )}
+          <AuthField
+            label="아이디"
+            value={values.id}
+            onChangeText={(id) => setValues((current) => ({ ...current, id }))}
+            placeholder="아이디를 입력해주세요"
+            error={errors.id}
+            hasError={isError}
           />
-          <Controller
-            control={control}
-            name="password"
-            render={({ field }) => (
-              <AuthField
-                label="비밀번호"
-                value={field.value}
-                onChangeText={field.onChange}
-                placeholder="비밀번호를 입력해주세요"
-                secureTextEntry
-                error={errors.password?.message}
-                hasError={isError}
-                trailingIcon="visibility-off"
-              />
-            )}
+          <AuthField
+            label="비밀번호"
+            value={values.password}
+            onChangeText={(password) =>
+              setValues((current) => ({ ...current, password }))
+            }
+            placeholder="비밀번호를 입력해주세요"
+            secureTextEntry
+            error={errors.password}
+            hasError={isError}
+            trailingIcon="visibility-off"
           />
           {login.error || isError ? (
             <Text style={styles.error}>

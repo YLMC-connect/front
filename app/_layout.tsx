@@ -30,26 +30,6 @@ export default function RootLayout() {
               name="modal/prayer-new"
               options={{ presentation: "modal" }}
             />
-            <Stack.Screen
-              name="modal/life-study-apply"
-              options={{ presentation: "modal" }}
-            />
-            <Stack.Screen
-              name="modal/prayer-apply"
-              options={{ presentation: "modal" }}
-            />
-            <Stack.Screen
-              name="modal/prayer-request"
-              options={{ presentation: "modal" }}
-            />
-            <Stack.Screen
-              name="modal/group-notice"
-              options={{ presentation: "modal" }}
-            />
-            <Stack.Screen
-              name="modal/group-members"
-              options={{ presentation: "modal" }}
-            />
           </Stack>
         </SafeAreaProvider>
       </QueryClientProvider>

@@ -19,7 +19,7 @@ INDEX="docs/INDEX.md"
 START_MARKER="<!-- AUTO-GENERATED-START: domain-status -->"
 END_MARKER="<!-- AUTO-GENERATED-END: domain-status -->"
 
-DOMAINS=(common auth market group life-study prayer)
+DOMAINS=(common auth market group mypage life-study prayer)
 
 domain_label() {
   case "$1" in
@@ -27,6 +27,7 @@ domain_label() {
     auth)       echo "auth (인증)" ;;
     market)     echo "market (나눔장터)" ;;
     group)      echo "group (소모임)" ;;
+    mypage)     echo "mypage (MY)" ;;
     life-study) echo "life-study (삶공부)" ;;
     prayer)     echo "prayer (중보기도)" ;;
     *)          echo "$1" ;;
@@ -49,7 +50,7 @@ TMP=$(mktemp)
     if [ "$GH_OK" = "1" ]; then
       open_count=$(gh issue list --label "$d" --state open --limit 200 --json number --jq 'length' 2>/dev/null || echo 0)
       closed_count=$(gh issue list --label "$d" --state closed --limit 200 --json number --jq 'length' 2>/dev/null || echo 0)
-      last=$(gh issue list --label "$d" --state all --limit 200 --json updatedAt --jq 'if length == 0 then "—" else (max_by(.updatedAt).updatedAt[0:10]) end' 2>/dev/null || echo "—")
+      last=$(gh issue list --label "$d" --state all --limit 200 --json updatedAt --jq 'if length == 0 then "—" else (max_by(.updatedAt).updatedAt | fromdateiso8601 | strflocaltime("%Y-%m-%d")) end' 2>/dev/null || echo "—")
       [ -z "$last" ] && last="—"
     else
       open_count="?"

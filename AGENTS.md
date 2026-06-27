@@ -1,6 +1,7 @@
-# YLMC Connect — AI 작업 규칙
+# YLMC Connect — Codex 작업 규칙
 
-본 문서는 매 응답 시작 시 시스템 컨텍스트로 자동 주입됩니다. **모든 작업에 강제력** 을 갖습니다.
+본 문서는 Codex가 저장소 지침으로 읽는 `AGENTS.md` 입니다. **모든 작업에 강제력** 을 갖습니다.
+Claude Code 호환본은 [CLAUDE.md](CLAUDE.md) 이며, 규칙 변경 시 두 파일을 함께 동기화합니다.
 
 ---
 

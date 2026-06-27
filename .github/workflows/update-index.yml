@@ -4,9 +4,9 @@ on:
   push:
     branches: [main]
     paths:
-      - 'docs/features/**'
-      - 'scripts/gen-index.sh'
-      - '.github/workflows/update-index.yml'
+      - "docs/features/**"
+      - "scripts/gen-index.sh"
+      - ".github/workflows/update-index.yml"
   issues:
     types: [opened, closed, edited, reopened, labeled, unlabeled, deleted]
   workflow_dispatch:

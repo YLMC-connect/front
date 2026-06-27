@@ -7,7 +7,7 @@ assignees: ''
 ---
 
 ## 도메인
-<!-- common / auth / market / group / life-study / prayer 중 하나. 라벨도 동일 부여 -->
+<!-- common / auth / market / group / mypage / life-study / prayer 중 하나. 라벨도 동일 부여 -->
 
 ## 목표
 <!-- 1~2 문장. 무엇을 달성해야 하는가 -->

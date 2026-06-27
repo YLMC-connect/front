@@ -1,0 +1,95 @@
+appId: com.ylmc.connect.dev
+name: YLMC Connect v1 smoke
+tags:
+  - smoke
+---
+- runFlow:
+    when:
+      visible: Process system isn't responding
+    commands:
+      - tapOn: Wait
+- runFlow:
+    when:
+      visible: Continue
+    commands:
+      - tapOn: Continue
+      - extendedWaitUntil:
+          visible: Reload
+          timeout: 60000
+      - tapOn:
+          point: "90%,45%"
+- runFlow:
+    when:
+      visible: Reload
+    commands:
+      - tapOn:
+          point: "90%,45%"
+- runFlow:
+    when:
+      visible: DEVELOPMENT SERVERS
+    commands:
+      - tapOn:
+          point: "50%,24%"
+      - extendedWaitUntil:
+          visible: Reload
+          timeout: 60000
+      - tapOn:
+          point: "90%,45%"
+- openLink: ylmc-connect:///
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:
+    when:
+      visible: Process system isn't responding
+    commands:
+      - tapOn: Wait
+- runFlow:
+    when:
+      visible: Continue
+    commands:
+      - tapOn: Continue
+      - extendedWaitUntil:
+          visible: Reload
+          timeout: 60000
+      - tapOn:
+          point: "90%,45%"
+- runFlow:
+    when:
+      visible: Reload
+    commands:
+      - tapOn:
+          point: "90%,45%"
+- extendedWaitUntil:
+    visible:
+      id: tab-home
+    timeout: 60000
+- tapOn:
+    id: tab-home
+- extendedWaitUntil:
+    visible:
+      id: screen-home
+    timeout: 60000
+- assertVisible:
+    id: screen-home
+- tapOn:
+    id: tab-market
+- assertVisible:
+    id: screen-market
+- tapOn:
+    id: tab-group
+- assertVisible:
+    id: screen-group
+- tapOn:
+    id: tab-faith
+- assertVisible:
+    id: screen-faith
+- assertVisible: 중보기도
+- assertVisible: 삶공부
+- tapOn:
+    text: 삶공부
+- assertVisible:
+    text: 신청가능·진행중
+- tapOn:
+    id: tab-mypage
+- assertVisible:
+    id: screen-mypage

@@ -38,7 +38,7 @@ YLMC Connect 는 iOS / Android 모두를 지원하는 교회 커뮤니티 앱이
 
 - **NativeWind v4 (Tailwind CSS for RN)** — `className` 으로 Tailwind 유틸리티 클래스를 RN 컴포넌트에 직접 적용. 화면 수가 30~50 으로 늘어나는 중간 규모에서 StyleSheet 만으로 가는 것보다 보일러플레이트가 크게 줄고, 디자인 토큰 일관성이 클래스 이름 자체로 강제됨.
 - **디자인 토큰 단일 출처: `src/constants/theme.ts`** — `tailwind.config.js` 가 이 파일을 `require` 하여 `theme.extend.colors` / `spacing` / `fontSize` 로 흘려 넣는다. 따라서 토큰을 두 곳에 적을 일은 없음. JSX 에서는 `className="bg-brand"`, TS 에서는 `theme.colors.brand` 둘 다 같은 값에서 출발한다.
-- **gluestack-ui는 보조 패턴 확보용 CLI로 둔다** — `gluestack-ui` CLI는 devDependency로 고정하되 `init`으로 기본 테마를 앱 기준에 섞지 않는다. 필요한 컴포넌트만 추가하고, Downloads 원본 JSX/token의 색상·간격·radius·타이포그래피·상태값으로 재정의한 뒤 프로젝트 공통 컴포넌트 계층에 흡수한다.
+- **gluestack-ui는 Provider부터 적용한다** — `GluestackUIProvider`를 앱 루트에 두고 overlay/toast 기반을 확보한다. 개별 화면은 gluestack 컴포넌트를 직접 흩뿌리지 않고, 필요한 컴포넌트만 추가해 Downloads 원본 JSX/token의 색상·간격·radius·타이포그래피·상태값으로 재정의한 뒤 프로젝트 공통 컴포넌트 계층에 흡수한다.
 - **StyleSheet 는 “경계 케이스” 전용**: ① 차트/그래프 라이브러리의 색상 prop, ② React Navigation 헤더 옵션, ③ Sentry / 알림 등 네이티브 모달, ④ 동적 보간 (다크모드 색상 계산) — 즉 `className` 으로 표현 불가능한 곳만.
 - **함정 4종**: PLAN.md 호환성 표에 명시 — Babel preset(`nativewind/babel`) · Metro 래퍼(`withNativeWind`) · entry 의 `import './global.css'` · `nativewind-env.d.ts` 중 하나라도 빠지면 **에러 없이 className 이 무시** 된다. Phase 1 NativeWind 셋업 작업이 4 개 게이트 모두 통과하도록 검증해야 함.
 

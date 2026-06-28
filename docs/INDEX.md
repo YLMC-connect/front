@@ -1,6 +1,6 @@
 # YLMC Connect — 인덱스
 
-> 마지막 갱신: 2026-06-27 (Downloads preview 기준 하단 탭 홈/나눔/동행/기도/삶공부 재정렬, 동행 내부 소모임/봉사 segment 반영, MY 홈 진입 전환, gluestack-ui Provider 적용) | 현재 Phase: 6 — API 연결 준비 (진행중)
+> 마지막 갱신: 2026-06-29 (archive 문서 안내문 축소, PLAN.md 폐기 탭 설명 최신 IA로 정리) | 현재 Phase: 6 — API 연결 준비 (진행중)
 
 본 문서는 **작업자 5분용 진입점** 입니다. 외부인은 [README.md](../README.md) 부터, AI 작업 규칙은 [AGENTS.md](../AGENTS.md) 를 참고하세요. 문서 시스템이 어긋났을 때의 복구 절차는 [MAINTENANCE.md](MAINTENANCE.md).
 

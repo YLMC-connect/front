@@ -40,7 +40,7 @@
 | 패키지                        | 주의사항                                                                                                                                                                                                                                                                    |
 | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Expo Router v7                | SDK 55와 함께 배포됨, `expo-router` 별도 버전 고정 불필요                                                                                                                                                                                                                   |
-| TanStack Query (React Native) | `onlineManager`, `focusManager` 설정 + `query-async-storage-persister` 연동 필요                                                                                                                                                                                            |
+| TanStack Query (React Native) | `onlineManager`, `focusManager` 설정을 사용합니다. 영속 캐시는 실제 API 데이터 재사용 요구가 생길 때 `query-async-storage-persister`로 추가합니다.                                                                                                                           |
 | Zustand v5                    | React 18 미만 미지원 (Expo SDK 55 = React 19.2 이므로 문제없음)                                                                                                                                                                                                             |
 | @sentry/react-native          | Expo plugin 등록 필수 (`app.json`의 `plugins` 배열)                                                                                                                                                                                                                         |
 | expo-notifications            | iOS는 development build 필요 (Expo Go에서 일부 기능 미지원)                                                                                                                                                                                                                 |
@@ -62,7 +62,7 @@ Notion의 “열린문커넥트” 기획 정의와 `열린문커넥트.zip` 디
 | v1       | 삶공부, 중보기도, 홈 주요 활동 확장                                                                                | 교회 공지·알림, 푸시, 실제 파일 업로드, 실제 관리자 도구 |
 | API 준비 | Swagger에서 확인된 인증 API adapter 구조, `secureStore` 토큰 저장 유틸                                             | 실제 API 응답 스키마 확정 전 fetch 활성화 금지           |
 
-현재 앱 라우팅은 Notion/프로젝트 기준 홈 / 나눔 / 소모임 / 동행 / MY 5탭입니다. Downloads 원본의 탭 배열은 구조 복사 대상이 아니라 색상·pill glass·아이콘 상태 같은 시각 기준으로만 사용합니다. 삶공부와 중보기도는 `동행` 탭의 segmented view로 묶고, 상세/신청/작성 route는 숨김 route로 유지합니다. 서버성 데이터는 `screens -> hooks(TanStack Query) -> services -> mocks/API` 흐름을 따르고, Zustand는 인증·UI·임시 작성 상태에만 사용합니다.
+현재 앱 라우팅은 Downloads preview 기준 홈 / 나눔 / 동행 / 기도 / 삶공부 5탭입니다. `MY`는 하단 탭에서 제거하고 홈의 내 정보 진입점에서 숨김 route로 연결합니다. `동행` 탭 내부는 소모임/봉사 segment를 가지며, 상세/신청/작성 route는 하단 탭에 노출하지 않습니다. 서버성 데이터는 `screens -> hooks(TanStack Query) -> services -> mocks/API` 흐름을 따르고, Zustand는 인증·UI·임시 작성 상태에만 사용합니다.
 
 ### 🛒 나눔
 
@@ -645,11 +645,11 @@ queryClient.setDefaultOptions({
 | ------- | ------ | ------------- | ----------------------------------------------- | ------------------------------------------ |
 | 1       | 홈     | `home`        | `home-outline` / `home`                         | 공지, 최신 피드 모아보기                   |
 | 2       | 나눔   | `market`      | `shopping-outline` / `shopping`                 | 목록 / 상세 / 글쓰기                       |
-| 3       | 소모임 | `group`       | `account-multiple-outline` / `account-multiple` | 목록 / 상세 / 신청                         |
-| 4       | 동행   | `faith`       | `heart-outline` / `heart`                       | 중보기도 목록, 삶공부 목록, 각 상세 / 신청 |
-| 5       | MY     | `me`          | `account-outline` / `account`                   | 내 정보 / 내 활동 / 관심 목록 / 고객센터   |
+| 3       | 동행   | `group`       | `account-multiple-outline` / `account-multiple` | 소모임 / 봉사 / 상세 / 신청                |
+| 4       | 기도   | `prayer`      | `hands-pray` / `hands-pray`                     | 기도방 / 기도제목 / 신청                   |
+| 5       | 삶공부 | `life-study`  | `book-open-page-variant-outline` / `book-open-page-variant` | 과정 목록 / 상세 / 신청 / 이력 |
 
-> 탭 개수·라벨·라우팅은 Notion/프로젝트 IA를 기준으로 유지합니다. Downloads `lib.jsx`의 `TABS`는 pill glass, outline/filled icon state, active surface 같은 시각 언어만 번역합니다.
+> `MY`는 하단 탭이 아니라 홈의 내 정보 진입점에서 접근합니다. Downloads preview의 5탭 배열을 현재 IA 기준으로 유지합니다.
 
 ---
 
@@ -766,5 +766,6 @@ queryClient.setDefaultOptions({
 | 2026-05-22 | MVP 기준 재정의 — Notion 최신 기획을 우선해 MVP를 인증·홈·나눔·소모임·MY·이미지 선택으로 확정. 중보기도·삶공부는 MVP에서 분리하고 실제 API·푸시·차단은 후속 TODO로 이동. `열린문커넥트.zip` 디자인 토큰을 앱 theme 기준으로 반영                                                                                                                                                                                                                                                      |
 | 2026-05-22 | v1 기준 반영 — Notion 기능 범위와 IA를 우선해 삶공부·중보기도를 v1 범위로 확정하고, Expo Dev Client 기반 실행/검증 및 인증 API adapter 준비를 Phase 6 기준으로 반영                                                                                                                                                                                                                                                                                                                   |
 | 2026-05-23 | 자동 테스트 체계 반영 — `validate`에 typecheck/lint/format/test를 포함하고, Jest/RNTL smoke, Dev Client Metro smoke, Maestro v1 탭 E2E smoke, ADR 0005를 Phase 1 검증 기준에 포함                                                                                                                                                                                                                                                                                                     |
-| 2026-05-23 | Maestro E2E 안정화 — Android Emulator에서는 Metro 상태 확인 URL과 Dev Client 전달 URL을 분리하고, Dev Client welcome sheet를 넘긴 뒤 v1 6탭 smoke를 `testID` 기준으로 검증                                                                                                                                                                                                                                                                                                            |
-| 2026-05-27 | ZIP 5탭 IA 정정 — 디자인 산출물 기준을 최우선으로 재확정해 하단 탭을 홈/나눔/소모임/동행/MY로 정리하고, 삶공부·중보기도는 동행 내부 segment와 숨김 상세 route로 유지                                                                                                                                                                                                                                                                                                                  |
+| 2026-05-23 | Maestro E2E 안정화 — Android Emulator에서는 Metro 상태 확인 URL과 Dev Client 전달 URL을 분리하고, Dev Client welcome sheet를 넘긴 뒤 v1 탭 smoke를 `testID` 기준으로 검증                                                                                                                                                                                                                                                                                                               |
+| 2026-05-27 | ZIP 5탭 IA 정정 — 디자인 산출물 기준을 최우선으로 재확정해 하단 탭을 홈/나눔/동행/기도/삶공부로 정리하고, MY는 홈 내 정보 진입점으로 이동                                                                                                                                                                                                                                                                                                                            |
+| 2026-06-29 | 문서 정리 — GitHub Issues/PR로 이관된 archive 본문을 안내문으로 축소하고, PLAN.md의 폐기된 홈/나눔/소모임/동행/MY 탭 설명을 최신 Downloads preview IA로 갱신                                                                                                                                                                                                                                                                                        |

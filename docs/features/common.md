@@ -59,6 +59,7 @@
 - CI lockfile 정합성 복구 — gluestack 전이 의존성의 peer 요구인 `@react-spectrum/provider@3.11.1`을 명시해 GitHub Actions의 `npm ci` 실패를 해소
 - 공통 API transport 기반 추가 — 환경별 base URL, `{ code, message, data }` envelope 검증, Authorization 헤더, `ApiError` 정규화를 `src/lib/apiClient.ts`에 격리하고 단위 테스트 추가
 - 인증 API 계약 게이트 추가 — `scripts/check-auth-api-contract.mjs`가 Swagger의 구체 성공 DTO·공개 endpoint JWT 예외·security scheme 참조를 자동 확인
+- 인증 401 복구 경계 추가 — 인증 요청의 동시 401을 단일 refresh로 합치고 성공 시 각 요청을 한 번만 재시도하며 공개 요청은 재발급 대상에서 제외
 
 ---
 
@@ -83,6 +84,7 @@
 | `src/components/ui/index.tsx`                                 | ZIP 토큰 기준 Button, Card, Badge, Chip, form, modal/dialog, sheet, toast, FAB 등 공통 UI                                                                                                                                                  |
 | `src/components/gluestack-ui/gluestack-ui-provider/index.tsx` | gluestack overlay/toast provider. 앱 루트에서 light mode로 사용                                                                                                                                                                            |
 | `src/lib/apiClient.ts`                                        | 공통 API envelope·오류·Authorization 처리                                                                                                                                                                                                  |
+| `src/lib/authRecovery.ts`                                     | API client와 인증 session manager 사이의 refresh 연결 지점                                                                                                                                                                                 |
 | `src/lib/secureStore.ts`                                      | access/refresh token 안전 저장                                                                                                                                                                                                             |
 | `src/types/api.ts`                                            | 서버 공통 `ApiResponse<T>` 타입                                                                                                                                                                                                            |
 | `src/constants/theme.ts`                                      | `열린문커넥트.zip` 기준 color, radius, font, lineHeight, weight, shadow 디자인 토큰                                                                                                                                                        |
@@ -105,6 +107,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-10) **401 재발급은 API client 인스턴스별 single-flight로 처리한다** — 동시에 만료된 여러 인증 요청은 refresh Promise 하나를 공유하고 성공 후 각 원 요청을 최대 한 번만 재시도합니다. `auth: false` 공개 요청의 401은 로그인 실패이므로 refresh하지 않습니다.
 - (2026-07-10) **공통 API client는 transport 책임만 가진다** — base URL, envelope, 오류, Authorization을 공통화하되 API DTO를 화면 모델로 직접 노출하지 않습니다. 도메인별 service/mapper가 서버 필드와 화면 모델의 차이를 흡수합니다.
 - (2026-07-10) **Swagger 계약 검사는 확정 전 일반 CI와 분리한다** — 인증 성공 DTO와 JWT 정의가 미완성인 동안 `test:api:contract`는 별도 명령으로 누락을 가시화합니다. 백엔드 계약 확정 후 통과 상태가 되면 CI 게이트 포함 여부를 결정합니다.
 - (2026-07-10) **CI의 peer dependency 요구는 lockfile 우회 없이 명시한다** — gluestack 전이 의존성이 요구하는 `@react-spectrum/provider@3.11.1`을 직접 고정합니다. `npm ci --legacy-peer-deps`로 검증을 약화하지 않고 Node 20.19.4/npm 10.8.2 기준 깨끗한 설치를 유지합니다.

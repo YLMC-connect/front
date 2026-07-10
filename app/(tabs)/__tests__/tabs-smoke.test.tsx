@@ -1,4 +1,5 @@
-import { screen } from "@testing-library/react-native";
+import { fireEvent, screen, waitFor } from "@testing-library/react-native";
+import { useRouter } from "expo-router";
 import GroupDetailScreen from "../group/[id]";
 import GroupMembersScreen from "../group/members";
 import GroupScreen from "../group";
@@ -24,6 +25,7 @@ import PrayerApplyScreenRoute from "../prayer/apply";
 import PrayerScreen from "../prayer";
 import PrayerRequestScreenRoute from "../prayer/request";
 import { renderWithClient } from "../../../src/test/renderWithClient";
+import * as authService from "../../../src/services/authService";
 
 describe("v1 tab smoke screens", () => {
   it("renders the home screen", () => {
@@ -158,6 +160,22 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("마이페이지")).toBeTruthy();
     expect(screen.getByText("활동 관리")).toBeTruthy();
     expect(screen.getByText("개인정보 처리방침")).toBeTruthy();
+  });
+
+  it("clears the session before leaving my page on logout", async () => {
+    const logout = jest
+      .spyOn(authService, "logout")
+      .mockRejectedValueOnce(new Error("keystore delete failed"));
+    const replace = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({ replace } as never);
+    renderWithClient(<MyPageScreen />);
+
+    fireEvent.press(screen.getByText("로그아웃"));
+
+    await waitFor(() => {
+      expect(logout).toHaveBeenCalledTimes(1);
+      expect(replace).toHaveBeenCalledWith("/login");
+    });
   });
 
   it("renders the profile edit screen", () => {

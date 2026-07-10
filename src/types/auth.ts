@@ -18,3 +18,9 @@ export interface AuthSession {
   refreshToken: string;
   member: Member;
 }
+
+export type AuthStatus =
+  | "restoring"
+  | "authenticated"
+  | "anonymous"
+  | "unavailable";

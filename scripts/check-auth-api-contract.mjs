@@ -56,7 +56,7 @@ const requireResolvableSecurity = (label, path, method) => {
     for (const name of Object.keys(requirement)) {
       if (!schemes[name]) {
         failures.push(
-          `${label}이 정의되지 않은 security scheme '${name}'을 참조합니다.`,
+          `${label}: 정의되지 않은 security scheme '${name}'을 참조합니다.`,
         );
       }
     }

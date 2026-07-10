@@ -1,4 +1,5 @@
 import Constants from "expo-constants";
+import { recoverAuth } from "./authRecovery";
 import { secureTokenStore } from "./secureStore";
 import type { ApiResponse } from "../types/api";
 
@@ -13,6 +14,8 @@ export type ApiClientOptions = {
   baseUrl: BaseUrlSource;
   fetchImpl?: FetchImplementation;
   getAccessToken?: () => Promise<string | null>;
+  refreshAuth?: () => Promise<void>;
+  onAuthFailure?: () => Promise<void> | void;
 };
 
 export class ApiError extends Error {
@@ -88,67 +91,106 @@ export function createApiClient({
   baseUrl,
   fetchImpl = fetch,
   getAccessToken = async () => null,
+  refreshAuth,
+  onAuthFailure,
 }: ApiClientOptions) {
+  let refreshPromise: Promise<boolean> | null = null;
+
+  const tryRefresh = () => {
+    if (!refreshAuth) return Promise.resolve(false);
+
+    if (!refreshPromise) {
+      refreshPromise = refreshAuth()
+        .then(() => true)
+        .catch(async () => {
+          try {
+            await onAuthFailure?.();
+          } catch {
+            // Preserve the original 401 response when cleanup also fails.
+          }
+          return false;
+        })
+        .finally(() => {
+          refreshPromise = null;
+        });
+    }
+
+    return refreshPromise;
+  };
+
+  const request = async <T>(
+    path: string,
+    options: ApiRequestOptions,
+    canRefresh: boolean,
+  ): Promise<T | null> => {
+    const { auth = true, ...requestInit } = options;
+    const headers = toHeaderRecord(requestInit.headers);
+
+    if (!hasHeader(headers, "Accept")) headers.Accept = "application/json";
+    if (
+      typeof requestInit.body === "string" &&
+      !hasHeader(headers, "Content-Type")
+    ) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    if (auth) {
+      const accessToken = await getAccessToken();
+      if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    const url = `${resolveBaseUrl(baseUrl)}/${path.replace(/^\/+/, "")}`;
+    let response: Response;
+    try {
+      response = await fetchImpl(url, { ...requestInit, headers });
+    } catch {
+      throw new ApiError({
+        code: "NETWORK_ERROR",
+        message: "네트워크 연결을 확인해주세요.",
+        status: 0,
+      });
+    }
+
+    const text = await response.text();
+    let body: unknown;
+    try {
+      body = text ? JSON.parse(text) : null;
+    } catch {
+      body = null;
+    }
+
+    if (auth && canRefresh && response.status === 401) {
+      const refreshed = await tryRefresh();
+      if (refreshed) return request<T>(path, options, false);
+    }
+
+    if (!isApiResponse(body)) {
+      throw new ApiError({
+        code: "INVALID_RESPONSE",
+        message: "서버 응답 형식을 확인할 수 없습니다.",
+        status: response.status,
+        data: body,
+      });
+    }
+
+    if (!response.ok || body.code !== "SUCCESS") {
+      throw new ApiError({
+        code: body.code,
+        message: body.message,
+        status: response.status,
+        data: body.data,
+      });
+    }
+
+    return body.data as T | null;
+  };
+
   return {
-    async request<T>(
+    request<T>(
       path: string,
       options: ApiRequestOptions = {},
     ): Promise<T | null> {
-      const { auth = true, ...requestInit } = options;
-      const headers = toHeaderRecord(requestInit.headers);
-
-      if (!hasHeader(headers, "Accept")) headers.Accept = "application/json";
-      if (
-        typeof requestInit.body === "string" &&
-        !hasHeader(headers, "Content-Type")
-      ) {
-        headers["Content-Type"] = "application/json";
-      }
-
-      if (auth) {
-        const accessToken = await getAccessToken();
-        if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
-      }
-
-      const url = `${resolveBaseUrl(baseUrl)}/${path.replace(/^\/+/, "")}`;
-      let response: Response;
-      try {
-        response = await fetchImpl(url, { ...requestInit, headers });
-      } catch {
-        throw new ApiError({
-          code: "NETWORK_ERROR",
-          message: "네트워크 연결을 확인해주세요.",
-          status: 0,
-        });
-      }
-
-      const text = await response.text();
-      let body: unknown;
-      try {
-        body = text ? JSON.parse(text) : null;
-      } catch {
-        body = null;
-      }
-
-      if (!isApiResponse(body)) {
-        throw new ApiError({
-          code: "INVALID_RESPONSE",
-          message: "서버 응답 형식을 확인할 수 없습니다.",
-          status: response.status,
-          data: body,
-        });
-      }
-
-      if (!response.ok || body.code !== "SUCCESS") {
-        throw new ApiError({
-          code: body.code,
-          message: body.message,
-          status: response.status,
-          data: body.data,
-        });
-      }
-
-      return body.data as T | null;
+      return request<T>(path, options, true);
     },
   };
 }
@@ -156,4 +198,5 @@ export function createApiClient({
 export const apiClient = createApiClient({
   baseUrl: getApiBaseUrl,
   getAccessToken: () => secureTokenStore.getAccessToken(),
+  refreshAuth: recoverAuth,
 });

@@ -72,6 +72,8 @@ Jest + React Native Testing Library로 공통 UI, 도메인 옵션, 홈/나눔/�
 
 `test:api:contract`는 공개 OpenAPI 문서의 로그인·토큰 재발급·회원가입·내 정보 성공 DTO와 JWT 정의를 확인합니다. 백엔드 계약이 불완전하면 누락 항목을 출력하고 실패하며, 계약 확정 전에는 일반 `validate`와 분리해 실행합니다. 다른 OpenAPI 문서를 확인할 때는 `YLMC_OPENAPI_URL`로 덮어씁니다.
 
+인증 세션은 `authSessionService`가 SecureStore 토큰 저장·앱 시작 복원·동시 401 단일 재발급·재발급 실패 로그아웃을 관리합니다. Swagger 성공 DTO가 확정되기 전에는 mock adapter를 사용하며, HTTP adapter만 교체해 같은 세션 흐름을 유지합니다.
+
 Dev Client Metro smoke:
 
 ```bash

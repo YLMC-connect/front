@@ -29,6 +29,7 @@
 - 인증 API 공통 기반 추가 — `{ code, message, data }` envelope와 Authorization 헤더, 공통 오류를 처리하는 `src/lib/apiClient.ts` 및 단위 테스트 구현
 - SecureStore 토큰 조회 보강 — access/refresh token 개별·동시 조회와 저장·삭제 동작을 테스트로 고정
 - Swagger 인증 계약 검사 추가 — `npm run test:api:contract`로 login/refresh/signup/me 성공 DTO와 JWT 정의 누락을 자동 판정
+- 인증 세션 수명주기 구현 — 로그인·회원가입 토큰 저장, 앱 시작 세션 복원, 401 refresh token rotation, 재발급 실패 토큰 정리·로그아웃을 `authSessionService`로 통합하고 자동 테스트 추가
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -42,6 +43,7 @@
 | `app/(auth)/signup.tsx`               | 회원가입 화면                      |
 | `src/store/authStore.ts`              | Zustand 인증 상태                  |
 | `src/services/authService.ts`         | 인증 mock service                  |
+| `src/services/authSessionService.ts`  | 토큰 저장·복원·재발급·로그아웃 상태 전이 |
 | `src/services/authAdapter.ts`         | mock/http auth adapter 스위치 지점 |
 | `src/hooks/useAuth.ts`                | 인증 액션 hook                     |
 | `src/types/auth.ts`                   | 인증 입력/응답 타입                |
@@ -53,10 +55,11 @@
 
 ## 데이터 타입
 
-`LoginInput`, `SignupInput`, `AuthSession`을 `src/types/auth.ts`에 정의합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리하며, 인증 성공 DTO는 Swagger에 필드가 확정된 뒤 추가합니다.
+`LoginInput`, `SignupInput`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리하며, 인증 성공 DTO는 Swagger에 필드가 확정된 뒤 추가합니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-10) **세션 상태 전이는 session manager가 단독 소유한다** — 화면/hook은 토큰을 직접 다루지 않습니다. adapter 성공 후 SecureStore 저장이 끝나야 `authenticated`가 되며, 앱 시작은 현재 회원 조회로 복원하고 401이면 refresh합니다. refresh 실패는 토큰을 지우고 `anonymous`, 일반 네트워크 실패는 토큰을 보존하고 `unavailable`로 구분합니다.
 - (2026-07-10) **불완전한 인증 성공 응답은 추측하지 않는다** — login/refresh/signup/me 성공 DTO와 refresh rotation 정책이 Swagger에 확정되기 전에는 `httpAuthAdapter`를 활성화하지 않습니다. `test:api:contract`는 이 계약 게이트를 자동 판정하며, 미확정 기간에는 일반 `validate`와 분리합니다.
 - (2026-07-10) **API DTO와 화면 도메인 모델을 분리한다** — 공통 API client는 envelope·오류·Authorization만 담당하고, 서버 DTO를 화면 모델로 바꾸는 책임은 도메인 service/mapper에 둡니다.
 - (2026-06-27) **가입 코드 route는 제거한다** — Downloads 최신 원본에 독립 `ScreenInviteCode` 구현이 없고 기존 MVP 결정에서도 가입코드를 제외했으므로, 부정확한 reference 안내 화면을 유지하지 않습니다.

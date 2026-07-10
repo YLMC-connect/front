@@ -60,6 +60,7 @@
 - 공통 API transport 기반 추가 — 환경별 base URL, `{ code, message, data }` envelope 검증, Authorization 헤더, `ApiError` 정규화를 `src/lib/apiClient.ts`에 격리하고 단위 테스트 추가
 - 인증 API 계약 게이트 추가 — `scripts/check-auth-api-contract.mjs`가 Swagger의 구체 성공 DTO·공개 endpoint JWT 예외·security scheme 참조를 자동 확인
 - 인증 401 복구 경계 추가 — 인증 요청의 동시 401을 단일 refresh로 합치고 성공 시 각 요청을 한 번만 재시도하며 공개 요청은 재발급 대상에서 제외
+- 나눔 API 계약 게이트 추가 — Swagger endpoint와 목록/상세 화면 필수 필드 누락을 `test:api:contract:market`으로 자동 판정
 
 ---
 
@@ -99,6 +100,7 @@
 | `scripts/capture-design-screens.mjs`                          | Android Dev Client에서 design route 스크린샷 캡처. `YLMC_CAPTURE_INDEXES`, `YLMC_CAPTURE_RESET_EACH_ROUTE`, `YLMC_CAPTURE_ROUTE_OPEN_REPEATS`, `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT`, `YLMC_CAPTURE_DISMISS_AFTER_ROUTE`로 부분 재캡처 가능 |
 | `scripts/compare-design-screens.mjs`                          | 원본/앱 스크린샷 normalized diff 생성. 원본 PNG가 단색 빈 화면이면 `originalFlat`로 표시해 JSX 기준 검토 대상으로 분리                                                                                                                     |
 | `scripts/check-auth-api-contract.mjs`                         | login/refresh/signup/me 성공 DTO와 JWT 정의를 확인하는 Swagger 계약 검사                                                                                                                                                                   |
+| `scripts/check-market-api-contract.mjs`                       | 나눔 CRUD·댓글·신고 및 화면 요구 필드를 확인하는 Swagger 계약 검사                                                                                                                                                                         |
 | `.maestro/smoke.yml`                                          | v1 핵심 탭 진입 `testID` 기반 E2E smoke                                                                                                                                                                                                    |
 
 ## 데이터 타입

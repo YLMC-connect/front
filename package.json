@@ -17,6 +17,7 @@
     "test": "jest --watchAll=false",
     "test:coverage": "jest --coverage --watchAll=false",
     "test:api:contract": "node scripts/check-auth-api-contract.mjs",
+    "test:api:contract:market": "node scripts/check-market-api-contract.mjs",
     "validate": "npm run typecheck && npm run lint && npm run format:check && npm run test",
     "ui:add": "gluestack-ui add",
     "test:dev-client:smoke": "node scripts/dev-client-smoke.mjs",

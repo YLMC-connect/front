@@ -1,6 +1,6 @@
 # market (나눔)
 
-> 마지막 갱신: 2026-06-27 | 담당 Phase: P1/P2 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-10 | 담당 Phase: P1/P2/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -35,6 +35,7 @@
 - 나눔 목록 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenMarketList`의 상태 탭, 카테고리 칩, 86px thumb row, 예약/완료 overlay, fixed FAB 구조를 `/market` route에 RN으로 직접 반영
 - 나눔 상세 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenMarketDetail`의 정사각형 hero, 상태 overlay/banner, 작성자/칩/본문, 액션 row, 댓글, 하단 composer 구조를 `/market/[id]` route에 RN으로 직접 반영
 - 나눔 작성 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenMarketCreate`의 close/action topbar, 사진 레일, 카테고리 chip, 제목/물품상태/상세설명 section, 안내 박스를 `modal/market-new` route에 RN으로 직접 반영
+- 나눔 API 계약 게이트 추가 — `npm run test:api:contract:market`으로 CRUD·댓글·신고 endpoint와 목록/상세 화면 요구 필드를 자동 검증
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -46,6 +47,7 @@
 | `src/mocks/market.ts`            | 나눔 mock 데이터                  |
 | `src/constants/domainOptions.ts` | 나눔 카테고리/상태/신고 사유 옵션 |
 | `src/types/market.ts`            | 나눔 타입                         |
+| `scripts/check-market-api-contract.mjs` | 나눔 Swagger endpoint·화면 요구 필드 검사 |
 
 ## 데이터 타입
 
@@ -53,6 +55,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-10) **나눔 mapper는 화면 필수 계약 13건 해소 후 활성화한다** — 목록의 `authorName/images/keyword`, 상태·카테고리·물품상태 enum, 이미지 필수 정책, 상태 변경 endpoint가 Swagger에 없어 현재 HTTP 전환은 작성자 ID 노출·썸네일 소실·코드 추측을 유발합니다. `test:api:contract:market` 통과 전에는 기존 mock 화면을 유지합니다.
 - (2026-06-27) **미사용 service/hook/card 레이어는 제거한다** — 현재 나눔 화면은 Downloads 원본을 기준으로 다시 구현할 예정이고 `MarketItemCard`, `marketService`, `useMarketItems` 호출처가 없어, 실제 API 연결 시 필요한 표면만 다시 만든다.
 - (2026-06-27) **나눔 목록은 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenMarketList` 구조를 `/market` route에 직접 반영하고, 상태별 variant는 query parameter에서 필요한 범위만 해석합니다. 별도 service/hook은 실제 API 스키마 확정 전까지 만들지 않습니다.
 - (2026-06-27) **나눔 상세는 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenMarketDetail`의 기본 상세 구조를 `/market/[id]` route에 직접 반영합니다. 신고/상태 변경 sheet 같은 예외 variant는 실제 필요 시 작은 overlay로 추가합니다.
@@ -78,7 +81,7 @@
 
 ## 미결 / 추적
 
-- 실제 나눔 API 스키마, 이미지 업로드 방식, 페이지네이션 방식 확인 필요.
+- Swagger 목록 작성자명·대표 이미지·검색, 코드 enum, 이미지 필수, 상태 변경 endpoint 13건 확정 필요. 단일 출처는 Issue #19이며 `npm run test:api:contract:market`으로 확인합니다.
 - 신고 처리 후 블라인드/관리자 큐 정책은 API/운영 정책 확정 후 반영.
 - 나눔 작성 residual은 topbar/chip/control typography 정렬 후 `market-create-limit mean=14.62`, `market-create-fill mean=13.69`, `market-edit mean=13.70`, `market-create mean=12.22`, `market-create-back mean=7.72`입니다. 빈 작성/뒤로가기 화면은 status bar/time, RN font metrics, confirm overlay geometry 차이로 소폭 상승했지만 화면군 합계는 감소했습니다.
 - 나눔 목록 residual은 FAB root overlay 정렬 후 `market-list-all mean=13.75`, `market-list mean=10.64`, `market-list-reserved mean=6.79`, `market-list-done mean=6.31`입니다. 남은 차이는 native status bar/time, RN font metrics, tab bar geometry와 목록 row text metric 차이로 추적합니다.

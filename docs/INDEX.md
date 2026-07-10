@@ -25,13 +25,13 @@
 
 | 도메인 | 진행 중 | 완료 | 마지막 갱신 | 상세 |
 |---|---|---|---|---|
-| common (공통 인프라) | 1 | 2 | 2026-06-27 | [features/common.md](features/common.md) |
-| auth (인증) | 2 | 1 | 2026-05-31 | [features/auth.md](features/auth.md) |
-| market (나눔장터) | 1 | 1 | 2026-05-31 | [features/market.md](features/market.md) |
-| group (소모임) | 1 | 1 | 2026-05-31 | [features/group.md](features/group.md) |
-| mypage (MY) | 1 | 1 | 2026-05-31 | [features/mypage.md](features/mypage.md) |
-| life-study (삶공부) | 1 | 1 | 2026-05-31 | [features/life-study.md](features/life-study.md) |
-| prayer (중보기도) | 1 | 1 | 2026-05-31 | [features/prayer.md](features/prayer.md) |
+| common (공통 인프라) | 1 | 2 | 2026-07-10 | [features/common.md](features/common.md) |
+| auth (인증) | 2 | 1 | 2026-07-10 | [features/auth.md](features/auth.md) |
+| market (나눔장터) | 1 | 1 | 2026-07-10 | [features/market.md](features/market.md) |
+| group (소모임) | 1 | 1 | 2026-07-10 | [features/group.md](features/group.md) |
+| mypage (MY) | 1 | 1 | 2026-07-10 | [features/mypage.md](features/mypage.md) |
+| life-study (삶공부) | 1 | 1 | 2026-07-10 | [features/life-study.md](features/life-study.md) |
+| prayer (중보기도) | 1 | 1 | 2026-07-10 | [features/prayer.md](features/prayer.md) |
 
 <!-- AUTO-GENERATED-END: domain-status -->
 

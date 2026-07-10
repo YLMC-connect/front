@@ -5,10 +5,27 @@ const DEFAULT_INVENTORY_PATH =
 const DEFAULT_ORIGINAL_MANIFEST_PATH =
   "/private/tmp/ylmc-golden-screens/2026-05-23/original/manifest.json";
 
-const withVariant = (path, variant) =>
-  variant ? `${path}?variant=${encodeURIComponent(variant)}` : path;
+const DESIGN_VARIANT_PARAM = "designVariant";
 
-const routeFor = (screen) => {
+const withDesignVariant = (path, variant) =>
+  variant
+    ? `${path}?${DESIGN_VARIANT_PARAM}=${encodeURIComponent(variant)}`
+    : path;
+
+const normalizeDesignRoute = (route) => {
+  if (!route || !route.includes("?")) return route;
+  const [path, query] = route.split("?", 2);
+  const params = new URLSearchParams(query);
+  const legacyVariant = params.get("variant");
+  if (legacyVariant && !params.has(DESIGN_VARIANT_PARAM)) {
+    params.set(DESIGN_VARIANT_PARAM, legacyVariant);
+    params.delete("variant");
+  }
+  const normalizedQuery = params.toString();
+  return normalizedQuery ? `${path}?${normalizedQuery}` : path;
+};
+
+export const routeFor = (screen) => {
   if (screen.component === "ScreenPrayerList") {
     return "/prayer";
   }
@@ -18,7 +35,7 @@ const routeFor = (screen) => {
   }
 
   if (screen.currentRoute || screen.routeProposal) {
-    return screen.currentRoute || screen.routeProposal;
+    return normalizeDesignRoute(screen.currentRoute || screen.routeProposal);
   }
 
   const { component, variant } = screen;
@@ -27,37 +44,37 @@ const routeFor = (screen) => {
     case "ScreenSplash":
       return "/splash";
     case "ScreenLogin":
-      return withVariant("/login", variant);
+      return withDesignVariant("/login", variant);
     case "ScreenInviteCode":
-      return withVariant("/invite-code", variant);
+      return withDesignVariant("/invite-code", variant);
     case "ScreenTerms":
       return "/terms";
     case "ScreenTermsSheet":
       return "/terms-sheet";
     case "ScreenSignup":
-      return withVariant("/signup", variant);
+      return withDesignVariant("/signup", variant);
     case "ScreenHome":
       return "/";
     case "ScreenNotifications":
       return "/notifications";
     case "ScreenMarketList":
-      return withVariant("/market", variant);
+      return withDesignVariant("/market", variant);
     case "ScreenMarketDetail":
-      return withVariant("/market/1", variant);
+      return withDesignVariant("/market/1", variant);
     case "ScreenMarketCreate":
-      return withVariant("/modal/market-new", variant);
+      return withDesignVariant("/modal/market-new", variant);
     case "ScreenGroupList":
-      return withVariant("/group", variant);
+      return withDesignVariant("/group", variant);
     case "ScreenServiceList":
-      return "/group?variant=service";
+      return "/group?section=service";
     case "ScreenGroupDetail":
-      return withVariant("/group/1", variant);
+      return withDesignVariant("/group/1", variant);
     case "ScreenGroupCreate":
-      return withVariant("/modal/group-new", variant);
+      return withDesignVariant("/modal/group-new", variant);
     case "ScreenGroupNotices":
-      return withVariant("/group/notices", variant);
+      return withDesignVariant("/group/notices", variant);
     case "ScreenGroupMembers":
-      return withVariant("/group/members", variant);
+      return withDesignVariant("/group/members", variant);
     case "ScreenPrayerList":
       return "/prayer";
     case "ScreenPrayerDetail":
@@ -77,25 +94,25 @@ const routeFor = (screen) => {
     case "ScreenStudyHistory":
       return "/life-study/history";
     case "ScreenMyPage":
-      return withVariant("/mypage", variant);
+      return withDesignVariant("/mypage", variant);
     case "ScreenLogoutConfirm":
-      return "/mypage?variant=logout-confirm";
+      return "/mypage?designVariant=logout-confirm";
     case "ScreenEditProfile":
-      return withVariant("/mypage/edit", variant);
+      return withDesignVariant("/mypage/edit", variant);
     case "ScreenActivity":
-      return withVariant("/mypage/activity", variant);
+      return withDesignVariant("/mypage/activity", variant);
     case "ScreenBlocked":
-      return withVariant("/mypage/blocked", variant);
+      return withDesignVariant("/mypage/blocked", variant);
     case "ScreenFAQ":
-      return withVariant("/mypage/faq", variant);
+      return withDesignVariant("/mypage/faq", variant);
     case "ScreenTerms2":
       return "/mypage/terms";
     case "ScreenPrivacy":
       return "/mypage/privacy";
     case "ScreenWithdraw":
-      return withVariant("/mypage/withdraw", variant);
+      return withDesignVariant("/mypage/withdraw", variant);
     case "ScreenUserProfile":
-      return withVariant("/mypage/user/1", variant);
+      return withDesignVariant("/mypage/user/1", variant);
     case "ScreenMyWishlist":
       return "/mypage/wishlist";
     case "ScreenNotifSettings":

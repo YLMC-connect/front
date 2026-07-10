@@ -8,6 +8,7 @@ import {
   VisualThumb,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { readDesignVariant } from "../../../src/lib/designVariant";
 
 type Status = "all" | "sharing" | "reserved" | "done";
 
@@ -82,10 +83,8 @@ const posts = [
 
 export default function MarketScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = Array.isArray(params.variant)
-    ? params.variant[0]
-    : params.variant;
+  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const variant = readDesignVariant(params.designVariant);
   const isError = variant === "network-error";
   const isEmpty = variant === "empty";
   const activeStatus =

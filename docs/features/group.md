@@ -57,6 +57,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-10) **동행 디자인 variant와 실제 탐색 상태를 분리한다** — 캡처용 권한·오류·confirm/toast 상태는 development 전용 `designVariant`, 실제 소모임/봉사 segment는 `section` query를 사용합니다. 서버 권한·모집 상태가 연결되면 domain model이 화면 분기를 소유합니다.
 - (2026-07-10) **동행 mapper는 화면·관리 계약 24건 해소 후 활성화한다** — 주요 endpoint는 대부분 존재하지만 목록 `content/schedule`, category/status/keyword 필터, 응답 enum, 화면 입력 제한, 소모임장 이관 endpoint가 부족합니다. `test:api:contract:group` 통과 전에는 기존 mock 화면을 유지하고 강퇴를 이관처럼 사용하는 권한 추측을 금지합니다.
 - (2026-06-27) **동행 탭은 소모임/봉사 segment를 가진다** — Downloads `ScreenGroupList`와 `ScreenServiceList`를 기준으로 `/group`은 하단 `동행` 탭 루트가 되고, 내부에서 `소모임` 목록과 `봉사` 전용 리스트를 전환합니다.
 - (2026-06-27) **미사용 service/hook/card 레이어는 제거한다** — 현재 소모임 화면은 Downloads 원본을 기준으로 다시 구현할 예정이고 `GroupCard`, `groupService`, `useGroups` 호출처가 없어, 실제 API 연결 시 필요한 표면만 다시 만든다.

@@ -55,6 +55,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-10) **나눔 디자인 상태와 API 상태를 분리한다** — 목록 empty/error/status, 상세 권한·예약·완료·예외, 작성 form 상태는 `designVariant`로만 캡처하며 production에서는 무시합니다. 실제 상태는 API mapper와 query/mutation 결과로 결정합니다.
 - (2026-07-10) **나눔 mapper는 화면 필수 계약 13건 해소 후 활성화한다** — 목록의 `authorName/images/keyword`, 상태·카테고리·물품상태 enum, 이미지 필수 정책, 상태 변경 endpoint가 Swagger에 없어 현재 HTTP 전환은 작성자 ID 노출·썸네일 소실·코드 추측을 유발합니다. `test:api:contract:market` 통과 전에는 기존 mock 화면을 유지합니다.
 - (2026-06-27) **미사용 service/hook/card 레이어는 제거한다** — 현재 나눔 화면은 Downloads 원본을 기준으로 다시 구현할 예정이고 `MarketItemCard`, `marketService`, `useMarketItems` 호출처가 없어, 실제 API 연결 시 필요한 표면만 다시 만든다.
 - (2026-06-27) **나눔 목록은 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenMarketList` 구조를 `/market` route에 직접 반영하고, 상태별 variant는 query parameter에서 필요한 범위만 해석합니다. 별도 service/hook은 실제 API 스키마 확정 전까지 만들지 않습니다.

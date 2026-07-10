@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../../src/components/layout/Screen";
 import { ConfirmDialog, Toast, TopBar } from "../../../../src/components/ui";
 import { theme } from "../../../../src/constants/theme";
+import { readDesignVariant } from "../../../../src/lib/designVariant";
 
 type Variant =
   | "default"
@@ -27,8 +28,8 @@ function variantOf(value: string | string[] | undefined): Variant {
 
 export default function UserProfileScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = variantOf(params.variant);
+  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const variant = variantOf(readDesignVariant(params.designVariant));
   const isBlockedView = variant === "blocked";
   const isWithdrawn = variant === "withdrawn";
   const name = isWithdrawn ? "알 수 없음" : "박정아";

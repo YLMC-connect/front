@@ -14,6 +14,7 @@ import { Screen } from "../../src/components/layout/Screen";
 import { TopBar } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { useAuth } from "../../src/hooks/useAuth";
+import { readDesignVariant } from "../../src/lib/designVariant";
 
 type FormValues = {
   id: string;
@@ -54,9 +55,9 @@ function validateSignup(values: FormValues) {
 }
 
 export default function SignupScreen() {
-  const params = useLocalSearchParams<{ variant?: string }>();
+  const params = useLocalSearchParams<{ designVariant?: string }>();
   const { signup } = useAuth();
-  const variant = params.variant ?? "default";
+  const variant = readDesignVariant(params.designVariant) ?? "default";
   const isDefault = variant === "default";
   const isPwError = variant === "pw-error";
   const isPhoneError = variant === "phone-error";

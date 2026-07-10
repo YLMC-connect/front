@@ -12,6 +12,7 @@ import { Screen } from "../../src/components/layout/Screen";
 import { Button, Toast } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { useAuth } from "../../src/hooks/useAuth";
+import { readDesignVariant } from "../../src/lib/designVariant";
 
 type FormValues = {
   id: string;
@@ -19,12 +20,6 @@ type FormValues = {
 };
 
 type FormErrors = Partial<Record<keyof FormValues, string>>;
-type VariantValue = string | string[] | undefined;
-
-function variantOf(value: VariantValue, fallback = "default") {
-  return Array.isArray(value) ? (value[0] ?? fallback) : (value ?? fallback);
-}
-
 function validateLogin(values: FormValues) {
   const errors: FormErrors = {};
   if (!values.id.trim()) errors.id = "아이디를 입력해주세요.";
@@ -33,8 +28,8 @@ function validateLogin(values: FormValues) {
 }
 
 export default function LoginScreen() {
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = variantOf(params.variant);
+  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const variant = readDesignVariant(params.designVariant) ?? "default";
   const isDefault = variant === "default";
   const isError = variant === "error";
   const isLoading = variant === "loading";

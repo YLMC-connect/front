@@ -60,7 +60,7 @@ npm run validate
 
 `validate`는 `typecheck`, `lint`, `format:check`, `test`를 순서대로 실행합니다. CI도 `npm ci` 후 `npm run validate`를 수행합니다.
 
-OpenAPI 계약 검사 공통 엔진은 `test:contract-utils`로 네트워크 없이 검증하며 `validate`에 포함됩니다. 실제 Swagger 상태를 확인하는 도메인별 계약 명령은 백엔드 계약이 미완성인 동안 별도로 실행합니다.
+OpenAPI 계약 검사와 디자인 라우트 같은 Node 스크립트는 `test:scripts`로 네트워크 없이 검증하며 `validate`에 포함됩니다. 실제 Swagger 상태를 확인하는 도메인별 계약 명령은 백엔드 계약이 미완성인 동안 별도로 실행합니다.
 
 단위/컴포넌트 테스트:
 
@@ -127,6 +127,8 @@ npm run test:visual:compare
 `test:visual:prepare`는 `/Users/mingulee/Downloads/열린문커넥트.zip`에서 110개 JSX 화면 inventory와 원본 PNG를 `/private/tmp/ylmc-golden-screens/2026-05-23` 아래에 재생성합니다. 원본 PNG 렌더링에는 로컬 Chrome/Chromium이 필요하며, inventory/manifest만 빠르게 만들 때는 `YLMC_PREPARE_ORIGINALS=0 npm run test:visual:prepare`를 사용할 수 있습니다.
 
 `test:visual:capture`는 위 inventory를 Android Dev Client route로 열어 앱 스크린샷을 저장합니다. 일부 화면만 다시 찍을 때는 `YLMC_CAPTURE_INDEXES=29,30`처럼 지정할 수 있고, stale route를 줄이려면 `YLMC_CAPTURE_RESET_EACH_ROUTE=1 YLMC_CAPTURE_ROUTE_OPEN_REPEATS=2`를 함께 사용합니다. ZIP 원본 360x720 논리 viewport에 맞춰 비교할 때는 `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT=1`을 추가합니다. 이 옵션은 캡처 중 Android Emulator를 1080x2160@480으로 임시 조정하고 완료 후 원래 size/density로 복원합니다. 캡처 스크립트는 Dev Client first-run menu를 route 캡처 직전에 닫고, viewport override가 있으면 입력 좌표도 override size 기준으로 계산합니다. 로그인/가입 코드처럼 route 진입 후 고정 좌표 탭이 화면 버튼을 누를 수 있는 경우에는 `YLMC_CAPTURE_DISMISS_AFTER_ROUTE=0`으로 route 이후 dismiss 탭만 끕니다. `test:visual:compare`는 원본 PNG와 앱 PNG를 비교하되, 원본 PNG가 단색 빈 화면이면 report에 `originalFlat=yes`로 표시합니다. 이런 항목은 pixel diff보다 JSX 소스와 앱 캡처를 직접 비교합니다.
+
+캡처용 화면 상태는 `designVariant` query를 사용하며 development build에서만 해석됩니다. 실제 동행 segment와 MY 활동 탭은 각각 `section`, `tab` query를 사용하므로 production 서버 상태와 디자인 캡처 상태가 섞이지 않습니다.
 
 ## 문서 지도
 

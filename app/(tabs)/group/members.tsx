@@ -10,6 +10,7 @@ import {
   TopBar,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { readDesignVariant } from "../../../src/lib/designVariant";
 
 const members = [
   { name: "김은혜", leader: true, joined: "2024.03.12", me: true },
@@ -22,14 +23,10 @@ const members = [
   { name: "강민서", joined: "2025.03.05", leader: false, me: false },
 ] as const;
 
-function variantOf(value: string | string[] | undefined) {
-  return Array.isArray(value) ? (value[0] ?? "default") : (value ?? "default");
-}
-
 export default function GroupMembersScreenRoute() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = variantOf(params.variant);
+  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const variant = readDesignVariant(params.designVariant) ?? "default";
   const isTransfer = variant === "transfer" || variant === "transfer-confirm";
   const transferTarget = isTransfer ? "박정아" : null;
 

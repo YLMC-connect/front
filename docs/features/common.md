@@ -63,6 +63,7 @@
 - 나눔 API 계약 게이트 추가 — Swagger endpoint와 목록/상세 화면 필수 필드 누락을 `test:api:contract:market`으로 자동 판정
 - OpenAPI 계약 검사 공통화 — 인증·나눔·동행 검사기의 로딩·endpoint·schema·enum·보안·제약 검사를 `openapi-contract-utils.mjs`로 통합하고 오프라인 Node 테스트를 `validate`에 포함
 - 동행 API 계약 게이트 추가 — Swagger 주요 endpoint와 목록/관리 화면 필수 계약 누락을 `test:api:contract:group`으로 자동 판정
+- 디자인 상태 query 분리 — Dev Client 캡처 전용 `designVariant`를 production에서 무시하고 실제 동행 segment·MY 활동 탭은 `section`·`tab` query로 분리
 
 ---
 
@@ -88,6 +89,7 @@
 | `src/components/gluestack-ui/gluestack-ui-provider/index.tsx` | gluestack overlay/toast provider. 앱 루트에서 light mode로 사용                                                                                                                                                                            |
 | `src/lib/apiClient.ts`                                        | 공통 API envelope·오류·Authorization 처리                                                                                                                                                                                                  |
 | `src/lib/authRecovery.ts`                                     | API client와 인증 session manager 사이의 refresh 연결 지점                                                                                                                                                                                 |
+| `src/lib/designVariant.ts`                                    | development 전용 디자인 상태 query 해석                                                                                                                                                                                                    |
 | `src/lib/secureStore.ts`                                      | access/refresh token 안전 저장                                                                                                                                                                                                             |
 | `src/types/api.ts`                                            | 서버 공통 `ApiResponse<T>` 타입                                                                                                                                                                                                            |
 | `src/constants/theme.ts`                                      | `열린문커넥트.zip` 기준 color, radius, font, lineHeight, weight, shadow 디자인 토큰                                                                                                                                                        |
@@ -113,7 +115,8 @@
 
 ## 결정 사항 (최신 위)
 
-- (2026-07-10) **계약 검사 엔진과 도메인 요구 목록을 분리한다** — OpenAPI 로딩과 공통 규칙은 `openapi-contract-utils.mjs`, 인증·나눔·동행의 필수 endpoint/필드는 각 checker가 소유합니다. 공통 엔진은 네트워크 없이 `test:contract-utils`로 CI 검증합니다.
+- (2026-07-10) **디자인 상태는 production 데이터 상태를 덮지 않는다** — visual capture는 `designVariant`만 사용하고 `readDesignVariant`가 development에서만 값을 반환합니다. 실제 탐색 상태는 `section`, `tab`처럼 의미 있는 query로 분리하며 서버 오류·권한·완료 상태는 향후 service/domain model에서 결정합니다.
+- (2026-07-10) **계약 검사 엔진과 도메인 요구 목록을 분리한다** — OpenAPI 로딩과 공통 규칙은 `openapi-contract-utils.mjs`, 인증·나눔·동행의 필수 endpoint/필드는 각 checker가 소유합니다. 공통 엔진과 디자인 라우트는 네트워크 없이 `test:scripts`로 CI 검증합니다.
 - (2026-07-10) **401 재발급은 API client 인스턴스별 single-flight로 처리한다** — 동시에 만료된 여러 인증 요청은 refresh Promise 하나를 공유하고 성공 후 각 원 요청을 최대 한 번만 재시도합니다. `auth: false` 공개 요청의 401은 로그인 실패이므로 refresh하지 않습니다.
 - (2026-07-10) **공통 API client는 transport 책임만 가진다** — base URL, envelope, 오류, Authorization을 공통화하되 API DTO를 화면 모델로 직접 노출하지 않습니다. 도메인별 service/mapper가 서버 필드와 화면 모델의 차이를 흡수합니다.
 - (2026-07-10) **Swagger 계약 검사는 확정 전 일반 CI와 분리한다** — 인증 성공 DTO와 JWT 정의가 미완성인 동안 `test:api:contract`는 별도 명령으로 누락을 가시화합니다. 백엔드 계약 확정 후 통과 상태가 되면 CI 게이트 포함 여부를 결정합니다.

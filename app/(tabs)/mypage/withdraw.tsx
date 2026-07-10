@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import { Button, ConfirmDialog, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { readDesignVariant } from "../../../src/lib/designVariant";
 
 const cautions = [
   "작성한 나눔 게시글·댓글은 익명으로 남습니다",
@@ -12,14 +13,10 @@ const cautions = [
   "소모임장인 경우 가장 먼저 가입한 멤버에게 자동 이관됩니다",
 ] as const;
 
-function variantOf(value: string | string[] | undefined) {
-  return Array.isArray(value) ? (value[0] ?? "default") : (value ?? "default");
-}
-
 export default function WithdrawScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const showConfirm = variantOf(params.variant) === "confirm";
+  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const showConfirm = readDesignVariant(params.designVariant) === "confirm";
 
   return (
     <Screen scroll={false} padded={false}>

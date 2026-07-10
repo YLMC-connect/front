@@ -12,6 +12,7 @@ import {
 import { Screen } from "../../../src/components/layout/Screen";
 import { Avatar, VisualThumb } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { readDesignVariant } from "../../../src/lib/designVariant";
 
 type CommentItem = {
   author: string;
@@ -50,10 +51,8 @@ const comments: CommentItem[] = [
 ] as const;
 
 export default function MarketDetailScreen() {
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = Array.isArray(params.variant)
-    ? params.variant[0]
-    : (params.variant ?? "own");
+  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const variant = readDesignVariant(params.designVariant) ?? "own";
   const router = useRouter();
   const { width } = useWindowDimensions();
   const isOwn = !variant.startsWith("other");

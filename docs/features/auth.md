@@ -59,6 +59,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-10) **로그인·회원가입 오류/loading/toast query는 디자인 전용이다** — 캡처용 `designVariant`는 development에서만 해석합니다. 실제 로그인 오류와 pending 상태는 mutation 결과가 단일 출처이며 URL query로 인증 결과를 만들지 않습니다.
 - (2026-07-10) **세션 상태 전이는 session manager가 단독 소유한다** — 화면/hook은 토큰을 직접 다루지 않습니다. adapter 성공 후 SecureStore 저장이 끝나야 `authenticated`가 되며, 앱 시작은 현재 회원 조회로 복원하고 401이면 refresh합니다. refresh 실패는 토큰을 지우고 `anonymous`, 일반 네트워크 실패는 토큰을 보존하고 `unavailable`로 구분합니다.
 - (2026-07-10) **불완전한 인증 성공 응답은 추측하지 않는다** — login/refresh/signup/me 성공 DTO와 refresh rotation 정책이 Swagger에 확정되기 전에는 `httpAuthAdapter`를 활성화하지 않습니다. `test:api:contract`는 이 계약 게이트를 자동 판정하며, 미확정 기간에는 일반 `validate`와 분리합니다.
 - (2026-07-10) **API DTO와 화면 도메인 모델을 분리한다** — 공통 API client는 envelope·오류·Authorization만 담당하고, 서버 DTO를 화면 모델로 바꾸는 책임은 도메인 service/mapper에 둡니다.

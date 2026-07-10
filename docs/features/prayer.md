@@ -1,6 +1,6 @@
 # prayer (중보기도)
 
-> 마지막 갱신: 2026-06-27 | 담당 Phase: P5 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-10 | 담당 Phase: P5/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -48,6 +48,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-10) **기도 상세 디자인 상태는 development 전용이다** — 기도 완료·empty·현황·응답 캡처는 `designVariant`만 사용하고 production에서는 무시합니다. 실제 상태는 mock/API service 결과가 결정합니다.
 - (2026-06-27) **기도는 독립 하단 탭이다** — Downloads `PREVIEW_TAB_ROUTES` 기준으로 `/prayer`는 하단 `기도` 탭 루트입니다. 화면 구현은 기존 기도 목록 renderer를 재사용하되, 내부 `중보기도/삶공부` segment는 노출하지 않습니다.
 - (2026-06-27) **내 기도제목은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenPrayerRequest` 구조를 `/prayer/request` route에 직접 반영합니다. 실제 응답완료 요청 API는 기도제목 상태 전이 정책 확정 후 연결합니다.
 - (2026-06-27) **기도방 참여 신청은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenPrayerApply` 구조를 `/prayer/apply` route에 직접 반영합니다. 실제 신청 API와 중복 신청 제한은 승인 정책 확정 후 연결합니다.

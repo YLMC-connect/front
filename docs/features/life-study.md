@@ -1,6 +1,6 @@
 # life-study (삶공부)
 
-> 마지막 갱신: 2026-06-27 | 담당 Phase: P5 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-10 | 담당 Phase: P5/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -47,6 +47,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-10) **삶공부 상세 수강 디자인 상태는 development 전용이다** — 캡처용 enrolled 상태는 `designVariant`로만 열고 production에서는 무시합니다. 실제 수강 여부는 overview/detail service 모델이 결정합니다.
 - (2026-06-27) **삶공부는 독립 하단 탭이다** — Downloads `PREVIEW_TAB_ROUTES` 기준으로 `/life-study`는 하단 `삶공부` 탭 루트입니다. 화면 구현은 기존 삶공부 목록 renderer를 재사용하되, 내부 `중보기도/삶공부` segment는 노출하지 않습니다.
 - (2026-06-27) **삶공부 수강 내역은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenStudyHistory` 구조를 `/life-study/history` route에 직접 반영합니다. 실제 수료 뱃지/수료증 데이터는 API 스키마 확정 후 연결합니다.
 - (2026-06-27) **삶공부 수강 신청은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenStudyApply`의 기본 form 구조를 `/life-study/apply` route에 직접 반영합니다. 신청 완료 상태와 실제 신청 API는 상태 전이 정책 확정 후 연결합니다.

@@ -5,6 +5,7 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import { ConfirmDialog, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { readDesignVariant } from "../../../src/lib/designVariant";
 
 const filledTitle = "5월 18일 토요일 모임 안내";
 const filledBody = `이번 주 토요일은 북한산 도선사 코스로 갑니다.
@@ -17,14 +18,10 @@ const filledBody = `이번 주 토요일은 북한산 도선사 코스로 갑니
 
 문의는 단톡방으로 부탁드려요. 함께 오르며 좋은 시간 보내요!`;
 
-function variantOf(value: string | string[] | undefined) {
-  return Array.isArray(value) ? (value[0] ?? "create") : (value ?? "create");
-}
-
 export default function GroupNoticesScreenRoute() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = variantOf(params.variant);
+  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const variant = readDesignVariant(params.designVariant) ?? "create";
   const isEdit = variant === "edit" || variant === "delete-confirm";
   const isFilled = isEdit || variant === "create-filled";
   const showDelete = variant === "delete-confirm";

@@ -11,6 +11,7 @@ import {
   VisualThumb,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { readDesignVariant } from "../../../src/lib/designVariant";
 
 const categories = [
   { key: "all", label: "전체" },
@@ -127,11 +128,12 @@ const serviceItems = [
 
 export default function GroupScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = Array.isArray(params.variant)
-    ? params.variant[0]
-    : params.variant;
-  const section = variant === "service" ? "service" : "groups";
+  const params = useLocalSearchParams<{
+    section?: string;
+    designVariant?: string;
+  }>();
+  const variant = readDesignVariant(params.designVariant);
+  const section = params.section === "service" ? "service" : "groups";
   const isMyFull = variant === "my-full";
   const isError = variant === "network-error";
   const myGroups = isError
@@ -184,7 +186,7 @@ export default function GroupScreen() {
                 onPress={() =>
                   router.replace(
                     item.key === "service"
-                      ? "/group?variant=service"
+                      ? "/group?section=service"
                       : "/group",
                   )
                 }

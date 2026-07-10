@@ -1,6 +1,6 @@
 # group (소모임)
 
-> 마지막 갱신: 2026-06-27 | 담당 Phase: P1/P3 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-10 | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -35,6 +35,7 @@
 - 소모임 공지 작성/수정 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupNotices`의 close topbar, 삭제/등록 action, 공개 안내, 제목/내용 입력 section, 삭제 confirm을 `/group/notices` route에 RN으로 직접 반영
 - 소모임 멤버 관리 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupMembers`의 flat row list, 강퇴 pill, 이관 경고/선택 row, 하단 이관 action, confirm/toast variant를 `/group/members` route에 RN으로 직접 반영
 - 동행 탭 구조 반영 — Downloads `ScreenGroupList`/`ScreenServiceList` 기준으로 `/group`을 `동행` 루트로 두고 내부 `소모임/봉사` segment와 봉사 전용 card list를 추가
+- 동행 API 계약 게이트 추가 — `npm run test:api:contract:group`으로 목록·상세·내 목록·멤버/공지·참여/탈퇴·생성/수정/상태/관리 endpoint와 화면 필수 계약을 자동 검증
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -48,6 +49,7 @@
 | `src/mocks/groups.ts`            | 소모임 mock 데이터                 |
 | `src/constants/domainOptions.ts` | 소모임 카테고리/상태 필터 옵션     |
 | `src/types/group.ts`             | 소모임 타입                        |
+| `scripts/check-group-api-contract.mjs` | 동행 Swagger endpoint·화면/관리 계약 검사 |
 
 ## 데이터 타입
 
@@ -55,6 +57,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-10) **동행 mapper는 화면·관리 계약 24건 해소 후 활성화한다** — 주요 endpoint는 대부분 존재하지만 목록 `content/schedule`, category/status/keyword 필터, 응답 enum, 화면 입력 제한, 소모임장 이관 endpoint가 부족합니다. `test:api:contract:group` 통과 전에는 기존 mock 화면을 유지하고 강퇴를 이관처럼 사용하는 권한 추측을 금지합니다.
 - (2026-06-27) **동행 탭은 소모임/봉사 segment를 가진다** — Downloads `ScreenGroupList`와 `ScreenServiceList`를 기준으로 `/group`은 하단 `동행` 탭 루트가 되고, 내부에서 `소모임` 목록과 `봉사` 전용 리스트를 전환합니다.
 - (2026-06-27) **미사용 service/hook/card 레이어는 제거한다** — 현재 소모임 화면은 Downloads 원본을 기준으로 다시 구현할 예정이고 `GroupCard`, `groupService`, `useGroups` 호출처가 없어, 실제 API 연결 시 필요한 표면만 다시 만든다.
 - (2026-06-27) **소모임 목록은 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenGroupList` 구조를 `/group` route에 직접 반영합니다. 별도 service/hook은 실제 API 스키마 확정 전까지 만들지 않습니다.
@@ -82,6 +85,7 @@
 
 ## 미결 / 추적
 
+- Swagger 목록 설명·일정·필터, type/category/status enum, 입력 제한, 소모임장 이관 계약 24건 확정 필요. 단일 출처는 Issue #21이며 `npm run test:api:contract:group`으로 확인합니다.
 - 참여 신청이 즉시 참여인지 승인 대기인지 운영 정책 확인 필요.
 - 공지 작성 권한과 소모임장/관리자 권한 모델 확인 필요.
 - 강제 내보내기 이의 제기/복구 플로우는 실제 API와 운영 정책 확정 후 반영.

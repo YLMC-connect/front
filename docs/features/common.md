@@ -61,6 +61,8 @@
 - 인증 API 계약 게이트 추가 — `scripts/check-auth-api-contract.mjs`가 Swagger의 구체 성공 DTO·공개 endpoint JWT 예외·security scheme 참조를 자동 확인
 - 인증 401 복구 경계 추가 — 인증 요청의 동시 401을 단일 refresh로 합치고 성공 시 각 요청을 한 번만 재시도하며 공개 요청은 재발급 대상에서 제외
 - 나눔 API 계약 게이트 추가 — Swagger endpoint와 목록/상세 화면 필수 필드 누락을 `test:api:contract:market`으로 자동 판정
+- OpenAPI 계약 검사 공통화 — 인증·나눔·동행 검사기의 로딩·endpoint·schema·enum·보안·제약 검사를 `openapi-contract-utils.mjs`로 통합하고 오프라인 Node 테스트를 `validate`에 포함
+- 동행 API 계약 게이트 추가 — Swagger 주요 endpoint와 목록/관리 화면 필수 계약 누락을 `test:api:contract:group`으로 자동 판정
 
 ---
 
@@ -101,6 +103,8 @@
 | `scripts/compare-design-screens.mjs`                          | 원본/앱 스크린샷 normalized diff 생성. 원본 PNG가 단색 빈 화면이면 `originalFlat`로 표시해 JSX 기준 검토 대상으로 분리                                                                                                                     |
 | `scripts/check-auth-api-contract.mjs`                         | login/refresh/signup/me 성공 DTO와 JWT 정의를 확인하는 Swagger 계약 검사                                                                                                                                                                   |
 | `scripts/check-market-api-contract.mjs`                       | 나눔 CRUD·댓글·신고 및 화면 요구 필드를 확인하는 Swagger 계약 검사                                                                                                                                                                         |
+| `scripts/check-group-api-contract.mjs`                        | 동행 목록·상세·내 목록·멤버/공지·참여/관리 계약을 확인하는 Swagger 계약 검사                                                                                                                                                               |
+| `scripts/openapi-contract-utils.mjs`                          | 도메인별 Swagger 계약 검사 공통 유틸과 실패 수집                                                                                                                                                                                           |
 | `.maestro/smoke.yml`                                          | v1 핵심 탭 진입 `testID` 기반 E2E smoke                                                                                                                                                                                                    |
 
 ## 데이터 타입
@@ -109,6 +113,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-10) **계약 검사 엔진과 도메인 요구 목록을 분리한다** — OpenAPI 로딩과 공통 규칙은 `openapi-contract-utils.mjs`, 인증·나눔·동행의 필수 endpoint/필드는 각 checker가 소유합니다. 공통 엔진은 네트워크 없이 `test:contract-utils`로 CI 검증합니다.
 - (2026-07-10) **401 재발급은 API client 인스턴스별 single-flight로 처리한다** — 동시에 만료된 여러 인증 요청은 refresh Promise 하나를 공유하고 성공 후 각 원 요청을 최대 한 번만 재시도합니다. `auth: false` 공개 요청의 401은 로그인 실패이므로 refresh하지 않습니다.
 - (2026-07-10) **공통 API client는 transport 책임만 가진다** — base URL, envelope, 오류, Authorization을 공통화하되 API DTO를 화면 모델로 직접 노출하지 않습니다. 도메인별 service/mapper가 서버 필드와 화면 모델의 차이를 흡수합니다.
 - (2026-07-10) **Swagger 계약 검사는 확정 전 일반 CI와 분리한다** — 인증 성공 DTO와 JWT 정의가 미완성인 동안 `test:api:contract`는 별도 명령으로 누락을 가시화합니다. 백엔드 계약 확정 후 통과 상태가 되면 CI 게이트 포함 여부를 결정합니다.

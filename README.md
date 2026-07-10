@@ -60,6 +60,8 @@ npm run validate
 
 `validate`는 `typecheck`, `lint`, `format:check`, `test`를 순서대로 실행합니다. CI도 `npm ci` 후 `npm run validate`를 수행합니다.
 
+OpenAPI 계약 검사 공통 엔진은 `test:contract-utils`로 네트워크 없이 검증하며 `validate`에 포함됩니다. 실제 Swagger 상태를 확인하는 도메인별 계약 명령은 백엔드 계약이 미완성인 동안 별도로 실행합니다.
+
 단위/컴포넌트 테스트:
 
 ```bash
@@ -67,6 +69,7 @@ npm run test
 npm run test:coverage
 npm run test:api:contract
 npm run test:api:contract:market
+npm run test:api:contract:group
 ```
 
 Jest + React Native Testing Library로 공통 UI, 도메인 옵션, 홈/나눔/동행/기도/삶공부 핵심 화면 렌더링을 mock-first 기준으로 확인합니다.
@@ -74,6 +77,8 @@ Jest + React Native Testing Library로 공통 UI, 도메인 옵션, 홈/나눔/�
 `test:api:contract`는 공개 OpenAPI 문서의 로그인·토큰 재발급·회원가입·내 정보 성공 DTO와 JWT 정의를 확인합니다. 백엔드 계약이 불완전하면 누락 항목을 출력하고 실패하며, 계약 확정 전에는 일반 `validate`와 분리해 실행합니다. 다른 OpenAPI 문서를 확인할 때는 `YLMC_OPENAPI_URL`로 덮어씁니다.
 
 `test:api:contract:market`은 나눔 CRUD·댓글·신고 endpoint와 목록/상세 화면에 필요한 작성자명·이미지·검색·enum·상태 변경 계약을 확인합니다. 누락 필드를 임의 fallback으로 감추지 않고 DTO mapper를 활성화하기 전에 실패로 노출합니다.
+
+`test:api:contract:group`은 동행 목록·상세·내 목록·멤버/공지·참여/탈퇴·생성/수정/상태/관리 endpoint와 카드 표시 필드, 필터, enum, 입력 제한, 소모임장 이관 계약을 확인합니다.
 
 인증 세션은 `authSessionService`가 SecureStore 토큰 저장·앱 시작 복원·동시 401 단일 재발급·재발급 실패 로그아웃을 관리합니다. Swagger 성공 DTO가 확정되기 전에는 mock adapter를 사용하며, HTTP adapter만 교체해 같은 세션 흐름을 유지합니다.
 

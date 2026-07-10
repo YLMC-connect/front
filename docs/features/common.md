@@ -1,6 +1,6 @@
 # common (공통 인프라)
 
-> 마지막 갱신: 2026-06-29 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-10 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -56,6 +56,7 @@
 - Downloads preview 탭 IA 재정렬 — 하단 탭을 홈/나눔/동행/기도/삶공부로 맞추고, MY는 홈 프로필 카드 진입으로 전환
 - gluestack-ui Provider 적용 — `GluestackUIProvider`를 앱 루트에 연결하고, NativeWind/Tailwind 기존 설정은 유지
 - 오래된 문서 정리 — GitHub Issues/PR로 이관된 archive 문서는 안내문만 남기고, PLAN.md의 폐기된 탭 설명을 최신 홈/나눔/동행/기도/삶공부 IA로 갱신
+- CI lockfile 정합성 복구 — gluestack 전이 의존성의 peer 요구인 `@react-spectrum/provider@3.11.1`을 명시해 GitHub Actions의 `npm ci` 실패를 해소
 
 ---
 
@@ -69,6 +70,7 @@
 | `docs/MAINTENANCE.md`                                         | 문서 드리프트 복구 런북                                                                                                                                                                                                                    |
 | `scripts/gen-index.sh`                                        | GitHub Issues 기반 도메인 상태표 재생성                                                                                                                                                                                                    |
 | `docs/features/common.md`                                     | common 도메인 컨텍스트                                                                                                                                                                                                                     |
+| `package.json`, `package-lock.json`                           | 공통 런타임 의존성과 CI 재현 가능한 npm lockfile                                                                                                                                                                                          |
 | `app/_layout.tsx`                                             | QueryClient, SafeArea, Router Provider 루트                                                                                                                                                                                                |
 | `app/(tabs)/_layout.tsx`                                      | Downloads preview 기준 홈/나눔/동행/기도/삶공부 5탭 layout와 glass custom floating tab bar                                                                                                                                                 |
 | `app/(tabs)/index.tsx`                                        | 디자인 번역 기반 홈 화면. 홈 프로필 카드에서 숨김 MY route로 진입                                                                                                                                                                          |
@@ -97,6 +99,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-10) **CI의 peer dependency 요구는 lockfile 우회 없이 명시한다** — gluestack 전이 의존성이 요구하는 `@react-spectrum/provider@3.11.1`을 직접 고정합니다. `npm ci --legacy-peer-deps`로 검증을 약화하지 않고 Node 20.19.4/npm 10.8.2 기준 깨끗한 설치를 유지합니다.
 - (2026-06-29) **archive 문서는 이관 안내만 유지한다** — 작업 목록은 GitHub Issues, 변경 이력은 PR description이 단일 출처이므로 `docs/_archive/LOG.md`와 `docs/_archive/TASKS.md`는 긴 과거 본문 대신 조회 안내만 둡니다.
 - (2026-06-27) **탭 IA는 Downloads preview 기준을 따른다** — 하단 탭은 `홈/나눔/동행/기도/삶공부`입니다. `MY`는 하단 탭에서 제거하고 홈 상단 `내 정보 보기` 카드로 진입합니다. `동행` 탭 내부는 Downloads `ScreenGroupList`/`ScreenServiceList`처럼 `소모임/봉사` segment를 둡니다.
 - (2026-06-27) **부정확한 reference/scaffold runtime은 제거한다** — Downloads 최신 원본이 확인된 화면은 실제 RN route로 옮기고, 원본이 확인되지 않는 reference route나 호출처 없는 modal/profile scaffold route는 유지하지 않습니다.
@@ -159,7 +162,7 @@
 ## 의존성
 
 - GitHub Issues / PR description 기반 작업 추적 규칙에 의존합니다.
-- Expo SDK 55, Expo Dev Client, TanStack Query, Zustand, NativeWind, `expo-image-picker`, `expo-image`에 의존합니다.
+- Expo SDK 55, Expo Dev Client, TanStack Query, Zustand, NativeWind, `expo-image-picker`, `expo-image`, `@react-spectrum/provider@3.11.1`에 의존합니다.
 
 ## 관련 ADR
 

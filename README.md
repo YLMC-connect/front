@@ -46,6 +46,12 @@ npm run start:dev-client -- --port 8081 --localhost
 
 Codex 기본 샌드박스에서는 위 명령이 `Starting project...` 이후 8081 포트에 바인딩되지 않을 수 있습니다. 샌드박스 밖 로컬 권한으로는 `npm run test:dev-client:smoke`가 `http://localhost:8081/status` 응답까지 확인했습니다. development build가 설치된 iOS/Android 기기에서는 같은 Metro에 연결해 실제 앱 실행을 확인합니다.
 
+development 환경의 기본 API는 `https://ylmc-api.duckdns.org`입니다. 다른 서버를 사용할 때는 실행 또는 빌드 환경에서 덮어씁니다.
+
+```bash
+EXPO_PUBLIC_API_URL=https://example.test npm run start:dev-client
+```
+
 검증 명령:
 
 ```bash
@@ -59,9 +65,12 @@ npm run validate
 ```bash
 npm run test
 npm run test:coverage
+npm run test:api:contract
 ```
 
 Jest + React Native Testing Library로 공통 UI, 도메인 옵션, 홈/나눔/동행/기도/삶공부 핵심 화면 렌더링을 mock-first 기준으로 확인합니다.
+
+`test:api:contract`는 공개 OpenAPI 문서의 로그인·토큰 재발급·회원가입·내 정보 성공 DTO와 JWT 정의를 확인합니다. 백엔드 계약이 불완전하면 누락 항목을 출력하고 실패하며, 계약 확정 전에는 일반 `validate`와 분리해 실행합니다. 다른 OpenAPI 문서를 확인할 때는 `YLMC_OPENAPI_URL`로 덮어씁니다.
 
 Dev Client Metro smoke:
 

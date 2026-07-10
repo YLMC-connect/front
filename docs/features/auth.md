@@ -1,6 +1,6 @@
 # auth (인증)
 
-> 마지막 갱신: 2026-06-27 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-10 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -26,30 +26,39 @@
 - Splash 실제 route 복구 — `DesignSourceScreens` placeholder를 제거하고 Downloads `ScreenSplash` 기준 gradient, door logo, title/subtitle, loading dots를 실제 RN 화면으로 반영
 - 약관 동의 실제 route 복구 — `DesignSourceScreens` placeholder를 제거하고 Downloads `ScreenTerms`/`ScreenTermsSheet` 기준 전체 동의, 필수/선택 약관 row, bottom sheet 전문을 실제 RN 화면으로 반영
 - 가입 코드 reference route 제거 — Downloads 원본에 독립 `ScreenInviteCode`가 없고 MVP 제외 결정이 있어 부정확한 placeholder route를 삭제
+- 인증 API 공통 기반 추가 — `{ code, message, data }` envelope와 Authorization 헤더, 공통 오류를 처리하는 `src/lib/apiClient.ts` 및 단위 테스트 구현
+- SecureStore 토큰 조회 보강 — access/refresh token 개별·동시 조회와 저장·삭제 동작을 테스트로 고정
+- Swagger 인증 계약 검사 추가 — `npm run test:api:contract`로 login/refresh/signup/me 성공 DTO와 JWT 정의 누락을 자동 판정
 
 ## 주요 파일 (도메인 파일 지도)
 
-| 경로                          | 역할                               |
-| ----------------------------- | ---------------------------------- |
-| `app/(auth)/_layout.tsx`      | 인증 스택 layout                   |
-| `app/(auth)/splash.tsx`       | Splash 실제 화면                   |
-| `app/(auth)/terms.tsx`        | 약관 동의 실제 화면                |
-| `app/(auth)/terms-sheet.tsx`  | 약관 전문 bottom sheet 실제 화면   |
-| `app/(auth)/login.tsx`        | 로그인 화면                        |
-| `app/(auth)/signup.tsx`       | 회원가입 화면                      |
-| `src/store/authStore.ts`      | Zustand 인증 상태                  |
-| `src/services/authService.ts` | 인증 mock service                  |
-| `src/services/authAdapter.ts` | mock/http auth adapter 스위치 지점 |
-| `src/hooks/useAuth.ts`        | 인증 액션 hook                     |
-| `src/types/auth.ts`           | 인증 입력/응답 타입                |
-| `src/mocks/auth.ts`           | mock 사용자/성도 데이터            |
+| 경로                                  | 역할                               |
+| ------------------------------------- | ---------------------------------- |
+| `app/(auth)/_layout.tsx`              | 인증 스택 layout                   |
+| `app/(auth)/splash.tsx`               | Splash 실제 화면                   |
+| `app/(auth)/terms.tsx`                | 약관 동의 실제 화면                |
+| `app/(auth)/terms-sheet.tsx`          | 약관 전문 bottom sheet 실제 화면   |
+| `app/(auth)/login.tsx`                | 로그인 화면                        |
+| `app/(auth)/signup.tsx`               | 회원가입 화면                      |
+| `src/store/authStore.ts`              | Zustand 인증 상태                  |
+| `src/services/authService.ts`         | 인증 mock service                  |
+| `src/services/authAdapter.ts`         | mock/http auth adapter 스위치 지점 |
+| `src/hooks/useAuth.ts`                | 인증 액션 hook                     |
+| `src/types/auth.ts`                   | 인증 입력/응답 타입                |
+| `src/types/api.ts`                    | 공통 `ApiResponse<T>` envelope     |
+| `src/mocks/auth.ts`                   | mock 사용자/성도 데이터            |
+| `src/lib/apiClient.ts`                | 공통 응답·오류·Authorization 처리  |
+| `src/lib/secureStore.ts`              | access/refresh token 안전 저장     |
+| `scripts/check-auth-api-contract.mjs` | Swagger 인증 계약 검사             |
 
 ## 데이터 타입
 
-`LoginInput`, `SignupInput`, `AuthSession`을 `src/types/auth.ts`에 정의합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다.
+`LoginInput`, `SignupInput`, `AuthSession`을 `src/types/auth.ts`에 정의합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리하며, 인증 성공 DTO는 Swagger에 필드가 확정된 뒤 추가합니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-10) **불완전한 인증 성공 응답은 추측하지 않는다** — login/refresh/signup/me 성공 DTO와 refresh rotation 정책이 Swagger에 확정되기 전에는 `httpAuthAdapter`를 활성화하지 않습니다. `test:api:contract`는 이 계약 게이트를 자동 판정하며, 미확정 기간에는 일반 `validate`와 분리합니다.
+- (2026-07-10) **API DTO와 화면 도메인 모델을 분리한다** — 공통 API client는 envelope·오류·Authorization만 담당하고, 서버 DTO를 화면 모델로 바꾸는 책임은 도메인 service/mapper에 둡니다.
 - (2026-06-27) **가입 코드 route는 제거한다** — Downloads 최신 원본에 독립 `ScreenInviteCode` 구현이 없고 기존 MVP 결정에서도 가입코드를 제외했으므로, 부정확한 reference 안내 화면을 유지하지 않습니다.
 - (2026-06-27) **Splash route는 placeholder가 아니라 실제 RN 화면으로 둔다** — Downloads `ScreenSplash`의 핵심 구조를 직접 렌더링하고, 웹 전용 blur/status glyph는 새 의존성 없이 생략합니다.
 - (2026-06-27) **약관 route는 placeholder가 아니라 실제 RN 화면으로 둔다** — Downloads `ScreenTerms`와 `ScreenTermsSheet`의 동의 row/bottom sheet 구조를 공통 `TermsAgreementScreen`으로 직접 렌더링합니다.
@@ -67,7 +76,7 @@
 
 ## 미결 / 추적
 
-- 실제 로그인 API의 응답 스키마와 refresh token rotation 정책 확인 필요.
+- 실제 로그인·회원가입·내 정보 성공 DTO, refresh 요청/응답 및 token rotation 정책, 공개 endpoint의 JWT 예외, `/api/member/me` security scheme 이름 확정 필요. 단일 출처는 Issue #9입니다.
 - 약관/개인정보 동의 화면의 필수 여부와 문구 확정 필요.
 - auth bottom CTA/toast 정렬 후 `login-toast mean=10.18`, `code-toast mean=10.10`, `code-error mean=8.80`, `code-loading mean=8.32`, `code default mean=8.66`까지 낮췄습니다. `terms-sheet mean=12.21`는 Android status bar/time, backdrop blur 미적용, RN/web font metric 차이가 남아 후속 공통 overlay 정렬에서 추적합니다.
 - signup variant residual은 `ScreenSignup` 구조 정렬 후 `signup-pw-error 21.74→10.14`, `signup-id-dup 20.65→9.18`, `signup default 12.50→7.76`까지 낮췄습니다. 남은 차이는 RN status bar/time, secure input glyph/font metrics, CSS gradient/shadow 번역 차이 중심으로 후속 공통 정렬에서 추적합니다.

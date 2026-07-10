@@ -57,6 +57,8 @@
 - gluestack-ui Provider 적용 — `GluestackUIProvider`를 앱 루트에 연결하고, NativeWind/Tailwind 기존 설정은 유지
 - 오래된 문서 정리 — GitHub Issues/PR로 이관된 archive 문서는 안내문만 남기고, PLAN.md의 폐기된 탭 설명을 최신 홈/나눔/동행/기도/삶공부 IA로 갱신
 - CI lockfile 정합성 복구 — gluestack 전이 의존성의 peer 요구인 `@react-spectrum/provider@3.11.1`을 명시해 GitHub Actions의 `npm ci` 실패를 해소
+- 공통 API transport 기반 추가 — 환경별 base URL, `{ code, message, data }` envelope 검증, Authorization 헤더, `ApiError` 정규화를 `src/lib/apiClient.ts`에 격리하고 단위 테스트 추가
+- 인증 API 계약 게이트 추가 — `scripts/check-auth-api-contract.mjs`가 Swagger의 구체 성공 DTO·공개 endpoint JWT 예외·security scheme 참조를 자동 확인
 
 ---
 
@@ -80,6 +82,9 @@
 | `src/components/faith/FaithSectionsScreen.tsx`                | 기도/삶공부 목록의 공유 렌더러. route가 아니라 `/prayer`, `/life-study`에서 section prop으로 사용                                                                                                                                          |
 | `src/components/ui/index.tsx`                                 | ZIP 토큰 기준 Button, Card, Badge, Chip, form, modal/dialog, sheet, toast, FAB 등 공통 UI                                                                                                                                                  |
 | `src/components/gluestack-ui/gluestack-ui-provider/index.tsx` | gluestack overlay/toast provider. 앱 루트에서 light mode로 사용                                                                                                                                                                            |
+| `src/lib/apiClient.ts`                                        | 공통 API envelope·오류·Authorization 처리                                                                                                                                                                                                  |
+| `src/lib/secureStore.ts`                                      | access/refresh token 안전 저장                                                                                                                                                                                                             |
+| `src/types/api.ts`                                            | 서버 공통 `ApiResponse<T>` 타입                                                                                                                                                                                                            |
 | `src/constants/theme.ts`                                      | `열린문커넥트.zip` 기준 color, radius, font, lineHeight, weight, shadow 디자인 토큰                                                                                                                                                        |
 | `jest.setup.ts`                                               | Jest mock 설정과 Expo Router/native module 테스트 어댑터                                                                                                                                                                                   |
 | `src/test/renderWithClient.tsx`                               | TanStack Query 화면 테스트용 test wrapper                                                                                                                                                                                                  |
@@ -91,6 +96,7 @@
 | `scripts/prepare-design-artifacts.mjs`                        | ZIP에서 110개 visual inventory와 원본 PNG를 재생성. 기본 출력은 `/private/tmp/ylmc-golden-screens/2026-05-23`                                                                                                                              |
 | `scripts/capture-design-screens.mjs`                          | Android Dev Client에서 design route 스크린샷 캡처. `YLMC_CAPTURE_INDEXES`, `YLMC_CAPTURE_RESET_EACH_ROUTE`, `YLMC_CAPTURE_ROUTE_OPEN_REPEATS`, `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT`, `YLMC_CAPTURE_DISMISS_AFTER_ROUTE`로 부분 재캡처 가능 |
 | `scripts/compare-design-screens.mjs`                          | 원본/앱 스크린샷 normalized diff 생성. 원본 PNG가 단색 빈 화면이면 `originalFlat`로 표시해 JSX 기준 검토 대상으로 분리                                                                                                                     |
+| `scripts/check-auth-api-contract.mjs`                         | login/refresh/signup/me 성공 DTO와 JWT 정의를 확인하는 Swagger 계약 검사                                                                                                                                                                   |
 | `.maestro/smoke.yml`                                          | v1 핵심 탭 진입 `testID` 기반 E2E smoke                                                                                                                                                                                                    |
 
 ## 데이터 타입
@@ -99,6 +105,8 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-10) **공통 API client는 transport 책임만 가진다** — base URL, envelope, 오류, Authorization을 공통화하되 API DTO를 화면 모델로 직접 노출하지 않습니다. 도메인별 service/mapper가 서버 필드와 화면 모델의 차이를 흡수합니다.
+- (2026-07-10) **Swagger 계약 검사는 확정 전 일반 CI와 분리한다** — 인증 성공 DTO와 JWT 정의가 미완성인 동안 `test:api:contract`는 별도 명령으로 누락을 가시화합니다. 백엔드 계약 확정 후 통과 상태가 되면 CI 게이트 포함 여부를 결정합니다.
 - (2026-07-10) **CI의 peer dependency 요구는 lockfile 우회 없이 명시한다** — gluestack 전이 의존성이 요구하는 `@react-spectrum/provider@3.11.1`을 직접 고정합니다. `npm ci --legacy-peer-deps`로 검증을 약화하지 않고 Node 20.19.4/npm 10.8.2 기준 깨끗한 설치를 유지합니다.
 - (2026-06-29) **archive 문서는 이관 안내만 유지한다** — 작업 목록은 GitHub Issues, 변경 이력은 PR description이 단일 출처이므로 `docs/_archive/LOG.md`와 `docs/_archive/TASKS.md`는 긴 과거 본문 대신 조회 안내만 둡니다.
 - (2026-06-27) **탭 IA는 Downloads preview 기준을 따른다** — 하단 탭은 `홈/나눔/동행/기도/삶공부`입니다. `MY`는 하단 탭에서 제거하고 홈 상단 `내 정보 보기` 카드로 진입합니다. `동행` 탭 내부는 Downloads `ScreenGroupList`/`ScreenServiceList`처럼 `소모임/봉사` segment를 둡니다.

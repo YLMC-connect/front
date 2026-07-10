@@ -7,6 +7,16 @@ export const secureTokenStore = {
   async getAccessToken() {
     return SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
   },
+  async getRefreshToken() {
+    return SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+  },
+  async getTokens() {
+    const [accessToken, refreshToken] = await Promise.all([
+      SecureStore.getItemAsync(ACCESS_TOKEN_KEY),
+      SecureStore.getItemAsync(REFRESH_TOKEN_KEY),
+    ]);
+    return { accessToken, refreshToken };
+  },
   async setTokens(accessToken: string, refreshToken: string) {
     await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, accessToken);
     await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);

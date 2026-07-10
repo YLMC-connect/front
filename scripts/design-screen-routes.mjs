@@ -10,11 +10,11 @@ const withVariant = (path, variant) =>
 
 const routeFor = (screen) => {
   if (screen.component === "ScreenPrayerList") {
-    return "/faith";
+    return "/prayer";
   }
 
   if (screen.component === "ScreenStudyList") {
-    return "/faith?section=study";
+    return "/life-study";
   }
 
   if (screen.currentRoute || screen.routeProposal) {
@@ -48,6 +48,8 @@ const routeFor = (screen) => {
       return withVariant("/modal/market-new", variant);
     case "ScreenGroupList":
       return withVariant("/group", variant);
+    case "ScreenServiceList":
+      return "/group?variant=service";
     case "ScreenGroupDetail":
       return withVariant("/group/1", variant);
     case "ScreenGroupCreate":
@@ -57,7 +59,7 @@ const routeFor = (screen) => {
     case "ScreenGroupMembers":
       return withVariant("/group/members", variant);
     case "ScreenPrayerList":
-      return "/faith";
+      return "/prayer";
     case "ScreenPrayerDetail":
       return "/prayer/1";
     case "ScreenPrayerApply":
@@ -67,7 +69,7 @@ const routeFor = (screen) => {
     case "ScreenPrayerWrite":
       return "/modal/prayer-new";
     case "ScreenStudyList":
-      return "/faith?section=study";
+      return "/life-study";
     case "ScreenStudyDetail":
       return "/life-study/1";
     case "ScreenStudyApply":

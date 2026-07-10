@@ -1,16 +1,11 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { Screen } from "../../../src/components/layout/Screen";
-import { FloatingActionButton } from "../../../src/components/ui";
-import { theme } from "../../../src/constants/theme";
+import { theme } from "../../constants/theme";
+import { Screen } from "../layout/Screen";
+import { FloatingActionButton } from "../ui";
 
 type FaithSection = "pray" | "study";
-
-const sections: readonly { key: FaithSection; label: string }[] = [
-  { key: "pray", label: "기도" },
-  { key: "study", label: "삶공부" },
-];
 
 const prayerRooms = [
   {
@@ -109,22 +104,7 @@ const requiredCourses = [
   },
 ] as const;
 
-export default function FaithScreen({
-  forcedSection,
-}: {
-  forcedSection?: FaithSection;
-}) {
-  const params = useLocalSearchParams<{ section?: string }>();
-  const paramSection = Array.isArray(params.section)
-    ? params.section[0]
-    : params.section;
-  const section: FaithSection =
-    forcedSection ?? (paramSection === "study" ? "study" : "pray");
-
-  const changeSection = (next: FaithSection) => {
-    router.replace(next === "study" ? "/faith?section=study" : "/faith");
-  };
-
+export function FaithSectionsScreen({ section }: { section: FaithSection }) {
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
@@ -148,30 +128,6 @@ export default function FaithScreen({
               />
             </View>
           ) : null}
-        </View>
-
-        <View style={styles.segmented}>
-          {sections.map((item) => {
-            const selected = item.key === section;
-            return (
-              <Pressable
-                key={item.key}
-                accessibilityRole="tab"
-                accessibilityState={selected ? { selected: true } : {}}
-                onPress={() => changeSection(item.key)}
-                style={[styles.segment, selected ? styles.segmentOn : null]}
-              >
-                <Text
-                  style={[
-                    styles.segmentText,
-                    selected ? styles.segmentTextOn : null,
-                  ]}
-                >
-                  {item.label}
-                </Text>
-              </Pressable>
-            );
-          })}
         </View>
 
         <ScrollView contentContainerStyle={styles.body}>

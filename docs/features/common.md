@@ -1,6 +1,6 @@
 # common (공통 인프라)
 
-> 마지막 갱신: 2026-06-27 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-10 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -26,7 +26,7 @@
 - `열린문커넥트.zip` 원본 화면 110개 기준 갱신 — JSX inventory를 기준으로 `my-wishlist`, `notif-settings`, `support`, `inquiry`, `account`까지 포함하고 Dev Client 앱 캡처/비교 스크립트를 추가
 - Dev Client Maestro smoke 시작 상태 고정 — Dev Client 안내 메뉴는 조건부로 닫고 `ylmc-connect:///` 루트 딥링크를 연 뒤 v1 탭 smoke를 실행해 이전 캡처 route/dialog 상태에 영향받지 않도록 함
 - 숨김 상세 route 시각 기준 정렬 — 실제 pathname 기준으로 루트 탭에서만 floating tab bar를 표시하고, 상세/모달/확인 화면은 원본 ZIP처럼 하단 탭 여백을 제거
-- ZIP 5탭 정보구조 재정렬 — 루트 탭을 홈/나눔/소모임/동행/MY로 맞추고, 중보기도·삶공부 목록은 `동행` 탭의 segmented view로 배치
+- 폐기된 ZIP 5탭 정보구조 재정렬 — 한때 루트 탭을 홈/나눔/소모임/동행/MY로 맞췄으나, Downloads preview 확인 후 홈/나눔/동행/기도/삶공부로 대체
 - ZIP 공통 디자인 토큰/컴포넌트 정렬 — `app-tokens.css`, `halo-tokens.css`, 공통 JSX의 button/card/tab/form/dialog/sheet/toast 패턴을 `theme.ts`, 공통 UI, Screen, custom tab bar에 React Native 방식으로 반영
 - ZIP TopBar/Avatar 공통 패턴 정렬 — 상세 화면 back pill은 `뒤로` label을 포함하고, Avatar는 ZIP `gradFor` 해시 팔레트와 같은 색상 기준을 사용
 - ZIP `Thumb` 공통 패턴 정렬 — `VisualThumb`는 ZIP JSX처럼 icon prop이 있을 때만 아이콘을 렌더링하고, 기본 썸네일은 추상 도형만 표시
@@ -45,7 +45,7 @@
 - ZIP bottom CTA surface 정렬 — 공통 `Button`의 Pressable style을 정적 surface로 확정해 Android Dev Client에서 배경/크기 없이 text만 보이던 bottom-flat CTA를 ZIP pill 버튼으로 복구
 - auth/input 화면 부분 캡처 안정화 — route 진입 후 Dev Client dismiss 탭이 로그인/가입 버튼을 누르지 않도록 `YLMC_CAPTURE_DISMISS_AFTER_ROUTE=0` 옵션을 추가
 - ZIP 홈 섹션 rhythm 정렬 — `ScreenHome` 기준 section header padding과 홈 소모임 카드 padding을 맞춰 `home` residual을 `16.96→15.42`로 낮춤
-- ZIP 5탭 icon state 정렬 — 하단 탭을 ZIP `TABS` 순서(홈/나눔/소모임/동행/MY)와 outline/filled state에 맞추고, `동행`은 ZIP의 실제 heart glyph 기준으로 정렬
+- 폐기된 ZIP 5탭 icon state 정렬 — 기존 홈/나눔/소모임/동행/MY 탭 아이콘 기준은 Downloads preview의 홈/나눔/동행/기도/삶공부 기준으로 대체
 - ZIP `Thumb` proportional geometry 정렬 — 공통 `VisualThumb`의 추상 circle 위치/크기/opacity를 ZIP `Thumb` SVG 수식 기준으로 번역
 - Maestro smoke ANR overlay 처리 보강 — Android Emulator가 일시적으로 `Process system isn't responding` dialog를 띄우면 `Wait`를 누른 뒤 Dev Client menu 처리와 5탭 smoke를 이어가도록 `.maestro/smoke.yml` 보강
 - ZIP FAB root overlay 정렬 — 공통 `FloatingActionButton`도 정적 pill surface로 렌더링하고, FAB 사용 목록 화면은 body ScrollView와 root FAB layer를 분리해 ZIP `Phone` 구조에 맞춤
@@ -53,36 +53,45 @@
 - 홈 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `screens-home.jsx`의 프로필 카드, 오늘의 기도제목, 내 활동 요약 구조를 `/` route에 RN으로 직접 반영
 - 알림 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenNotifications`의 오늘/지난 알림 section, unread row, circular icon, unread dot, 모두 읽음 action을 `/notifications` route에 RN으로 직접 반영
 - 부정확한 reference/scaffold runtime 제거 — Downloads 원본이 확인된 화면은 실제 route로 옮기고, 원본 없는 reference route와 호출처 없는 modal/profile scaffold route를 삭제
+- Downloads preview 탭 IA 재정렬 — 하단 탭을 홈/나눔/동행/기도/삶공부로 맞추고, MY는 홈 프로필 카드 진입으로 전환
+- gluestack-ui Provider 적용 — `GluestackUIProvider`를 앱 루트에 연결하고, NativeWind/Tailwind 기존 설정은 유지
+- 오래된 문서 정리 — GitHub Issues/PR로 이관된 archive 문서는 안내문만 남기고, PLAN.md의 폐기된 탭 설명을 최신 홈/나눔/동행/기도/삶공부 IA로 갱신
+- CI lockfile 정합성 복구 — gluestack 전이 의존성의 peer 요구인 `@react-spectrum/provider@3.11.1`을 명시해 GitHub Actions의 `npm ci` 실패를 해소
 
 ---
 
 ## 주요 파일 (도메인 파일 지도)
 
-| 경로                                   | 역할                                                                                                                                                                                                                                       |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `AGENTS.md`                            | Codex가 읽는 프로젝트 작업 규칙                                                                                                                                                                                                            |
-| `CLAUDE.md`                            | Claude Code 호환용 작업 규칙 복사본                                                                                                                                                                                                        |
-| `docs/INDEX.md`                        | 작업자용 문서 진입점과 도메인 상태표                                                                                                                                                                                                       |
-| `docs/MAINTENANCE.md`                  | 문서 드리프트 복구 런북                                                                                                                                                                                                                    |
-| `scripts/gen-index.sh`                 | GitHub Issues 기반 도메인 상태표 재생성                                                                                                                                                                                                    |
-| `docs/features/common.md`              | common 도메인 컨텍스트                                                                                                                                                                                                                     |
-| `app/_layout.tsx`                      | QueryClient, SafeArea, Router Provider 루트                                                                                                                                                                                                |
-| `app/(tabs)/_layout.tsx`               | ZIP 기준 5탭 layout와 glass custom floating tab bar                                                                                                                                                                                        |
-| `app/(tabs)/faith/index.tsx`           | ZIP 기준 `동행` 루트 탭. 중보기도/삶공부 segmented view를 전환                                                                                                                                                                             |
-| `app/(tabs)/index.tsx`                 | 디자인 번역 기반 홈 화면                                                                                                                                                                                                                   |
-| `src/components/ui/index.tsx`          | ZIP 토큰 기준 Button, Card, Badge, Chip, form, modal/dialog, sheet, toast, FAB 등 공통 UI                                                                                                                                                  |
-| `src/constants/theme.ts`               | `열린문커넥트.zip` 기준 color, radius, font, lineHeight, weight, shadow 디자인 토큰                                                                                                                                                        |
-| `jest.setup.ts`                        | Jest mock 설정과 Expo Router/native module 테스트 어댑터                                                                                                                                                                                   |
-| `src/test/renderWithClient.tsx`        | TanStack Query 화면 테스트용 test wrapper                                                                                                                                                                                                  |
-| `.github/workflows/ci.yml`             | PR/push `npm ci` + `npm run validate`                                                                                                                                                                                                      |
-| `.github/workflows/e2e-smoke.yml`      | 수동/release/nightly용 Maestro smoke workflow 뼈대                                                                                                                                                                                         |
-| `scripts/dev-client-smoke.mjs`         | Expo Dev Client Metro 부팅과 `/status` 응답 확인                                                                                                                                                                                           |
-| `scripts/maestro-smoke.mjs`            | Metro 확인/부팅과 Dev Client deep link를 거쳐 Maestro smoke 실행. Android Emulator는 `localhost`/`127.0.0.1` + `adb reverse` 기준이며 ADB로 Dev Client를 먼저 연 뒤 `.maestro/smoke.yml`이 메뉴/탭 검증을 담당                             |
-| `scripts/design-screen-routes.mjs`     | ZIP JSX inventory 110개 화면을 Expo Router route와 screenshot filename으로 매핑                                                                                                                                                            |
-| `scripts/prepare-design-artifacts.mjs` | ZIP에서 110개 visual inventory와 원본 PNG를 재생성. 기본 출력은 `/private/tmp/ylmc-golden-screens/2026-05-23`                                                                                                                              |
-| `scripts/capture-design-screens.mjs`   | Android Dev Client에서 design route 스크린샷 캡처. `YLMC_CAPTURE_INDEXES`, `YLMC_CAPTURE_RESET_EACH_ROUTE`, `YLMC_CAPTURE_ROUTE_OPEN_REPEATS`, `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT`, `YLMC_CAPTURE_DISMISS_AFTER_ROUTE`로 부분 재캡처 가능 |
-| `scripts/compare-design-screens.mjs`   | 원본/앱 스크린샷 normalized diff 생성. 원본 PNG가 단색 빈 화면이면 `originalFlat`로 표시해 JSX 기준 검토 대상으로 분리                                                                                                                     |
-| `.maestro/smoke.yml`                   | v1 핵심 탭 진입 `testID` 기반 E2E smoke                                                                                                                                                                                                    |
+| 경로                                                          | 역할                                                                                                                                                                                                                                       |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `AGENTS.md`                                                   | Codex가 읽는 프로젝트 작업 규칙                                                                                                                                                                                                            |
+| `CLAUDE.md`                                                   | Claude Code 호환용 작업 규칙 복사본                                                                                                                                                                                                        |
+| `docs/INDEX.md`                                               | 작업자용 문서 진입점과 도메인 상태표                                                                                                                                                                                                       |
+| `docs/MAINTENANCE.md`                                         | 문서 드리프트 복구 런북                                                                                                                                                                                                                    |
+| `scripts/gen-index.sh`                                        | GitHub Issues 기반 도메인 상태표 재생성                                                                                                                                                                                                    |
+| `docs/features/common.md`                                     | common 도메인 컨텍스트                                                                                                                                                                                                                     |
+| `package.json`, `package-lock.json`                           | 공통 런타임 의존성과 CI 재현 가능한 npm lockfile                                                                                                                                                                                          |
+| `app/_layout.tsx`                                             | QueryClient, SafeArea, Router Provider 루트                                                                                                                                                                                                |
+| `app/(tabs)/_layout.tsx`                                      | Downloads preview 기준 홈/나눔/동행/기도/삶공부 5탭 layout와 glass custom floating tab bar                                                                                                                                                 |
+| `app/(tabs)/index.tsx`                                        | 디자인 번역 기반 홈 화면. 홈 프로필 카드에서 숨김 MY route로 진입                                                                                                                                                                          |
+| `app/(tabs)/group/index.tsx`                                  | Downloads `동행` 탭 루트. 내부에서 소모임/봉사 segment 전환                                                                                                                                                                                |
+| `app/(tabs)/prayer/index.tsx`                                 | Downloads `기도` 하단 탭 루트. 기도 목록 화면 렌더링                                                                                                                                                                                       |
+| `app/(tabs)/life-study/index.tsx`                             | Downloads `삶공부` 하단 탭 루트. 삶공부 목록 화면 렌더링                                                                                                                                                                                   |
+| `src/components/faith/FaithSectionsScreen.tsx`                | 기도/삶공부 목록의 공유 렌더러. route가 아니라 `/prayer`, `/life-study`에서 section prop으로 사용                                                                                                                                          |
+| `src/components/ui/index.tsx`                                 | ZIP 토큰 기준 Button, Card, Badge, Chip, form, modal/dialog, sheet, toast, FAB 등 공통 UI                                                                                                                                                  |
+| `src/components/gluestack-ui/gluestack-ui-provider/index.tsx` | gluestack overlay/toast provider. 앱 루트에서 light mode로 사용                                                                                                                                                                            |
+| `src/constants/theme.ts`                                      | `열린문커넥트.zip` 기준 color, radius, font, lineHeight, weight, shadow 디자인 토큰                                                                                                                                                        |
+| `jest.setup.ts`                                               | Jest mock 설정과 Expo Router/native module 테스트 어댑터                                                                                                                                                                                   |
+| `src/test/renderWithClient.tsx`                               | TanStack Query 화면 테스트용 test wrapper                                                                                                                                                                                                  |
+| `.github/workflows/ci.yml`                                    | PR/push `npm ci` + `npm run validate`                                                                                                                                                                                                      |
+| `.github/workflows/e2e-smoke.yml`                             | 수동/release/nightly용 Maestro smoke workflow 뼈대                                                                                                                                                                                         |
+| `scripts/dev-client-smoke.mjs`                                | Expo Dev Client Metro 부팅과 `/status` 응답 확인                                                                                                                                                                                           |
+| `scripts/maestro-smoke.mjs`                                   | Metro 확인/부팅과 Dev Client deep link를 거쳐 Maestro smoke 실행. Android Emulator는 `localhost`/`127.0.0.1` + `adb reverse` 기준이며 ADB로 Dev Client를 먼저 연 뒤 `.maestro/smoke.yml`이 메뉴/탭 검증을 담당                             |
+| `scripts/design-screen-routes.mjs`                            | ZIP JSX inventory 110개 화면을 Expo Router route와 screenshot filename으로 매핑                                                                                                                                                            |
+| `scripts/prepare-design-artifacts.mjs`                        | ZIP에서 110개 visual inventory와 원본 PNG를 재생성. 기본 출력은 `/private/tmp/ylmc-golden-screens/2026-05-23`                                                                                                                              |
+| `scripts/capture-design-screens.mjs`                          | Android Dev Client에서 design route 스크린샷 캡처. `YLMC_CAPTURE_INDEXES`, `YLMC_CAPTURE_RESET_EACH_ROUTE`, `YLMC_CAPTURE_ROUTE_OPEN_REPEATS`, `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT`, `YLMC_CAPTURE_DISMISS_AFTER_ROUTE`로 부분 재캡처 가능 |
+| `scripts/compare-design-screens.mjs`                          | 원본/앱 스크린샷 normalized diff 생성. 원본 PNG가 단색 빈 화면이면 `originalFlat`로 표시해 JSX 기준 검토 대상으로 분리                                                                                                                     |
+| `.maestro/smoke.yml`                                          | v1 핵심 탭 진입 `testID` 기반 E2E smoke                                                                                                                                                                                                    |
 
 ## 데이터 타입
 
@@ -90,14 +99,17 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-10) **CI의 peer dependency 요구는 lockfile 우회 없이 명시한다** — gluestack 전이 의존성이 요구하는 `@react-spectrum/provider@3.11.1`을 직접 고정합니다. `npm ci --legacy-peer-deps`로 검증을 약화하지 않고 Node 20.19.4/npm 10.8.2 기준 깨끗한 설치를 유지합니다.
+- (2026-06-29) **archive 문서는 이관 안내만 유지한다** — 작업 목록은 GitHub Issues, 변경 이력은 PR description이 단일 출처이므로 `docs/_archive/LOG.md`와 `docs/_archive/TASKS.md`는 긴 과거 본문 대신 조회 안내만 둡니다.
+- (2026-06-27) **탭 IA는 Downloads preview 기준을 따른다** — 하단 탭은 `홈/나눔/동행/기도/삶공부`입니다. `MY`는 하단 탭에서 제거하고 홈 상단 `내 정보 보기` 카드로 진입합니다. `동행` 탭 내부는 Downloads `ScreenGroupList`/`ScreenServiceList`처럼 `소모임/봉사` segment를 둡니다.
 - (2026-06-27) **부정확한 reference/scaffold runtime은 제거한다** — Downloads 최신 원본이 확인된 화면은 실제 RN route로 옮기고, 원본이 확인되지 않는 reference route나 호출처 없는 modal/profile scaffold route는 유지하지 않습니다.
 - (2026-06-27) **디자인 기준은 Downloads 원본 하나로 둔다** — `/Users/mingulee/Downloads/열린문커넥트.zip`과 압축 해제 폴더를 디자인 단일 기준으로 사용합니다. RN으로 옮긴 `OriginalMockScreens`와 임시 reference 안내 화면은 최신 원본과 어긋날 수 있어 제거합니다.
 - (2026-06-27) **주요 화면은 placeholder가 아니라 실제 RN 화면으로 되돌린다** — Downloads 원본을 확인하라는 안내 화면은 임시 연결용이며, 구현 대상 route는 원본 JSX/token을 기준으로 실제 앱 화면을 직접 렌더링합니다. 홈 route부터 `screens-home.jsx` 구조를 RN으로 반영합니다.
 - (2026-06-27) **알림 route도 실제 RN 화면으로 렌더링한다** — Downloads `ScreenNotifications` 구조를 `/notifications`에 직접 반영하고, reference export는 제거합니다.
-- (2026-06-27) **gluestack-ui는 디자인 기준이 아니다** — NativeWind/Tailwind와 TanStack Query는 유지합니다. `gluestack-ui` CLI는 패턴 확보용 devDependency로 두고, `init`으로 기본 테마를 섞지 않습니다. 필요한 컴포넌트만 추가한 뒤 색상·간격·라운드·타이포그래피·상태값은 Downloads 원본 기준으로 재정의하고 공통 컴포넌트 계층에 흡수합니다.
-- (2026-06-27) **탭 IA는 프로젝트 기준, 시각은 Downloads 기준으로 분리한다** — Downloads `lib.jsx`의 `TABS`는 실제 앱 구조와 다르므로 복사하지 않습니다. 루트 탭은 홈/나눔/소모임/동행/MY를 유지하고, 하단 tab bar의 pill glass, active surface, icon state만 Downloads `app-tokens.css`/`lib.jsx`에서 번역합니다.
+- (2026-06-27) **gluestack-ui는 Provider부터 적용한다** — `GluestackUIProvider`를 앱 루트에 연결합니다. NativeWind v4/Tailwind v3 기존 설정과 Downloads 디자인 토큰은 유지하며, 개별 컴포넌트는 화면에 직접 흩뿌리지 않고 공통 UI 계층에서 필요한 것만 흡수합니다.
+- (2026-06-27) **폐기됨: 루트 탭 홈/나눔/소모임/동행/MY** — Downloads `PREVIEW_TAB_ROUTES` 확인 결과 실제 기준은 홈/나눔/동행/기도/삶공부이며, 이 결정은 위 최신 결정으로 대체합니다.
 - (2026-05-27) **FAB도 ZIP root overlay surface로 관리한다** — `FloatingActionButton`은 공통 `Button`과 같이 정적 Pressable surface를 사용해 Android Dev Client 캡처에서 배경/크기 누락을 막습니다. `Screen` scroll content 안에 FAB를 두면 ZIP `Phone`의 fixed root layer와 달라지므로 FAB가 있는 reference 화면은 `Screen scroll={false}` + 내부 ScrollView + root FAB 구조로 둡니다.
-- (2026-05-27) **탭 아이콘은 Downloads의 outline/filled state만 따른다** — Downloads `lib.jsx`의 탭 배열은 실제 앱 IA와 다르므로 구조 기준으로 쓰지 않습니다. RN 하단 탭은 홈/나눔/소모임/동행/MY 5개만 노출하고, 아이콘은 각 탭 의미에 맞는 outline/filled state로 번역하며 삶공부·중보기도는 `동행` 내부 segment로 둡니다.
+- (2026-05-27) **폐기됨: 기도/삶공부를 동행 내부에 둔다** — 최신 Downloads preview에서는 기도와 삶공부가 독립 하단 탭입니다. 동행 내부 segment는 소모임/봉사만 유지합니다.
 - (2026-05-27) **`VisualThumb` circle geometry는 ZIP SVG 수식을 비율로 번역한다** — ZIP `Thumb`는 100x100 viewBox에서 큰 circle `r=32 opacity=.35`, 작은 circle `r=22 opacity=.22`를 seed 기반 center로 배치합니다. RN `VisualThumb`도 size prop에 비례해 같은 center/diameter/opacity를 계산하고, fixed 58/38px orb는 사용하지 않습니다.
 - (2026-05-27) **Maestro smoke는 Android 시스템 ANR dialog를 환경 overlay로 처리한다** — Dev Client가 정상 앱 화면을 띄운 뒤에도 Emulator가 `Process system isn't responding` dialog를 일시 표시할 수 있으므로, smoke flow는 해당 dialog에서 `Wait`를 누르고 기존 Dev Client `Continue`/`Reload` 처리로 복귀합니다. 이 처리는 앱 기능 검증 대상이 아니라 테스트 환경 안정화입니다.
 - (2026-05-27) **홈 section header는 ZIP `.sec-head` rhythm을 따른다** — 공통 `Section`은 다른 화면의 밀도를 유지하고, 홈 reference 화면만 ZIP `ScreenHome`의 `padding: 16px 18px 8px` section header와 14px 소모임 카드 padding을 별도 wrapper로 번역합니다.
@@ -118,7 +130,7 @@
 - (2026-05-26) **Dev Client smoke는 서버 선택 화면도 조건부 처리한다** — Android Emulator에서 앱 상태를 clear하면 Expo Dev Client가 `DEVELOPMENT SERVERS` 화면에 남을 수 있으므로, `.maestro/smoke.yml`은 해당 화면이 보일 때 개발 서버 row를 탭하고 `Reload` 메뉴를 닫은 뒤 앱 루트 딥링크 검증을 진행합니다.
 - (2026-05-25) **공통 UI 토큰은 ZIP app-level tokens를 우선 번역한다** — `app-tokens.css`의 primary/surface/ink/line/radius/shadow/type, `halo-tokens.css`의 glass/elevation/type 기준을 `theme.ts`에 반영하고, Button/Card/Badge/Chip/SegmentedTabs/TopBar/Dialog/Sheet/Toast/FAB/Input은 화면별 땜질보다 공통 컴포넌트에서 먼저 맞춥니다. RN에서 직접 표현이 어려운 CSS blur/box-shadow는 `borderColor`, `shadow*`, `elevation` 조합으로 번역합니다.
 - (2026-05-25) **상세 TopBar와 Avatar는 ZIP 공통 JSX를 따른다** — `TopBar` back affordance는 원형 아이콘이 아니라 `뒤로` text pill이며, `Avatar` 색상은 이름/seed 해시 기반 ZIP 팔레트를 사용합니다. gradient는 새 라이브러리 없이 solid swatch로 번역합니다.
-- (2026-05-25) **탭 구조는 ZIP 5탭 기준으로 한다** — 루트 탭은 홈/나눔/소모임/동행/MY이며, 중보기도와 삶공부는 ZIP처럼 `동행` 탭의 segmented view로 묶습니다. 기존 `/prayer`, `/life-study` route는 상세/딥링크/기존 캡처 호환을 위해 숨김 route로 유지합니다.
+- (2026-05-25) **폐기됨: 탭 구조는 ZIP 5탭 기준으로 한다** — 루트 탭 홈/나눔/소모임/동행/MY와 기도/삶공부 동행 segment 결정은 Downloads preview 확인 후 폐기했습니다.
 - (2026-05-23) **시각 검증은 JSX + Dev Client 캡처를 함께 본다** — ZIP의 JSX를 화면 구조/컴포넌트 원천으로 보고, 스크린샷은 실제 렌더링 확인용으로 사용합니다. 원본 PNG가 단색 빈 화면이면 `compare` report의 `originalFlat`를 근거로 pixel diff를 품질 판단에서 제외하고 JSX 소스를 우선합니다.
 - (2026-05-23) **루트 탭과 숨김 route의 하단 여백을 분리한다** — Expo Router tabs state는 상세 route에서도 루트 탭을 유지할 수 있으므로, floating tab bar와 `Screen` 하단 padding은 `usePathname()`의 실제 path 기준으로 적용합니다.
 - (2026-05-23) **Maestro smoke는 루트 route에서 시작한다** — Dev Client가 이전 deep link route나 confirm dialog를 복원할 수 있으므로, smoke flow는 안내 메뉴를 조건부로 닫은 뒤 `ylmc-connect:///`를 열어 홈 탭부터 검증합니다.
@@ -143,14 +155,14 @@
 - Sentry SDK 설치/초기화, husky/lint-staged는 후속 작업입니다.
 - Jest/RNTL은 smoke 범위부터 적용했습니다. 서비스 mutation, hook edge case, 상세/작성 화면 테스트는 Phase 6 이후 API adapter 범위와 함께 확장합니다.
 - Codex 기본 샌드박스에서는 `expo start --dev-client --port 8081 --localhost`가 `Starting project...` 이후 8081에 바인딩되지 않을 수 있습니다. 샌드박스 밖 로컬 권한에서는 `npm run test:dev-client:smoke`로 `/status` 응답을 확인했습니다.
-- Maestro CLI `2.6.0`은 Homebrew tap(`mobile-dev-inc/tap`)으로 설치되어 있으며, Android Emulator `Medium_Phone_API_36.1`에서 `npm run test:e2e:smoke` 통과를 확인했습니다. 현재 smoke는 ADB로 Dev Client deep link를 먼저 열고, Maestro가 Dev Client 메뉴를 닫은 뒤 홈/나눔/소모임/동행/MY 탭과 동행 내부 삶공부 segment 진입을 검증합니다.
+- Maestro CLI `2.6.0`은 Homebrew tap(`mobile-dev-inc/tap`)으로 설치되어 있으며, Android Emulator `Medium_Phone_API_36.1`에서 `npm run test:e2e:smoke` 통과 이력이 있습니다. 현재 smoke 기준은 홈/나눔/동행/기도/삶공부 탭 진입입니다.
 - 제공 ZIP 110개 화면은 `test:visual:prepare` → Dev Client full capture/partial recapture → `test:visual:compare`로 검증하며 현재 비교 리포트 기준 `screens=110`, `missing=0`, `originalFlat=0`입니다. 남은 residual diff는 상태바/SafeArea, React Native 폰트·모달 번역 차이와 실제 UI 차이를 분리해 추적합니다.
 - 2026-05-27 ZIP FAB root overlay 정렬 후 비교 리포트는 `screens=110`, `missing=0`입니다. 대표 residual은 `market-list-all 15.27→13.75`, `group-list 11.61→10.21`, `pray-list 13.32→12.28`, `pray-request 10.17→9.34`로 낮췄습니다. 남은 상위 residual은 `splash`, `me-privacy`, `home`, market detail/create 계열입니다.
 
 ## 의존성
 
 - GitHub Issues / PR description 기반 작업 추적 규칙에 의존합니다.
-- Expo SDK 55, Expo Dev Client, TanStack Query, Zustand, NativeWind, `expo-image-picker`, `expo-image`에 의존합니다.
+- Expo SDK 55, Expo Dev Client, TanStack Query, Zustand, NativeWind, `expo-image-picker`, `expo-image`, `@react-spectrum/provider@3.11.1`에 의존합니다.
 
 ## 관련 ADR
 

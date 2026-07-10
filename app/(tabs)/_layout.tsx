@@ -9,19 +9,22 @@ const tabIcons: Record<string, { off: IconName; on: IconName }> = {
   index: { off: "home-outline", on: "home" },
   "market/index": { off: "shopping-outline", on: "shopping" },
   "group/index": { off: "account-multiple-outline", on: "account-multiple" },
-  "faith/index": { off: "heart-outline", on: "heart" },
-  "mypage/index": { off: "account-outline", on: "account" },
+  "prayer/index": { off: "hands-pray", on: "hands-pray" },
+  "life-study/index": {
+    off: "book-open-page-variant-outline",
+    on: "book-open-page-variant",
+  },
 };
 
 const tabHrefs: Record<
   string,
-  "/" | "/market" | "/group" | "/faith" | "/mypage"
+  "/" | "/market" | "/group" | "/prayer" | "/life-study"
 > = {
   index: "/",
   "market/index": "/market",
   "group/index": "/group",
-  "faith/index": "/faith",
-  "mypage/index": "/mypage",
+  "prayer/index": "/prayer",
+  "life-study/index": "/life-study",
 };
 
 const rootTabPaths = new Set<string>(Object.values(tabHrefs));
@@ -51,29 +54,28 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="group/index"
-        options={{ title: "소모임", tabBarButtonTestID: "tab-group" }}
+        options={{ title: "동행", tabBarButtonTestID: "tab-group" }}
       />
       <Tabs.Screen
-        name="faith/index"
-        options={{ title: "동행", tabBarButtonTestID: "tab-faith" }}
+        name="prayer/index"
+        options={{ title: "기도", tabBarButtonTestID: "tab-prayer" }}
       />
       <Tabs.Screen
-        name="mypage/index"
-        options={{ title: "MY", tabBarButtonTestID: "tab-mypage" }}
+        name="life-study/index"
+        options={{ title: "삶공부", tabBarButtonTestID: "tab-life-study" }}
       />
       <Tabs.Screen name="market/[id]" options={{ href: null }} />
       <Tabs.Screen name="group/[id]" options={{ href: null }} />
       <Tabs.Screen name="group/notices" options={{ href: null }} />
       <Tabs.Screen name="group/members" options={{ href: null }} />
-      <Tabs.Screen name="life-study/index" options={{ href: null }} />
       <Tabs.Screen name="life-study/[id]" options={{ href: null }} />
       <Tabs.Screen name="life-study/apply" options={{ href: null }} />
       <Tabs.Screen name="life-study/history" options={{ href: null }} />
-      <Tabs.Screen name="prayer/index" options={{ href: null }} />
       <Tabs.Screen name="prayer/[id]" options={{ href: null }} />
       <Tabs.Screen name="prayer/apply" options={{ href: null }} />
       <Tabs.Screen name="prayer/request" options={{ href: null }} />
       <Tabs.Screen name="notifications" options={{ href: null }} />
+      <Tabs.Screen name="mypage/index" options={{ href: null }} />
       <Tabs.Screen name="mypage/edit" options={{ href: null }} />
       <Tabs.Screen name="mypage/activity" options={{ href: null }} />
       <Tabs.Screen name="mypage/blocked" options={{ href: null }} />

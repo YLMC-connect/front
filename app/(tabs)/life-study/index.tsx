@@ -1,5 +1,5 @@
-import FaithScreen from "../faith";
+import { FaithSectionsScreen } from "../../../src/components/faith/FaithSectionsScreen";
 
 export default function LifeStudyScreen() {
-  return <FaithScreen forcedSection="study" />;
+  return <FaithSectionsScreen section="study" />;
 }

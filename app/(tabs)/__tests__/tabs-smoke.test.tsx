@@ -1,5 +1,4 @@
 import { screen } from "@testing-library/react-native";
-import FaithScreen from "../faith";
 import GroupDetailScreen from "../group/[id]";
 import GroupMembersScreen from "../group/members";
 import GroupScreen from "../group";
@@ -58,7 +57,9 @@ describe("v1 tab smoke screens", () => {
   it("renders the group screen", () => {
     renderWithClient(<GroupScreen />);
 
-    expect(screen.getByText("소모임")).toBeTruthy();
+    expect(screen.getByText("동행")).toBeTruthy();
+    expect(screen.getAllByText("소모임").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("봉사").length).toBeGreaterThan(0);
     expect(screen.getByText("내 소모임")).toBeTruthy();
     expect(screen.getByText("전체 모임")).toBeTruthy();
   });
@@ -87,16 +88,6 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("소모임장")).toBeTruthy();
   });
 
-  it("renders the faith screen", () => {
-    renderWithClient(<FaithScreen />);
-
-    expect(screen.getByText("함께 기도하고 응답을 나눠요")).toBeTruthy();
-    expect(screen.getByText("내 기도방")).toBeTruthy();
-    expect(
-      screen.getByText("월-토 오전/오후 기도방은 신청 화면에서 선택해요."),
-    ).toBeTruthy();
-  });
-
   it("renders the prayer detail screen", () => {
     renderWithClient(<PrayerDetailScreen />);
 
@@ -110,6 +101,7 @@ describe("v1 tab smoke screens", () => {
 
     expect(screen.getByText("함께 기도하고 응답을 나눠요")).toBeTruthy();
     expect(screen.getByText("내 기도방")).toBeTruthy();
+    expect(screen.queryByText("삶공부")).toBeNull();
   });
 
   it("renders the prayer apply screen", () => {
@@ -141,6 +133,7 @@ describe("v1 tab smoke screens", () => {
 
     expect(screen.getByText("말씀으로 배우고 삶으로 자라가요")).toBeTruthy();
     expect(screen.getByText("내 학습경로")).toBeTruthy();
+    expect(screen.queryByText("중보기도")).toBeNull();
   });
 
   it("renders the life study apply screen", () => {

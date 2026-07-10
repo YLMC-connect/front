@@ -1,4 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../src/components/layout/Screen";
 import { Avatar } from "../../src/components/ui";
@@ -26,11 +27,17 @@ const activityItems = [
 ] as const;
 
 export default function HomeScreen() {
+  const router = useRouter();
+
   return (
     <Screen padded={false}>
       <View style={styles.top}>
         <Text style={styles.brand}>열린문 커넥트</Text>
-        <Pressable accessibilityLabel="내 정보 보기" style={styles.profileCard}>
+        <Pressable
+          accessibilityLabel="내 정보 보기"
+          style={styles.profileCard}
+          onPress={() => router.push("/mypage")}
+        >
           <Avatar name="김은혜" size={42} seed="김은혜" />
           <View style={styles.profileText}>
             <Text style={styles.profileName}>김은혜님</Text>

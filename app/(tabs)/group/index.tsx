@@ -140,7 +140,7 @@ export default function GroupScreen() {
 
   if (isMyFull) {
     return (
-      <Screen scroll={false} padded={false}>
+      <Screen scroll={false} padded={false} testID="screen-group">
         <View style={styles.root}>
           <View style={styles.topBar}>
             <Text style={styles.title}>내 소모임</Text>
@@ -160,7 +160,7 @@ export default function GroupScreen() {
   }
 
   return (
-    <Screen scroll={false} padded={false}>
+    <Screen scroll={false} padded={false} testID="screen-group">
       <View style={styles.root}>
         <View style={styles.topBar}>
           <Text style={styles.title}>동행</Text>

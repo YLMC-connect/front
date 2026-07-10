@@ -1,5 +1,9 @@
 import { MOCK_MEMBERS } from "./auth";
-import type { LifeStudyCourse, LifeStudyHistory } from "../types/lifeStudy";
+import type {
+  LifeStudyCourse,
+  LifeStudyHistory,
+  LifeStudyOverview,
+} from "../types/lifeStudy";
 
 export const mockLifeStudyCourses: LifeStudyCourse[] = [
   {
@@ -69,3 +73,79 @@ export const mockLifeStudyHistory: LifeStudyHistory[] = [
     certificateIssued: true,
   },
 ];
+
+export const mockLifeStudyOverview: LifeStudyOverview = {
+  path: {
+    completedRequired: 1,
+    totalRequired: 5,
+    nextRecommendation: "생명언어의 삶",
+    eligibility: "생명의 삶 이후 가능",
+  },
+  openCourses: [
+    {
+      id: "life-overview-open-1",
+      title: "생명의 삶",
+      kind: "required",
+      weekCount: 13,
+      instructorName: "박귀원",
+      applicationPeriod: "6.24 ~ 7.05",
+      enrolledCount: 18,
+      capacity: 24,
+      summary: "신앙의 근본을 바로 세우는 가장 기본 과정",
+    },
+    {
+      id: "life-overview-open-2",
+      title: "생명언어의 삶",
+      kind: "optional",
+      weekCount: 13,
+      instructorName: "김숙자 이연홍",
+      applicationPeriod: "6.24 ~ 7.05",
+      enrolledCount: 10,
+      capacity: 16,
+      summary: "하나님 자녀의 품격에 맞는 언어습관 훈련",
+    },
+    {
+      id: "life-overview-open-3",
+      title: "기도의 삶",
+      kind: "optional",
+      weekCount: 8,
+      instructorName: "김경숙",
+      applicationPeriod: "6.24 ~ 7.05",
+      enrolledCount: 12,
+      capacity: 20,
+      summary: "중보기도 원칙과 실제 적용을 배우는 과정",
+    },
+  ],
+  courses: [
+    {
+      id: "life-overview-course-1",
+      title: "생명의 삶",
+      kind: "required",
+      weekCount: 13,
+      instructorName: "박귀원",
+      status: "completed",
+      summary: "구원의 확신과 신앙의 근본을 바로 세우는 가장 기본 과정",
+      target: "등록교인 누구나",
+    },
+    {
+      id: "life-overview-course-2",
+      title: "새로운 삶",
+      kind: "required",
+      weekCount: 13,
+      instructorName: "손현종",
+      status: "recommended",
+      summary: "하나님 나라의 가치관과 매일 QT의 첫걸음을 돕는 과정",
+      target: "생명의 삶 수료자",
+    },
+    {
+      id: "life-overview-course-3",
+      title: "경건의 삶",
+      kind: "required",
+      weekCount: 13,
+      instructorName: "서상오",
+      status: "pending",
+      summary: "경건 훈련으로 하나님과 이웃과의 사랑의 관계를 연습",
+      target: "새로운 삶 수료자",
+    },
+  ],
+};

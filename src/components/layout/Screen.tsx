@@ -17,10 +17,12 @@ export function Screen({
   children,
   scroll = true,
   padded = true,
+  testID,
 }: {
   children: ReactNode;
   scroll?: boolean;
   padded?: boolean;
+  testID?: string;
 }) {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
@@ -30,6 +32,7 @@ export function Screen({
 
   return (
     <View
+      testID={testID}
       style={[
         styles.safe,
         { paddingTop: Math.max(insets.top, designStatusBarHeight) },

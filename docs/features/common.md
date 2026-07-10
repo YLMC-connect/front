@@ -57,6 +57,8 @@
 - gluestack-ui Provider 적용 — `GluestackUIProvider`를 앱 루트에 연결하고, NativeWind/Tailwind 기존 설정은 유지
 - 오래된 문서 정리 — GitHub Issues/PR로 이관된 archive 문서는 안내문만 남기고, PLAN.md의 폐기된 탭 설명을 최신 홈/나눔/동행/기도/삶공부 IA로 갱신
 - CI lockfile 정합성 복구 — gluestack 전이 의존성의 peer 요구인 `@react-spectrum/provider@3.11.1`을 명시해 GitHub Actions의 `npm ci` 실패를 해소
+- faith 루트 데이터 경계 정리 — 기도·삶공부 overview를 화면 내부 fixture에서 domain mock/service/query hook으로 이동하고 공통 queryKey와 비동기 상태 처리를 적용
+- 탭 smoke 관찰성 복구 — 공통 `Screen`의 선택적 `testID` 전달과 5개 루트 탭 식별자를 복원하고 삶공부 비동기 콘텐츠 기준으로 Maestro 시나리오 갱신
 
 ---
 
@@ -99,6 +101,8 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-10) **루트 탭 E2E 식별자는 `Screen`이 전달한다** — 화면별 wrapper를 추가하지 않고 공통 `Screen`의 선택적 `testID`를 사용합니다. smoke는 화면 진입 식별자와 비동기 데이터가 렌더링된 현재 IA 문구를 함께 검증합니다.
+- (2026-07-10) **mock-first 화면도 service/query 경계를 지킨다** — 실제 사용자 API가 없는 도메인도 화면이 fixture를 직접 소유하지 않고 `screen → hook → service → mock` 흐름을 사용합니다. API 추가 시 화면이 아니라 service/mapper를 교체합니다.
 - (2026-07-10) **CI의 peer dependency 요구는 lockfile 우회 없이 명시한다** — gluestack 전이 의존성이 요구하는 `@react-spectrum/provider@3.11.1`을 직접 고정합니다. `npm ci --legacy-peer-deps`로 검증을 약화하지 않고 Node 20.19.4/npm 10.8.2 기준 깨끗한 설치를 유지합니다.
 - (2026-06-29) **archive 문서는 이관 안내만 유지한다** — 작업 목록은 GitHub Issues, 변경 이력은 PR description이 단일 출처이므로 `docs/_archive/LOG.md`와 `docs/_archive/TASKS.md`는 긴 과거 본문 대신 조회 안내만 둡니다.
 - (2026-06-27) **탭 IA는 Downloads preview 기준을 따른다** — 하단 탭은 `홈/나눔/동행/기도/삶공부`입니다. `MY`는 하단 탭에서 제거하고 홈 상단 `내 정보 보기` 카드로 진입합니다. `동행` 탭 내부는 Downloads `ScreenGroupList`/`ScreenServiceList`처럼 `소모임/봉사` segment를 둡니다.

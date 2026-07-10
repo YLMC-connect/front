@@ -36,3 +36,30 @@ export interface PrayerTopicInput {
   content: string;
   isAnonymous: boolean;
 }
+
+export type PrayerOverviewRoomStatus = "joined" | "pending";
+export type PrayerRequestStatus = "reviewing" | "published" | "rejected";
+export type PrayerPeriod = "morning" | "afternoon";
+
+export interface PrayerOverviewRoom {
+  id: string;
+  weekday: PrayerWeekday;
+  period: PrayerPeriod;
+  memberCount: number;
+  completedCount?: number;
+  participationRate?: number;
+  status: PrayerOverviewRoomStatus;
+}
+
+export interface PrayerRequestSummary {
+  id: string;
+  title: string;
+  category: string;
+  status: PrayerRequestStatus;
+  description: string;
+}
+
+export interface PrayerOverview {
+  rooms: readonly PrayerOverviewRoom[];
+  requests: readonly PrayerRequestSummary[];
+}

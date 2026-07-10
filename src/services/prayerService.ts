@@ -1,11 +1,24 @@
 import { MOCK_USER } from "../mocks/auth";
-import { mockPrayerRooms, mockPrayerTopics } from "../mocks/prayers";
-import type { PrayerTopic, PrayerTopicInput } from "../types/prayer";
+import {
+  mockPrayerOverview,
+  mockPrayerRooms,
+  mockPrayerTopics,
+} from "../mocks/prayers";
+import type {
+  PrayerOverview,
+  PrayerTopic,
+  PrayerTopicInput,
+} from "../types/prayer";
 
 const rooms = [...mockPrayerRooms];
 let topics: PrayerTopic[] = [...mockPrayerTopics];
 
 const delay = (ms = 180) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export async function fetchPrayerOverview(): Promise<PrayerOverview> {
+  await delay();
+  return mockPrayerOverview;
+}
 
 async function ensurePrayerRoom(id: string) {
   await delay();

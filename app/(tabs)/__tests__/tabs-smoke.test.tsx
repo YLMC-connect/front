@@ -98,11 +98,11 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("오늘 기도 완료")).toBeTruthy();
   });
 
-  it("renders the direct prayer screen", () => {
+  it("renders the direct prayer screen", async () => {
     renderWithClient(<PrayerScreen />);
 
     expect(screen.getByText("함께 기도하고 응답을 나눠요")).toBeTruthy();
-    expect(screen.getByText("내 기도방")).toBeTruthy();
+    expect(await screen.findByText("내 기도방")).toBeTruthy();
     expect(screen.queryByText("삶공부")).toBeNull();
   });
 
@@ -130,11 +130,11 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("커리큘럼")).toBeTruthy();
   });
 
-  it("renders the direct life study screen", () => {
+  it("renders the direct life study screen", async () => {
     renderWithClient(<LifeStudyScreen />);
 
     expect(screen.getByText("말씀으로 배우고 삶으로 자라가요")).toBeTruthy();
-    expect(screen.getByText("내 학습경로")).toBeTruthy();
+    expect(await screen.findByText("내 학습경로")).toBeTruthy();
     expect(screen.queryByText("중보기도")).toBeNull();
   });
 

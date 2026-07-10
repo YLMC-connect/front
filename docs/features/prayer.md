@@ -25,30 +25,32 @@
 - 기도방 참여 신청 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenPrayerApply`의 요일/시간 선택, 신청자 정보, 승인 대기 안내, 하단 신청 CTA를 `/prayer/apply` route에 RN으로 직접 반영
 - 내 기도제목 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenPrayerRequest`의 승인 안내, 상태 badge list, 선택 row, 응답완료 요청 CTA를 `/prayer/request` route에 RN으로 직접 반영
 - Downloads preview 탭 IA 반영 — `/prayer`를 숨김 route가 아니라 하단 `기도` 탭 루트로 복구
+- 기도 루트 overview 데이터 경계 정리 — 화면 내부 fixture를 `types → mocks → service → TanStack Query hook`으로 이동하고 loading/error 상태 및 서비스 테스트 추가
 
 ## 주요 파일 (도메인 파일 지도)
 
-| 경로                                           | 역할                                 |
-| ---------------------------------------------- | ------------------------------------ |
-| `app/(tabs)/prayer/index.tsx`                  | Downloads 하단 `기도` 탭 루트        |
-| `src/components/faith/FaithSectionsScreen.tsx` | 기도 목록 공유 렌더러                |
-| `app/(tabs)/prayer/[id].tsx`                   | 기도방 상세, 기도제목, 응답 기록     |
-| `app/(tabs)/prayer/apply.tsx`                  | 기도방 참여 신청 요일/시간 선택 화면 |
-| `app/(tabs)/prayer/request.tsx`                | 내 기도제목 요청 상태 목록           |
-| `app/modal/prayer-new.tsx`                     | 기도제목 등록 모달                   |
-| `src/services/prayerService.ts`                | 기도제목 생성 mock service           |
-| `src/hooks/usePrayers.ts`                      | 기도제목 생성 mutation hook          |
-| `src/mocks/prayers.ts`                         | 기도방/기도제목 mock 데이터          |
-| `src/constants/domainOptions.ts`               | 중보기도 요일 필터 옵션              |
-| `src/types/prayer.ts`                          | 중보기도 타입                        |
+| 경로                                           | 역할                                            |
+| ---------------------------------------------- | ----------------------------------------------- |
+| `app/(tabs)/prayer/index.tsx`                  | Downloads 하단 `기도` 탭 루트                   |
+| `src/components/faith/FaithSectionsScreen.tsx` | 기도 목록 공유 렌더러                           |
+| `app/(tabs)/prayer/[id].tsx`                   | 기도방 상세, 기도제목, 응답 기록                |
+| `app/(tabs)/prayer/apply.tsx`                  | 기도방 참여 신청 요일/시간 선택 화면            |
+| `app/(tabs)/prayer/request.tsx`                | 내 기도제목 요청 상태 목록                      |
+| `app/modal/prayer-new.tsx`                     | 기도제목 등록 모달                              |
+| `src/services/prayerService.ts`                | 기도 overview 조회·기도제목 생성 mock service   |
+| `src/hooks/usePrayers.ts`                      | 기도 overview query·기도제목 생성 mutation hook |
+| `src/mocks/prayers.ts`                         | 기도방/기도제목 mock 데이터                     |
+| `src/constants/domainOptions.ts`               | 중보기도 요일 필터 옵션                         |
+| `src/types/prayer.ts`                          | 중보기도 타입                                   |
 
 ## 데이터 타입
 
-`PrayerRoom`은 `weekday`, `leader`, `memberCount`, `isJoined`를 포함합니다. `PrayerTopic`은 `isAnonymous`, `prayerCount`, `hasPrayed`, `isAnswered`, `answer`를 포함합니다.
+`PrayerRoom`은 `weekday`, `leader`, `memberCount`, `isJoined`를 포함합니다. `PrayerTopic`은 `isAnonymous`, `prayerCount`, `hasPrayed`, `isAnswered`, `answer`를 포함합니다. 루트 화면 전용 `PrayerOverview`는 요일방 요약과 내 기도제목 상태 요약을 가지며, 추후 API DTO mapper의 출력 모델로 사용합니다.
 
 ## 결정 사항 (최신 위)
 
 - (2026-07-10) **기도 상세 디자인 상태는 development 전용이다** — 기도 완료·empty·현황·응답 캡처는 `designVariant`만 사용하고 production에서는 무시합니다. 실제 상태는 mock/API service 결과가 결정합니다.
+- (2026-07-10) **기도 루트는 overview query만 소비한다** — `FaithSectionsScreen`은 fixture를 직접 소유하지 않고 `usePrayerOverview → fetchPrayerOverview → mockPrayerOverview` 경계를 사용합니다. 사용자 API가 생기면 service/mapper만 교체하며 화면 문구와 상태 label은 view model mapping으로 유지합니다.
 - (2026-06-27) **기도는 독립 하단 탭이다** — Downloads `PREVIEW_TAB_ROUTES` 기준으로 `/prayer`는 하단 `기도` 탭 루트입니다. 화면 구현은 기존 기도 목록 renderer를 재사용하되, 내부 `중보기도/삶공부` segment는 노출하지 않습니다.
 - (2026-06-27) **내 기도제목은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenPrayerRequest` 구조를 `/prayer/request` route에 직접 반영합니다. 실제 응답완료 요청 API는 기도제목 상태 전이 정책 확정 후 연결합니다.
 - (2026-06-27) **기도방 참여 신청은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenPrayerApply` 구조를 `/prayer/apply` route에 직접 반영합니다. 실제 신청 API와 중복 신청 제한은 승인 정책 확정 후 연결합니다.

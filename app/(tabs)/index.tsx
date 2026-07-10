@@ -30,7 +30,7 @@ export default function HomeScreen() {
   const router = useRouter();
 
   return (
-    <Screen padded={false}>
+    <Screen padded={false} testID="screen-home">
       <View style={styles.top}>
         <Text style={styles.brand}>열린문 커넥트</Text>
         <Pressable

@@ -87,5 +87,6 @@ tags:
     id: tab-life-study
 - assertVisible:
     id: screen-faith
-- assertVisible:
-    text: 신청가능·진행중
+- extendedWaitUntil:
+    visible: 지금 신청 가능한 과정
+    timeout: 5000

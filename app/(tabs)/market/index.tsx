@@ -103,7 +103,7 @@ export default function MarketScreen() {
         : posts.filter((post) => post.status === activeStatus);
 
   return (
-    <Screen scroll={false} padded={false}>
+    <Screen scroll={false} padded={false} testID="screen-market">
       <View style={styles.root}>
         <View style={styles.topBar}>
           <Text style={styles.title}>나눔</Text>

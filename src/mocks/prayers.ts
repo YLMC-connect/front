@@ -1,5 +1,5 @@
 import { MOCK_MEMBERS, MOCK_USER } from "./auth";
-import type { PrayerRoom, PrayerTopic } from "../types/prayer";
+import type { PrayerOverview, PrayerRoom, PrayerTopic } from "../types/prayer";
 
 export const mockPrayerRooms: PrayerRoom[] = [
   {
@@ -72,3 +72,47 @@ export const mockPrayerTopics: PrayerTopic[] = [
     createdAt: "2026-05-20T09:15:00.000Z",
   },
 ];
+
+export const mockPrayerOverview: PrayerOverview = {
+  rooms: [
+    {
+      id: "prayer-overview-room-mon-am",
+      weekday: "mon",
+      period: "morning",
+      memberCount: 45,
+      completedCount: 34,
+      participationRate: 75,
+      status: "joined",
+    },
+    {
+      id: "prayer-overview-room-thu-pm",
+      weekday: "thu",
+      period: "afternoon",
+      memberCount: 10,
+      status: "pending",
+    },
+  ],
+  requests: [
+    {
+      id: "prayer-overview-request-1",
+      title: "어머니 수술 후 회복",
+      category: "치유",
+      status: "reviewing",
+      description: "관리자 검토 후 공개됩니다",
+    },
+    {
+      id: "prayer-overview-request-2",
+      title: "가족의 신앙 회복",
+      category: "구원",
+      status: "published",
+      description: "중보기도요원에게 공개 중입니다",
+    },
+    {
+      id: "prayer-overview-request-3",
+      title: "새로운 자리에서의 평안",
+      category: "일반",
+      status: "rejected",
+      description: "개인정보 표현 수정이 필요합니다",
+    },
+  ],
+};

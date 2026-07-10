@@ -64,6 +64,8 @@
 - OpenAPI 계약 검사 공통화 — 인증·나눔·동행 검사기의 로딩·endpoint·schema·enum·보안·제약 검사를 `openapi-contract-utils.mjs`로 통합하고 오프라인 Node 테스트를 `validate`에 포함
 - 동행 API 계약 게이트 추가 — Swagger 주요 endpoint와 목록/관리 화면 필수 계약 누락을 `test:api:contract:group`으로 자동 판정
 - 디자인 상태 query 분리 — Dev Client 캡처 전용 `designVariant`를 production에서 무시하고 실제 동행 segment·MY 활동 탭은 `section`·`tab` query로 분리
+- faith 루트 데이터 경계 정리 — 기도·삶공부 overview를 화면 내부 fixture에서 domain mock/service/query hook으로 이동하고 공통 queryKey와 비동기 상태 처리를 적용
+- 탭 smoke 관찰성 복구 — 공통 `Screen`의 선택적 `testID` 전달과 5개 루트 탭 식별자를 복원하고 삶공부 비동기 콘텐츠 기준으로 Maestro 시나리오 갱신
 
 ---
 
@@ -120,6 +122,8 @@
 - (2026-07-10) **401 재발급은 API client 인스턴스별 single-flight로 처리한다** — 동시에 만료된 여러 인증 요청은 refresh Promise 하나를 공유하고 성공 후 각 원 요청을 최대 한 번만 재시도합니다. `auth: false` 공개 요청의 401은 로그인 실패이므로 refresh하지 않습니다.
 - (2026-07-10) **공통 API client는 transport 책임만 가진다** — base URL, envelope, 오류, Authorization을 공통화하되 API DTO를 화면 모델로 직접 노출하지 않습니다. 도메인별 service/mapper가 서버 필드와 화면 모델의 차이를 흡수합니다.
 - (2026-07-10) **Swagger 계약 검사는 확정 전 일반 CI와 분리한다** — 인증 성공 DTO와 JWT 정의가 미완성인 동안 `test:api:contract`는 별도 명령으로 누락을 가시화합니다. 백엔드 계약 확정 후 통과 상태가 되면 CI 게이트 포함 여부를 결정합니다.
+- (2026-07-10) **루트 탭 E2E 식별자는 `Screen`이 전달한다** — 화면별 wrapper를 추가하지 않고 공통 `Screen`의 선택적 `testID`를 사용합니다. smoke는 화면 진입 식별자와 비동기 데이터가 렌더링된 현재 IA 문구를 함께 검증합니다.
+- (2026-07-10) **mock-first 화면도 service/query 경계를 지킨다** — 실제 사용자 API가 없는 도메인도 화면이 fixture를 직접 소유하지 않고 `screen → hook → service → mock` 흐름을 사용합니다. API 추가 시 화면이 아니라 service/mapper를 교체합니다.
 - (2026-07-10) **CI의 peer dependency 요구는 lockfile 우회 없이 명시한다** — gluestack 전이 의존성이 요구하는 `@react-spectrum/provider@3.11.1`을 직접 고정합니다. `npm ci --legacy-peer-deps`로 검증을 약화하지 않고 Node 20.19.4/npm 10.8.2 기준 깨끗한 설치를 유지합니다.
 - (2026-06-29) **archive 문서는 이관 안내만 유지한다** — 작업 목록은 GitHub Issues, 변경 이력은 PR description이 단일 출처이므로 `docs/_archive/LOG.md`와 `docs/_archive/TASKS.md`는 긴 과거 본문 대신 조회 안내만 둡니다.
 - (2026-06-27) **탭 IA는 Downloads preview 기준을 따른다** — 하단 탭은 `홈/나눔/동행/기도/삶공부`입니다. `MY`는 하단 탭에서 제거하고 홈 상단 `내 정보 보기` 카드로 진입합니다. `동행` 탭 내부는 Downloads `ScreenGroupList`/`ScreenServiceList`처럼 `소모임/봉사` segment를 둡니다.

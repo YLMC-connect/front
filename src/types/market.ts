@@ -64,6 +64,15 @@ export interface MarketCommentInput {
   content: string;
 }
 
+export interface MarketCommentTarget {
+  marketId: string;
+  commentId: string;
+}
+
+export interface MarketCommentUpdateInput extends MarketCommentTarget {
+  content: string;
+}
+
 export interface MarketDetail {
   id: string;
   thumbSeed: number;

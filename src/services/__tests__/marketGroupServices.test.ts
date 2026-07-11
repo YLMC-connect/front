@@ -8,8 +8,10 @@ import {
 import {
   createMarketComment,
   createMarketService,
+  deleteMarketComment,
   fetchMarketDetail,
   fetchMarketOverview,
+  updateMarketComment,
   type MarketDataSource,
 } from "../marketService";
 
@@ -41,6 +43,8 @@ describe("market and group service boundaries", () => {
       getOverview: jest.fn().mockResolvedValue({ items: [] }),
       getDetail: jest.fn().mockRejectedValue(new Error("not used")),
       createComment: jest.fn().mockRejectedValue(new Error("not used")),
+      updateComment: jest.fn().mockRejectedValue(new Error("not used")),
+      deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
     };
     const service = createMarketService(dataSource);
 
@@ -62,6 +66,8 @@ describe("market and group service boundaries", () => {
       getOverview: jest.fn().mockRejectedValue(new Error("not used")),
       getDetail: jest.fn().mockRejectedValue(new Error("not used")),
       createComment: jest.fn().mockResolvedValue(createdComment),
+      updateComment: jest.fn().mockRejectedValue(new Error("not used")),
+      deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
     };
     const service = createMarketService(dataSource);
 
@@ -79,6 +85,8 @@ describe("market and group service boundaries", () => {
       getOverview: jest.fn().mockRejectedValue(new Error("not used")),
       getDetail: jest.fn().mockRejectedValue(new Error("not used")),
       createComment: jest.fn().mockRejectedValue(new Error("not used")),
+      updateComment: jest.fn().mockRejectedValue(new Error("not used")),
+      deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
     };
     const service = createMarketService(dataSource);
 
@@ -98,6 +106,45 @@ describe("market and group service boundaries", () => {
 
     expect(after.comments).toHaveLength(before.comments.length + 1);
     expect(after.comments.at(-1)).toEqual(created);
+  });
+
+  it("updates and persists an owned comment in the default mock data source", async () => {
+    const updated = await updateMarketComment({
+      marketId: "1",
+      commentId: "comment-4",
+      content: "  수정한 댓글입니다.  ",
+    });
+    const detail = await fetchMarketDetail("1");
+
+    expect(updated).toMatchObject({
+      id: "comment-4",
+      content: "수정한 댓글입니다.",
+      isEdited: true,
+    });
+    expect(detail.comments.find(({ id }) => id === "comment-4")).toEqual(
+      updated,
+    );
+  });
+
+  it("deletes an owned comment as a persistent tombstone", async () => {
+    await deleteMarketComment({ marketId: "1", commentId: "comment-4" });
+    const detail = await fetchMarketDetail("1");
+
+    expect(detail.comments.find(({ id }) => id === "comment-4")).toMatchObject({
+      id: "comment-4",
+      content: undefined,
+      isDeleted: true,
+    });
+  });
+
+  it("rejects changing another member's comment", async () => {
+    await expect(
+      updateMarketComment({
+        marketId: "1",
+        commentId: "comment-1",
+        content: "바꾸면 안 되는 댓글",
+      }),
+    ).rejects.toThrow("내 댓글만 변경할 수 있습니다.");
   });
 
   it("returns group overview and detail through the default data source", async () => {

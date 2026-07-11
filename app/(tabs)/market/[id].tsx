@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -16,7 +17,9 @@ import { Avatar, ErrorState, VisualThumb } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import {
   useCreateMarketComment,
+  useDeleteMarketComment,
   useMarketDetail,
+  useUpdateMarketComment,
 } from "../../../src/hooks/useMarket";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 import type { MarketDetailComment } from "../../../src/types/market";
@@ -30,7 +33,10 @@ export default function MarketDetailScreen() {
   const variant = readDesignVariant(params.designVariant);
   const detail = useMarketDetail(id);
   const createComment = useCreateMarketComment(id);
+  const updateComment = useUpdateMarketComment(id);
+  const deleteComment = useDeleteMarketComment(id);
   const [comment, setComment] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const router = useRouter();
   const { width } = useWindowDimensions();
 
@@ -89,11 +95,41 @@ export default function MarketDetailScreen() {
   const authorName = variant?.startsWith("other")
     ? "박정아"
     : market.authorName;
+  const isCommentPending = createComment.isPending || updateComment.isPending;
+  const resetCommentComposer = () => {
+    setComment("");
+    setEditingCommentId(null);
+  };
   const onSubmitComment = () => {
     if (!comment.trim()) return;
-    createComment.mutate(comment, {
-      onSuccess: () => setComment(""),
-    });
+    if (editingCommentId) {
+      updateComment.mutate(
+        { commentId: editingCommentId, content: comment },
+        { onSuccess: resetCommentComposer },
+      );
+      return;
+    }
+    createComment.mutate(comment, { onSuccess: resetCommentComposer });
+  };
+  const onEditComment = (target: MarketDetailComment) => {
+    setEditingCommentId(target.id);
+    setComment(target.content ?? "");
+  };
+  const onDeleteComment = (target: MarketDetailComment) => {
+    Alert.alert("댓글 삭제", "삭제한 댓글은 복구할 수 없습니다.", [
+      { text: "취소", style: "cancel" },
+      {
+        text: "삭제",
+        style: "destructive",
+        onPress: () => {
+          deleteComment.mutate(target.id, {
+            onSuccess: () => {
+              if (editingCommentId === target.id) resetCommentComposer();
+            },
+          });
+        },
+      },
+    ]);
   };
 
   return (
@@ -192,37 +228,54 @@ export default function MarketDetailScreen() {
               )}
             </View>
 
-            <CommentsSection comments={market.comments} />
+            <CommentsSection
+              comments={market.comments}
+              onEdit={onEditComment}
+              onDelete={onDeleteComment}
+            />
           </View>
         </ScrollView>
 
         <View style={styles.composer}>
+          {editingCommentId ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={resetCommentComposer}
+              style={styles.cancelEdit}
+            >
+              <Text style={styles.cancelEditText}>수정 취소</Text>
+            </Pressable>
+          ) : null}
           <TextInput
             testID="market-comment-input"
             value={comment}
             onChangeText={setComment}
-            editable={!createComment.isPending}
-            placeholder="댓글을 입력해주세요"
+            editable={!isCommentPending}
+            placeholder={
+              editingCommentId ? "댓글을 수정해주세요" : "댓글을 입력해주세요"
+            }
             placeholderTextColor={theme.colors.inkMute}
             style={styles.commentInput}
           />
           <Pressable
             testID="market-comment-submit"
             accessibilityRole="button"
-            accessibilityLabel="댓글 등록"
+            accessibilityLabel={editingCommentId ? "댓글 수정" : "댓글 등록"}
             onPress={onSubmitComment}
-            disabled={!comment.trim() || createComment.isPending}
+            disabled={!comment.trim() || isCommentPending}
             style={styles.sendButton}
           >
-            {createComment.isPending ? (
+            {isCommentPending ? (
               <ActivityIndicator size="small" color={theme.colors.white} />
             ) : (
               <MaterialIcons name="send" size={18} color={theme.colors.white} />
             )}
           </Pressable>
         </View>
-        {createComment.isError ? (
-          <Text style={styles.commentError}>댓글 등록에 실패했습니다.</Text>
+        {createComment.isError ||
+        updateComment.isError ||
+        deleteComment.isError ? (
+          <Text style={styles.commentError}>댓글 처리에 실패했습니다.</Text>
         ) : null}
       </View>
     </Screen>
@@ -288,7 +341,15 @@ function Action({
   );
 }
 
-function CommentsSection({ comments }: { comments: MarketDetailComment[] }) {
+function CommentsSection({
+  comments,
+  onEdit,
+  onDelete,
+}: {
+  comments: MarketDetailComment[];
+  onEdit: (comment: MarketDetailComment) => void;
+  onDelete: (comment: MarketDetailComment) => void;
+}) {
   const activeCount = comments.filter((comment) => !comment.isDeleted).length;
 
   return (
@@ -319,8 +380,21 @@ function CommentsSection({ comments }: { comments: MarketDetailComment[] }) {
                 <View style={styles.commentActions}>
                   {comment.isMine ? (
                     <>
-                      <MiniAction icon="edit" label="수정" />
-                      <MiniAction icon="delete-outline" label="삭제" danger />
+                      <MiniAction
+                        testID={`market-comment-edit-${comment.id}`}
+                        accessibilityLabel={`댓글 수정 ${comment.content}`}
+                        icon="edit"
+                        label="수정"
+                        onPress={() => onEdit(comment)}
+                      />
+                      <MiniAction
+                        testID={`market-comment-delete-${comment.id}`}
+                        accessibilityLabel={`댓글 삭제 ${comment.content}`}
+                        icon="delete-outline"
+                        label="삭제"
+                        danger
+                        onPress={() => onDelete(comment)}
+                      />
                     </>
                   ) : (
                     <MiniAction icon="outlined-flag" label="신고" />
@@ -339,13 +413,25 @@ function MiniAction({
   icon,
   label,
   danger = false,
+  onPress,
+  testID,
+  accessibilityLabel,
 }: {
   icon: keyof typeof MaterialIcons.glyphMap;
   label: string;
   danger?: boolean;
+  onPress?: () => void;
+  testID?: string;
+  accessibilityLabel?: string;
 }) {
   return (
-    <View style={styles.miniAction}>
+    <Pressable
+      testID={testID}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole={onPress ? "button" : undefined}
+      onPress={onPress}
+      style={styles.miniAction}
+    >
       <MaterialIcons
         name={icon}
         size={14}
@@ -354,7 +440,7 @@ function MiniAction({
       <Text style={[styles.miniActionText, danger ? styles.dangerText : null]}>
         {label}
       </Text>
-    </View>
+    </Pressable>
   );
 }
 
@@ -660,6 +746,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     padding: 8,
+  },
+  cancelEdit: {
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  cancelEditText: {
+    color: theme.colors.inkSoft,
+    fontSize: theme.fontSize.xs,
+    fontWeight: theme.fontWeight.semibold,
   },
   commentError: {
     position: "absolute",

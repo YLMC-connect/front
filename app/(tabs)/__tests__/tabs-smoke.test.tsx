@@ -1,5 +1,6 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
+import { Alert } from "react-native";
 import GroupDetailScreen from "../group/[id]";
 import GroupMembersScreen from "../group/members";
 import GroupScreen from "../group";
@@ -79,6 +80,46 @@ describe("v1 tab smoke screens", () => {
         screen.getByPlaceholderText("댓글을 입력해주세요").props.value,
       ).toBe(""),
     );
+  });
+
+  it("edits an owned comment from the market detail screen", async () => {
+    renderWithClient(<MarketDetailScreen />);
+
+    await screen.findByText("아직 남아있을까요? 늦었지만 가능하면 부탁드려요.");
+    fireEvent.press(screen.getByTestId("market-comment-edit-comment-4"));
+    fireEvent.changeText(
+      screen.getByPlaceholderText("댓글을 수정해주세요"),
+      "수정된 댓글 내용",
+    );
+    fireEvent.press(screen.getByLabelText("댓글 수정"));
+
+    expect(await screen.findByText("수정된 댓글 내용")).toBeTruthy();
+    await waitFor(() =>
+      expect(
+        screen.getByPlaceholderText("댓글을 입력해주세요").props.value,
+      ).toBe(""),
+    );
+  });
+
+  it("deletes an owned comment after confirmation", async () => {
+    const alert = jest
+      .spyOn(Alert, "alert")
+      .mockImplementation((_title, _message, buttons) => {
+        buttons?.find(({ text }) => text === "삭제")?.onPress?.();
+      });
+    renderWithClient(<MarketDetailScreen />);
+
+    await screen.findByTestId("market-comment-delete-comment-4");
+    const deletedBefore = screen.getAllByText("삭제된 댓글입니다").length;
+    fireEvent.press(screen.getByTestId("market-comment-delete-comment-4"));
+
+    await waitFor(() =>
+      expect(screen.getAllByText("삭제된 댓글입니다")).toHaveLength(
+        deletedBefore + 1,
+      ),
+    );
+    expect(screen.queryByTestId("market-comment-delete-comment-4")).toBeNull();
+    alert.mockRestore();
   });
 
   it("renders the group screen", async () => {

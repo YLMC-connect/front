@@ -93,6 +93,33 @@ tags:
 - extendedWaitUntil:
     visible: Maestro comment
     timeout: 5000
+- scrollUntilVisible:
+    element:
+      id: market-comment-edit-mock-comment-1-.*
+    direction: DOWN
+- tapOn:
+    id: market-comment-edit-mock-comment-1-.*
+- tapOn:
+    id: market-comment-input
+- eraseText: 15
+- inputText: Maestro edited
+- hideKeyboard
+- tapOn:
+    id: market-comment-submit
+- scrollUntilVisible:
+    element:
+      text: Maestro edited
+    direction: DOWN
+- assertVisible: Maestro edited
+- scrollUntilVisible:
+    element:
+      id: market-comment-delete-mock-comment-1-.*
+    direction: DOWN
+- tapOn:
+    id: market-comment-delete-mock-comment-1-.*
+- assertVisible: 댓글 삭제
+- tapOn: 삭제
+- assertNotVisible: Maestro edited
 - back
 - assertVisible:
     id: screen-home

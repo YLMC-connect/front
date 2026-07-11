@@ -38,6 +38,7 @@
 - 나눔 API 계약 게이트 추가 — `npm run test:api:contract:market`으로 CRUD·댓글·신고·이미지 업로드 endpoint와 목록/상세 화면 요구 필드를 자동 검증
 - 나눔 조회 데이터 경계 추가 — 목록·상세·댓글 fixture를 화면에서 `mockMarketDataSource`로 이동하고 `useMarketOverview`/`useMarketDetail` query를 통해 렌더링하며 미사용 중복 mock 목록 제거
 - 댓글 CUD 수직 경계 연결 — 상세 composer와 내 댓글 action을 create/update/delete hook → service → `MarketDataSource` mutation으로 연결하고, mock 재조회 유지·Query cache 갱신·수정 취소·삭제 확인과 Android Maestro 등록/수정/삭제 흐름을 검증
+- 댓글 삭제 CI flake 제거 — 1초를 넘을 수 있는 mock mutation 완료 assertion에 5초 제한을 명시하고 대상 테스트 5개 병렬 실행·전체 validate로 안정성 확인
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -59,6 +60,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-11) **비동기 UI 테스트는 기능 timeout과 assertion timeout을 분리한다** — mock 지연이 CI 병렬 부하에서 Testing Library 기본 제한을 넘을 수 있으므로, 삭제 완료 상태를 확인하는 assertion에만 5초를 허용하고 production mutation 시간은 변경하지 않습니다.
 - (2026-07-11) **댓글 수정은 composer를 재사용하고 삭제는 확인 후 tombstone으로 바꾼다** — 별도 편집 화면 없이 내 댓글 action이 composer의 편집 대상을 설정하며, 삭제는 네이티브 확인 이후 성공할 때만 cache와 mock 저장소를 갱신합니다. 다른 작성자의 댓글 변경은 data source에서도 거부하고 신고는 사유 선택 UI·오류 code 확정 전까지 연결하지 않습니다.
 - (2026-07-11) **댓글 등록은 계약 확정 전에도 완전한 mock 수직 흐름으로 유지한다** — 화면은 data source를 직접 호출하지 않고 hook mutation만 사용하며, service는 공백 댓글을 차단하고 입력을 정규화합니다. 성공 결과는 상세 query cache에 반영하고 mock data source에도 보관해 재조회와 HTTP 교체 시 화면 소비자를 유지합니다.
 - (2026-07-11) **나눔 핵심 흐름은 오류 코드가 문서화되어야 HTTP로 전환한다** — 상세·등록·수정·삭제·댓글 등록/수정/삭제·신고의 4xx/5xx code가 Swagger에 있어야 화면 메시지 표를 확정할 수 있습니다. 현재 오류 문서 누락 8건을 포함한 전체 누락은 36건입니다.

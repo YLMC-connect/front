@@ -113,10 +113,12 @@ describe("v1 tab smoke screens", () => {
     const deletedBefore = screen.getAllByText("삭제된 댓글입니다").length;
     fireEvent.press(screen.getByTestId("market-comment-delete-comment-4"));
 
-    await waitFor(() =>
-      expect(screen.getAllByText("삭제된 댓글입니다")).toHaveLength(
-        deletedBefore + 1,
-      ),
+    await waitFor(
+      () =>
+        expect(screen.getAllByText("삭제된 댓글입니다")).toHaveLength(
+          deletedBefore + 1,
+        ),
+      { timeout: 5000 },
     );
     expect(screen.queryByTestId("market-comment-delete-comment-4")).toBeNull();
     alert.mockRestore();

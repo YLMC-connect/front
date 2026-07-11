@@ -59,6 +59,11 @@ export interface MarketDetailComment {
   isDeleted: boolean;
 }
 
+export interface MarketCommentInput {
+  marketId: string;
+  content: string;
+}
+
 export interface MarketDetail {
   id: string;
   thumbSeed: number;

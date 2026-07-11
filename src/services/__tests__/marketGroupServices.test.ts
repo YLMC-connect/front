@@ -6,6 +6,7 @@ import {
   type GroupDataSource,
 } from "../groupService";
 import {
+  createMarketComment,
   createMarketService,
   fetchMarketDetail,
   fetchMarketOverview,
@@ -39,11 +40,64 @@ describe("market and group service boundaries", () => {
     const dataSource: MarketDataSource = {
       getOverview: jest.fn().mockResolvedValue({ items: [] }),
       getDetail: jest.fn().mockRejectedValue(new Error("not used")),
+      createComment: jest.fn().mockRejectedValue(new Error("not used")),
     };
     const service = createMarketService(dataSource);
 
     await expect(service.fetchOverview()).resolves.toEqual({ items: [] });
     expect(dataSource.getOverview).toHaveBeenCalledTimes(1);
+  });
+
+  it("trims and creates a market comment through the data source", async () => {
+    const createdComment = {
+      id: "comment-new",
+      authorName: "김은혜",
+      createdLabel: "방금 전",
+      content: "새 댓글",
+      isMine: true,
+      isEdited: false,
+      isDeleted: false,
+    };
+    const dataSource: MarketDataSource = {
+      getOverview: jest.fn().mockRejectedValue(new Error("not used")),
+      getDetail: jest.fn().mockRejectedValue(new Error("not used")),
+      createComment: jest.fn().mockResolvedValue(createdComment),
+    };
+    const service = createMarketService(dataSource);
+
+    await expect(
+      service.createComment({ marketId: "1", content: "  새 댓글  " }),
+    ).resolves.toEqual(createdComment);
+    expect(dataSource.createComment).toHaveBeenCalledWith({
+      marketId: "1",
+      content: "새 댓글",
+    });
+  });
+
+  it("rejects an empty market comment before calling the data source", () => {
+    const dataSource: MarketDataSource = {
+      getOverview: jest.fn().mockRejectedValue(new Error("not used")),
+      getDetail: jest.fn().mockRejectedValue(new Error("not used")),
+      createComment: jest.fn().mockRejectedValue(new Error("not used")),
+    };
+    const service = createMarketService(dataSource);
+
+    expect(() =>
+      service.createComment({ marketId: "1", content: "   " }),
+    ).toThrow("댓글 내용을 입력해주세요.");
+    expect(dataSource.createComment).not.toHaveBeenCalled();
+  });
+
+  it("keeps a created comment in the default mock data source", async () => {
+    const before = await fetchMarketDetail("1");
+    const created = await createMarketComment({
+      marketId: "1",
+      content: "다시 불러와도 남는 댓글",
+    });
+    const after = await fetchMarketDetail("1");
+
+    expect(after.comments).toHaveLength(before.comments.length + 1);
+    expect(after.comments.at(-1)).toEqual(created);
   });
 
   it("returns group overview and detail through the default data source", async () => {

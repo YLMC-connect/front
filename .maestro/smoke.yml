@@ -75,6 +75,27 @@ tags:
     id: tab-market
 - assertVisible:
     id: screen-market
+- tapOn: 아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)
+- extendedWaitUntil:
+    visible:
+      id: market-comment-input
+    timeout: 5000
+- tapOn:
+    id: market-comment-input
+- inputText: Maestro comment
+- hideKeyboard
+- tapOn:
+    id: market-comment-submit
+- scrollUntilVisible:
+    element:
+      text: Maestro comment
+    direction: DOWN
+- extendedWaitUntil:
+    visible: Maestro comment
+    timeout: 5000
+- back
+- assertVisible:
+    id: screen-home
 - tapOn:
     id: tab-group
 - assertVisible:

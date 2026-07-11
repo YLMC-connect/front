@@ -1,5 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -13,7 +14,10 @@ import {
 import { Screen } from "../../../src/components/layout/Screen";
 import { Avatar, ErrorState, VisualThumb } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
-import { useMarketDetail } from "../../../src/hooks/useMarket";
+import {
+  useCreateMarketComment,
+  useMarketDetail,
+} from "../../../src/hooks/useMarket";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 import type { MarketDetailComment } from "../../../src/types/market";
 
@@ -25,6 +29,8 @@ export default function MarketDetailScreen() {
   const id = params.id ?? "1";
   const variant = readDesignVariant(params.designVariant);
   const detail = useMarketDetail(id);
+  const createComment = useCreateMarketComment(id);
+  const [comment, setComment] = useState("");
   const router = useRouter();
   const { width } = useWindowDimensions();
 
@@ -83,6 +89,12 @@ export default function MarketDetailScreen() {
   const authorName = variant?.startsWith("other")
     ? "박정아"
     : market.authorName;
+  const onSubmitComment = () => {
+    if (!comment.trim()) return;
+    createComment.mutate(comment, {
+      onSuccess: () => setComment(""),
+    });
+  };
 
   return (
     <Screen scroll={false} padded={false}>
@@ -186,15 +198,32 @@ export default function MarketDetailScreen() {
 
         <View style={styles.composer}>
           <TextInput
-            editable={false}
+            testID="market-comment-input"
+            value={comment}
+            onChangeText={setComment}
+            editable={!createComment.isPending}
             placeholder="댓글을 입력해주세요"
             placeholderTextColor={theme.colors.inkMute}
             style={styles.commentInput}
           />
-          <Pressable accessibilityRole="button" style={styles.sendButton}>
-            <MaterialIcons name="send" size={18} color={theme.colors.white} />
+          <Pressable
+            testID="market-comment-submit"
+            accessibilityRole="button"
+            accessibilityLabel="댓글 등록"
+            onPress={onSubmitComment}
+            disabled={!comment.trim() || createComment.isPending}
+            style={styles.sendButton}
+          >
+            {createComment.isPending ? (
+              <ActivityIndicator size="small" color={theme.colors.white} />
+            ) : (
+              <MaterialIcons name="send" size={18} color={theme.colors.white} />
+            )}
           </Pressable>
         </View>
+        {createComment.isError ? (
+          <Text style={styles.commentError}>댓글 등록에 실패했습니다.</Text>
+        ) : null}
       </View>
     </Screen>
   );
@@ -631,6 +660,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     padding: 8,
+  },
+  commentError: {
+    position: "absolute",
+    right: 18,
+    bottom: 72,
+    color: theme.colors.danger,
+    fontSize: theme.fontSize.xs,
   },
   commentInput: {
     flex: 1,

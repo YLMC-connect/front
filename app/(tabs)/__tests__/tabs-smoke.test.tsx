@@ -60,6 +60,27 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByPlaceholderText("댓글을 입력해주세요")).toBeTruthy();
   });
 
+  it("creates a comment from the market detail screen", async () => {
+    renderWithClient(<MarketDetailScreen />);
+
+    await screen.findByText(
+      "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
+    );
+    fireEvent.changeText(
+      screen.getByPlaceholderText("댓글을 입력해주세요"),
+      "새로 등록한 댓글",
+    );
+    fireEvent.press(screen.getByLabelText("댓글 등록"));
+
+    expect(await screen.findByText("새로 등록한 댓글")).toBeTruthy();
+    expect(screen.getByText("댓글 4개")).toBeTruthy();
+    await waitFor(() =>
+      expect(
+        screen.getByPlaceholderText("댓글을 입력해주세요").props.value,
+      ).toBe(""),
+    );
+  });
+
   it("renders the group screen", async () => {
     renderWithClient(<GroupScreen />);
 

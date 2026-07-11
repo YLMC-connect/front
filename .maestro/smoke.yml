@@ -35,7 +35,7 @@ tags:
           timeout: 60000
       - tapOn:
           point: "90%,45%"
-- openLink: ylmc-connect:///
+- openLink: ylmc-connect:///login
 - waitForAnimationToEnd:
     timeout: 5000
 - runFlow:
@@ -59,6 +59,22 @@ tags:
     commands:
       - tapOn:
           point: "90%,45%"
+- extendedWaitUntil:
+    visible:
+      id: login-id-input
+    timeout: 60000
+- tapOn:
+    id: login-id-input
+- inputText: gracekim
+- tapOn:
+    id: login-password-input
+- inputText: password
+- hideKeyboard
+- tapOn: 로그인
+- extendedWaitUntil:
+    visible:
+      id: screen-home
+    timeout: 5000
 - extendedWaitUntil:
     visible:
       id: tab-home

@@ -67,6 +67,7 @@ export default function LoginScreen() {
 
         <View style={styles.form}>
           <AuthField
+            testID="login-id-input"
             label="아이디"
             value={values.id}
             onChangeText={(id) => setValues((current) => ({ ...current, id }))}
@@ -75,6 +76,7 @@ export default function LoginScreen() {
             hasError={isError}
           />
           <AuthField
+            testID="login-password-input"
             label="비밀번호"
             value={values.password}
             onChangeText={(password) =>
@@ -128,6 +130,7 @@ export default function LoginScreen() {
 }
 
 function AuthField({
+  testID,
   label,
   value,
   onChangeText,
@@ -137,6 +140,7 @@ function AuthField({
   hasError = false,
   trailingIcon,
 }: {
+  testID?: string;
   label: string;
   value: string;
   onChangeText: (value: string) => void;
@@ -151,6 +155,7 @@ function AuthField({
       <Text style={styles.fieldLabel}>{label}</Text>
       <View style={[styles.inputBox, hasError ? styles.inputBoxError : null]}>
         <NativeTextInput
+          testID={testID}
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}

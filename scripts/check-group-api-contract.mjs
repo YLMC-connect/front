@@ -15,6 +15,7 @@ const {
   requireMaxLength,
   requireRequiredProperty,
   hasOperationMatching,
+  requireDocumentedErrorCodes,
 } = contract;
 
 requireConcreteSuccess("동행 목록", "/api/communion", "get");
@@ -156,6 +157,22 @@ const hasLeaderTransfer = hasOperationMatching(({ operation }) => {
 });
 if (!hasLeaderTransfer) {
   failures.push("소모임장 이관 endpoint가 없습니다.");
+}
+
+for (const [label, path, method] of [
+  ["동행 상세", "/api/communion/{id}", "get"],
+  ["동행 생성", "/api/communion", "post"],
+  ["동행 수정", "/api/communion/{id}", "put"],
+  ["동행 삭제", "/api/communion/{id}", "delete"],
+  ["동행 상태 변경", "/api/communion/{id}/status", "put"],
+  ["동행 참여", "/api/communion/{id}/join", "post"],
+  ["동행 탈퇴", "/api/communion/{id}/leave", "delete"],
+  ["멤버 강퇴", "/api/communion/{id}/kick/{targetUserId}", "delete"],
+  ["공지 생성", "/api/communion/{id}/notices", "post"],
+  ["공지 수정", "/api/communion/{id}/notices/{noticeId}", "put"],
+  ["공지 삭제", "/api/communion/{id}/notices/{noticeId}", "delete"],
+]) {
+  requireDocumentedErrorCodes(label, path, method);
 }
 
 contract.report("동행 API");

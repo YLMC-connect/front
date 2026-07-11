@@ -13,7 +13,9 @@ import {
 import { Screen } from "../../src/components/layout/Screen";
 import { TopBar } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
+import { authApiErrorMessages } from "../../src/constants/apiErrorMessages";
 import { useAuth } from "../../src/hooks/useAuth";
+import { getApiErrorMessage } from "../../src/lib/apiErrorMessage";
 import { readDesignVariant } from "../../src/lib/designVariant";
 
 type FormValues = {
@@ -235,7 +237,13 @@ export default function SignupScreen() {
           </View>
 
           {signup.error ? (
-            <Text style={styles.error}>{signup.error.message}</Text>
+            <Text style={styles.error}>
+              {getApiErrorMessage(
+                signup.error,
+                authApiErrorMessages,
+                "회원가입에 실패했습니다. 입력 정보를 확인해주세요.",
+              )}
+            </Text>
           ) : null}
         </ScrollView>
 

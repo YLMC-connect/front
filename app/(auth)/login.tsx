@@ -11,7 +11,9 @@ import {
 import { Screen } from "../../src/components/layout/Screen";
 import { Button, Toast } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
+import { authApiErrorMessages } from "../../src/constants/apiErrorMessages";
 import { useAuth } from "../../src/hooks/useAuth";
+import { getApiErrorMessage } from "../../src/lib/apiErrorMessage";
 import { readDesignVariant } from "../../src/lib/designVariant";
 
 type FormValues = {
@@ -86,8 +88,13 @@ export default function LoginScreen() {
           />
           {login.error || isError ? (
             <Text style={styles.error}>
-              {login.error?.message ??
-                "아이디 또는 비밀번호가 올바르지 않습니다"}
+              {login.error
+                ? getApiErrorMessage(
+                    login.error,
+                    authApiErrorMessages,
+                    "아이디 또는 비밀번호를 확인해주세요.",
+                  )
+                : "아이디 또는 비밀번호가 올바르지 않습니다"}
             </Text>
           ) : null}
           <Button

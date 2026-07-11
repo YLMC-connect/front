@@ -80,6 +80,8 @@ Jest + React Native Testing Library로 공통 UI, 도메인 옵션, 홈/나눔/�
 
 `test:api:contract:group`은 동행 목록·상세·내 목록·멤버/공지·참여/탈퇴·생성/수정/상태/관리 endpoint와 카드 표시 필드, 일정·장소, 필터, enum, 제목/본문·정원 입력 제한, 소모임장 이관 계약을 확인합니다.
 
+API 오류는 `getApiErrorMessage`가 `ApiError.code`를 도메인 메시지 표로 변환합니다. 문서화되지 않은 API 코드는 서버 `message`를 그대로 노출하지 않고 화면별 안전한 fallback을 사용하며, 현재 Swagger에 정의된 인증 `MEM001~MEM006`은 `authApiErrorMessages`로 관리합니다.
+
 인증 세션은 `authSessionService`가 SecureStore 토큰 저장·앱 시작 복원·동시 401 단일 재발급·재발급 실패 로그아웃을 관리합니다. Swagger 성공 DTO가 확정되기 전에는 mock adapter를 사용하며, HTTP adapter만 교체해 같은 세션 흐름을 유지합니다.
 
 Dev Client Metro smoke:

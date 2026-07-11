@@ -15,6 +15,7 @@ const {
   requireMaxItems,
   findOperationMatching,
   failures,
+  requireDocumentedErrorCodes,
 } = contract;
 
 requireConcreteSuccess("나눔 목록", "/api/share", "get");
@@ -120,6 +121,19 @@ if (!imageUpload) {
 } else {
   requireConcreteRequest("이미지 업로드", imageUpload.path, imageUpload.method);
   requireConcreteSuccess("이미지 업로드", imageUpload.path, imageUpload.method);
+}
+
+for (const [label, path, method] of [
+  ["나눔 상세", "/api/share/{id}", "get"],
+  ["나눔 등록", "/api/share", "post"],
+  ["나눔 수정", "/api/share/{id}", "put"],
+  ["나눔 삭제", "/api/share/{id}", "delete"],
+  ["댓글 등록", "/api/share/{id}/comments", "post"],
+  ["댓글 수정", "/api/share/comments/{commentId}", "put"],
+  ["댓글 삭제", "/api/share/comments/{commentId}", "delete"],
+  ["콘텐츠 신고", "/api/reports", "post"],
+]) {
+  requireDocumentedErrorCodes(label, path, method);
 }
 
 contract.report("나눔 API");

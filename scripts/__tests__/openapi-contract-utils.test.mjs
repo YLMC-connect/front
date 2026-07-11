@@ -37,6 +37,7 @@ function createSpec() {
                 },
               },
             },
+            400: { description: "ITEM001: 요청 값이 올바르지 않습니다." },
           },
         },
       },
@@ -75,6 +76,7 @@ test("accepts concrete operations and declared schema constraints", () => {
   contract.requireSuccessDataProperties("목록", "/items", "get", ["available"]);
   contract.requireConcreteRequest("생성", "/items", "post");
   contract.requirePublicOperation("생성", "/items", "post");
+  contract.requireDocumentedErrorCodes("생성", "/items", "post");
   contract.requireResolvableSecurity("목록", "/items", "get");
   contract.requireProperties("ItemRequest", ["name", "status", "size"]);
   contract.requireEnum("ItemRequest", "status");
@@ -99,8 +101,9 @@ test("collects missing operations, fields, enums, and constraints", () => {
   contract.requireMinimum("ItemRequest", "size", 3);
   contract.requireMaxItems("ItemRequest", "images", 4);
   contract.requireSuccessDataProperties("목록", "/items", "get", ["missing"]);
+  contract.requireDocumentedErrorCodes("목록", "/items", "get");
 
-  assert.equal(contract.failures.length, 9);
+  assert.equal(contract.failures.length, 10);
   assert.match(contract.failures[0], /endpoint가 없습니다/);
   assert.match(contract.failures[1], /필드가 없습니다/);
   assert.match(contract.failures[2], /enum 값/);

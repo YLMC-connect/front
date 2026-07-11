@@ -12,6 +12,7 @@ const {
   requireResolvableSecurity,
   requireProperties,
   requireEnum,
+  requireDocumentedErrorCodes,
 } = contract;
 
 requireConcreteRequest("로그인", "/api/auth/login", "post");
@@ -36,5 +37,15 @@ requireSuccessDataProperties("회원 중복확인", "/api/member/duplicate", "po
 requirePublicOperation("회원 중복확인", "/api/member/duplicate", "post");
 requireProperties("MemberDuplicateRequest", ["searchType", "searchValue"]);
 requireEnum("MemberDuplicateRequest", "searchType");
+
+for (const [label, path, method] of [
+  ["로그인", "/api/auth/login", "post"],
+  ["토큰 재발급", "/api/auth/refresh", "post"],
+  ["회원가입", "/api/signup", "post"],
+  ["내 정보 조회", "/api/member/me", "get"],
+  ["회원 중복확인", "/api/member/duplicate", "post"],
+]) {
+  requireDocumentedErrorCodes(label, path, method);
+}
 
 contract.report("인증 API");

@@ -158,6 +158,19 @@ export function createOpenApiContract(spec) {
     }
   };
 
+  const requireDocumentedErrorCodes = (label, path, method) => {
+    const operation = requireOperation(label, path, method);
+    if (!operation) return;
+    const descriptions = Object.entries(operation.responses ?? {})
+      .filter(([status]) => /^[45]\d\d$/.test(status))
+      .map(([, response]) => response?.description ?? "")
+      .join(" ");
+
+    if (!/\b[A-Z][A-Z0-9_]*\d{3}\b/.test(descriptions)) {
+      failures.push(`${label} 오류 코드가 응답 description에 없습니다.`);
+    }
+  };
+
   const requireResolvableSecurity = (label, path, method) => {
     const operation = operationAt(path, method);
     const schemes = spec.components?.securitySchemes ?? {};
@@ -212,6 +225,7 @@ export function createOpenApiContract(spec) {
     requireMaxItems,
     requireMaxLength,
     requirePublicOperation,
+    requireDocumentedErrorCodes,
     requireResolvableSecurity,
     findOperationMatching,
     hasOperationMatching,

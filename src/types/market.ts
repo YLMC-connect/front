@@ -35,3 +35,40 @@ export interface MarketInput {
   location: string;
   images: string[];
 }
+
+export interface MarketOverviewItem {
+  id: string;
+  thumbSeed: number;
+  title: string;
+  authorName: string;
+  createdLabel: string;
+  status: MarketStatus;
+}
+
+export interface MarketOverview {
+  items: MarketOverviewItem[];
+}
+
+export interface MarketDetailComment {
+  id: string;
+  authorName: string;
+  createdLabel: string;
+  content?: string;
+  isMine: boolean;
+  isEdited: boolean;
+  isDeleted: boolean;
+}
+
+export interface MarketDetail {
+  id: string;
+  thumbSeed: number;
+  title: string;
+  content: string;
+  categoryLabel: string;
+  conditionLabel: string;
+  status: MarketStatus;
+  authorName: string;
+  createdLabel: string;
+  isMine: boolean;
+  comments: MarketDetailComment[];
+}

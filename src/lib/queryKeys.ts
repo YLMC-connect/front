@@ -2,6 +2,18 @@ export const queryKeys = {
   home: {
     all: ["home"] as const,
   },
+  market: {
+    all: ["market"] as const,
+    overview: () => [...queryKeys.market.all, "overview"] as const,
+    detail: (id: string) => [...queryKeys.market.all, "detail", id] as const,
+  },
+  group: {
+    all: ["group"] as const,
+    overview: () => [...queryKeys.group.all, "overview"] as const,
+    detail: (id: string) => [...queryKeys.group.all, "detail", id] as const,
+    members: (id: string) =>
+      [...queryKeys.group.detail(id), "members"] as const,
+  },
   lifeStudy: {
     all: ["lifeStudy"] as const,
     overview: () => [...queryKeys.lifeStudy.all, "overview"] as const,

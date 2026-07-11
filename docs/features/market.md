@@ -1,6 +1,6 @@
 # market (나눔)
 
-> 마지막 갱신: 2026-07-10 | 담당 Phase: P1/P2/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-11 | 담당 Phase: P1/P2/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -36,6 +36,7 @@
 - 나눔 상세 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenMarketDetail`의 정사각형 hero, 상태 overlay/banner, 작성자/칩/본문, 액션 row, 댓글, 하단 composer 구조를 `/market/[id]` route에 RN으로 직접 반영
 - 나눔 작성 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenMarketCreate`의 close/action topbar, 사진 레일, 카테고리 chip, 제목/물품상태/상세설명 section, 안내 박스를 `modal/market-new` route에 RN으로 직접 반영
 - 나눔 API 계약 게이트 추가 — `npm run test:api:contract:market`으로 CRUD·댓글·신고 endpoint와 목록/상세 화면 요구 필드를 자동 검증
+- 나눔 조회 데이터 경계 추가 — 목록·상세·댓글 fixture를 화면에서 `mockMarketDataSource`로 이동하고 `useMarketOverview`/`useMarketDetail` query를 통해 렌더링하며 미사용 중복 mock 목록 제거
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -45,16 +46,19 @@
 | `app/(tabs)/market/[id].tsx`     | 나눔 상세, 상태 변경, 댓글, 신고  |
 | `app/modal/market-new.tsx`       | 나눔 작성 모달                    |
 | `src/mocks/market.ts`            | 나눔 mock 데이터                  |
+| `src/services/marketService.ts`  | 교체 가능한 나눔 조회 data source 경계 |
+| `src/hooks/useMarket.ts`         | 나눔 목록·상세 TanStack Query hook |
 | `src/constants/domainOptions.ts` | 나눔 카테고리/상태/신고 사유 옵션 |
 | `src/types/market.ts`            | 나눔 타입                         |
 | `scripts/check-market-api-contract.mjs` | 나눔 Swagger endpoint·화면 요구 필드 검사 |
 
 ## 데이터 타입
 
-`MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
+`MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. 화면 조회 모델 `MarketOverview`/`MarketDetail`은 목록 표시값, 작성자 소유 여부, 댓글 상태를 포함하며 API DTO mapper의 출력 경계입니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-11) **나눔 화면은 계약 확정 전에도 mock data source를 사용한다** — HTTP DTO/enum mapper 활성화는 기존 13건 계약 gate 뒤로 유지하되, 목록·상세 화면은 `useMarket* → marketService → mockMarketDataSource`를 소비합니다. 계약 확정 후 화면이 아니라 data source만 교체합니다.
 - (2026-07-10) **나눔 디자인 상태와 API 상태를 분리한다** — 목록 empty/error/status, 상세 권한·예약·완료·예외, 작성 form 상태는 `designVariant`로만 캡처하며 production에서는 무시합니다. 실제 상태는 API mapper와 query/mutation 결과로 결정합니다.
 - (2026-07-10) **나눔 mapper는 화면 필수 계약 13건 해소 후 활성화한다** — 목록의 `authorName/images/keyword`, 상태·카테고리·물품상태 enum, 이미지 필수 정책, 상태 변경 endpoint가 Swagger에 없어 현재 HTTP 전환은 작성자 ID 노출·썸네일 소실·코드 추측을 유발합니다. `test:api:contract:market` 통과 전에는 기존 mock 화면을 유지합니다.
 - (2026-06-27) **미사용 service/hook/card 레이어는 제거한다** — 현재 나눔 화면은 Downloads 원본을 기준으로 다시 구현할 예정이고 `MarketItemCard`, `marketService`, `useMarketItems` 호출처가 없어, 실제 API 연결 시 필요한 표면만 다시 만든다.

@@ -1,6 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
+  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -10,54 +11,22 @@ import {
   View,
 } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
-import { Avatar, VisualThumb } from "../../../src/components/ui";
+import { Avatar, ErrorState, VisualThumb } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { useMarketDetail } from "../../../src/hooks/useMarket";
 import { readDesignVariant } from "../../../src/lib/designVariant";
-
-type CommentItem = {
-  author: string;
-  when: string;
-  text?: string;
-  self?: boolean;
-  edited?: boolean;
-  deleted?: boolean;
-};
-
-const comments: CommentItem[] = [
-  {
-    author: "이수진",
-    when: "30분 전",
-    text: "필요해요! 토요일에 들를게요. 연락드릴게요 :)",
-    self: false,
-  },
-  {
-    author: "김지영",
-    when: "25분 전",
-    text: "좋은 나눔 감사해요. 저도 비슷한 시기에 정리했는데 도움이 많이 됐어요!",
-    self: false,
-    edited: true,
-  },
-  {
-    author: "정혜진",
-    when: "20분 전",
-    deleted: true,
-  },
-  {
-    author: "한유라",
-    when: "10분 전",
-    text: "아직 남아있을까요? 늦었지만 가능하면 부탁드려요.",
-    self: true,
-  },
-] as const;
+import type { MarketDetailComment } from "../../../src/types/market";
 
 export default function MarketDetailScreen() {
-  const params = useLocalSearchParams<{ designVariant?: string }>();
-  const variant = readDesignVariant(params.designVariant) ?? "own";
+  const params = useLocalSearchParams<{
+    id?: string;
+    designVariant?: string;
+  }>();
+  const id = params.id ?? "1";
+  const variant = readDesignVariant(params.designVariant);
+  const detail = useMarketDetail(id);
   const router = useRouter();
   const { width } = useWindowDimensions();
-  const isOwn = !variant.startsWith("other");
-  const isReserved = variant === "own-reserved";
-  const isDone = variant === "own-done";
 
   if (variant === "deleted" || variant === "blocked") {
     return (
@@ -83,12 +52,48 @@ export default function MarketDetailScreen() {
     );
   }
 
+  if (detail.isPending) {
+    return (
+      <Screen>
+        <View style={styles.loading}>
+          <ActivityIndicator color={theme.colors.primary} />
+        </View>
+      </Screen>
+    );
+  }
+
+  if (detail.isError || !detail.data) {
+    return (
+      <Screen>
+        <ErrorState message="나눔 정보를 다시 불러와주세요." />
+      </Screen>
+    );
+  }
+
+  const market = detail.data;
+  const isOwn = variant ? !variant.startsWith("other") : market.isMine;
+  const status =
+    variant === "own-reserved"
+      ? "reserved"
+      : variant === "own-done"
+        ? "done"
+        : market.status;
+  const isReserved = status === "reserved";
+  const isDone = status === "done";
+  const authorName = variant?.startsWith("other")
+    ? "박정아"
+    : market.authorName;
+
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
         <ScrollView contentContainerStyle={styles.content}>
           <View style={[styles.hero, { height: width }]}>
-            <VisualThumb size={width} seed={0} style={styles.heroThumb} />
+            <VisualThumb
+              size={width}
+              seed={market.thumbSeed}
+              style={styles.heroThumb}
+            />
             <View style={styles.heroScrim} />
             <Pressable
               accessibilityRole="button"
@@ -134,33 +139,28 @@ export default function MarketDetailScreen() {
 
           <View style={isDone ? styles.doneContent : null}>
             <View style={styles.authorRow}>
-              <Avatar name={isOwn ? "김은혜" : "박정아"} size={40} />
+              <Avatar name={authorName} size={40} />
               <View style={styles.authorText}>
-                <Text style={styles.authorName}>
-                  {isOwn ? "김은혜" : "박정아"}
-                </Text>
-                <Text style={styles.meta}>1시간 전</Text>
+                <Text style={styles.authorName}>{authorName}</Text>
+                <Text style={styles.meta}>{market.createdLabel}</Text>
               </View>
             </View>
 
             <View style={styles.article}>
               <View style={styles.chips}>
                 <View style={styles.softChip}>
-                  <Text style={styles.softChipText}>유아·아동용품</Text>
+                  <Text style={styles.softChipText}>
+                    {market.categoryLabel}
+                  </Text>
                 </View>
                 <View style={styles.conditionChip}>
-                  <Text style={styles.conditionText}>사용감 있음</Text>
+                  <Text style={styles.conditionText}>
+                    {market.conditionLabel}
+                  </Text>
                 </View>
               </View>
-              <Text style={styles.title}>
-                아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)
-              </Text>
-              <Text style={styles.body}>
-                아이가 커서 더 이상 쓰지 않는 장난감 정리해요. 대부분 깨끗하게
-                사용한 것들이고, 블록류 20점 + 인형류 10점 정도 됩니다. 필요하신
-                분께 무료로 드려요!{"\n\n"}수령은 토요일 오후 교회 1층 로비에서
-                가능합니다. 한 분께 일괄로 드리려고 합니다.
-              </Text>
+              <Text style={styles.title}>{market.title}</Text>
+              <Text style={styles.body}>{market.content}</Text>
             </View>
 
             <View style={styles.actions}>
@@ -180,7 +180,7 @@ export default function MarketDetailScreen() {
               )}
             </View>
 
-            <CommentsSection />
+            <CommentsSection comments={market.comments} />
           </View>
         </ScrollView>
 
@@ -259,36 +259,36 @@ function Action({
   );
 }
 
-function CommentsSection() {
-  const activeCount = comments.filter((comment) => !comment.deleted).length;
+function CommentsSection({ comments }: { comments: MarketDetailComment[] }) {
+  const activeCount = comments.filter((comment) => !comment.isDeleted).length;
 
   return (
     <View style={styles.comments}>
       <Text style={styles.commentCount}>댓글 {activeCount}개</Text>
       {comments.map((comment, index) => (
         <View
-          key={`${comment.author}-${comment.when}`}
+          key={comment.id}
           style={[
             styles.commentRow,
             index === comments.length - 1 ? styles.commentRowLast : null,
           ]}
         >
-          <Avatar name={comment.author} size={32} />
+          <Avatar name={comment.authorName} size={32} />
           <View style={styles.commentBody}>
             <View style={styles.commentMeta}>
-              <Text style={styles.commentAuthor}>{comment.author}</Text>
-              <Text style={styles.commentWhen}>{comment.when}</Text>
-              {comment.edited ? (
+              <Text style={styles.commentAuthor}>{comment.authorName}</Text>
+              <Text style={styles.commentWhen}>{comment.createdLabel}</Text>
+              {comment.isEdited ? (
                 <Text style={styles.commentWhen}>· 수정됨</Text>
               ) : null}
             </View>
-            {comment.deleted ? (
+            {comment.isDeleted ? (
               <Text style={styles.deletedComment}>삭제된 댓글입니다</Text>
             ) : (
               <>
-                <Text style={styles.commentText}>{comment.text}</Text>
+                <Text style={styles.commentText}>{comment.content}</Text>
                 <View style={styles.commentActions}>
-                  {comment.self ? (
+                  {comment.isMine ? (
                     <>
                       <MiniAction icon="edit" label="수정" />
                       <MiniAction icon="delete-outline" label="삭제" danger />
@@ -331,6 +331,11 @@ function MiniAction({
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  loading: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   content: { paddingBottom: 96 },
   hero: {
     position: "relative",

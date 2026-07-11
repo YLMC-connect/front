@@ -1,39 +1,29 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
-import { Avatar, Card, TopBar } from "../../../src/components/ui";
+import { Avatar, Card, ErrorState, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { useGroupDetail } from "../../../src/hooks/useGroups";
 import { readDesignVariant } from "../../../src/lib/designVariant";
-
-const members = ["김은혜", "박정아", "이수진", "김지영", "정혜진", "조미경"];
-
-const notices = [
-  {
-    title: "5월 18일 토요일 모임 안내",
-    preview:
-      "이번 주 토요일은 북한산 도선사 코스로 갑니다. 오전 7시 교회 앞에서 모입니다.",
-    when: "2일 전",
-  },
-  {
-    title: "신규 멤버 환영합니다",
-    preview:
-      "이번 달에 새로 합류해주신 분들 진심으로 환영해요. 다음 모임 때 소개 시간이 있을 예정입니다.",
-    when: "1주 전",
-    edited: true,
-  },
-];
 
 export default function GroupDetailScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ designVariant?: string }>();
-  const variant = readDesignVariant(params.designVariant) ?? "leader";
+  const params = useLocalSearchParams<{
+    id?: string;
+    designVariant?: string;
+  }>();
+  const id = params.id ?? "1";
+  const variant = readDesignVariant(params.designVariant);
+  const detail = useGroupDetail(id);
   const isDeleted = variant === "deleted-exception";
-  const isLeader = variant === "leader" || variant === "leader-closed";
-  const isMember = variant === "member" || variant === "leave-confirm";
-  const isNonMember = variant === "non-member" || variant === "non-closed";
-  const isClosed = variant === "leader-closed" || variant === "non-closed";
-  const current = isClosed ? 25 : 18;
 
   if (isDeleted) {
     return (
@@ -54,6 +44,40 @@ export default function GroupDetailScreen() {
     );
   }
 
+  if (detail.isPending) {
+    return (
+      <Screen>
+        <View style={styles.loading}>
+          <ActivityIndicator color={theme.colors.primary} />
+        </View>
+      </Screen>
+    );
+  }
+
+  if (detail.isError || !detail.data) {
+    return (
+      <Screen>
+        <ErrorState message="소모임 정보를 다시 불러와주세요." />
+      </Screen>
+    );
+  }
+
+  const group = detail.data;
+  const isLeader = variant
+    ? variant === "leader" || variant === "leader-closed"
+    : group.isLeader;
+  const isMember = variant
+    ? variant === "member" || variant === "leave-confirm"
+    : group.isJoined && !group.isLeader;
+  const isNonMember = variant
+    ? variant === "non-member" || variant === "non-closed"
+    : !group.isJoined;
+  const isClosed = variant
+    ? variant === "leader-closed" || variant === "non-closed"
+    : group.status === "closed";
+  const current = isClosed ? group.maxMembers : group.currentMembers;
+  const leaderName = variant && !isLeader ? "한지수" : group.leaderName;
+
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
@@ -62,7 +86,7 @@ export default function GroupDetailScreen() {
           <View style={styles.header}>
             <View style={styles.chips}>
               <View style={styles.categoryChip}>
-                <Text style={styles.categoryText}>운동·건강</Text>
+                <Text style={styles.categoryText}>{group.categoryLabel}</Text>
               </View>
               <View
                 style={[
@@ -81,7 +105,7 @@ export default function GroupDetailScreen() {
               </View>
             </View>
 
-            <Text style={styles.title}>토요 산악회</Text>
+            <Text style={styles.title}>{group.name}</Text>
 
             <View style={styles.memberMeta}>
               <MaterialIcons
@@ -90,23 +114,18 @@ export default function GroupDetailScreen() {
                 color={theme.colors.inkSoft}
               />
               <Text style={styles.memberMetaText}>
-                현재 <Text style={styles.memberCount}>{current}</Text> / 최대 25
+                현재 <Text style={styles.memberCount}>{current}</Text> / 최대{" "}
+                {group.maxMembers}
               </Text>
             </View>
 
-            <Text style={styles.description}>
-              매주 토요일 함께 산을 오르며 자연을 느끼고 신앙을 나누는
-              모임입니다.{"\n"}등산 초보도 환영해요. 등산화·물·간식만 챙겨오시면
-              돼요.{"\n"}모임 일정과 코스는 매주 화요일 공지로 안내드립니다.
-            </Text>
+            <Text style={styles.description}>{group.description}</Text>
 
             <View style={styles.leaderCard}>
-              <Avatar name={isLeader ? "김은혜" : "한지수"} size={36} />
+              <Avatar name={leaderName} size={36} />
               <View style={styles.leaderText}>
                 <Text style={styles.leaderLabel}>소모임장</Text>
-                <Text style={styles.leaderName}>
-                  {isLeader ? "김은혜" : "한지수"}
-                </Text>
+                <Text style={styles.leaderName}>{leaderName}</Text>
               </View>
               <View style={styles.leaderBadge}>
                 <Text style={styles.leaderBadgeText}>소모임장</Text>
@@ -145,13 +164,13 @@ export default function GroupDetailScreen() {
             ) : null}
           </View>
 
-          <SectionTitle title={`멤버 ${members.length}명`} />
+          <SectionTitle title={`멤버 ${group.members.length}명`} />
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.memberRail}
           >
-            {members.map((name, index) => (
+            {group.members.map((name, index) => (
               <View key={name} style={styles.memberItem}>
                 <View>
                   <Avatar name={name} size={48} />
@@ -174,18 +193,18 @@ export default function GroupDetailScreen() {
 
           <SectionTitle title="공지사항" />
           <View style={styles.noticeList}>
-            {notices.map((notice) => (
-              <Card key={notice.title} style={styles.noticeCard}>
+            {group.notices.map((notice) => (
+              <Card key={notice.id} style={styles.noticeCard}>
                 <View style={styles.noticeTitleRow}>
                   <Text style={styles.noticeTitle}>{notice.title}</Text>
-                  {notice.edited ? (
+                  {notice.isEdited ? (
                     <Text style={styles.editedText}>수정됨</Text>
                   ) : null}
                 </View>
                 <Text numberOfLines={2} style={styles.noticePreview}>
                   {notice.preview}
                 </Text>
-                <Text style={styles.noticeWhen}>{notice.when}</Text>
+                <Text style={styles.noticeWhen}>{notice.createdLabel}</Text>
                 {isLeader ? (
                   <View style={styles.noticeActions}>
                     <MiniAction icon="edit" label="수정" />
@@ -257,6 +276,11 @@ function SectionTitle({ title }: { title: string }) {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  loading: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   body: {
     paddingBottom: 24,
   },

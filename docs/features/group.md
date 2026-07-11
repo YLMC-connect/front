@@ -1,6 +1,6 @@
 # group (소모임)
 
-> 마지막 갱신: 2026-07-10 | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-11 | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -36,6 +36,7 @@
 - 소모임 멤버 관리 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupMembers`의 flat row list, 강퇴 pill, 이관 경고/선택 row, 하단 이관 action, confirm/toast variant를 `/group/members` route에 RN으로 직접 반영
 - 동행 탭 구조 반영 — Downloads `ScreenGroupList`/`ScreenServiceList` 기준으로 `/group`을 `동행` 루트로 두고 내부 `소모임/봉사` segment와 봉사 전용 card list를 추가
 - 동행 API 계약 게이트 추가 — `npm run test:api:contract:group`으로 목록·상세·내 목록·멤버/공지·참여/탈퇴·생성/수정/상태/관리 endpoint와 화면 필수 계약을 자동 검증
+- 동행 조회 데이터 경계 추가 — 목록·봉사·내 목록·상세·멤버 fixture를 화면에서 `mockGroupDataSource`로 이동하고 `useGroupOverview`/`useGroupDetail`/`useGroupMembers` query로 렌더링하며 미사용 중복 mock 목록 제거
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -47,16 +48,19 @@
 | `app/(tabs)/group/members.tsx`   | 소모임 멤버 관리와 소모임장 이관   |
 | `app/modal/group-new.tsx`        | 소모임 개설 모달                   |
 | `src/mocks/groups.ts`            | 소모임 mock 데이터                 |
+| `src/services/groupService.ts`   | 교체 가능한 동행 조회 data source 경계 |
+| `src/hooks/useGroups.ts`         | 동행 목록·상세·멤버 TanStack Query hook |
 | `src/constants/domainOptions.ts` | 소모임 카테고리/상태 필터 옵션     |
 | `src/types/group.ts`             | 소모임 타입                        |
 | `scripts/check-group-api-contract.mjs` | 동행 Swagger endpoint·화면/관리 계약 검사 |
 
 ## 데이터 타입
 
-`Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
+`Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 화면 조회 모델 `GroupOverview`/`GroupDetail`/`GroupMemberDetail`은 목록·봉사·권한·멤버·공지 표시값을 포함하며 API DTO mapper의 출력 경계입니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-11) **동행 조회 화면은 계약 확정 전에도 mock data source를 사용한다** — HTTP DTO/enum/권한 mapper 활성화는 기존 24건 계약 gate 뒤로 유지하되, 목록·상세·멤버 화면은 `useGroup* → groupService → mockGroupDataSource`를 소비합니다. 실제 목록·내 목록·멤버 응답은 같은 data source 인터페이스로 교체합니다.
 - (2026-07-10) **동행 디자인 variant와 실제 탐색 상태를 분리한다** — 캡처용 권한·오류·confirm/toast 상태는 development 전용 `designVariant`, 실제 소모임/봉사 segment는 `section` query를 사용합니다. 서버 권한·모집 상태가 연결되면 domain model이 화면 분기를 소유합니다.
 - (2026-07-10) **동행 mapper는 화면·관리 계약 24건 해소 후 활성화한다** — 주요 endpoint는 대부분 존재하지만 목록 `content/schedule`, category/status/keyword 필터, 응답 enum, 화면 입력 제한, 소모임장 이관 endpoint가 부족합니다. `test:api:contract:group` 통과 전에는 기존 mock 화면을 유지하고 강퇴를 이관처럼 사용하는 권한 추측을 금지합니다.
 - (2026-06-27) **동행 탭은 소모임/봉사 segment를 가진다** — Downloads `ScreenGroupList`와 `ScreenServiceList`를 기준으로 `/group`은 하단 `동행` 탭 루트가 되고, 내부에서 `소모임` 목록과 `봉사` 전용 리스트를 전환합니다.

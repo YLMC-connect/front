@@ -36,40 +36,44 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("내 활동 요약")).toBeTruthy();
   });
 
-  it("renders the market screen", () => {
+  it("renders the market screen", async () => {
     renderWithClient(<MarketScreen />);
 
     expect(screen.getByText("나눔")).toBeTruthy();
     expect(screen.getByText("나눔중")).toBeTruthy();
     expect(
-      screen.getByText("아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)"),
+      await screen.findByText(
+        "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
+      ),
     ).toBeTruthy();
   });
 
-  it("renders the market detail screen", () => {
+  it("renders the market detail screen", async () => {
     renderWithClient(<MarketDetailScreen />);
 
     expect(
-      screen.getByText("아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)"),
+      await screen.findByText(
+        "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
+      ),
     ).toBeTruthy();
     expect(screen.getByText("댓글 3개")).toBeTruthy();
     expect(screen.getByPlaceholderText("댓글을 입력해주세요")).toBeTruthy();
   });
 
-  it("renders the group screen", () => {
+  it("renders the group screen", async () => {
     renderWithClient(<GroupScreen />);
 
     expect(screen.getByText("동행")).toBeTruthy();
     expect(screen.getAllByText("소모임").length).toBeGreaterThan(0);
     expect(screen.getAllByText("봉사").length).toBeGreaterThan(0);
-    expect(screen.getByText("내 소모임")).toBeTruthy();
+    expect(await screen.findByText("내 소모임")).toBeTruthy();
     expect(screen.getByText("전체 모임")).toBeTruthy();
   });
 
-  it("renders the group detail screen", () => {
+  it("renders the group detail screen", async () => {
     renderWithClient(<GroupDetailScreen />);
 
-    expect(screen.getByText("토요 산악회")).toBeTruthy();
+    expect(await screen.findByText("토요 산악회")).toBeTruthy();
     expect(screen.getByText("멤버 6명")).toBeTruthy();
     expect(screen.getByText("공지사항")).toBeTruthy();
   });
@@ -82,11 +86,11 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByPlaceholderText("공지 제목 (최대 30자)")).toBeTruthy();
   });
 
-  it("renders the group members screen", () => {
+  it("renders the group members screen", async () => {
     renderWithClient(<GroupMembersScreen />);
 
     expect(screen.getByText("멤버 관리")).toBeTruthy();
-    expect(screen.getByText("전체 8명")).toBeTruthy();
+    expect(await screen.findByText("전체 8명")).toBeTruthy();
     expect(screen.getByText("소모임장")).toBeTruthy();
   });
 

@@ -58,7 +58,7 @@
 - 오래된 문서 정리 — GitHub Issues/PR로 이관된 archive 문서는 안내문만 남기고, PLAN.md의 폐기된 탭 설명을 최신 홈/나눔/동행/기도/삶공부 IA로 갱신
 - CI lockfile 정합성 복구 — gluestack 전이 의존성의 peer 요구인 `@react-spectrum/provider@3.11.1`을 명시해 GitHub Actions의 `npm ci` 실패를 해소
 - 공통 API transport 기반 추가 — 환경별 base URL, `{ code, message, data }` envelope 검증, Authorization 헤더, `ApiError` 정규화를 `src/lib/apiClient.ts`에 격리하고 단위 테스트 추가
-- 인증 API 계약 게이트 추가 — `scripts/check-auth-api-contract.mjs`가 Swagger의 구체 성공 DTO·공개 endpoint JWT 예외·security scheme 참조를 자동 확인
+- 인증 API 계약 게이트 추가 — `scripts/check-auth-api-contract.mjs`가 Swagger의 구체 성공 DTO·회원 중복확인 `data.available`·공개 endpoint JWT 예외·security scheme 참조를 자동 확인
 - 인증 401 복구 경계 추가 — 인증 요청의 동시 401을 단일 refresh로 합치고 성공 시 각 요청을 한 번만 재시도하며 공개 요청은 재발급 대상에서 제외
 - 나눔 API 계약 게이트 추가 — Swagger endpoint와 목록/상세 화면 필수 필드 누락을 `test:api:contract:market`으로 자동 판정
 - OpenAPI 계약 검사 공통화 — 인증·나눔·동행 검사기의 로딩·endpoint·schema·enum·보안·제약 검사를 `openapi-contract-utils.mjs`로 통합하고 오프라인 Node 테스트를 `validate`에 포함
@@ -120,6 +120,7 @@
 ## 결정 사항 (최신 위)
 
 - (2026-07-11) **visual capture는 Dev Client overlay node만 조작한다** — route 진입 후 고정 좌표를 블라인드 탭하지 않고 UI hierarchy에서 overlay label과 bounds를 찾을 때만 탭합니다. 앱 화면이면 즉시 캡처 단계로 넘어가 비동기 목록 카드나 CTA가 눌리지 않게 합니다.
+- (2026-07-11) **계약 gate는 envelope 내부 필드도 검증한다** — endpoint와 응답 `$ref` 존재만으로 통과시키지 않고, 화면 흐름이 의존하는 `data.available`처럼 필수 성공 필드는 공통 OpenAPI 유틸이 실제 schema property까지 확인합니다.
 - (2026-07-11) **실제 API 대기 중에도 조회 화면은 data source 경계를 지킨다** — Swagger DTO를 추측하는 HTTP mapper는 계약 검사 통과 전까지 만들지 않지만, 화면은 fixture를 직접 소유하지 않고 `screen → hook → service → data source` 흐름을 사용합니다. HTTP 전환은 data source 구현 교체로 제한합니다.
 - (2026-07-10) **디자인 상태는 production 데이터 상태를 덮지 않는다** — visual capture는 `designVariant`만 사용하고 `readDesignVariant`가 development에서만 값을 반환합니다. 실제 탐색 상태는 `section`, `tab`처럼 의미 있는 query로 분리하며 서버 오류·권한·완료 상태는 향후 service/domain model에서 결정합니다.
 - (2026-07-10) **계약 검사 엔진과 도메인 요구 목록을 분리한다** — OpenAPI 로딩과 공통 규칙은 `openapi-contract-utils.mjs`, 인증·나눔·동행의 필수 endpoint/필드는 각 checker가 소유합니다. 공통 엔진과 디자인 라우트는 네트워크 없이 `test:scripts`로 CI 검증합니다.

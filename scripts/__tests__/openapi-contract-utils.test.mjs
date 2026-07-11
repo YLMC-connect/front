@@ -55,7 +55,12 @@ function createSpec() {
         },
         ItemResponse: {
           type: "object",
-          properties: { data: { type: "array" } },
+          properties: {
+            data: {
+              type: "object",
+              properties: { available: { type: "boolean" } },
+            },
+          },
         },
       },
     },
@@ -66,6 +71,7 @@ test("accepts concrete operations and declared schema constraints", () => {
   const contract = createOpenApiContract(createSpec());
 
   contract.requireConcreteSuccess("목록", "/items", "get");
+  contract.requireSuccessDataProperties("목록", "/items", "get", ["available"]);
   contract.requireConcreteRequest("생성", "/items", "post");
   contract.requirePublicOperation("생성", "/items", "post");
   contract.requireResolvableSecurity("목록", "/items", "get");
@@ -87,8 +93,9 @@ test("collects missing operations, fields, enums, and constraints", () => {
   contract.requireRequiredProperty("ItemRequest", "status");
   contract.requireMaxLength("ItemRequest", "name", 30);
   contract.requireMaximum("ItemRequest", "size", 10);
+  contract.requireSuccessDataProperties("목록", "/items", "get", ["missing"]);
 
-  assert.equal(contract.failures.length, 6);
+  assert.equal(contract.failures.length, 7);
   assert.match(contract.failures[0], /endpoint가 없습니다/);
   assert.match(contract.failures[1], /필드가 없습니다/);
   assert.match(contract.failures[2], /enum 값/);

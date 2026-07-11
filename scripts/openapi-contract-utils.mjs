@@ -22,6 +22,12 @@ export function createOpenApiContract(spec) {
     return Object.values(content)[0]?.schema;
   };
 
+  const resolveSchema = (schema) => {
+    const prefix = "#/components/schemas/";
+    if (!schema?.$ref?.startsWith(prefix)) return schema;
+    return schemaNamed(schema.$ref.slice(prefix.length));
+  };
+
   const isConcreteSchema = (schema) =>
     Boolean(
       schema?.$ref ||
@@ -55,6 +61,24 @@ export function createOpenApiContract(spec) {
     const schema = schemaFromContent(operation.responses?.["200"]?.content);
     if (!isConcreteSchema(schema)) {
       failures.push(`${label} 200 응답 스키마가 구체 DTO가 아닙니다.`);
+    }
+  };
+
+  const requireSuccessDataProperties = (label, path, method, properties) => {
+    const operation = requireOperation(label, path, method);
+    if (!operation) return;
+    const responseSchema = schemaFromContent(
+      operation.responses?.["200"]?.content,
+    );
+    const envelopeSchema = resolveSchema(responseSchema);
+    const dataSchema = resolveSchema(envelopeSchema?.properties?.data);
+
+    for (const property of properties) {
+      if (!dataSchema?.properties?.[property]) {
+        failures.push(
+          `${label} 200 응답 data.${property} 필드가 구체적으로 정의되지 않았습니다.`,
+        );
+      }
     }
   };
 
@@ -155,6 +179,7 @@ export function createOpenApiContract(spec) {
     requireOperation,
     requireConcreteRequest,
     requireConcreteSuccess,
+    requireSuccessDataProperties,
     requireProperties,
     requireEnum,
     requireRequiredProperty,

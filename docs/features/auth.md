@@ -1,6 +1,6 @@
 # auth (인증)
 
-> 마지막 갱신: 2026-07-10 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-11 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -30,6 +30,7 @@
 - SecureStore 토큰 조회 보강 — access/refresh token 개별·동시 조회와 저장·삭제 동작을 테스트로 고정
 - Swagger 인증 계약 검사 추가 — `npm run test:api:contract`로 login/refresh/signup/me 성공 DTO와 JWT 정의 누락을 자동 판정
 - 인증 세션 수명주기 구현 — 로그인·회원가입 토큰 저장, 앱 시작 세션 복원, 401 refresh token rotation, 재발급 실패 토큰 정리·로그아웃을 `authSessionService`로 통합하고 자동 테스트 추가
+- 회원 중복확인 계약 검사 추가 — `POST /api/member/duplicate` 요청 enum과 공개 endpoint 여부, 200 envelope의 `data.available` 필드를 자동 검증
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -55,10 +56,11 @@
 
 ## 데이터 타입
 
-`LoginInput`, `SignupInput`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리하며, 인증 성공 DTO는 Swagger에 필드가 확정된 뒤 추가합니다.
+`LoginInput`, `SignupInput`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리합니다. 중복확인 요청은 Swagger의 `searchType: id | phone`, `searchValue` 계약을 따르며 성공 DTO의 `data.available`이 확정된 뒤 HTTP adapter 타입을 추가합니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-11) **회원가입 전 중복확인도 인증 계약 gate에 포함한다** — `POST /api/member/duplicate`는 구체 요청뿐 아니라 공개 endpoint `security: []`와 200 응답 `data.available`을 반드시 제공해야 합니다. 설명 문자열만으로 성공 응답을 추측하지 않습니다.
 - (2026-07-10) **로그인·회원가입 오류/loading/toast query는 디자인 전용이다** — 캡처용 `designVariant`는 development에서만 해석합니다. 실제 로그인 오류와 pending 상태는 mutation 결과가 단일 출처이며 URL query로 인증 결과를 만들지 않습니다.
 - (2026-07-10) **세션 상태 전이는 session manager가 단독 소유한다** — 화면/hook은 토큰을 직접 다루지 않습니다. adapter 성공 후 SecureStore 저장이 끝나야 `authenticated`가 되며, 앱 시작은 현재 회원 조회로 복원하고 401이면 refresh합니다. refresh 실패는 토큰을 지우고 `anonymous`, 일반 네트워크 실패는 토큰을 보존하고 `unavailable`로 구분합니다.
 - (2026-07-10) **불완전한 인증 성공 응답은 추측하지 않는다** — login/refresh/signup/me 성공 DTO와 refresh rotation 정책이 Swagger에 확정되기 전에는 `httpAuthAdapter`를 활성화하지 않습니다. `test:api:contract`는 이 계약 게이트를 자동 판정하며, 미확정 기간에는 일반 `validate`와 분리합니다.
@@ -80,7 +82,7 @@
 
 ## 미결 / 추적
 
-- 실제 로그인·회원가입·내 정보 성공 DTO, refresh 요청/응답 및 token rotation 정책, 공개 endpoint의 JWT 예외, `/api/member/me` security scheme 이름 확정 필요. 단일 출처는 Issue #9입니다.
+- 실제 로그인·회원가입·내 정보 성공 DTO, refresh 요청/응답 및 token rotation 정책, 공개 endpoint의 JWT 예외, `/api/member/me` security scheme 이름, 중복확인 `data.available` 성공 응답 확정 필요. 단일 출처는 Issue #9이며 현재 `test:api:contract`는 11건을 검출합니다.
 - 약관/개인정보 동의 화면의 필수 여부와 문구 확정 필요.
 - auth bottom CTA/toast 정렬 후 `login-toast mean=10.18`, `code-toast mean=10.10`, `code-error mean=8.80`, `code-loading mean=8.32`, `code default mean=8.66`까지 낮췄습니다. `terms-sheet mean=12.21`는 Android status bar/time, backdrop blur 미적용, RN/web font metric 차이가 남아 후속 공통 overlay 정렬에서 추적합니다.
 - signup variant residual은 `ScreenSignup` 구조 정렬 후 `signup-pw-error 21.74→10.14`, `signup-id-dup 20.65→9.18`, `signup default 12.50→7.76`까지 낮췄습니다. 남은 차이는 RN status bar/time, secure input glyph/font metrics, CSS gradient/shadow 번역 차이 중심으로 후속 공통 정렬에서 추적합니다.

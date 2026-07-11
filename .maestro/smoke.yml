@@ -275,3 +275,20 @@ tags:
 - extendedWaitUntil:
     visible: 지금 신청 가능한 과정
     timeout: 5000
+- tapOn:
+    id: tab-home
+- assertVisible:
+    id: screen-home
+- tapOn:
+    id: home-open-mypage
+- assertVisible: 마이페이지
+- scrollUntilVisible:
+    element:
+      id: mypage-logout
+    direction: DOWN
+- tapOn:
+    id: mypage-logout
+- extendedWaitUntil:
+    visible:
+      id: login-id-input
+    timeout: 5000

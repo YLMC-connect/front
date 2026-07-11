@@ -1,12 +1,14 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
-import { router } from "expo-router";
+import { router, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
+import MyPageScreen from "../../(tabs)/mypage";
 import LoginScreenRoute from "../login";
 import SignupScreenRoute from "../signup";
 import SplashScreenRoute from "../splash";
 import TermsSheetScreenRoute from "../terms-sheet";
 import TermsScreenRoute from "../terms";
 import { renderWithClient } from "../../../src/test/renderWithClient";
+import { MOCK_USER } from "../../../src/mocks/auth";
 import { useAuthStore } from "../../../src/store/authStore";
 
 jest.mock("expo-secure-store", () => ({
@@ -165,6 +167,32 @@ describe("auth smoke screens", () => {
       currentUser: { id: "member-new-member", name: "새성도" },
       isLoggedIn: true,
       status: "authenticated",
+    });
+  });
+
+  it("clears both tokens and becomes anonymous when logout cleanup partially fails", async () => {
+    const replace = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({ replace } as never);
+    jest
+      .mocked(SecureStore.deleteItemAsync)
+      .mockRejectedValueOnce(new Error("keystore delete failed"))
+      .mockResolvedValueOnce(undefined);
+    useAuthStore.getState().setAuthenticated(MOCK_USER);
+    renderWithClient(<MyPageScreen />);
+
+    fireEvent.press(screen.getByTestId("mypage-logout"));
+
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/login"));
+    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(
+      "ylmc.access_token",
+    );
+    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(
+      "ylmc.refresh_token",
+    );
+    expect(useAuthStore.getState()).toMatchObject({
+      currentUser: null,
+      isLoggedIn: false,
+      status: "anonymous",
     });
   });
 });

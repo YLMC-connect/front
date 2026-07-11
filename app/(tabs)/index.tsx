@@ -34,6 +34,7 @@ export default function HomeScreen() {
       <View style={styles.top}>
         <Text style={styles.brand}>열린문 커넥트</Text>
         <Pressable
+          testID="home-open-mypage"
           accessibilityLabel="내 정보 보기"
           style={styles.profileCard}
           onPress={() => router.push("/mypage")}

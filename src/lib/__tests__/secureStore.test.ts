@@ -51,4 +51,22 @@ describe("secureTokenStore", () => {
       "ylmc.refresh_token",
     );
   });
+
+  it("attempts to delete both tokens when one deletion fails", async () => {
+    const error = new Error("keystore delete failed");
+    jest
+      .mocked(SecureStore.deleteItemAsync)
+      .mockRejectedValueOnce(error)
+      .mockResolvedValueOnce(undefined);
+
+    await expect(secureTokenStore.clear()).rejects.toBe(error);
+
+    expect(SecureStore.deleteItemAsync).toHaveBeenCalledTimes(2);
+    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(
+      "ylmc.access_token",
+    );
+    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(
+      "ylmc.refresh_token",
+    );
+  });
 });

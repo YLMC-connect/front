@@ -22,7 +22,13 @@ export const secureTokenStore = {
     await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
   },
   async clear() {
-    await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-    await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+    const results = await Promise.allSettled([
+      SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY),
+      SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY),
+    ]);
+    const failed = results.find(
+      (result): result is PromiseRejectedResult => result.status === "rejected",
+    );
+    if (failed) throw failed.reason;
   },
 };

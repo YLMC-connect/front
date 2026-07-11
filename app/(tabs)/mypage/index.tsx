@@ -159,6 +159,7 @@ function MenuRow({
 
   return (
     <Pressable
+      testID={item.action === "logout" ? "mypage-logout" : undefined}
       accessibilityRole="button"
       onPress={onPress}
       style={[styles.menuRow, last ? styles.menuRowLast : null]}

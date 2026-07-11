@@ -11,6 +11,8 @@ const {
   requireProperties,
   requireEnum,
   requireRequiredProperty,
+  requireMaxLength,
+  requireMaxItems,
   findOperationMatching,
   failures,
 } = contract;
@@ -64,6 +66,7 @@ requireProperties("ShareDetailDto", [
   "authorName",
   "createdAt",
   "images",
+  "location",
 ]);
 requireProperties("ShareCommentResponseDto", [
   "id",
@@ -81,6 +84,25 @@ for (const schemaName of ["ShareDto", "ShareDetailDto"]) {
 requireEnum("ShareListRequestDto", "status");
 requireEnum("ShareListRequestDto", "categoryCode");
 requireRequiredProperty("ShareCreateRequestDto", "images");
+requireMaxItems("ShareCreateRequestDto", "images", 5);
+
+const shareWriteFields = [
+  "title",
+  "content",
+  "categoryCode",
+  "itemStatus",
+  "location",
+];
+for (const schemaName of ["ShareCreateRequestDto", "ShareUpdateRequestDto"]) {
+  requireProperties(schemaName, shareWriteFields);
+  for (const property of shareWriteFields) {
+    requireRequiredProperty(schemaName, property);
+  }
+  requireEnum(schemaName, "categoryCode");
+  requireEnum(schemaName, "itemStatus");
+  requireMaxLength(schemaName, "title", 30);
+  requireMaxLength(schemaName, "content", 500);
+}
 requireOperation("나눔 상태 변경", "/api/share/{id}/status", "put");
 
 const imageUpload = findOperationMatching(({ method, operation }) => {

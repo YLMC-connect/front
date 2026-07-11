@@ -121,6 +121,7 @@
 
 - (2026-07-11) **visual capture는 Dev Client overlay node만 조작한다** — route 진입 후 고정 좌표를 블라인드 탭하지 않고 UI hierarchy에서 overlay label과 bounds를 찾을 때만 탭합니다. 앱 화면이면 즉시 캡처 단계로 넘어가 비동기 목록 카드나 CTA가 눌리지 않게 합니다.
 - (2026-07-11) **계약 gate는 envelope 내부 필드도 검증한다** — endpoint와 응답 `$ref` 존재만으로 통과시키지 않고, 화면 흐름이 의존하는 `data.available`처럼 필수 성공 필드는 공통 OpenAPI 유틸이 실제 schema property까지 확인합니다.
+- (2026-07-11) **계약 gate는 request 제약도 화면 규칙과 대조한다** — required/property뿐 아니라 `minLength/maxLength`, `minimum/maximum`, `maxItems`, enum을 검증해 프런트 validator와 서버 DTO가 서로 다른 규칙을 갖지 않게 합니다.
 - (2026-07-11) **실제 API 대기 중에도 조회 화면은 data source 경계를 지킨다** — Swagger DTO를 추측하는 HTTP mapper는 계약 검사 통과 전까지 만들지 않지만, 화면은 fixture를 직접 소유하지 않고 `screen → hook → service → data source` 흐름을 사용합니다. HTTP 전환은 data source 구현 교체로 제한합니다.
 - (2026-07-10) **디자인 상태는 production 데이터 상태를 덮지 않는다** — visual capture는 `designVariant`만 사용하고 `readDesignVariant`가 development에서만 값을 반환합니다. 실제 탐색 상태는 `section`, `tab`처럼 의미 있는 query로 분리하며 서버 오류·권한·완료 상태는 향후 service/domain model에서 결정합니다.
 - (2026-07-10) **계약 검사 엔진과 도메인 요구 목록을 분리한다** — OpenAPI 로딩과 공통 규칙은 `openapi-contract-utils.mjs`, 인증·나눔·동행의 필수 endpoint/필드는 각 checker가 소유합니다. 공통 엔진과 디자인 라우트는 네트워크 없이 `test:scripts`로 CI 검증합니다.

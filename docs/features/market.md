@@ -58,6 +58,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-11) **나눔 request 계약은 PLAN의 작성 필드와 화면 제한을 함께 검증한다** — 생성·수정은 제목/내용/카테고리/물품상태/장소를 필수로 요구하고 제목 30자, 내용 500자, 사진 5장과 입력 enum을 확인합니다. 현재 Swagger와 PLAN 사이의 장소 필드 충돌을 포함한 전체 누락은 28건입니다.
 - (2026-07-11) **이미지 업로드도 나눔 계약 gate에 포함한다** — 게시글 `images` 필드만으로는 로컬 URI를 서버 URL로 바꿀 수 없으므로, 경로를 가정하지 않고 이미지/파일 업로드 operation을 찾아 request/200 DTO까지 확인합니다. 현재 누락은 기존 13건에 업로드 endpoint 1건을 더한 14건입니다.
 - (2026-07-11) **나눔 화면은 계약 확정 전에도 mock data source를 사용한다** — HTTP DTO/enum mapper 활성화는 기존 13건 계약 gate 뒤로 유지하되, 목록·상세 화면은 `useMarket* → marketService → mockMarketDataSource`를 소비합니다. 계약 확정 후 화면이 아니라 data source만 교체합니다.
 - (2026-07-10) **나눔 디자인 상태와 API 상태를 분리한다** — 목록 empty/error/status, 상세 권한·예약·완료·예외, 작성 form 상태는 `designVariant`로만 캡처하며 production에서는 무시합니다. 실제 상태는 API mapper와 query/mutation 결과로 결정합니다.
@@ -87,7 +88,7 @@
 
 ## 미결 / 추적
 
-- Swagger 목록 작성자명·대표 이미지·검색, 코드 enum, 이미지 필수, 상태 변경·이미지 업로드 endpoint 14건 확정 필요. 단일 출처는 Issue #19이며 `npm run test:api:contract:market`으로 확인합니다.
+- Swagger 목록 작성자명·대표 이미지·검색, 상세/작성 장소, 입력·응답 enum, 제목/본문/사진 제한, 이미지 필수, 상태 변경·이미지 업로드 endpoint 28건 확정 필요. 장소를 백엔드 계약에 추가할지 최신 기획에서 제거할지도 명시적으로 결정해야 합니다. 단일 출처는 Issue #19이며 `npm run test:api:contract:market`으로 확인합니다.
 - 신고 처리 후 블라인드/관리자 큐 정책은 API/운영 정책 확정 후 반영.
 - 나눔 작성 residual은 topbar/chip/control typography 정렬 후 `market-create-limit mean=14.62`, `market-create-fill mean=13.69`, `market-edit mean=13.70`, `market-create mean=12.22`, `market-create-back mean=7.72`입니다. 빈 작성/뒤로가기 화면은 status bar/time, RN font metrics, confirm overlay geometry 차이로 소폭 상승했지만 화면군 합계는 감소했습니다.
 - 나눔 목록 residual은 FAB root overlay 정렬 후 `market-list-all mean=13.75`, `market-list mean=10.64`, `market-list-reserved mean=6.79`, `market-list-done mean=6.31`입니다. 남은 차이는 native status bar/time, RN font metrics, tab bar geometry와 목록 row text metric 차이로 추적합니다.

@@ -11,7 +11,9 @@ const {
   requireProperties,
   requireEnum,
   requireMaximum,
+  requireMinimum,
   requireMaxLength,
+  requireRequiredProperty,
   hasOperationMatching,
 } = contract;
 
@@ -58,6 +60,7 @@ requireProperties("CommunionDto", [
   "title",
   "content",
   "schedule",
+  "location",
   "categoryCode",
   "maxParticipants",
   "currentParticipants",
@@ -78,6 +81,8 @@ requireProperties("CommunionDetailDto", [
   "type",
   "title",
   "content",
+  "schedule",
+  "location",
   "categoryCode",
   "maxParticipants",
   "currentParticipants",
@@ -107,6 +112,26 @@ requireEnum("CommunionCreateRequestDto", "categoryCode");
 requireEnum("CommunionUpdateRequestDto", "categoryCode");
 requireEnum("CommunionStatusUpdateRequestDto", "status");
 
+const createFields = [
+  "type",
+  "title",
+  "content",
+  "categoryCode",
+  "maxParticipants",
+  "schedule",
+  "location",
+];
+const updateFields = createFields.filter((field) => field !== "type");
+for (const [schemaName, fields] of [
+  ["CommunionCreateRequestDto", createFields],
+  ["CommunionUpdateRequestDto", updateFields],
+]) {
+  requireProperties(schemaName, fields);
+  for (const property of fields) {
+    requireRequiredProperty(schemaName, property);
+  }
+}
+
 for (const schemaName of [
   "CommunionCreateRequestDto",
   "CommunionUpdateRequestDto",
@@ -114,6 +139,7 @@ for (const schemaName of [
   requireMaxLength(schemaName, "title", 20);
   requireMaxLength(schemaName, "content", 200);
   requireMaximum(schemaName, "maxParticipants", 100);
+  requireMinimum(schemaName, "maxParticipants", 2);
 }
 requireMaxLength("NoticeRequestDto", "title", 30);
 requireMaxLength("NoticeRequestDto", "content", 500);

@@ -50,7 +50,8 @@ function createSpec() {
           properties: {
             name: { type: "string", maxLength: 20 },
             status: { type: "string", enum: ["OPEN", "DONE"] },
-            size: { type: "integer", maximum: 100 },
+            size: { type: "integer", minimum: 2, maximum: 100 },
+            images: { type: "array", maxItems: 5 },
           },
         },
         ItemResponse: {
@@ -80,6 +81,8 @@ test("accepts concrete operations and declared schema constraints", () => {
   contract.requireRequiredProperty("ItemRequest", "name");
   contract.requireMaxLength("ItemRequest", "name", 20);
   contract.requireMaximum("ItemRequest", "size", 100);
+  contract.requireMinimum("ItemRequest", "size", 2);
+  contract.requireMaxItems("ItemRequest", "images", 5);
 
   assert.deepEqual(contract.failures, []);
 });
@@ -93,9 +96,11 @@ test("collects missing operations, fields, enums, and constraints", () => {
   contract.requireRequiredProperty("ItemRequest", "status");
   contract.requireMaxLength("ItemRequest", "name", 30);
   contract.requireMaximum("ItemRequest", "size", 10);
+  contract.requireMinimum("ItemRequest", "size", 3);
+  contract.requireMaxItems("ItemRequest", "images", 4);
   contract.requireSuccessDataProperties("목록", "/items", "get", ["missing"]);
 
-  assert.equal(contract.failures.length, 7);
+  assert.equal(contract.failures.length, 9);
   assert.match(contract.failures[0], /endpoint가 없습니다/);
   assert.match(contract.failures[1], /필드가 없습니다/);
   assert.match(contract.failures[2], /enum 값/);

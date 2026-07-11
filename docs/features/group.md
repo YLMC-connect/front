@@ -60,6 +60,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-11) **동행 request 계약은 PLAN의 일정·장소와 화면 제한을 함께 검증한다** — 목록·상세·생성·수정에서 일정과 장소를 요구하고 제목 20자, 내용 200자, 정원 2~100명, 공지 30/500자 제약을 확인합니다. 현재 Swagger와 PLAN 사이의 일정·장소 충돌을 포함한 전체 누락은 35건입니다.
 - (2026-07-11) **동행 조회 화면은 계약 확정 전에도 mock data source를 사용한다** — HTTP DTO/enum/권한 mapper 활성화는 기존 24건 계약 gate 뒤로 유지하되, 목록·상세·멤버 화면은 `useGroup* → groupService → mockGroupDataSource`를 소비합니다. 실제 목록·내 목록·멤버 응답은 같은 data source 인터페이스로 교체합니다.
 - (2026-07-10) **동행 디자인 variant와 실제 탐색 상태를 분리한다** — 캡처용 권한·오류·confirm/toast 상태는 development 전용 `designVariant`, 실제 소모임/봉사 segment는 `section` query를 사용합니다. 서버 권한·모집 상태가 연결되면 domain model이 화면 분기를 소유합니다.
 - (2026-07-10) **동행 mapper는 화면·관리 계약 24건 해소 후 활성화한다** — 주요 endpoint는 대부분 존재하지만 목록 `content/schedule`, category/status/keyword 필터, 응답 enum, 화면 입력 제한, 소모임장 이관 endpoint가 부족합니다. `test:api:contract:group` 통과 전에는 기존 mock 화면을 유지하고 강퇴를 이관처럼 사용하는 권한 추측을 금지합니다.
@@ -90,7 +91,7 @@
 
 ## 미결 / 추적
 
-- Swagger 목록 설명·일정·필터, type/category/status enum, 입력 제한, 소모임장 이관 계약 24건 확정 필요. 단일 출처는 Issue #21이며 `npm run test:api:contract:group`으로 확인합니다.
+- Swagger 목록 설명·일정·장소·필터, 상세 일정·장소, type/category/status enum, 입력 제한, 소모임장 이관 계약 35건 확정 필요. 일정·장소를 백엔드 계약에 추가할지 최신 기획에서 제거할지도 명시적으로 결정해야 합니다. 단일 출처는 Issue #21이며 `npm run test:api:contract:group`으로 확인합니다.
 - 참여 신청이 즉시 참여인지 승인 대기인지 운영 정책 확인 필요.
 - 공지 작성 권한과 소모임장/관리자 권한 모델 확인 필요.
 - 강제 내보내기 이의 제기/복구 플로우는 실제 API와 운영 정책 확정 후 반영.

@@ -118,6 +118,24 @@ export function createOpenApiContract(spec) {
     }
   };
 
+  const requireMinimum = (schemaName, property, expected) => {
+    const minimum = schemaNamed(schemaName)?.properties?.[property]?.minimum;
+    if (minimum !== expected) {
+      failures.push(
+        `${schemaName}.${property} minimum이 ${expected}(으)로 명시되지 않았습니다.`,
+      );
+    }
+  };
+
+  const requireMaxItems = (schemaName, property, expected) => {
+    const maxItems = schemaNamed(schemaName)?.properties?.[property]?.maxItems;
+    if (maxItems !== expected) {
+      failures.push(
+        `${schemaName}.${property} maxItems가 ${expected}(으)로 명시되지 않았습니다.`,
+      );
+    }
+  };
+
   const requireMaxLength = (schemaName, property, expected) => {
     const maxLength =
       schemaNamed(schemaName)?.properties?.[property]?.maxLength;
@@ -190,6 +208,8 @@ export function createOpenApiContract(spec) {
     requireEnum,
     requireRequiredProperty,
     requireMaximum,
+    requireMinimum,
+    requireMaxItems,
     requireMaxLength,
     requirePublicOperation,
     requireResolvableSecurity,

@@ -76,7 +76,7 @@ Jest + React Native Testing Library로 공통 UI, 도메인 옵션, 홈/나눔/�
 
 `test:api:contract`는 공개 OpenAPI 문서의 로그인·토큰 재발급·회원가입·내 정보 성공 DTO, 회원 중복확인 `data.available`, 공개 endpoint/JWT 정의를 확인합니다. 백엔드 계약이 불완전하면 누락 항목을 출력하고 실패하며, 계약 확정 전에는 일반 `validate`와 분리해 실행합니다. 다른 OpenAPI 문서를 확인할 때는 `YLMC_OPENAPI_URL`로 덮어씁니다.
 
-`test:api:contract:market`은 나눔 CRUD·댓글·신고 endpoint와 목록/상세 화면에 필요한 작성자명·이미지·검색·enum·상태 변경 계약을 확인합니다. 누락 필드를 임의 fallback으로 감추지 않고 DTO mapper를 활성화하기 전에 실패로 노출합니다.
+`test:api:contract:market`은 나눔 CRUD·댓글·신고·이미지 업로드 endpoint와 목록/상세 화면에 필요한 작성자명·이미지·검색·enum·상태 변경 계약을 확인합니다. 업로드 경로 이름을 가정하지 않고 operation summary/id로 찾은 뒤 request/200 DTO를 검증합니다. 누락 필드를 임의 fallback으로 감추지 않고 DTO mapper를 활성화하기 전에 실패로 노출합니다.
 
 `test:api:contract:group`은 동행 목록·상세·내 목록·멤버/공지·참여/탈퇴·생성/수정/상태/관리 endpoint와 카드 표시 필드, 필터, enum, 입력 제한, 소모임장 이관 계약을 확인합니다.
 

@@ -60,7 +60,7 @@
 - 공통 API transport 기반 추가 — 환경별 base URL, `{ code, message, data }` envelope 검증, Authorization 헤더, `ApiError` 정규화를 `src/lib/apiClient.ts`에 격리하고 단위 테스트 추가
 - 인증 API 계약 게이트 추가 — `scripts/check-auth-api-contract.mjs`가 Swagger의 구체 성공 DTO·회원 중복확인 `data.available`·공개 endpoint JWT 예외·security scheme 참조를 자동 확인
 - 인증 401 복구 경계 추가 — 인증 요청의 동시 401을 단일 refresh로 합치고 성공 시 각 요청을 한 번만 재시도하며 공개 요청은 재발급 대상에서 제외
-- 나눔 API 계약 게이트 추가 — Swagger endpoint와 목록/상세 화면 필수 필드 누락을 `test:api:contract:market`으로 자동 판정
+- 나눔 API 계약 게이트 추가 — Swagger CRUD·댓글·신고·이미지 업로드 endpoint와 목록/상세 화면 필드 누락을 `test:api:contract:market`으로 자동 판정
 - OpenAPI 계약 검사 공통화 — 인증·나눔·동행 검사기의 로딩·endpoint·schema·enum·보안·제약 검사를 `openapi-contract-utils.mjs`로 통합하고 오프라인 Node 테스트를 `validate`에 포함
 - 동행 API 계약 게이트 추가 — Swagger 주요 endpoint와 목록/관리 화면 필수 계약 누락을 `test:api:contract:group`으로 자동 판정
 - 디자인 상태 query 분리 — Dev Client 캡처 전용 `designVariant`를 production에서 무시하고 실제 동행 segment·MY 활동 탭은 `section`·`tab` query로 분리

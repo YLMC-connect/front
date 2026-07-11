@@ -35,7 +35,7 @@
 - 나눔 목록 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenMarketList`의 상태 탭, 카테고리 칩, 86px thumb row, 예약/완료 overlay, fixed FAB 구조를 `/market` route에 RN으로 직접 반영
 - 나눔 상세 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenMarketDetail`의 정사각형 hero, 상태 overlay/banner, 작성자/칩/본문, 액션 row, 댓글, 하단 composer 구조를 `/market/[id]` route에 RN으로 직접 반영
 - 나눔 작성 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenMarketCreate`의 close/action topbar, 사진 레일, 카테고리 chip, 제목/물품상태/상세설명 section, 안내 박스를 `modal/market-new` route에 RN으로 직접 반영
-- 나눔 API 계약 게이트 추가 — `npm run test:api:contract:market`으로 CRUD·댓글·신고 endpoint와 목록/상세 화면 요구 필드를 자동 검증
+- 나눔 API 계약 게이트 추가 — `npm run test:api:contract:market`으로 CRUD·댓글·신고·이미지 업로드 endpoint와 목록/상세 화면 요구 필드를 자동 검증
 - 나눔 조회 데이터 경계 추가 — 목록·상세·댓글 fixture를 화면에서 `mockMarketDataSource`로 이동하고 `useMarketOverview`/`useMarketDetail` query를 통해 렌더링하며 미사용 중복 mock 목록 제거
 
 ## 주요 파일 (도메인 파일 지도)
@@ -58,6 +58,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-11) **이미지 업로드도 나눔 계약 gate에 포함한다** — 게시글 `images` 필드만으로는 로컬 URI를 서버 URL로 바꿀 수 없으므로, 경로를 가정하지 않고 이미지/파일 업로드 operation을 찾아 request/200 DTO까지 확인합니다. 현재 누락은 기존 13건에 업로드 endpoint 1건을 더한 14건입니다.
 - (2026-07-11) **나눔 화면은 계약 확정 전에도 mock data source를 사용한다** — HTTP DTO/enum mapper 활성화는 기존 13건 계약 gate 뒤로 유지하되, 목록·상세 화면은 `useMarket* → marketService → mockMarketDataSource`를 소비합니다. 계약 확정 후 화면이 아니라 data source만 교체합니다.
 - (2026-07-10) **나눔 디자인 상태와 API 상태를 분리한다** — 목록 empty/error/status, 상세 권한·예약·완료·예외, 작성 form 상태는 `designVariant`로만 캡처하며 production에서는 무시합니다. 실제 상태는 API mapper와 query/mutation 결과로 결정합니다.
 - (2026-07-10) **나눔 mapper는 화면 필수 계약 13건 해소 후 활성화한다** — 목록의 `authorName/images/keyword`, 상태·카테고리·물품상태 enum, 이미지 필수 정책, 상태 변경 endpoint가 Swagger에 없어 현재 HTTP 전환은 작성자 ID 노출·썸네일 소실·코드 추측을 유발합니다. `test:api:contract:market` 통과 전에는 기존 mock 화면을 유지합니다.
@@ -86,7 +87,7 @@
 
 ## 미결 / 추적
 
-- Swagger 목록 작성자명·대표 이미지·검색, 코드 enum, 이미지 필수, 상태 변경 endpoint 13건 확정 필요. 단일 출처는 Issue #19이며 `npm run test:api:contract:market`으로 확인합니다.
+- Swagger 목록 작성자명·대표 이미지·검색, 코드 enum, 이미지 필수, 상태 변경·이미지 업로드 endpoint 14건 확정 필요. 단일 출처는 Issue #19이며 `npm run test:api:contract:market`으로 확인합니다.
 - 신고 처리 후 블라인드/관리자 큐 정책은 API/운영 정책 확정 후 반영.
 - 나눔 작성 residual은 topbar/chip/control typography 정렬 후 `market-create-limit mean=14.62`, `market-create-fill mean=13.69`, `market-edit mean=13.70`, `market-create mean=12.22`, `market-create-back mean=7.72`입니다. 빈 작성/뒤로가기 화면은 status bar/time, RN font metrics, confirm overlay geometry 차이로 소폭 상승했지만 화면군 합계는 감소했습니다.
 - 나눔 목록 residual은 FAB root overlay 정렬 후 `market-list-all mean=13.75`, `market-list mean=10.64`, `market-list-reserved mean=6.79`, `market-list-done mean=6.31`입니다. 남은 차이는 native status bar/time, RN font metrics, tab bar geometry와 목록 row text metric 차이로 추적합니다.

@@ -117,6 +117,16 @@ test("reports inherited security and unresolved scheme references", () => {
 test("finds a domain operation by metadata without assuming its path", () => {
   const contract = createOpenApiContract(createSpec());
 
+  assert.deepEqual(
+    contract.findOperationMatching(
+      ({ operation }) => operation?.summary === "항목 목록",
+    ),
+    {
+      path: "/items",
+      method: "get",
+      operation: createSpec().paths["/items"].get,
+    },
+  );
   assert.equal(
     contract.hasOperationMatching(
       ({ operation }) => operation?.summary === "항목 목록",
@@ -128,5 +138,11 @@ test("finds a domain operation by metadata without assuming its path", () => {
       ({ operation }) => operation?.summary === "소모임장 이관",
     ),
     false,
+  );
+  assert.equal(
+    contract.findOperationMatching(
+      ({ operation }) => operation?.summary === "존재하지 않음",
+    ),
+    undefined,
   );
 });

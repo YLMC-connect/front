@@ -154,12 +154,18 @@ export function createOpenApiContract(spec) {
     }
   };
 
+  const findOperationMatching = (predicate) => {
+    for (const [path, pathItem] of Object.entries(spec.paths ?? {})) {
+      for (const [method, operation] of Object.entries(pathItem)) {
+        const candidate = { path, method, operation };
+        if (predicate(candidate)) return candidate;
+      }
+    }
+    return undefined;
+  };
+
   const hasOperationMatching = (predicate) =>
-    Object.entries(spec.paths ?? {}).some(([path, pathItem]) =>
-      Object.entries(pathItem).some(([method, operation]) =>
-        predicate({ path, method, operation }),
-      ),
-    );
+    Boolean(findOperationMatching(predicate));
 
   const report = (label) => {
     if (failures.length > 0) {
@@ -187,6 +193,7 @@ export function createOpenApiContract(spec) {
     requireMaxLength,
     requirePublicOperation,
     requireResolvableSecurity,
+    findOperationMatching,
     hasOperationMatching,
     report,
   };

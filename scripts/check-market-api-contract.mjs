@@ -11,6 +11,8 @@ const {
   requireProperties,
   requireEnum,
   requireRequiredProperty,
+  findOperationMatching,
+  failures,
 } = contract;
 
 requireConcreteSuccess("나눔 목록", "/api/share", "get");
@@ -80,5 +82,22 @@ requireEnum("ShareListRequestDto", "status");
 requireEnum("ShareListRequestDto", "categoryCode");
 requireRequiredProperty("ShareCreateRequestDto", "images");
 requireOperation("나눔 상태 변경", "/api/share/{id}/status", "put");
+
+const imageUpload = findOperationMatching(({ method, operation }) => {
+  const summary = operation?.summary ?? "";
+  const operationId = operation?.operationId ?? "";
+  return (
+    method === "post" &&
+    ((summary.includes("업로드") &&
+      (summary.includes("이미지") || summary.includes("파일"))) ||
+      /upload.*(image|file)|(image|file).*upload/i.test(operationId))
+  );
+});
+if (!imageUpload) {
+  failures.push("이미지 업로드 endpoint가 없습니다.");
+} else {
+  requireConcreteRequest("이미지 업로드", imageUpload.path, imageUpload.method);
+  requireConcreteSuccess("이미지 업로드", imageUpload.path, imageUpload.method);
+}
 
 contract.report("나눔 API");

@@ -243,6 +243,22 @@ describe("v1 tab smoke screens", () => {
     expect(screen.queryByText("수정된 산악회 공지")).toBeNull();
   });
 
+  it("deletes a group notice directly from the detail", async () => {
+    renderWithClient(<GroupDetailScreen />);
+
+    await screen.findByTestId("group-notice-delete-notice-2");
+    fireEvent.press(screen.getByTestId("group-notice-delete-notice-2"));
+    expect(screen.getByText("공지를 삭제하시겠습니까?")).toBeTruthy();
+    fireEvent.press(screen.getAllByText("삭제").at(-1)!);
+
+    await waitFor(
+      () =>
+        expect(screen.queryByTestId("group-notice-delete-notice-2")).toBeNull(),
+      { timeout: 5000 },
+    );
+    expect(screen.queryByText("신규 멤버 환영합니다")).toBeNull();
+  });
+
   it("renders the group members screen", async () => {
     renderWithClient(<GroupMembersScreen />);
 

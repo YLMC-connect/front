@@ -252,12 +252,10 @@ tags:
 - assertVisible: Maestro edited notice
 - scrollUntilVisible:
     element:
-      id: group-notice-edit-mock-notice-1-.*
+      id: group-notice-delete-mock-notice-1-.*
     direction: DOWN
 - tapOn:
-    id: group-notice-edit-mock-notice-1-.*
-- tapOn:
-    id: group-notice-delete
+    id: group-notice-delete-mock-notice-1-.*
 - assertVisible: 공지를 삭제하시겠습니까?
 - tapOn: 삭제
 - assertNotVisible: Maestro edited notice

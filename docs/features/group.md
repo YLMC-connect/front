@@ -39,13 +39,14 @@
 - 동행 조회 데이터 경계 추가 — 목록·봉사·내 목록·상세·멤버 fixture를 화면에서 `mockGroupDataSource`로 이동하고 `useGroupOverview`/`useGroupDetail`/`useGroupMembers` query로 렌더링하며 미사용 중복 mock 목록 제거
 - 소모임 공지 관리 수직 흐름 연결 — 공지 작성·수정·삭제를 `useGroup* → groupService → mockGroupDataSource` 경계와 상세 query cache에 연결하고, 저장 후 해당 소모임 상세로 명시적으로 복귀하도록 구현
 - 소모임 공지 회귀 검증 — 서비스·화면 테스트에서 입력 정규화와 생성/수정/삭제 지속성을 확인하고 Android Maestro에서 작성→수정→삭제를 완주. 공지 디자인 4개 상태 residual은 `create 5.48`, `create-filled/edit 10.76`, `delete-confirm 10.86`
+- 소모임 상세 공지 인라인 삭제 연결 — 공지 카드의 기존 삭제 액션을 같은 `useDeleteGroupNotice` mutation과 확인 대화상자에 연결하고, 상세 cache 즉시 제거·실패 문구·Android Maestro 직접 삭제를 검증
 
 ## 주요 파일 (도메인 파일 지도)
 
 | 경로                             | 역할                               |
 | -------------------------------- | ---------------------------------- |
 | `app/(tabs)/group/index.tsx`     | 동행 탭 루트, 소모임/봉사 segment  |
-| `app/(tabs)/group/[id].tsx`      | 소모임 상세, 참여/탈퇴, 공지, 멤버 |
+| `app/(tabs)/group/[id].tsx`      | 소모임 상세, 공지 작성·인라인 삭제, 멤버 |
 | `app/(tabs)/group/notices.tsx`   | 소모임 공지 작성/수정/삭제          |
 | `app/(tabs)/group/members.tsx`   | 소모임 멤버 관리와 소모임장 이관   |
 | `app/modal/group-new.tsx`        | 소모임 개설 모달                   |
@@ -62,6 +63,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-11) **공지 삭제 진입점은 하나의 mutation 경계를 공유한다** — 편집 화면과 상세 카드의 삭제 UI는 각각 local confirm 상태만 소유하고, 실제 삭제·cache 갱신·mock 지속성은 `useDeleteGroupNotice → groupService → GroupDataSource` 한 경로에서 처리합니다.
 - (2026-07-11) **공지 CUD는 화면과 mock data source 사이의 완결된 수직 경계로 먼저 제공한다** — 제목/내용은 trim 후 필수값과 30/500자 제한을 서비스에서 검증하고, mutation 성공 시 상세 query cache를 갱신합니다. 실제 HTTP 전환은 공지 권한과 오류 코드 계약이 문서화되면 같은 data source 인터페이스에서 수행하며, 캡처용 `designVariant` 상태는 실제 폼 상태와 분리합니다.
 - (2026-07-11) **동행 핵심 흐름은 오류 코드가 문서화되어야 HTTP로 전환한다** — 상세·생성·수정·삭제·상태·참여·탈퇴·강퇴·공지 CUD의 4xx/5xx code가 Swagger에 있어야 권한/정원/상태 오류 문구를 확정할 수 있습니다. 현재 오류 문서 누락 11건을 포함한 전체 누락은 46건입니다.
 - (2026-07-11) **동행 request 계약은 PLAN의 일정·장소와 화면 제한을 함께 검증한다** — 목록·상세·생성·수정에서 일정과 장소를 요구하고 제목 20자, 내용 200자, 정원 2~100명, 공지 30/500자 제약을 확인합니다. 현재 Swagger와 PLAN 사이의 일정·장소 충돌을 포함한 전체 누락은 35건입니다.

@@ -1,5 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -9,9 +10,18 @@ import {
   View,
 } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
-import { Avatar, Card, ErrorState, TopBar } from "../../../src/components/ui";
+import {
+  Avatar,
+  Card,
+  ConfirmDialog,
+  ErrorState,
+  TopBar,
+} from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
-import { useGroupDetail } from "../../../src/hooks/useGroups";
+import {
+  useDeleteGroupNotice,
+  useGroupDetail,
+} from "../../../src/hooks/useGroups";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 
 export default function GroupDetailScreen() {
@@ -23,6 +33,11 @@ export default function GroupDetailScreen() {
   const id = params.id ?? "1";
   const variant = readDesignVariant(params.designVariant);
   const detail = useGroupDetail(id);
+  const deleteNotice = useDeleteGroupNotice(id);
+  const [deletingNotice, setDeletingNotice] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
   const isDeleted = variant === "deleted-exception";
 
   if (isDeleted) {
@@ -226,13 +241,46 @@ export default function GroupDetailScreen() {
                         )
                       }
                     />
-                    <MiniAction icon="delete-outline" label="삭제" danger />
+                    <MiniAction
+                      testID={`group-notice-delete-${notice.id}`}
+                      icon="delete-outline"
+                      label="삭제"
+                      danger
+                      onPress={() =>
+                        setDeletingNotice({
+                          id: notice.id,
+                          title: notice.title,
+                        })
+                      }
+                    />
                   </View>
                 ) : null}
               </Card>
             ))}
           </View>
         </ScrollView>
+        {deleteNotice.isError ? (
+          <Text style={styles.noticeError}>공지 삭제에 실패했습니다.</Text>
+        ) : null}
+        <ConfirmDialog
+          visible={Boolean(deletingNotice)}
+          title="공지를 삭제하시겠습니까?"
+          message={
+            deletingNotice
+              ? `“${deletingNotice.title}” 공지는 삭제 후 복구할 수 없어요.`
+              : ""
+          }
+          confirmText="삭제"
+          danger
+          onCancel={() => setDeletingNotice(null)}
+          onConfirm={() => {
+            if (!deletingNotice || deleteNotice.isPending) return;
+            deleteNotice.mutate(deletingNotice.id, {
+              onSuccess: () => setDeletingNotice(null),
+              onError: () => setDeletingNotice(null),
+            });
+          }}
+        />
       </View>
     </Screen>
   );
@@ -316,6 +364,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  noticeError: {
+    paddingHorizontal: 22,
+    paddingBottom: 10,
+    color: theme.colors.danger,
+    fontSize: theme.fontSize.sm,
   },
   body: {
     paddingBottom: 24,

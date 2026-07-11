@@ -120,6 +120,19 @@ tags:
 - assertVisible: 댓글 삭제
 - tapOn: 삭제
 - assertNotVisible: Maestro edited
+- scrollUntilVisible:
+    element:
+      id: market-comment-report-comment-1
+    direction: UP
+- tapOn:
+    id: market-comment-report-comment-1
+- tapOn: 나눔을 빙자한 홍보·광고
+- tapOn: 신고하기
+- assertVisible: 신고가 접수되었습니다
+- tapOn:
+    id: market-comment-report-comment-1
+- tapOn: 신고하기
+- assertVisible: 이미 신고한 콘텐츠입니다
 - back
 - assertVisible:
     id: screen-home

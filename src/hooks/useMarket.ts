@@ -5,9 +5,10 @@ import {
   deleteMarketComment,
   fetchMarketDetail,
   fetchMarketOverview,
+  reportMarketContent,
   updateMarketComment,
 } from "../services/marketService";
-import type { MarketDetail } from "../types/market";
+import type { MarketDetail, MarketReportInput } from "../types/market";
 
 export function useMarketOverview() {
   return useQuery({
@@ -66,6 +67,12 @@ export function useDeleteMarketComment(marketId: string) {
             : detail,
       );
     },
+  });
+}
+
+export function useReportMarketContent() {
+  return useMutation({
+    mutationFn: (input: MarketReportInput) => reportMarketContent(input),
   });
 }
 

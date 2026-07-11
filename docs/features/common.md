@@ -34,6 +34,7 @@
 - 디자인 viewport 기반 부분 캡처 옵션 추가 — `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT=1` 사용 시 Android Emulator를 1080x2160@480으로 임시 조정해 ZIP 360x720 논리 viewport에 맞춰 캡처하고, 캡처 후 원래 size/density로 복원
 - ZIP frame safe-area 정렬 — `Screen`은 ZIP `phone-status` 44px frame을 기준으로 top offset을 맞추고, 하단 fixed action/tab 계열은 ZIP처럼 bottom inset 위로 과도하게 뜨지 않도록 bottom safe-area padding을 제거
 - ZIP RadioSheet compact/footer 정렬 — 긴 radio 목록은 ZIP 신고 sheet처럼 20px radio mark와 12px row padding을 사용하고, sheet footer는 48px pill 버튼으로 맞춤
+- RadioSheet 실제 선택 경계 추가 — 선택 callback·접근성 radio state·confirm disabled를 공통화해 디자인 reference와 실제 mutation form이 같은 sheet를 사용
 - ZIP visual artifact 재생성 자동화 — `npm run test:visual:prepare`로 ZIP standalone HTML에서 110개 inventory/manifest/original PNG를 다시 만들고, full `npm run test:visual:compare`를 `screens=110`, `missing=0`으로 복구
 - ZIP animated original settle 반영 — bottom sheet/toast animation이 끝난 최종 프레임을 기준으로 원본 PNG를 재생성하도록 `scripts/prepare-design-artifacts.mjs`에 `YLMC_PREPARE_RENDER_SETTLE_MS` 대기값을 추가
 - Dev Client Maestro smoke 후행 메뉴 처리 보강 — 루트 딥링크 이후 늦게 표시되는 `Continue`/`Reload` developer menu도 조건부로 닫고 탭 검증을 진행
@@ -121,6 +122,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-11) **RadioSheet는 표시 전용과 제어형 입력을 모두 지원한다** — `onValueChange`가 있으면 option을 접근 가능한 radio Pressable로 렌더링하고, 없으면 기존 reference 표시 동작을 유지합니다. 비동기/필수 입력 상태는 `confirmDisabled`로 footer에서 차단합니다.
 - (2026-07-11) **visual capture는 Dev Client overlay node만 조작한다** — route 진입 후 고정 좌표를 블라인드 탭하지 않고 UI hierarchy에서 overlay label과 bounds를 찾을 때만 탭합니다. 앱 화면이면 즉시 캡처 단계로 넘어가 비동기 목록 카드나 CTA가 눌리지 않게 합니다.
 - (2026-07-11) **계약 gate는 envelope 내부 필드도 검증한다** — endpoint와 응답 `$ref` 존재만으로 통과시키지 않고, 화면 흐름이 의존하는 `data.available`처럼 필수 성공 필드는 공통 OpenAPI 유틸이 실제 schema property까지 확인합니다.
 - (2026-07-11) **계약 gate는 request 제약도 화면 규칙과 대조한다** — required/property뿐 아니라 `minLength/maxLength`, `minimum/maximum`, `maxItems`, enum을 검증해 프런트 validator와 서버 DTO가 서로 다른 규칙을 갖지 않게 합니다.

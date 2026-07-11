@@ -9,8 +9,10 @@ import {
   createMarketComment,
   createMarketService,
   deleteMarketComment,
+  DuplicateMarketReportError,
   fetchMarketDetail,
   fetchMarketOverview,
+  reportMarketContent,
   updateMarketComment,
   type MarketDataSource,
 } from "../marketService";
@@ -45,6 +47,7 @@ describe("market and group service boundaries", () => {
       createComment: jest.fn().mockRejectedValue(new Error("not used")),
       updateComment: jest.fn().mockRejectedValue(new Error("not used")),
       deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
+      reportContent: jest.fn().mockRejectedValue(new Error("not used")),
     };
     const service = createMarketService(dataSource);
 
@@ -68,6 +71,7 @@ describe("market and group service boundaries", () => {
       createComment: jest.fn().mockResolvedValue(createdComment),
       updateComment: jest.fn().mockRejectedValue(new Error("not used")),
       deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
+      reportContent: jest.fn().mockRejectedValue(new Error("not used")),
     };
     const service = createMarketService(dataSource);
 
@@ -87,6 +91,7 @@ describe("market and group service boundaries", () => {
       createComment: jest.fn().mockRejectedValue(new Error("not used")),
       updateComment: jest.fn().mockRejectedValue(new Error("not used")),
       deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
+      reportContent: jest.fn().mockRejectedValue(new Error("not used")),
     };
     const service = createMarketService(dataSource);
 
@@ -145,6 +150,41 @@ describe("market and group service boundaries", () => {
         content: "바꾸면 안 되는 댓글",
       }),
     ).rejects.toThrow("내 댓글만 변경할 수 있습니다.");
+  });
+
+  it("records a report once and rejects a duplicate target", async () => {
+    const input = {
+      targetType: "comment" as const,
+      targetId: "comment-2",
+      reason: "advertising" as const,
+    };
+
+    await expect(reportMarketContent(input)).resolves.toBeUndefined();
+    await expect(reportMarketContent(input)).rejects.toBeInstanceOf(
+      DuplicateMarketReportError,
+    );
+  });
+
+  it("requires details for the other report reason", () => {
+    const dataSource: MarketDataSource = {
+      getOverview: jest.fn().mockRejectedValue(new Error("not used")),
+      getDetail: jest.fn().mockRejectedValue(new Error("not used")),
+      createComment: jest.fn().mockRejectedValue(new Error("not used")),
+      updateComment: jest.fn().mockRejectedValue(new Error("not used")),
+      deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
+      reportContent: jest.fn().mockRejectedValue(new Error("not used")),
+    };
+    const service = createMarketService(dataSource);
+
+    expect(() =>
+      service.reportContent({
+        targetType: "market",
+        targetId: "1",
+        reason: "other",
+        content: "   ",
+      }),
+    ).toThrow("기타 신고 사유를 입력해주세요.");
+    expect(dataSource.reportContent).not.toHaveBeenCalled();
   });
 
   it("returns group overview and detail through the default data source", async () => {

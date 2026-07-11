@@ -1,4 +1,5 @@
 import type { Comment, Member } from "./common";
+import type { MARKET_REPORT_REASONS } from "../constants/domainOptions";
 
 export type MarketCategory =
   | "all"
@@ -71,6 +72,16 @@ export interface MarketCommentTarget {
 
 export interface MarketCommentUpdateInput extends MarketCommentTarget {
   content: string;
+}
+
+export type MarketReportReason = (typeof MARKET_REPORT_REASONS)[number]["key"];
+export type MarketReportTargetType = "market" | "comment";
+
+export interface MarketReportInput {
+  targetType: MarketReportTargetType;
+  targetId: string;
+  reason: MarketReportReason;
+  content?: string;
 }
 
 export interface MarketDetail {

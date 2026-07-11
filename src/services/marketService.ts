@@ -7,7 +7,15 @@ import type {
   MarketDetail,
   MarketDetailComment,
   MarketOverview,
+  MarketReportInput,
 } from "../types/market";
+
+export class DuplicateMarketReportError extends Error {
+  constructor() {
+    super("이미 신고한 콘텐츠입니다.");
+    this.name = "DuplicateMarketReportError";
+  }
+}
 
 export interface MarketDataSource {
   getOverview(): Promise<MarketOverview>;
@@ -15,10 +23,12 @@ export interface MarketDataSource {
   createComment(input: MarketCommentInput): Promise<MarketDetailComment>;
   updateComment(input: MarketCommentUpdateInput): Promise<MarketDetailComment>;
   deleteComment(input: MarketCommentTarget): Promise<void>;
+  reportContent(input: MarketReportInput): Promise<void>;
 }
 
 const delay = (ms = 180) => new Promise((resolve) => setTimeout(resolve, ms));
 const mockComments = new Map<string, MarketDetailComment[]>();
+const mockReportTargets = new Set<string>();
 
 function getMockComments(marketId: string) {
   const detail = mockMarketDetails[marketId];
@@ -96,6 +106,12 @@ export const mockMarketDataSource: MarketDataSource = {
       ),
     );
   },
+  async reportContent(input) {
+    await delay();
+    const key = `${input.targetType}:${input.targetId}`;
+    if (mockReportTargets.has(key)) throw new DuplicateMarketReportError();
+    mockReportTargets.add(key);
+  },
 };
 
 export function createMarketService(dataSource: MarketDataSource) {
@@ -114,6 +130,16 @@ export function createMarketService(dataSource: MarketDataSource) {
     },
     deleteComment: (input: MarketCommentTarget) =>
       dataSource.deleteComment(input),
+    reportContent: (input: MarketReportInput) => {
+      const content = input.content?.trim();
+      if (input.reason === "other" && !content) {
+        throw new Error("기타 신고 사유를 입력해주세요.");
+      }
+      return dataSource.reportContent({
+        ...input,
+        content: content || undefined,
+      });
+    },
   };
 }
 
@@ -124,3 +150,4 @@ export const fetchMarketDetail = marketService.fetchDetail;
 export const createMarketComment = marketService.createComment;
 export const updateMarketComment = marketService.updateComment;
 export const deleteMarketComment = marketService.deleteComment;
+export const reportMarketContent = marketService.reportContent;

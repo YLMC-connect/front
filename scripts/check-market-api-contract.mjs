@@ -37,6 +37,17 @@ requireConcreteSuccess(
 );
 requireConcreteRequest("콘텐츠 신고", "/api/reports", "post");
 requireConcreteSuccess("콘텐츠 신고", "/api/reports", "post");
+requireProperties("ReportRequestDto", [
+  "targetType",
+  "targetId",
+  "reportReasonCode",
+  "content",
+]);
+for (const property of ["targetType", "targetId", "reportReasonCode"]) {
+  requireRequiredProperty("ReportRequestDto", property);
+}
+requireEnum("ReportRequestDto", "targetType");
+requireEnum("ReportRequestDto", "reportReasonCode");
 
 requireProperties("ShareDto", [
   "id",

@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -13,16 +13,35 @@ import {
   View,
 } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
-import { Avatar, ErrorState, VisualThumb } from "../../../src/components/ui";
+import {
+  Avatar,
+  ErrorState,
+  RadioSheet,
+  Toast,
+  VisualThumb,
+} from "../../../src/components/ui";
+import { MARKET_REPORT_REASONS } from "../../../src/constants/domainOptions";
 import { theme } from "../../../src/constants/theme";
 import {
   useCreateMarketComment,
   useDeleteMarketComment,
   useMarketDetail,
+  useReportMarketContent,
   useUpdateMarketComment,
 } from "../../../src/hooks/useMarket";
 import { readDesignVariant } from "../../../src/lib/designVariant";
-import type { MarketDetailComment } from "../../../src/types/market";
+import { DuplicateMarketReportError } from "../../../src/services/marketService";
+import type {
+  MarketDetailComment,
+  MarketReportInput,
+  MarketReportReason,
+} from "../../../src/types/market";
+
+const reportReasonOptions = MARKET_REPORT_REASONS.map(({ key, label }) => ({
+  value: key,
+  label,
+}));
+type ReportTarget = Pick<MarketReportInput, "targetType" | "targetId">;
 
 export default function MarketDetailScreen() {
   const params = useLocalSearchParams<{
@@ -31,14 +50,45 @@ export default function MarketDetailScreen() {
   }>();
   const id = params.id ?? "1";
   const variant = readDesignVariant(params.designVariant);
+  const isReportSheetVariant =
+    variant === "report" || variant === "report-other-input";
+  const isReportVariant =
+    isReportSheetVariant || variant === "report-dup-toast";
   const detail = useMarketDetail(id);
   const createComment = useCreateMarketComment(id);
   const updateComment = useUpdateMarketComment(id);
   const deleteComment = useDeleteMarketComment(id);
+  const reportContent = useReportMarketContent();
   const [comment, setComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
+  const [reportReason, setReportReason] =
+    useState<MarketReportReason>("false_information");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reportMessage, setReportMessage] = useState<string>();
   const router = useRouter();
   const { width } = useWindowDimensions();
+
+  useEffect(() => {
+    if (isReportSheetVariant) {
+      setReportTarget({ targetType: "market", targetId: id });
+      setReportReason(
+        variant === "report-other-input" ? "other" : "false_information",
+      );
+      setReportDetails(
+        variant === "report-other-input"
+          ? "홍보성 글 같아요. 같은 사진을 여러 번 올리는 것 같습니다."
+          : "",
+      );
+      setReportMessage(undefined);
+      return;
+    }
+
+    setReportTarget(null);
+    setReportMessage(
+      variant === "report-dup-toast" ? "이미 신고한 게시글입니다" : undefined,
+    );
+  }, [id, isReportSheetVariant, variant]);
 
   if (variant === "deleted" || variant === "blocked") {
     return (
@@ -83,7 +133,9 @@ export default function MarketDetailScreen() {
   }
 
   const market = detail.data;
-  const isOwn = variant ? !variant.startsWith("other") : market.isMine;
+  const isOwn = variant
+    ? !variant.startsWith("other") && !isReportVariant
+    : market.isMine;
   const status =
     variant === "own-reserved"
       ? "reserved"
@@ -92,9 +144,10 @@ export default function MarketDetailScreen() {
         : market.status;
   const isReserved = status === "reserved";
   const isDone = status === "done";
-  const authorName = variant?.startsWith("other")
-    ? "박정아"
-    : market.authorName;
+  const authorName =
+    variant?.startsWith("other") || isReportVariant
+      ? "박정아"
+      : market.authorName;
   const isCommentPending = createComment.isPending || updateComment.isPending;
   const resetCommentComposer = () => {
     setComment("");
@@ -130,6 +183,37 @@ export default function MarketDetailScreen() {
         },
       },
     ]);
+  };
+  const openReport = (target: ReportTarget) => {
+    setReportTarget(target);
+    setReportReason("false_information");
+    setReportDetails("");
+    setReportMessage(undefined);
+  };
+  const closeReport = () => setReportTarget(null);
+  const onSubmitReport = () => {
+    if (!reportTarget) return;
+    reportContent.mutate(
+      {
+        ...reportTarget,
+        reason: reportReason,
+        content: reportDetails || undefined,
+      },
+      {
+        onSuccess: () => {
+          closeReport();
+          setReportMessage("신고가 접수되었습니다");
+        },
+        onError: (error) => {
+          if (error instanceof DuplicateMarketReportError) {
+            closeReport();
+            setReportMessage("이미 신고한 콘텐츠입니다");
+            return;
+          }
+          setReportMessage("신고 처리에 실패했습니다");
+        },
+      },
+    );
   };
 
   return (
@@ -222,7 +306,14 @@ export default function MarketDetailScreen() {
                 <Action icon="delete-outline" label="삭제" danger />
               ) : (
                 <>
-                  <Action icon="outlined-flag" label="신고" />
+                  <Action
+                    testID="market-report-post"
+                    icon="outlined-flag"
+                    label="신고"
+                    onPress={() =>
+                      openReport({ targetType: "market", targetId: market.id })
+                    }
+                  />
                   <Action icon="block" label="차단" danger />
                 </>
               )}
@@ -232,6 +323,9 @@ export default function MarketDetailScreen() {
               comments={market.comments}
               onEdit={onEditComment}
               onDelete={onDeleteComment}
+              onReport={(target) =>
+                openReport({ targetType: "comment", targetId: target.id })
+              }
             />
           </View>
         </ScrollView>
@@ -277,6 +371,37 @@ export default function MarketDetailScreen() {
         deleteComment.isError ? (
           <Text style={styles.commentError}>댓글 처리에 실패했습니다.</Text>
         ) : null}
+        <RadioSheet
+          visible={Boolean(reportTarget)}
+          title="신고"
+          options={reportReasonOptions}
+          value={reportReason}
+          confirmText="신고하기"
+          danger
+          hint="허위·악의적 신고 시 이용이 제한될 수 있습니다."
+          confirmDisabled={
+            reportContent.isPending ||
+            (reportReason === "other" && !reportDetails.trim())
+          }
+          onValueChange={(value) =>
+            setReportReason(value as MarketReportReason)
+          }
+          onClose={closeReport}
+          onConfirm={onSubmitReport}
+        >
+          {reportReason === "other" ? (
+            <TextInput
+              value={reportDetails}
+              onChangeText={setReportDetails}
+              placeholder="신고 사유를 자세히 입력해주세요"
+              placeholderTextColor={theme.colors.inkMute}
+              multiline
+              style={styles.reportInput}
+              textAlignVertical="top"
+            />
+          ) : null}
+        </RadioSheet>
+        <Toast message={reportMessage} offset={106} />
       </View>
     </Screen>
   );
@@ -324,15 +449,24 @@ function Action({
   icon,
   label,
   danger = false,
+  onPress,
+  testID,
 }: {
   icon: keyof typeof MaterialIcons.glyphMap;
   label: string;
   danger?: boolean;
+  onPress?: () => void;
+  testID?: string;
 }) {
   const color = danger ? theme.colors.danger : theme.colors.ink;
 
   return (
-    <Pressable accessibilityRole="button" style={styles.action}>
+    <Pressable
+      testID={testID}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={styles.action}
+    >
       <MaterialIcons name={icon} size={18} color={color} />
       <Text style={[styles.actionText, danger ? styles.dangerText : null]}>
         {label}
@@ -345,10 +479,12 @@ function CommentsSection({
   comments,
   onEdit,
   onDelete,
+  onReport,
 }: {
   comments: MarketDetailComment[];
   onEdit: (comment: MarketDetailComment) => void;
   onDelete: (comment: MarketDetailComment) => void;
+  onReport: (comment: MarketDetailComment) => void;
 }) {
   const activeCount = comments.filter((comment) => !comment.isDeleted).length;
 
@@ -397,7 +533,12 @@ function CommentsSection({
                       />
                     </>
                   ) : (
-                    <MiniAction icon="outlined-flag" label="신고" />
+                    <MiniAction
+                      testID={`market-comment-report-${comment.id}`}
+                      icon="outlined-flag"
+                      label="신고"
+                      onPress={() => onReport(comment)}
+                    />
                   )}
                 </View>
               </>
@@ -771,6 +912,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     color: theme.colors.ink,
     fontSize: theme.fontSize.md,
+  },
+  reportInput: {
+    minHeight: 96,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: theme.colors.lineStrong,
+    borderRadius: theme.radius.md,
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.sm,
   },
   sendButton: {
     width: 44,

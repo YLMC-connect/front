@@ -35,6 +35,9 @@
 - 인증 오류 코드 메시지 경계 추가 — Swagger에 문서화된 `MEM001~MEM006`을 고정 사용자 문구로 매핑하고 미등록 API 코드는 안전한 fallback을 사용
 - 로그인 화면·세션 통합 검증 추가 — 입력 검증 후 `useAuth → authService → authSessionService → SecureStore`로 access/refresh token을 저장하고 `authenticated` 상태가 된 뒤 홈으로 이동하는 순서를 화면 테스트로 고정
 - 핵심 Maestro 로그인 선행 — 앱 데이터를 초기화한 Dev Client에서 `/login`에 진입해 `gracekim/password`로 로그인한 뒤 나눔·동행·기도·삶공부 스모크를 실행하도록 골든 패스를 연결
+- 회원가입 화면·세션 통합 검증 추가 — 현재 아이디의 사용 가능 응답을 받은 뒤 전체 입력을 제출하고, signup session의 토큰 저장·신규 사용자 인증 상태·홈 이동을 화면 테스트로 고정
+- 회원가입 중복확인 결과 무효화 검증 — 사용 가능 확인 후 아이디가 바뀌면 이전 결과를 폐기하고 재확인 전 제출·토큰 저장을 차단하는 회귀 테스트 추가
+- 핵심 Maestro 회원가입 선행 — 앱 상태 초기화 후 회원가입 중복확인→전체 입력→홈 진입을 완료하고 다시 로그인한 뒤 도메인 스모크를 실행하도록 인증 골든 패스 확장
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -66,6 +69,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-11) **핵심 E2E는 회원가입과 로그인을 같은 세션 경계로 검증한다** — 메인 Maestro는 회원가입 성공으로 홈에 도달한 뒤 로그인 route를 다시 열어 재인증하고 도메인 흐름을 실행합니다. 두 화면은 토큰을 직접 다루지 않고 동일한 session manager를 사용해야 합니다.
 - (2026-07-11) **핵심 E2E는 로그인 성공 이후에만 도메인 흐름을 실행한다** — 메인 Maestro는 앱 상태를 초기화하고 로그인 화면의 실제 입력과 mutation을 거쳐 홈에 도달해야 나눔·동행 검증을 계속합니다. 서비스 단위 테스트와 별도로 화면→SecureStore→인증 store→navigation 연결을 증명합니다.
 - (2026-07-11) **중복확인 결과는 검사한 값과 함께 보관한다** — 요청 중 아이디가 바뀌었을 때 이전 응답을 현재 값의 결과로 오인하지 않도록 `{ value, available }`을 함께 비교합니다. 기본 가입 제출은 현재 아이디의 사용 가능 응답을 받은 뒤에만 허용하고, 연락처 중복확인 UI는 디자인 확정 전까지 새로 만들지 않습니다.
 - (2026-07-11) **API 오류는 서버 message가 아니라 code로 사용자 문구를 결정한다** — 문서화된 `MEM001~MEM006`은 인증 메시지 표로 관리하고, 네트워크/응답 형식 오류는 공통 문구를 사용합니다. 미등록 API 코드는 내부 서버 문장을 노출하지 않고 화면별 fallback을 표시합니다.
@@ -94,7 +98,7 @@
 - 실제 로그인·회원가입·내 정보 성공 DTO, refresh 요청/응답 및 token rotation 정책, 공개 endpoint의 JWT 예외, `/api/member/me` security scheme 이름, 중복확인 `data.available`, 로그인·재발급 오류 코드 확정 필요. 단일 출처는 Issue #9이며 현재 `test:api:contract`는 13건을 검출합니다.
 - 약관/개인정보 동의 화면의 필수 여부와 문구 확정 필요.
 - auth bottom CTA/toast 정렬 후 `login-toast mean=10.18`, `code-toast mean=10.10`, `code-error mean=8.80`, `code-loading mean=8.32`, `code default mean=8.66`까지 낮췄습니다. 로그인 입력 식별자 추가 후 기본 화면 부분 재캡처는 `login mean=13.18`로 렌더 구조 변동이 없음을 확인했습니다. `terms-sheet mean=12.21`는 Android status bar/time, backdrop blur 미적용, RN/web font metric 차이가 남아 후속 공통 overlay 정렬에서 추적합니다.
-- signup variant residual은 `ScreenSignup` 구조 정렬 후 `signup-pw-error 21.74→10.14`, `signup-id-dup 20.65→9.18`, `signup default 12.50→7.76`까지 낮췄습니다. 남은 차이는 RN status bar/time, secure input glyph/font metrics, CSS gradient/shadow 번역 차이 중심으로 후속 공통 정렬에서 추적합니다.
+- signup variant residual은 `ScreenSignup` 구조 정렬 후 `signup-pw-error 21.74→10.14`, `signup-id-dup 20.65→9.18`, `signup default 12.50→7.76`까지 낮췄습니다. 입력 식별자 추가 후 기본 화면 부분 재캡처는 `signup mean=12.99`로 확인했으며 구조 변경은 없습니다. 남은 차이는 RN status bar/time, secure input glyph/font metrics, CSS gradient/shadow 번역 차이 중심으로 후속 공통 정렬에서 추적합니다.
 
 ## 의존성
 

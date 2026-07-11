@@ -105,4 +105,66 @@ describe("auth smoke screens", () => {
       expect(screen.getByText("이미 사용 중인 아이디입니다")).toBeTruthy(),
     );
   });
+
+  it("invalidates an available id result when the input changes", async () => {
+    renderWithClient(<SignupScreenRoute />);
+
+    fireEvent.changeText(screen.getByTestId("signup-id-input"), "new-member");
+    fireEvent.press(screen.getByTestId("signup-check-id"));
+    await screen.findByText("사용 가능한 아이디입니다");
+
+    fireEvent.changeText(
+      screen.getByTestId("signup-id-input"),
+      "another-member",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("signup-password-input"),
+      "password1",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("signup-password-confirm-input"),
+      "password1",
+    );
+    fireEvent.changeText(screen.getByTestId("signup-name-input"), "새성도");
+    fireEvent.changeText(
+      screen.getByTestId("signup-phone-input"),
+      "01012345678",
+    );
+    fireEvent.press(screen.getByTestId("signup-submit"));
+
+    expect(screen.getByText("아이디 중복 확인이 필요합니다.")).toBeTruthy();
+    expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
+  });
+
+  it("stores a signup session after checking id availability", async () => {
+    renderWithClient(<SignupScreenRoute />);
+
+    fireEvent.changeText(screen.getByTestId("signup-id-input"), "new-member");
+    fireEvent.press(screen.getByTestId("signup-check-id"));
+    await screen.findByText("사용 가능한 아이디입니다");
+    fireEvent.changeText(
+      screen.getByTestId("signup-password-input"),
+      "password1",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("signup-password-confirm-input"),
+      "password1",
+    );
+    fireEvent.changeText(screen.getByTestId("signup-name-input"), "새성도");
+    fireEvent.changeText(
+      screen.getByTestId("signup-phone-input"),
+      "01012345678",
+    );
+    fireEvent.press(screen.getByTestId("signup-submit"));
+
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/"), {
+      timeout: 5000,
+    });
+    expect(SecureStore.setItemAsync).toHaveBeenCalledTimes(2);
+    expect(useAuthStore.getState()).toMatchObject({
+      currentUser: { id: "member-new-member", name: "새성도" },
+      isLoggedIn: true,
+      status: "authenticated",
+    });
+  });
 });

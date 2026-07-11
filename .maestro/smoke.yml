@@ -35,7 +35,7 @@ tags:
           timeout: 60000
       - tapOn:
           point: "90%,45%"
-- openLink: ylmc-connect:///login
+- openLink: ylmc-connect:///signup
 - waitForAnimationToEnd:
     timeout: 5000
 - runFlow:
@@ -61,8 +61,55 @@ tags:
           point: "90%,45%"
 - extendedWaitUntil:
     visible:
-      id: login-id-input
+      id: signup-id-input
     timeout: 60000
+- tapOn:
+    id: signup-id-input
+- inputText: maestro-member
+- hideKeyboard
+- tapOn:
+    id: signup-check-id
+- extendedWaitUntil:
+    visible: 사용 가능한 아이디입니다
+    timeout: 5000
+- tapOn:
+    id: signup-password-input
+- inputText: password1
+- scrollUntilVisible:
+    element:
+      id: signup-password-confirm-input
+    direction: DOWN
+- tapOn:
+    id: signup-password-confirm-input
+- inputText: password1
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: signup-name-input
+    direction: DOWN
+- tapOn:
+    id: signup-name-input
+- inputText: Maestro
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: signup-phone-input
+    direction: DOWN
+- tapOn:
+    id: signup-phone-input
+- inputText: 01012345678
+- hideKeyboard
+- tapOn:
+    id: signup-submit
+- extendedWaitUntil:
+    visible:
+      id: screen-home
+    timeout: 5000
+- openLink: ylmc-connect:///login
+- extendedWaitUntil:
+    visible:
+      id: login-id-input
+    timeout: 5000
 - tapOn:
     id: login-id-input
 - inputText: gracekim

@@ -172,6 +172,7 @@ export default function SignupScreen() {
               <View style={styles.idRow}>
                 <View style={styles.idInputWrap}>
                   <SignupInput
+                    testID="signup-id-input"
                     value={values.id}
                     onChangeText={setField("id")}
                     placeholder="아이디"
@@ -183,6 +184,7 @@ export default function SignupScreen() {
                   />
                 </View>
                 <Pressable
+                  testID="signup-check-id"
                   accessibilityRole="button"
                   onPress={onCheckIdAvailability}
                   disabled={checkAvailability.isPending}
@@ -211,6 +213,7 @@ export default function SignupScreen() {
 
             <Field label="비밀번호">
               <SignupInput
+                testID="signup-password-input"
                 value={values.password}
                 onChangeText={setField("password")}
                 placeholder="비밀번호"
@@ -230,6 +233,7 @@ export default function SignupScreen() {
 
             <Field label="비밀번호 확인">
               <SignupInput
+                testID="signup-password-confirm-input"
                 value={values.passwordConfirm}
                 onChangeText={setField("passwordConfirm")}
                 placeholder="비밀번호 확인"
@@ -245,6 +249,7 @@ export default function SignupScreen() {
 
             <Field label="이름">
               <SignupInput
+                testID="signup-name-input"
                 value={values.userName}
                 onChangeText={setField("userName")}
                 placeholder="실명을 입력해주세요"
@@ -258,6 +263,7 @@ export default function SignupScreen() {
 
             <Field label="연락처">
               <SignupInput
+                testID="signup-phone-input"
                 value={values.phone}
                 onChangeText={setField("phone")}
                 placeholder="010-XXXX-XXXX"
@@ -303,6 +309,7 @@ export default function SignupScreen() {
 
         <View style={styles.bottomFlat}>
           <Pressable
+            testID="signup-submit"
             accessibilityRole="button"
             onPress={onSubmit}
             disabled={isSubmitDisabled || signup.isPending || isLoading}
@@ -357,6 +364,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function SignupInput({
+  testID,
   value,
   onChangeText,
   placeholder,
@@ -364,6 +372,7 @@ function SignupInput({
   secureTextEntry,
   keyboardType = "default",
 }: {
+  testID?: string;
   value?: string;
   onChangeText: (value: string) => void;
   placeholder: string;
@@ -380,6 +389,7 @@ function SignupInput({
       ]}
     >
       <TextInput
+        testID={testID}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}

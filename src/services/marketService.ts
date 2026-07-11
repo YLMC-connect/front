@@ -7,6 +7,7 @@ import type {
   MarketDetail,
   MarketDetailComment,
   MarketOverview,
+  MarketPostTarget,
   MarketReportInput,
 } from "../types/market";
 
@@ -20,6 +21,7 @@ export class DuplicateMarketReportError extends Error {
 export interface MarketDataSource {
   getOverview(): Promise<MarketOverview>;
   getDetail(id: string): Promise<MarketDetail>;
+  deletePost(input: MarketPostTarget): Promise<void>;
   createComment(input: MarketCommentInput): Promise<MarketDetailComment>;
   updateComment(input: MarketCommentUpdateInput): Promise<MarketDetailComment>;
   deleteComment(input: MarketCommentTarget): Promise<void>;
@@ -29,6 +31,7 @@ export interface MarketDataSource {
 const delay = (ms = 180) => new Promise((resolve) => setTimeout(resolve, ms));
 const mockComments = new Map<string, MarketDetailComment[]>();
 const mockReportTargets = new Set<string>();
+const mockDeletedPosts = new Set<string>();
 
 function getMockComments(marketId: string) {
   const detail = mockMarketDetails[marketId];
@@ -55,16 +58,32 @@ function findOwnMockComment(input: MarketCommentTarget) {
 export const mockMarketDataSource: MarketDataSource = {
   async getOverview() {
     await delay();
-    return mockMarketOverview;
+    return {
+      items: mockMarketOverview.items.filter(
+        ({ id }) => !mockDeletedPosts.has(id),
+      ),
+    };
   },
   async getDetail(id) {
     await delay();
     const detail = mockMarketDetails[id];
-    if (!detail) throw new Error("존재하지 않는 나눔입니다.");
+    if (!detail || mockDeletedPosts.has(id)) {
+      throw new Error("존재하지 않는 나눔입니다.");
+    }
     return {
       ...detail,
       comments: getMockComments(id).map((comment) => ({ ...comment })),
     };
+  },
+  async deletePost(input) {
+    await delay();
+    const detail = mockMarketDetails[input.marketId];
+    if (!detail || mockDeletedPosts.has(input.marketId)) {
+      throw new Error("존재하지 않는 나눔입니다.");
+    }
+    if (!detail.isMine) throw new Error("내 나눔만 삭제할 수 있습니다.");
+    mockDeletedPosts.add(input.marketId);
+    mockComments.delete(input.marketId);
   },
   async createComment(input) {
     await delay();
@@ -118,6 +137,7 @@ export function createMarketService(dataSource: MarketDataSource) {
   return {
     fetchOverview: () => dataSource.getOverview(),
     fetchDetail: (id: string) => dataSource.getDetail(id),
+    deletePost: (input: MarketPostTarget) => dataSource.deletePost(input),
     createComment: (input: MarketCommentInput) => {
       const content = input.content.trim();
       if (!content) throw new Error("댓글 내용을 입력해주세요.");
@@ -147,6 +167,7 @@ const marketService = createMarketService(mockMarketDataSource);
 
 export const fetchMarketOverview = marketService.fetchOverview;
 export const fetchMarketDetail = marketService.fetchDetail;
+export const deleteMarketPost = marketService.deletePost;
 export const createMarketComment = marketService.createComment;
 export const updateMarketComment = marketService.updateComment;
 export const deleteMarketComment = marketService.deleteComment;

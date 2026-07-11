@@ -70,6 +70,10 @@ export interface MarketCommentTarget {
   commentId: string;
 }
 
+export interface MarketPostTarget {
+  marketId: string;
+}
+
 export interface MarketCommentUpdateInput extends MarketCommentTarget {
   content: string;
 }

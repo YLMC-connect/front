@@ -133,9 +133,17 @@ tags:
     id: market-comment-report-comment-1
 - tapOn: 신고하기
 - assertVisible: 이미 신고한 콘텐츠입니다
-- back
+- scrollUntilVisible:
+    element:
+      id: market-delete-post
+    direction: UP
+- tapOn:
+    id: market-delete-post
+- assertVisible: 게시글을 삭제하시겠습니까?
+- tapOn: 삭제
 - assertVisible:
-    id: screen-home
+    id: screen-market
+- assertNotVisible: 아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)
 - tapOn:
     id: tab-group
 - assertVisible:

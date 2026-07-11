@@ -15,6 +15,7 @@ import {
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   Avatar,
+  ConfirmDialog,
   ErrorState,
   RadioSheet,
   Toast,
@@ -25,6 +26,7 @@ import { theme } from "../../../src/constants/theme";
 import {
   useCreateMarketComment,
   useDeleteMarketComment,
+  useDeleteMarketPost,
   useMarketDetail,
   useReportMarketContent,
   useUpdateMarketComment,
@@ -58,6 +60,7 @@ export default function MarketDetailScreen() {
   const createComment = useCreateMarketComment(id);
   const updateComment = useUpdateMarketComment(id);
   const deleteComment = useDeleteMarketComment(id);
+  const deletePost = useDeleteMarketPost(id);
   const reportContent = useReportMarketContent();
   const [comment, setComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
@@ -66,6 +69,7 @@ export default function MarketDetailScreen() {
     useState<MarketReportReason>("false_information");
   const [reportDetails, setReportDetails] = useState("");
   const [reportMessage, setReportMessage] = useState<string>();
+  const [showDelete, setShowDelete] = useState(variant === "delete-confirm");
   const router = useRouter();
   const { width } = useWindowDimensions();
 
@@ -89,6 +93,10 @@ export default function MarketDetailScreen() {
       variant === "report-dup-toast" ? "이미 신고한 게시글입니다" : undefined,
     );
   }, [id, isReportSheetVariant, variant]);
+
+  useEffect(() => {
+    setShowDelete(variant === "delete-confirm");
+  }, [variant]);
 
   if (variant === "deleted" || variant === "blocked") {
     return (
@@ -183,6 +191,17 @@ export default function MarketDetailScreen() {
         },
       },
     ]);
+  };
+  const onDeletePost = () => {
+    setShowDelete(true);
+  };
+  const onConfirmDeletePost = () => {
+    deletePost.mutate(undefined, {
+      onSuccess: () => {
+        setShowDelete(false);
+        router.replace("/market");
+      },
+    });
   };
   const openReport = (target: ReportTarget) => {
     setReportTarget(target);
@@ -299,11 +318,23 @@ export default function MarketDetailScreen() {
               {isOwn && !isDone ? (
                 <>
                   <Action icon="edit" label="수정" />
-                  <Action icon="delete-outline" label="삭제" danger />
+                  <Action
+                    testID="market-delete-post"
+                    icon="delete-outline"
+                    label="삭제"
+                    danger
+                    onPress={onDeletePost}
+                  />
                   <Action icon="sync-alt" label="상태 변경" />
                 </>
               ) : isOwn ? (
-                <Action icon="delete-outline" label="삭제" danger />
+                <Action
+                  testID="market-delete-post"
+                  icon="delete-outline"
+                  label="삭제"
+                  danger
+                  onPress={onDeletePost}
+                />
               ) : (
                 <>
                   <Action
@@ -401,6 +432,15 @@ export default function MarketDetailScreen() {
             />
           ) : null}
         </RadioSheet>
+        <ConfirmDialog
+          visible={showDelete}
+          title="게시글을 삭제하시겠습니까?"
+          message="삭제하면 댓글을 포함한 모든 내용이 사라지며 복구할 수 없어요."
+          confirmText="삭제"
+          danger
+          onCancel={() => setShowDelete(false)}
+          onConfirm={onConfirmDeletePost}
+        />
         <Toast message={reportMessage} offset={106} />
       </View>
     </Screen>

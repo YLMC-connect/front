@@ -140,6 +140,21 @@ describe("v1 tab smoke screens", () => {
     expect(await screen.findByText("이미 신고한 콘텐츠입니다")).toBeTruthy();
   });
 
+  it("deletes an owned market post and returns to the market list", async () => {
+    const replace = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({ replace } as never);
+    renderWithClient(<MarketDetailScreen />);
+
+    await screen.findByTestId("market-delete-post");
+    fireEvent.press(screen.getByTestId("market-delete-post"));
+    expect(screen.getByText("게시글을 삭제하시겠습니까?")).toBeTruthy();
+    fireEvent.press(screen.getAllByText("삭제").at(-1)!);
+
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/market"), {
+      timeout: 5000,
+    });
+  });
+
   it("renders the group screen", async () => {
     renderWithClient(<GroupScreen />);
 

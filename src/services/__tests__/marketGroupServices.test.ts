@@ -12,6 +12,7 @@ import {
   createMarketComment,
   createMarketService,
   deleteMarketComment,
+  deleteMarketPost,
   DuplicateMarketReportError,
   fetchMarketDetail,
   fetchMarketOverview,
@@ -47,6 +48,7 @@ describe("market and group service boundaries", () => {
     const dataSource: MarketDataSource = {
       getOverview: jest.fn().mockResolvedValue({ items: [] }),
       getDetail: jest.fn().mockRejectedValue(new Error("not used")),
+      deletePost: jest.fn().mockRejectedValue(new Error("not used")),
       createComment: jest.fn().mockRejectedValue(new Error("not used")),
       updateComment: jest.fn().mockRejectedValue(new Error("not used")),
       deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
@@ -71,6 +73,7 @@ describe("market and group service boundaries", () => {
     const dataSource: MarketDataSource = {
       getOverview: jest.fn().mockRejectedValue(new Error("not used")),
       getDetail: jest.fn().mockRejectedValue(new Error("not used")),
+      deletePost: jest.fn().mockRejectedValue(new Error("not used")),
       createComment: jest.fn().mockResolvedValue(createdComment),
       updateComment: jest.fn().mockRejectedValue(new Error("not used")),
       deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
@@ -91,6 +94,7 @@ describe("market and group service boundaries", () => {
     const dataSource: MarketDataSource = {
       getOverview: jest.fn().mockRejectedValue(new Error("not used")),
       getDetail: jest.fn().mockRejectedValue(new Error("not used")),
+      deletePost: jest.fn().mockRejectedValue(new Error("not used")),
       createComment: jest.fn().mockRejectedValue(new Error("not used")),
       updateComment: jest.fn().mockRejectedValue(new Error("not used")),
       deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
@@ -172,6 +176,7 @@ describe("market and group service boundaries", () => {
     const dataSource: MarketDataSource = {
       getOverview: jest.fn().mockRejectedValue(new Error("not used")),
       getDetail: jest.fn().mockRejectedValue(new Error("not used")),
+      deletePost: jest.fn().mockRejectedValue(new Error("not used")),
       createComment: jest.fn().mockRejectedValue(new Error("not used")),
       updateComment: jest.fn().mockRejectedValue(new Error("not used")),
       deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
@@ -188,6 +193,17 @@ describe("market and group service boundaries", () => {
       }),
     ).toThrow("기타 신고 사유를 입력해주세요.");
     expect(dataSource.reportContent).not.toHaveBeenCalled();
+  });
+
+  it("deletes an owned market post from detail and overview persistence", async () => {
+    await deleteMarketPost({ marketId: "1" });
+
+    await expect(fetchMarketDetail("1")).rejects.toThrow(
+      "존재하지 않는 나눔입니다.",
+    );
+    await expect(fetchMarketOverview()).resolves.toMatchObject({
+      items: expect.not.arrayContaining([expect.objectContaining({ id: "1" })]),
+    });
   });
 
   it("returns group overview and detail through the default data source", async () => {

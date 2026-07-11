@@ -3,12 +3,17 @@ import { queryKeys } from "../lib/queryKeys";
 import {
   createMarketComment,
   deleteMarketComment,
+  deleteMarketPost,
   fetchMarketDetail,
   fetchMarketOverview,
   reportMarketContent,
   updateMarketComment,
 } from "../services/marketService";
-import type { MarketDetail, MarketReportInput } from "../types/market";
+import type {
+  MarketDetail,
+  MarketOverview,
+  MarketReportInput,
+} from "../types/market";
 
 export function useMarketOverview() {
   return useQuery({
@@ -80,6 +85,29 @@ export function useMarketDetail(id: string) {
   return useQuery({
     queryKey: queryKeys.market.detail(id),
     queryFn: () => fetchMarketDetail(id),
+  });
+}
+
+export function useDeleteMarketPost(marketId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => deleteMarketPost({ marketId }),
+    onSuccess: () => {
+      queryClient.setQueryData<MarketOverview>(
+        queryKeys.market.overview(),
+        (overview) =>
+          overview
+            ? {
+                ...overview,
+                items: overview.items.filter(({ id }) => id !== marketId),
+              }
+            : overview,
+      );
+      queryClient.removeQueries({
+        queryKey: queryKeys.market.detail(marketId),
+      });
+    },
   });
 }
 

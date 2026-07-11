@@ -41,27 +41,31 @@
 - 댓글 삭제 CI flake 제거 — 1초를 넘을 수 있는 mock mutation 완료 assertion에 5초 제한을 명시하고 대상 테스트 5개 병렬 실행·전체 validate로 안정성 확인
 - 게시글·댓글 신고 수직 경계 연결 — 디자인 기준 8개 사유를 선택 가능한 `RadioSheet`로 복구하고 `useReportMarketContent → marketService → MarketDataSource` mutation, 기타 상세 검증, 중복 신고 도메인 오류·toast를 Android Maestro로 검증
 - 신고 디자인 variant 상태 누수 제거 — route query가 바뀔 때 report sheet/기타 입력/중복 toast를 development 전용 effect로 동기화하고 부분 시각 residual을 `10.73/10.29/13.78`로 확인
+- 나눔 게시글 삭제 수직 경계 연결 — 소유 게시글 삭제를 `useDeleteMarketPost → marketService → MarketDataSource`로 연결하고 상세·목록 mock 지속성, overview/detail query 정리, 삭제 확인 후 목록 복귀를 Android Maestro로 검증
+- 게시글 삭제 확인 디자인/실제 상태 통합 — 실제 삭제와 `delete-confirm` 캡처가 같은 `ConfirmDialog`를 사용하도록 분리하고 원본 문구를 적용해 해당 residual을 `19.52→16.65`로 개선
 
 ## 주요 파일 (도메인 파일 지도)
 
 | 경로                             | 역할                              |
 | -------------------------------- | --------------------------------- |
 | `app/(tabs)/market/index.tsx`    | 나눔 목록, 상태/카테고리 필터     |
-| `app/(tabs)/market/[id].tsx`     | 나눔 상세, 상태 변경, 댓글, 신고  |
+| `app/(tabs)/market/[id].tsx`     | 나눔 상세, 게시글 삭제, 댓글, 신고 |
 | `app/modal/market-new.tsx`       | 나눔 작성 모달                    |
 | `src/mocks/market.ts`            | 나눔 mock 데이터                  |
-| `src/services/marketService.ts`  | 교체 가능한 나눔 조회·댓글 CUD·신고 data source 경계 |
-| `src/hooks/useMarket.ts`         | 나눔 query와 댓글 CUD·신고 mutation hook |
+| `src/services/marketService.ts`  | 교체 가능한 나눔 조회·게시글 삭제·댓글 CUD·신고 data source 경계 |
+| `src/hooks/useMarket.ts`         | 나눔 query와 게시글 삭제·댓글 CUD·신고 mutation hook |
 | `src/constants/domainOptions.ts` | 나눔 카테고리/상태/신고 사유 옵션 |
 | `src/types/market.ts`            | 나눔 타입                         |
 | `scripts/check-market-api-contract.mjs` | 나눔 Swagger endpoint·화면 요구 필드 검사 |
 
 ## 데이터 타입
 
-`MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. 화면 조회 모델 `MarketOverview`/`MarketDetail`은 목록 표시값, 작성자 소유 여부, 댓글 상태를 포함하며 API DTO mapper의 출력 경계입니다. 댓글 CUD는 `MarketCommentInput`, `MarketCommentUpdateInput`, `MarketCommentTarget`으로 등록 본문과 대상 ID를 구분하고 결과는 `MarketDetailComment` 또는 삭제 tombstone으로 정규화합니다. 신고는 `MarketReportInput`에서 게시글/댓글 대상, 프런트 사유, 선택 상세를 분리하며 서버 enum이 확정되면 HTTP mapper가 코드 변환을 소유합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
+`MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. 화면 조회 모델 `MarketOverview`/`MarketDetail`은 목록 표시값, 작성자 소유 여부, 댓글 상태를 포함하며 API DTO mapper의 출력 경계입니다. 게시글 삭제 대상은 `MarketPostTarget`, 댓글 CUD는 `MarketCommentInput`, `MarketCommentUpdateInput`, `MarketCommentTarget`으로 게시글 ID와 댓글 ID를 구분하고 결과는 목록/상세 제거 또는 `MarketDetailComment` 삭제 tombstone으로 정규화합니다. 신고는 `MarketReportInput`에서 게시글/댓글 대상, 프런트 사유, 선택 상세를 분리하며 서버 enum이 확정되면 HTTP mapper가 코드 변환을 소유합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-11) **게시글 삭제는 작성·수정 계약과 분리해 완결된 mock 수직 흐름으로 제공한다** — 삭제는 게시글 ID와 소유권만 필요하므로 data source에서 최종 검증하고, 성공 시 overview에서 제거하고 detail query를 폐기한 뒤 나눔 목록으로 이동합니다. 작성·수정은 위치 입력과 이미지 업로드 계약이 없으므로 일부 필드를 임의로 채우지 않습니다.
+- (2026-07-11) **게시글 삭제 확인은 실제 상태와 디자인 variant가 같은 공통 dialog를 사용한다** — 실제 버튼은 local state를 열고, development 전용 `delete-confirm`은 route query 변화 effect로만 같은 상태를 동기화해 production mutation을 덮지 않습니다.
 - (2026-07-11) **신고 사유는 프런트 도메인 값과 서버 code를 분리한다** — 화면은 디자인 원본의 8개 사유 key를 사용하고, mock data source는 대상 단위 중복만 검증합니다. Swagger의 `targetType/reportReasonCode` enum과 오류 code가 확정되기 전에는 예시 문자열을 HTTP 값으로 추측하지 않으며 계약 gate가 두 enum을 요구합니다.
 - (2026-07-11) **신고 디자인 variant는 query 변화에 맞춰 effect로 동기화한다** — 캡처 스크립트가 같은 상세 컴포넌트에서 route query만 바꾸므로 `report/report-other-input/report-dup-toast` 상태를 development 전용으로 초기화합니다. 실제 신고 mutation은 query가 변하지 않아 이 effect와 독립적입니다.
 - (2026-07-11) **비동기 UI 테스트는 기능 timeout과 assertion timeout을 분리한다** — mock 지연이 CI 병렬 부하에서 Testing Library 기본 제한을 넘을 수 있으므로, 삭제 완료 상태를 확인하는 assertion에만 5초를 허용하고 production mutation 시간은 변경하지 않습니다.
@@ -102,7 +106,7 @@
 - 신고 처리 후 블라인드/관리자 큐 정책은 API/운영 정책 확정 후 반영.
 - 나눔 작성 residual은 topbar/chip/control typography 정렬 후 `market-create-limit mean=14.62`, `market-create-fill mean=13.69`, `market-edit mean=13.70`, `market-create mean=12.22`, `market-create-back mean=7.72`입니다. 빈 작성/뒤로가기 화면은 status bar/time, RN font metrics, confirm overlay geometry 차이로 소폭 상승했지만 화면군 합계는 감소했습니다.
 - 나눔 목록 residual은 FAB root overlay 정렬 후 `market-list-all mean=13.75`, `market-list mean=10.64`, `market-list-reserved mean=6.79`, `market-list-done mean=6.31`입니다. 남은 차이는 native status bar/time, RN font metrics, tab bar geometry와 목록 row text metric 차이로 추적합니다.
-- 나눔 상세 residual은 신고 variant 재연결 후 `market-detail-report mean=10.73`, `report-other-input mean=10.29`, `report-dup-toast mean=13.78`입니다. 부분 캡처 compare의 `missing=99`는 출력 폴더를 3개 index만으로 초기화한 결과라 전체 회귀 수치로 사용하지 않으며, 대상 3개 PNG 존재와 residual만 확인했습니다. 남은 차이는 RN font metrics, native shadow/blur 번역, sheet/input capture 조건으로 추적합니다.
+- 나눔 상세 residual은 신고 variant 재연결 후 `market-detail-report mean=10.73`, `report-other-input mean=10.29`, `report-dup-toast mean=13.78`이며, 게시글 삭제 확인 문구·공통 dialog 연결 후 `market-detail-delete-confirm mean=16.65`입니다. 부분 캡처 compare의 missing 수치는 선택 index만 출력 폴더에 둔 결과라 전체 회귀 수치로 사용하지 않으며, 대상 PNG 존재와 residual만 확인했습니다. 남은 차이는 RN font metrics, native shadow/blur 번역, sheet/input capture 조건으로 추적합니다.
 
 ## 의존성
 

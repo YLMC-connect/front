@@ -28,6 +28,10 @@ type FormValues = {
 };
 
 type FormErrors = Partial<Record<keyof FormValues, string>>;
+type IdAvailability = {
+  value: string;
+  available: boolean;
+};
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -58,7 +62,7 @@ function validateSignup(values: FormValues) {
 
 export default function SignupScreen() {
   const params = useLocalSearchParams<{ designVariant?: string }>();
-  const { signup } = useAuth();
+  const { checkAvailability, signup } = useAuth();
   const variant = readDesignVariant(params.designVariant) ?? "default";
   const isDefault = variant === "default";
   const isPwError = variant === "pw-error";
@@ -85,15 +89,46 @@ export default function SignupScreen() {
         },
   );
   const [errors, setErrors] = useState<FormErrors>({});
+  const [idAvailability, setIdAvailability] = useState<IdAvailability | null>(
+    null,
+  );
+  const currentIdAvailability =
+    idAvailability?.value === values.id.trim()
+      ? idAvailability.available
+      : null;
 
   const setField =
     (field: keyof FormValues) =>
     (value: string): void => {
       setValues((current) => ({ ...current, [field]: value }));
+      if (field === "id") setIdAvailability(null);
     };
+
+  const onCheckIdAvailability = () => {
+    const id = values.id.trim();
+    if (id.length < 3) {
+      setErrors((current) => ({
+        ...current,
+        id: "아이디는 3자 이상 입력해주세요.",
+      }));
+      return;
+    }
+
+    setErrors((current) => ({ ...current, id: undefined }));
+    checkAvailability.mutate(
+      { searchType: "id", searchValue: id },
+      {
+        onSuccess: ({ available }) =>
+          setIdAvailability({ value: id, available }),
+      },
+    );
+  };
 
   const onSubmit = () => {
     const nextErrors = validateSignup(values);
+    if (isDefault && currentIdAvailability !== true) {
+      nextErrors.id = "아이디 중복 확인이 필요합니다.";
+    }
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
@@ -140,19 +175,38 @@ export default function SignupScreen() {
                     value={values.id}
                     onChangeText={setField("id")}
                     placeholder="아이디"
-                    hasError={variant === "id-dup" || Boolean(errors.id)}
+                    hasError={
+                      currentIdAvailability === false ||
+                      variant === "id-dup" ||
+                      Boolean(errors.id)
+                    }
                   />
                 </View>
-                <View style={styles.checkButton}>
-                  <Text style={styles.checkButtonText}>중복 확인</Text>
-                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={onCheckIdAvailability}
+                  disabled={checkAvailability.isPending}
+                  style={styles.checkButton}
+                >
+                  {checkAvailability.isPending ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={theme.colors.primaryDeep}
+                    />
+                  ) : (
+                    <Text style={styles.checkButtonText}>중복 확인</Text>
+                  )}
+                </Pressable>
               </View>
               <InlineError>
                 {errors.id ??
-                  (variant === "id-dup"
+                  (currentIdAvailability === false || variant === "id-dup"
                     ? "이미 사용 중인 아이디입니다"
                     : undefined)}
               </InlineError>
+              {currentIdAvailability === true ? (
+                <FieldHint>사용 가능한 아이디입니다</FieldHint>
+              ) : null}
             </Field>
 
             <Field label="비밀번호">

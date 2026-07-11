@@ -15,6 +15,7 @@ const session: AuthSession = {
 
 function setup() {
   const adapter: jest.Mocked<AuthAdapter> = {
+    checkAvailability: jest.fn().mockResolvedValue({ available: true }),
     login: jest.fn().mockResolvedValue(session),
     signup: jest.fn().mockResolvedValue(session),
     refresh: jest.fn().mockResolvedValue({

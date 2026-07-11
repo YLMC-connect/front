@@ -1,4 +1,5 @@
-import { screen } from "@testing-library/react-native";
+import { fireEvent, screen, waitFor } from "@testing-library/react-native";
+import SignupScreenRoute from "../signup";
 import SplashScreenRoute from "../splash";
 import TermsSheetScreenRoute from "../terms-sheet";
 import TermsScreenRoute from "../terms";
@@ -25,5 +26,27 @@ describe("auth smoke screens", () => {
 
     expect(screen.getAllByText("서비스 이용약관").length).toBeGreaterThan(0);
     expect(screen.getByText("시행일자: 2026년 1월 1일")).toBeTruthy();
+  });
+
+  it("shows that a new member id is available", async () => {
+    renderWithClient(<SignupScreenRoute />);
+
+    fireEvent.changeText(screen.getByPlaceholderText("아이디"), "new-member");
+    fireEvent.press(screen.getByText("중복 확인"));
+
+    await waitFor(() =>
+      expect(screen.getByText("사용 가능한 아이디입니다")).toBeTruthy(),
+    );
+  });
+
+  it("shows that a known member id is unavailable", async () => {
+    renderWithClient(<SignupScreenRoute />);
+
+    fireEvent.changeText(screen.getByPlaceholderText("아이디"), "gracekim");
+    fireEvent.press(screen.getByText("중복 확인"));
+
+    await waitFor(() =>
+      expect(screen.getByText("이미 사용 중인 아이디입니다")).toBeTruthy(),
+    );
   });
 });

@@ -31,6 +31,7 @@
 - Swagger 인증 계약 검사 추가 — `npm run test:api:contract`로 login/refresh/signup/me 성공 DTO와 JWT 정의 누락을 자동 판정
 - 인증 세션 수명주기 구현 — 로그인·회원가입 토큰 저장, 앱 시작 세션 복원, 401 refresh token rotation, 재발급 실패 토큰 정리·로그아웃을 `authSessionService`로 통합하고 자동 테스트 추가
 - 회원 중복확인 계약 검사 추가 — `POST /api/member/duplicate` 요청 enum과 공개 endpoint 여부, 200 envelope의 `data.available` 필드를 자동 검증
+- 회원 중복확인 mock 경계와 화면 연결 — `id | phone` 요청과 `available` 도메인 결과를 auth adapter/service/hook으로 격리하고, 기존 아이디 중복확인 버튼·가입 전 확인 gate를 실제 mutation에 연결
 - 인증 오류 코드 메시지 경계 추가 — Swagger에 문서화된 `MEM001~MEM006`을 고정 사용자 문구로 매핑하고 미등록 API 코드는 안전한 fallback을 사용
 
 ## 주요 파일 (도메인 파일 지도)
@@ -59,10 +60,11 @@
 
 ## 데이터 타입
 
-`LoginInput`, `SignupInput`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리합니다. 중복확인 요청은 Swagger의 `searchType: id | phone`, `searchValue` 계약을 따르며 성공 DTO의 `data.available`이 확정된 뒤 HTTP adapter 타입을 추가합니다.
+`LoginInput`, `SignupInput`, `MemberDuplicateInput`, `MemberAvailability`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리합니다. 중복확인 요청은 Swagger의 `searchType: id | phone`, `searchValue` 계약을 따르며 화면에는 `available` 도메인 결과만 노출합니다. 실제 HTTP 응답 mapper는 `data.available`이 성공 schema에 명시된 뒤 활성화합니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-11) **중복확인 결과는 검사한 값과 함께 보관한다** — 요청 중 아이디가 바뀌었을 때 이전 응답을 현재 값의 결과로 오인하지 않도록 `{ value, available }`을 함께 비교합니다. 기본 가입 제출은 현재 아이디의 사용 가능 응답을 받은 뒤에만 허용하고, 연락처 중복확인 UI는 디자인 확정 전까지 새로 만들지 않습니다.
 - (2026-07-11) **API 오류는 서버 message가 아니라 code로 사용자 문구를 결정한다** — 문서화된 `MEM001~MEM006`은 인증 메시지 표로 관리하고, 네트워크/응답 형식 오류는 공통 문구를 사용합니다. 미등록 API 코드는 내부 서버 문장을 노출하지 않고 화면별 fallback을 표시합니다.
 - (2026-07-11) **회원가입 전 중복확인도 인증 계약 gate에 포함한다** — `POST /api/member/duplicate`는 구체 요청뿐 아니라 공개 endpoint `security: []`와 200 응답 `data.available`을 반드시 제공해야 합니다. 설명 문자열만으로 성공 응답을 추측하지 않습니다.
 - (2026-07-10) **로그인·회원가입 오류/loading/toast query는 디자인 전용이다** — 캡처용 `designVariant`는 development에서만 해석합니다. 실제 로그인 오류와 pending 상태는 mutation 결과가 단일 출처이며 URL query로 인증 결과를 만들지 않습니다.

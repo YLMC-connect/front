@@ -6,6 +6,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 function createTestQueryClient() {
   return new QueryClient({
     defaultOptions: {
+      mutations: {
+        gcTime: 0,
+      },
       queries: {
         gcTime: Infinity,
         retry: false,

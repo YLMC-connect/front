@@ -137,8 +137,17 @@ export default function GroupDetailScreen() {
             {isLeader ? (
               <Card style={styles.actionCard}>
                 <Action icon="edit" label="수정" />
-                <Action icon="campaign" label="공지" />
-                <Action icon="groups" label="멤버" />
+                <Action
+                  testID="group-notice-open-create"
+                  icon="campaign"
+                  label="공지"
+                  onPress={() => router.push(`/group/notices?id=${id}`)}
+                />
+                <Action
+                  icon="groups"
+                  label="멤버"
+                  onPress={() => router.push(`/group/members?id=${id}`)}
+                />
                 <Action icon="delete-outline" label="삭제" danger />
               </Card>
             ) : isMember ? (
@@ -207,7 +216,16 @@ export default function GroupDetailScreen() {
                 <Text style={styles.noticeWhen}>{notice.createdLabel}</Text>
                 {isLeader ? (
                   <View style={styles.noticeActions}>
-                    <MiniAction icon="edit" label="수정" />
+                    <MiniAction
+                      testID={`group-notice-edit-${notice.id}`}
+                      icon="edit"
+                      label="수정"
+                      onPress={() =>
+                        router.push(
+                          `/group/notices?id=${id}&noticeId=${notice.id}`,
+                        )
+                      }
+                    />
                     <MiniAction icon="delete-outline" label="삭제" danger />
                   </View>
                 ) : null}
@@ -224,13 +242,22 @@ function Action({
   icon,
   label,
   danger = false,
+  onPress,
+  testID,
 }: {
   icon: keyof typeof MaterialIcons.glyphMap;
   label: string;
   danger?: boolean;
+  onPress?: () => void;
+  testID?: string;
 }) {
   return (
-    <Pressable accessibilityRole="button" style={styles.action}>
+    <Pressable
+      testID={testID}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={styles.action}
+    >
       <MaterialIcons
         name={icon}
         size={18}
@@ -247,13 +274,22 @@ function MiniAction({
   icon,
   label,
   danger = false,
+  onPress,
+  testID,
 }: {
   icon: keyof typeof MaterialIcons.glyphMap;
   label: string;
   danger?: boolean;
+  onPress?: () => void;
+  testID?: string;
 }) {
   return (
-    <View style={styles.miniAction}>
+    <Pressable
+      testID={testID}
+      accessibilityRole={onPress ? "button" : undefined}
+      onPress={onPress}
+      style={styles.miniAction}
+    >
       <MaterialIcons
         name={icon}
         size={14}
@@ -262,7 +298,7 @@ function MiniAction({
       <Text style={[styles.miniActionText, danger ? styles.dangerText : null]}>
         {label}
       </Text>
-    </View>
+    </Pressable>
   );
 }
 

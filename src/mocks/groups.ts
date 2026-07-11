@@ -134,6 +134,8 @@ export const mockGroupDetails: Record<string, GroupDetail> = {
       {
         id: "notice-1",
         title: "5월 18일 토요일 모임 안내",
+        content:
+          "이번 주 토요일은 북한산 도선사 코스로 갑니다. 오전 7시 교회 앞에서 모이며, 등산 시간은 약 4시간 예상해요. 준비물은 등산화, 물, 간식입니다.",
         preview:
           "이번 주 토요일은 북한산 도선사 코스로 갑니다. 오전 7시 교회 앞에서 모입니다.",
         createdLabel: "2일 전",
@@ -142,6 +144,8 @@ export const mockGroupDetails: Record<string, GroupDetail> = {
       {
         id: "notice-2",
         title: "신규 멤버 환영합니다",
+        content:
+          "이번 달에 새로 합류해주신 분들 진심으로 환영해요. 다음 모임 때 소개 시간이 있을 예정입니다.",
         preview:
           "이번 달에 새로 합류해주신 분들 진심으로 환영해요. 다음 모임 때 소개 시간이 있을 예정입니다.",
         createdLabel: "1주 전",

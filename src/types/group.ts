@@ -80,9 +80,25 @@ export interface GroupOverview {
 export interface GroupDetailNotice {
   id: string;
   title: string;
+  content: string;
   preview: string;
   createdLabel: string;
   isEdited: boolean;
+}
+
+export interface GroupNoticeInput {
+  groupId: string;
+  title: string;
+  content: string;
+}
+
+export interface GroupNoticeUpdateInput extends GroupNoticeInput {
+  noticeId: string;
+}
+
+export interface GroupNoticeTarget {
+  groupId: string;
+  noticeId: string;
 }
 
 export interface GroupDetail {

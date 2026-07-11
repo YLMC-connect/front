@@ -1,5 +1,5 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Alert } from "react-native";
 import GroupDetailScreen from "../group/[id]";
 import GroupMembersScreen from "../group/members";
@@ -164,6 +164,68 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("공지 작성")).toBeTruthy();
     expect(screen.getByText("소모임 멤버에게만 공개됩니다.")).toBeTruthy();
     expect(screen.getByPlaceholderText("공지 제목 (최대 30자)")).toBeTruthy();
+  });
+
+  it("creates a group notice and persists it in the detail", async () => {
+    const replace = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({ replace } as never);
+    const editor = renderWithClient(<GroupNoticesScreen />);
+
+    fireEvent.changeText(
+      screen.getByPlaceholderText("공지 제목 (최대 30자)"),
+      "새 모임 공지",
+    );
+    fireEvent.changeText(
+      screen.getByPlaceholderText("공지 내용을 입력해주세요"),
+      "이번 주 모임 장소가 변경되었습니다.",
+    );
+    fireEvent.press(screen.getByTestId("group-notice-submit"));
+
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/group/1"), {
+      timeout: 5000,
+    });
+    editor.unmount();
+    renderWithClient(<GroupDetailScreen />);
+    expect(await screen.findByText("새 모임 공지")).toBeTruthy();
+  });
+
+  it("updates and deletes a group notice from the editor", async () => {
+    const replace = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({ replace } as never);
+    jest.mocked(useLocalSearchParams).mockReturnValue({
+      id: "1",
+      noticeId: "notice-1",
+    });
+    const editor = renderWithClient(<GroupNoticesScreen />);
+
+    await waitFor(() =>
+      expect(
+        screen.getByPlaceholderText("공지 제목 (최대 30자)").props.value,
+      ).toBe("5월 18일 토요일 모임 안내"),
+    );
+    fireEvent.changeText(
+      screen.getByPlaceholderText("공지 제목 (최대 30자)"),
+      "수정된 산악회 공지",
+    );
+    fireEvent.press(screen.getByTestId("group-notice-submit"));
+    await waitFor(() => expect(replace).toHaveBeenCalledTimes(1), {
+      timeout: 5000,
+    });
+    editor.unmount();
+
+    const deleteEditor = renderWithClient(<GroupNoticesScreen />);
+    await screen.findByTestId("group-notice-delete");
+    fireEvent.press(screen.getByTestId("group-notice-delete"));
+    fireEvent.press(screen.getAllByText("삭제").at(-1)!);
+    await waitFor(() => expect(replace).toHaveBeenCalledTimes(2), {
+      timeout: 5000,
+    });
+    deleteEditor.unmount();
+
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
+    renderWithClient(<GroupDetailScreen />);
+    await screen.findByText("토요 산악회");
+    expect(screen.queryByText("수정된 산악회 공지")).toBeNull();
   });
 
   it("renders the group members screen", async () => {

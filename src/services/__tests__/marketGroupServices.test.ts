@@ -1,8 +1,11 @@
 import {
+  createGroupNotice,
   createGroupService,
+  deleteGroupNotice,
   fetchGroupDetail,
   fetchGroupMembers,
   fetchGroupOverview,
+  updateGroupNotice,
   type GroupDataSource,
 } from "../groupService";
 import {
@@ -210,11 +213,60 @@ describe("market and group service boundaries", () => {
     });
   });
 
+  it("creates, updates, and deletes a persisted group notice", async () => {
+    const created = await createGroupNotice({
+      groupId: "1",
+      title: "  새 공지  ",
+      content: "  새 공지 내용입니다.  ",
+    });
+    expect(created).toMatchObject({
+      title: "새 공지",
+      content: "새 공지 내용입니다.",
+      isEdited: false,
+    });
+
+    const updated = await updateGroupNotice({
+      groupId: "1",
+      noticeId: created.id,
+      title: "수정 공지",
+      content: "수정된 공지 내용입니다.",
+    });
+    expect(updated).toMatchObject({
+      id: created.id,
+      title: "수정 공지",
+      isEdited: true,
+    });
+
+    await deleteGroupNotice({ groupId: "1", noticeId: created.id });
+    const detail = await fetchGroupDetail("1");
+    expect(detail.notices.some(({ id }) => id === created.id)).toBe(false);
+  });
+
+  it("rejects an empty group notice before calling the data source", () => {
+    const dataSource: GroupDataSource = {
+      getOverview: jest.fn().mockRejectedValue(new Error("not used")),
+      getDetail: jest.fn().mockRejectedValue(new Error("not used")),
+      getMembers: jest.fn().mockRejectedValue(new Error("not used")),
+      createNotice: jest.fn().mockRejectedValue(new Error("not used")),
+      updateNotice: jest.fn().mockRejectedValue(new Error("not used")),
+      deleteNotice: jest.fn().mockRejectedValue(new Error("not used")),
+    };
+    const service = createGroupService(dataSource);
+
+    expect(() =>
+      service.createNotice({ groupId: "1", title: " ", content: "내용" }),
+    ).toThrow("공지 제목을 입력해주세요.");
+    expect(dataSource.createNotice).not.toHaveBeenCalled();
+  });
+
   it("switches the group data source without changing service consumers", async () => {
     const dataSource: GroupDataSource = {
       getOverview: jest.fn().mockResolvedValue({ groups: [], services: [] }),
       getDetail: jest.fn().mockRejectedValue(new Error("not used")),
       getMembers: jest.fn().mockRejectedValue(new Error("not used")),
+      createNotice: jest.fn().mockRejectedValue(new Error("not used")),
+      updateNotice: jest.fn().mockRejectedValue(new Error("not used")),
+      deleteNotice: jest.fn().mockRejectedValue(new Error("not used")),
     };
     const service = createGroupService(dataSource);
 

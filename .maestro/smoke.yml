@@ -140,6 +140,59 @@ tags:
     id: tab-group
 - assertVisible:
     id: screen-group
+- tapOn: 토요 산악회
+- extendedWaitUntil:
+    visible:
+      id: group-notice-open-create
+    timeout: 5000
+- tapOn:
+    id: group-notice-open-create
+- tapOn:
+    id: group-notice-title-input
+- inputText: Maestro notice
+- tapOn:
+    id: group-notice-content-input
+- inputText: Maestro notice content
+- hideKeyboard
+- tapOn:
+    id: group-notice-submit
+- scrollUntilVisible:
+    element:
+      text: Maestro notice
+    direction: DOWN
+- assertVisible: Maestro notice
+- scrollUntilVisible:
+    element:
+      id: group-notice-edit-mock-notice-1-.*
+    direction: DOWN
+- tapOn:
+    id: group-notice-edit-mock-notice-1-.*
+- tapOn:
+    id: group-notice-title-input
+- eraseText: 14
+- inputText: Maestro edited notice
+- hideKeyboard
+- tapOn:
+    id: group-notice-submit
+- scrollUntilVisible:
+    element:
+      text: Maestro edited notice
+    direction: DOWN
+- assertVisible: Maestro edited notice
+- scrollUntilVisible:
+    element:
+      id: group-notice-edit-mock-notice-1-.*
+    direction: DOWN
+- tapOn:
+    id: group-notice-edit-mock-notice-1-.*
+- tapOn:
+    id: group-notice-delete
+- assertVisible: 공지를 삭제하시겠습니까?
+- tapOn: 삭제
+- assertNotVisible: Maestro edited notice
+- back
+- assertVisible:
+    id: screen-home
 - tapOn:
     id: tab-prayer
 - assertVisible:

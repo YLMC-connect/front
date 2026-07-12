@@ -2,7 +2,6 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -14,7 +13,9 @@ import { Screen } from "../../../src/components/layout/Screen";
 import {
   EmptyState,
   ErrorState,
+  AppText,
   FloatingActionButton,
+  ListSkeleton,
   SegmentedTabs,
   VisualThumb,
 } from "../../../src/components/ui";
@@ -89,7 +90,7 @@ export default function MarketScreen() {
     <Screen scroll={false} padded={false} testID="screen-market">
       <View style={styles.root}>
         <View style={styles.topBar}>
-          <Text style={styles.title}>나눔</Text>
+          <AppText variant="screenTitle">나눔</AppText>
           <Pressable
             accessibilityLabel={searchOpen ? "나눔 검색 닫기" : "나눔 검색"}
             accessibilityRole="button"
@@ -163,7 +164,7 @@ export default function MarketScreen() {
         <ScrollView contentContainerStyle={styles.list}>
           {isLoading ? (
             <View style={styles.loading}>
-              <ActivityIndicator color={theme.colors.primary} />
+              <ListSkeleton rows={4} />
             </View>
           ) : isError ? (
             <ErrorState
@@ -171,7 +172,10 @@ export default function MarketScreen() {
               onRetry={() => overview.refetch()}
             />
           ) : visiblePosts.length === 0 ? (
-            <MarketEmptyState status={isEmpty ? null : activeStatus} />
+            <MarketEmptyState
+              status={isEmpty ? null : activeStatus}
+              onCreate={() => router.push("/modal/market-new")}
+            />
           ) : (
             visiblePosts.map((post, index) => (
               <PostRow
@@ -214,25 +218,28 @@ function PostRow({
       style={[styles.row, last ? styles.rowLast : null]}
     >
       <View style={styles.thumbWrap}>
-        <VisualThumb size={86} seed={post.thumbSeed} />
+        <VisualThumb size={96} seed={post.thumbSeed} />
         {done ? (
           <View style={styles.doneOverlay}>
-            <Text style={styles.doneText}>나눔완료</Text>
+            <AppText variant="caption" tone="inverse">
+              나눔완료
+            </AppText>
           </View>
         ) : null}
         {reserved ? <StatusBadge /> : null}
       </View>
 
       <View style={[styles.rowText, done ? styles.rowTextDone : null]}>
-        <Text
+        <AppText
           numberOfLines={2}
-          style={[styles.postTitle, done ? styles.postTitleDone : null]}
+          variant="cardTitle"
+          tone={done ? "muted" : "primary"}
         >
           {post.title}
-        </Text>
-        <Text style={styles.postMeta}>
+        </AppText>
+        <AppText variant="caption" tone="muted" style={styles.postMeta}>
           {post.authorName} · {post.createdLabel}
-        </Text>
+        </AppText>
       </View>
     </Pressable>
   );
@@ -241,12 +248,20 @@ function PostRow({
 function StatusBadge() {
   return (
     <View style={styles.statusBadge}>
-      <Text style={styles.statusBadgeText}>예약중</Text>
+      <AppText variant="caption" tone="inverse">
+        예약중
+      </AppText>
     </View>
   );
 }
 
-function MarketEmptyState({ status }: { status: Status | null }) {
+function MarketEmptyState({
+  status,
+  onCreate,
+}: {
+  status: Status | null;
+  onCreate: () => void;
+}) {
   const message =
     status === "reserved"
       ? {
@@ -276,6 +291,8 @@ function MarketEmptyState({ status }: { status: Status | null }) {
         title={message.title}
         description={message.description}
         icon="shopping-bag"
+        actionLabel="나눔 등록하기"
+        onAction={onCreate}
       />
     </View>
   );
@@ -287,15 +304,10 @@ const styles = StyleSheet.create({
   },
   topBar: {
     minHeight: 56,
-    paddingHorizontal: 18,
+    paddingHorizontal: theme.layout.screenX,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-  },
-  title: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize["2xl"],
-    fontWeight: theme.fontWeight.extrabold,
   },
   searchButton: {
     width: 44,
@@ -305,7 +317,7 @@ const styles = StyleSheet.create({
   },
   searchWrap: {
     minHeight: 46,
-    marginHorizontal: 18,
+    marginHorizontal: theme.layout.screenX,
     marginBottom: 10,
     paddingHorizontal: 14,
     flexDirection: "row",
@@ -322,7 +334,7 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
   },
   statusTabs: {
-    marginHorizontal: 18,
+    marginHorizontal: theme.layout.screenX,
     marginTop: 4,
     marginBottom: 10,
   },
@@ -331,7 +343,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   categories: {
-    paddingHorizontal: 18,
+    paddingHorizontal: theme.layout.screenX,
     gap: 8,
   },
   chip: {
@@ -360,13 +372,12 @@ const styles = StyleSheet.create({
     paddingBottom: 164,
   },
   loading: {
-    paddingTop: 80,
-    alignItems: "center",
+    paddingTop: theme.spacing[2],
   },
   row: {
     flexDirection: "row",
-    gap: 14,
-    paddingHorizontal: 22,
+    gap: theme.layout.listGap,
+    paddingHorizontal: theme.layout.screenX,
     paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.line,
@@ -375,8 +386,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
   },
   thumbWrap: {
-    width: 86,
-    height: 86,
+    width: 96,
+    height: 96,
     borderRadius: theme.radius.md,
     overflow: "hidden",
     flexShrink: 0,
@@ -386,11 +397,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(20,30,18,0.55)",
     alignItems: "center",
     justifyContent: "center",
-  },
-  doneText: {
-    color: theme.colors.white,
-    fontSize: theme.fontSize.md,
-    fontWeight: theme.fontWeight.extrabold,
   },
   statusBadge: {
     position: "absolute",
@@ -402,11 +408,6 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     ...theme.shadow.card,
   },
-  statusBadgeText: {
-    color: theme.colors.white,
-    fontSize: theme.fontSize.xs,
-    fontWeight: theme.fontWeight.bold,
-  },
   rowText: {
     flex: 1,
     minWidth: 0,
@@ -415,20 +416,8 @@ const styles = StyleSheet.create({
   rowTextDone: {
     opacity: 0.55,
   },
-  postTitle: {
-    color: theme.colors.ink,
-    fontSize: 14.5,
-    lineHeight: 20,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  postTitleDone: {
-    color: theme.colors.inkSoft,
-  },
   postMeta: {
     marginTop: 6,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-    lineHeight: theme.lineHeight.sm,
   },
   emptyWrap: {
     paddingHorizontal: 32,
@@ -437,7 +426,7 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: "absolute",
-    right: 18,
+    right: theme.layout.screenX,
     bottom: 86,
   },
 });

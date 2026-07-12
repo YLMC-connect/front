@@ -10,6 +10,8 @@
 
 ## ✅ 완료
 
+- 공통 TopBar 디자인 시스템 반영 — MY 상세 화면이 역할형 section title·caption subtitle과 44px back target, semantic text 대비를 공통으로 상속
+
 - MY 활동 내역 underline tab 공통화와 메뉴 href 타입 보강 — 기존 탭 geometry·query 이동을 유지하고 `as never` 우회를 제거
 - MY 화면 고도화 — `app/(tabs)/mypage/index.tsx`
 - MY 타입 구현 — `src/types/mypage.ts`
@@ -56,6 +58,8 @@
 `MyPageData`는 나눔, 소모임, 삶공부, 기도방, 관심 제목, FAQ 목록을 묶어 반환합니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-07-12) **MY 상세 제목은 공통 TopBar 역할형 typography를 상속한다** — 화면별 로컬 title 크기를 추가하지 않고 공통 sectionTitle/caption과 44px back affordance를 사용합니다.
 
 - (2026-07-11) **MY 로그아웃은 저장소 정리 결과와 무관하게 로그인 화면으로 이동한다** — 실제 토큰 삭제와 인증 상태 전이는 auth session manager가 소유하고, MY 화면은 성공·실패 모두 `/login`으로 이동합니다. 마이페이지 기본 화면 부분 재캡처 residual은 `mean=12.09`입니다.
 - (2026-07-10) **MY 디자인 상태와 실제 탭 탐색을 분리한다** — 프로필/차단/FAQ/탈퇴 예외 화면은 development 전용 `designVariant`, 활동 내역의 실제 탭 이동은 `tab` query를 사용합니다. production URL로 confirm/toast/empty 상태를 강제하지 않습니다.

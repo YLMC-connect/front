@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 동행 목록 디자인 시스템 적용 — 내 소모임은 기존 cover 강조 카드를 유지하고 전체 모임은 border/shadow 반복을 제거한 flat list로 전환했으며 역할형 typography, 20px 여백, Skeleton, 절제된 FAB를 적용
 - 동행 작성·탐색 mock 흐름 연결 — 카테고리/소모임명/설명/최대인원/일정/장소를 실제 입력·검증해 mock service에 저장하고 상세 이동·목록 재조회까지 연결했으며, 소모임/봉사 검색·카테고리 필터·내 소모임 전체보기를 활성화
 - 동행 상세 action·mini action과 개설 폼 section/divider 공통화 — 기존 geometry·공지 관리 동작을 유지하면서 공통 UI 파일로 이동
 - 소모임 목록/상세/개설 화면 구현 — `app/(tabs)/group/index.tsx`, `app/(tabs)/group/[id].tsx`, `app/modal/group-new.tsx`
@@ -64,6 +65,8 @@
 `Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 화면 조회 모델 `GroupOverview`/`GroupDetail`/`GroupMemberDetail`은 목록·봉사·권한·멤버·공지 표시값을 포함하며 API DTO mapper의 출력 경계입니다. `GroupDetailNotice`는 수정 폼 재사용을 위한 전체 `content`를 포함하고, 공지 쓰기 경계는 `GroupNoticeInput`/`GroupNoticeUpdateInput`/`GroupNoticeTarget`으로 분리합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-07-12) **동행은 대표 영역과 전체 탐색 영역의 surface 수준을 구분한다** — 내 소모임 가로 목록만 cover card로 강조하고 전체 모임은 구분선 기반 flat row로 표시합니다. 이미지 asset은 추가하지 않고 기존 `VisualCover`를 유지합니다.
 
 - (2026-07-12) **동행 개설은 API 계약 전에도 service mutation 경계를 통과한다** — 작성 화면은 `useCreateGroup → createGroup → GroupDataSource`를 사용하고 생성한 모임·상세·멤버를 runtime mock에 함께 유지합니다. 가로 내 소모임 목록은 snap 이동과 실제 전체보기 화면을 제공합니다.
 

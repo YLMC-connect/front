@@ -1,22 +1,17 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   Avatar,
+  AppText,
   Card,
   ConfirmDialog,
   DetailAction,
   DetailMiniAction,
   ErrorState,
+  Skeleton,
   TopBar,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
@@ -65,7 +60,11 @@ export default function GroupDetailScreen() {
     return (
       <Screen>
         <View style={styles.loading}>
-          <ActivityIndicator color={theme.colors.primary} />
+          <Skeleton width="100%" height={220} radius={0} />
+          <View style={styles.loadingBody}>
+            <Skeleton width="70%" height={26} />
+            <Skeleton width="100%" height={76} />
+          </View>
         </View>
       </Screen>
     );
@@ -74,7 +73,10 @@ export default function GroupDetailScreen() {
   if (detail.isError || !detail.data) {
     return (
       <Screen>
-        <ErrorState message="소모임 정보를 다시 불러와주세요." />
+        <ErrorState
+          message="소모임 정보를 다시 불러와주세요."
+          onRetry={() => detail.refetch()}
+        />
       </Screen>
     );
   }
@@ -122,7 +124,7 @@ export default function GroupDetailScreen() {
               </View>
             </View>
 
-            <Text style={styles.title}>{group.name}</Text>
+            <AppText variant="screenTitle">{group.name}</AppText>
 
             <View style={styles.memberMeta}>
               <MaterialIcons
@@ -136,7 +138,9 @@ export default function GroupDetailScreen() {
               </Text>
             </View>
 
-            <Text style={styles.description}>{group.description}</Text>
+            <AppText variant="body" tone="secondary" style={styles.description}>
+              {group.description}
+            </AppText>
 
             <View style={styles.leaderCard}>
               <Avatar name={leaderName} size={36} />
@@ -300,8 +304,10 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   loading: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+  },
+  loadingBody: {
+    padding: theme.layout.screenX,
+    gap: theme.layout.listGap,
   },
   noticeError: {
     paddingHorizontal: 22,
@@ -313,8 +319,8 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   header: {
-    paddingHorizontal: 22,
-    paddingTop: 4,
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: theme.spacing[5],
     paddingBottom: 18,
   },
   chips: {
@@ -351,12 +357,6 @@ const styles = StyleSheet.create({
   recruitTextClosed: {
     color: theme.colors.inkMute,
   },
-  title: {
-    color: theme.colors.ink,
-    fontSize: 24,
-    lineHeight: 30,
-    fontWeight: theme.fontWeight.extrabold,
-  },
   memberMeta: {
     marginTop: 10,
     flexDirection: "row",
@@ -373,9 +373,6 @@ const styles = StyleSheet.create({
   },
   description: {
     marginTop: 14,
-    color: theme.colors.inkSoft,
-    fontSize: 13,
-    lineHeight: 22,
   },
   leaderCard: {
     marginTop: 16,

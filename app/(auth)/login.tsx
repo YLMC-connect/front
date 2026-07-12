@@ -4,12 +4,11 @@ import { useState } from "react";
 import {
   Pressable,
   StyleSheet,
-  Text,
   TextInput as NativeTextInput,
   View,
 } from "react-native";
 import { Screen } from "../../src/components/layout/Screen";
-import { Button, Toast } from "../../src/components/ui";
+import { AppText, Button, Toast } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { authApiErrorMessages } from "../../src/constants/apiErrorMessages";
 import { useAuth } from "../../src/hooks/useAuth";
@@ -63,8 +62,12 @@ export default function LoginScreen() {
           <View style={styles.logo}>
             <MaterialIcons name="door-front" size={38} color="#fff" />
           </View>
-          <Text style={styles.title}>열린문 커넥트</Text>
-          <Text style={styles.subtitle}>교회 가족과 함께하는 일상</Text>
+          <AppText variant="screenTitle" style={styles.title}>
+            열린문 커넥트
+          </AppText>
+          <AppText variant="body" tone="secondary" style={styles.subtitle}>
+            교회 가족과 함께하는 일상
+          </AppText>
         </View>
 
         <View style={styles.form}>
@@ -95,7 +98,7 @@ export default function LoginScreen() {
             onTrailingPress={() => setPasswordVisible((visible) => !visible)}
           />
           {login.error || isError ? (
-            <Text style={styles.error}>
+            <AppText variant="caption" tone="danger">
               {login.error
                 ? getApiErrorMessage(
                     login.error,
@@ -103,7 +106,7 @@ export default function LoginScreen() {
                     "아이디 또는 비밀번호를 확인해주세요.",
                   )
                 : "아이디 또는 비밀번호가 올바르지 않습니다"}
-            </Text>
+            </AppText>
           ) : null}
           <Button
             onPress={onSubmit}
@@ -117,11 +120,15 @@ export default function LoginScreen() {
             onPress={() => setFeedback("비밀번호 찾기는 준비 중입니다")}
             style={styles.findPassword}
           >
-            <Text style={styles.findPasswordText}>비밀번호 찾기</Text>
+            <AppText variant="caption" tone="muted">
+              비밀번호 찾기
+            </AppText>
           </Pressable>
           <View style={styles.dividerRow}>
             <View style={styles.divider} />
-            <Text style={styles.dividerText}>처음이신가요?</Text>
+            <AppText variant="caption" tone="disabled">
+              처음이신가요?
+            </AppText>
             <View style={styles.divider} />
           </View>
           <Link href="/signup" style={styles.signupButton}>
@@ -129,7 +136,9 @@ export default function LoginScreen() {
           </Link>
         </View>
         <View style={styles.spacer} />
-        <Text style={styles.copy}>© 열린문교회</Text>
+        <AppText variant="caption" tone="disabled" style={styles.copy}>
+          © 열린문교회
+        </AppText>
       </View>
       <Toast
         message={feedback || (isToast ? "네트워크 연결을 확인해주세요" : "")}
@@ -166,7 +175,9 @@ function AuthField({
 }) {
   return (
     <View>
-      <Text style={styles.fieldLabel}>{label}</Text>
+      <AppText variant="caption" tone="secondary" style={styles.fieldLabel}>
+        {label}
+      </AppText>
       <View style={[styles.inputBox, hasError ? styles.inputBoxError : null]}>
         <NativeTextInput
           testID={testID}
@@ -193,13 +204,21 @@ function AuthField({
           </Pressable>
         ) : null}
       </View>
-      {error ? <Text style={styles.fieldError}>{error}</Text> : null}
+      {error ? (
+        <AppText variant="caption" tone="danger" style={styles.fieldError}>
+          {error}
+        </AppText>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, paddingHorizontal: 24, paddingTop: 20 },
+  root: {
+    flex: 1,
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: theme.spacing[5],
+  },
   hero: { alignItems: "center", marginTop: 28 },
   logo: {
     width: 76,
@@ -215,18 +234,12 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   title: {
-    color: theme.colors.ink,
-    fontWeight: "900",
-    fontSize: 22,
     marginTop: 16,
   },
-  subtitle: { color: theme.colors.inkMute, fontWeight: "600", fontSize: 13 },
+  subtitle: { marginTop: theme.spacing[1] },
   form: { gap: 14, marginTop: 36 },
   fieldLabel: {
     marginBottom: 6,
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.semibold,
   },
   inputBox: {
     minHeight: 48,
@@ -256,14 +269,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  error: { color: theme.colors.danger, fontSize: 13 },
-  fieldError: { marginTop: 6, color: theme.colors.danger, fontSize: 12 },
+  fieldError: { marginTop: 6 },
   findPassword: {
     alignSelf: "center",
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
-  findPasswordText: { color: theme.colors.inkMute, fontSize: 13 },
   dividerRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -272,7 +283,6 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   divider: { flex: 1, height: 1, backgroundColor: theme.colors.line },
-  dividerText: { color: theme.colors.inkHint, fontSize: 12, fontWeight: "600" },
   signupButton: {
     color: theme.colors.primaryDeep,
     textAlign: "center",
@@ -285,9 +295,7 @@ const styles = StyleSheet.create({
   },
   spacer: { flex: 1 },
   copy: {
-    color: theme.colors.inkHint,
     textAlign: "center",
-    fontSize: 11,
     paddingVertical: 12,
     paddingBottom: 28,
   },

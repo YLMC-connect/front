@@ -21,6 +21,7 @@ import {
   ErrorState,
   RadioSheet,
   Toast,
+  Skeleton,
   VisualThumb,
 } from "../../../src/components/ui";
 import { MARKET_REPORT_REASONS } from "../../../src/constants/domainOptions";
@@ -128,7 +129,12 @@ export default function MarketDetailScreen() {
     return (
       <Screen>
         <View style={styles.loading}>
-          <ActivityIndicator color={theme.colors.primary} />
+          <Skeleton width="100%" height={360} radius={0} />
+          <View style={styles.loadingBody}>
+            <Skeleton width="45%" height={18} />
+            <Skeleton width="88%" height={24} />
+            <Skeleton width="100%" height={80} />
+          </View>
         </View>
       </Screen>
     );
@@ -137,7 +143,10 @@ export default function MarketDetailScreen() {
   if (detail.isError || !detail.data) {
     return (
       <Screen>
-        <ErrorState message="나눔 정보를 다시 불러와주세요." />
+        <ErrorState
+          message="나눔 정보를 다시 불러와주세요."
+          onRetry={() => detail.refetch()}
+        />
       </Screen>
     );
   }
@@ -566,8 +575,10 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   loading: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+  },
+  loadingBody: {
+    padding: theme.layout.screenX,
+    gap: theme.layout.listGap,
   },
   content: { paddingBottom: 152 },
   hero: {

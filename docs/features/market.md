@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 나눔 목록 디자인 시스템 적용 — 화면/카드/보조문구 typography, 20px 화면 여백, 96px 기존 추상 썸네일, Skeleton 로딩, 행동 가능한 empty state와 오류 재시도, 절제된 FAB를 적용하고 flat row 구조를 유지
 - 나눔 작성·탐색 mock 흐름 연결 — 사진/카테고리/상태/제목/설명/수령 장소를 실제 입력·검증해 mock service에 저장하고 상세 이동·목록 재조회까지 연결했으며, 목록 카테고리 필터와 제목/작성자 검색을 활성화
 - 나눔 상세 action·mini action과 작성 폼 section/divider 공통화 — 기존 geometry·testID·댓글 CRUD 동작을 유지하면서 공통 UI 파일로 이동
 - 나눔 목록/상세/작성 화면 구현 — `app/(tabs)/market/index.tsx`, `app/(tabs)/market/[id].tsx`, `app/modal/market-new.tsx`
@@ -65,6 +66,8 @@
 `MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. 화면 조회 모델 `MarketOverview`/`MarketDetail`은 목록 표시값, 작성자 소유 여부, 댓글 상태를 포함하며 API DTO mapper의 출력 경계입니다. 게시글 삭제 대상은 `MarketPostTarget`, 댓글 CUD는 `MarketCommentInput`, `MarketCommentUpdateInput`, `MarketCommentTarget`으로 게시글 ID와 댓글 ID를 구분하고 결과는 목록/상세 제거 또는 `MarketDetailComment` 삭제 tombstone으로 정규화합니다. 신고는 `MarketReportInput`에서 게시글/댓글 대상, 프런트 사유, 선택 상세를 분리하며 서버 enum이 확정되면 HTTP mapper가 코드 변환을 소유합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-07-12) **나눔은 사진 asset 추가 없이 정보 계층만 개선한다** — 사용자 요청에 따라 기존 `VisualThumb`를 유지하되 제목·작성자/시간의 역할을 분리하고 목록은 flat row로 표시합니다. 실제 물품 사진은 업로드/API 계약 작업에서 다룹니다.
 
 - (2026-07-12) **나눔 작성은 API 계약 전에도 service mutation 경계를 통과한다** — 작성 화면은 fixture를 직접 변경하지 않고 `useCreateMarketPost → createMarketPost → MarketDataSource`를 사용합니다. 생성 결과는 runtime mock 목록/상세에 유지하고 실제 API 연결 시 data source/mapper만 교체합니다.
 

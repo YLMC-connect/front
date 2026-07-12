@@ -2,7 +2,6 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -24,7 +23,13 @@ import type {
   PrayerWeekday,
 } from "../../types/prayer";
 import { Screen } from "../layout/Screen";
-import { EmptyState, ErrorState, FloatingActionButton } from "../ui";
+import {
+  AppText,
+  EmptyState,
+  ErrorState,
+  FloatingActionButton,
+  ListSkeleton,
+} from "../ui";
 
 type FaithSection = "pray" | "study";
 
@@ -36,14 +41,14 @@ export function FaithSectionsScreen({ section }: { section: FaithSection }) {
       <View style={styles.root}>
         <View style={styles.topBar}>
           <View style={styles.topText}>
-            <Text style={styles.title}>
+            <AppText variant="screenTitle">
               {section === "study" ? "삶공부" : "기도"}
-            </Text>
-            <Text style={styles.subtitle}>
+            </AppText>
+            <AppText variant="caption" tone="secondary" style={styles.subtitle}>
               {section === "study"
                 ? "말씀으로 배우고 삶으로 자라가요"
                 : "함께 기도하고 응답을 나눠요"}
-            </Text>
+            </AppText>
           </View>
           {section === "study" ? (
             <Pressable
@@ -124,10 +129,52 @@ function PrayerContent() {
     );
   }
 
+  const joinedRooms = data.rooms.filter((room) => room.status === "joined");
+  const todayCompleted = joinedRooms.reduce(
+    (total, room) => total + (room.completedCount ?? 0),
+    0,
+  );
+  const todayMembers = joinedRooms.reduce(
+    (total, room) => total + room.memberCount,
+    0,
+  );
+  const todayPercent = todayMembers
+    ? Math.round((todayCompleted / todayMembers) * 100)
+    : 0;
+
   return (
     <>
+      <View style={styles.todayCard}>
+        <View style={styles.todayTop}>
+          <View>
+            <AppText variant="caption" tone="brand">
+              오늘의 기도 진행
+            </AppText>
+            <AppText variant="sectionTitle" style={styles.todayTitle}>
+              함께 기도한 성도 {todayCompleted}명
+            </AppText>
+          </View>
+          <AppText variant="screenTitle" tone="brand">
+            {todayPercent}%
+          </AppText>
+        </View>
+        <View style={styles.todayTrack}>
+          <View
+            style={[
+              styles.todayFill,
+              { width: `${todayPercent}%` as `${number}%` },
+            ]}
+          />
+        </View>
+        <AppText variant="caption" tone="muted" style={styles.todayMeta}>
+          참여 중인 기도방 {joinedRooms.length}개 · 전체 {todayMembers}명
+        </AppText>
+      </View>
+
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>내 기도방</Text>
+        <AppText variant="sectionTitle" style={styles.sectionTitle}>
+          내 기도방
+        </AppText>
         <View style={styles.stack}>
           {data.rooms.map((room) => (
             <Pressable
@@ -139,10 +186,10 @@ function PrayerContent() {
               <PrayerDayBadge weekday={room.weekday} period={room.period} />
               <View style={styles.cardText}>
                 <View style={styles.badgeRow}>
-                  <Text style={styles.roomTitle}>
+                  <AppText variant="cardTitle">
                     {weekdayLabels[room.weekday].long}{" "}
                     {periodLabels[room.period]}
-                  </Text>
+                  </AppText>
                   <View
                     style={[
                       styles.statusBadge,
@@ -154,7 +201,11 @@ function PrayerContent() {
                     </Text>
                   </View>
                 </View>
-                <Text style={styles.mutedText}>
+                <AppText
+                  variant="caption"
+                  tone="muted"
+                  style={styles.mutedText}
+                >
                   멤버 {room.memberCount}명 · 오늘 완료{" "}
                   {room.completedCount == null
                     ? "승인 대기"
@@ -163,7 +214,7 @@ function PrayerContent() {
                   {room.participationRate == null
                     ? "-"
                     : `${room.participationRate}%`}
-                </Text>
+                </AppText>
               </View>
               <MaterialIcons
                 name="chevron-right"
@@ -176,7 +227,9 @@ function PrayerContent() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>내 기도제목</Text>
+        <AppText variant="sectionTitle" style={styles.sectionTitle}>
+          내 기도제목
+        </AppText>
         <View style={styles.stack}>
           {data.requests.map((item) => (
             <Pressable
@@ -196,8 +249,16 @@ function PrayerContent() {
                     </Text>
                   </View>
                 </View>
-                <Text style={styles.requestTitle}>{item.title}</Text>
-                <Text style={styles.mutedText}>{item.description}</Text>
+                <AppText variant="cardTitle" style={styles.requestTitle}>
+                  {item.title}
+                </AppText>
+                <AppText
+                  variant="caption"
+                  tone="muted"
+                  style={styles.mutedText}
+                >
+                  {item.description}
+                </AppText>
               </View>
               <MaterialIcons
                 name="chevron-right"
@@ -217,7 +278,9 @@ function PrayerContent() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>중보기도 신청</Text>
+        <AppText variant="sectionTitle" style={styles.sectionTitle}>
+          중보기도 신청
+        </AppText>
         <Pressable
           accessibilityRole="button"
           onPress={() => router.push("/prayer/apply")}
@@ -231,10 +294,10 @@ function PrayerContent() {
             />
           </View>
           <View style={styles.cardText}>
-            <Text style={styles.applyTitle}>중보기도 신청</Text>
-            <Text style={styles.applyDesc}>
+            <AppText variant="cardTitle">중보기도 신청</AppText>
+            <AppText variant="body" tone="secondary" style={styles.applyDesc}>
               월-토 오전/오후 기도방은 신청 화면에서 선택해요.
-            </Text>
+            </AppText>
           </View>
         </Pressable>
       </View>
@@ -279,16 +342,22 @@ function StudyContent({ search }: { search: string }) {
   return (
     <>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>내 학습경로</Text>
+        <AppText variant="sectionTitle" style={styles.sectionTitle}>
+          내 학습경로
+        </AppText>
         <View style={styles.pathCard}>
           <View style={styles.pathTop}>
             <View>
-              <Text style={styles.pathEyebrow}>필수 과정 진행률</Text>
-              <Text style={styles.pathTitle}>
+              <AppText variant="caption" tone="brand">
+                필수 과정 진행률
+              </AppText>
+              <AppText variant="sectionTitle" style={styles.pathTitle}>
                 {data.path.completedRequired} / {data.path.totalRequired} 완료
-              </Text>
+              </AppText>
             </View>
-            <Text style={styles.pathPercent}>{progressPercent}%</Text>
+            <AppText variant="screenTitle" tone="brand">
+              {progressPercent}%
+            </AppText>
           </View>
           <View style={styles.progressTrack}>
             <View
@@ -314,7 +383,9 @@ function StudyContent({ search }: { search: string }) {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>지금 신청 가능한 과정</Text>
+        <AppText variant="sectionTitle" style={styles.sectionTitle}>
+          지금 신청 가능한 과정
+        </AppText>
         <View style={styles.stack}>
           {openCourses.map((course) => (
             <CourseCard key={course.id} course={course} open />
@@ -323,7 +394,9 @@ function StudyContent({ search }: { search: string }) {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>전체 과정</Text>
+        <AppText variant="sectionTitle" style={styles.sectionTitle}>
+          전체 과정
+        </AppText>
         <View style={styles.stack}>
           {courses.map((course) => (
             <CourseCard key={course.id} course={course} />
@@ -337,7 +410,7 @@ function StudyContent({ search }: { search: string }) {
 function OverviewLoading() {
   return (
     <View style={styles.overviewState}>
-      <ActivityIndicator color={theme.colors.primary} />
+      <ListSkeleton rows={3} thumbnail={false} />
     </View>
   );
 }
@@ -368,7 +441,10 @@ function CourseCard({
     <Pressable
       accessibilityRole="button"
       onPress={() => router.push(`/life-study/${course.id}`)}
-      style={styles.courseCard}
+      style={[
+        styles.courseCard,
+        open ? styles.courseCardFeatured : styles.courseCardFlat,
+      ]}
     >
       <View style={styles.courseOrb} />
       <View style={styles.badgeRow}>
@@ -388,8 +464,12 @@ function CourseCard({
           {course.weekCount}주 · {course.instructorName}
         </Text>
       </View>
-      <Text style={styles.courseTitle}>{course.title}</Text>
-      <Text style={styles.courseSummary}>{course.summary}</Text>
+      <AppText variant="sectionTitle" style={styles.courseTitle}>
+        {course.title}
+      </AppText>
+      <AppText variant="body" tone="secondary" style={styles.courseSummary}>
+        {course.summary}
+      </AppText>
       {open ? (
         <View style={styles.courseGrid}>
           <View style={styles.courseMetric}>
@@ -446,7 +526,7 @@ const styles = StyleSheet.create({
   },
   topBar: {
     minHeight: 56,
-    paddingHorizontal: 18,
+    paddingHorizontal: theme.layout.screenX,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -455,16 +535,8 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
   },
-  title: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize["2xl"],
-    fontWeight: theme.fontWeight.extrabold,
-  },
   subtitle: {
     marginTop: 2,
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
-    lineHeight: theme.lineHeight.sm,
   },
   searchButton: {
     width: 44,
@@ -474,7 +546,7 @@ const styles = StyleSheet.create({
   },
   searchWrap: {
     minHeight: 46,
-    marginHorizontal: 18,
+    marginHorizontal: theme.layout.screenX,
     marginBottom: 10,
     paddingHorizontal: 14,
     flexDirection: "row",
@@ -491,7 +563,7 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
   },
   segmented: {
-    marginHorizontal: 18,
+    marginHorizontal: theme.layout.screenX,
     marginBottom: 10,
     borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.ring,
@@ -523,35 +595,57 @@ const styles = StyleSheet.create({
   },
   bodyWithFab: { paddingBottom: 164 },
   bodyWithTab: { paddingBottom: 116 },
+  todayCard: {
+    marginHorizontal: theme.layout.screenX,
+    marginTop: theme.spacing[2],
+    marginBottom: theme.spacing[3],
+    borderRadius: theme.radius.lg,
+    backgroundColor: theme.colors.sageSoft,
+    padding: theme.layout.cardPadding,
+  },
+  todayTop: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: theme.spacing[3],
+  },
+  todayTitle: { marginTop: theme.spacing[1] },
+  todayTrack: {
+    height: 8,
+    marginTop: theme.spacing[4],
+    borderRadius: theme.radius.pill,
+    overflow: "hidden",
+    backgroundColor: "rgba(255,255,255,0.76)",
+  },
+  todayFill: {
+    height: "100%",
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.primary,
+  },
+  todayMeta: { marginTop: theme.spacing[2] },
   overviewState: {
-    paddingVertical: 80,
-    alignItems: "center",
+    paddingVertical: theme.spacing[2],
   },
   section: {
-    marginTop: 6,
+    marginTop: theme.spacing[2],
   },
   sectionTitle: {
-    paddingHorizontal: 18,
-    paddingTop: 10,
-    paddingBottom: 8,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.bold,
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: theme.spacing[5],
+    paddingBottom: theme.spacing[3],
   },
   stack: {
-    paddingHorizontal: 18,
-    gap: 10,
+    paddingHorizontal: theme.layout.screenX,
+    gap: 0,
   },
   roomCard: {
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface,
-    padding: 15,
+    minHeight: 84,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
+    paddingVertical: theme.spacing[4],
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    ...theme.shadow.card,
   },
   dayBadge: {
     width: 48,
@@ -585,11 +679,6 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 6,
   },
-  roomTitle: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-    fontWeight: "800",
-  },
   statusBadge: {
     borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.primarySoft,
@@ -622,29 +711,22 @@ const styles = StyleSheet.create({
   },
   mutedText: {
     marginTop: 5,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
-    lineHeight: theme.lineHeight.xs,
   },
   requestCard: {
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface,
-    padding: 14,
+    minHeight: 88,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
+    paddingVertical: theme.spacing[4],
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 10,
-    ...theme.shadow.card,
   },
   requestTitle: {
     marginTop: 8,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-    fontWeight: "800",
   },
   outlineButton: {
     minHeight: 48,
+    marginTop: theme.spacing[3],
     borderRadius: theme.radius.pill,
     borderWidth: 1.5,
     borderColor: theme.colors.primary,
@@ -658,7 +740,7 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.bold,
   },
   applyCard: {
-    marginHorizontal: 18,
+    marginHorizontal: theme.layout.screenX,
     borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: "rgba(91,122,176,0.22)",
@@ -667,7 +749,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    ...theme.shadow.card,
   },
   applyIcon: {
     width: 48,
@@ -678,19 +759,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexShrink: 0,
   },
-  applyTitle: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
-    fontWeight: "800",
-  },
   applyDesc: {
     marginTop: 5,
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 20,
   },
   pathCard: {
-    marginHorizontal: 18,
+    marginHorizontal: theme.layout.screenX,
     borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: "rgba(107,130,96,0.14)",
@@ -703,21 +776,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 10,
   },
-  pathEyebrow: {
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.xs,
-    fontWeight: theme.fontWeight.extrabold,
-  },
   pathTitle: {
     marginTop: 5,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.xl,
-    fontWeight: "900",
-  },
-  pathPercent: {
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize["2xl"],
-    fontWeight: "900",
   },
   progressTrack: {
     marginTop: 12,
@@ -755,12 +815,17 @@ const styles = StyleSheet.create({
   courseCard: {
     position: "relative",
     overflow: "hidden",
+    paddingVertical: theme.spacing[5],
+  },
+  courseCardFeatured: {
     borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
     padding: 16,
     ...theme.shadow.card,
+  },
+  courseCardFlat: {
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
   },
   courseOrb: {
     position: "absolute",
@@ -773,15 +838,9 @@ const styles = StyleSheet.create({
   },
   courseTitle: {
     marginTop: 8,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.xl,
-    fontWeight: theme.fontWeight.bold,
   },
   courseSummary: {
     marginTop: 5,
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 20,
   },
   courseGrid: {
     marginTop: 12,
@@ -802,7 +861,7 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: "absolute",
-    right: 18,
+    right: theme.layout.screenX,
     bottom: 86,
   },
 });

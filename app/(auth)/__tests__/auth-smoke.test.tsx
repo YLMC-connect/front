@@ -111,6 +111,20 @@ describe("auth smoke screens", () => {
     );
   });
 
+  it("toggles signup password visibility with accessible controls", () => {
+    renderWithClient(<SignupScreenRoute />);
+    const visibilityButtons = screen.getAllByLabelText("비밀번호 보기");
+
+    expect(visibilityButtons).toHaveLength(2);
+    expect(
+      screen.getByTestId("signup-password-input").props.secureTextEntry,
+    ).toBe(true);
+    fireEvent.press(visibilityButtons[0]);
+    expect(
+      screen.getByTestId("signup-password-input").props.secureTextEntry,
+    ).toBe(false);
+  });
+
   it("shows that a known member id is unavailable", async () => {
     renderWithClient(<SignupScreenRoute />);
 

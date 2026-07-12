@@ -13,6 +13,8 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- 공통 디자인 시스템 2차 정리 — JSON 단일 소스의 semantic color·spacing·radius, 6단계 역할형 typography, layout·절제된 shadow 토큰과 `AppText`, pulse Skeleton/ListSkeleton, action 지원 Empty/Error/Success 상태를 구축하고 홈·핵심 탭·인증에 적용
+- 전체 UI 정보 계층 고급화 — 홈 활동·동행 전체 모임·기도방/기도제목·삶공부 일반 과정을 flat list로 정리하고, 홈 핵심 활동·기도 오늘 진행률·삶공부 학습경로처럼 화면별 대표 요소를 유지·강화
 - 홈 제외 핵심 화면 사용성 보강 — 공통 오류 상태에 선택적 재시도 액션을 추가하고 하단 탭 label 가독성, fixed FAB·composer가 있는 목록/상세의 마지막 콘텐츠 스크롤 여백을 보정
 - 공통 모션 시스템 적용 — Reanimated 기반 140~220ms 모션 토큰, 동작 줄이기 대응, `MotionPressable`, 선택 적용 Card 등장, Dialog/Sheet/Toast presence 전환을 공통 UI에 반영
 - 라우팅·공통 UI 유지보수 경계 정리 — 하단 5탭 metadata를 단일 설정으로 통합하고 navigator `any`를 제거했으며, 상세 action/badge, modal form section, underline tab을 역할별 공통 파일로 분리
@@ -112,6 +114,9 @@
 | `src/lib/secureStore.ts`                                      | access/refresh token 안전 저장                                                                                                                                                                                                             |
 | `src/types/api.ts`                                            | 서버 공통 `ApiResponse<T>` 타입                                                                                                                                                                                                            |
 | `src/constants/theme.ts`                                      | `열린문커넥트.zip` 기준 color, radius, font, lineHeight, weight, shadow 디자인 토큰                                                                                                                                                        |
+| `src/constants/designTokens.json`                             | Tailwind와 React Native theme가 함께 읽는 color·spacing·radius 단일 소스                                                                                                                                                                  |
+| `src/components/ui/app-text.tsx`                              | 6단계 역할형 typography와 semantic text tone을 적용하는 공통 텍스트                                                                                                                                                                       |
+| `src/components/ui/skeleton.tsx`                              | 동작 줄이기 대응 Skeleton과 핵심 목록용 ListSkeleton                                                                                                                                                                                       |
 | `jest.setup.ts`                                               | Jest mock 설정과 Expo Router/native module 테스트 어댑터                                                                                                                                                                                   |
 | `src/test/renderWithClient.tsx`                               | TanStack Query 화면 테스트용 test wrapper                                                                                                                                                                                                  |
 | `.github/workflows/ci.yml`                                    | PR/push `npm ci` + `npm run validate`                                                                                                                                                                                                      |
@@ -133,6 +138,12 @@
 [../../PLAN.md](../../PLAN.md) “🗃 데이터 타입 설계 > 공통” 참조.
 
 ## 결정 사항 (최신 위)
+
+- (2026-07-12) **텍스트는 크기 이름보다 화면 역할로 사용한다** — `display / screenTitle / sectionTitle / cardTitle / body / caption` 6단계만 공통 기준으로 두고 `AppText`가 semantic tone을 함께 적용합니다. Button·badge처럼 컴포넌트 자체 역할이 있는 텍스트는 해당 공통 컴포넌트가 관리합니다.
+- (2026-07-12) **Tailwind와 RN theme의 기초 토큰은 JSON 단일 소스를 공유한다** — color·spacing·radius는 `designTokens.json`을 두 설정이 직접 읽고, typography·layout·shadow·motion은 타입이 필요한 `theme.ts`가 관리합니다.
+- (2026-07-12) **반복 정보는 flat list, 핵심 정보만 surface card로 강조한다** — 단순 목록은 구분선과 여백을 사용하며 카드가 필요할 때도 강한 border와 shadow를 함께 사용하지 않습니다. 하단 탭·FAB shadow도 의미는 유지하되 강도를 낮춥니다.
+- (2026-07-12) **루트·작성 화면의 기본 수평 여백은 20px이다** — 화면 섹션 28~32px, card padding 16px, 제목-설명 8px, 목록 12px을 `theme.layout` 기준으로 사용합니다. 제공 ZIP과 부분 캡처 geometry가 고정된 기존 상세·overlay 화면은 공통 TopBar/상태 UI만 상속하고 화면 전용 간격을 유지합니다.
+- (2026-07-12) **이미지 asset 개선은 이번 디자인 시스템 범위에서 제외한다** — 사용자 요청에 따라 기존 `VisualThumb`/`VisualCover`를 유지하며 사진 생성·추가와 API 이미지 계약 변경은 수행하지 않습니다.
 
 - (2026-07-12) **고정 overlay 화면은 마지막 콘텐츠가 완전히 위로 스크롤되어야 한다** — FAB·하단 탭·댓글 composer의 위치는 유지하되 내부 ScrollView의 bottom padding으로 최종 카드와 입력 영역이 가려지지 않게 합니다. 오류 상태는 query가 refetch를 제공할 때만 `다시 시도`를 노출합니다.
 

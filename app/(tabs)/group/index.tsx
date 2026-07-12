@@ -2,7 +2,6 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -13,10 +12,12 @@ import {
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   Badge,
+  AppText,
   Card,
   EmptyState,
   ErrorState,
   FloatingActionButton,
+  ListSkeleton,
   SegmentedTabs,
   VisualCover,
   VisualThumb,
@@ -73,7 +74,7 @@ export default function GroupScreen() {
       <Screen scroll={false} padded={false} testID="screen-group">
         <View style={styles.root}>
           <View style={styles.topBar}>
-            <Text style={styles.title}>내 소모임</Text>
+            <AppText variant="screenTitle">내 소모임</AppText>
             <Pressable
               accessibilityLabel="내 소모임 닫기"
               accessibilityRole="button"
@@ -90,7 +91,7 @@ export default function GroupScreen() {
           <ScrollView contentContainerStyle={styles.fullList}>
             {isLoading ? (
               <View style={styles.loading}>
-                <ActivityIndicator color={theme.colors.primary} />
+                <ListSkeleton rows={3} thumbnail={false} />
               </View>
             ) : (
               myGroups.map((group) => (
@@ -111,7 +112,7 @@ export default function GroupScreen() {
     <Screen scroll={false} padded={false} testID="screen-group">
       <View style={styles.root}>
         <View style={styles.topBar}>
-          <Text style={styles.title}>동행</Text>
+          <AppText variant="screenTitle">동행</AppText>
           <Pressable
             accessibilityLabel={searchOpen ? "동행 검색 닫기" : "동행 검색"}
             accessibilityRole="button"
@@ -159,7 +160,7 @@ export default function GroupScreen() {
         <ScrollView contentContainerStyle={styles.body}>
           {isLoading ? (
             <View style={styles.loading}>
-              <ActivityIndicator color={theme.colors.primary} />
+              <ListSkeleton rows={4} thumbnail={false} />
             </View>
           ) : isError ? (
             <ErrorState
@@ -194,13 +195,26 @@ export default function GroupScreen() {
                               {item.schedule}
                             </Text>
                           </View>
-                          <Text style={styles.serviceTitle}>{item.name}</Text>
-                          <Text style={styles.serviceDesc}>
+                          <AppText
+                            variant="cardTitle"
+                            style={styles.serviceTitle}
+                          >
+                            {item.name}
+                          </AppText>
+                          <AppText
+                            variant="body"
+                            tone="secondary"
+                            style={styles.serviceDesc}
+                          >
                             {item.description}
-                          </Text>
-                          <Text style={styles.serviceCount}>
+                          </AppText>
+                          <AppText
+                            variant="caption"
+                            tone="muted"
+                            style={styles.serviceCount}
+                          >
                             참여 {item.currentMembers}/{item.maxMembers}명
-                          </Text>
+                          </AppText>
                         </View>
                         <MaterialIcons
                           name="chevron-right"
@@ -217,13 +231,15 @@ export default function GroupScreen() {
             <>
               <View style={styles.section}>
                 <View style={styles.sectionHead}>
-                  <Text style={styles.sectionTitle}>내 소모임</Text>
+                  <AppText variant="sectionTitle">내 소모임</AppText>
                   <Pressable
                     accessibilityRole="button"
                     onPress={() => setShowMyFull(true)}
                     style={styles.moreButton}
                   >
-                    <Text style={styles.moreText}>전체보기</Text>
+                    <AppText variant="caption" tone="brand">
+                      전체보기
+                    </AppText>
                   </Pressable>
                 </View>
                 <ScrollView
@@ -231,7 +247,7 @@ export default function GroupScreen() {
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.mineList}
                   style={styles.mineScroll}
-                  snapToInterval={226}
+                  snapToInterval={238}
                   decelerationRate="fast"
                 >
                   {myGroups.map((group) => (
@@ -241,21 +257,32 @@ export default function GroupScreen() {
                       style={styles.mineCard}
                       onPress={() => router.push(`/group/${group.id}`)}
                     >
-                      <VisualCover height={78} seed={group.coverSeed} />
-                      <Text numberOfLines={1} style={styles.mineTitle}>
+                      <VisualCover height={92} seed={group.coverSeed} />
+                      <AppText
+                        numberOfLines={1}
+                        variant="cardTitle"
+                        style={styles.mineTitle}
+                      >
                         {group.name}
-                      </Text>
-                      <Text numberOfLines={1} style={styles.mineMeta}>
+                      </AppText>
+                      <AppText
+                        numberOfLines={1}
+                        variant="caption"
+                        tone="muted"
+                        style={styles.mineMeta}
+                      >
                         멤버 {group.currentMembers}명 ·{" "}
                         {categoryOf(group.category)}
-                      </Text>
+                      </AppText>
                     </Pressable>
                   ))}
                 </ScrollView>
               </View>
 
               <View style={styles.section}>
-                <Text style={styles.allSectionTitle}>전체 모임</Text>
+                <AppText variant="sectionTitle" style={styles.allSectionTitle}>
+                  전체 모임
+                </AppText>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -332,9 +359,9 @@ function GroupCard({
       style={[styles.groupCard, closed ? styles.closedCard : null]}
     >
       <View style={styles.cardTop}>
-        <Text numberOfLines={1} style={styles.cardTitle}>
+        <AppText numberOfLines={1} variant="cardTitle" style={styles.cardTitle}>
           {group.name}
-        </Text>
+        </AppText>
         <RecruitBadge closed={closed} />
       </View>
       <View style={styles.categoryPill}>
@@ -342,15 +369,20 @@ function GroupCard({
           {categoryOf(group.category)}
         </Text>
       </View>
-      <Text numberOfLines={2} style={styles.desc}>
+      <AppText
+        numberOfLines={2}
+        variant="body"
+        tone="secondary"
+        style={styles.desc}
+      >
         {group.description}
-      </Text>
+      </AppText>
       <View style={styles.memberRow}>
         <MaterialIcons name="groups" size={14} color={theme.colors.inkMute} />
-        <Text style={styles.memberText}>
+        <AppText variant="caption" tone="muted">
           현재 <Text style={styles.memberCount}>{group.currentMembers}</Text> /
           최대 {group.maxMembers}
-        </Text>
+        </AppText>
       </View>
     </Pressable>
   );
@@ -378,15 +410,10 @@ const styles = StyleSheet.create({
   },
   topBar: {
     minHeight: 56,
-    paddingHorizontal: 18,
+    paddingHorizontal: theme.layout.screenX,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-  },
-  title: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize["2xl"],
-    fontWeight: theme.fontWeight.extrabold,
   },
   searchButton: {
     width: 44,
@@ -396,7 +423,7 @@ const styles = StyleSheet.create({
   },
   searchWrap: {
     minHeight: 46,
-    marginHorizontal: 18,
+    marginHorizontal: theme.layout.screenX,
     marginBottom: 10,
     paddingHorizontal: 14,
     flexDirection: "row",
@@ -413,40 +440,27 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
   },
   segmented: {
-    marginHorizontal: 18,
+    marginHorizontal: theme.layout.screenX,
     marginBottom: 10,
   },
   body: {
     paddingBottom: 164,
   },
   section: {
-    marginTop: 6,
+    marginTop: theme.spacing[3],
   },
   sectionHead: {
-    paddingHorizontal: 18,
-    paddingTop: 10,
-    paddingBottom: 8,
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: theme.spacing[4],
+    paddingBottom: theme.spacing[3],
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  sectionTitle: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.bold,
-  },
   allSectionTitle: {
-    paddingHorizontal: 18,
-    paddingTop: 10,
-    paddingBottom: 8,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.bold,
-  },
-  moreText: {
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.bold,
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: theme.spacing[4],
+    paddingBottom: theme.spacing[3],
   },
   moreButton: {
     minHeight: 44,
@@ -458,38 +472,30 @@ const styles = StyleSheet.create({
     flexGrow: 0,
   },
   mineList: {
-    paddingHorizontal: 18,
+    paddingHorizontal: theme.layout.screenX,
     paddingBottom: 6,
-    gap: 12,
+    gap: theme.layout.listGap,
   },
   mineCard: {
-    width: 214,
+    width: 226,
     flexShrink: 0,
     borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
-    padding: 14,
+    padding: theme.layout.cardPadding,
     ...theme.shadow.card,
   },
   mineTitle: {
     marginTop: 10,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-    fontWeight: "800",
   },
   mineMeta: {
     marginTop: 5,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
-    lineHeight: theme.lineHeight.xs,
   },
   categoryScroll: {
     flexGrow: 0,
     marginBottom: 6,
   },
   categories: {
-    paddingHorizontal: 18,
+    paddingHorizontal: theme.layout.screenX,
     gap: 8,
   },
   chip: {
@@ -515,13 +521,13 @@ const styles = StyleSheet.create({
     color: theme.colors.white,
   },
   groupList: {
-    paddingHorizontal: 18,
+    paddingHorizontal: theme.layout.screenX,
     paddingTop: 6,
     paddingBottom: 12,
-    gap: 12,
+    gap: 0,
   },
   serviceList: {
-    marginHorizontal: 18,
+    marginHorizontal: theme.layout.screenX,
     paddingTop: 6,
     paddingBottom: 12,
     gap: 12,
@@ -550,38 +556,26 @@ const styles = StyleSheet.create({
   },
   serviceTitle: {
     marginTop: 7,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.lg,
-    fontWeight: "800",
   },
   serviceDesc: {
     marginTop: 5,
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
-    lineHeight: theme.lineHeight.sm,
   },
   serviceCount: {
     marginTop: 8,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
   },
   fullList: {
-    paddingHorizontal: 18,
+    paddingHorizontal: theme.layout.screenX,
     paddingTop: 6,
     paddingBottom: 28,
     gap: 12,
   },
   loading: {
-    paddingTop: 80,
-    alignItems: "center",
+    paddingTop: theme.spacing[2],
   },
   groupCard: {
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface,
-    padding: 16,
-    ...theme.shadow.card,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
+    paddingVertical: theme.spacing[5],
   },
   closedCard: {
     opacity: 0.5,
@@ -596,10 +590,6 @@ const styles = StyleSheet.create({
   cardTitle: {
     flex: 1,
     minWidth: 0,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.lg,
-    lineHeight: 22,
-    fontWeight: theme.fontWeight.bold,
   },
   badge: {
     flexShrink: 0,
@@ -635,9 +625,6 @@ const styles = StyleSheet.create({
   },
   desc: {
     marginTop: 10,
-    color: theme.colors.inkSoft,
-    fontSize: 13.5,
-    lineHeight: 21,
   },
   memberRow: {
     marginTop: 12,
@@ -645,17 +632,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
   },
-  memberText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.semibold,
-  },
   memberCount: {
     color: theme.colors.primaryDeep,
   },
   fab: {
     position: "absolute",
-    right: 18,
+    right: theme.layout.screenX,
     bottom: 86,
   },
 });

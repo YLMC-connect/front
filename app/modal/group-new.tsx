@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
-    paddingHorizontal: 22,
+    paddingHorizontal: theme.layout.screenX,
   },
   chip: {
     minHeight: 44,
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
   chipTextOn: { color: theme.colors.white },
   input: {
     minHeight: 48,
-    marginHorizontal: 22,
+    marginHorizontal: theme.layout.screenX,
     borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    paddingHorizontal: 22,
+    paddingHorizontal: theme.layout.screenX,
   },
   capacityInput: {
     width: 120,
@@ -372,13 +372,13 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.xs,
   },
   inlineError: {
-    marginHorizontal: 22,
+    marginHorizontal: theme.layout.screenX,
     marginTop: 8,
     color: theme.colors.danger,
     fontSize: theme.fontSize.sm,
   },
   infoBox: {
-    marginHorizontal: 22,
+    marginHorizontal: theme.layout.screenX,
     marginTop: 22,
     borderRadius: theme.radius.md,
     backgroundColor: theme.colors.primarySoft,
@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
   errorText: {
-    marginHorizontal: 22,
+    marginHorizontal: theme.layout.screenX,
     marginTop: 12,
     color: theme.colors.danger,
     fontSize: theme.fontSize.sm,
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: theme.colors.line,
     backgroundColor: theme.colors.bg,
-    paddingHorizontal: 22,
+    paddingHorizontal: theme.layout.screenX,
     paddingTop: 12,
     paddingBottom: Platform.OS === "ios" ? 28 : 16,
   },

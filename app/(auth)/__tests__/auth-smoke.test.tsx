@@ -57,6 +57,20 @@ describe("auth smoke screens", () => {
     expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
   });
 
+  it("toggles password visibility and explains the unavailable recovery flow", () => {
+    renderWithClient(<LoginScreenRoute />);
+    const password = screen.getByTestId("login-password-input");
+
+    expect(password.props.secureTextEntry).toBe(true);
+    fireEvent.press(screen.getByLabelText("비밀번호 보기"));
+    expect(
+      screen.getByTestId("login-password-input").props.secureTextEntry,
+    ).toBe(false);
+
+    fireEvent.press(screen.getByText("비밀번호 찾기"));
+    expect(screen.getByText("비밀번호 찾기는 준비 중입니다")).toBeTruthy();
+  });
+
   it("stores the login session before entering the home screen", async () => {
     renderWithClient(<LoginScreenRoute />);
 

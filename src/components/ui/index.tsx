@@ -598,15 +598,32 @@ export function EmptyState({
 
 export function ErrorState({
   message = "잠시 후 다시 시도해주세요.",
+  onRetry,
 }: {
   message?: string;
+  onRetry?: () => void;
 }) {
   return (
-    <EmptyState
-      title="불러오지 못했습니다"
-      description={message}
-      icon="error-outline"
-    />
+    <View style={styles.state}>
+      <View style={styles.stateIcon}>
+        <MaterialIcons
+          name="error-outline"
+          size={42}
+          color={theme.colors.inkHint}
+        />
+      </View>
+      <Text style={styles.stateTitle}>불러오지 못했습니다</Text>
+      <Text style={styles.stateText}>{message}</Text>
+      {onRetry ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onRetry}
+          style={styles.retryButton}
+        >
+          <Text style={styles.retryButtonText}>다시 시도</Text>
+        </Pressable>
+      ) : null}
+    </View>
   );
 }
 
@@ -1366,6 +1383,22 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: "center",
     lineHeight: 19,
+  },
+  retryButton: {
+    minHeight: 44,
+    marginTop: 4,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: theme.colors.lineStrong,
+    backgroundColor: theme.colors.surface,
+    paddingHorizontal: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  retryButtonText: {
+    color: theme.colors.primaryDeep,
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.bold,
   },
   skeleton: {
     borderRadius: theme.radius.sm,

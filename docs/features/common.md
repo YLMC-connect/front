@@ -13,6 +13,7 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- 홈 제외 핵심 화면 사용성 보강 — 공통 오류 상태에 선택적 재시도 액션을 추가하고 하단 탭 label 가독성, fixed FAB·composer가 있는 목록/상세의 마지막 콘텐츠 스크롤 여백을 보정
 - 공통 모션 시스템 적용 — Reanimated 기반 140~220ms 모션 토큰, 동작 줄이기 대응, `MotionPressable`, 선택 적용 Card 등장, Dialog/Sheet/Toast presence 전환을 공통 UI에 반영
 - 라우팅·공통 UI 유지보수 경계 정리 — 하단 5탭 metadata를 단일 설정으로 통합하고 navigator `any`를 제거했으며, 상세 action/badge, modal form section, underline tab을 역할별 공통 파일로 분리
 - 탭 선택 indicator 공통화 — 하단 5탭은 이동 indicator와 선택 아이콘 pop을 사용하고, 나눔 상태 탭·동행 소모임/봉사·기도 작성 선택 탭은 공통 `SegmentedTabs` 이동 indicator를 공유
@@ -132,6 +133,8 @@
 [../../PLAN.md](../../PLAN.md) “🗃 데이터 타입 설계 > 공통” 참조.
 
 ## 결정 사항 (최신 위)
+
+- (2026-07-12) **고정 overlay 화면은 마지막 콘텐츠가 완전히 위로 스크롤되어야 한다** — FAB·하단 탭·댓글 composer의 위치는 유지하되 내부 ScrollView의 bottom padding으로 최종 카드와 입력 영역이 가려지지 않게 합니다. 오류 상태는 query가 refetch를 제공할 때만 `다시 시도`를 노출합니다.
 
 - (2026-07-12) **앱 색상 모드는 라이트로 고정한다** — `GluestackUIProvider mode="light"`를 유지하고 Tailwind의 `darkMode: "class"`는 수동 모드 제어 허용에만 사용합니다. 다크 테마나 시스템 모드 전환은 추가하지 않습니다.
 - (2026-07-12) **하단 탭 shell은 불투명한 흰 배경을 사용한다** — floating 캡슐의 테두리·그림자는 유지하되 배경 alpha는 사용하지 않아 뒤 화면이 비치지 않도록 합니다.

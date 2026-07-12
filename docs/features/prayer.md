@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 기도 루트 무반응 요소 연결 — 기도방 카드는 상세, 기도제목 카드·전체보기는 요청 목록, 중보기도 신청 카드는 신청 화면으로 이동하고 오류 상태 재시도와 FAB 하단 스크롤 여백을 적용
 - 기도 상세 로컬 badge·underline tab 제거 — 기존 geometry와 선택 상태를 공통 `DetailBadge`·`UnderlineTabs`로 이동
 - 중보기도 목록/상세/등록 화면 구현 — `app/(tabs)/prayer/index.tsx`, `app/(tabs)/prayer/[id].tsx`, `app/modal/prayer-new.tsx`
 - 중보기도 타입, mock 데이터, 기도제목 생성 service, TanStack Query mutation hook 구현 — `src/types/prayer.ts`, `src/mocks/prayers.ts`, `src/services/prayerService.ts`, `src/hooks/usePrayers.ts`
@@ -49,6 +50,8 @@
 `PrayerRoom`은 `weekday`, `leader`, `memberCount`, `isJoined`를 포함합니다. `PrayerTopic`은 `isAnonymous`, `prayerCount`, `hasPrayed`, `isAnswered`, `answer`를 포함합니다. 루트 화면 전용 `PrayerOverview`는 요일방 요약과 내 기도제목 상태 요약을 가지며, 추후 API DTO mapper의 출력 모델로 사용합니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-07-12) **기도 루트의 카드형 affordance는 기존 실제 route로 이동한다** — 새 상세 계약을 추측하지 않고 현재 존재하는 `/prayer/[id]`, `/prayer/request`, `/prayer/apply`로 연결하며 query 오류는 같은 overview를 refetch합니다.
 
 - (2026-07-10) **기도 상세 디자인 상태는 development 전용이다** — 기도 완료·empty·현황·응답 캡처는 `designVariant`만 사용하고 production에서는 무시합니다. 실제 상태는 mock/API service 결과가 결정합니다.
 - (2026-07-10) **기도 루트는 overview query만 소비한다** — `FaithSectionsScreen`은 fixture를 직접 소유하지 않고 `usePrayerOverview → fetchPrayerOverview → mockPrayerOverview` 경계를 사용합니다. 사용자 API가 생기면 service/mapper만 교체하며 화면 문구와 상태 label은 view model mapping으로 유지합니다.

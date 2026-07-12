@@ -1,5 +1,6 @@
 import { mockMarketDetails, mockMarketOverview } from "../mocks/market";
 import { MOCK_USER } from "../mocks/auth";
+import { MARKET_CATEGORIES } from "../constants/domainOptions";
 import type {
   MarketCommentInput,
   MarketCommentTarget,
@@ -7,6 +8,7 @@ import type {
   MarketDetail,
   MarketDetailComment,
   MarketOverview,
+  MarketInput,
   MarketPostTarget,
   MarketReportInput,
 } from "../types/market";
@@ -21,6 +23,7 @@ export class DuplicateMarketReportError extends Error {
 export interface MarketDataSource {
   getOverview(): Promise<MarketOverview>;
   getDetail(id: string): Promise<MarketDetail>;
+  createPost(input: MarketInput): Promise<MarketDetail>;
   deletePost(input: MarketPostTarget): Promise<void>;
   createComment(input: MarketCommentInput): Promise<MarketDetailComment>;
   updateComment(input: MarketCommentUpdateInput): Promise<MarketDetailComment>;
@@ -32,9 +35,12 @@ const delay = (ms = 180) => new Promise((resolve) => setTimeout(resolve, ms));
 const mockComments = new Map<string, MarketDetailComment[]>();
 const mockReportTargets = new Set<string>();
 const mockDeletedPosts = new Set<string>();
+const mockCreatedOverviewItems: MarketOverview["items"] = [];
+const mockCreatedDetails = new Map<string, MarketDetail>();
 
 function getMockComments(marketId: string) {
-  const detail = mockMarketDetails[marketId];
+  const detail =
+    mockCreatedDetails.get(marketId) ?? mockMarketDetails[marketId];
   if (!detail) throw new Error("존재하지 않는 나눔입니다.");
 
   const comments = mockComments.get(marketId);
@@ -59,14 +65,14 @@ export const mockMarketDataSource: MarketDataSource = {
   async getOverview() {
     await delay();
     return {
-      items: mockMarketOverview.items.filter(
+      items: [...mockCreatedOverviewItems, ...mockMarketOverview.items].filter(
         ({ id }) => !mockDeletedPosts.has(id),
       ),
     };
   },
   async getDetail(id) {
     await delay();
-    const detail = mockMarketDetails[id];
+    const detail = mockCreatedDetails.get(id) ?? mockMarketDetails[id];
     if (!detail || mockDeletedPosts.has(id)) {
       throw new Error("존재하지 않는 나눔입니다.");
     }
@@ -75,9 +81,44 @@ export const mockMarketDataSource: MarketDataSource = {
       comments: getMockComments(id).map((comment) => ({ ...comment })),
     };
   },
+  async createPost(input) {
+    await delay();
+    const id = `mock-market-${Date.now()}`;
+    const categoryLabel =
+      MARKET_CATEGORIES.find(({ key }) => key === input.category)?.label ??
+      input.category;
+    const detail: MarketDetail = {
+      id,
+      thumbSeed:
+        mockMarketOverview.items.length + mockCreatedOverviewItems.length,
+      title: input.title,
+      content: input.description,
+      categoryLabel,
+      conditionLabel: input.condition,
+      status: "sharing",
+      authorName: MOCK_USER.name,
+      createdLabel: "방금 전",
+      isMine: true,
+      comments: [],
+    };
+    mockCreatedDetails.set(id, detail);
+    mockCreatedOverviewItems.unshift({
+      id,
+      thumbSeed: detail.thumbSeed,
+      title: detail.title,
+      authorName: detail.authorName,
+      createdLabel: detail.createdLabel,
+      status: detail.status,
+      category: input.category,
+    });
+    mockComments.set(id, []);
+    return detail;
+  },
   async deletePost(input) {
     await delay();
-    const detail = mockMarketDetails[input.marketId];
+    const detail =
+      mockCreatedDetails.get(input.marketId) ??
+      mockMarketDetails[input.marketId];
     if (!detail || mockDeletedPosts.has(input.marketId)) {
       throw new Error("존재하지 않는 나눔입니다.");
     }
@@ -137,6 +178,28 @@ export function createMarketService(dataSource: MarketDataSource) {
   return {
     fetchOverview: () => dataSource.getOverview(),
     fetchDetail: (id: string) => dataSource.getDetail(id),
+    createPost: (input: MarketInput) => {
+      const normalized = {
+        ...input,
+        title: input.title.trim(),
+        description: input.description.trim(),
+        location: input.location.trim(),
+      };
+      if (normalized.title.length < 2 || normalized.title.length > 30) {
+        throw new Error("제목은 2~30자로 입력해주세요.");
+      }
+      if (
+        normalized.description.length < 5 ||
+        normalized.description.length > 500
+      ) {
+        throw new Error("상세 설명은 5~500자로 입력해주세요.");
+      }
+      if (!normalized.location) throw new Error("수령 장소를 입력해주세요.");
+      if (normalized.images.length < 1) {
+        throw new Error("사진을 1장 이상 추가해주세요.");
+      }
+      return dataSource.createPost(normalized);
+    },
     deletePost: (input: MarketPostTarget) => dataSource.deletePost(input),
     createComment: (input: MarketCommentInput) => {
       const content = input.content.trim();
@@ -167,6 +230,7 @@ const marketService = createMarketService(mockMarketDataSource);
 
 export const fetchMarketOverview = marketService.fetchOverview;
 export const fetchMarketDetail = marketService.fetchDetail;
+export const createMarketPost = marketService.createPost;
 export const deleteMarketPost = marketService.deletePost;
 export const createMarketComment = marketService.createComment;
 export const updateMarketComment = marketService.updateComment;

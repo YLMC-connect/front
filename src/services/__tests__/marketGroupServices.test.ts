@@ -1,4 +1,5 @@
 import {
+  createGroup,
   createGroupNotice,
   createGroupService,
   deleteGroupNotice,
@@ -9,6 +10,7 @@ import {
   type GroupDataSource,
 } from "../groupService";
 import {
+  createMarketPost,
   createMarketComment,
   createMarketService,
   deleteMarketComment,
@@ -48,6 +50,7 @@ describe("market and group service boundaries", () => {
     const dataSource: MarketDataSource = {
       getOverview: jest.fn().mockResolvedValue({ items: [] }),
       getDetail: jest.fn().mockRejectedValue(new Error("not used")),
+      createPost: jest.fn().mockRejectedValue(new Error("not used")),
       deletePost: jest.fn().mockRejectedValue(new Error("not used")),
       createComment: jest.fn().mockRejectedValue(new Error("not used")),
       updateComment: jest.fn().mockRejectedValue(new Error("not used")),
@@ -73,6 +76,7 @@ describe("market and group service boundaries", () => {
     const dataSource: MarketDataSource = {
       getOverview: jest.fn().mockRejectedValue(new Error("not used")),
       getDetail: jest.fn().mockRejectedValue(new Error("not used")),
+      createPost: jest.fn().mockRejectedValue(new Error("not used")),
       deletePost: jest.fn().mockRejectedValue(new Error("not used")),
       createComment: jest.fn().mockResolvedValue(createdComment),
       updateComment: jest.fn().mockRejectedValue(new Error("not used")),
@@ -94,6 +98,7 @@ describe("market and group service boundaries", () => {
     const dataSource: MarketDataSource = {
       getOverview: jest.fn().mockRejectedValue(new Error("not used")),
       getDetail: jest.fn().mockRejectedValue(new Error("not used")),
+      createPost: jest.fn().mockRejectedValue(new Error("not used")),
       deletePost: jest.fn().mockRejectedValue(new Error("not used")),
       createComment: jest.fn().mockRejectedValue(new Error("not used")),
       updateComment: jest.fn().mockRejectedValue(new Error("not used")),
@@ -176,6 +181,7 @@ describe("market and group service boundaries", () => {
     const dataSource: MarketDataSource = {
       getOverview: jest.fn().mockRejectedValue(new Error("not used")),
       getDetail: jest.fn().mockRejectedValue(new Error("not used")),
+      createPost: jest.fn().mockRejectedValue(new Error("not used")),
       deletePost: jest.fn().mockRejectedValue(new Error("not used")),
       createComment: jest.fn().mockRejectedValue(new Error("not used")),
       updateComment: jest.fn().mockRejectedValue(new Error("not used")),
@@ -204,6 +210,25 @@ describe("market and group service boundaries", () => {
     await expect(fetchMarketOverview()).resolves.toMatchObject({
       items: expect.not.arrayContaining([expect.objectContaining({ id: "1" })]),
     });
+  });
+
+  it("creates a market post and keeps it in mock overview", async () => {
+    const created = await createMarketPost({
+      images: ["file://market.jpg"],
+      category: "home",
+      title: "  새 나눔 물품  ",
+      condition: "사용감 있음",
+      description: "  필요한 분께 나누고 싶습니다.  ",
+      location: "  교회 로비  ",
+    });
+    const overview = await fetchMarketOverview();
+
+    expect(created).toMatchObject({
+      title: "새 나눔 물품",
+      content: "필요한 분께 나누고 싶습니다.",
+      isMine: true,
+    });
+    expect(overview.items[0]).toMatchObject({ id: created.id });
   });
 
   it("returns group overview and detail through the default data source", async () => {
@@ -263,6 +288,7 @@ describe("market and group service boundaries", () => {
       getOverview: jest.fn().mockRejectedValue(new Error("not used")),
       getDetail: jest.fn().mockRejectedValue(new Error("not used")),
       getMembers: jest.fn().mockRejectedValue(new Error("not used")),
+      createGroup: jest.fn().mockRejectedValue(new Error("not used")),
       createNotice: jest.fn().mockRejectedValue(new Error("not used")),
       updateNotice: jest.fn().mockRejectedValue(new Error("not used")),
       deleteNotice: jest.fn().mockRejectedValue(new Error("not used")),
@@ -280,6 +306,7 @@ describe("market and group service boundaries", () => {
       getOverview: jest.fn().mockResolvedValue({ groups: [], services: [] }),
       getDetail: jest.fn().mockRejectedValue(new Error("not used")),
       getMembers: jest.fn().mockRejectedValue(new Error("not used")),
+      createGroup: jest.fn().mockRejectedValue(new Error("not used")),
       createNotice: jest.fn().mockRejectedValue(new Error("not used")),
       updateNotice: jest.fn().mockRejectedValue(new Error("not used")),
       deleteNotice: jest.fn().mockRejectedValue(new Error("not used")),
@@ -291,5 +318,24 @@ describe("market and group service boundaries", () => {
       services: [],
     });
     expect(dataSource.getOverview).toHaveBeenCalledTimes(1);
+  });
+
+  it("creates a group and keeps it in mock overview", async () => {
+    const created = await createGroup({
+      category: "cell",
+      name: "  새 소모임  ",
+      description: "  함께 말씀을 나누는 모임입니다.  ",
+      maxMembers: 8,
+      schedule: "  매주 토요일 오후 2시  ",
+      location: "  교육관 2층  ",
+    });
+    const overview = await fetchGroupOverview();
+
+    expect(created).toMatchObject({
+      name: "새 소모임",
+      description: "함께 말씀을 나누는 모임입니다.",
+      isLeader: true,
+    });
+    expect(overview.groups[0]).toMatchObject({ id: created.id });
   });
 });

@@ -1,11 +1,13 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { theme } from "../../constants/theme";
@@ -22,11 +24,13 @@ import type {
   PrayerWeekday,
 } from "../../types/prayer";
 import { Screen } from "../layout/Screen";
-import { ErrorState, FloatingActionButton } from "../ui";
+import { EmptyState, ErrorState, FloatingActionButton } from "../ui";
 
 type FaithSection = "pray" | "study";
 
 export function FaithSectionsScreen({ section }: { section: FaithSection }) {
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [search, setSearch] = useState("");
   return (
     <Screen scroll={false} padded={false} testID="screen-faith">
       <View style={styles.root}>
@@ -42,18 +46,56 @@ export function FaithSectionsScreen({ section }: { section: FaithSection }) {
             </Text>
           </View>
           {section === "study" ? (
-            <View style={styles.searchButton}>
+            <Pressable
+              accessibilityLabel={
+                searchOpen ? "삶공부 검색 닫기" : "삶공부 검색"
+              }
+              accessibilityRole="button"
+              onPress={() => {
+                setSearchOpen((open) => !open);
+                if (searchOpen) setSearch("");
+              }}
+              style={styles.searchButton}
+            >
               <MaterialIcons
-                name="search"
+                name={searchOpen ? "close" : "search"}
                 size={22}
                 color={theme.colors.inkSoft}
               />
-            </View>
+            </Pressable>
           ) : null}
         </View>
 
-        <ScrollView contentContainerStyle={styles.body}>
-          {section === "study" ? <StudyContent /> : <PrayerContent />}
+        {section === "study" && searchOpen ? (
+          <View style={styles.searchWrap}>
+            <MaterialIcons
+              name="search"
+              size={19}
+              color={theme.colors.inkMute}
+            />
+            <TextInput
+              autoFocus
+              accessibilityLabel="삶공부 검색어"
+              value={search}
+              onChangeText={setSearch}
+              placeholder="과정명 또는 강사 검색"
+              placeholderTextColor={theme.colors.inkMute}
+              style={styles.searchInput}
+            />
+          </View>
+        ) : null}
+
+        <ScrollView
+          contentContainerStyle={[
+            styles.body,
+            section === "pray" ? styles.bodyWithFab : styles.bodyWithTab,
+          ]}
+        >
+          {section === "study" ? (
+            <StudyContent search={search} />
+          ) : (
+            <PrayerContent />
+          )}
         </ScrollView>
 
         {section === "pray" ? (
@@ -70,11 +112,16 @@ export function FaithSectionsScreen({ section }: { section: FaithSection }) {
 }
 
 function PrayerContent() {
-  const { data, isError, isPending } = usePrayerOverview();
+  const { data, isError, isPending, refetch } = usePrayerOverview();
 
   if (isPending) return <OverviewLoading />;
   if (isError || !data) {
-    return <ErrorState message="기도 정보를 다시 불러와주세요." />;
+    return (
+      <ErrorState
+        message="기도 정보를 다시 불러와주세요."
+        onRetry={() => refetch()}
+      />
+    );
   }
 
   return (
@@ -83,7 +130,12 @@ function PrayerContent() {
         <Text style={styles.sectionTitle}>내 기도방</Text>
         <View style={styles.stack}>
           {data.rooms.map((room) => (
-            <Pressable key={room.id} style={styles.roomCard}>
+            <Pressable
+              key={room.id}
+              accessibilityRole="button"
+              onPress={() => router.push(`/prayer/${room.id}`)}
+              style={styles.roomCard}
+            >
               <PrayerDayBadge weekday={room.weekday} period={room.period} />
               <View style={styles.cardText}>
                 <View style={styles.badgeRow}>
@@ -127,7 +179,12 @@ function PrayerContent() {
         <Text style={styles.sectionTitle}>내 기도제목</Text>
         <View style={styles.stack}>
           {data.requests.map((item) => (
-            <Pressable key={item.id} style={styles.requestCard}>
+            <Pressable
+              key={item.id}
+              accessibilityRole="button"
+              onPress={() => router.push("/prayer/request")}
+              style={styles.requestCard}
+            >
               <View style={styles.cardText}>
                 <View style={styles.badgeRow}>
                   <View style={styles.muteBadge}>
@@ -149,7 +206,11 @@ function PrayerContent() {
               />
             </Pressable>
           ))}
-          <Pressable style={styles.outlineButton}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push("/prayer/request")}
+            style={styles.outlineButton}
+          >
             <Text style={styles.outlineButtonText}>내 기도제목 전체보기</Text>
           </Pressable>
         </View>
@@ -157,7 +218,11 @@ function PrayerContent() {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>중보기도 신청</Text>
-        <View style={styles.applyCard}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push("/prayer/apply")}
+          style={styles.applyCard}
+        >
           <View style={styles.applyIcon}>
             <MaterialIcons
               name="volunteer-activism"
@@ -171,23 +236,45 @@ function PrayerContent() {
               월-토 오전/오후 기도방은 신청 화면에서 선택해요.
             </Text>
           </View>
-        </View>
+        </Pressable>
       </View>
     </>
   );
 }
 
-function StudyContent() {
-  const { data, isError, isPending } = useLifeStudyOverview();
+function StudyContent({ search }: { search: string }) {
+  const { data, isError, isPending, refetch } = useLifeStudyOverview();
 
   if (isPending) return <OverviewLoading />;
   if (isError || !data) {
-    return <ErrorState message="삶공부 정보를 다시 불러와주세요." />;
+    return (
+      <ErrorState
+        message="삶공부 정보를 다시 불러와주세요."
+        onRetry={() => refetch()}
+      />
+    );
   }
 
   const progressPercent = Math.round(
     (data.path.completedRequired / data.path.totalRequired) * 100,
   );
+  const normalizedSearch = search.trim().toLocaleLowerCase();
+  const matchesSearch = (course: LifeStudyOverviewCourse) =>
+    !normalizedSearch ||
+    course.title.toLocaleLowerCase().includes(normalizedSearch) ||
+    course.instructorName.toLocaleLowerCase().includes(normalizedSearch);
+  const openCourses = data.openCourses.filter(matchesSearch);
+  const courses = data.courses.filter(matchesSearch);
+
+  if (normalizedSearch && openCourses.length === 0 && courses.length === 0) {
+    return (
+      <EmptyState
+        title="검색 결과가 없어요"
+        description="과정명이나 강사 이름을 바꿔보세요."
+        icon="search-off"
+      />
+    );
+  }
 
   return (
     <>
@@ -229,7 +316,7 @@ function StudyContent() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>지금 신청 가능한 과정</Text>
         <View style={styles.stack}>
-          {data.openCourses.map((course) => (
+          {openCourses.map((course) => (
             <CourseCard key={course.id} course={course} open />
           ))}
         </View>
@@ -238,7 +325,7 @@ function StudyContent() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>전체 과정</Text>
         <View style={styles.stack}>
-          {data.courses.map((course) => (
+          {courses.map((course) => (
             <CourseCard key={course.id} course={course} />
           ))}
         </View>
@@ -278,7 +365,11 @@ function CourseCard({
   open?: boolean;
 }) {
   return (
-    <Pressable style={styles.courseCard}>
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => router.push(`/life-study/${course.id}`)}
+      style={styles.courseCard}
+    >
       <View style={styles.courseOrb} />
       <View style={styles.badgeRow}>
         <View style={open ? styles.warnBadge : styles.muteBadge}>
@@ -376,10 +467,28 @@ const styles = StyleSheet.create({
     lineHeight: theme.lineHeight.sm,
   },
   searchButton: {
-    width: 36,
-    height: 36,
+    width: 44,
+    height: 44,
     alignItems: "center",
     justifyContent: "center",
+  },
+  searchWrap: {
+    minHeight: 46,
+    marginHorizontal: 18,
+    marginBottom: 10,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.lineStrong,
+    backgroundColor: theme.colors.surface,
+  },
+  searchInput: {
+    flex: 1,
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.md,
   },
   segmented: {
     marginHorizontal: 18,
@@ -410,8 +519,10 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.bold,
   },
   body: {
-    paddingBottom: 100,
+    paddingBottom: 24,
   },
+  bodyWithFab: { paddingBottom: 164 },
+  bodyWithTab: { paddingBottom: 116 },
   overviewState: {
     paddingVertical: 80,
     alignItems: "center",

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../lib/queryKeys";
 import {
+  createMarketPost,
   createMarketComment,
   deleteMarketComment,
   deleteMarketPost,
@@ -11,6 +12,7 @@ import {
 } from "../services/marketService";
 import type {
   MarketDetail,
+  MarketInput,
   MarketOverview,
   MarketReportInput,
 } from "../types/market";
@@ -19,6 +21,21 @@ export function useMarketOverview() {
   return useQuery({
     queryKey: queryKeys.market.overview(),
     queryFn: fetchMarketOverview,
+  });
+}
+
+export function useCreateMarketPost() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: MarketInput) => createMarketPost(input),
+    onSuccess: (detail) => {
+      queryClient.setQueryData<MarketDetail>(
+        queryKeys.market.detail(detail.id),
+        detail,
+      );
+      queryClient.invalidateQueries({ queryKey: queryKeys.market.overview() });
+    },
   });
 }
 

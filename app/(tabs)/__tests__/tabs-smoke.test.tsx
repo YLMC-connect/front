@@ -1,5 +1,5 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { router, useLocalSearchParams, useRouter } from "expo-router";
 import { Alert } from "react-native";
 import GroupDetailScreen from "../group/[id]";
 import GroupMembersScreen from "../group/members";
@@ -47,6 +47,23 @@ describe("v1 tab smoke screens", () => {
         "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
       ),
     ).toBeTruthy();
+  });
+
+  it("filters and searches market posts", async () => {
+    renderWithClient(<MarketScreen />);
+    await screen.findByText(
+      "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
+    );
+
+    fireEvent.press(screen.getByText("도서·문구"));
+    expect(screen.getByText("어린이 동화책 30권 묶음 나눔")).toBeTruthy();
+    expect(
+      screen.queryByText("아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)"),
+    ).toBeNull();
+
+    fireEvent.press(screen.getByLabelText("나눔 검색"));
+    fireEvent.changeText(screen.getByLabelText("나눔 검색어"), "동화책");
+    expect(screen.getByText("어린이 동화책 30권 묶음 나눔")).toBeTruthy();
   });
 
   it("renders the market detail screen", async () => {
@@ -163,6 +180,15 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getAllByText("봉사").length).toBeGreaterThan(0);
     expect(await screen.findByText("내 소모임")).toBeTruthy();
     expect(screen.getByText("전체 모임")).toBeTruthy();
+  });
+
+  it("opens group search and filters the visible list", async () => {
+    renderWithClient(<GroupScreen />);
+    await screen.findByText("내 소모임");
+
+    fireEvent.press(screen.getByLabelText("동행 검색"));
+    fireEvent.changeText(screen.getByLabelText("동행 검색어"), "없는 모임");
+    expect(screen.getAllByText("검색 결과가 없어요").length).toBeGreaterThan(0);
   });
 
   it("renders the group detail screen", async () => {
@@ -283,6 +309,19 @@ describe("v1 tab smoke screens", () => {
     expect(screen.queryByText("삶공부")).toBeNull();
   });
 
+  it("opens prayer cards and application actions", async () => {
+    jest.mocked(router.push).mockClear();
+    renderWithClient(<PrayerScreen />);
+    await screen.findByText("내 기도방");
+
+    fireEvent.press(screen.getByText("월요일 오전"));
+    expect(router.push).toHaveBeenCalledWith(
+      "/prayer/prayer-overview-room-mon-am",
+    );
+    fireEvent.press(screen.getAllByText("중보기도 신청").at(-1)!);
+    expect(router.push).toHaveBeenCalledWith("/prayer/apply");
+  });
+
   it("renders the prayer apply screen", () => {
     renderWithClient(<PrayerApplyScreenRoute />);
 
@@ -313,6 +352,19 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("말씀으로 배우고 삶으로 자라가요")).toBeTruthy();
     expect(await screen.findByText("내 학습경로")).toBeTruthy();
     expect(screen.queryByText("중보기도")).toBeNull();
+  });
+
+  it("searches life study courses and opens a course", async () => {
+    jest.mocked(router.push).mockClear();
+    renderWithClient(<LifeStudyScreen />);
+    await screen.findByText("내 학습경로");
+
+    fireEvent.press(screen.getByLabelText("삶공부 검색"));
+    fireEvent.changeText(screen.getByLabelText("삶공부 검색어"), "생명의 삶");
+    fireEvent.press(screen.getAllByText("생명의 삶")[0]);
+    expect(router.push).toHaveBeenCalledWith(
+      "/life-study/life-overview-open-1",
+    );
   });
 
   it("renders the life study apply screen", () => {

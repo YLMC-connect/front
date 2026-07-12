@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 로그인 보조 동작 연결 — 비밀번호 표시/숨기기를 접근 가능한 버튼으로 연결하고 MVP 제외 상태인 비밀번호 찾기는 무반응 링크 대신 준비 중 피드백을 표시
 - 인증 route guard와 웹 세션 저장 경계 추가 — 복원 중 route를 숨기고 anonymous/unavailable은 auth만, authenticated는 app/modal만 허용하며, 네이티브 SecureStore를 유지한 채 웹은 탭 단위 sessionStorage를 사용하도록 테스트로 고정
 - Mock 회원가입/로그인 화면 구현 — `app/(auth)/signup.tsx`, `app/(auth)/login.tsx`
 - ZIP 원본 auth 화면 라우트 보강 — splash, 가입 코드, 약관 동의/전문, 로그인/회원가입 상태 variant
@@ -72,6 +73,8 @@
 `LoginInput`, `SignupInput`, `MemberDuplicateInput`, `MemberAvailability`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리합니다. 중복확인 요청은 Swagger의 `searchType: id | phone`, `searchValue` 계약을 따르며 화면에는 `available` 도메인 결과만 노출합니다. 실제 HTTP 응답 mapper는 `data.available`이 성공 schema에 명시된 뒤 활성화합니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-07-12) **MVP 제외 기능도 가짜 affordance로 남기지 않는다** — 비밀번호 찾기는 실제 복구 계약이 생기기 전까지 이동을 추측하지 않고 `준비 중` 피드백을 표시하며, 비밀번호 visibility는 로컬 UI 상태로 즉시 전환합니다.
 
 - (2026-07-11) **로그아웃은 모든 토큰 삭제를 시도한 뒤 메모리 세션을 반드시 종료한다** — SecureStore의 한 키 삭제가 실패해도 다른 키 삭제를 건너뛰지 않으며, native cleanup 오류는 호출자에게 전달하되 session manager의 `finally`가 `anonymous` 상태를 보장합니다. 마이페이지는 오류 여부와 관계없이 로그인 화면으로 이동합니다.
 - (2026-07-11) **핵심 E2E는 회원가입과 로그인을 같은 세션 경계로 검증한다** — 메인 Maestro는 회원가입 성공으로 홈에 도달한 뒤 로그인 route를 다시 열어 재인증하고 도메인 흐름을 실행합니다. 두 화면은 토큰을 직접 다루지 않고 동일한 session manager를 사용해야 합니다.

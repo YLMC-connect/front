@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 동행 작성·탐색 mock 흐름 연결 — 카테고리/소모임명/설명/최대인원/일정/장소를 실제 입력·검증해 mock service에 저장하고 상세 이동·목록 재조회까지 연결했으며, 소모임/봉사 검색·카테고리 필터·내 소모임 전체보기를 활성화
 - 동행 상세 action·mini action과 개설 폼 section/divider 공통화 — 기존 geometry·공지 관리 동작을 유지하면서 공통 UI 파일로 이동
 - 소모임 목록/상세/개설 화면 구현 — `app/(tabs)/group/index.tsx`, `app/(tabs)/group/[id].tsx`, `app/modal/group-new.tsx`
 - 소모임 타입과 mock 데이터 구현 — `src/types/group.ts`, `src/mocks/groups.ts`
@@ -63,6 +64,8 @@
 `Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 화면 조회 모델 `GroupOverview`/`GroupDetail`/`GroupMemberDetail`은 목록·봉사·권한·멤버·공지 표시값을 포함하며 API DTO mapper의 출력 경계입니다. `GroupDetailNotice`는 수정 폼 재사용을 위한 전체 `content`를 포함하고, 공지 쓰기 경계는 `GroupNoticeInput`/`GroupNoticeUpdateInput`/`GroupNoticeTarget`으로 분리합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-07-12) **동행 개설은 API 계약 전에도 service mutation 경계를 통과한다** — 작성 화면은 `useCreateGroup → createGroup → GroupDataSource`를 사용하고 생성한 모임·상세·멤버를 runtime mock에 함께 유지합니다. 가로 내 소모임 목록은 snap 이동과 실제 전체보기 화면을 제공합니다.
 
 - (2026-07-11) **공지 삭제 진입점은 하나의 mutation 경계를 공유한다** — 편집 화면과 상세 카드의 삭제 UI는 각각 local confirm 상태만 소유하고, 실제 삭제·cache 갱신·mock 지속성은 `useDeleteGroupNotice → groupService → GroupDataSource` 한 경로에서 처리합니다.
 - (2026-07-11) **공지 CUD는 화면과 mock data source 사이의 완결된 수직 경계로 먼저 제공한다** — 제목/내용은 trim 후 필수값과 30/500자 제한을 서비스에서 검증하고, mutation 성공 시 상세 query cache를 갱신합니다. 실제 HTTP 전환은 공지 권한과 오류 코드 계약이 문서화되면 같은 data source 인터페이스에서 수행하며, 캡처용 `designVariant` 상태는 실제 폼 상태와 분리합니다.

@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   tabLabel: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: "700",
   },
 });

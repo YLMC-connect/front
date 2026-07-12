@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 삶공부 루트 탐색 연결 — 과정명/강사 검색, 검색 결과 없음 상태, 과정 카드 상세 이동, overview 오류 재시도와 하단 탭 위 스크롤 여백을 적용
 - 삶공부 상세 로컬 badge 제거 — 기존 bordered geometry와 tone을 공통 `DetailBadge`로 이동
 - 삶공부 목록/상세 화면 구현 — `app/(tabs)/life-study/index.tsx`, `app/(tabs)/life-study/[id].tsx`
 - 삶공부 타입, mock 데이터, 목록 service, TanStack Query 목록 hook 구현 — `src/types/lifeStudy.ts`, `src/mocks/lifeStudy.ts`, `src/services/lifeStudyService.ts`, `src/hooks/useLifeStudyCourses.ts`
@@ -48,6 +49,8 @@
 `LifeStudyCourse`는 `status`, `sessions`, `currentSession`, `capacity`, `enrolledCount`, `isEnrolled`, `isCompleted`, `curriculum`을 포함합니다. `LifeStudyHistory`는 수강 회차와 수료증 발급 여부를 포함합니다. 루트 화면 전용 `LifeStudyOverview`는 필수 과정 진행 경로, 신청 가능한 과정, 전체 과정 요약을 가지며 추후 API DTO mapper의 출력 모델로 사용합니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-07-12) **삶공부 검색은 overview view model 안에서 수행한다** — API 검색 endpoint를 추측하지 않고 현재 조회된 신청 가능/전체 과정의 제목·강사만 로컬 필터링하며 과정 선택은 기존 `/life-study/[id]` 상세 route로 이동합니다.
 
 - (2026-07-10) **삶공부 상세 수강 디자인 상태는 development 전용이다** — 캡처용 enrolled 상태는 `designVariant`로만 열고 production에서는 무시합니다. 실제 수강 여부는 overview/detail service 모델이 결정합니다.
 - (2026-07-10) **삶공부 루트는 overview query만 소비한다** — `FaithSectionsScreen`은 fixture를 직접 소유하지 않고 `useLifeStudyOverview → fetchLifeStudyOverview → mockLifeStudyOverview` 경계를 사용합니다. 사용자 API가 생기면 service/mapper만 교체하며 화면은 동일한 overview 모델을 유지합니다.

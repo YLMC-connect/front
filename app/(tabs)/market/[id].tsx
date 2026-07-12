@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  content: { paddingBottom: 96 },
+  content: { paddingBottom: 152 },
   hero: {
     position: "relative",
     backgroundColor: "#E2DED3",

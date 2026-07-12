@@ -1,10 +1,13 @@
+import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
@@ -16,6 +19,7 @@ import {
   VisualThumb,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { MARKET_CATEGORIES } from "../../../src/constants/domainOptions";
 import { useMarketOverview } from "../../../src/hooks/useMarket";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 import type { MarketOverviewItem } from "../../../src/types/market";
@@ -36,17 +40,6 @@ const statusHrefs = {
   done: "/market?status=done",
 } as const;
 
-const categories = [
-  "전체",
-  "의류·잡화",
-  "가전·가구",
-  "도서·문구",
-  "식품·생필품",
-  "유아·아동용품",
-  "스포츠·취미",
-  "기타",
-] as const;
-
 export default function MarketScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
@@ -55,6 +48,10 @@ export default function MarketScreen() {
   }>();
   const variant = readDesignVariant(params.designVariant);
   const overview = useMarketOverview();
+  const [category, setCategory] =
+    useState<(typeof MARKET_CATEGORIES)[number]["key"]>("all");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const isError = variant === "network-error" || overview.isError;
   const isEmpty = variant === "empty";
   const activeStatus =
@@ -70,7 +67,7 @@ export default function MarketScreen() {
           : variant === "tab-done"
             ? "done"
             : "sharing";
-  const visiblePosts =
+  const statusPosts =
     isError || isEmpty
       ? []
       : activeStatus === "all"
@@ -78,6 +75,14 @@ export default function MarketScreen() {
         : (overview.data?.items ?? []).filter(
             (post) => post.status === activeStatus,
           );
+  const normalizedSearch = search.trim().toLocaleLowerCase();
+  const visiblePosts = statusPosts.filter(
+    (post) =>
+      (category === "all" || post.category === category) &&
+      (!normalizedSearch ||
+        post.title.toLocaleLowerCase().includes(normalizedSearch) ||
+        post.authorName.toLocaleLowerCase().includes(normalizedSearch)),
+  );
   const isLoading = overview.isPending && !isError && !isEmpty;
 
   return (
@@ -85,7 +90,41 @@ export default function MarketScreen() {
       <View style={styles.root}>
         <View style={styles.topBar}>
           <Text style={styles.title}>나눔</Text>
+          <Pressable
+            accessibilityLabel={searchOpen ? "나눔 검색 닫기" : "나눔 검색"}
+            accessibilityRole="button"
+            onPress={() => {
+              setSearchOpen((open) => !open);
+              if (searchOpen) setSearch("");
+            }}
+            style={styles.searchButton}
+          >
+            <MaterialIcons
+              name={searchOpen ? "close" : "search"}
+              size={22}
+              color={theme.colors.inkSoft}
+            />
+          </Pressable>
         </View>
+
+        {searchOpen ? (
+          <View style={styles.searchWrap}>
+            <MaterialIcons
+              name="search"
+              size={19}
+              color={theme.colors.inkMute}
+            />
+            <TextInput
+              autoFocus
+              accessibilityLabel="나눔 검색어"
+              value={search}
+              onChangeText={setSearch}
+              placeholder="제목 또는 작성자 검색"
+              placeholderTextColor={theme.colors.inkMute}
+              style={styles.searchInput}
+            />
+          </View>
+        ) : null}
 
         <SegmentedTabs
           items={statusTabs}
@@ -101,19 +140,22 @@ export default function MarketScreen() {
           contentContainerStyle={styles.categories}
           style={styles.categoryScroll}
         >
-          {categories.map((category) => {
-            const selected = category === "전체";
+          {MARKET_CATEGORIES.map((item) => {
+            const selected = item.key === category;
             return (
-              <View
-                key={category}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                onPress={() => setCategory(item.key)}
+                key={item.key}
                 style={[styles.chip, selected ? styles.chipOn : null]}
               >
                 <Text
                   style={[styles.chipText, selected ? styles.chipTextOn : null]}
                 >
-                  {category}
+                  {item.label}
                 </Text>
-              </View>
+              </Pressable>
             );
           })}
         </ScrollView>
@@ -124,7 +166,10 @@ export default function MarketScreen() {
               <ActivityIndicator color={theme.colors.primary} />
             </View>
           ) : isError ? (
-            <ErrorState message="네트워크 연결을 확인하고 다시 시도해주세요." />
+            <ErrorState
+              message="네트워크 연결을 확인하고 다시 시도해주세요."
+              onRetry={() => overview.refetch()}
+            />
           ) : visiblePosts.length === 0 ? (
             <MarketEmptyState status={isEmpty ? null : activeStatus} />
           ) : (
@@ -243,12 +288,38 @@ const styles = StyleSheet.create({
   topBar: {
     minHeight: 56,
     paddingHorizontal: 18,
-    justifyContent: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   title: {
     color: theme.colors.ink,
     fontSize: theme.fontSize["2xl"],
     fontWeight: theme.fontWeight.extrabold,
+  },
+  searchButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  searchWrap: {
+    minHeight: 46,
+    marginHorizontal: 18,
+    marginBottom: 10,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.lineStrong,
+    backgroundColor: theme.colors.surface,
+  },
+  searchInput: {
+    flex: 1,
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.md,
   },
   statusTabs: {
     marginHorizontal: 18,
@@ -264,7 +335,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   chip: {
-    minHeight: 34,
+    minHeight: 44,
     borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.surface,
     borderWidth: 1,
@@ -286,7 +357,7 @@ const styles = StyleSheet.create({
     color: theme.colors.white,
   },
   list: {
-    paddingBottom: 100,
+    paddingBottom: 164,
   },
   loading: {
     paddingTop: 80,

@@ -42,6 +42,8 @@ export default function LoginScreen() {
     password: isDefault ? "" : "password",
   });
   const [errors, setErrors] = useState<FormErrors>({});
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [feedback, setFeedback] = useState("");
   const isFilled = values.id.length > 0 && values.password.length > 0;
 
   const onSubmit = () => {
@@ -83,10 +85,14 @@ export default function LoginScreen() {
               setValues((current) => ({ ...current, password }))
             }
             placeholder="비밀번호를 입력해주세요"
-            secureTextEntry
+            secureTextEntry={!passwordVisible}
             error={errors.password}
             hasError={isError}
-            trailingIcon="visibility-off"
+            trailingIcon={passwordVisible ? "visibility" : "visibility-off"}
+            trailingLabel={
+              passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"
+            }
+            onTrailingPress={() => setPasswordVisible((visible) => !visible)}
           />
           {login.error || isError ? (
             <Text style={styles.error}>
@@ -106,7 +112,11 @@ export default function LoginScreen() {
           >
             로그인
           </Button>
-          <Pressable style={styles.findPassword}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setFeedback("비밀번호 찾기는 준비 중입니다")}
+            style={styles.findPassword}
+          >
             <Text style={styles.findPasswordText}>비밀번호 찾기</Text>
           </Pressable>
           <View style={styles.dividerRow}>
@@ -122,8 +132,8 @@ export default function LoginScreen() {
         <Text style={styles.copy}>© 열린문교회</Text>
       </View>
       <Toast
-        message={isToast ? "네트워크 연결을 확인해주세요" : ""}
-        icon="sync"
+        message={feedback || (isToast ? "네트워크 연결을 확인해주세요" : "")}
+        icon={feedback ? "info" : "sync"}
       />
     </Screen>
   );
@@ -139,6 +149,8 @@ function AuthField({
   error,
   hasError = false,
   trailingIcon,
+  trailingLabel,
+  onTrailingPress,
 }: {
   testID?: string;
   label: string;
@@ -149,6 +161,8 @@ function AuthField({
   error?: string;
   hasError?: boolean;
   trailingIcon?: keyof typeof MaterialIcons.glyphMap;
+  trailingLabel?: string;
+  onTrailingPress?: () => void;
 }) {
   return (
     <View>
@@ -164,11 +178,19 @@ function AuthField({
           style={styles.input}
         />
         {trailingIcon ? (
-          <MaterialIcons
-            name={trailingIcon}
-            size={20}
-            color={theme.colors.inkMute}
-          />
+          <Pressable
+            accessibilityLabel={trailingLabel}
+            accessibilityRole="button"
+            hitSlop={8}
+            onPress={onTrailingPress}
+            style={styles.trailingButton}
+          >
+            <MaterialIcons
+              name={trailingIcon}
+              size={20}
+              color={theme.colors.inkMute}
+            />
+          </Pressable>
         ) : null}
       </View>
       {error ? <Text style={styles.fieldError}>{error}</Text> : null}
@@ -226,6 +248,13 @@ const styles = StyleSheet.create({
     color: theme.colors.ink,
     fontSize: theme.fontSize.md,
     padding: 0,
+  },
+  trailingButton: {
+    width: 40,
+    height: 40,
+    marginRight: -10,
+    alignItems: "center",
+    justifyContent: "center",
   },
   error: { color: theme.colors.danger, fontSize: 13 },
   fieldError: { marginTop: 6, color: theme.colors.danger, fontSize: 12 },

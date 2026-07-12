@@ -9,6 +9,7 @@ export const mockMarketOverview: MarketOverview = {
       authorName: "박정아",
       createdLabel: "1시간 전",
       status: "sharing",
+      category: "baby",
     },
     {
       id: "2",
@@ -17,6 +18,7 @@ export const mockMarketOverview: MarketOverview = {
       authorName: "이수진",
       createdLabel: "3시간 전",
       status: "reserved",
+      category: "home",
     },
     {
       id: "3",
@@ -25,6 +27,7 @@ export const mockMarketOverview: MarketOverview = {
       authorName: "김지영",
       createdLabel: "어제",
       status: "sharing",
+      category: "baby",
     },
     {
       id: "4",
@@ -33,6 +36,7 @@ export const mockMarketOverview: MarketOverview = {
       authorName: "정혜진",
       createdLabel: "어제",
       status: "sharing",
+      category: "book",
     },
     {
       id: "5",
@@ -41,6 +45,7 @@ export const mockMarketOverview: MarketOverview = {
       authorName: "조미경",
       createdLabel: "2일 전",
       status: "done",
+      category: "home",
     },
     {
       id: "6",
@@ -49,6 +54,7 @@ export const mockMarketOverview: MarketOverview = {
       authorName: "한유라",
       createdLabel: "3일 전",
       status: "sharing",
+      category: "cloth",
     },
   ],
 };

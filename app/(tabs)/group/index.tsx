@@ -1,17 +1,20 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   Badge,
   Card,
+  EmptyState,
   ErrorState,
   FloatingActionButton,
   SegmentedTabs,
@@ -19,21 +22,10 @@ import {
   VisualThumb,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { GROUP_CATEGORIES } from "../../../src/constants/domainOptions";
 import { useGroupOverview } from "../../../src/hooks/useGroups";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 import type { GroupOverviewItem } from "../../../src/types/group";
-
-const categories = [
-  { key: "all", label: "전체" },
-  { key: "bible", label: "성경공부·예배" },
-  { key: "pray", label: "기도모임" },
-  { key: "volunteer", label: "봉사" },
-  { key: "hobby", label: "취미·문화" },
-  { key: "sport", label: "운동·건강" },
-  { key: "cell", label: "목장" },
-  { key: "mission", label: "선교" },
-  { key: "etc", label: "기타" },
-] as const;
 
 const sections = [
   { key: "groups", label: "소모임" },
@@ -52,20 +44,48 @@ export default function GroupScreen() {
   }>();
   const variant = readDesignVariant(params.designVariant);
   const overview = useGroupOverview();
+  const [category, setCategory] =
+    useState<(typeof GROUP_CATEGORIES)[number]["key"]>("all");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [showMyFull, setShowMyFull] = useState(false);
   const section = params.section === "service" ? "service" : "groups";
   const isMyFull = variant === "my-full";
   const isError = variant === "network-error" || overview.isError;
-  const groups = overview.data?.groups ?? [];
-  const serviceItems = overview.data?.services ?? [];
+  const normalizedSearch = search.trim().toLocaleLowerCase();
+  const matchesSearch = (name: string, description: string) =>
+    !normalizedSearch ||
+    name.toLocaleLowerCase().includes(normalizedSearch) ||
+    description.toLocaleLowerCase().includes(normalizedSearch);
+  const groups = (overview.data?.groups ?? []).filter(
+    (group) =>
+      (category === "all" || group.category === category) &&
+      matchesSearch(group.name, group.description),
+  );
+  const serviceItems = (overview.data?.services ?? []).filter((item) =>
+    matchesSearch(item.name, item.description),
+  );
   const myGroups = isError ? [] : groups.filter((group) => group.isJoined);
   const isLoading = overview.isPending && !isError;
 
-  if (isMyFull) {
+  if (isMyFull || showMyFull) {
     return (
       <Screen scroll={false} padded={false} testID="screen-group">
         <View style={styles.root}>
           <View style={styles.topBar}>
             <Text style={styles.title}>내 소모임</Text>
+            <Pressable
+              accessibilityLabel="내 소모임 닫기"
+              accessibilityRole="button"
+              onPress={() => (isMyFull ? router.back() : setShowMyFull(false))}
+              style={styles.searchButton}
+            >
+              <MaterialIcons
+                name="close"
+                size={22}
+                color={theme.colors.inkSoft}
+              />
+            </Pressable>
           </View>
           <ScrollView contentContainerStyle={styles.fullList}>
             {isLoading ? (
@@ -92,14 +112,41 @@ export default function GroupScreen() {
       <View style={styles.root}>
         <View style={styles.topBar}>
           <Text style={styles.title}>동행</Text>
-          <View style={styles.searchButton}>
+          <Pressable
+            accessibilityLabel={searchOpen ? "동행 검색 닫기" : "동행 검색"}
+            accessibilityRole="button"
+            onPress={() => {
+              setSearchOpen((open) => !open);
+              if (searchOpen) setSearch("");
+            }}
+            style={styles.searchButton}
+          >
             <MaterialIcons
-              name="search"
+              name={searchOpen ? "close" : "search"}
               size={22}
               color={theme.colors.inkSoft}
             />
-          </View>
+          </Pressable>
         </View>
+
+        {searchOpen ? (
+          <View style={styles.searchWrap}>
+            <MaterialIcons
+              name="search"
+              size={19}
+              color={theme.colors.inkMute}
+            />
+            <TextInput
+              autoFocus
+              accessibilityLabel="동행 검색어"
+              value={search}
+              onChangeText={setSearch}
+              placeholder="소모임 또는 봉사 검색"
+              placeholderTextColor={theme.colors.inkMute}
+              style={styles.searchInput}
+            />
+          </View>
+        ) : null}
 
         <SegmentedTabs
           items={sections}
@@ -115,59 +162,77 @@ export default function GroupScreen() {
               <ActivityIndicator color={theme.colors.primary} />
             </View>
           ) : isError ? (
-            <ErrorState message="네트워크 연결을 확인하고 다시 시도해주세요." />
+            <ErrorState
+              message="네트워크 연결을 확인하고 다시 시도해주세요."
+              onRetry={() => overview.refetch()}
+            />
           ) : section === "service" ? (
             <View style={styles.serviceList}>
-              {serviceItems.map((item) => (
-                <Pressable
-                  key={item.id}
-                  accessibilityRole="button"
-                  onPress={() => router.push(`/group/${item.linkedGroupId}`)}
-                >
-                  <Card style={styles.serviceCard}>
-                    <View style={styles.serviceRow}>
-                      <VisualThumb
-                        size={62}
-                        seed={item.coverSeed}
-                        icon="volunteer-activism"
-                      />
-                      <View style={styles.serviceBody}>
-                        <View style={styles.serviceMetaRow}>
-                          <Badge>{item.statusLabel}</Badge>
-                          <Text style={styles.serviceSchedule}>
-                            {item.schedule}
+              {serviceItems.length === 0 ? (
+                <EmptyState
+                  title="검색 결과가 없어요"
+                  description="다른 검색어로 다시 찾아보세요."
+                />
+              ) : (
+                serviceItems.map((item) => (
+                  <Pressable
+                    key={item.id}
+                    accessibilityRole="button"
+                    onPress={() => router.push(`/group/${item.linkedGroupId}`)}
+                  >
+                    <Card style={styles.serviceCard}>
+                      <View style={styles.serviceRow}>
+                        <VisualThumb
+                          size={62}
+                          seed={item.coverSeed}
+                          icon="volunteer-activism"
+                        />
+                        <View style={styles.serviceBody}>
+                          <View style={styles.serviceMetaRow}>
+                            <Badge>{item.statusLabel}</Badge>
+                            <Text style={styles.serviceSchedule}>
+                              {item.schedule}
+                            </Text>
+                          </View>
+                          <Text style={styles.serviceTitle}>{item.name}</Text>
+                          <Text style={styles.serviceDesc}>
+                            {item.description}
+                          </Text>
+                          <Text style={styles.serviceCount}>
+                            참여 {item.currentMembers}/{item.maxMembers}명
                           </Text>
                         </View>
-                        <Text style={styles.serviceTitle}>{item.name}</Text>
-                        <Text style={styles.serviceDesc}>
-                          {item.description}
-                        </Text>
-                        <Text style={styles.serviceCount}>
-                          참여 {item.currentMembers}/{item.maxMembers}명
-                        </Text>
+                        <MaterialIcons
+                          name="chevron-right"
+                          size={20}
+                          color={theme.colors.inkMute}
+                        />
                       </View>
-                      <MaterialIcons
-                        name="chevron-right"
-                        size={20}
-                        color={theme.colors.inkMute}
-                      />
-                    </View>
-                  </Card>
-                </Pressable>
-              ))}
+                    </Card>
+                  </Pressable>
+                ))
+              )}
             </View>
           ) : (
             <>
               <View style={styles.section}>
                 <View style={styles.sectionHead}>
                   <Text style={styles.sectionTitle}>내 소모임</Text>
-                  <Text style={styles.moreText}>전체보기</Text>
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => setShowMyFull(true)}
+                    style={styles.moreButton}
+                  >
+                    <Text style={styles.moreText}>전체보기</Text>
+                  </Pressable>
                 </View>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.mineList}
                   style={styles.mineScroll}
+                  snapToInterval={226}
+                  decelerationRate="fast"
                 >
                   {myGroups.map((group) => (
                     <Pressable
@@ -197,11 +262,14 @@ export default function GroupScreen() {
                   contentContainerStyle={styles.categories}
                   style={styles.categoryScroll}
                 >
-                  {categories.map((category) => {
-                    const selected = category.key === "all";
+                  {GROUP_CATEGORIES.map((item) => {
+                    const selected = item.key === category;
                     return (
-                      <View
-                        key={category.key}
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityState={{ selected }}
+                        onPress={() => setCategory(item.key)}
+                        key={item.key}
                         style={[styles.chip, selected ? styles.chipOn : null]}
                       >
                         <Text
@@ -210,20 +278,27 @@ export default function GroupScreen() {
                             selected ? styles.chipTextOn : null,
                           ]}
                         >
-                          {category.label}
+                          {item.label}
                         </Text>
-                      </View>
+                      </Pressable>
                     );
                   })}
                 </ScrollView>
                 <View style={styles.groupList}>
-                  {groups.map((group) => (
-                    <GroupCard
-                      key={group.id}
-                      group={group}
-                      onPress={() => router.push(`/group/${group.id}`)}
+                  {groups.length === 0 ? (
+                    <EmptyState
+                      title="검색 결과가 없어요"
+                      description="카테고리나 검색어를 바꿔보세요."
                     />
-                  ))}
+                  ) : (
+                    groups.map((group) => (
+                      <GroupCard
+                        key={group.id}
+                        group={group}
+                        onPress={() => router.push(`/group/${group.id}`)}
+                      />
+                    ))
+                  )}
                 </View>
               </View>
             </>
@@ -292,7 +367,9 @@ function RecruitBadge({ closed }: { closed: boolean }) {
 }
 
 function categoryOf(key: string) {
-  return categories.find((category) => category.key === key)?.label ?? "기타";
+  return (
+    GROUP_CATEGORIES.find((category) => category.key === key)?.label ?? "기타"
+  );
 }
 
 const styles = StyleSheet.create({
@@ -312,17 +389,35 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.extrabold,
   },
   searchButton: {
-    width: 36,
-    height: 36,
+    width: 44,
+    height: 44,
     alignItems: "center",
     justifyContent: "center",
+  },
+  searchWrap: {
+    minHeight: 46,
+    marginHorizontal: 18,
+    marginBottom: 10,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.lineStrong,
+    backgroundColor: theme.colors.surface,
+  },
+  searchInput: {
+    flex: 1,
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.md,
   },
   segmented: {
     marginHorizontal: 18,
     marginBottom: 10,
   },
   body: {
-    paddingBottom: 100,
+    paddingBottom: 164,
   },
   section: {
     marginTop: 6,
@@ -352,6 +447,12 @@ const styles = StyleSheet.create({
     color: theme.colors.primaryDeep,
     fontSize: theme.fontSize.sm,
     fontWeight: theme.fontWeight.bold,
+  },
+  moreButton: {
+    minHeight: 44,
+    justifyContent: "center",
+    paddingHorizontal: 8,
+    marginVertical: -8,
   },
   mineScroll: {
     flexGrow: 0,
@@ -392,7 +493,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   chip: {
-    minHeight: 34,
+    minHeight: 44,
     borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.surface,
     borderWidth: 1,

@@ -44,6 +44,7 @@ export interface MarketOverviewItem {
   authorName: string;
   createdLabel: string;
   status: MarketStatus;
+  category: Exclude<MarketCategory, "all">;
 }
 
 export interface MarketOverview {

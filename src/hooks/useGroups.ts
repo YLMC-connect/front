@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../lib/queryKeys";
 import {
+  createGroup,
   createGroupNotice,
   deleteGroupNotice,
   fetchGroupDetail,
@@ -10,6 +11,7 @@ import {
 } from "../services/groupService";
 import type {
   GroupDetail,
+  GroupInput,
   GroupNoticeInput,
   GroupNoticeUpdateInput,
 } from "../types/group";
@@ -18,6 +20,20 @@ export function useGroupOverview() {
   return useQuery({
     queryKey: queryKeys.group.overview(),
     queryFn: fetchGroupOverview,
+  });
+}
+
+export function useCreateGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: GroupInput) => createGroup(input),
+    onSuccess: (detail) => {
+      queryClient.setQueryData<GroupDetail>(
+        queryKeys.group.detail(detail.id),
+        detail,
+      );
+      queryClient.invalidateQueries({ queryKey: queryKeys.group.overview() });
+    },
   });
 }
 

@@ -1,6 +1,9 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useMemo, useState } from "react";
 import {
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -9,29 +12,42 @@ import {
   View,
 } from "react-native";
 import {
+  Button,
+  ConfirmDialog,
+  ImagePickerField,
   ModalFormSection as Section,
   SectionDivider as Divider,
-  VisualThumb,
+  Toast,
 } from "../../src/components/ui";
+import { MARKET_CATEGORIES } from "../../src/constants/domainOptions";
 import { theme } from "../../src/constants/theme";
+import { useCreateMarketPost } from "../../src/hooks/useMarket";
 import { readDesignVariant } from "../../src/lib/designVariant";
+import type { MarketInput } from "../../src/types/market";
 
-const categories = [
-  "의류·잡화",
-  "가전·가구",
-  "도서·문구",
-  "식품·생필품",
-  "유아·아동용품",
-  "스포츠·취미",
-  "기타",
-] as const;
-
+const categories = MARKET_CATEGORIES.slice(1) as readonly {
+  key: MarketInput["category"];
+  label: string;
+}[];
 const conditions = ["새것", "사용감 있음", "파손 있음"] as const;
 
 const filledValues = {
-  title: "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
+  images: ["https://picsum.photos/seed/market-new/240/240"],
+  category: "baby" as const,
+  title: "아이 장난감 정리하면서 나눔합니다",
+  condition: "사용감 있음",
   description:
-    "아이가 커서 더 이상 쓰지 않는 장난감 정리해요.\n대부분 깨끗하게 사용한 것들이고, 블록류 20점 + 인형류 10점 정도 됩니다.\n필요하신 분께 무료로 드려요!\n\n수령은 토요일 오후 교회 1층 로비에서 가능합니다.",
+    "아이가 커서 더 이상 쓰지 않는 장난감 정리해요. 토요일 오후 교회 1층 로비에서 수령 가능합니다.",
+  location: "교회 1층 로비",
+};
+
+const emptyValues: MarketInput = {
+  images: [],
+  category: "etc",
+  title: "",
+  condition: "사용감 있음",
+  description: "",
+  location: "",
 };
 
 export default function MarketNewModal() {
@@ -39,21 +55,61 @@ export default function MarketNewModal() {
   const params = useLocalSearchParams<{ designVariant?: string }>();
   const variant = readDesignVariant(params.designVariant) ?? "create";
   const isEdit = variant === "edit";
-  const isFilled =
+  const useFilledValues =
     isEdit ||
     variant === "create-filled" ||
     variant === "back-warn" ||
     variant === "limit-toast";
-  const photos = isFilled ? [0, 1, 2] : [];
-  const title = isFilled ? filledValues.title : "";
-  const description = isFilled ? filledValues.description : "";
+  const initialValues = useMemo<MarketInput>(
+    () => (useFilledValues ? filledValues : emptyValues),
+    [useFilledValues],
+  );
+  const [values, setValues] = useState(initialValues);
+  const [error, setError] = useState<string>();
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+  const createPost = useCreateMarketPost();
+  const isDirty = JSON.stringify(values) !== JSON.stringify(initialValues);
+
+  const update = <Key extends keyof MarketInput>(
+    key: Key,
+    value: MarketInput[Key],
+  ) => {
+    setError(undefined);
+    setValues((current) => ({ ...current, [key]: value }));
+  };
+
+  const close = () => {
+    if (isDirty) {
+      setShowCloseConfirm(true);
+      return;
+    }
+    router.back();
+  };
+
+  const submit = async () => {
+    setError(undefined);
+    try {
+      const created = await createPost.mutateAsync(values);
+      router.replace(`/market/${created.id}`);
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "나눔을 등록하지 못했습니다.",
+      );
+    }
+  };
 
   return (
-    <View style={styles.root}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={styles.root}
+    >
       <View style={styles.topBar}>
         <Pressable
+          accessibilityLabel="나눔 등록 닫기"
           accessibilityRole="button"
-          onPress={() => router.back()}
+          onPress={close}
           style={styles.closeButton}
         >
           <MaterialIcons name="close" size={22} color={theme.colors.inkSoft} />
@@ -62,52 +118,35 @@ export default function MarketNewModal() {
         <Text style={styles.topTitle}>
           {isEdit ? "나눔 수정" : "나눔 등록"}
         </Text>
-        <Text style={[styles.saveText, !isFilled ? styles.saveDisabled : null]}>
-          {isEdit ? "저장" : "등록"}
-        </Text>
+        <View style={styles.topSpacer} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.body}>
-        <View style={styles.photoSection}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.photoRail}
-          >
-            <View style={styles.photoAdd}>
-              <MaterialIcons
-                name="photo-camera"
-                size={22}
-                color={theme.colors.inkMute}
-              />
-              <Text style={styles.photoCount}>사진 {photos.length}/5</Text>
-            </View>
-            {photos.map((seed, index) => (
-              <View key={seed} style={styles.photoItem}>
-                <VisualThumb size={90} seed={seed} />
-                {index === 0 ? (
-                  <View style={styles.mainBadge}>
-                    <Text style={styles.mainBadgeText}>대표</Text>
-                  </View>
-                ) : null}
-                <View style={styles.removePhoto}>
-                  <MaterialIcons name="close" size={12} color="#fff" />
-                </View>
-              </View>
-            ))}
-          </ScrollView>
-          <Text style={styles.photoHint}>최대 5장, JPG/PNG/WEBP, 5MB 이하</Text>
-        </View>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.body}
+      >
+        <Section label="사진" required hint={`사진 ${values.images.length}/5`}>
+          <View style={styles.fieldInset}>
+            <ImagePickerField
+              value={values.images}
+              onChange={(images) => update("images", images)}
+              maxImages={5}
+            />
+          </View>
+        </Section>
 
         <Divider />
 
         <Section label="카테고리" required>
           <View style={styles.chips}>
             {categories.map((category) => {
-              const selected = isFilled && category === "유아·아동용품";
+              const selected = values.category === category.key;
               return (
-                <View
-                  key={category}
+                <Pressable
+                  key={category.key}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  onPress={() => update("category", category.key)}
                   style={[styles.chip, selected ? styles.chipOn : null]}
                 >
                   <Text
@@ -116,9 +155,9 @@ export default function MarketNewModal() {
                       selected ? styles.chipTextOn : null,
                     ]}
                   >
-                    {category}
+                    {category.label}
                   </Text>
-                </View>
+                </Pressable>
               );
             })}
           </View>
@@ -126,10 +165,12 @@ export default function MarketNewModal() {
 
         <Divider />
 
-        <Section label="제목" required hint={`${title.length}/30`}>
+        <Section label="제목" required hint={`${values.title.length}/30`}>
           <TextInput
-            editable={false}
-            value={title}
+            accessibilityLabel="나눔 제목"
+            value={values.title}
+            onChangeText={(title) => update("title", title)}
+            maxLength={30}
             placeholder="제목을 입력해주세요 (최대 30자)"
             placeholderTextColor={theme.colors.inkMute}
             style={styles.input}
@@ -141,10 +182,13 @@ export default function MarketNewModal() {
         <Section label="물품 상태" required>
           <View style={styles.conditionRow}>
             {conditions.map((condition) => {
-              const selected = isFilled && condition === "사용감 있음";
+              const selected = values.condition === condition;
               return (
-                <View
+                <Pressable
                   key={condition}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  onPress={() => update("condition", condition)}
                   style={[
                     styles.condition,
                     selected ? styles.conditionOn : null,
@@ -158,7 +202,7 @@ export default function MarketNewModal() {
                   >
                     {condition}
                   </Text>
-                </View>
+                </Pressable>
               );
             })}
           </View>
@@ -166,15 +210,34 @@ export default function MarketNewModal() {
 
         <Divider />
 
-        <Section label="상세 설명" required hint={`${description.length}/500`}>
+        <Section
+          label="상세 설명"
+          required
+          hint={`${values.description.length}/500`}
+        >
           <TextInput
-            editable={false}
+            accessibilityLabel="나눔 상세 설명"
             multiline
-            value={description}
+            value={values.description}
+            onChangeText={(description) => update("description", description)}
+            maxLength={500}
             placeholder="물품 상태, 수령 방법, 일정 등을 자세히 적어주세요"
             placeholderTextColor={theme.colors.inkMute}
             style={[styles.input, styles.textarea]}
             textAlignVertical="top"
+          />
+        </Section>
+
+        <Divider />
+
+        <Section label="수령 장소" required>
+          <TextInput
+            accessibilityLabel="나눔 수령 장소"
+            value={values.location}
+            onChangeText={(location) => update("location", location)}
+            placeholder="예: 교회 1층 로비"
+            placeholderTextColor={theme.colors.inkMute}
+            style={styles.input}
           />
         </Section>
 
@@ -188,25 +251,42 @@ export default function MarketNewModal() {
             직거래 시 안전한 장소(교회 로비 등)에서 만나주세요.
           </Text>
         </View>
+        {error ? (
+          <Text accessibilityRole="alert" style={styles.errorText}>
+            {error}
+          </Text>
+        ) : null}
       </ScrollView>
 
-      {variant === "limit-toast" ? (
-        <View style={styles.toast}>
-          <MaterialIcons name="check" size={18} color="#fff" />
-          <Text style={styles.toastText}>
-            하루에 나눔은 5개까지 등록할 수 있어요
-          </Text>
-        </View>
-      ) : null}
-    </View>
+      <View style={styles.footer}>
+        <Button onPress={submit} loading={createPost.isPending}>
+          {isEdit ? "변경사항 저장" : "나눔 등록"}
+        </Button>
+      </View>
+
+      <ConfirmDialog
+        visible={showCloseConfirm}
+        title="작성을 그만둘까요?"
+        message="입력한 내용은 저장되지 않습니다."
+        confirmText="나가기"
+        danger
+        onCancel={() => setShowCloseConfirm(false)}
+        onConfirm={() => router.back()}
+      />
+      <Toast
+        message={
+          variant === "limit-toast"
+            ? "하루에 나눔은 5개까지 등록할 수 있어요"
+            : ""
+        }
+        offset={96}
+      />
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: theme.colors.bg,
-  },
+  root: { flex: 1, backgroundColor: theme.colors.bg },
   topBar: {
     minHeight: 56,
     flexDirection: "row",
@@ -216,6 +296,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     minWidth: 68,
+    minHeight: 44,
     flexDirection: "row",
     alignItems: "center",
     gap: 2,
@@ -232,79 +313,9 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.lg,
     fontWeight: theme.fontWeight.bold,
   },
-  saveText: {
-    minWidth: 68,
-    textAlign: "right",
-    color: theme.colors.primary,
-    fontSize: theme.fontSize.md,
-    fontWeight: theme.fontWeight.bold,
-  },
-  saveDisabled: {
-    color: theme.colors.inkHint,
-  },
-  body: {
-    paddingBottom: 24,
-  },
-  photoSection: {
-    paddingTop: 6,
-    paddingBottom: 18,
-  },
-  photoRail: {
-    gap: 10,
-    paddingHorizontal: 22,
-    paddingVertical: 4,
-  },
-  photoAdd: {
-    width: 90,
-    height: 90,
-    borderRadius: theme.radius.md,
-    borderWidth: 1.5,
-    borderStyle: "dashed",
-    borderColor: theme.colors.lineStrong,
-    backgroundColor: theme.colors.surface2,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 4,
-  },
-  photoCount: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
-    fontWeight: theme.fontWeight.bold,
-  },
-  photoHint: {
-    paddingHorizontal: 22,
-    paddingTop: 8,
-    color: theme.colors.inkHint,
-    fontSize: 11.5,
-  },
-  photoItem: {
-    position: "relative",
-  },
-  mainBadge: {
-    position: "absolute",
-    left: 6,
-    bottom: 6,
-    borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  mainBadgeText: {
-    color: theme.colors.white,
-    fontSize: 10,
-    fontWeight: theme.fontWeight.bold,
-  },
-  removePhoto: {
-    position: "absolute",
-    top: 4,
-    right: 4,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(20,30,18,0.70)",
-  },
+  topSpacer: { width: 68 },
+  body: { paddingBottom: 24 },
+  fieldInset: { paddingHorizontal: 22 },
   chips: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -312,12 +323,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
   },
   chip: {
+    minHeight: 44,
+    justifyContent: "center",
     borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.surface,
     borderWidth: 1,
     borderColor: theme.colors.line,
     paddingHorizontal: 12,
-    paddingVertical: 8,
   },
   chipOn: {
     backgroundColor: theme.colors.primary,
@@ -328,9 +340,7 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.sm,
     fontWeight: theme.fontWeight.semibold,
   },
-  chipTextOn: {
-    color: theme.colors.white,
-  },
+  chipTextOn: { color: theme.colors.white },
   input: {
     minHeight: 48,
     marginHorizontal: 22,
@@ -342,74 +352,55 @@ const styles = StyleSheet.create({
     color: theme.colors.ink,
     fontSize: theme.fontSize.md,
   },
-  textarea: {
-    minHeight: 150,
-    paddingTop: 12,
-    lineHeight: 22,
-  },
-  conditionRow: {
-    flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: 22,
-  },
+  textarea: { minHeight: 132, paddingTop: 12, lineHeight: 22 },
+  conditionRow: { flexDirection: "row", gap: 8, paddingHorizontal: 22 },
   condition: {
+    minHeight: 44,
     flex: 1,
-    minHeight: 42,
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
   },
   conditionOn: {
     borderColor: theme.colors.primary,
     backgroundColor: theme.colors.primarySoft,
   },
-  conditionText: {
-    color: theme.colors.inkSoft,
-    fontSize: 13,
-    fontWeight: theme.fontWeight.medium,
-  },
+  conditionText: { color: theme.colors.inkSoft, fontSize: theme.fontSize.sm },
   conditionTextOn: {
     color: theme.colors.primaryDeep,
     fontWeight: theme.fontWeight.bold,
   },
   infoBox: {
     marginHorizontal: 22,
-    marginTop: 16,
-    marginBottom: 22,
+    marginTop: 22,
     borderRadius: theme.radius.md,
     backgroundColor: theme.colors.primarySoft,
     flexDirection: "row",
     gap: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
   infoText: {
     flex: 1,
     color: theme.colors.primaryDeep,
     fontSize: theme.fontSize.sm,
-    lineHeight: 18,
+    lineHeight: 19,
   },
-  toast: {
-    position: "absolute",
-    left: 18,
-    right: 18,
-    bottom: 28,
-    borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.toast,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 13,
-    ...theme.shadow.toast,
+  errorText: {
+    marginHorizontal: 22,
+    marginTop: 12,
+    color: theme.colors.danger,
+    fontSize: theme.fontSize.sm,
   },
-  toastText: {
-    color: theme.colors.white,
-    fontSize: theme.fontSize.md,
-    fontWeight: theme.fontWeight.semibold,
+  footer: {
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.line,
+    backgroundColor: theme.colors.bg,
+    paddingHorizontal: 22,
+    paddingTop: 12,
+    paddingBottom: Platform.OS === "ios" ? 28 : 16,
   },
 });

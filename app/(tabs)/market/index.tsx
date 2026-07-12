@@ -12,6 +12,7 @@ import {
   EmptyState,
   ErrorState,
   FloatingActionButton,
+  SegmentedTabs,
   VisualThumb,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
@@ -28,6 +29,13 @@ const statusTabs: readonly { key: Status; label: string }[] = [
   { key: "done", label: "나눔완료" },
 ];
 
+const statusHrefs = {
+  all: "/market?status=all",
+  sharing: "/market",
+  reserved: "/market?status=reserved",
+  done: "/market?status=done",
+} as const;
+
 const categories = [
   "전체",
   "의류·잡화",
@@ -41,19 +49,27 @@ const categories = [
 
 export default function MarketScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const params = useLocalSearchParams<{
+    designVariant?: string;
+    status?: string;
+  }>();
   const variant = readDesignVariant(params.designVariant);
   const overview = useMarketOverview();
   const isError = variant === "network-error" || overview.isError;
   const isEmpty = variant === "empty";
   const activeStatus =
-    variant === "tab-all"
-      ? "all"
-      : variant === "tab-reserved"
-        ? "reserved"
-        : variant === "tab-done"
-          ? "done"
-          : "sharing";
+    params.status === "all" ||
+    params.status === "sharing" ||
+    params.status === "reserved" ||
+    params.status === "done"
+      ? params.status
+      : variant === "tab-all"
+        ? "all"
+        : variant === "tab-reserved"
+          ? "reserved"
+          : variant === "tab-done"
+            ? "done"
+            : "sharing";
   const visiblePosts =
     isError || isEmpty
       ? []
@@ -71,26 +87,13 @@ export default function MarketScreen() {
           <Text style={styles.title}>나눔</Text>
         </View>
 
-        <View style={styles.statusTabs}>
-          {statusTabs.map((tab) => {
-            const selected = tab.key === activeStatus;
-            return (
-              <View
-                key={tab.key}
-                style={[styles.statusTab, selected ? styles.statusTabOn : null]}
-              >
-                <Text
-                  style={[
-                    styles.statusText,
-                    selected ? styles.statusTextOn : null,
-                  ]}
-                >
-                  {tab.label}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
+        <SegmentedTabs
+          items={statusTabs}
+          active={activeStatus}
+          onChange={(status) => router.replace(statusHrefs[status])}
+          style={styles.statusTabs}
+          testIDPrefix="market-status"
+        />
 
         <ScrollView
           horizontal
@@ -251,30 +254,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 18,
     marginTop: 4,
     marginBottom: 10,
-    borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.ring,
-    padding: 4,
-    flexDirection: "row",
-  },
-  statusTab: {
-    flex: 1,
-    minHeight: 38,
-    borderRadius: theme.radius.pill,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  statusTabOn: {
-    backgroundColor: theme.colors.surface,
-    ...theme.shadow.card,
-  },
-  statusText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  statusTextOn: {
-    color: theme.colors.ink,
-    fontWeight: theme.fontWeight.bold,
   },
   categoryScroll: {
     flexGrow: 0,

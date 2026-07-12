@@ -1,6 +1,16 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs, usePathname, useRouter } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
+import { MotionPressable } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 
 type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
@@ -104,7 +114,65 @@ function AppTabBar({ state, descriptors, navigation }: any) {
   });
 
   return (
-    <View style={styles.tabShell}>
+    <VisibleTabBar
+      state={state}
+      descriptors={descriptors}
+      navigation={navigation}
+      router={router}
+      routes={routes}
+    />
+  );
+}
+
+function VisibleTabBar({
+  state,
+  descriptors,
+  navigation,
+  router,
+  routes,
+}: any) {
+  const reduceMotion = useReducedMotion();
+  const [itemWidth, setItemWidth] = useState(0);
+  const selectedIndex = routes.findIndex(
+    (route: any) =>
+      state.routes.findIndex((item: any) => item.key === route.key) ===
+      state.index,
+  );
+  const indicatorIndex = useSharedValue(Math.max(selectedIndex, 0));
+  const didMount = useRef(false);
+
+  useEffect(() => {
+    const nextIndex = Math.max(selectedIndex, 0);
+    if (!didMount.current || reduceMotion) {
+      indicatorIndex.value = nextIndex;
+      didMount.current = true;
+      return;
+    }
+
+    indicatorIndex.value = withTiming(nextIndex, {
+      duration: theme.motion.duration.base,
+    });
+  }, [indicatorIndex, reduceMotion, selectedIndex]);
+
+  const indicatorStyle = useAnimatedStyle(() => ({
+    opacity: itemWidth > 0 ? 1 : 0,
+    width: itemWidth,
+    transform: [{ translateX: indicatorIndex.value * itemWidth }],
+  }));
+
+  return (
+    <View
+      style={styles.tabShell}
+      onLayout={(event) => {
+        const contentWidth = Math.max(event.nativeEvent.layout.width - 12, 0);
+        setItemWidth(routes.length > 0 ? contentWidth / routes.length : 0);
+      }}
+    >
+      <Animated.View
+        pointerEvents="none"
+        testID="tab-active-indicator"
+        style={[styles.tabIndicator, indicatorStyle]}
+      />
       {routes.map((route: any) => {
         const index = state.routes.findIndex(
           (item: any) => item.key === route.key,
@@ -112,13 +180,13 @@ function AppTabBar({ state, descriptors, navigation }: any) {
         const focused = state.index === index;
         const options = descriptors[route.key].options;
         const label = options.title ?? route.name;
-        const color = focused ? theme.colors.white : theme.colors.inkMute;
 
         return (
-          <Pressable
+          <AppTabButton
             key={route.key}
-            accessibilityRole="tab"
-            accessibilityState={focused ? { selected: true } : {}}
+            route={route}
+            label={label}
+            focused={focused}
             testID={options.tabBarButtonTestID}
             onPress={() => {
               const href = tabHrefs[route.name];
@@ -129,22 +197,63 @@ function AppTabBar({ state, descriptors, navigation }: any) {
 
               navigation.navigate(route.name);
             }}
-            style={[styles.tabItem, focused ? styles.tabItemActive : null]}
-          >
-            <MaterialCommunityIcons
-              name={
-                focused
-                  ? (tabIcons[route.name]?.on ?? "circle")
-                  : (tabIcons[route.name]?.off ?? "circle-outline")
-              }
-              size={20}
-              color={color}
-            />
-            <Text style={[styles.tabLabel, { color }]}>{label}</Text>
-          </Pressable>
+          />
         );
       })}
     </View>
+  );
+}
+
+function AppTabButton({ route, label, focused, testID, onPress }: any) {
+  const reduceMotion = useReducedMotion();
+  const iconScale = useSharedValue(1);
+  const didMount = useRef(false);
+  const color = focused ? theme.colors.white : theme.colors.inkMute;
+
+  useEffect(() => {
+    if (!didMount.current) {
+      didMount.current = true;
+      return;
+    }
+
+    if (!focused || reduceMotion) {
+      iconScale.value = 1;
+      return;
+    }
+
+    iconScale.value = withSequence(
+      withTiming(theme.motion.scale.tabIcon, {
+        duration: theme.motion.duration.fast / 2,
+      }),
+      withSpring(1, theme.motion.spring),
+    );
+  }, [focused, iconScale, reduceMotion]);
+
+  const iconStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: iconScale.value }],
+  }));
+
+  return (
+    <MotionPressable
+      accessibilityRole="tab"
+      accessibilityState={focused ? { selected: true } : {}}
+      testID={testID}
+      onPress={onPress}
+      style={styles.tabItem}
+    >
+      <Animated.View style={iconStyle}>
+        <MaterialCommunityIcons
+          name={
+            focused
+              ? (tabIcons[route.name]?.on ?? "circle")
+              : (tabIcons[route.name]?.off ?? "circle-outline")
+          }
+          size={20}
+          color={color}
+        />
+      </Animated.View>
+      <Text style={[styles.tabLabel, { color }]}>{label}</Text>
+    </MotionPressable>
   );
 }
 
@@ -158,7 +267,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.72)",
-    backgroundColor: "rgba(255,255,255,0.90)",
+    backgroundColor: theme.colors.white,
     paddingHorizontal: 6,
     paddingVertical: 7,
     flexDirection: "row",
@@ -173,8 +282,14 @@ const styles = StyleSheet.create({
     gap: 2,
     paddingHorizontal: 4,
     paddingVertical: 6,
+    zIndex: 1,
   },
-  tabItemActive: {
+  tabIndicator: {
+    position: "absolute",
+    left: 6,
+    top: 7,
+    bottom: 7,
+    borderRadius: 999,
     backgroundColor: theme.colors.primary,
     shadowColor: "rgba(91, 122, 176, 0.74)",
     shadowOffset: { width: 0, height: 10 },

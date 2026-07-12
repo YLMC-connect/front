@@ -1,6 +1,6 @@
 # common (공통 인프라)
 
-> 마지막 갱신: 2026-07-11 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-12 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -13,6 +13,10 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- 공통 모션 시스템 적용 — Reanimated 기반 140~220ms 모션 토큰, 동작 줄이기 대응, `MotionPressable`, 선택 적용 Card 등장, Dialog/Sheet/Toast presence 전환을 공통 UI에 반영
+- 탭 선택 indicator 공통화 — 하단 5탭은 이동 indicator와 선택 아이콘 pop을 사용하고, 나눔 상태 탭·동행 소모임/봉사·기도 작성 선택 탭은 공통 `SegmentedTabs` 이동 indicator를 공유
+- 하단 탭 shell 불투명 흰색 고정 — floating shell의 테두리·그림자는 유지하고 반투명 alpha를 제거해 뒤 화면이 비치지 않는 흰 배경으로 표시
+- Expo Web 라이트 모드 충돌 해소 — NativeWind dark mode 제어 방식을 `class`로 맞춰 Gluestack의 `mode="light"` 강제 설정이 CSS interop의 `media` 정책과 충돌하지 않도록 수정
 - Codex 작업 규칙 진입점 정리 — `AGENTS.md`, `CLAUDE.md`, `README.md`, `docs/INDEX.md`, `docs/MAINTENANCE.md`
 - Expo SDK 55 앱 기반 생성 — `package.json`, `app.config.ts`, `eas.json`, `tsconfig.json`, `babel.config.js`, `metro.config.js`, `tailwind.config.js`, `global.css`, `nativewind-env.d.ts`
 - 공통 런타임/디자인 기반 생성 — `src/lib/queryClient.ts`, `src/lib/queryKeys.ts`, `src/lib/secureStore.ts`, `src/constants/theme.ts`, `src/components/ui/index.tsx`, `src/components/layout/Screen.tsx`
@@ -83,7 +87,7 @@
 | `docs/MAINTENANCE.md`                                         | 문서 드리프트 복구 런북                                                                                                                                                                                                                    |
 | `scripts/gen-index.sh`                                        | GitHub Issues 기반 도메인 상태표 재생성                                                                                                                                                                                                    |
 | `docs/features/common.md`                                     | common 도메인 컨텍스트                                                                                                                                                                                                                     |
-| `package.json`, `package-lock.json`                           | 공통 런타임 의존성과 CI 재현 가능한 npm lockfile                                                                                                                                                                                          |
+| `package.json`, `package-lock.json`                           | 공통 런타임 의존성과 CI 재현 가능한 npm lockfile                                                                                                                                                                                           |
 | `app/_layout.tsx`                                             | QueryClient, SafeArea, Router Provider 루트                                                                                                                                                                                                |
 | `app/(tabs)/_layout.tsx`                                      | Downloads preview 기준 홈/나눔/동행/기도/삶공부 5탭 layout와 glass custom floating tab bar                                                                                                                                                 |
 | `app/(tabs)/index.tsx`                                        | 디자인 번역 기반 홈 화면. 홈 프로필 카드에서 숨김 MY route로 진입                                                                                                                                                                          |
@@ -92,6 +96,7 @@
 | `app/(tabs)/life-study/index.tsx`                             | Downloads `삶공부` 하단 탭 루트. 삶공부 목록 화면 렌더링                                                                                                                                                                                   |
 | `src/components/faith/FaithSectionsScreen.tsx`                | 기도/삶공부 목록의 공유 렌더러. route가 아니라 `/prayer`, `/life-study`에서 section prop으로 사용                                                                                                                                          |
 | `src/components/ui/index.tsx`                                 | ZIP 토큰 기준 Button, Card, Badge, Chip, form, modal/dialog, sheet, toast, FAB 등 공통 UI                                                                                                                                                  |
+| `src/components/ui/motion.tsx`                                | Reanimated 기반 공통 press scale과 overlay presence 제어. 시스템 동작 줄이기 설정을 반영                                                                                                                                                   |
 | `src/components/gluestack-ui/gluestack-ui-provider/index.tsx` | gluestack overlay/toast provider. 앱 루트에서 light mode로 사용                                                                                                                                                                            |
 | `src/lib/apiClient.ts`                                        | 공통 API envelope·오류·Authorization 처리                                                                                                                                                                                                  |
 | `src/lib/apiErrorMessage.ts`                                  | API 오류 코드와 도메인 사용자 문구 매핑                                                                                                                                                                                                    |
@@ -122,6 +127,10 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-12) **앱 색상 모드는 라이트로 고정한다** — `GluestackUIProvider mode="light"`를 유지하고 Tailwind의 `darkMode: "class"`는 수동 모드 제어 허용에만 사용합니다. 다크 테마나 시스템 모드 전환은 추가하지 않습니다.
+- (2026-07-12) **하단 탭 shell은 불투명한 흰 배경을 사용한다** — floating 캡슐의 테두리·그림자는 유지하되 배경 alpha는 사용하지 않아 뒤 화면이 비치지 않도록 합니다.
+- (2026-07-12) **짧은 상호작용 모션은 공통 토큰과 Reanimated로 관리한다** — 140~220ms 범위의 press/선택/overlay 전환을 사용하고 시스템 동작 줄이기 설정에서는 이동·확대를 생략합니다. 화면별 카드·목록 등장 효과는 자동 적용하지 않고 명시적으로 선택합니다.
+- (2026-07-12) **화면 내부 선택 탭은 공통 `SegmentedTabs`를 사용한다** — 나눔의 전체/나눔중/예약중/나눔완료와 동행의 소모임/봉사, 기도 작성의 작성자 표시를 같은 이동 indicator와 접근성 상태로 관리합니다.
 - (2026-07-11) **RadioSheet는 표시 전용과 제어형 입력을 모두 지원한다** — `onValueChange`가 있으면 option을 접근 가능한 radio Pressable로 렌더링하고, 없으면 기존 reference 표시 동작을 유지합니다. 비동기/필수 입력 상태는 `confirmDisabled`로 footer에서 차단합니다.
 - (2026-07-11) **visual capture는 Dev Client overlay node만 조작한다** — route 진입 후 고정 좌표를 블라인드 탭하지 않고 UI hierarchy에서 overlay label과 bounds를 찾을 때만 탭합니다. 앱 화면이면 즉시 캡처 단계로 넘어가 비동기 목록 카드나 CTA가 눌리지 않게 합니다.
 - (2026-07-11) **계약 gate는 envelope 내부 필드도 검증한다** — endpoint와 응답 `$ref` 존재만으로 통과시키지 않고, 화면 흐름이 의존하는 `data.available`처럼 필수 성공 필드는 공통 OpenAPI 유틸이 실제 schema property까지 확인합니다.
@@ -198,7 +207,7 @@
 ## 의존성
 
 - GitHub Issues / PR description 기반 작업 추적 규칙에 의존합니다.
-- Expo SDK 55, Expo Dev Client, TanStack Query, Zustand, NativeWind, `expo-image-picker`, `expo-image`, `@react-spectrum/provider@3.11.1`에 의존합니다.
+- Expo SDK 55, Expo Dev Client, Reanimated 4, TanStack Query, Zustand, NativeWind, `expo-image-picker`, `expo-image`, `@react-spectrum/provider@3.11.1`에 의존합니다.
 
 ## 관련 ADR
 

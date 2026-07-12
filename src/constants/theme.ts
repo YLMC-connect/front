@@ -81,6 +81,27 @@ const fontWeight = {
   extrabold: "800",
 } as const;
 
+const motion = {
+  duration: {
+    fast: 140,
+    base: 200,
+    overlay: 220,
+  },
+  distance: {
+    xs: 4,
+    sm: 8,
+  },
+  scale: {
+    pressed: 0.97,
+    tabIcon: 1.12,
+  },
+  spring: {
+    damping: 18,
+    stiffness: 260,
+    mass: 0.8,
+  },
+} as const;
+
 const shadow = {
   card: {
     shadowColor: "rgba(20,30,18,0.18)",
@@ -147,5 +168,6 @@ export const theme = {
   fontSize,
   lineHeight,
   fontWeight,
+  motion,
   shadow,
 } as const;

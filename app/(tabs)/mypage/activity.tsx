@@ -9,6 +9,7 @@ import {
   VisualThumb,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { readDesignVariant } from "../../../src/lib/designVariant";
 
 type ActivityTab = "posts" | "comments" | "groups";
 
@@ -101,8 +102,13 @@ function variantOf(value: string | string[] | undefined) {
 
 export default function ActivityScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = variantOf(params.variant);
+  const params = useLocalSearchParams<{
+    tab?: string;
+    designVariant?: string;
+  }>();
+  const variant = variantOf(
+    readDesignVariant(params.designVariant) ?? params.tab,
+  );
   const active = variant === "empty" ? "posts" : variant;
 
   return (
@@ -116,9 +122,7 @@ export default function ActivityScreen() {
               <Pressable
                 accessibilityRole="button"
                 key={tab.key}
-                onPress={() =>
-                  router.push(`/mypage/activity?variant=${tab.key}`)
-                }
+                onPress={() => router.push(`/mypage/activity?tab=${tab.key}`)}
                 style={[styles.tab, selected ? styles.tabOn : null]}
               >
                 <Text

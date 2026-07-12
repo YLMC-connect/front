@@ -1,6 +1,6 @@
 # mypage (MY / 성도 프로필)
 
-> 마지막 갱신: 2026-06-27 | 담당 Phase: P4 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-11 | 담당 Phase: P4/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -33,12 +33,13 @@
 - 타 성도 프로필 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenUserProfile`의 중앙 avatar/name, outline 차단 CTA, blocked/withdrawn/confirm/toast 상태를 `/mypage/user/[id]` route에 RN으로 직접 반영
 - 원본 없는 MY reference route 제거 — Downloads 최신 원본에서 확인되지 않는 관심목록/알림설정/고객센터/문의/계정관리 placeholder route를 삭제하고, 로그아웃은 MY 메뉴에서 직접 처리
 - MY 하단 탭 제거 — Downloads preview 기준 하단 탭에서 MY를 숨기고 홈 상단 `내 정보 보기` 카드에서 `/mypage`로 진입
+- MY 로그아웃 인증 경계 검증 — 홈 프로필 카드→마이페이지→로그아웃→로그인 화면 복귀를 Android Maestro로 완주하고, SecureStore 일부 삭제 실패에도 두 토큰 삭제 시도·익명 상태 전환·로그인 이동을 화면 테스트로 고정
 
 ## 주요 파일 (도메인 파일 지도)
 
 | 경로                              | 역할                              |
 | --------------------------------- | --------------------------------- |
-| `app/(tabs)/mypage/index.tsx`     | 홈에서 진입하는 숨김 MY 화면      |
+| `app/(tabs)/mypage/index.tsx`     | 홈에서 진입하는 MY·로그아웃 화면  |
 | `app/(tabs)/mypage/edit.tsx`      | 프로필 수정 연락처/비밀번호 화면  |
 | `app/(tabs)/mypage/activity.tsx`  | 나눔 게시글/댓글/소모임 활동 내역 |
 | `app/(tabs)/mypage/blocked.tsx`   | 차단 사용자 목록과 해제 상태      |
@@ -55,6 +56,8 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-11) **MY 로그아웃은 저장소 정리 결과와 무관하게 로그인 화면으로 이동한다** — 실제 토큰 삭제와 인증 상태 전이는 auth session manager가 소유하고, MY 화면은 성공·실패 모두 `/login`으로 이동합니다. 마이페이지 기본 화면 부분 재캡처 residual은 `mean=12.09`입니다.
+- (2026-07-10) **MY 디자인 상태와 실제 탭 탐색을 분리한다** — 프로필/차단/FAQ/탈퇴 예외 화면은 development 전용 `designVariant`, 활동 내역의 실제 탭 이동은 `tab` query를 사용합니다. production URL로 confirm/toast/empty 상태를 강제하지 않습니다.
 - (2026-06-27) **MY는 홈에서 진입한다** — Downloads preview의 하단 탭은 홈/나눔/동행/기도/삶공부이므로 `MY`는 하단 탭에서 제거하고 홈 프로필 카드 `내 정보 보기`를 `/mypage` 진입점으로 사용합니다.
 - (2026-06-27) **원본 없는 MY reference route는 제거한다** — Downloads 최신 원본에서 독립 화면 함수를 확인할 수 없는 관심목록/알림설정/고객센터/문의/계정관리 placeholder는 유지하지 않습니다. 로그아웃은 별도 화면 없이 MY 메뉴에서 `useAuth.logout()`으로 처리합니다.
 - (2026-06-27) **타 성도 프로필은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenUserProfile` 구조를 `/mypage/user/[id]` route에 직접 반영합니다. 실제 차단 API와 탈퇴 사용자 조회 정책은 사용자 정책 확정 후 연결합니다.

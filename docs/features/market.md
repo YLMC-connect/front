@@ -1,6 +1,6 @@
 # market (나눔)
 
-> 마지막 갱신: 2026-06-27 | 담당 Phase: P1/P2 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-11 | 담당 Phase: P1/P2/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -35,24 +35,48 @@
 - 나눔 목록 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenMarketList`의 상태 탭, 카테고리 칩, 86px thumb row, 예약/완료 overlay, fixed FAB 구조를 `/market` route에 RN으로 직접 반영
 - 나눔 상세 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenMarketDetail`의 정사각형 hero, 상태 overlay/banner, 작성자/칩/본문, 액션 row, 댓글, 하단 composer 구조를 `/market/[id]` route에 RN으로 직접 반영
 - 나눔 작성 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenMarketCreate`의 close/action topbar, 사진 레일, 카테고리 chip, 제목/물품상태/상세설명 section, 안내 박스를 `modal/market-new` route에 RN으로 직접 반영
+- 나눔 API 계약 게이트 추가 — `npm run test:api:contract:market`으로 CRUD·댓글·신고·이미지 업로드 endpoint와 목록/상세 화면 요구 필드를 자동 검증
+- 나눔 조회 데이터 경계 추가 — 목록·상세·댓글 fixture를 화면에서 `mockMarketDataSource`로 이동하고 `useMarketOverview`/`useMarketDetail` query를 통해 렌더링하며 미사용 중복 mock 목록 제거
+- 댓글 CUD 수직 경계 연결 — 상세 composer와 내 댓글 action을 create/update/delete hook → service → `MarketDataSource` mutation으로 연결하고, mock 재조회 유지·Query cache 갱신·수정 취소·삭제 확인과 Android Maestro 등록/수정/삭제 흐름을 검증
+- 댓글 삭제 CI flake 제거 — 1초를 넘을 수 있는 mock mutation 완료 assertion에 5초 제한을 명시하고 대상 테스트 5개 병렬 실행·전체 validate로 안정성 확인
+- 게시글·댓글 신고 수직 경계 연결 — 디자인 기준 8개 사유를 선택 가능한 `RadioSheet`로 복구하고 `useReportMarketContent → marketService → MarketDataSource` mutation, 기타 상세 검증, 중복 신고 도메인 오류·toast를 Android Maestro로 검증
+- 신고 디자인 variant 상태 누수 제거 — route query가 바뀔 때 report sheet/기타 입력/중복 toast를 development 전용 effect로 동기화하고 부분 시각 residual을 `10.73/10.29/13.78`로 확인
+- 나눔 게시글 삭제 수직 경계 연결 — 소유 게시글 삭제를 `useDeleteMarketPost → marketService → MarketDataSource`로 연결하고 상세·목록 mock 지속성, overview/detail query 정리, 삭제 확인 후 목록 복귀를 Android Maestro로 검증
+- 게시글 삭제 확인 디자인/실제 상태 통합 — 실제 삭제와 `delete-confirm` 캡처가 같은 `ConfirmDialog`를 사용하도록 분리하고 원본 문구를 적용해 해당 residual을 `19.52→16.65`로 개선
 
 ## 주요 파일 (도메인 파일 지도)
 
 | 경로                             | 역할                              |
 | -------------------------------- | --------------------------------- |
 | `app/(tabs)/market/index.tsx`    | 나눔 목록, 상태/카테고리 필터     |
-| `app/(tabs)/market/[id].tsx`     | 나눔 상세, 상태 변경, 댓글, 신고  |
+| `app/(tabs)/market/[id].tsx`     | 나눔 상세, 게시글 삭제, 댓글, 신고 |
 | `app/modal/market-new.tsx`       | 나눔 작성 모달                    |
 | `src/mocks/market.ts`            | 나눔 mock 데이터                  |
+| `src/services/marketService.ts`  | 교체 가능한 나눔 조회·게시글 삭제·댓글 CUD·신고 data source 경계 |
+| `src/hooks/useMarket.ts`         | 나눔 query와 게시글 삭제·댓글 CUD·신고 mutation hook |
 | `src/constants/domainOptions.ts` | 나눔 카테고리/상태/신고 사유 옵션 |
 | `src/types/market.ts`            | 나눔 타입                         |
+| `scripts/check-market-api-contract.mjs` | 나눔 Swagger endpoint·화면 요구 필드 검사 |
 
 ## 데이터 타입
 
-`MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
+`MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. 화면 조회 모델 `MarketOverview`/`MarketDetail`은 목록 표시값, 작성자 소유 여부, 댓글 상태를 포함하며 API DTO mapper의 출력 경계입니다. 게시글 삭제 대상은 `MarketPostTarget`, 댓글 CUD는 `MarketCommentInput`, `MarketCommentUpdateInput`, `MarketCommentTarget`으로 게시글 ID와 댓글 ID를 구분하고 결과는 목록/상세 제거 또는 `MarketDetailComment` 삭제 tombstone으로 정규화합니다. 신고는 `MarketReportInput`에서 게시글/댓글 대상, 프런트 사유, 선택 상세를 분리하며 서버 enum이 확정되면 HTTP mapper가 코드 변환을 소유합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-11) **게시글 삭제는 작성·수정 계약과 분리해 완결된 mock 수직 흐름으로 제공한다** — 삭제는 게시글 ID와 소유권만 필요하므로 data source에서 최종 검증하고, 성공 시 overview에서 제거하고 detail query를 폐기한 뒤 나눔 목록으로 이동합니다. 작성·수정은 위치 입력과 이미지 업로드 계약이 없으므로 일부 필드를 임의로 채우지 않습니다.
+- (2026-07-11) **게시글 삭제 확인은 실제 상태와 디자인 variant가 같은 공통 dialog를 사용한다** — 실제 버튼은 local state를 열고, development 전용 `delete-confirm`은 route query 변화 effect로만 같은 상태를 동기화해 production mutation을 덮지 않습니다.
+- (2026-07-11) **신고 사유는 프런트 도메인 값과 서버 code를 분리한다** — 화면은 디자인 원본의 8개 사유 key를 사용하고, mock data source는 대상 단위 중복만 검증합니다. Swagger의 `targetType/reportReasonCode` enum과 오류 code가 확정되기 전에는 예시 문자열을 HTTP 값으로 추측하지 않으며 계약 gate가 두 enum을 요구합니다.
+- (2026-07-11) **신고 디자인 variant는 query 변화에 맞춰 effect로 동기화한다** — 캡처 스크립트가 같은 상세 컴포넌트에서 route query만 바꾸므로 `report/report-other-input/report-dup-toast` 상태를 development 전용으로 초기화합니다. 실제 신고 mutation은 query가 변하지 않아 이 effect와 독립적입니다.
+- (2026-07-11) **비동기 UI 테스트는 기능 timeout과 assertion timeout을 분리한다** — mock 지연이 CI 병렬 부하에서 Testing Library 기본 제한을 넘을 수 있으므로, 삭제 완료 상태를 확인하는 assertion에만 5초를 허용하고 production mutation 시간은 변경하지 않습니다.
+- (2026-07-11) **댓글 수정은 composer를 재사용하고 삭제는 확인 후 tombstone으로 바꾼다** — 별도 편집 화면 없이 내 댓글 action이 composer의 편집 대상을 설정하며, 삭제는 네이티브 확인 이후 성공할 때만 cache와 mock 저장소를 갱신합니다. 다른 작성자의 댓글 변경은 data source에서도 거부하고 신고는 사유 선택 UI·오류 code 확정 전까지 연결하지 않습니다.
+- (2026-07-11) **댓글 등록은 계약 확정 전에도 완전한 mock 수직 흐름으로 유지한다** — 화면은 data source를 직접 호출하지 않고 hook mutation만 사용하며, service는 공백 댓글을 차단하고 입력을 정규화합니다. 성공 결과는 상세 query cache에 반영하고 mock data source에도 보관해 재조회와 HTTP 교체 시 화면 소비자를 유지합니다.
+- (2026-07-11) **나눔 핵심 흐름은 오류 코드가 문서화되어야 HTTP로 전환한다** — 상세·등록·수정·삭제·댓글 등록/수정/삭제·신고의 4xx/5xx code가 Swagger에 있어야 화면 메시지 표를 확정할 수 있습니다. 신고 enum 누락 2건과 오류 문서 누락 8건을 포함한 전체 누락은 38건입니다.
+- (2026-07-11) **나눔 request 계약은 PLAN의 작성 필드와 화면 제한을 함께 검증한다** — 생성·수정은 제목/내용/카테고리/물품상태/장소를 필수로 요구하고 제목 30자, 내용 500자, 사진 5장과 입력 enum을 확인합니다. 현재 Swagger와 PLAN 사이의 장소 필드 충돌을 포함한 전체 누락은 28건입니다.
+- (2026-07-11) **이미지 업로드도 나눔 계약 gate에 포함한다** — 게시글 `images` 필드만으로는 로컬 URI를 서버 URL로 바꿀 수 없으므로, 경로를 가정하지 않고 이미지/파일 업로드 operation을 찾아 request/200 DTO까지 확인합니다. 현재 누락은 기존 13건에 업로드 endpoint 1건을 더한 14건입니다.
+- (2026-07-11) **나눔 화면은 계약 확정 전에도 mock data source를 사용한다** — HTTP DTO/enum mapper 활성화는 기존 13건 계약 gate 뒤로 유지하되, 목록·상세 화면은 `useMarket* → marketService → mockMarketDataSource`를 소비합니다. 계약 확정 후 화면이 아니라 data source만 교체합니다.
+- (2026-07-10) **나눔 디자인 상태와 API 상태를 분리한다** — 목록 empty/error/status, 상세 권한·예약·완료·예외, 작성 form 상태는 `designVariant`로만 캡처하며 production에서는 무시합니다. 실제 상태는 API mapper와 query/mutation 결과로 결정합니다.
+- (2026-07-10) **나눔 mapper는 화면 필수 계약 13건 해소 후 활성화한다** — 목록의 `authorName/images/keyword`, 상태·카테고리·물품상태 enum, 이미지 필수 정책, 상태 변경 endpoint가 Swagger에 없어 현재 HTTP 전환은 작성자 ID 노출·썸네일 소실·코드 추측을 유발합니다. `test:api:contract:market` 통과 전에는 기존 mock 화면을 유지합니다.
 - (2026-06-27) **미사용 service/hook/card 레이어는 제거한다** — 현재 나눔 화면은 Downloads 원본을 기준으로 다시 구현할 예정이고 `MarketItemCard`, `marketService`, `useMarketItems` 호출처가 없어, 실제 API 연결 시 필요한 표면만 다시 만든다.
 - (2026-06-27) **나눔 목록은 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenMarketList` 구조를 `/market` route에 직접 반영하고, 상태별 variant는 query parameter에서 필요한 범위만 해석합니다. 별도 service/hook은 실제 API 스키마 확정 전까지 만들지 않습니다.
 - (2026-06-27) **나눔 상세는 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenMarketDetail`의 기본 상세 구조를 `/market/[id]` route에 직접 반영합니다. 신고/상태 변경 sheet 같은 예외 variant는 실제 필요 시 작은 overlay로 추가합니다.
@@ -78,15 +102,15 @@
 
 ## 미결 / 추적
 
-- 실제 나눔 API 스키마, 이미지 업로드 방식, 페이지네이션 방식 확인 필요.
+- Swagger 목록 작성자명·대표 이미지·검색, 상세/작성 장소, 입력·응답·신고 enum, 제목/본문/사진 제한, 이미지 필수, 상태 변경·이미지 업로드 endpoint, 핵심 흐름 오류 코드 38건 확정 필요. 장소를 백엔드 계약에 추가할지 최신 기획에서 제거할지도 명시적으로 결정해야 합니다. 단일 출처는 Issue #19이며 `npm run test:api:contract:market`으로 확인합니다.
 - 신고 처리 후 블라인드/관리자 큐 정책은 API/운영 정책 확정 후 반영.
 - 나눔 작성 residual은 topbar/chip/control typography 정렬 후 `market-create-limit mean=14.62`, `market-create-fill mean=13.69`, `market-edit mean=13.70`, `market-create mean=12.22`, `market-create-back mean=7.72`입니다. 빈 작성/뒤로가기 화면은 status bar/time, RN font metrics, confirm overlay geometry 차이로 소폭 상승했지만 화면군 합계는 감소했습니다.
 - 나눔 목록 residual은 FAB root overlay 정렬 후 `market-list-all mean=13.75`, `market-list mean=10.64`, `market-list-reserved mean=6.79`, `market-list-done mean=6.31`입니다. 남은 차이는 native status bar/time, RN font metrics, tab bar geometry와 목록 row text metric 차이로 추적합니다.
-- 나눔 상세 residual은 typography/chip/scrim 정렬 후 `market-detail-own mean=9.31`, `market-detail-resv mean=9.36`, `market-detail-other mean=9.34`, `market-detail-rep2 mean=10.51`, `market-detail-repts mean=10.00`입니다. 남은 차이는 RN font metrics, native shadow/blur 번역, sheet/input capture 조건으로 추적합니다. 전체 비교 리포트는 `/private/tmp/ylmc-golden-screens/2026-05-23/compare/visual-compare-report.tsv`입니다.
+- 나눔 상세 residual은 신고 variant 재연결 후 `market-detail-report mean=10.73`, `report-other-input mean=10.29`, `report-dup-toast mean=13.78`이며, 게시글 삭제 확인 문구·공통 dialog 연결 후 `market-detail-delete-confirm mean=16.65`입니다. 부분 캡처 compare의 missing 수치는 선택 index만 출력 폴더에 둔 결과라 전체 회귀 수치로 사용하지 않으며, 대상 PNG 존재와 residual만 확인했습니다. 남은 차이는 RN font metrics, native shadow/blur 번역, sheet/input capture 조건으로 추적합니다.
 
 ## 의존성
 
-- common 도메인의 UI와 이미지 선택 컴포넌트에 의존합니다.
+- common 도메인의 UI, `queryKeys`, `queryClient`, 이미지 선택 컴포넌트에 의존합니다.
 - auth 도메인의 mock 현재 사용자에 의존합니다.
 
 ## 관련 ADR

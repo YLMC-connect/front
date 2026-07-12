@@ -1,13 +1,24 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   EmptyState,
   ErrorState,
   FloatingActionButton,
+  SegmentedTabs,
   VisualThumb,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { useMarketOverview } from "../../../src/hooks/useMarket";
+import { readDesignVariant } from "../../../src/lib/designVariant";
+import type { MarketOverviewItem } from "../../../src/types/market";
 
 type Status = "all" | "sharing" | "reserved" | "done";
 
@@ -17,6 +28,13 @@ const statusTabs: readonly { key: Status; label: string }[] = [
   { key: "reserved", label: "예약중" },
   { key: "done", label: "나눔완료" },
 ];
+
+const statusHrefs = {
+  all: "/market?status=all",
+  sharing: "/market",
+  reserved: "/market?status=reserved",
+  done: "/market?status=done",
+} as const;
 
 const categories = [
   "전체",
@@ -29,107 +47,53 @@ const categories = [
   "기타",
 ] as const;
 
-const posts = [
-  {
-    id: "1",
-    thumb: 0,
-    title: "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
-    author: "박정아",
-    when: "1시간 전",
-    status: "sharing",
-  },
-  {
-    id: "2",
-    thumb: 1,
-    title: "토스터기·전기주전자 세트 나눔해요",
-    author: "이수진",
-    when: "3시간 전",
-    status: "reserved",
-  },
-  {
-    id: "3",
-    thumb: 2,
-    title: "유아용 카시트 (사용감 있음)",
-    author: "김지영",
-    when: "어제",
-    status: "sharing",
-  },
-  {
-    id: "4",
-    thumb: 3,
-    title: "어린이 동화책 30권 묶음 나눔",
-    author: "정혜진",
-    when: "어제",
-    status: "sharing",
-  },
-  {
-    id: "5",
-    thumb: 4,
-    title: "도자기 다세트 (몇 개 파손 있음)",
-    author: "조미경",
-    when: "2일 전",
-    status: "done",
-  },
-  {
-    id: "6",
-    thumb: 5,
-    title: "아기 가을 옷 (90사이즈)",
-    author: "한유라",
-    when: "3일 전",
-    status: "sharing",
-  },
-] as const;
-
 export default function MarketScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = Array.isArray(params.variant)
-    ? params.variant[0]
-    : params.variant;
-  const isError = variant === "network-error";
+  const params = useLocalSearchParams<{
+    designVariant?: string;
+    status?: string;
+  }>();
+  const variant = readDesignVariant(params.designVariant);
+  const overview = useMarketOverview();
+  const isError = variant === "network-error" || overview.isError;
   const isEmpty = variant === "empty";
   const activeStatus =
-    variant === "tab-all"
-      ? "all"
-      : variant === "tab-reserved"
-        ? "reserved"
-        : variant === "tab-done"
-          ? "done"
-          : "sharing";
+    params.status === "all" ||
+    params.status === "sharing" ||
+    params.status === "reserved" ||
+    params.status === "done"
+      ? params.status
+      : variant === "tab-all"
+        ? "all"
+        : variant === "tab-reserved"
+          ? "reserved"
+          : variant === "tab-done"
+            ? "done"
+            : "sharing";
   const visiblePosts =
     isError || isEmpty
       ? []
       : activeStatus === "all"
-        ? posts
-        : posts.filter((post) => post.status === activeStatus);
+        ? (overview.data?.items ?? [])
+        : (overview.data?.items ?? []).filter(
+            (post) => post.status === activeStatus,
+          );
+  const isLoading = overview.isPending && !isError && !isEmpty;
 
   return (
-    <Screen scroll={false} padded={false}>
+    <Screen scroll={false} padded={false} testID="screen-market">
       <View style={styles.root}>
         <View style={styles.topBar}>
           <Text style={styles.title}>나눔</Text>
         </View>
 
-        <View style={styles.statusTabs}>
-          {statusTabs.map((tab) => {
-            const selected = tab.key === activeStatus;
-            return (
-              <View
-                key={tab.key}
-                style={[styles.statusTab, selected ? styles.statusTabOn : null]}
-              >
-                <Text
-                  style={[
-                    styles.statusText,
-                    selected ? styles.statusTextOn : null,
-                  ]}
-                >
-                  {tab.label}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
+        <SegmentedTabs
+          items={statusTabs}
+          active={activeStatus}
+          onChange={(status) => router.replace(statusHrefs[status])}
+          style={styles.statusTabs}
+          testIDPrefix="market-status"
+        />
 
         <ScrollView
           horizontal
@@ -155,7 +119,11 @@ export default function MarketScreen() {
         </ScrollView>
 
         <ScrollView contentContainerStyle={styles.list}>
-          {isError ? (
+          {isLoading ? (
+            <View style={styles.loading}>
+              <ActivityIndicator color={theme.colors.primary} />
+            </View>
+          ) : isError ? (
             <ErrorState message="네트워크 연결을 확인하고 다시 시도해주세요." />
           ) : visiblePosts.length === 0 ? (
             <MarketEmptyState status={isEmpty ? null : activeStatus} />
@@ -187,7 +155,7 @@ function PostRow({
   last,
   onPress,
 }: {
-  post: (typeof posts)[number];
+  post: MarketOverviewItem;
   last: boolean;
   onPress: () => void;
 }) {
@@ -201,7 +169,7 @@ function PostRow({
       style={[styles.row, last ? styles.rowLast : null]}
     >
       <View style={styles.thumbWrap}>
-        <VisualThumb size={86} seed={post.thumb} />
+        <VisualThumb size={86} seed={post.thumbSeed} />
         {done ? (
           <View style={styles.doneOverlay}>
             <Text style={styles.doneText}>나눔완료</Text>
@@ -218,7 +186,7 @@ function PostRow({
           {post.title}
         </Text>
         <Text style={styles.postMeta}>
-          {post.author} · {post.when}
+          {post.authorName} · {post.createdLabel}
         </Text>
       </View>
     </Pressable>
@@ -286,30 +254,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 18,
     marginTop: 4,
     marginBottom: 10,
-    borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.ring,
-    padding: 4,
-    flexDirection: "row",
-  },
-  statusTab: {
-    flex: 1,
-    minHeight: 38,
-    borderRadius: theme.radius.pill,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  statusTabOn: {
-    backgroundColor: theme.colors.surface,
-    ...theme.shadow.card,
-  },
-  statusText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  statusTextOn: {
-    color: theme.colors.ink,
-    fontWeight: theme.fontWeight.bold,
   },
   categoryScroll: {
     flexGrow: 0,
@@ -343,6 +287,10 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingBottom: 100,
+  },
+  loading: {
+    paddingTop: 80,
+    alignItems: "center",
   },
   row: {
     flexDirection: "row",

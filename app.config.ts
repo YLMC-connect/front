@@ -7,7 +7,7 @@ const bundleIds = {
 } as const;
 
 const apiUrls = {
-  development: "https://dev-api.example.invalid",
+  development: "https://ylmc-api.duckdns.org",
   preview: "https://staging-api.example.invalid",
   production: "https://api.example.invalid",
 } as const;
@@ -18,6 +18,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   const variant =
     (process.env.APP_VARIANT as Variant | undefined) ?? "development";
   const resolvedVariant = variant in bundleIds ? variant : "development";
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? apiUrls[resolvedVariant];
 
   return {
     ...config,
@@ -46,7 +47,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       ["expo-dev-client", { toolsButton: false }],
     ],
     extra: {
-      apiUrl: apiUrls[resolvedVariant],
+      apiUrl,
       variant: resolvedVariant,
     },
   };

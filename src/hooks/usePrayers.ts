@@ -1,6 +1,9 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../lib/queryKeys";
-import { createPrayerTopic } from "../services/prayerService";
+import {
+  createPrayerTopic,
+  fetchPrayerOverview,
+} from "../services/prayerService";
 import type { PrayerTopicInput } from "../types/prayer";
 
 export function useCreatePrayerTopic(roomId: string) {
@@ -15,5 +18,12 @@ export function useCreatePrayerTopic(roomId: string) {
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.home.all });
     },
+  });
+}
+
+export function usePrayerOverview() {
+  return useQuery({
+    queryKey: queryKeys.prayer.overview(),
+    queryFn: fetchPrayerOverview,
   });
 }

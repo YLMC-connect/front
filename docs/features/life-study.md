@@ -1,6 +1,6 @@
 # life-study (삶공부)
 
-> 마지막 갱신: 2026-06-27 | 담당 Phase: P5 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-10 | 담당 Phase: P5/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -25,6 +25,7 @@
 - 삶공부 수강 신청 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenStudyApply`의 과정 요약, 신청 정보, 신앙 연차 chip, 수강 약속, 하단 CTA를 `/life-study/apply` route에 RN으로 직접 반영
 - 삶공부 수강 내역 실제 화면 복구 — PrototypeScaffold placeholder 대신 Downloads `ScreenStudyHistory`의 신청중/수강 중/추천 과정/지난 과정/수료 뱃지 섹션을 `/life-study/history` route에 RN으로 직접 반영
 - Downloads preview 탭 IA 반영 — `/life-study`를 숨김 route가 아니라 하단 `삶공부` 탭 루트로 복구
+- 삶공부 루트 overview 데이터 경계 정리 — 화면 내부 fixture를 `types → mocks → service → TanStack Query hook`으로 이동하고 loading/error 상태 및 서비스 테스트 추가
 
 ## 주요 파일 (도메인 파일 지도)
 
@@ -35,18 +36,20 @@
 | `app/(tabs)/life-study/[id].tsx`               | 삶공부 상세, 신청/취소, 진도/커리큘럼 |
 | `app/(tabs)/life-study/apply.tsx`              | 삶공부 수강 신청 입력 화면            |
 | `app/(tabs)/life-study/history.tsx`            | 삶공부 신청/수강/지난 과정 내역 화면  |
-| `src/services/lifeStudyService.ts`             | 삶공부 목록 mock service              |
-| `src/hooks/useLifeStudyCourses.ts`             | 삶공부 목록 query hook                |
+| `src/services/lifeStudyService.ts`             | 삶공부 목록·overview mock service     |
+| `src/hooks/useLifeStudyCourses.ts`             | 삶공부 목록·overview query hook       |
 | `src/mocks/lifeStudy.ts`                       | 삶공부 mock 데이터                    |
 | `src/constants/domainOptions.ts`               | 삶공부 상태 필터 옵션                 |
 | `src/types/lifeStudy.ts`                       | 삶공부 타입                           |
 
 ## 데이터 타입
 
-`LifeStudyCourse`는 `status`, `sessions`, `currentSession`, `capacity`, `enrolledCount`, `isEnrolled`, `isCompleted`, `curriculum`을 포함합니다. `LifeStudyHistory`는 수강 회차와 수료증 발급 여부를 포함합니다.
+`LifeStudyCourse`는 `status`, `sessions`, `currentSession`, `capacity`, `enrolledCount`, `isEnrolled`, `isCompleted`, `curriculum`을 포함합니다. `LifeStudyHistory`는 수강 회차와 수료증 발급 여부를 포함합니다. 루트 화면 전용 `LifeStudyOverview`는 필수 과정 진행 경로, 신청 가능한 과정, 전체 과정 요약을 가지며 추후 API DTO mapper의 출력 모델로 사용합니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-10) **삶공부 상세 수강 디자인 상태는 development 전용이다** — 캡처용 enrolled 상태는 `designVariant`로만 열고 production에서는 무시합니다. 실제 수강 여부는 overview/detail service 모델이 결정합니다.
+- (2026-07-10) **삶공부 루트는 overview query만 소비한다** — `FaithSectionsScreen`은 fixture를 직접 소유하지 않고 `useLifeStudyOverview → fetchLifeStudyOverview → mockLifeStudyOverview` 경계를 사용합니다. 사용자 API가 생기면 service/mapper만 교체하며 화면은 동일한 overview 모델을 유지합니다.
 - (2026-06-27) **삶공부는 독립 하단 탭이다** — Downloads `PREVIEW_TAB_ROUTES` 기준으로 `/life-study`는 하단 `삶공부` 탭 루트입니다. 화면 구현은 기존 삶공부 목록 renderer를 재사용하되, 내부 `중보기도/삶공부` segment는 노출하지 않습니다.
 - (2026-06-27) **삶공부 수강 내역은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenStudyHistory` 구조를 `/life-study/history` route에 직접 반영합니다. 실제 수료 뱃지/수료증 데이터는 API 스키마 확정 후 연결합니다.
 - (2026-06-27) **삶공부 수강 신청은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenStudyApply`의 기본 form 구조를 `/life-study/apply` route에 직접 반영합니다. 신청 완료 상태와 실제 신청 API는 상태 전이 정책 확정 후 연결합니다.

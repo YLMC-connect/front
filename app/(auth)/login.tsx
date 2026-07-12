@@ -11,7 +11,10 @@ import {
 import { Screen } from "../../src/components/layout/Screen";
 import { Button, Toast } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
+import { authApiErrorMessages } from "../../src/constants/apiErrorMessages";
 import { useAuth } from "../../src/hooks/useAuth";
+import { getApiErrorMessage } from "../../src/lib/apiErrorMessage";
+import { readDesignVariant } from "../../src/lib/designVariant";
 
 type FormValues = {
   id: string;
@@ -19,12 +22,6 @@ type FormValues = {
 };
 
 type FormErrors = Partial<Record<keyof FormValues, string>>;
-type VariantValue = string | string[] | undefined;
-
-function variantOf(value: VariantValue, fallback = "default") {
-  return Array.isArray(value) ? (value[0] ?? fallback) : (value ?? fallback);
-}
-
 function validateLogin(values: FormValues) {
   const errors: FormErrors = {};
   if (!values.id.trim()) errors.id = "아이디를 입력해주세요.";
@@ -33,8 +30,8 @@ function validateLogin(values: FormValues) {
 }
 
 export default function LoginScreen() {
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = variantOf(params.variant);
+  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const variant = readDesignVariant(params.designVariant) ?? "default";
   const isDefault = variant === "default";
   const isError = variant === "error";
   const isLoading = variant === "loading";
@@ -70,6 +67,7 @@ export default function LoginScreen() {
 
         <View style={styles.form}>
           <AuthField
+            testID="login-id-input"
             label="아이디"
             value={values.id}
             onChangeText={(id) => setValues((current) => ({ ...current, id }))}
@@ -78,6 +76,7 @@ export default function LoginScreen() {
             hasError={isError}
           />
           <AuthField
+            testID="login-password-input"
             label="비밀번호"
             value={values.password}
             onChangeText={(password) =>
@@ -91,8 +90,13 @@ export default function LoginScreen() {
           />
           {login.error || isError ? (
             <Text style={styles.error}>
-              {login.error?.message ??
-                "아이디 또는 비밀번호가 올바르지 않습니다"}
+              {login.error
+                ? getApiErrorMessage(
+                    login.error,
+                    authApiErrorMessages,
+                    "아이디 또는 비밀번호를 확인해주세요.",
+                  )
+                : "아이디 또는 비밀번호가 올바르지 않습니다"}
             </Text>
           ) : null}
           <Button
@@ -126,6 +130,7 @@ export default function LoginScreen() {
 }
 
 function AuthField({
+  testID,
   label,
   value,
   onChangeText,
@@ -135,6 +140,7 @@ function AuthField({
   hasError = false,
   trailingIcon,
 }: {
+  testID?: string;
   label: string;
   value: string;
   onChangeText: (value: string) => void;
@@ -149,6 +155,7 @@ function AuthField({
       <Text style={styles.fieldLabel}>{label}</Text>
       <View style={[styles.inputBox, hasError ? styles.inputBoxError : null]}>
         <NativeTextInput
+          testID={testID}
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}

@@ -17,10 +17,13 @@ export const MARKET_STATUS_TABS = [
 ] as const;
 
 export const MARKET_REPORT_REASONS = [
-  { key: "inappropriate", label: "부적절한 내용" },
-  { key: "spam", label: "홍보·스팸" },
-  { key: "abuse", label: "비방·괴롭힘" },
-  { key: "no_show", label: "약속 불이행" },
+  { key: "prohibited_item", label: "금지 품목 게시" },
+  { key: "false_information", label: "허위 물품 정보" },
+  { key: "payment_request", label: "금전 요구·암묵적 거래 유도" },
+  { key: "duplicate_post", label: "동일 물품 중복 게시" },
+  { key: "stolen_image", label: "타인 사진 무단 도용" },
+  { key: "advertising", label: "나눔을 빙자한 홍보·광고" },
+  { key: "abusive", label: "욕설·혐오 표현" },
   { key: "other", label: "기타" },
 ] as const;
 

@@ -9,6 +9,7 @@ import {
   TopBar,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { readDesignVariant } from "../../../src/lib/designVariant";
 
 const blockedUsers = [
   { name: "이모씨", seed: 1, when: "2025.11.20" },
@@ -16,14 +17,10 @@ const blockedUsers = [
   { name: "정모씨", seed: 5, when: "2025.06.15" },
 ] as const;
 
-function variantOf(value: string | string[] | undefined) {
-  return Array.isArray(value) ? (value[0] ?? "default") : (value ?? "default");
-}
-
 export default function BlockedScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = variantOf(params.variant);
+  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const variant = readDesignVariant(params.designVariant) ?? "default";
   const users =
     variant === "empty"
       ? []

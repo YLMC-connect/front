@@ -1,112 +1,34 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { theme } from "../../constants/theme";
+import { useLifeStudyOverview } from "../../hooks/useLifeStudyCourses";
+import { usePrayerOverview } from "../../hooks/usePrayers";
+import type {
+  LifeStudyOverviewCourse,
+  LifeStudyOverviewStatus,
+} from "../../types/lifeStudy";
+import type {
+  PrayerOverviewRoomStatus,
+  PrayerPeriod,
+  PrayerRequestStatus,
+  PrayerWeekday,
+} from "../../types/prayer";
 import { Screen } from "../layout/Screen";
-import { FloatingActionButton } from "../ui";
+import { ErrorState, FloatingActionButton } from "../ui";
 
 type FaithSection = "pray" | "study";
 
-const prayerRooms = [
-  {
-    day: "월",
-    time: "오전",
-    members: 45,
-    done: "34명",
-    rate: "75%",
-    status: "참여중",
-  },
-  {
-    day: "목",
-    time: "오후",
-    members: 10,
-    done: "승인 대기",
-    rate: "-",
-    status: "승인 대기",
-  },
-] as const;
-
-const prayerRequests = [
-  {
-    title: "어머니 수술 후 회복",
-    category: "치유",
-    status: "검토중",
-    desc: "관리자 검토 후 공개됩니다",
-  },
-  {
-    title: "가족의 신앙 회복",
-    category: "구원",
-    status: "공개중",
-    desc: "중보기도요원에게 공개 중입니다",
-  },
-  {
-    title: "새로운 자리에서의 평안",
-    category: "일반",
-    status: "반려",
-    desc: "개인정보 표현 수정이 필요합니다",
-  },
-] as const;
-
-const openCourses = [
-  {
-    name: "생명의 삶",
-    type: "필수",
-    weeks: "13주",
-    leader: "박귀원",
-    period: "6.24 ~ 7.05",
-    seats: "18 / 24명",
-    summary: "신앙의 근본을 바로 세우는 가장 기본 과정",
-  },
-  {
-    name: "생명언어의 삶",
-    type: "선택",
-    weeks: "13주",
-    leader: "김숙자 이연홍",
-    period: "6.24 ~ 7.05",
-    seats: "10 / 16명",
-    summary: "하나님 자녀의 품격에 맞는 언어습관 훈련",
-  },
-  {
-    name: "기도의 삶",
-    type: "선택",
-    weeks: "8주",
-    leader: "김경숙",
-    period: "6.24 ~ 7.05",
-    seats: "12 / 20명",
-    summary: "중보기도 원칙과 실제 적용을 배우는 과정",
-  },
-] as const;
-
-const requiredCourses = [
-  {
-    name: "생명의 삶",
-    weeks: "13주",
-    leader: "박귀원",
-    status: "수료",
-    summary: "구원의 확신과 신앙의 근본을 바로 세우는 가장 기본 과정",
-    target: "등록교인 누구나",
-  },
-  {
-    name: "새로운 삶",
-    weeks: "13주",
-    leader: "손현종",
-    status: "추천",
-    summary: "하나님 나라의 가치관과 매일 QT의 첫걸음을 돕는 과정",
-    target: "생명의 삶 수료자",
-  },
-  {
-    name: "경건의 삶",
-    weeks: "13주",
-    leader: "서상오",
-    status: "대기",
-    summary: "경건 훈련으로 하나님과 이웃과의 사랑의 관계를 연습",
-    target: "새로운 삶 수료자",
-  },
-] as const;
-
 export function FaithSectionsScreen({ section }: { section: FaithSection }) {
   return (
-    <Screen scroll={false} padded={false}>
+    <Screen scroll={false} padded={false} testID="screen-faith">
       <View style={styles.root}>
         <View style={styles.topBar}>
           <View style={styles.topText}>
@@ -148,31 +70,47 @@ export function FaithSectionsScreen({ section }: { section: FaithSection }) {
 }
 
 function PrayerContent() {
+  const { data, isError, isPending } = usePrayerOverview();
+
+  if (isPending) return <OverviewLoading />;
+  if (isError || !data) {
+    return <ErrorState message="기도 정보를 다시 불러와주세요." />;
+  }
+
   return (
     <>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>내 기도방</Text>
         <View style={styles.stack}>
-          {prayerRooms.map((room) => (
-            <Pressable key={`${room.day}-${room.time}`} style={styles.roomCard}>
-              <PrayerDayBadge day={room.day} time={room.time} />
+          {data.rooms.map((room) => (
+            <Pressable key={room.id} style={styles.roomCard}>
+              <PrayerDayBadge weekday={room.weekday} period={room.period} />
               <View style={styles.cardText}>
                 <View style={styles.badgeRow}>
                   <Text style={styles.roomTitle}>
-                    {dayName(room.day)} {room.time}
+                    {weekdayLabels[room.weekday].long}{" "}
+                    {periodLabels[room.period]}
                   </Text>
                   <View
                     style={[
                       styles.statusBadge,
-                      room.status !== "참여중" ? styles.warnBadge : null,
+                      room.status !== "joined" ? styles.warnBadge : null,
                     ]}
                   >
-                    <Text style={styles.statusBadgeText}>{room.status}</Text>
+                    <Text style={styles.statusBadgeText}>
+                      {roomStatusLabels[room.status]}
+                    </Text>
                   </View>
                 </View>
                 <Text style={styles.mutedText}>
-                  멤버 {room.members}명 · 오늘 완료 {room.done} · 참여율{" "}
-                  {room.rate}
+                  멤버 {room.memberCount}명 · 오늘 완료{" "}
+                  {room.completedCount == null
+                    ? "승인 대기"
+                    : `${room.completedCount}명`}{" "}
+                  · 참여율{" "}
+                  {room.participationRate == null
+                    ? "-"
+                    : `${room.participationRate}%`}
                 </Text>
               </View>
               <MaterialIcons
@@ -188,19 +126,21 @@ function PrayerContent() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>내 기도제목</Text>
         <View style={styles.stack}>
-          {prayerRequests.map((item) => (
-            <Pressable key={item.title} style={styles.requestCard}>
+          {data.requests.map((item) => (
+            <Pressable key={item.id} style={styles.requestCard}>
               <View style={styles.cardText}>
                 <View style={styles.badgeRow}>
                   <View style={styles.muteBadge}>
                     <Text style={styles.muteBadgeText}>{item.category}</Text>
                   </View>
                   <View style={styles.statusBadge}>
-                    <Text style={styles.statusBadgeText}>{item.status}</Text>
+                    <Text style={styles.statusBadgeText}>
+                      {requestStatusLabels[item.status]}
+                    </Text>
                   </View>
                 </View>
                 <Text style={styles.requestTitle}>{item.title}</Text>
-                <Text style={styles.mutedText}>{item.desc}</Text>
+                <Text style={styles.mutedText}>{item.description}</Text>
               </View>
               <MaterialIcons
                 name="chevron-right"
@@ -238,6 +178,17 @@ function PrayerContent() {
 }
 
 function StudyContent() {
+  const { data, isError, isPending } = useLifeStudyOverview();
+
+  if (isPending) return <OverviewLoading />;
+  if (isError || !data) {
+    return <ErrorState message="삶공부 정보를 다시 불러와주세요." />;
+  }
+
+  const progressPercent = Math.round(
+    (data.path.completedRequired / data.path.totalRequired) * 100,
+  );
+
   return (
     <>
       <View style={styles.section}>
@@ -246,21 +197,30 @@ function StudyContent() {
           <View style={styles.pathTop}>
             <View>
               <Text style={styles.pathEyebrow}>필수 과정 진행률</Text>
-              <Text style={styles.pathTitle}>1 / 5 완료</Text>
+              <Text style={styles.pathTitle}>
+                {data.path.completedRequired} / {data.path.totalRequired} 완료
+              </Text>
             </View>
-            <Text style={styles.pathPercent}>20%</Text>
+            <Text style={styles.pathPercent}>{progressPercent}%</Text>
           </View>
           <View style={styles.progressTrack}>
-            <View style={styles.progressFill} />
+            <View
+              style={[
+                styles.progressFill,
+                { width: `${progressPercent}%` as `${number}%` },
+              ]}
+            />
           </View>
           <View style={styles.pathGrid}>
             <View style={styles.pathMetric}>
               <Text style={styles.metricLabel}>다음 추천</Text>
-              <Text style={styles.metricValue}>생명언어의 삶</Text>
+              <Text style={styles.metricValue}>
+                {data.path.nextRecommendation}
+              </Text>
             </View>
             <View style={styles.pathMetric}>
               <Text style={styles.metricLabel}>수강 기준</Text>
-              <Text style={styles.metricValue}>생명의 삶 이후 가능</Text>
+              <Text style={styles.metricValue}>{data.path.eligibility}</Text>
             </View>
           </View>
         </View>
@@ -269,8 +229,8 @@ function StudyContent() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>지금 신청 가능한 과정</Text>
         <View style={styles.stack}>
-          {openCourses.map((course) => (
-            <CourseCard key={course.name} course={course} open />
+          {data.openCourses.map((course) => (
+            <CourseCard key={course.id} course={course} open />
           ))}
         </View>
       </View>
@@ -278,8 +238,8 @@ function StudyContent() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>전체 과정</Text>
         <View style={styles.stack}>
-          {requiredCourses.map((course) => (
-            <CourseCard key={course.name} course={course} />
+          {data.courses.map((course) => (
+            <CourseCard key={course.id} course={course} />
           ))}
         </View>
       </View>
@@ -287,11 +247,25 @@ function StudyContent() {
   );
 }
 
-function PrayerDayBadge({ day, time }: { day: string; time: string }) {
+function OverviewLoading() {
+  return (
+    <View style={styles.overviewState}>
+      <ActivityIndicator color={theme.colors.primary} />
+    </View>
+  );
+}
+
+function PrayerDayBadge({
+  weekday,
+  period,
+}: {
+  weekday: PrayerWeekday;
+  period: PrayerPeriod;
+}) {
   return (
     <View style={styles.dayBadge}>
-      <Text style={styles.dayText}>{day}</Text>
-      <Text style={styles.timeText}>{time}</Text>
+      <Text style={styles.dayText}>{weekdayLabels[weekday].short}</Text>
+      <Text style={styles.timeText}>{periodLabels[period]}</Text>
     </View>
   );
 }
@@ -300,17 +274,7 @@ function CourseCard({
   course,
   open,
 }: {
-  course: {
-    name: string;
-    type?: string;
-    weeks: string;
-    leader: string;
-    period?: string;
-    seats?: string;
-    status?: string;
-    summary: string;
-    target?: string;
-  };
+  course: LifeStudyOverviewCourse;
   open?: boolean;
 }) {
   return (
@@ -319,27 +283,33 @@ function CourseCard({
       <View style={styles.badgeRow}>
         <View style={open ? styles.warnBadge : styles.muteBadge}>
           <Text style={open ? styles.statusBadgeText : styles.muteBadgeText}>
-            {open ? "신청 기간" : (course.status ?? "대기")}
+            {open
+              ? "신청 기간"
+              : lifeStudyStatusLabels[course.status ?? "pending"]}
           </Text>
         </View>
         <View style={styles.muteBadge}>
-          <Text style={styles.muteBadgeText}>{course.type ?? "필수"}</Text>
+          <Text style={styles.muteBadgeText}>
+            {course.kind === "required" ? "필수" : "선택"}
+          </Text>
         </View>
         <Text style={styles.mutedText}>
-          {course.weeks} · {course.leader}
+          {course.weekCount}주 · {course.instructorName}
         </Text>
       </View>
-      <Text style={styles.courseTitle}>{course.name}</Text>
+      <Text style={styles.courseTitle}>{course.title}</Text>
       <Text style={styles.courseSummary}>{course.summary}</Text>
       {open ? (
         <View style={styles.courseGrid}>
           <View style={styles.courseMetric}>
             <Text style={styles.metricLabel}>신청 기간</Text>
-            <Text style={styles.metricValue}>{course.period}</Text>
+            <Text style={styles.metricValue}>{course.applicationPeriod}</Text>
           </View>
           <View style={styles.courseMetric}>
             <Text style={styles.metricLabel}>정원</Text>
-            <Text style={styles.metricValue}>{course.seats}</Text>
+            <Text style={styles.metricValue}>
+              {course.enrolledCount} / {course.capacity}명
+            </Text>
           </View>
         </View>
       ) : (
@@ -349,17 +319,35 @@ function CourseCard({
   );
 }
 
-function dayName(day: string) {
-  const names: Record<string, string> = {
-    월: "월요일",
-    화: "화요일",
-    수: "수요일",
-    목: "목요일",
-    금: "금요일",
-    토: "토요일",
-  };
-  return names[day] ?? `${day}요일`;
-}
+const weekdayLabels: Record<PrayerWeekday, { short: string; long: string }> = {
+  mon: { short: "월", long: "월요일" },
+  tue: { short: "화", long: "화요일" },
+  wed: { short: "수", long: "수요일" },
+  thu: { short: "목", long: "목요일" },
+  fri: { short: "금", long: "금요일" },
+};
+
+const periodLabels: Record<PrayerPeriod, string> = {
+  morning: "오전",
+  afternoon: "오후",
+};
+
+const roomStatusLabels: Record<PrayerOverviewRoomStatus, string> = {
+  joined: "참여중",
+  pending: "승인 대기",
+};
+
+const requestStatusLabels: Record<PrayerRequestStatus, string> = {
+  reviewing: "검토중",
+  published: "공개중",
+  rejected: "반려",
+};
+
+const lifeStudyStatusLabels: Record<LifeStudyOverviewStatus, string> = {
+  completed: "수료",
+  recommended: "추천",
+  pending: "대기",
+};
 
 const styles = StyleSheet.create({
   root: {
@@ -423,6 +411,10 @@ const styles = StyleSheet.create({
   },
   body: {
     paddingBottom: 100,
+  },
+  overviewState: {
+    paddingVertical: 80,
+    alignItems: "center",
   },
   section: {
     marginTop: 6,
@@ -624,7 +616,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   progressFill: {
-    width: "20%",
     height: "100%",
     borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.primary,

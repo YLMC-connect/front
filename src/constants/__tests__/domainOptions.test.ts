@@ -1,6 +1,7 @@
 import {
   GROUP_STATUS_TABS,
   LIFE_STUDY_STATUS_TABS,
+  MARKET_REPORT_REASONS,
   MARKET_STATUS_TABS,
   PRAYER_WEEKDAY_TABS,
 } from "../domainOptions";
@@ -12,6 +13,19 @@ describe("domain options", () => {
       "나눔중",
       "예약중",
       "나눔완료",
+    ]);
+  });
+
+  it("keeps the design-approved market report reasons available", () => {
+    expect(MARKET_REPORT_REASONS.map(({ label }) => label)).toEqual([
+      "금지 품목 게시",
+      "허위 물품 정보",
+      "금전 요구·암묵적 거래 유도",
+      "동일 물품 중복 게시",
+      "타인 사진 무단 도용",
+      "나눔을 빙자한 홍보·광고",
+      "욕설·혐오 표현",
+      "기타",
     ]);
   });
 

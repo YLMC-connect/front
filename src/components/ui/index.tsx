@@ -1,7 +1,13 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import type { ComponentProps, ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -10,13 +16,28 @@ import {
   type PressableProps,
   ScrollView,
   StyleSheet,
+  type StyleProp,
   Text,
   TextInput,
   View,
+  type ViewStyle,
 } from "react-native";
+import Animated, {
+  FadeInUp,
+  interpolate,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import { theme } from "../../constants/theme";
+import { MotionPressable, useMotionPresence } from "./motion";
+
+export { MotionPressable } from "./motion";
 
 type IconName = ComponentProps<typeof MaterialIcons>["name"];
+const SEGMENT_GAP = 4;
+const SEGMENT_PADDING = 4;
 
 const avatarPalettes = [
   "#8FA882",
@@ -71,7 +92,7 @@ export function Button({
   ];
 
   return (
-    <Pressable
+    <MotionPressable
       accessibilityRole="button"
       disabled={disabled || loading}
       onPress={onPress}
@@ -101,17 +122,40 @@ export function Button({
           <Text style={textStyle}>{children}</Text>
         </>
       )}
-    </Pressable>
+    </MotionPressable>
   );
 }
 
 export function Card({
   children,
   style,
+  animated = false,
+  animationDelay = 0,
 }: {
   children: ReactNode;
-  style?: object;
+  style?: StyleProp<ViewStyle>;
+  animated?: boolean;
+  animationDelay?: number;
 }) {
+  const reduceMotion = useReducedMotion();
+
+  if (animated) {
+    return (
+      <Animated.View
+        entering={
+          reduceMotion
+            ? undefined
+            : FadeInUp.duration(theme.motion.duration.base).delay(
+                animationDelay,
+              )
+        }
+        style={[styles.card, style]}
+      >
+        {children}
+      </Animated.View>
+    );
+  }
+
   return <View style={[styles.card, style]}>{children}</View>;
 }
 
@@ -133,10 +177,14 @@ export function FloatingActionButton({
   ]);
 
   return (
-    <Pressable accessibilityRole="button" {...pressableProps} style={fabStyle}>
+    <MotionPressable
+      accessibilityRole="button"
+      {...pressableProps}
+      style={fabStyle}
+    >
       <MaterialIcons name={icon} size={20} color="#fff" />
       {label ? <Text style={styles.fabText}>{label}</Text> : null}
-    </Pressable>
+    </MotionPressable>
   );
 }
 
@@ -394,20 +442,73 @@ export function SegmentedTabs<T extends string>({
   items,
   active,
   onChange,
+  style,
+  testIDPrefix,
 }: {
   items: readonly { key: T; label: string }[];
   active: T;
   onChange: (key: T) => void;
+  style?: StyleProp<ViewStyle>;
+  testIDPrefix?: string;
 }) {
+  const reduceMotion = useReducedMotion();
+  const [itemWidth, setItemWidth] = useState(0);
+  const selectedIndex = Math.max(
+    items.findIndex((item) => item.key === active),
+    0,
+  );
+  const indicatorIndex = useSharedValue(selectedIndex);
+  const didMount = useRef(false);
+
+  useEffect(() => {
+    if (!didMount.current || reduceMotion) {
+      indicatorIndex.value = selectedIndex;
+      didMount.current = true;
+      return;
+    }
+
+    indicatorIndex.value = withTiming(selectedIndex, {
+      duration: theme.motion.duration.base,
+    });
+  }, [indicatorIndex, reduceMotion, selectedIndex]);
+
+  const indicatorStyle = useAnimatedStyle(() => ({
+    opacity: itemWidth > 0 ? 1 : 0,
+    width: itemWidth,
+    transform: [
+      { translateX: indicatorIndex.value * (itemWidth + SEGMENT_GAP) },
+    ],
+  }));
+
   return (
-    <View style={styles.segmented}>
+    <View
+      style={[styles.segmented, style]}
+      onLayout={(event) => {
+        const gapWidth = Math.max(items.length - 1, 0) * SEGMENT_GAP;
+        const contentWidth = Math.max(
+          event.nativeEvent.layout.width - SEGMENT_PADDING * 2 - gapWidth,
+          0,
+        );
+        setItemWidth(items.length > 0 ? contentWidth / items.length : 0);
+      }}
+    >
+      <Animated.View
+        pointerEvents="none"
+        testID={testIDPrefix ? `${testIDPrefix}-indicator` : undefined}
+        style={[styles.segmentIndicator, indicatorStyle]}
+      />
       {items.map((item) => {
         const selected = item.key === active;
         return (
-          <Pressable
+          <MotionPressable
             key={item.key}
-            onPress={() => onChange(item.key)}
-            style={[styles.segment, selected && styles.segmentSelected]}
+            accessibilityRole="tab"
+            accessibilityState={selected ? { selected: true } : {}}
+            testID={testIDPrefix ? `${testIDPrefix}-${item.key}` : undefined}
+            onPress={() => {
+              if (!selected) onChange(item.key);
+            }}
+            style={styles.segment}
           >
             <Text
               style={[
@@ -417,7 +518,7 @@ export function SegmentedTabs<T extends string>({
             >
               {item.label}
             </Text>
-          </Pressable>
+          </MotionPressable>
         );
       })}
     </View>
@@ -513,12 +614,33 @@ export function Toast({
   offset?: number;
   icon?: IconName;
 }) {
-  if (!message) return null;
+  const contentRef = useRef(message);
+  if (message) contentRef.current = message;
+  const { mounted, progress } = useMotionPresence(Boolean(message), {
+    duration: theme.motion.duration.base,
+  });
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [
+      {
+        translateY: interpolate(
+          progress.value,
+          [0, 1],
+          [theme.motion.distance.sm, 0],
+        ),
+      },
+    ],
+  }));
+
+  if (!mounted) return null;
   return (
-    <View style={[styles.toast, { bottom: offset }]}>
+    <Animated.View
+      testID="motion-toast"
+      style={[styles.toast, { bottom: offset }, animatedStyle]}
+    >
       <MaterialIcons name={icon} size={18} color="#fff" />
-      <Text style={styles.toastText}>{message}</Text>
-    </View>
+      <Text style={styles.toastText}>{contentRef.current}</Text>
+    </Animated.View>
   );
 }
 
@@ -541,15 +663,40 @@ export function ConfirmDialog({
   cancelText?: string;
   danger?: boolean;
 }) {
+  const { mounted, progress } = useMotionPresence(visible);
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+  }));
+  const panelStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [
+      {
+        translateY: interpolate(
+          progress.value,
+          [0, 1],
+          [theme.motion.distance.sm, 0],
+        ),
+      },
+      { scale: interpolate(progress.value, [0, 1], [0.96, 1]) },
+    ],
+  }));
+
   return (
     <Modal
       transparent
-      visible={visible}
-      animationType="fade"
+      visible={mounted}
+      animationType="none"
       onRequestClose={onCancel}
     >
       <View style={styles.modalOverlay}>
-        <View style={styles.dialog}>
+        <Animated.View
+          pointerEvents="none"
+          style={[StyleSheet.absoluteFill, styles.modalBackdrop, backdropStyle]}
+        />
+        <Animated.View
+          testID="confirm-dialog-panel"
+          style={[styles.dialog, panelStyle]}
+        >
           <Text style={styles.dialogTitle}>{title}</Text>
           {message ? <Text style={styles.dialogText}>{message}</Text> : null}
           <View style={styles.dialogActions}>
@@ -571,7 +718,7 @@ export function ConfirmDialog({
               <Text style={styles.dialogConfirmText}>{confirmText}</Text>
             </Pressable>
           </View>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -590,21 +737,51 @@ export function BottomSheet({
   footer?: ReactNode;
   onClose: () => void;
 }) {
+  const [sheetMeasured, setSheetMeasured] = useState(false);
+  const sheetHeight = useSharedValue(0);
+  const { mounted, progress } = useMotionPresence(visible, {
+    enterReady: sheetMeasured,
+  });
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+  }));
+  const panelStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [
+      {
+        translateY:
+          (1 - progress.value) *
+          Math.max(sheetHeight.value, theme.motion.distance.sm),
+      },
+    ],
+  }));
+
   return (
     <Modal
       transparent
-      visible={visible}
-      animationType="slide"
+      visible={mounted}
+      animationType="none"
       onRequestClose={onClose}
     >
       <View style={styles.sheetOverlay}>
+        <Animated.View
+          pointerEvents="none"
+          style={[StyleSheet.absoluteFill, styles.sheetBackdrop, backdropStyle]}
+        />
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-        <View style={styles.sheet}>
+        <Animated.View
+          testID="bottom-sheet-panel"
+          onLayout={(event) => {
+            sheetHeight.value = event.nativeEvent.layout.height;
+            if (!sheetMeasured) setSheetMeasured(true);
+          }}
+          style={[styles.sheet, panelStyle]}
+        >
           <View style={styles.sheetHandle} />
           <Text style={styles.sheetTitle}>{title}</Text>
           <View style={styles.sheetContent}>{children}</View>
           {footer ? <View style={styles.sheetFooter}>{footer}</View> : null}
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -621,6 +798,8 @@ export function RadioSheet({
   children,
   onClose,
   onConfirm,
+  onValueChange,
+  confirmDisabled = false,
 }: {
   visible: boolean;
   title: string;
@@ -637,6 +816,8 @@ export function RadioSheet({
   children?: ReactNode;
   onClose: () => void;
   onConfirm: () => void;
+  onValueChange?: (value: string) => void;
+  confirmDisabled?: boolean;
 }) {
   const compact = options.length > 5;
 
@@ -660,9 +841,11 @@ export function RadioSheet({
             <Pressable
               accessibilityRole="button"
               onPress={onConfirm}
+              disabled={confirmDisabled}
               style={[
                 styles.sheetFooterButton,
                 danger ? styles.sheetDangerButton : styles.sheetConfirmButton,
+                confirmDisabled ? styles.sheetFooterButtonDisabled : null,
               ]}
             >
               <Text style={styles.sheetConfirmText}>{confirmText}</Text>
@@ -675,8 +858,18 @@ export function RadioSheet({
         {options.map((option, index) => {
           const selected = option.value === value;
           return (
-            <View
+            <Pressable
               key={option.value}
+              accessibilityRole={onValueChange ? "radio" : undefined}
+              accessibilityState={{
+                selected,
+                disabled: option.disabled,
+              }}
+              onPress={
+                onValueChange && !option.disabled
+                  ? () => onValueChange(option.value)
+                  : undefined
+              }
               style={[
                 styles.radioOption,
                 compact ? styles.radioOptionCompact : null,
@@ -719,7 +912,7 @@ export function RadioSheet({
               {option.disabled ? (
                 <Text style={styles.radioMeta}>현재 상태</Text>
               ) : null}
-            </View>
+            </Pressable>
           );
         })}
       </View>
@@ -1024,9 +1217,10 @@ const styles = StyleSheet.create({
   },
   chipTextSelected: { color: theme.colors.white },
   segmented: {
+    position: "relative",
     flexDirection: "row",
-    gap: 4,
-    padding: 4,
+    gap: SEGMENT_GAP,
+    padding: SEGMENT_PADDING,
     backgroundColor: "rgba(30,41,32,0.05)",
     borderRadius: theme.radius.pill,
   },
@@ -1036,8 +1230,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: theme.radius.pill,
+    zIndex: 1,
   },
-  segmentSelected: {
+  segmentIndicator: {
+    position: "absolute",
+    left: 4,
+    top: 4,
+    bottom: 4,
+    borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.surface,
     ...theme.shadow.card,
   },
@@ -1189,10 +1389,12 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: theme.colors.overlay,
     alignItems: "center",
     justifyContent: "center",
     padding: 28,
+  },
+  modalBackdrop: {
+    backgroundColor: theme.colors.overlay,
   },
   dialog: {
     width: "100%",
@@ -1247,6 +1449,8 @@ const styles = StyleSheet.create({
   sheetOverlay: {
     flex: 1,
     justifyContent: "flex-end",
+  },
+  sheetBackdrop: {
     backgroundColor: theme.colors.sheetOverlay,
   },
   sheet: {
@@ -1298,6 +1502,7 @@ const styles = StyleSheet.create({
   sheetDangerButton: {
     backgroundColor: theme.colors.danger,
   },
+  sheetFooterButtonDisabled: { opacity: 0.45 },
   sheetCancelText: {
     color: theme.colors.inkSoft,
     fontSize: theme.fontSize.md,

@@ -46,6 +46,12 @@ npm run start:dev-client -- --port 8081 --localhost
 
 Codex 기본 샌드박스에서는 위 명령이 `Starting project...` 이후 8081 포트에 바인딩되지 않을 수 있습니다. 샌드박스 밖 로컬 권한으로는 `npm run test:dev-client:smoke`가 `http://localhost:8081/status` 응답까지 확인했습니다. development build가 설치된 iOS/Android 기기에서는 같은 Metro에 연결해 실제 앱 실행을 확인합니다.
 
+development 환경의 기본 API는 `https://ylmc-api.duckdns.org`입니다. 다른 서버를 사용할 때는 실행 또는 빌드 환경에서 덮어씁니다.
+
+```bash
+EXPO_PUBLIC_API_URL=https://example.test npm run start:dev-client
+```
+
 검증 명령:
 
 ```bash
@@ -54,14 +60,29 @@ npm run validate
 
 `validate`는 `typecheck`, `lint`, `format:check`, `test`를 순서대로 실행합니다. CI도 `npm ci` 후 `npm run validate`를 수행합니다.
 
+OpenAPI 계약 검사와 디자인 라우트 같은 Node 스크립트는 `test:scripts`로 네트워크 없이 검증하며 `validate`에 포함됩니다. 실제 Swagger 상태를 확인하는 도메인별 계약 명령은 백엔드 계약이 미완성인 동안 별도로 실행합니다.
+
 단위/컴포넌트 테스트:
 
 ```bash
 npm run test
 npm run test:coverage
+npm run test:api:contract
+npm run test:api:contract:market
+npm run test:api:contract:group
 ```
 
 Jest + React Native Testing Library로 공통 UI, 도메인 옵션, 홈/나눔/동행/기도/삶공부 핵심 화면 렌더링을 mock-first 기준으로 확인합니다.
+
+`test:api:contract`는 공개 OpenAPI 문서의 로그인·토큰 재발급·회원가입·내 정보 성공 DTO, 회원 중복확인 `data.available`, 공개 endpoint/JWT 정의를 확인합니다. 백엔드 계약이 불완전하면 누락 항목을 출력하고 실패하며, 계약 확정 전에는 일반 `validate`와 분리해 실행합니다. 다른 OpenAPI 문서를 확인할 때는 `YLMC_OPENAPI_URL`로 덮어씁니다.
+
+`test:api:contract:market`은 나눔 CRUD·댓글·신고·이미지 업로드 endpoint와 목록/상세/작성 화면에 필요한 작성자명·이미지·검색·장소·enum·상태 변경·제목/본문 길이·사진 5장 계약을 확인합니다. 업로드 경로 이름을 가정하지 않고 operation summary/id로 찾은 뒤 request/200 DTO를 검증합니다. 누락 필드를 임의 fallback으로 감추지 않고 DTO mapper를 활성화하기 전에 실패로 노출합니다.
+
+`test:api:contract:group`은 동행 목록·상세·내 목록·멤버/공지·참여/탈퇴·생성/수정/상태/관리 endpoint와 카드 표시 필드, 일정·장소, 필터, enum, 제목/본문·정원 입력 제한, 소모임장 이관 계약을 확인합니다.
+
+API 오류는 `getApiErrorMessage`가 `ApiError.code`를 도메인 메시지 표로 변환합니다. 문서화되지 않은 API 코드는 서버 `message`를 그대로 노출하지 않고 화면별 안전한 fallback을 사용하며, 현재 Swagger에 정의된 인증 `MEM001~MEM006`은 `authApiErrorMessages`로 관리합니다.
+
+인증 세션은 `authSessionService`가 SecureStore 토큰 저장·앱 시작 복원·동시 401 단일 재발급·재발급 실패 로그아웃을 관리합니다. Swagger 성공 DTO가 확정되기 전에는 mock adapter를 사용하며, HTTP adapter만 교체해 같은 세션 흐름을 유지합니다.
 
 Dev Client Metro smoke:
 
@@ -107,7 +128,9 @@ npm run test:visual:compare
 
 `test:visual:prepare`는 `/Users/mingulee/Downloads/열린문커넥트.zip`에서 110개 JSX 화면 inventory와 원본 PNG를 `/private/tmp/ylmc-golden-screens/2026-05-23` 아래에 재생성합니다. 원본 PNG 렌더링에는 로컬 Chrome/Chromium이 필요하며, inventory/manifest만 빠르게 만들 때는 `YLMC_PREPARE_ORIGINALS=0 npm run test:visual:prepare`를 사용할 수 있습니다.
 
-`test:visual:capture`는 위 inventory를 Android Dev Client route로 열어 앱 스크린샷을 저장합니다. 일부 화면만 다시 찍을 때는 `YLMC_CAPTURE_INDEXES=29,30`처럼 지정할 수 있고, stale route를 줄이려면 `YLMC_CAPTURE_RESET_EACH_ROUTE=1 YLMC_CAPTURE_ROUTE_OPEN_REPEATS=2`를 함께 사용합니다. ZIP 원본 360x720 논리 viewport에 맞춰 비교할 때는 `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT=1`을 추가합니다. 이 옵션은 캡처 중 Android Emulator를 1080x2160@480으로 임시 조정하고 완료 후 원래 size/density로 복원합니다. 캡처 스크립트는 Dev Client first-run menu를 route 캡처 직전에 닫고, viewport override가 있으면 입력 좌표도 override size 기준으로 계산합니다. 로그인/가입 코드처럼 route 진입 후 고정 좌표 탭이 화면 버튼을 누를 수 있는 경우에는 `YLMC_CAPTURE_DISMISS_AFTER_ROUTE=0`으로 route 이후 dismiss 탭만 끕니다. `test:visual:compare`는 원본 PNG와 앱 PNG를 비교하되, 원본 PNG가 단색 빈 화면이면 report에 `originalFlat=yes`로 표시합니다. 이런 항목은 pixel diff보다 JSX 소스와 앱 캡처를 직접 비교합니다.
+`test:visual:capture`는 위 inventory를 Android Dev Client route로 열어 앱 스크린샷을 저장합니다. 일부 화면만 다시 찍을 때는 `YLMC_CAPTURE_INDEXES=29,30`처럼 지정할 수 있고, stale route를 줄이려면 `YLMC_CAPTURE_RESET_EACH_ROUTE=1 YLMC_CAPTURE_ROUTE_OPEN_REPEATS=2`를 함께 사용합니다. ZIP 원본 360x720 논리 viewport에 맞춰 비교할 때는 `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT=1`을 추가합니다. 이 옵션은 캡처 중 Android Emulator를 1080x2160@480으로 임시 조정하고 완료 후 원래 size/density로 복원합니다. 캡처 스크립트는 Android UI hierarchy에서 `Continue`/`Reload`/`DEVELOPMENT SERVERS`가 실제로 보일 때만 해당 node bounds를 사용해 Dev Client 메뉴를 닫습니다. 특수 환경에서 route 이후 메뉴 처리를 생략하려면 `YLMC_CAPTURE_DISMISS_AFTER_ROUTE=0`을 사용할 수 있습니다. `test:visual:compare`는 원본 PNG와 앱 PNG를 비교하되, 원본 PNG가 단색 빈 화면이면 report에 `originalFlat=yes`로 표시합니다. 이런 항목은 pixel diff보다 JSX 소스와 앱 캡처를 직접 비교합니다.
+
+캡처용 화면 상태는 `designVariant` query를 사용하며 development build에서만 해석됩니다. 실제 동행 segment와 MY 활동 탭은 각각 `section`, `tab` query를 사용하므로 production 서버 상태와 디자인 캡처 상태가 섞이지 않습니다.
 
 ## 문서 지도
 

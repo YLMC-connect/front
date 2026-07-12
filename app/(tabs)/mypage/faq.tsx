@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import { TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { readDesignVariant } from "../../../src/lib/designVariant";
 
 const categories = ["전체", "계정", "중고·나눔", "소모임", "기도", "삶공부"];
 
@@ -23,14 +24,10 @@ const faqs = [
   { open: false, question: "탈퇴하면 데이터는 어떻게 되나요?", answer: "" },
 ] as const;
 
-function variantOf(value: string | string[] | undefined) {
-  return Array.isArray(value) ? (value[0] ?? "default") : (value ?? "default");
-}
-
 export default function FaqScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const empty = variantOf(params.variant) === "empty";
+  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const empty = readDesignVariant(params.designVariant) === "empty";
 
   return (
     <Screen scroll={false} padded={false}>

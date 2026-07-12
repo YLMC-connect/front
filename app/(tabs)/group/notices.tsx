@@ -1,10 +1,25 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import type { ReactNode } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { type ReactNode, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import { ConfirmDialog, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import {
+  useCreateGroupNotice,
+  useDeleteGroupNotice,
+  useGroupDetail,
+  useUpdateGroupNotice,
+} from "../../../src/hooks/useGroups";
+import { readDesignVariant } from "../../../src/lib/designVariant";
 
 const filledTitle = "5월 18일 토요일 모임 안내";
 const filledBody = `이번 주 토요일은 북한산 도선사 코스로 갑니다.
@@ -17,19 +32,60 @@ const filledBody = `이번 주 토요일은 북한산 도선사 코스로 갑니
 
 문의는 단톡방으로 부탁드려요. 함께 오르며 좋은 시간 보내요!`;
 
-function variantOf(value: string | string[] | undefined) {
-  return Array.isArray(value) ? (value[0] ?? "create") : (value ?? "create");
-}
-
 export default function GroupNoticesScreenRoute() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = variantOf(params.variant);
-  const isEdit = variant === "edit" || variant === "delete-confirm";
-  const isFilled = isEdit || variant === "create-filled";
-  const showDelete = variant === "delete-confirm";
-  const title = isFilled ? filledTitle : "";
-  const body = isFilled ? filledBody : "";
+  const params = useLocalSearchParams<{
+    id?: string;
+    noticeId?: string;
+    designVariant?: string;
+  }>();
+  const groupId = params.id ?? "1";
+  const variant = readDesignVariant(params.designVariant);
+  const isDesignEdit = variant === "edit" || variant === "delete-confirm";
+  const noticeId = params.noticeId ?? (isDesignEdit ? "notice-1" : undefined);
+  const isEdit = Boolean(noticeId);
+  const detail = useGroupDetail(groupId);
+  const createNotice = useCreateGroupNotice(groupId);
+  const updateNotice = useUpdateGroupNotice(groupId);
+  const deleteNotice = useDeleteGroupNotice(groupId);
+  const isDesignFilled = isDesignEdit || variant === "create-filled";
+  const [title, setTitle] = useState(isDesignFilled ? filledTitle : "");
+  const [body, setBody] = useState(isDesignFilled ? filledBody : "");
+  const [showDelete, setShowDelete] = useState(variant === "delete-confirm");
+
+  useEffect(() => {
+    if (!variant) return;
+    const filled = isDesignEdit || variant === "create-filled";
+    setTitle(filled ? filledTitle : "");
+    setBody(filled ? filledBody : "");
+    setShowDelete(variant === "delete-confirm");
+  }, [isDesignEdit, variant]);
+
+  useEffect(() => {
+    if (variant || !noticeId) return;
+    const notice = detail.data?.notices.find(({ id }) => id === noticeId);
+    if (!notice) return;
+    setTitle(notice.title);
+    setBody(notice.content);
+  }, [detail.data, noticeId, variant]);
+
+  const isFilled = Boolean(title.trim() && body.trim());
+  const isPending = createNotice.isPending || updateNotice.isPending;
+  const onSubmit = () => {
+    if (!isFilled || isPending) return;
+    const onSuccess = () => router.replace(`/group/${groupId}`);
+    if (noticeId) {
+      updateNotice.mutate({ noticeId, title, content: body }, { onSuccess });
+      return;
+    }
+    createNotice.mutate({ title, content: body }, { onSuccess });
+  };
+  const onConfirmDelete = () => {
+    if (!noticeId) return;
+    deleteNotice.mutate(noticeId, {
+      onSuccess: () => router.replace(`/group/${groupId}`),
+    });
+  };
 
   return (
     <Screen scroll={false} padded={false}>
@@ -41,15 +97,30 @@ export default function GroupNoticesScreenRoute() {
           onBack={() => router.back()}
           right={
             <View style={styles.actions}>
-              {isEdit ? <Text style={styles.deleteAction}>삭제</Text> : null}
-              <Text
-                style={[
-                  styles.submitAction,
-                  !isFilled ? styles.submitOff : null,
-                ]}
+              {isEdit ? (
+                <Pressable
+                  testID="group-notice-delete"
+                  accessibilityRole="button"
+                  onPress={() => setShowDelete(true)}
+                >
+                  <Text style={styles.deleteAction}>삭제</Text>
+                </Pressable>
+              ) : null}
+              <Pressable
+                testID="group-notice-submit"
+                accessibilityRole="button"
+                onPress={onSubmit}
+                disabled={!isFilled || isPending}
               >
-                {isEdit ? "저장" : "등록"}
-              </Text>
+                <Text
+                  style={[
+                    styles.submitAction,
+                    !isFilled ? styles.submitOff : null,
+                  ]}
+                >
+                  {isPending ? "저장 중" : isEdit ? "저장" : "등록"}
+                </Text>
+              </Pressable>
             </View>
           }
         />
@@ -66,8 +137,9 @@ export default function GroupNoticesScreenRoute() {
 
           <Field label="제목" required hint={`${title.length}/30`}>
             <TextInput
+              testID="group-notice-title-input"
               value={title}
-              editable={false}
+              onChangeText={setTitle}
               placeholder="공지 제목 (최대 30자)"
               placeholderTextColor={theme.colors.inkMute}
               maxLength={30}
@@ -79,8 +151,9 @@ export default function GroupNoticesScreenRoute() {
 
           <Field label="내용" required hint={`${body.length}/500`}>
             <TextInput
+              testID="group-notice-content-input"
               value={body}
-              editable={false}
+              onChangeText={setBody}
               multiline
               placeholder="공지 내용을 입력해주세요"
               placeholderTextColor={theme.colors.inkMute}
@@ -91,14 +164,26 @@ export default function GroupNoticesScreenRoute() {
           </Field>
         </ScrollView>
 
+        {createNotice.isError ||
+        updateNotice.isError ||
+        deleteNotice.isError ? (
+          <Text style={styles.error}>공지 처리에 실패했습니다.</Text>
+        ) : null}
+        {isEdit && detail.isPending ? (
+          <ActivityIndicator
+            color={theme.colors.primary}
+            style={styles.loading}
+          />
+        ) : null}
+
         <ConfirmDialog
           visible={showDelete}
           title="공지를 삭제하시겠습니까?"
           message="삭제한 공지는 복구할 수 없어요."
           confirmText="삭제"
           danger
-          onCancel={() => router.back()}
-          onConfirm={() => router.back()}
+          onCancel={() => setShowDelete(false)}
+          onConfirm={onConfirmDelete}
         />
       </View>
     </Screen>
@@ -221,5 +306,16 @@ const styles = StyleSheet.create({
   divider: {
     height: 8,
     backgroundColor: "rgba(30,41,32,0.05)",
+  },
+  error: {
+    color: theme.colors.danger,
+    fontSize: theme.fontSize.sm,
+    paddingHorizontal: 22,
+    paddingBottom: 12,
+  },
+  loading: {
+    position: "absolute",
+    top: 70,
+    right: 22,
   },
 });

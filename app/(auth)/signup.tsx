@@ -13,7 +13,10 @@ import {
 import { Screen } from "../../src/components/layout/Screen";
 import { TopBar } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
+import { authApiErrorMessages } from "../../src/constants/apiErrorMessages";
 import { useAuth } from "../../src/hooks/useAuth";
+import { getApiErrorMessage } from "../../src/lib/apiErrorMessage";
+import { readDesignVariant } from "../../src/lib/designVariant";
 
 type FormValues = {
   id: string;
@@ -25,6 +28,10 @@ type FormValues = {
 };
 
 type FormErrors = Partial<Record<keyof FormValues, string>>;
+type IdAvailability = {
+  value: string;
+  available: boolean;
+};
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -54,9 +61,9 @@ function validateSignup(values: FormValues) {
 }
 
 export default function SignupScreen() {
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const { signup } = useAuth();
-  const variant = params.variant ?? "default";
+  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const { checkAvailability, signup } = useAuth();
+  const variant = readDesignVariant(params.designVariant) ?? "default";
   const isDefault = variant === "default";
   const isPwError = variant === "pw-error";
   const isPhoneError = variant === "phone-error";
@@ -82,15 +89,46 @@ export default function SignupScreen() {
         },
   );
   const [errors, setErrors] = useState<FormErrors>({});
+  const [idAvailability, setIdAvailability] = useState<IdAvailability | null>(
+    null,
+  );
+  const currentIdAvailability =
+    idAvailability?.value === values.id.trim()
+      ? idAvailability.available
+      : null;
 
   const setField =
     (field: keyof FormValues) =>
     (value: string): void => {
       setValues((current) => ({ ...current, [field]: value }));
+      if (field === "id") setIdAvailability(null);
     };
+
+  const onCheckIdAvailability = () => {
+    const id = values.id.trim();
+    if (id.length < 3) {
+      setErrors((current) => ({
+        ...current,
+        id: "아이디는 3자 이상 입력해주세요.",
+      }));
+      return;
+    }
+
+    setErrors((current) => ({ ...current, id: undefined }));
+    checkAvailability.mutate(
+      { searchType: "id", searchValue: id },
+      {
+        onSuccess: ({ available }) =>
+          setIdAvailability({ value: id, available }),
+      },
+    );
+  };
 
   const onSubmit = () => {
     const nextErrors = validateSignup(values);
+    if (isDefault && currentIdAvailability !== true) {
+      nextErrors.id = "아이디 중복 확인이 필요합니다.";
+    }
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
@@ -134,26 +172,48 @@ export default function SignupScreen() {
               <View style={styles.idRow}>
                 <View style={styles.idInputWrap}>
                   <SignupInput
+                    testID="signup-id-input"
                     value={values.id}
                     onChangeText={setField("id")}
                     placeholder="아이디"
-                    hasError={variant === "id-dup" || Boolean(errors.id)}
+                    hasError={
+                      currentIdAvailability === false ||
+                      variant === "id-dup" ||
+                      Boolean(errors.id)
+                    }
                   />
                 </View>
-                <View style={styles.checkButton}>
-                  <Text style={styles.checkButtonText}>중복 확인</Text>
-                </View>
+                <Pressable
+                  testID="signup-check-id"
+                  accessibilityRole="button"
+                  onPress={onCheckIdAvailability}
+                  disabled={checkAvailability.isPending}
+                  style={styles.checkButton}
+                >
+                  {checkAvailability.isPending ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={theme.colors.primaryDeep}
+                    />
+                  ) : (
+                    <Text style={styles.checkButtonText}>중복 확인</Text>
+                  )}
+                </Pressable>
               </View>
               <InlineError>
                 {errors.id ??
-                  (variant === "id-dup"
+                  (currentIdAvailability === false || variant === "id-dup"
                     ? "이미 사용 중인 아이디입니다"
                     : undefined)}
               </InlineError>
+              {currentIdAvailability === true ? (
+                <FieldHint>사용 가능한 아이디입니다</FieldHint>
+              ) : null}
             </Field>
 
             <Field label="비밀번호">
               <SignupInput
+                testID="signup-password-input"
                 value={values.password}
                 onChangeText={setField("password")}
                 placeholder="비밀번호"
@@ -173,6 +233,7 @@ export default function SignupScreen() {
 
             <Field label="비밀번호 확인">
               <SignupInput
+                testID="signup-password-confirm-input"
                 value={values.passwordConfirm}
                 onChangeText={setField("passwordConfirm")}
                 placeholder="비밀번호 확인"
@@ -188,6 +249,7 @@ export default function SignupScreen() {
 
             <Field label="이름">
               <SignupInput
+                testID="signup-name-input"
                 value={values.userName}
                 onChangeText={setField("userName")}
                 placeholder="실명을 입력해주세요"
@@ -201,6 +263,7 @@ export default function SignupScreen() {
 
             <Field label="연락처">
               <SignupInput
+                testID="signup-phone-input"
                 value={values.phone}
                 onChangeText={setField("phone")}
                 placeholder="010-XXXX-XXXX"
@@ -234,12 +297,19 @@ export default function SignupScreen() {
           </View>
 
           {signup.error ? (
-            <Text style={styles.error}>{signup.error.message}</Text>
+            <Text style={styles.error}>
+              {getApiErrorMessage(
+                signup.error,
+                authApiErrorMessages,
+                "회원가입에 실패했습니다. 입력 정보를 확인해주세요.",
+              )}
+            </Text>
           ) : null}
         </ScrollView>
 
         <View style={styles.bottomFlat}>
           <Pressable
+            testID="signup-submit"
             accessibilityRole="button"
             onPress={onSubmit}
             disabled={isSubmitDisabled || signup.isPending || isLoading}
@@ -294,6 +364,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function SignupInput({
+  testID,
   value,
   onChangeText,
   placeholder,
@@ -301,6 +372,7 @@ function SignupInput({
   secureTextEntry,
   keyboardType = "default",
 }: {
+  testID?: string;
   value?: string;
   onChangeText: (value: string) => void;
   placeholder: string;
@@ -317,6 +389,7 @@ function SignupInput({
       ]}
     >
       <TextInput
+        testID={testID}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}

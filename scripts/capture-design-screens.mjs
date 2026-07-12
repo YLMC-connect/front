@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildDesignRouteRows } from "./design-screen-routes.mjs";
+import { findDevClientOverlay } from "./capture-ui-state.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, "..");
@@ -192,6 +193,16 @@ const tapPercent = (device, xRatio, yRatio) => {
   ]);
 };
 
+const readUiHierarchy = (device) => {
+  try {
+    const destination = "/sdcard/ylmc-window.xml";
+    adb(device, ["shell", "uiautomator", "dump", destination]);
+    return adb(device, ["shell", "cat", destination]);
+  } catch {
+    return "";
+  }
+};
+
 const openUrl = (device, url) => {
   adb(device, [
     "shell",
@@ -213,10 +224,23 @@ const openRoute = (device, route) => {
 
 const dismissDevMenu = async (device, attempts = 8) => {
   for (let attempt = 0; attempt < attempts; attempt += 1) {
-    console.log(`dismiss dev menu ${attempt + 1}/${attempts}`);
-    tapPercent(device, 0.5, 0.855);
-    await sleep(800);
-    tapPercent(device, 0.84, 0.575);
+    const overlay = findDevClientOverlay(readUiHierarchy(device));
+    if (!overlay) return;
+
+    console.log(
+      `dismiss dev menu ${attempt + 1}/${attempts}: ${overlay.state}`,
+    );
+    if (overlay.state === "development-servers") {
+      tapPercent(device, 0.5, 0.24);
+    } else if (overlay.center) {
+      adb(device, [
+        "shell",
+        "input",
+        "tap",
+        String(overlay.center.x),
+        String(overlay.center.y),
+      ]);
+    }
     await sleep(800);
   }
 };
@@ -254,8 +278,7 @@ const prepareDevClient = async (device) => {
   openUrl(device, devClientUrl);
 
   await sleep(6000);
-  console.log("Selecting development server");
-  tapPercent(device, 0.5, 0.24);
+  await dismissDevMenu(device);
   await sleep(8000);
   await dismissDevMenu(device);
   await sleep(warmupDelayMs);

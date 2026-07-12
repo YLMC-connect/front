@@ -1,6 +1,9 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -10,55 +13,90 @@ import {
   View,
 } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
-import { Avatar, VisualThumb } from "../../../src/components/ui";
+import {
+  Avatar,
+  ConfirmDialog,
+  ErrorState,
+  RadioSheet,
+  Toast,
+  VisualThumb,
+} from "../../../src/components/ui";
+import { MARKET_REPORT_REASONS } from "../../../src/constants/domainOptions";
 import { theme } from "../../../src/constants/theme";
+import {
+  useCreateMarketComment,
+  useDeleteMarketComment,
+  useDeleteMarketPost,
+  useMarketDetail,
+  useReportMarketContent,
+  useUpdateMarketComment,
+} from "../../../src/hooks/useMarket";
+import { readDesignVariant } from "../../../src/lib/designVariant";
+import { DuplicateMarketReportError } from "../../../src/services/marketService";
+import type {
+  MarketDetailComment,
+  MarketReportInput,
+  MarketReportReason,
+} from "../../../src/types/market";
 
-type CommentItem = {
-  author: string;
-  when: string;
-  text?: string;
-  self?: boolean;
-  edited?: boolean;
-  deleted?: boolean;
-};
-
-const comments: CommentItem[] = [
-  {
-    author: "이수진",
-    when: "30분 전",
-    text: "필요해요! 토요일에 들를게요. 연락드릴게요 :)",
-    self: false,
-  },
-  {
-    author: "김지영",
-    when: "25분 전",
-    text: "좋은 나눔 감사해요. 저도 비슷한 시기에 정리했는데 도움이 많이 됐어요!",
-    self: false,
-    edited: true,
-  },
-  {
-    author: "정혜진",
-    when: "20분 전",
-    deleted: true,
-  },
-  {
-    author: "한유라",
-    when: "10분 전",
-    text: "아직 남아있을까요? 늦었지만 가능하면 부탁드려요.",
-    self: true,
-  },
-] as const;
+const reportReasonOptions = MARKET_REPORT_REASONS.map(({ key, label }) => ({
+  value: key,
+  label,
+}));
+type ReportTarget = Pick<MarketReportInput, "targetType" | "targetId">;
 
 export default function MarketDetailScreen() {
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = Array.isArray(params.variant)
-    ? params.variant[0]
-    : (params.variant ?? "own");
+  const params = useLocalSearchParams<{
+    id?: string;
+    designVariant?: string;
+  }>();
+  const id = params.id ?? "1";
+  const variant = readDesignVariant(params.designVariant);
+  const isReportSheetVariant =
+    variant === "report" || variant === "report-other-input";
+  const isReportVariant =
+    isReportSheetVariant || variant === "report-dup-toast";
+  const detail = useMarketDetail(id);
+  const createComment = useCreateMarketComment(id);
+  const updateComment = useUpdateMarketComment(id);
+  const deleteComment = useDeleteMarketComment(id);
+  const deletePost = useDeleteMarketPost(id);
+  const reportContent = useReportMarketContent();
+  const [comment, setComment] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
+  const [reportReason, setReportReason] =
+    useState<MarketReportReason>("false_information");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reportMessage, setReportMessage] = useState<string>();
+  const [showDelete, setShowDelete] = useState(variant === "delete-confirm");
   const router = useRouter();
   const { width } = useWindowDimensions();
-  const isOwn = !variant.startsWith("other");
-  const isReserved = variant === "own-reserved";
-  const isDone = variant === "own-done";
+
+  useEffect(() => {
+    if (isReportSheetVariant) {
+      setReportTarget({ targetType: "market", targetId: id });
+      setReportReason(
+        variant === "report-other-input" ? "other" : "false_information",
+      );
+      setReportDetails(
+        variant === "report-other-input"
+          ? "홍보성 글 같아요. 같은 사진을 여러 번 올리는 것 같습니다."
+          : "",
+      );
+      setReportMessage(undefined);
+      return;
+    }
+
+    setReportTarget(null);
+    setReportMessage(
+      variant === "report-dup-toast" ? "이미 신고한 게시글입니다" : undefined,
+    );
+  }, [id, isReportSheetVariant, variant]);
+
+  useEffect(() => {
+    setShowDelete(variant === "delete-confirm");
+  }, [variant]);
 
   if (variant === "deleted" || variant === "blocked") {
     return (
@@ -84,12 +122,129 @@ export default function MarketDetailScreen() {
     );
   }
 
+  if (detail.isPending) {
+    return (
+      <Screen>
+        <View style={styles.loading}>
+          <ActivityIndicator color={theme.colors.primary} />
+        </View>
+      </Screen>
+    );
+  }
+
+  if (detail.isError || !detail.data) {
+    return (
+      <Screen>
+        <ErrorState message="나눔 정보를 다시 불러와주세요." />
+      </Screen>
+    );
+  }
+
+  const market = detail.data;
+  const isOwn = variant
+    ? !variant.startsWith("other") && !isReportVariant
+    : market.isMine;
+  const status =
+    variant === "own-reserved"
+      ? "reserved"
+      : variant === "own-done"
+        ? "done"
+        : market.status;
+  const isReserved = status === "reserved";
+  const isDone = status === "done";
+  const authorName =
+    variant?.startsWith("other") || isReportVariant
+      ? "박정아"
+      : market.authorName;
+  const isCommentPending = createComment.isPending || updateComment.isPending;
+  const resetCommentComposer = () => {
+    setComment("");
+    setEditingCommentId(null);
+  };
+  const onSubmitComment = () => {
+    if (!comment.trim()) return;
+    if (editingCommentId) {
+      updateComment.mutate(
+        { commentId: editingCommentId, content: comment },
+        { onSuccess: resetCommentComposer },
+      );
+      return;
+    }
+    createComment.mutate(comment, { onSuccess: resetCommentComposer });
+  };
+  const onEditComment = (target: MarketDetailComment) => {
+    setEditingCommentId(target.id);
+    setComment(target.content ?? "");
+  };
+  const onDeleteComment = (target: MarketDetailComment) => {
+    Alert.alert("댓글 삭제", "삭제한 댓글은 복구할 수 없습니다.", [
+      { text: "취소", style: "cancel" },
+      {
+        text: "삭제",
+        style: "destructive",
+        onPress: () => {
+          deleteComment.mutate(target.id, {
+            onSuccess: () => {
+              if (editingCommentId === target.id) resetCommentComposer();
+            },
+          });
+        },
+      },
+    ]);
+  };
+  const onDeletePost = () => {
+    setShowDelete(true);
+  };
+  const onConfirmDeletePost = () => {
+    deletePost.mutate(undefined, {
+      onSuccess: () => {
+        setShowDelete(false);
+        router.replace("/market");
+      },
+    });
+  };
+  const openReport = (target: ReportTarget) => {
+    setReportTarget(target);
+    setReportReason("false_information");
+    setReportDetails("");
+    setReportMessage(undefined);
+  };
+  const closeReport = () => setReportTarget(null);
+  const onSubmitReport = () => {
+    if (!reportTarget) return;
+    reportContent.mutate(
+      {
+        ...reportTarget,
+        reason: reportReason,
+        content: reportDetails || undefined,
+      },
+      {
+        onSuccess: () => {
+          closeReport();
+          setReportMessage("신고가 접수되었습니다");
+        },
+        onError: (error) => {
+          if (error instanceof DuplicateMarketReportError) {
+            closeReport();
+            setReportMessage("이미 신고한 콘텐츠입니다");
+            return;
+          }
+          setReportMessage("신고 처리에 실패했습니다");
+        },
+      },
+    );
+  };
+
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
         <ScrollView contentContainerStyle={styles.content}>
           <View style={[styles.hero, { height: width }]}>
-            <VisualThumb size={width} seed={0} style={styles.heroThumb} />
+            <VisualThumb
+              size={width}
+              seed={market.thumbSeed}
+              style={styles.heroThumb}
+            />
             <View style={styles.heroScrim} />
             <Pressable
               accessibilityRole="button"
@@ -135,67 +290,158 @@ export default function MarketDetailScreen() {
 
           <View style={isDone ? styles.doneContent : null}>
             <View style={styles.authorRow}>
-              <Avatar name={isOwn ? "김은혜" : "박정아"} size={40} />
+              <Avatar name={authorName} size={40} />
               <View style={styles.authorText}>
-                <Text style={styles.authorName}>
-                  {isOwn ? "김은혜" : "박정아"}
-                </Text>
-                <Text style={styles.meta}>1시간 전</Text>
+                <Text style={styles.authorName}>{authorName}</Text>
+                <Text style={styles.meta}>{market.createdLabel}</Text>
               </View>
             </View>
 
             <View style={styles.article}>
               <View style={styles.chips}>
                 <View style={styles.softChip}>
-                  <Text style={styles.softChipText}>유아·아동용품</Text>
+                  <Text style={styles.softChipText}>
+                    {market.categoryLabel}
+                  </Text>
                 </View>
                 <View style={styles.conditionChip}>
-                  <Text style={styles.conditionText}>사용감 있음</Text>
+                  <Text style={styles.conditionText}>
+                    {market.conditionLabel}
+                  </Text>
                 </View>
               </View>
-              <Text style={styles.title}>
-                아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)
-              </Text>
-              <Text style={styles.body}>
-                아이가 커서 더 이상 쓰지 않는 장난감 정리해요. 대부분 깨끗하게
-                사용한 것들이고, 블록류 20점 + 인형류 10점 정도 됩니다. 필요하신
-                분께 무료로 드려요!{"\n\n"}수령은 토요일 오후 교회 1층 로비에서
-                가능합니다. 한 분께 일괄로 드리려고 합니다.
-              </Text>
+              <Text style={styles.title}>{market.title}</Text>
+              <Text style={styles.body}>{market.content}</Text>
             </View>
 
             <View style={styles.actions}>
               {isOwn && !isDone ? (
                 <>
                   <Action icon="edit" label="수정" />
-                  <Action icon="delete-outline" label="삭제" danger />
+                  <Action
+                    testID="market-delete-post"
+                    icon="delete-outline"
+                    label="삭제"
+                    danger
+                    onPress={onDeletePost}
+                  />
                   <Action icon="sync-alt" label="상태 변경" />
                 </>
               ) : isOwn ? (
-                <Action icon="delete-outline" label="삭제" danger />
+                <Action
+                  testID="market-delete-post"
+                  icon="delete-outline"
+                  label="삭제"
+                  danger
+                  onPress={onDeletePost}
+                />
               ) : (
                 <>
-                  <Action icon="outlined-flag" label="신고" />
+                  <Action
+                    testID="market-report-post"
+                    icon="outlined-flag"
+                    label="신고"
+                    onPress={() =>
+                      openReport({ targetType: "market", targetId: market.id })
+                    }
+                  />
                   <Action icon="block" label="차단" danger />
                 </>
               )}
             </View>
 
-            <CommentsSection />
+            <CommentsSection
+              comments={market.comments}
+              onEdit={onEditComment}
+              onDelete={onDeleteComment}
+              onReport={(target) =>
+                openReport({ targetType: "comment", targetId: target.id })
+              }
+            />
           </View>
         </ScrollView>
 
         <View style={styles.composer}>
+          {editingCommentId ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={resetCommentComposer}
+              style={styles.cancelEdit}
+            >
+              <Text style={styles.cancelEditText}>수정 취소</Text>
+            </Pressable>
+          ) : null}
           <TextInput
-            editable={false}
-            placeholder="댓글을 입력해주세요"
+            testID="market-comment-input"
+            value={comment}
+            onChangeText={setComment}
+            editable={!isCommentPending}
+            placeholder={
+              editingCommentId ? "댓글을 수정해주세요" : "댓글을 입력해주세요"
+            }
             placeholderTextColor={theme.colors.inkMute}
             style={styles.commentInput}
           />
-          <Pressable accessibilityRole="button" style={styles.sendButton}>
-            <MaterialIcons name="send" size={18} color={theme.colors.white} />
+          <Pressable
+            testID="market-comment-submit"
+            accessibilityRole="button"
+            accessibilityLabel={editingCommentId ? "댓글 수정" : "댓글 등록"}
+            onPress={onSubmitComment}
+            disabled={!comment.trim() || isCommentPending}
+            style={styles.sendButton}
+          >
+            {isCommentPending ? (
+              <ActivityIndicator size="small" color={theme.colors.white} />
+            ) : (
+              <MaterialIcons name="send" size={18} color={theme.colors.white} />
+            )}
           </Pressable>
         </View>
+        {createComment.isError ||
+        updateComment.isError ||
+        deleteComment.isError ? (
+          <Text style={styles.commentError}>댓글 처리에 실패했습니다.</Text>
+        ) : null}
+        <RadioSheet
+          visible={Boolean(reportTarget)}
+          title="신고"
+          options={reportReasonOptions}
+          value={reportReason}
+          confirmText="신고하기"
+          danger
+          hint="허위·악의적 신고 시 이용이 제한될 수 있습니다."
+          confirmDisabled={
+            reportContent.isPending ||
+            (reportReason === "other" && !reportDetails.trim())
+          }
+          onValueChange={(value) =>
+            setReportReason(value as MarketReportReason)
+          }
+          onClose={closeReport}
+          onConfirm={onSubmitReport}
+        >
+          {reportReason === "other" ? (
+            <TextInput
+              value={reportDetails}
+              onChangeText={setReportDetails}
+              placeholder="신고 사유를 자세히 입력해주세요"
+              placeholderTextColor={theme.colors.inkMute}
+              multiline
+              style={styles.reportInput}
+              textAlignVertical="top"
+            />
+          ) : null}
+        </RadioSheet>
+        <ConfirmDialog
+          visible={showDelete}
+          title="게시글을 삭제하시겠습니까?"
+          message="삭제하면 댓글을 포함한 모든 내용이 사라지며 복구할 수 없어요."
+          confirmText="삭제"
+          danger
+          onCancel={() => setShowDelete(false)}
+          onConfirm={onConfirmDeletePost}
+        />
+        <Toast message={reportMessage} offset={106} />
       </View>
     </Screen>
   );
@@ -243,15 +489,24 @@ function Action({
   icon,
   label,
   danger = false,
+  onPress,
+  testID,
 }: {
   icon: keyof typeof MaterialIcons.glyphMap;
   label: string;
   danger?: boolean;
+  onPress?: () => void;
+  testID?: string;
 }) {
   const color = danger ? theme.colors.danger : theme.colors.ink;
 
   return (
-    <Pressable accessibilityRole="button" style={styles.action}>
+    <Pressable
+      testID={testID}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={styles.action}
+    >
       <MaterialIcons name={icon} size={18} color={color} />
       <Text style={[styles.actionText, danger ? styles.dangerText : null]}>
         {label}
@@ -260,42 +515,70 @@ function Action({
   );
 }
 
-function CommentsSection() {
-  const activeCount = comments.filter((comment) => !comment.deleted).length;
+function CommentsSection({
+  comments,
+  onEdit,
+  onDelete,
+  onReport,
+}: {
+  comments: MarketDetailComment[];
+  onEdit: (comment: MarketDetailComment) => void;
+  onDelete: (comment: MarketDetailComment) => void;
+  onReport: (comment: MarketDetailComment) => void;
+}) {
+  const activeCount = comments.filter((comment) => !comment.isDeleted).length;
 
   return (
     <View style={styles.comments}>
       <Text style={styles.commentCount}>댓글 {activeCount}개</Text>
       {comments.map((comment, index) => (
         <View
-          key={`${comment.author}-${comment.when}`}
+          key={comment.id}
           style={[
             styles.commentRow,
             index === comments.length - 1 ? styles.commentRowLast : null,
           ]}
         >
-          <Avatar name={comment.author} size={32} />
+          <Avatar name={comment.authorName} size={32} />
           <View style={styles.commentBody}>
             <View style={styles.commentMeta}>
-              <Text style={styles.commentAuthor}>{comment.author}</Text>
-              <Text style={styles.commentWhen}>{comment.when}</Text>
-              {comment.edited ? (
+              <Text style={styles.commentAuthor}>{comment.authorName}</Text>
+              <Text style={styles.commentWhen}>{comment.createdLabel}</Text>
+              {comment.isEdited ? (
                 <Text style={styles.commentWhen}>· 수정됨</Text>
               ) : null}
             </View>
-            {comment.deleted ? (
+            {comment.isDeleted ? (
               <Text style={styles.deletedComment}>삭제된 댓글입니다</Text>
             ) : (
               <>
-                <Text style={styles.commentText}>{comment.text}</Text>
+                <Text style={styles.commentText}>{comment.content}</Text>
                 <View style={styles.commentActions}>
-                  {comment.self ? (
+                  {comment.isMine ? (
                     <>
-                      <MiniAction icon="edit" label="수정" />
-                      <MiniAction icon="delete-outline" label="삭제" danger />
+                      <MiniAction
+                        testID={`market-comment-edit-${comment.id}`}
+                        accessibilityLabel={`댓글 수정 ${comment.content}`}
+                        icon="edit"
+                        label="수정"
+                        onPress={() => onEdit(comment)}
+                      />
+                      <MiniAction
+                        testID={`market-comment-delete-${comment.id}`}
+                        accessibilityLabel={`댓글 삭제 ${comment.content}`}
+                        icon="delete-outline"
+                        label="삭제"
+                        danger
+                        onPress={() => onDelete(comment)}
+                      />
                     </>
                   ) : (
-                    <MiniAction icon="outlined-flag" label="신고" />
+                    <MiniAction
+                      testID={`market-comment-report-${comment.id}`}
+                      icon="outlined-flag"
+                      label="신고"
+                      onPress={() => onReport(comment)}
+                    />
                   )}
                 </View>
               </>
@@ -311,13 +594,25 @@ function MiniAction({
   icon,
   label,
   danger = false,
+  onPress,
+  testID,
+  accessibilityLabel,
 }: {
   icon: keyof typeof MaterialIcons.glyphMap;
   label: string;
   danger?: boolean;
+  onPress?: () => void;
+  testID?: string;
+  accessibilityLabel?: string;
 }) {
   return (
-    <View style={styles.miniAction}>
+    <Pressable
+      testID={testID}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole={onPress ? "button" : undefined}
+      onPress={onPress}
+      style={styles.miniAction}
+    >
       <MaterialIcons
         name={icon}
         size={14}
@@ -326,12 +621,17 @@ function MiniAction({
       <Text style={[styles.miniActionText, danger ? styles.dangerText : null]}>
         {label}
       </Text>
-    </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  loading: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   content: { paddingBottom: 96 },
   hero: {
     position: "relative",
@@ -628,6 +928,22 @@ const styles = StyleSheet.create({
     gap: 8,
     padding: 8,
   },
+  cancelEdit: {
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  cancelEditText: {
+    color: theme.colors.inkSoft,
+    fontSize: theme.fontSize.xs,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  commentError: {
+    position: "absolute",
+    right: 18,
+    bottom: 72,
+    color: theme.colors.danger,
+    fontSize: theme.fontSize.xs,
+  },
   commentInput: {
     flex: 1,
     minHeight: 44,
@@ -636,6 +952,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     color: theme.colors.ink,
     fontSize: theme.fontSize.md,
+  },
+  reportInput: {
+    minHeight: 96,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: theme.colors.lineStrong,
+    borderRadius: theme.radius.md,
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.sm,
   },
   sendButton: {
     width: 44,

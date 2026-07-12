@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { VisualThumb } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
+import { readDesignVariant } from "../../src/lib/designVariant";
 
 const categories = [
   "의류·잡화",
@@ -32,10 +33,8 @@ const filledValues = {
 
 export default function MarketNewModal() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = Array.isArray(params.variant)
-    ? params.variant[0]
-    : (params.variant ?? "create");
+  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const variant = readDesignVariant(params.designVariant) ?? "create";
   const isEdit = variant === "edit";
   const isFilled =
     isEdit ||

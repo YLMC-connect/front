@@ -10,6 +10,7 @@ import {
 import { Screen } from "../../../src/components/layout/Screen";
 import { TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { readDesignVariant } from "../../../src/lib/designVariant";
 
 type Variant =
   | "default"
@@ -71,8 +72,8 @@ function ProfileTextInput({
 
 export default function EditProfileScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = variantOf(params.variant);
+  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const variant = variantOf(readDesignVariant(params.designVariant));
   const hasChange = variant !== "default";
   const isPhoneDup = variant === "phone-dup";
   const isCurrentPwError = variant === "current-pw-error";

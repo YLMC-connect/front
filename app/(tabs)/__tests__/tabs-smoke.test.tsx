@@ -1,4 +1,6 @@
-import { screen } from "@testing-library/react-native";
+import { fireEvent, screen, waitFor } from "@testing-library/react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { Alert } from "react-native";
 import GroupDetailScreen from "../group/[id]";
 import GroupMembersScreen from "../group/members";
 import GroupScreen from "../group";
@@ -24,6 +26,7 @@ import PrayerApplyScreenRoute from "../prayer/apply";
 import PrayerScreen from "../prayer";
 import PrayerRequestScreenRoute from "../prayer/request";
 import { renderWithClient } from "../../../src/test/renderWithClient";
+import * as authService from "../../../src/services/authService";
 
 describe("v1 tab smoke screens", () => {
   it("renders the home screen", () => {
@@ -34,40 +37,138 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("내 활동 요약")).toBeTruthy();
   });
 
-  it("renders the market screen", () => {
+  it("renders the market screen", async () => {
     renderWithClient(<MarketScreen />);
 
     expect(screen.getByText("나눔")).toBeTruthy();
     expect(screen.getByText("나눔중")).toBeTruthy();
     expect(
-      screen.getByText("아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)"),
+      await screen.findByText(
+        "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
+      ),
     ).toBeTruthy();
   });
 
-  it("renders the market detail screen", () => {
+  it("renders the market detail screen", async () => {
     renderWithClient(<MarketDetailScreen />);
 
     expect(
-      screen.getByText("아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)"),
+      await screen.findByText(
+        "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
+      ),
     ).toBeTruthy();
     expect(screen.getByText("댓글 3개")).toBeTruthy();
     expect(screen.getByPlaceholderText("댓글을 입력해주세요")).toBeTruthy();
   });
 
-  it("renders the group screen", () => {
+  it("creates a comment from the market detail screen", async () => {
+    renderWithClient(<MarketDetailScreen />);
+
+    await screen.findByText(
+      "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
+    );
+    fireEvent.changeText(
+      screen.getByPlaceholderText("댓글을 입력해주세요"),
+      "새로 등록한 댓글",
+    );
+    fireEvent.press(screen.getByLabelText("댓글 등록"));
+
+    expect(await screen.findByText("새로 등록한 댓글")).toBeTruthy();
+    expect(screen.getByText("댓글 4개")).toBeTruthy();
+    await waitFor(() =>
+      expect(
+        screen.getByPlaceholderText("댓글을 입력해주세요").props.value,
+      ).toBe(""),
+    );
+  });
+
+  it("edits an owned comment from the market detail screen", async () => {
+    renderWithClient(<MarketDetailScreen />);
+
+    await screen.findByText("아직 남아있을까요? 늦었지만 가능하면 부탁드려요.");
+    fireEvent.press(screen.getByTestId("market-comment-edit-comment-4"));
+    fireEvent.changeText(
+      screen.getByPlaceholderText("댓글을 수정해주세요"),
+      "수정된 댓글 내용",
+    );
+    fireEvent.press(screen.getByLabelText("댓글 수정"));
+
+    expect(await screen.findByText("수정된 댓글 내용")).toBeTruthy();
+    await waitFor(() =>
+      expect(
+        screen.getByPlaceholderText("댓글을 입력해주세요").props.value,
+      ).toBe(""),
+    );
+  });
+
+  it("deletes an owned comment after confirmation", async () => {
+    const alert = jest
+      .spyOn(Alert, "alert")
+      .mockImplementation((_title, _message, buttons) => {
+        buttons?.find(({ text }) => text === "삭제")?.onPress?.();
+      });
+    renderWithClient(<MarketDetailScreen />);
+
+    await screen.findByTestId("market-comment-delete-comment-4");
+    const deletedBefore = screen.getAllByText("삭제된 댓글입니다").length;
+    fireEvent.press(screen.getByTestId("market-comment-delete-comment-4"));
+
+    await waitFor(
+      () =>
+        expect(screen.getAllByText("삭제된 댓글입니다")).toHaveLength(
+          deletedBefore + 1,
+        ),
+      { timeout: 5000 },
+    );
+    expect(screen.queryByTestId("market-comment-delete-comment-4")).toBeNull();
+    alert.mockRestore();
+  });
+
+  it("reports another member's comment and handles a duplicate", async () => {
+    renderWithClient(<MarketDetailScreen />);
+
+    await screen.findByTestId("market-comment-report-comment-1");
+    fireEvent.press(screen.getByTestId("market-comment-report-comment-1"));
+    fireEvent.press(screen.getByText("나눔을 빙자한 홍보·광고"));
+    fireEvent.press(screen.getByText("신고하기"));
+
+    expect(await screen.findByText("신고가 접수되었습니다")).toBeTruthy();
+
+    fireEvent.press(screen.getByTestId("market-comment-report-comment-1"));
+    fireEvent.press(screen.getByText("신고하기"));
+
+    expect(await screen.findByText("이미 신고한 콘텐츠입니다")).toBeTruthy();
+  });
+
+  it("deletes an owned market post and returns to the market list", async () => {
+    const replace = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({ replace } as never);
+    renderWithClient(<MarketDetailScreen />);
+
+    await screen.findByTestId("market-delete-post");
+    fireEvent.press(screen.getByTestId("market-delete-post"));
+    expect(screen.getByText("게시글을 삭제하시겠습니까?")).toBeTruthy();
+    fireEvent.press(screen.getAllByText("삭제").at(-1)!);
+
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/market"), {
+      timeout: 5000,
+    });
+  });
+
+  it("renders the group screen", async () => {
     renderWithClient(<GroupScreen />);
 
     expect(screen.getByText("동행")).toBeTruthy();
     expect(screen.getAllByText("소모임").length).toBeGreaterThan(0);
     expect(screen.getAllByText("봉사").length).toBeGreaterThan(0);
-    expect(screen.getByText("내 소모임")).toBeTruthy();
+    expect(await screen.findByText("내 소모임")).toBeTruthy();
     expect(screen.getByText("전체 모임")).toBeTruthy();
   });
 
-  it("renders the group detail screen", () => {
+  it("renders the group detail screen", async () => {
     renderWithClient(<GroupDetailScreen />);
 
-    expect(screen.getByText("토요 산악회")).toBeTruthy();
+    expect(await screen.findByText("토요 산악회")).toBeTruthy();
     expect(screen.getByText("멤버 6명")).toBeTruthy();
     expect(screen.getByText("공지사항")).toBeTruthy();
   });
@@ -80,11 +181,89 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByPlaceholderText("공지 제목 (최대 30자)")).toBeTruthy();
   });
 
-  it("renders the group members screen", () => {
+  it("creates a group notice and persists it in the detail", async () => {
+    const replace = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({ replace } as never);
+    const editor = renderWithClient(<GroupNoticesScreen />);
+
+    fireEvent.changeText(
+      screen.getByPlaceholderText("공지 제목 (최대 30자)"),
+      "새 모임 공지",
+    );
+    fireEvent.changeText(
+      screen.getByPlaceholderText("공지 내용을 입력해주세요"),
+      "이번 주 모임 장소가 변경되었습니다.",
+    );
+    fireEvent.press(screen.getByTestId("group-notice-submit"));
+
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/group/1"), {
+      timeout: 5000,
+    });
+    editor.unmount();
+    renderWithClient(<GroupDetailScreen />);
+    expect(await screen.findByText("새 모임 공지")).toBeTruthy();
+  });
+
+  it("updates and deletes a group notice from the editor", async () => {
+    const replace = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({ replace } as never);
+    jest.mocked(useLocalSearchParams).mockReturnValue({
+      id: "1",
+      noticeId: "notice-1",
+    });
+    const editor = renderWithClient(<GroupNoticesScreen />);
+
+    await waitFor(() =>
+      expect(
+        screen.getByPlaceholderText("공지 제목 (최대 30자)").props.value,
+      ).toBe("5월 18일 토요일 모임 안내"),
+    );
+    fireEvent.changeText(
+      screen.getByPlaceholderText("공지 제목 (최대 30자)"),
+      "수정된 산악회 공지",
+    );
+    fireEvent.press(screen.getByTestId("group-notice-submit"));
+    await waitFor(() => expect(replace).toHaveBeenCalledTimes(1), {
+      timeout: 5000,
+    });
+    editor.unmount();
+
+    const deleteEditor = renderWithClient(<GroupNoticesScreen />);
+    await screen.findByTestId("group-notice-delete");
+    fireEvent.press(screen.getByTestId("group-notice-delete"));
+    fireEvent.press(screen.getAllByText("삭제").at(-1)!);
+    await waitFor(() => expect(replace).toHaveBeenCalledTimes(2), {
+      timeout: 5000,
+    });
+    deleteEditor.unmount();
+
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
+    renderWithClient(<GroupDetailScreen />);
+    await screen.findByText("토요 산악회");
+    expect(screen.queryByText("수정된 산악회 공지")).toBeNull();
+  });
+
+  it("deletes a group notice directly from the detail", async () => {
+    renderWithClient(<GroupDetailScreen />);
+
+    await screen.findByTestId("group-notice-delete-notice-2");
+    fireEvent.press(screen.getByTestId("group-notice-delete-notice-2"));
+    expect(screen.getByText("공지를 삭제하시겠습니까?")).toBeTruthy();
+    fireEvent.press(screen.getAllByText("삭제").at(-1)!);
+
+    await waitFor(
+      () =>
+        expect(screen.queryByTestId("group-notice-delete-notice-2")).toBeNull(),
+      { timeout: 5000 },
+    );
+    expect(screen.queryByText("신규 멤버 환영합니다")).toBeNull();
+  });
+
+  it("renders the group members screen", async () => {
     renderWithClient(<GroupMembersScreen />);
 
     expect(screen.getByText("멤버 관리")).toBeTruthy();
-    expect(screen.getByText("전체 8명")).toBeTruthy();
+    expect(await screen.findByText("전체 8명")).toBeTruthy();
     expect(screen.getByText("소모임장")).toBeTruthy();
   });
 
@@ -96,11 +275,11 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("오늘 기도 완료")).toBeTruthy();
   });
 
-  it("renders the direct prayer screen", () => {
+  it("renders the direct prayer screen", async () => {
     renderWithClient(<PrayerScreen />);
 
     expect(screen.getByText("함께 기도하고 응답을 나눠요")).toBeTruthy();
-    expect(screen.getByText("내 기도방")).toBeTruthy();
+    expect(await screen.findByText("내 기도방")).toBeTruthy();
     expect(screen.queryByText("삶공부")).toBeNull();
   });
 
@@ -128,11 +307,11 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("커리큘럼")).toBeTruthy();
   });
 
-  it("renders the direct life study screen", () => {
+  it("renders the direct life study screen", async () => {
     renderWithClient(<LifeStudyScreen />);
 
     expect(screen.getByText("말씀으로 배우고 삶으로 자라가요")).toBeTruthy();
-    expect(screen.getByText("내 학습경로")).toBeTruthy();
+    expect(await screen.findByText("내 학습경로")).toBeTruthy();
     expect(screen.queryByText("중보기도")).toBeNull();
   });
 
@@ -158,6 +337,22 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("마이페이지")).toBeTruthy();
     expect(screen.getByText("활동 관리")).toBeTruthy();
     expect(screen.getByText("개인정보 처리방침")).toBeTruthy();
+  });
+
+  it("clears the session before leaving my page on logout", async () => {
+    const logout = jest
+      .spyOn(authService, "logout")
+      .mockRejectedValueOnce(new Error("keystore delete failed"));
+    const replace = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({ replace } as never);
+    renderWithClient(<MyPageScreen />);
+
+    fireEvent.press(screen.getByText("로그아웃"));
+
+    await waitFor(() => {
+      expect(logout).toHaveBeenCalledTimes(1);
+      expect(replace).toHaveBeenCalledWith("/login");
+    });
   });
 
   it("renders the profile edit screen", () => {

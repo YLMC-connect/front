@@ -1,6 +1,6 @@
 # common (공통 인프라)
 
-> 마지막 갱신: 2026-07-10 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-11 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -34,6 +34,7 @@
 - 디자인 viewport 기반 부분 캡처 옵션 추가 — `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT=1` 사용 시 Android Emulator를 1080x2160@480으로 임시 조정해 ZIP 360x720 논리 viewport에 맞춰 캡처하고, 캡처 후 원래 size/density로 복원
 - ZIP frame safe-area 정렬 — `Screen`은 ZIP `phone-status` 44px frame을 기준으로 top offset을 맞추고, 하단 fixed action/tab 계열은 ZIP처럼 bottom inset 위로 과도하게 뜨지 않도록 bottom safe-area padding을 제거
 - ZIP RadioSheet compact/footer 정렬 — 긴 radio 목록은 ZIP 신고 sheet처럼 20px radio mark와 12px row padding을 사용하고, sheet footer는 48px pill 버튼으로 맞춤
+- RadioSheet 실제 선택 경계 추가 — 선택 callback·접근성 radio state·confirm disabled를 공통화해 디자인 reference와 실제 mutation form이 같은 sheet를 사용
 - ZIP visual artifact 재생성 자동화 — `npm run test:visual:prepare`로 ZIP standalone HTML에서 110개 inventory/manifest/original PNG를 다시 만들고, full `npm run test:visual:compare`를 `screens=110`, `missing=0`으로 복구
 - ZIP animated original settle 반영 — bottom sheet/toast animation이 끝난 최종 프레임을 기준으로 원본 PNG를 재생성하도록 `scripts/prepare-design-artifacts.mjs`에 `YLMC_PREPARE_RENDER_SETTLE_MS` 대기값을 추가
 - Dev Client Maestro smoke 후행 메뉴 처리 보강 — 루트 딥링크 이후 늦게 표시되는 `Continue`/`Reload` developer menu도 조건부로 닫고 탭 검증을 진행
@@ -57,6 +58,18 @@
 - gluestack-ui Provider 적용 — `GluestackUIProvider`를 앱 루트에 연결하고, NativeWind/Tailwind 기존 설정은 유지
 - 오래된 문서 정리 — GitHub Issues/PR로 이관된 archive 문서는 안내문만 남기고, PLAN.md의 폐기된 탭 설명을 최신 홈/나눔/동행/기도/삶공부 IA로 갱신
 - CI lockfile 정합성 복구 — gluestack 전이 의존성의 peer 요구인 `@react-spectrum/provider@3.11.1`을 명시해 GitHub Actions의 `npm ci` 실패를 해소
+- 공통 API transport 기반 추가 — 환경별 base URL, `{ code, message, data }` envelope 검증, Authorization 헤더, `ApiError` 정규화를 `src/lib/apiClient.ts`에 격리하고 단위 테스트 추가
+- 공통 API 오류 문구 경계 추가 — `ApiError.code`를 도메인 메시지 표로 변환하고 네트워크/응답 형식 공통 문구와 미등록 코드 fallback을 분리
+- 인증 API 계약 게이트 추가 — `scripts/check-auth-api-contract.mjs`가 Swagger의 구체 성공 DTO·회원 중복확인 `data.available`·공개 endpoint JWT 예외·security scheme 참조를 자동 확인
+- 인증 401 복구 경계 추가 — 인증 요청의 동시 401을 단일 refresh로 합치고 성공 시 각 요청을 한 번만 재시도하며 공개 요청은 재발급 대상에서 제외
+- 나눔 API 계약 게이트 추가 — Swagger CRUD·댓글·신고·이미지 업로드 endpoint와 목록/상세 화면 필드 누락을 `test:api:contract:market`으로 자동 판정
+- OpenAPI 계약 검사 공통화 — 인증·나눔·동행 검사기의 로딩·endpoint·schema·enum·보안·제약 검사를 `openapi-contract-utils.mjs`로 통합하고 오프라인 Node 테스트를 `validate`에 포함
+- 동행 API 계약 게이트 추가 — Swagger 주요 endpoint와 목록/관리 화면 필수 계약 누락을 `test:api:contract:group`으로 자동 판정
+- 디자인 상태 query 분리 — Dev Client 캡처 전용 `designVariant`를 production에서 무시하고 실제 동행 segment·MY 활동 탭은 `section`·`tab` query로 분리
+- faith 루트 데이터 경계 정리 — 기도·삶공부 overview를 화면 내부 fixture에서 domain mock/service/query hook으로 이동하고 공통 queryKey와 비동기 상태 처리를 적용
+- 탭 smoke 관찰성 복구 — 공통 `Screen`의 선택적 `testID` 전달과 5개 루트 탭 식별자를 복원하고 삶공부 비동기 콘텐츠 기준으로 Maestro 시나리오 갱신
+- 나눔·동행 조회 데이터 경계 정리 — 공통 `queryKeys`에 overview/detail/members 키를 추가하고 화면 fixture를 domain mock/service/query hook으로 이동
+- Dev Client visual capture 조건부 메뉴 처리 — Android UI hierarchy로 `Continue`/`Reload`/서버 선택 overlay를 감지하고 실제 node bounds만 눌러 앱 카드·버튼 오작동 캡처를 방지
 
 ---
 
@@ -80,6 +93,12 @@
 | `src/components/faith/FaithSectionsScreen.tsx`                | 기도/삶공부 목록의 공유 렌더러. route가 아니라 `/prayer`, `/life-study`에서 section prop으로 사용                                                                                                                                          |
 | `src/components/ui/index.tsx`                                 | ZIP 토큰 기준 Button, Card, Badge, Chip, form, modal/dialog, sheet, toast, FAB 등 공통 UI                                                                                                                                                  |
 | `src/components/gluestack-ui/gluestack-ui-provider/index.tsx` | gluestack overlay/toast provider. 앱 루트에서 light mode로 사용                                                                                                                                                                            |
+| `src/lib/apiClient.ts`                                        | 공통 API envelope·오류·Authorization 처리                                                                                                                                                                                                  |
+| `src/lib/apiErrorMessage.ts`                                  | API 오류 코드와 도메인 사용자 문구 매핑                                                                                                                                                                                                    |
+| `src/lib/authRecovery.ts`                                     | API client와 인증 session manager 사이의 refresh 연결 지점                                                                                                                                                                                 |
+| `src/lib/designVariant.ts`                                    | development 전용 디자인 상태 query 해석                                                                                                                                                                                                    |
+| `src/lib/secureStore.ts`                                      | access/refresh token 안전 저장                                                                                                                                                                                                             |
+| `src/types/api.ts`                                            | 서버 공통 `ApiResponse<T>` 타입                                                                                                                                                                                                            |
 | `src/constants/theme.ts`                                      | `열린문커넥트.zip` 기준 color, radius, font, lineHeight, weight, shadow 디자인 토큰                                                                                                                                                        |
 | `jest.setup.ts`                                               | Jest mock 설정과 Expo Router/native module 테스트 어댑터                                                                                                                                                                                   |
 | `src/test/renderWithClient.tsx`                               | TanStack Query 화면 테스트용 test wrapper                                                                                                                                                                                                  |
@@ -91,6 +110,10 @@
 | `scripts/prepare-design-artifacts.mjs`                        | ZIP에서 110개 visual inventory와 원본 PNG를 재생성. 기본 출력은 `/private/tmp/ylmc-golden-screens/2026-05-23`                                                                                                                              |
 | `scripts/capture-design-screens.mjs`                          | Android Dev Client에서 design route 스크린샷 캡처. `YLMC_CAPTURE_INDEXES`, `YLMC_CAPTURE_RESET_EACH_ROUTE`, `YLMC_CAPTURE_ROUTE_OPEN_REPEATS`, `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT`, `YLMC_CAPTURE_DISMISS_AFTER_ROUTE`로 부분 재캡처 가능 |
 | `scripts/compare-design-screens.mjs`                          | 원본/앱 스크린샷 normalized diff 생성. 원본 PNG가 단색 빈 화면이면 `originalFlat`로 표시해 JSX 기준 검토 대상으로 분리                                                                                                                     |
+| `scripts/check-auth-api-contract.mjs`                         | login/refresh/signup/me 성공 DTO와 JWT 정의를 확인하는 Swagger 계약 검사                                                                                                                                                                   |
+| `scripts/check-market-api-contract.mjs`                       | 나눔 CRUD·댓글·신고 및 화면 요구 필드를 확인하는 Swagger 계약 검사                                                                                                                                                                         |
+| `scripts/check-group-api-contract.mjs`                        | 동행 목록·상세·내 목록·멤버/공지·참여/관리 계약을 확인하는 Swagger 계약 검사                                                                                                                                                               |
+| `scripts/openapi-contract-utils.mjs`                          | 도메인별 Swagger 계약 검사 공통 유틸과 실패 수집                                                                                                                                                                                           |
 | `.maestro/smoke.yml`                                          | v1 핵심 탭 진입 `testID` 기반 E2E smoke                                                                                                                                                                                                    |
 
 ## 데이터 타입
@@ -99,6 +122,19 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-11) **RadioSheet는 표시 전용과 제어형 입력을 모두 지원한다** — `onValueChange`가 있으면 option을 접근 가능한 radio Pressable로 렌더링하고, 없으면 기존 reference 표시 동작을 유지합니다. 비동기/필수 입력 상태는 `confirmDisabled`로 footer에서 차단합니다.
+- (2026-07-11) **visual capture는 Dev Client overlay node만 조작한다** — route 진입 후 고정 좌표를 블라인드 탭하지 않고 UI hierarchy에서 overlay label과 bounds를 찾을 때만 탭합니다. 앱 화면이면 즉시 캡처 단계로 넘어가 비동기 목록 카드나 CTA가 눌리지 않게 합니다.
+- (2026-07-11) **계약 gate는 envelope 내부 필드도 검증한다** — endpoint와 응답 `$ref` 존재만으로 통과시키지 않고, 화면 흐름이 의존하는 `data.available`처럼 필수 성공 필드는 공통 OpenAPI 유틸이 실제 schema property까지 확인합니다.
+- (2026-07-11) **계약 gate는 request 제약도 화면 규칙과 대조한다** — required/property뿐 아니라 `minLength/maxLength`, `minimum/maximum`, `maxItems`, enum을 검증해 프런트 validator와 서버 DTO가 서로 다른 규칙을 갖지 않게 합니다.
+- (2026-07-11) **상태 변경 API는 오류 코드 문서화를 계약으로 요구한다** — 4xx/5xx response description에 식별 가능한 코드를 요구하고, 화면은 서버 message 대신 code 기반 도메인 문구를 사용합니다.
+- (2026-07-11) **실제 API 대기 중에도 조회 화면은 data source 경계를 지킨다** — Swagger DTO를 추측하는 HTTP mapper는 계약 검사 통과 전까지 만들지 않지만, 화면은 fixture를 직접 소유하지 않고 `screen → hook → service → data source` 흐름을 사용합니다. HTTP 전환은 data source 구현 교체로 제한합니다.
+- (2026-07-10) **디자인 상태는 production 데이터 상태를 덮지 않는다** — visual capture는 `designVariant`만 사용하고 `readDesignVariant`가 development에서만 값을 반환합니다. 실제 탐색 상태는 `section`, `tab`처럼 의미 있는 query로 분리하며 서버 오류·권한·완료 상태는 향후 service/domain model에서 결정합니다.
+- (2026-07-10) **계약 검사 엔진과 도메인 요구 목록을 분리한다** — OpenAPI 로딩과 공통 규칙은 `openapi-contract-utils.mjs`, 인증·나눔·동행의 필수 endpoint/필드는 각 checker가 소유합니다. 공통 엔진과 디자인 라우트는 네트워크 없이 `test:scripts`로 CI 검증합니다.
+- (2026-07-10) **401 재발급은 API client 인스턴스별 single-flight로 처리한다** — 동시에 만료된 여러 인증 요청은 refresh Promise 하나를 공유하고 성공 후 각 원 요청을 최대 한 번만 재시도합니다. `auth: false` 공개 요청의 401은 로그인 실패이므로 refresh하지 않습니다.
+- (2026-07-10) **공통 API client는 transport 책임만 가진다** — base URL, envelope, 오류, Authorization을 공통화하되 API DTO를 화면 모델로 직접 노출하지 않습니다. 도메인별 service/mapper가 서버 필드와 화면 모델의 차이를 흡수합니다.
+- (2026-07-10) **Swagger 계약 검사는 확정 전 일반 CI와 분리한다** — 인증 성공 DTO와 JWT 정의가 미완성인 동안 `test:api:contract`는 별도 명령으로 누락을 가시화합니다. 백엔드 계약 확정 후 통과 상태가 되면 CI 게이트 포함 여부를 결정합니다.
+- (2026-07-10) **루트 탭 E2E 식별자는 `Screen`이 전달한다** — 화면별 wrapper를 추가하지 않고 공통 `Screen`의 선택적 `testID`를 사용합니다. smoke는 화면 진입 식별자와 비동기 데이터가 렌더링된 현재 IA 문구를 함께 검증합니다.
+- (2026-07-10) **mock-first 화면도 service/query 경계를 지킨다** — 실제 사용자 API가 없는 도메인도 화면이 fixture를 직접 소유하지 않고 `screen → hook → service → mock` 흐름을 사용합니다. API 추가 시 화면이 아니라 service/mapper를 교체합니다.
 - (2026-07-10) **CI의 peer dependency 요구는 lockfile 우회 없이 명시한다** — gluestack 전이 의존성이 요구하는 `@react-spectrum/provider@3.11.1`을 직접 고정합니다. `npm ci --legacy-peer-deps`로 검증을 약화하지 않고 Node 20.19.4/npm 10.8.2 기준 깨끗한 설치를 유지합니다.
 - (2026-06-29) **archive 문서는 이관 안내만 유지한다** — 작업 목록은 GitHub Issues, 변경 이력은 PR description이 단일 출처이므로 `docs/_archive/LOG.md`와 `docs/_archive/TASKS.md`는 긴 과거 본문 대신 조회 안내만 둡니다.
 - (2026-06-27) **탭 IA는 Downloads preview 기준을 따른다** — 하단 탭은 `홈/나눔/동행/기도/삶공부`입니다. `MY`는 하단 탭에서 제거하고 홈 상단 `내 정보 보기` 카드로 진입합니다. `동행` 탭 내부는 Downloads `ScreenGroupList`/`ScreenServiceList`처럼 `소모임/봉사` segment를 둡니다.

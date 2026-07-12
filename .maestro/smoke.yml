@@ -35,7 +35,7 @@ tags:
           timeout: 60000
       - tapOn:
           point: "90%,45%"
-- openLink: ylmc-connect:///
+- openLink: ylmc-connect:///signup
 - waitForAnimationToEnd:
     timeout: 5000
 - runFlow:
@@ -61,6 +61,69 @@ tags:
           point: "90%,45%"
 - extendedWaitUntil:
     visible:
+      id: signup-id-input
+    timeout: 60000
+- tapOn:
+    id: signup-id-input
+- inputText: maestro-member
+- hideKeyboard
+- tapOn:
+    id: signup-check-id
+- extendedWaitUntil:
+    visible: 사용 가능한 아이디입니다
+    timeout: 5000
+- tapOn:
+    id: signup-password-input
+- inputText: password1
+- scrollUntilVisible:
+    element:
+      id: signup-password-confirm-input
+    direction: DOWN
+- tapOn:
+    id: signup-password-confirm-input
+- inputText: password1
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: signup-name-input
+    direction: DOWN
+- tapOn:
+    id: signup-name-input
+- inputText: Maestro
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: signup-phone-input
+    direction: DOWN
+- tapOn:
+    id: signup-phone-input
+- inputText: 01012345678
+- hideKeyboard
+- tapOn:
+    id: signup-submit
+- extendedWaitUntil:
+    visible:
+      id: screen-home
+    timeout: 5000
+- openLink: ylmc-connect:///login
+- extendedWaitUntil:
+    visible:
+      id: login-id-input
+    timeout: 5000
+- tapOn:
+    id: login-id-input
+- inputText: gracekim
+- tapOn:
+    id: login-password-input
+- inputText: password
+- hideKeyboard
+- tapOn: 로그인
+- extendedWaitUntil:
+    visible:
+      id: screen-home
+    timeout: 5000
+- extendedWaitUntil:
+    visible:
       id: tab-home
     timeout: 60000
 - tapOn:
@@ -75,10 +138,130 @@ tags:
     id: tab-market
 - assertVisible:
     id: screen-market
+- tapOn: 아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)
+- extendedWaitUntil:
+    visible:
+      id: market-comment-input
+    timeout: 5000
+- tapOn:
+    id: market-comment-input
+- inputText: Maestro comment
+- hideKeyboard
+- tapOn:
+    id: market-comment-submit
+- scrollUntilVisible:
+    element:
+      text: Maestro comment
+    direction: DOWN
+- extendedWaitUntil:
+    visible: Maestro comment
+    timeout: 5000
+- scrollUntilVisible:
+    element:
+      id: market-comment-edit-mock-comment-1-.*
+    direction: DOWN
+- tapOn:
+    id: market-comment-edit-mock-comment-1-.*
+- tapOn:
+    id: market-comment-input
+- eraseText: 15
+- inputText: Maestro edited
+- hideKeyboard
+- tapOn:
+    id: market-comment-submit
+- scrollUntilVisible:
+    element:
+      text: Maestro edited
+    direction: DOWN
+- assertVisible: Maestro edited
+- scrollUntilVisible:
+    element:
+      id: market-comment-delete-mock-comment-1-.*
+    direction: DOWN
+- tapOn:
+    id: market-comment-delete-mock-comment-1-.*
+- assertVisible: 댓글 삭제
+- tapOn: 삭제
+- assertNotVisible: Maestro edited
+- scrollUntilVisible:
+    element:
+      id: market-comment-report-comment-1
+    direction: UP
+- tapOn:
+    id: market-comment-report-comment-1
+- tapOn: 나눔을 빙자한 홍보·광고
+- tapOn: 신고하기
+- assertVisible: 신고가 접수되었습니다
+- tapOn:
+    id: market-comment-report-comment-1
+- tapOn: 신고하기
+- assertVisible: 이미 신고한 콘텐츠입니다
+- scrollUntilVisible:
+    element:
+      id: market-delete-post
+    direction: UP
+- tapOn:
+    id: market-delete-post
+- assertVisible: 게시글을 삭제하시겠습니까?
+- tapOn: 삭제
+- assertVisible:
+    id: screen-market
+- assertNotVisible: 아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)
 - tapOn:
     id: tab-group
 - assertVisible:
     id: screen-group
+- tapOn: 토요 산악회
+- extendedWaitUntil:
+    visible:
+      id: group-notice-open-create
+    timeout: 5000
+- tapOn:
+    id: group-notice-open-create
+- tapOn:
+    id: group-notice-title-input
+- inputText: Maestro notice
+- tapOn:
+    id: group-notice-content-input
+- inputText: Maestro notice content
+- hideKeyboard
+- tapOn:
+    id: group-notice-submit
+- scrollUntilVisible:
+    element:
+      text: Maestro notice
+    direction: DOWN
+- assertVisible: Maestro notice
+- scrollUntilVisible:
+    element:
+      id: group-notice-edit-mock-notice-1-.*
+    direction: DOWN
+- tapOn:
+    id: group-notice-edit-mock-notice-1-.*
+- tapOn:
+    id: group-notice-title-input
+- eraseText: 14
+- inputText: Maestro edited notice
+- hideKeyboard
+- tapOn:
+    id: group-notice-submit
+- scrollUntilVisible:
+    element:
+      text: Maestro edited notice
+    direction: DOWN
+- assertVisible: Maestro edited notice
+- scrollUntilVisible:
+    element:
+      id: group-notice-delete-mock-notice-1-.*
+    direction: DOWN
+- tapOn:
+    id: group-notice-delete-mock-notice-1-.*
+- assertVisible: 공지를 삭제하시겠습니까?
+- tapOn: 삭제
+- assertNotVisible: Maestro edited notice
+- back
+- assertVisible:
+    id: screen-home
 - tapOn:
     id: tab-prayer
 - assertVisible:
@@ -87,5 +270,23 @@ tags:
     id: tab-life-study
 - assertVisible:
     id: screen-faith
+- extendedWaitUntil:
+    visible: 지금 신청 가능한 과정
+    timeout: 5000
+- tapOn:
+    id: tab-home
 - assertVisible:
-    text: 신청가능·진행중
+    id: screen-home
+- tapOn:
+    id: home-open-mypage
+- assertVisible: 마이페이지
+- scrollUntilVisible:
+    element:
+      id: mypage-logout
+    direction: DOWN
+- tapOn:
+    id: mypage-logout
+- extendedWaitUntil:
+    visible:
+      id: login-id-input
+    timeout: 5000

@@ -22,7 +22,7 @@ const activityItems: MenuItem[] = [
   {
     label: "중보기도 활동 이력",
     icon: "volunteer-activism",
-    href: "/mypage/activity?variant=prayer",
+    href: "/mypage/activity?tab=prayer",
   },
   {
     label: "삶공부 수료",
@@ -59,10 +59,15 @@ export default function MyPageScreen() {
   const router = useRouter();
   const { logout } = useAuth();
 
-  const handleMenuPress = (item: MenuItem) => {
+  const handleMenuPress = async (item: MenuItem) => {
     if (item.action === "logout") {
-      logout();
-      router.replace("/login");
+      try {
+        await logout();
+      } catch {
+        // The in-memory session is cleared even if native token deletion fails.
+      } finally {
+        router.replace("/login");
+      }
       return;
     }
 
@@ -123,7 +128,7 @@ function MenuSection({
 }: {
   title: string;
   items: MenuItem[];
-  onPress: (item: MenuItem) => void;
+  onPress: (item: MenuItem) => void | Promise<void>;
 }) {
   return (
     <Section title={title}>
@@ -133,7 +138,7 @@ function MenuSection({
             key={item.label}
             item={item}
             last={index === items.length - 1}
-            onPress={() => onPress(item)}
+            onPress={() => void onPress(item)}
           />
         ))}
       </Card>
@@ -154,6 +159,7 @@ function MenuRow({
 
   return (
     <Pressable
+      testID={item.action === "logout" ? "mypage-logout" : undefined}
       accessibilityRole="button"
       onPress={onPress}
       style={[styles.menuRow, last ? styles.menuRowLast : null]}

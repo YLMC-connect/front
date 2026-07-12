@@ -1,6 +1,6 @@
 # auth (인증)
 
-> 마지막 갱신: 2026-06-27 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-11 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -26,30 +26,61 @@
 - Splash 실제 route 복구 — `DesignSourceScreens` placeholder를 제거하고 Downloads `ScreenSplash` 기준 gradient, door logo, title/subtitle, loading dots를 실제 RN 화면으로 반영
 - 약관 동의 실제 route 복구 — `DesignSourceScreens` placeholder를 제거하고 Downloads `ScreenTerms`/`ScreenTermsSheet` 기준 전체 동의, 필수/선택 약관 row, bottom sheet 전문을 실제 RN 화면으로 반영
 - 가입 코드 reference route 제거 — Downloads 원본에 독립 `ScreenInviteCode`가 없고 MVP 제외 결정이 있어 부정확한 placeholder route를 삭제
+- 인증 API 공통 기반 추가 — `{ code, message, data }` envelope와 Authorization 헤더, 공통 오류를 처리하는 `src/lib/apiClient.ts` 및 단위 테스트 구현
+- SecureStore 토큰 조회 보강 — access/refresh token 개별·동시 조회와 저장·삭제 동작을 테스트로 고정
+- Swagger 인증 계약 검사 추가 — `npm run test:api:contract`로 login/refresh/signup/me 성공 DTO와 JWT 정의 누락을 자동 판정
+- 인증 세션 수명주기 구현 — 로그인·회원가입 토큰 저장, 앱 시작 세션 복원, 401 refresh token rotation, 재발급 실패 토큰 정리·로그아웃을 `authSessionService`로 통합하고 자동 테스트 추가
+- 회원 중복확인 계약 검사 추가 — `POST /api/member/duplicate` 요청 enum과 공개 endpoint 여부, 200 envelope의 `data.available` 필드를 자동 검증
+- 회원 중복확인 mock 경계와 화면 연결 — `id | phone` 요청과 `available` 도메인 결과를 auth adapter/service/hook으로 격리하고, 기존 아이디 중복확인 버튼·가입 전 확인 gate를 실제 mutation에 연결
+- 인증 오류 코드 메시지 경계 추가 — Swagger에 문서화된 `MEM001~MEM006`을 고정 사용자 문구로 매핑하고 미등록 API 코드는 안전한 fallback을 사용
+- 로그인 화면·세션 통합 검증 추가 — 입력 검증 후 `useAuth → authService → authSessionService → SecureStore`로 access/refresh token을 저장하고 `authenticated` 상태가 된 뒤 홈으로 이동하는 순서를 화면 테스트로 고정
+- 핵심 Maestro 로그인 선행 — 앱 데이터를 초기화한 Dev Client에서 `/login`에 진입해 `gracekim/password`로 로그인한 뒤 나눔·동행·기도·삶공부 스모크를 실행하도록 골든 패스를 연결
+- 회원가입 화면·세션 통합 검증 추가 — 현재 아이디의 사용 가능 응답을 받은 뒤 전체 입력을 제출하고, signup session의 토큰 저장·신규 사용자 인증 상태·홈 이동을 화면 테스트로 고정
+- 회원가입 중복확인 결과 무효화 검증 — 사용 가능 확인 후 아이디가 바뀌면 이전 결과를 폐기하고 재확인 전 제출·토큰 저장을 차단하는 회귀 테스트 추가
+- 핵심 Maestro 회원가입 선행 — 앱 상태 초기화 후 회원가입 중복확인→전체 입력→홈 진입을 완료하고 다시 로그인한 뒤 도메인 스모크를 실행하도록 인증 골든 패스 확장
+- 로그아웃 토큰 정리 내결함성 보강 — access token 삭제가 실패해도 refresh token 삭제를 함께 시도하고, 정리 오류와 무관하게 session manager가 메모리 인증 상태를 `anonymous`로 전환하도록 테스트로 고정
+- 핵심 Maestro 로그아웃 종결 — 회원가입·로그인·도메인 흐름 후 홈→마이페이지→로그아웃을 실행하고 로그인 입력 화면 복귀까지 인증 골든 패스에 포함
 
 ## 주요 파일 (도메인 파일 지도)
 
-| 경로                          | 역할                               |
-| ----------------------------- | ---------------------------------- |
-| `app/(auth)/_layout.tsx`      | 인증 스택 layout                   |
-| `app/(auth)/splash.tsx`       | Splash 실제 화면                   |
-| `app/(auth)/terms.tsx`        | 약관 동의 실제 화면                |
-| `app/(auth)/terms-sheet.tsx`  | 약관 전문 bottom sheet 실제 화면   |
-| `app/(auth)/login.tsx`        | 로그인 화면                        |
-| `app/(auth)/signup.tsx`       | 회원가입 화면                      |
-| `src/store/authStore.ts`      | Zustand 인증 상태                  |
-| `src/services/authService.ts` | 인증 mock service                  |
-| `src/services/authAdapter.ts` | mock/http auth adapter 스위치 지점 |
-| `src/hooks/useAuth.ts`        | 인증 액션 hook                     |
-| `src/types/auth.ts`           | 인증 입력/응답 타입                |
-| `src/mocks/auth.ts`           | mock 사용자/성도 데이터            |
+| 경로                                  | 역할                               |
+| ------------------------------------- | ---------------------------------- |
+| `app/(auth)/_layout.tsx`              | 인증 스택 layout                   |
+| `app/(auth)/splash.tsx`               | Splash 실제 화면                   |
+| `app/(auth)/terms.tsx`                | 약관 동의 실제 화면                |
+| `app/(auth)/terms-sheet.tsx`          | 약관 전문 bottom sheet 실제 화면   |
+| `app/(auth)/login.tsx`                | 로그인 입력·오류·세션 시작 화면    |
+| `app/(auth)/signup.tsx`               | 회원가입 화면                      |
+| `src/store/authStore.ts`              | Zustand 인증 상태                  |
+| `src/services/authService.ts`         | 인증 mock service                  |
+| `src/services/authSessionService.ts`  | 토큰 저장·복원·재발급·로그아웃 상태 전이 |
+| `src/services/authAdapter.ts`         | mock/http auth adapter 스위치 지점 |
+| `src/hooks/useAuth.ts`                | 인증 액션 hook                     |
+| `src/types/auth.ts`                   | 인증 입력/응답 타입                |
+| `src/types/api.ts`                    | 공통 `ApiResponse<T>` envelope     |
+| `src/mocks/auth.ts`                   | mock 사용자/성도 데이터            |
+| `src/lib/apiClient.ts`                | 공통 응답·오류·Authorization 처리  |
+| `src/lib/apiErrorMessage.ts`          | API 오류 코드→사용자 문구 변환     |
+| `src/constants/apiErrorMessages.ts`   | 문서화된 인증 오류 코드 메시지 표  |
+| `src/lib/secureStore.ts`              | access/refresh token 안전 저장     |
+| `scripts/check-auth-api-contract.mjs` | Swagger 인증 계약 검사             |
 
 ## 데이터 타입
 
-`LoginInput`, `SignupInput`, `AuthSession`을 `src/types/auth.ts`에 정의합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다.
+`LoginInput`, `SignupInput`, `MemberDuplicateInput`, `MemberAvailability`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리합니다. 중복확인 요청은 Swagger의 `searchType: id | phone`, `searchValue` 계약을 따르며 화면에는 `available` 도메인 결과만 노출합니다. 실제 HTTP 응답 mapper는 `data.available`이 성공 schema에 명시된 뒤 활성화합니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-11) **로그아웃은 모든 토큰 삭제를 시도한 뒤 메모리 세션을 반드시 종료한다** — SecureStore의 한 키 삭제가 실패해도 다른 키 삭제를 건너뛰지 않으며, native cleanup 오류는 호출자에게 전달하되 session manager의 `finally`가 `anonymous` 상태를 보장합니다. 마이페이지는 오류 여부와 관계없이 로그인 화면으로 이동합니다.
+- (2026-07-11) **핵심 E2E는 회원가입과 로그인을 같은 세션 경계로 검증한다** — 메인 Maestro는 회원가입 성공으로 홈에 도달한 뒤 로그인 route를 다시 열어 재인증하고 도메인 흐름을 실행합니다. 두 화면은 토큰을 직접 다루지 않고 동일한 session manager를 사용해야 합니다.
+- (2026-07-11) **핵심 E2E는 로그인 성공 이후에만 도메인 흐름을 실행한다** — 메인 Maestro는 앱 상태를 초기화하고 로그인 화면의 실제 입력과 mutation을 거쳐 홈에 도달해야 나눔·동행 검증을 계속합니다. 서비스 단위 테스트와 별도로 화면→SecureStore→인증 store→navigation 연결을 증명합니다.
+- (2026-07-11) **중복확인 결과는 검사한 값과 함께 보관한다** — 요청 중 아이디가 바뀌었을 때 이전 응답을 현재 값의 결과로 오인하지 않도록 `{ value, available }`을 함께 비교합니다. 기본 가입 제출은 현재 아이디의 사용 가능 응답을 받은 뒤에만 허용하고, 연락처 중복확인 UI는 디자인 확정 전까지 새로 만들지 않습니다.
+- (2026-07-11) **API 오류는 서버 message가 아니라 code로 사용자 문구를 결정한다** — 문서화된 `MEM001~MEM006`은 인증 메시지 표로 관리하고, 네트워크/응답 형식 오류는 공통 문구를 사용합니다. 미등록 API 코드는 내부 서버 문장을 노출하지 않고 화면별 fallback을 표시합니다.
+- (2026-07-11) **회원가입 전 중복확인도 인증 계약 gate에 포함한다** — `POST /api/member/duplicate`는 구체 요청뿐 아니라 공개 endpoint `security: []`와 200 응답 `data.available`을 반드시 제공해야 합니다. 설명 문자열만으로 성공 응답을 추측하지 않습니다.
+- (2026-07-10) **로그인·회원가입 오류/loading/toast query는 디자인 전용이다** — 캡처용 `designVariant`는 development에서만 해석합니다. 실제 로그인 오류와 pending 상태는 mutation 결과가 단일 출처이며 URL query로 인증 결과를 만들지 않습니다.
+- (2026-07-10) **세션 상태 전이는 session manager가 단독 소유한다** — 화면/hook은 토큰을 직접 다루지 않습니다. adapter 성공 후 SecureStore 저장이 끝나야 `authenticated`가 되며, 앱 시작은 현재 회원 조회로 복원하고 401이면 refresh합니다. refresh 실패는 토큰을 지우고 `anonymous`, 일반 네트워크 실패는 토큰을 보존하고 `unavailable`로 구분합니다.
+- (2026-07-10) **불완전한 인증 성공 응답은 추측하지 않는다** — login/refresh/signup/me 성공 DTO와 refresh rotation 정책이 Swagger에 확정되기 전에는 `httpAuthAdapter`를 활성화하지 않습니다. `test:api:contract`는 이 계약 게이트를 자동 판정하며, 미확정 기간에는 일반 `validate`와 분리합니다.
+- (2026-07-10) **API DTO와 화면 도메인 모델을 분리한다** — 공통 API client는 envelope·오류·Authorization만 담당하고, 서버 DTO를 화면 모델로 바꾸는 책임은 도메인 service/mapper에 둡니다.
 - (2026-06-27) **가입 코드 route는 제거한다** — Downloads 최신 원본에 독립 `ScreenInviteCode` 구현이 없고 기존 MVP 결정에서도 가입코드를 제외했으므로, 부정확한 reference 안내 화면을 유지하지 않습니다.
 - (2026-06-27) **Splash route는 placeholder가 아니라 실제 RN 화면으로 둔다** — Downloads `ScreenSplash`의 핵심 구조를 직접 렌더링하고, 웹 전용 blur/status glyph는 새 의존성 없이 생략합니다.
 - (2026-06-27) **약관 route는 placeholder가 아니라 실제 RN 화면으로 둔다** — Downloads `ScreenTerms`와 `ScreenTermsSheet`의 동의 row/bottom sheet 구조를 공통 `TermsAgreementScreen`으로 직접 렌더링합니다.
@@ -67,10 +98,10 @@
 
 ## 미결 / 추적
 
-- 실제 로그인 API의 응답 스키마와 refresh token rotation 정책 확인 필요.
+- 실제 로그인·회원가입·내 정보 성공 DTO, refresh 요청/응답 및 token rotation 정책, 공개 endpoint의 JWT 예외, `/api/member/me` security scheme 이름, 중복확인 `data.available`, 로그인·재발급 오류 코드 확정 필요. 단일 출처는 Issue #9이며 현재 `test:api:contract`는 13건을 검출합니다.
 - 약관/개인정보 동의 화면의 필수 여부와 문구 확정 필요.
-- auth bottom CTA/toast 정렬 후 `login-toast mean=10.18`, `code-toast mean=10.10`, `code-error mean=8.80`, `code-loading mean=8.32`, `code default mean=8.66`까지 낮췄습니다. `terms-sheet mean=12.21`는 Android status bar/time, backdrop blur 미적용, RN/web font metric 차이가 남아 후속 공통 overlay 정렬에서 추적합니다.
-- signup variant residual은 `ScreenSignup` 구조 정렬 후 `signup-pw-error 21.74→10.14`, `signup-id-dup 20.65→9.18`, `signup default 12.50→7.76`까지 낮췄습니다. 남은 차이는 RN status bar/time, secure input glyph/font metrics, CSS gradient/shadow 번역 차이 중심으로 후속 공통 정렬에서 추적합니다.
+- auth bottom CTA/toast 정렬 후 `login-toast mean=10.18`, `code-toast mean=10.10`, `code-error mean=8.80`, `code-loading mean=8.32`, `code default mean=8.66`까지 낮췄습니다. 로그인 입력 식별자 추가 후 기본 화면 부분 재캡처는 `login mean=13.18`로 렌더 구조 변동이 없음을 확인했습니다. `terms-sheet mean=12.21`는 Android status bar/time, backdrop blur 미적용, RN/web font metric 차이가 남아 후속 공통 overlay 정렬에서 추적합니다.
+- signup variant residual은 `ScreenSignup` 구조 정렬 후 `signup-pw-error 21.74→10.14`, `signup-id-dup 20.65→9.18`, `signup default 12.50→7.76`까지 낮췄습니다. 입력 식별자 추가 후 기본 화면 부분 재캡처는 `signup mean=12.99`로 확인했으며 구조 변경은 없습니다. 남은 차이는 RN status bar/time, secure input glyph/font metrics, CSS gradient/shadow 번역 차이 중심으로 후속 공통 정렬에서 추적합니다.
 
 ## 의존성
 

@@ -621,6 +621,8 @@ export function RadioSheet({
   children,
   onClose,
   onConfirm,
+  onValueChange,
+  confirmDisabled = false,
 }: {
   visible: boolean;
   title: string;
@@ -637,6 +639,8 @@ export function RadioSheet({
   children?: ReactNode;
   onClose: () => void;
   onConfirm: () => void;
+  onValueChange?: (value: string) => void;
+  confirmDisabled?: boolean;
 }) {
   const compact = options.length > 5;
 
@@ -660,9 +664,11 @@ export function RadioSheet({
             <Pressable
               accessibilityRole="button"
               onPress={onConfirm}
+              disabled={confirmDisabled}
               style={[
                 styles.sheetFooterButton,
                 danger ? styles.sheetDangerButton : styles.sheetConfirmButton,
+                confirmDisabled ? styles.sheetFooterButtonDisabled : null,
               ]}
             >
               <Text style={styles.sheetConfirmText}>{confirmText}</Text>
@@ -675,8 +681,18 @@ export function RadioSheet({
         {options.map((option, index) => {
           const selected = option.value === value;
           return (
-            <View
+            <Pressable
               key={option.value}
+              accessibilityRole={onValueChange ? "radio" : undefined}
+              accessibilityState={{
+                selected,
+                disabled: option.disabled,
+              }}
+              onPress={
+                onValueChange && !option.disabled
+                  ? () => onValueChange(option.value)
+                  : undefined
+              }
               style={[
                 styles.radioOption,
                 compact ? styles.radioOptionCompact : null,
@@ -719,7 +735,7 @@ export function RadioSheet({
               {option.disabled ? (
                 <Text style={styles.radioMeta}>현재 상태</Text>
               ) : null}
-            </View>
+            </Pressable>
           );
         })}
       </View>
@@ -1298,6 +1314,7 @@ const styles = StyleSheet.create({
   sheetDangerButton: {
     backgroundColor: theme.colors.danger,
   },
+  sheetFooterButtonDisabled: { opacity: 0.45 },
   sheetCancelText: {
     color: theme.colors.inkSoft,
     fontSize: theme.fontSize.md,

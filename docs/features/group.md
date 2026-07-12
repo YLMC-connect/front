@@ -1,6 +1,6 @@
 # group (소모임)
 
-> 마지막 갱신: 2026-06-27 | 담당 Phase: P1/P3 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-11 | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -35,26 +35,41 @@
 - 소모임 공지 작성/수정 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupNotices`의 close topbar, 삭제/등록 action, 공개 안내, 제목/내용 입력 section, 삭제 confirm을 `/group/notices` route에 RN으로 직접 반영
 - 소모임 멤버 관리 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupMembers`의 flat row list, 강퇴 pill, 이관 경고/선택 row, 하단 이관 action, confirm/toast variant를 `/group/members` route에 RN으로 직접 반영
 - 동행 탭 구조 반영 — Downloads `ScreenGroupList`/`ScreenServiceList` 기준으로 `/group`을 `동행` 루트로 두고 내부 `소모임/봉사` segment와 봉사 전용 card list를 추가
+- 동행 API 계약 게이트 추가 — `npm run test:api:contract:group`으로 목록·상세·내 목록·멤버/공지·참여/탈퇴·생성/수정/상태/관리 endpoint와 화면 필수 계약을 자동 검증
+- 동행 조회 데이터 경계 추가 — 목록·봉사·내 목록·상세·멤버 fixture를 화면에서 `mockGroupDataSource`로 이동하고 `useGroupOverview`/`useGroupDetail`/`useGroupMembers` query로 렌더링하며 미사용 중복 mock 목록 제거
+- 소모임 공지 관리 수직 흐름 연결 — 공지 작성·수정·삭제를 `useGroup* → groupService → mockGroupDataSource` 경계와 상세 query cache에 연결하고, 저장 후 해당 소모임 상세로 명시적으로 복귀하도록 구현
+- 소모임 공지 회귀 검증 — 서비스·화면 테스트에서 입력 정규화와 생성/수정/삭제 지속성을 확인하고 Android Maestro에서 작성→수정→삭제를 완주. 공지 디자인 4개 상태 residual은 `create 5.48`, `create-filled/edit 10.76`, `delete-confirm 10.86`
+- 소모임 상세 공지 인라인 삭제 연결 — 공지 카드의 기존 삭제 액션을 같은 `useDeleteGroupNotice` mutation과 확인 대화상자에 연결하고, 상세 cache 즉시 제거·실패 문구·Android Maestro 직접 삭제를 검증
 
 ## 주요 파일 (도메인 파일 지도)
 
 | 경로                             | 역할                               |
 | -------------------------------- | ---------------------------------- |
 | `app/(tabs)/group/index.tsx`     | 동행 탭 루트, 소모임/봉사 segment  |
-| `app/(tabs)/group/[id].tsx`      | 소모임 상세, 참여/탈퇴, 공지, 멤버 |
-| `app/(tabs)/group/notices.tsx`   | 소모임 공지 작성/수정              |
+| `app/(tabs)/group/[id].tsx`      | 소모임 상세, 공지 작성·인라인 삭제, 멤버 |
+| `app/(tabs)/group/notices.tsx`   | 소모임 공지 작성/수정/삭제          |
 | `app/(tabs)/group/members.tsx`   | 소모임 멤버 관리와 소모임장 이관   |
 | `app/modal/group-new.tsx`        | 소모임 개설 모달                   |
 | `src/mocks/groups.ts`            | 소모임 mock 데이터                 |
+| `src/services/groupService.ts`   | 교체 가능한 동행 조회·공지 CUD data source 경계 |
+| `src/hooks/useGroups.ts`         | 동행 조회와 공지 CUD TanStack Query hook |
 | `src/constants/domainOptions.ts` | 소모임 카테고리/상태 필터 옵션     |
 | `src/types/group.ts`             | 소모임 타입                        |
+| `scripts/check-group-api-contract.mjs` | 동행 Swagger endpoint·화면/관리 계약 검사 |
 
 ## 데이터 타입
 
-`Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
+`Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 화면 조회 모델 `GroupOverview`/`GroupDetail`/`GroupMemberDetail`은 목록·봉사·권한·멤버·공지 표시값을 포함하며 API DTO mapper의 출력 경계입니다. `GroupDetailNotice`는 수정 폼 재사용을 위한 전체 `content`를 포함하고, 공지 쓰기 경계는 `GroupNoticeInput`/`GroupNoticeUpdateInput`/`GroupNoticeTarget`으로 분리합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-11) **공지 삭제 진입점은 하나의 mutation 경계를 공유한다** — 편집 화면과 상세 카드의 삭제 UI는 각각 local confirm 상태만 소유하고, 실제 삭제·cache 갱신·mock 지속성은 `useDeleteGroupNotice → groupService → GroupDataSource` 한 경로에서 처리합니다.
+- (2026-07-11) **공지 CUD는 화면과 mock data source 사이의 완결된 수직 경계로 먼저 제공한다** — 제목/내용은 trim 후 필수값과 30/500자 제한을 서비스에서 검증하고, mutation 성공 시 상세 query cache를 갱신합니다. 실제 HTTP 전환은 공지 권한과 오류 코드 계약이 문서화되면 같은 data source 인터페이스에서 수행하며, 캡처용 `designVariant` 상태는 실제 폼 상태와 분리합니다.
+- (2026-07-11) **동행 핵심 흐름은 오류 코드가 문서화되어야 HTTP로 전환한다** — 상세·생성·수정·삭제·상태·참여·탈퇴·강퇴·공지 CUD의 4xx/5xx code가 Swagger에 있어야 권한/정원/상태 오류 문구를 확정할 수 있습니다. 현재 오류 문서 누락 11건을 포함한 전체 누락은 46건입니다.
+- (2026-07-11) **동행 request 계약은 PLAN의 일정·장소와 화면 제한을 함께 검증한다** — 목록·상세·생성·수정에서 일정과 장소를 요구하고 제목 20자, 내용 200자, 정원 2~100명, 공지 30/500자 제약을 확인합니다. 현재 Swagger와 PLAN 사이의 일정·장소 충돌을 포함한 전체 누락은 35건입니다.
+- (2026-07-11) **동행 조회 화면은 계약 확정 전에도 mock data source를 사용한다** — HTTP DTO/enum/권한 mapper 활성화는 기존 24건 계약 gate 뒤로 유지하되, 목록·상세·멤버 화면은 `useGroup* → groupService → mockGroupDataSource`를 소비합니다. 실제 목록·내 목록·멤버 응답은 같은 data source 인터페이스로 교체합니다.
+- (2026-07-10) **동행 디자인 variant와 실제 탐색 상태를 분리한다** — 캡처용 권한·오류·confirm/toast 상태는 development 전용 `designVariant`, 실제 소모임/봉사 segment는 `section` query를 사용합니다. 서버 권한·모집 상태가 연결되면 domain model이 화면 분기를 소유합니다.
+- (2026-07-10) **동행 mapper는 화면·관리 계약 24건 해소 후 활성화한다** — 주요 endpoint는 대부분 존재하지만 목록 `content/schedule`, category/status/keyword 필터, 응답 enum, 화면 입력 제한, 소모임장 이관 endpoint가 부족합니다. `test:api:contract:group` 통과 전에는 기존 mock 화면을 유지하고 강퇴를 이관처럼 사용하는 권한 추측을 금지합니다.
 - (2026-06-27) **동행 탭은 소모임/봉사 segment를 가진다** — Downloads `ScreenGroupList`와 `ScreenServiceList`를 기준으로 `/group`은 하단 `동행` 탭 루트가 되고, 내부에서 `소모임` 목록과 `봉사` 전용 리스트를 전환합니다.
 - (2026-06-27) **미사용 service/hook/card 레이어는 제거한다** — 현재 소모임 화면은 Downloads 원본을 기준으로 다시 구현할 예정이고 `GroupCard`, `groupService`, `useGroups` 호출처가 없어, 실제 API 연결 시 필요한 표면만 다시 만든다.
 - (2026-06-27) **소모임 목록은 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenGroupList` 구조를 `/group` route에 직접 반영합니다. 별도 service/hook은 실제 API 스키마 확정 전까지 만들지 않습니다.
@@ -82,6 +97,7 @@
 
 ## 미결 / 추적
 
+- Swagger 목록 설명·일정·장소·필터, 상세 일정·장소, type/category/status enum, 입력 제한, 소모임장 이관, 핵심 흐름 오류 코드 46건 확정 필요. 일정·장소를 백엔드 계약에 추가할지 최신 기획에서 제거할지도 명시적으로 결정해야 합니다. 단일 출처는 Issue #21이며 `npm run test:api:contract:group`으로 확인합니다.
 - 참여 신청이 즉시 참여인지 승인 대기인지 운영 정책 확인 필요.
 - 공지 작성 권한과 소모임장/관리자 권한 모델 확인 필요.
 - 강제 내보내기 이의 제기/복구 플로우는 실제 API와 운영 정책 확정 후 반영.

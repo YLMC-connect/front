@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import { Card, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { readDesignVariant } from "../../../src/lib/designVariant";
 
 type TabKey = "pray" | "answers" | "status";
 
@@ -66,10 +67,8 @@ const pendingPeople = ["한수연", "오지연"];
 
 export default function PrayerDetailScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = Array.isArray(params.variant)
-    ? params.variant[0]
-    : (params.variant ?? "pray");
+  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const variant = readDesignVariant(params.designVariant) ?? "pray";
   const activeTab: TabKey =
     variant === "status" ||
     variant === "status-empty" ||

@@ -1,35 +1,37 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   Avatar,
   Button,
   ConfirmDialog,
+  ErrorState,
   Toast,
   TopBar,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
-
-const members = [
-  { name: "김은혜", leader: true, joined: "2024.03.12", me: true },
-  { name: "박정아", joined: "2024.04.02", leader: false, me: false },
-  { name: "이수진", joined: "2024.05.18", leader: false, me: false },
-  { name: "김지영", joined: "2024.07.21", leader: false, me: false },
-  { name: "정혜진", joined: "2024.09.04", leader: false, me: false },
-  { name: "조미경", joined: "2024.11.10", leader: false, me: false },
-  { name: "한유라", joined: "2025.01.22", leader: false, me: false },
-  { name: "강민서", joined: "2025.03.05", leader: false, me: false },
-] as const;
-
-function variantOf(value: string | string[] | undefined) {
-  return Array.isArray(value) ? (value[0] ?? "default") : (value ?? "default");
-}
+import { useGroupMembers } from "../../../src/hooks/useGroups";
+import { readDesignVariant } from "../../../src/lib/designVariant";
+import type { GroupMemberDetail } from "../../../src/types/group";
 
 export default function GroupMembersScreenRoute() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = variantOf(params.variant);
+  const params = useLocalSearchParams<{
+    groupId?: string;
+    designVariant?: string;
+  }>();
+  const groupId = params.groupId ?? "1";
+  const variant = readDesignVariant(params.designVariant) ?? "default";
+  const membersQuery = useGroupMembers(groupId);
+  const members = membersQuery.data ?? [];
   const isTransfer = variant === "transfer" || variant === "transfer-confirm";
   const transferTarget = isTransfer ? "박정아" : null;
 
@@ -43,7 +45,13 @@ export default function GroupMembersScreenRoute() {
         />
 
         <ScrollView contentContainerStyle={styles.body}>
-          {isTransfer ? (
+          {membersQuery.isPending ? (
+            <View style={styles.loading}>
+              <ActivityIndicator color={theme.colors.primary} />
+            </View>
+          ) : membersQuery.isError ? (
+            <ErrorState message="멤버 정보를 다시 불러와주세요." />
+          ) : isTransfer ? (
             <View style={styles.warningBox}>
               <MaterialIcons
                 name="warning-amber"
@@ -60,16 +68,16 @@ export default function GroupMembersScreenRoute() {
 
           {members.map((member, index) => (
             <MemberRow
-              key={member.name}
+              key={member.userId}
               member={member}
               transfer={isTransfer}
-              selected={member.name === transferTarget}
+              selected={member.userName === transferTarget}
               last={index === members.length - 1}
             />
           ))}
         </ScrollView>
 
-        {isTransfer ? (
+        {isTransfer && membersQuery.data ? (
           <View style={styles.bottomBar}>
             <Button disabled={!transferTarget}>이관하기</Button>
           </View>
@@ -109,37 +117,37 @@ function MemberRow({
   selected,
   last,
 }: {
-  member: (typeof members)[number];
+  member: GroupMemberDetail;
   transfer: boolean;
   selected: boolean;
   last: boolean;
 }) {
-  const candidate = transfer && !member.leader;
+  const candidate = transfer && !member.isLeader;
 
   return (
     <View
       style={[
         styles.row,
         !last ? styles.rowBorder : null,
-        transfer && member.leader ? styles.rowDisabled : null,
+        transfer && member.isLeader ? styles.rowDisabled : null,
         selected ? styles.rowSelected : null,
       ]}
     >
       {candidate ? <RadioMark selected={selected} /> : null}
-      <Avatar name={member.name} seed={member.name} size={42} />
+      <Avatar name={member.userName} seed={member.userName} size={42} />
       <View style={styles.memberText}>
         <View style={styles.nameRow}>
-          <Text style={styles.name}>{member.name}</Text>
-          {member.me ? <Text style={styles.me}>(나)</Text> : null}
-          {member.leader ? (
+          <Text style={styles.name}>{member.userName}</Text>
+          {member.isMine ? <Text style={styles.me}>(나)</Text> : null}
+          {member.isLeader ? (
             <View style={styles.leaderBadge}>
               <Text style={styles.leaderText}>소모임장</Text>
             </View>
           ) : null}
         </View>
-        <Text style={styles.joined}>{member.joined} 가입</Text>
+        <Text style={styles.joined}>{member.joinedLabel} 가입</Text>
       </View>
-      {!transfer && !member.leader ? (
+      {!transfer && !member.isLeader ? (
         <Pressable accessibilityRole="button" style={styles.kickButton}>
           <MaterialIcons name="close" size={12} color={theme.colors.danger} />
           <Text style={styles.kickText}>강퇴</Text>
@@ -163,6 +171,10 @@ const styles = StyleSheet.create({
   },
   body: {
     paddingBottom: 24,
+  },
+  loading: {
+    paddingTop: 80,
+    alignItems: "center",
   },
   warningBox: {
     marginHorizontal: 18,

@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { theme } from "../../src/constants/theme";
+import { readDesignVariant } from "../../src/lib/designVariant";
 
 const categories = [
   "성경공부·예배",
@@ -30,10 +31,8 @@ const filledValues = {
 
 export default function GroupNewModal() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ variant?: string }>();
-  const variant = Array.isArray(params.variant)
-    ? params.variant[0]
-    : (params.variant ?? "create");
+  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const variant = readDesignVariant(params.designVariant) ?? "create";
   const isEdit = ["edit", "range-error", "member-error"].includes(variant);
   const isFilled = isEdit || variant === "create-filled";
   const isRangeError = variant === "range-error";

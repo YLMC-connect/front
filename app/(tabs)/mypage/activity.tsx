@@ -1,11 +1,12 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   Badge,
   EmptyState,
   TopBar,
+  UnderlineTabs,
   VisualThumb,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
@@ -115,25 +116,12 @@ export default function ActivityScreen() {
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
         <TopBar title="활동 내역" back onBack={() => router.back()} />
-        <View style={styles.tabs}>
-          {tabs.map((tab) => {
-            const selected = tab.key === active;
-            return (
-              <Pressable
-                accessibilityRole="button"
-                key={tab.key}
-                onPress={() => router.push(`/mypage/activity?tab=${tab.key}`)}
-                style={[styles.tab, selected ? styles.tabOn : null]}
-              >
-                <Text
-                  style={[styles.tabText, selected ? styles.tabTextOn : null]}
-                >
-                  {tab.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        <UnderlineTabs
+          items={tabs}
+          active={active}
+          variant="border"
+          onChange={(tab) => router.push(`/mypage/activity?tab=${tab}`)}
+        />
 
         <ScrollView contentContainerStyle={styles.body}>
           {variant === "empty" ? (
@@ -244,32 +232,6 @@ function GroupRow({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-  },
-  tabs: {
-    flexDirection: "row",
-    paddingTop: 4,
-    paddingHorizontal: 18,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
-  },
-  tab: {
-    flex: 1,
-    alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 2,
-    borderBottomColor: "transparent",
-  },
-  tabOn: {
-    borderBottomColor: theme.colors.primary,
-  },
-  tabText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.md,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  tabTextOn: {
-    color: theme.colors.primaryDeep,
-    fontWeight: theme.fontWeight.bold,
   },
   body: {
     paddingHorizontal: 18,

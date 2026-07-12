@@ -1,6 +1,6 @@
 # market (나눔)
 
-> 마지막 갱신: 2026-07-11 | 담당 Phase: P1/P2/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-12 | 담당 Phase: P1/P2/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 나눔 상세 action·mini action과 작성 폼 section/divider 공통화 — 기존 geometry·testID·댓글 CRUD 동작을 유지하면서 공통 UI 파일로 이동
 - 나눔 목록/상세/작성 화면 구현 — `app/(tabs)/market/index.tsx`, `app/(tabs)/market/[id].tsx`, `app/modal/market-new.tsx`
 - 나눔 타입과 mock 데이터 구현 — `src/types/market.ts`, `src/mocks/market.ts`
 - 이미지 선택/미리보기 연결 — `ImagePickerField`에서 선택한 URI를 `MarketInput.images`로 저장하고 목록/상세 썸네일에 표시

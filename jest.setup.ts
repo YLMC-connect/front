@@ -9,6 +9,19 @@ jest.mock("react-native-reanimated", () => {
 
 jest.mock("expo-router", () => {
   const React = require("react");
+  const { View } = require("react-native");
+
+  const Stack = ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children);
+  Stack.Screen = ({ name }: { name: string }) =>
+    React.createElement(View, { testID: `route-${name}` });
+  Stack.Protected = ({
+    children,
+    guard,
+  }: {
+    children: React.ReactNode;
+    guard: boolean;
+  }) => (guard ? React.createElement(React.Fragment, null, children) : null);
 
   return {
     Link: ({ children }: { children: React.ReactNode }) =>
@@ -25,6 +38,7 @@ jest.mock("expo-router", () => {
     })),
     useLocalSearchParams: jest.fn(() => ({})),
     usePathname: jest.fn(() => "/"),
+    Stack,
   };
 });
 
@@ -35,8 +49,11 @@ jest.mock("@expo/vector-icons", () => {
   const MaterialIcons = ({ name }: { name: string }) =>
     React.createElement(Text, null, name);
   MaterialIcons.glyphMap = {};
+  const MaterialCommunityIcons = ({ name }: { name: string }) =>
+    React.createElement(Text, null, name);
+  MaterialCommunityIcons.glyphMap = {};
 
-  return { MaterialIcons };
+  return { MaterialCommunityIcons, MaterialIcons };
 });
 
 jest.mock("expo-image", () => {

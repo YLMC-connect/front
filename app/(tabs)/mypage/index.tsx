@@ -1,5 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, type Href } from "expo-router";
 import type { ComponentProps } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Screen, Section } from "../../../src/components/layout/Screen";
@@ -12,7 +12,7 @@ type IconName = ComponentProps<typeof MaterialIcons>["name"];
 type MenuItem = {
   label: string;
   icon: IconName;
-  href?: string;
+  href?: Href;
   action?: "logout";
   danger?: boolean;
 };
@@ -72,7 +72,7 @@ export default function MyPageScreen() {
     }
 
     if (item.href) {
-      router.push(item.href as never);
+      router.push(item.href);
     }
   };
 

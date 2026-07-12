@@ -1,6 +1,6 @@
 # prayer (중보기도)
 
-> 마지막 갱신: 2026-07-10 | 담당 Phase: P5/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-12 | 담당 Phase: P5/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 기도 상세 로컬 badge·underline tab 제거 — 기존 geometry와 선택 상태를 공통 `DetailBadge`·`UnderlineTabs`로 이동
 - 중보기도 목록/상세/등록 화면 구현 — `app/(tabs)/prayer/index.tsx`, `app/(tabs)/prayer/[id].tsx`, `app/modal/prayer-new.tsx`
 - 중보기도 타입, mock 데이터, 기도제목 생성 service, TanStack Query mutation hook 구현 — `src/types/prayer.ts`, `src/mocks/prayers.ts`, `src/services/prayerService.ts`, `src/hooks/usePrayers.ts`
 - 요일 필터, 기도방 참여/나가기, 기도제목 등록, 기도 체크, 응답 기록 mock mutation 구현

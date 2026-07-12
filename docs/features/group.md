@@ -1,6 +1,6 @@
 # group (소모임)
 
-> 마지막 갱신: 2026-07-11 | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-12 | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 동행 상세 action·mini action과 개설 폼 section/divider 공통화 — 기존 geometry·공지 관리 동작을 유지하면서 공통 UI 파일로 이동
 - 소모임 목록/상세/개설 화면 구현 — `app/(tabs)/group/index.tsx`, `app/(tabs)/group/[id].tsx`, `app/modal/group-new.tsx`
 - 소모임 타입과 mock 데이터 구현 — `src/types/group.ts`, `src/mocks/groups.ts`
 - 대표 이미지 선택/미리보기 연결 — `GroupInput.coverImage`를 카드/상세 cover에 표시

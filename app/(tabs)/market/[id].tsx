@@ -16,6 +16,8 @@ import { Screen } from "../../../src/components/layout/Screen";
 import {
   Avatar,
   ConfirmDialog,
+  DetailAction,
+  DetailMiniAction,
   ErrorState,
   RadioSheet,
   Toast,
@@ -317,18 +319,18 @@ export default function MarketDetailScreen() {
             <View style={styles.actions}>
               {isOwn && !isDone ? (
                 <>
-                  <Action icon="edit" label="수정" />
-                  <Action
+                  <DetailAction icon="edit" label="수정" />
+                  <DetailAction
                     testID="market-delete-post"
                     icon="delete-outline"
                     label="삭제"
                     danger
                     onPress={onDeletePost}
                   />
-                  <Action icon="sync-alt" label="상태 변경" />
+                  <DetailAction icon="sync-alt" label="상태 변경" />
                 </>
               ) : isOwn ? (
-                <Action
+                <DetailAction
                   testID="market-delete-post"
                   icon="delete-outline"
                   label="삭제"
@@ -337,7 +339,7 @@ export default function MarketDetailScreen() {
                 />
               ) : (
                 <>
-                  <Action
+                  <DetailAction
                     testID="market-report-post"
                     icon="outlined-flag"
                     label="신고"
@@ -345,7 +347,7 @@ export default function MarketDetailScreen() {
                       openReport({ targetType: "market", targetId: market.id })
                     }
                   />
-                  <Action icon="block" label="차단" danger />
+                  <DetailAction icon="block" label="차단" danger />
                 </>
               )}
             </View>
@@ -485,36 +487,6 @@ function StatusBanner({
   );
 }
 
-function Action({
-  icon,
-  label,
-  danger = false,
-  onPress,
-  testID,
-}: {
-  icon: keyof typeof MaterialIcons.glyphMap;
-  label: string;
-  danger?: boolean;
-  onPress?: () => void;
-  testID?: string;
-}) {
-  const color = danger ? theme.colors.danger : theme.colors.ink;
-
-  return (
-    <Pressable
-      testID={testID}
-      accessibilityRole="button"
-      onPress={onPress}
-      style={styles.action}
-    >
-      <MaterialIcons name={icon} size={18} color={color} />
-      <Text style={[styles.actionText, danger ? styles.dangerText : null]}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
 function CommentsSection({
   comments,
   onEdit,
@@ -556,14 +528,14 @@ function CommentsSection({
                 <View style={styles.commentActions}>
                   {comment.isMine ? (
                     <>
-                      <MiniAction
+                      <DetailMiniAction
                         testID={`market-comment-edit-${comment.id}`}
                         accessibilityLabel={`댓글 수정 ${comment.content}`}
                         icon="edit"
                         label="수정"
                         onPress={() => onEdit(comment)}
                       />
-                      <MiniAction
+                      <DetailMiniAction
                         testID={`market-comment-delete-${comment.id}`}
                         accessibilityLabel={`댓글 삭제 ${comment.content}`}
                         icon="delete-outline"
@@ -573,7 +545,7 @@ function CommentsSection({
                       />
                     </>
                   ) : (
-                    <MiniAction
+                    <DetailMiniAction
                       testID={`market-comment-report-${comment.id}`}
                       icon="outlined-flag"
                       label="신고"
@@ -587,41 +559,6 @@ function CommentsSection({
         </View>
       ))}
     </View>
-  );
-}
-
-function MiniAction({
-  icon,
-  label,
-  danger = false,
-  onPress,
-  testID,
-  accessibilityLabel,
-}: {
-  icon: keyof typeof MaterialIcons.glyphMap;
-  label: string;
-  danger?: boolean;
-  onPress?: () => void;
-  testID?: string;
-  accessibilityLabel?: string;
-}) {
-  return (
-    <Pressable
-      testID={testID}
-      accessibilityLabel={accessibilityLabel}
-      accessibilityRole={onPress ? "button" : undefined}
-      onPress={onPress}
-      style={styles.miniAction}
-    >
-      <MaterialIcons
-        name={icon}
-        size={14}
-        color={danger ? theme.colors.danger : theme.colors.inkMute}
-      />
-      <Text style={[styles.miniActionText, danger ? styles.dangerText : null]}>
-        {label}
-      </Text>
-    </Pressable>
   );
 }
 
@@ -834,23 +771,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     ...theme.shadow.card,
   },
-  action: {
-    flex: 1,
-    minHeight: 44,
-    borderRadius: theme.radius.md,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-  },
-  actionText: {
-    color: theme.colors.ink,
-    fontSize: 13.5,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  dangerText: {
-    color: theme.colors.danger,
-  },
   comments: {
     paddingHorizontal: 22,
     paddingTop: 4,
@@ -903,16 +823,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
     flexDirection: "row",
     gap: 12,
-  },
-  miniAction: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  miniActionText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.semibold,
   },
   composer: {
     position: "absolute",

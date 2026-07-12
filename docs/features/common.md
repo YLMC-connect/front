@@ -15,6 +15,7 @@
 
 - 공통 모션 시스템 적용 — Reanimated 기반 140~220ms 모션 토큰, 동작 줄이기 대응, `MotionPressable`, 선택 적용 Card 등장, Dialog/Sheet/Toast presence 전환을 공통 UI에 반영
 - 탭 선택 indicator 공통화 — 하단 5탭은 이동 indicator와 선택 아이콘 pop을 사용하고, 나눔 상태 탭·동행 소모임/봉사·기도 작성 선택 탭은 공통 `SegmentedTabs` 이동 indicator를 공유
+- 하단 탭 shell 투명화 — 선택 indicator는 유지하고 전체 탭을 감싸던 흰 배경·테두리·그림자를 제거
 - Codex 작업 규칙 진입점 정리 — `AGENTS.md`, `CLAUDE.md`, `README.md`, `docs/INDEX.md`, `docs/MAINTENANCE.md`
 - Expo SDK 55 앱 기반 생성 — `package.json`, `app.config.ts`, `eas.json`, `tsconfig.json`, `babel.config.js`, `metro.config.js`, `tailwind.config.js`, `global.css`, `nativewind-env.d.ts`
 - 공통 런타임/디자인 기반 생성 — `src/lib/queryClient.ts`, `src/lib/queryKeys.ts`, `src/lib/secureStore.ts`, `src/constants/theme.ts`, `src/components/ui/index.tsx`, `src/components/layout/Screen.tsx`
@@ -102,6 +103,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-12) **하단 탭 shell은 투명하게 유지한다** — 화면 하단을 덮는 흰 캡슐 배경·테두리·전체 그림자는 사용하지 않고 선택된 탭 indicator만 surface와 그림자를 가집니다.
 - (2026-07-12) **짧은 상호작용 모션은 공통 토큰과 Reanimated로 관리한다** — 140~220ms 범위의 press/선택/overlay 전환을 사용하고 시스템 동작 줄이기 설정에서는 이동·확대를 생략합니다. 화면별 카드·목록 등장 효과는 자동 적용하지 않고 명시적으로 선택합니다.
 - (2026-07-12) **화면 내부 선택 탭은 공통 `SegmentedTabs`를 사용한다** — 나눔의 전체/나눔중/예약중/나눔완료와 동행의 소모임/봉사, 기도 작성의 작성자 표시를 같은 이동 indicator와 접근성 상태로 관리합니다.
 - (2026-07-10) **CI의 peer dependency 요구는 lockfile 우회 없이 명시한다** — gluestack 전이 의존성이 요구하는 `@react-spectrum/provider@3.11.1`을 직접 고정합니다. `npm ci --legacy-peer-deps`로 검증을 약화하지 않고 Node 20.19.4/npm 10.8.2 기준 깨끗한 설치를 유지합니다.

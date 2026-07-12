@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 동행 목록 카드 형태 복구 — 내 소모임 가로 카드의 기존 크기·cover geometry와 전체 모임의 흰 surface·둥근 경계·12px 간격을 복구하고 검색·필터·전체보기·Skeleton은 유지
 - 동행 목록 디자인 시스템 적용 — 내 소모임은 기존 cover 강조 카드를 유지하고 전체 모임은 border/shadow 반복을 제거한 flat list로 전환했으며 역할형 typography, 20px 여백, Skeleton, 절제된 FAB를 적용
 - 동행 작성·탐색 mock 흐름 연결 — 카테고리/소모임명/설명/최대인원/일정/장소를 실제 입력·검증해 mock service에 저장하고 상세 이동·목록 재조회까지 연결했으며, 소모임/봉사 검색·카테고리 필터·내 소모임 전체보기를 활성화
 - 동행 상세 action·mini action과 개설 폼 section/divider 공통화 — 기존 geometry·공지 관리 동작을 유지하면서 공통 UI 파일로 이동
@@ -66,7 +67,8 @@
 
 ## 결정 사항 (최신 위)
 
-- (2026-07-12) **동행은 대표 영역과 전체 탐색 영역의 surface 수준을 구분한다** — 내 소모임 가로 목록만 cover card로 강조하고 전체 모임은 구분선 기반 flat row로 표시합니다. 이미지 asset은 추가하지 않고 기존 `VisualCover`를 유지합니다.
+- (2026-07-12) **동행 전체 모임도 독립 카드로 구분한다** — flat row 전환 후 항목 경계가 약해져 전체 모임에 흰 surface, 16px radius, 옅은 border와 약한 shadow를 복구합니다. 내 소모임 가로 카드는 기존 214px 폭과 78px cover geometry를 사용합니다.
+- (2026-07-12) **폐기됨: 동행은 대표 영역과 전체 탐색 영역의 surface 수준을 구분한다** — 전체 모임 flat row는 항목 경계가 약해 카드 형태로 복구했습니다. 이미지 asset은 추가하지 않고 기존 `VisualCover`를 유지합니다.
 
 - (2026-07-12) **동행 개설은 API 계약 전에도 service mutation 경계를 통과한다** — 작성 화면은 `useCreateGroup → createGroup → GroupDataSource`를 사용하고 생성한 모임·상세·멤버를 runtime mock에 함께 유지합니다. 가로 내 소모임 목록은 snap 이동과 실제 전체보기 화면을 제공합니다.
 

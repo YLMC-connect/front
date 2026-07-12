@@ -247,7 +247,7 @@ export default function GroupScreen() {
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.mineList}
                   style={styles.mineScroll}
-                  snapToInterval={238}
+                  snapToInterval={226}
                   decelerationRate="fast"
                 >
                   {myGroups.map((group) => (
@@ -257,7 +257,7 @@ export default function GroupScreen() {
                       style={styles.mineCard}
                       onPress={() => router.push(`/group/${group.id}`)}
                     >
-                      <VisualCover height={92} seed={group.coverSeed} />
+                      <VisualCover height={78} seed={group.coverSeed} />
                       <AppText
                         numberOfLines={1}
                         variant="cardTitle"
@@ -477,11 +477,13 @@ const styles = StyleSheet.create({
     gap: theme.layout.listGap,
   },
   mineCard: {
-    width: 226,
+    width: 214,
     flexShrink: 0,
     borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
-    padding: theme.layout.cardPadding,
+    padding: 14,
     ...theme.shadow.card,
   },
   mineTitle: {
@@ -524,7 +526,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.layout.screenX,
     paddingTop: 6,
     paddingBottom: 12,
-    gap: 0,
+    gap: theme.spacing[3],
   },
   serviceList: {
     marginHorizontal: theme.layout.screenX,
@@ -573,9 +575,12 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing[2],
   },
   groupCard: {
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
-    paddingVertical: theme.spacing[5],
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface,
+    padding: theme.spacing[4],
+    ...theme.shadow.card,
   },
   closedCard: {
     opacity: 0.5,

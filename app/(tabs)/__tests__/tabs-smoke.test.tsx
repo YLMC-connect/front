@@ -37,7 +37,7 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("내 활동 요약")).toBeTruthy();
   });
 
-  it("opens a home activity from the flat summary list", () => {
+  it("opens a home activity from the summary card", () => {
     const push = jest.fn();
     jest.mocked(useRouter).mockReturnValue({ push } as never);
     renderWithClient(<HomeScreen />);

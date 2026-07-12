@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react-native";
 import { StyleSheet } from "react-native";
 import designTokens from "../../../constants/designTokens.json";
 import { theme } from "../../../constants/theme";
-import { AppText, ListSkeleton, Skeleton } from "../index";
+import { AppText, Card, ListSkeleton, Skeleton } from "../index";
 
 describe("design system foundations", () => {
   it("keeps semantic colors and radii on the shared token source", () => {
@@ -31,6 +31,27 @@ describe("design system foundations", () => {
     expect(style).toMatchObject({
       ...theme.typography.sectionTitle,
       color: theme.colors.primaryDeep,
+    });
+  });
+
+  it("keeps shared cards visually separated from the canvas", () => {
+    const { toJSON } = render(
+      <Card>
+        <AppText>카드 내용</AppText>
+      </Card>,
+    );
+
+    const card = toJSON();
+    expect(card).not.toBeNull();
+    expect(Array.isArray(card)).toBe(false);
+    const cardStyle = StyleSheet.flatten(
+      !Array.isArray(card) ? card?.props.style : undefined,
+    );
+    expect(cardStyle).toMatchObject({
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.line,
+      borderRadius: theme.radius.lg,
     });
   });
 

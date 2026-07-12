@@ -13,6 +13,7 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- 핵심 목록 카드 경계 복구 — 홈 활동 요약과 공통 `Card`에 흰 surface·둥근 모서리·옅은 1px 경계를 복구하고 역할형 typography·20px 여백·절제된 shadow·상태 UI는 유지
 - 공통 디자인 시스템 2차 정리 — JSON 단일 소스의 semantic color·spacing·radius, 6단계 역할형 typography, layout·절제된 shadow 토큰과 `AppText`, pulse Skeleton/ListSkeleton, action 지원 Empty/Error/Success 상태를 구축하고 홈·핵심 탭·인증에 적용
 - 전체 UI 정보 계층 고급화 — 홈 활동·동행 전체 모임·기도방/기도제목·삶공부 일반 과정을 flat list로 정리하고, 홈 핵심 활동·기도 오늘 진행률·삶공부 학습경로처럼 화면별 대표 요소를 유지·강화
 - 홈 제외 핵심 화면 사용성 보강 — 공통 오류 상태에 선택적 재시도 액션을 추가하고 하단 탭 label 가독성, fixed FAB·composer가 있는 목록/상세의 마지막 콘텐츠 스크롤 여백을 보정
@@ -139,9 +140,10 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-12) **탭 루트의 주요 탐색 항목은 카드 경계를 유지한다** — 사용자가 평면 목록의 항목 경계가 약하다고 확인해 홈 활동·동행 전체 모임·기도방/기도제목·삶공부 전체 과정은 흰 surface, 16px radius, 옅은 border와 약한 shadow를 사용합니다. 나눔처럼 이미지 중심인 기존 row list는 유지합니다.
 - (2026-07-12) **텍스트는 크기 이름보다 화면 역할로 사용한다** — `display / screenTitle / sectionTitle / cardTitle / body / caption` 6단계만 공통 기준으로 두고 `AppText`가 semantic tone을 함께 적용합니다. Button·badge처럼 컴포넌트 자체 역할이 있는 텍스트는 해당 공통 컴포넌트가 관리합니다.
 - (2026-07-12) **Tailwind와 RN theme의 기초 토큰은 JSON 단일 소스를 공유한다** — color·spacing·radius는 `designTokens.json`을 두 설정이 직접 읽고, typography·layout·shadow·motion은 타입이 필요한 `theme.ts`가 관리합니다.
-- (2026-07-12) **반복 정보는 flat list, 핵심 정보만 surface card로 강조한다** — 단순 목록은 구분선과 여백을 사용하며 카드가 필요할 때도 강한 border와 shadow를 함께 사용하지 않습니다. 하단 탭·FAB shadow도 의미는 유지하되 강도를 낮춥니다.
+- (2026-07-12) **부분 폐기됨: 반복 정보는 flat list, 핵심 정보만 surface card로 강조한다** — 나눔처럼 이미지 중심인 기존 row list에는 유지하지만 홈 활동·동행 전체 모임·기도방/기도제목·삶공부 전체 과정에는 적용하지 않습니다. 카드가 필요할 때도 border와 shadow는 약하게 사용합니다.
 - (2026-07-12) **루트·작성 화면의 기본 수평 여백은 20px이다** — 화면 섹션 28~32px, card padding 16px, 제목-설명 8px, 목록 12px을 `theme.layout` 기준으로 사용합니다. 제공 ZIP과 부분 캡처 geometry가 고정된 기존 상세·overlay 화면은 공통 TopBar/상태 UI만 상속하고 화면 전용 간격을 유지합니다.
 - (2026-07-12) **이미지 asset 개선은 이번 디자인 시스템 범위에서 제외한다** — 사용자 요청에 따라 기존 `VisualThumb`/`VisualCover`를 유지하며 사진 생성·추가와 API 이미지 계약 변경은 수행하지 않습니다.
 

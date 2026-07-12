@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 기도 목록 카드 형태 복구 — 오늘의 기도 진행률은 유지하고 기도방·기도제목을 흰 surface, 둥근 경계, 12px 간격의 독립 카드로 복구
 - 기도 대표 요소·상태 UI 적용 — 참여 중인 방의 완료 인원을 합산한 오늘의 기도 진행 카드와 progress를 추가하고 기도방/기도제목은 flat list, loading은 Skeleton, error는 재시도로 정리
 - 기도 루트 무반응 요소 연결 — 기도방 카드는 상세, 기도제목 카드·전체보기는 요청 목록, 중보기도 신청 카드는 신청 화면으로 이동하고 오류 상태 재시도와 FAB 하단 스크롤 여백을 적용
 - 기도 상세 로컬 badge·underline tab 제거 — 기존 geometry와 선택 상태를 공통 `DetailBadge`·`UnderlineTabs`로 이동
@@ -52,7 +53,8 @@
 
 ## 결정 사항 (최신 위)
 
-- (2026-07-12) **기도 루트 대표 요소는 오늘 참여 진행이다** — overview의 참여 중 기도방 `completedCount/memberCount`를 합산해 오늘 완료 인원과 비율을 표시하며 새 서버 필드를 만들지 않습니다. 상세 목록은 차분한 icon/color와 flat row를 사용합니다.
+- (2026-07-12) **기도 루트의 내 기도방·내 기도제목은 카드로 구분한다** — 오늘 진행률 대표 surface 아래의 실제 이동 항목은 흰 surface, 16px radius, 옅은 border와 약한 shadow를 사용해 각 항목의 터치 경계를 분명히 합니다.
+- (2026-07-12) **기도 루트 대표 요소는 오늘 참여 진행이다** — overview의 참여 중 기도방 `completedCount/memberCount`를 합산해 오늘 완료 인원과 비율을 표시하며 새 서버 필드를 만들지 않습니다. 상세 목록의 차분한 icon/color는 유지하고 flat row만 카드 형태로 복구했습니다.
 
 - (2026-07-12) **기도 루트의 카드형 affordance는 기존 실제 route로 이동한다** — 새 상세 계약을 추측하지 않고 현재 존재하는 `/prayer/[id]`, `/prayer/request`, `/prayer/apply`로 연결하며 query 오류는 같은 overview를 refetch합니다.
 

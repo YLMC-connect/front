@@ -154,6 +154,8 @@ const styles = StyleSheet.create({
   profileCard: {
     minHeight: 68,
     borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
     paddingHorizontal: 14,
     paddingVertical: 12,
@@ -218,16 +220,20 @@ const styles = StyleSheet.create({
   },
   activityList: {
     paddingHorizontal: theme.layout.screenX,
+    gap: theme.spacing[3],
   },
   activityCard: {
     minHeight: 84,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
-    paddingHorizontal: theme.spacing[1],
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface,
+    paddingHorizontal: theme.spacing[4],
     paddingVertical: theme.spacing[4],
     flexDirection: "row",
     alignItems: "center",
     gap: theme.layout.listGap,
+    ...theme.shadow.card,
   },
   activityAccent: {
     alignSelf: "stretch",

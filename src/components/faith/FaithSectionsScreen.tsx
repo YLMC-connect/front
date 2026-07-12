@@ -441,10 +441,7 @@ function CourseCard({
     <Pressable
       accessibilityRole="button"
       onPress={() => router.push(`/life-study/${course.id}`)}
-      style={[
-        styles.courseCard,
-        open ? styles.courseCardFeatured : styles.courseCardFlat,
-      ]}
+      style={styles.courseCard}
     >
       <View style={styles.courseOrb} />
       <View style={styles.badgeRow}>
@@ -636,16 +633,19 @@ const styles = StyleSheet.create({
   },
   stack: {
     paddingHorizontal: theme.layout.screenX,
-    gap: 0,
+    gap: theme.spacing[3],
   },
   roomCard: {
     minHeight: 84,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
-    paddingVertical: theme.spacing[4],
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface,
+    padding: theme.spacing[4],
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    ...theme.shadow.card,
   },
   dayBadge: {
     width: 48,
@@ -714,12 +714,15 @@ const styles = StyleSheet.create({
   },
   requestCard: {
     minHeight: 88,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
-    paddingVertical: theme.spacing[4],
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface,
+    padding: theme.spacing[4],
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 10,
+    ...theme.shadow.card,
   },
   requestTitle: {
     marginTop: 8,
@@ -815,17 +818,12 @@ const styles = StyleSheet.create({
   courseCard: {
     position: "relative",
     overflow: "hidden",
-    paddingVertical: theme.spacing[5],
-  },
-  courseCardFeatured: {
     borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
-    padding: 16,
+    padding: theme.spacing[4],
     ...theme.shadow.card,
-  },
-  courseCardFlat: {
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
   },
   courseOrb: {
     position: "absolute",

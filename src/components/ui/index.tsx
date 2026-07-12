@@ -1210,7 +1210,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.lg,
     padding: 16,
-    borderWidth: 0,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
     ...theme.shadow.card,
   },
   fab: {

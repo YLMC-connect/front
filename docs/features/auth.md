@@ -1,6 +1,6 @@
 # auth (인증)
 
-> 마지막 갱신: 2026-07-11 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-12 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 인증 route guard와 웹 세션 저장 경계 추가 — 복원 중 route를 숨기고 anonymous/unavailable은 auth만, authenticated는 app/modal만 허용하며, 네이티브 SecureStore를 유지한 채 웹은 탭 단위 sessionStorage를 사용하도록 테스트로 고정
 - Mock 회원가입/로그인 화면 구현 — `app/(auth)/signup.tsx`, `app/(auth)/login.tsx`
 - ZIP 원본 auth 화면 라우트 보강 — splash, 가입 코드, 약관 동의/전문, 로그인/회원가입 상태 variant
 - 로그인 화면 1차 디자인 정렬 — ZIP prototype 기준 로고 hero, 카드 없는 폼, 큰 pill 버튼, 가입 CTA divider 적용
@@ -46,6 +47,7 @@
 | 경로                                  | 역할                               |
 | ------------------------------------- | ---------------------------------- |
 | `app/(auth)/_layout.tsx`              | 인증 스택 layout                   |
+| `src/components/auth/AuthRouteNavigator.tsx` | 인증 상태별 auth/app route 보호    |
 | `app/(auth)/splash.tsx`               | Splash 실제 화면                   |
 | `app/(auth)/terms.tsx`                | 약관 동의 실제 화면                |
 | `app/(auth)/terms-sheet.tsx`          | 약관 전문 bottom sheet 실제 화면   |
@@ -62,7 +64,7 @@
 | `src/lib/apiClient.ts`                | 공통 응답·오류·Authorization 처리  |
 | `src/lib/apiErrorMessage.ts`          | API 오류 코드→사용자 문구 변환     |
 | `src/constants/apiErrorMessages.ts`   | 문서화된 인증 오류 코드 메시지 표  |
-| `src/lib/secureStore.ts`              | access/refresh token 안전 저장     |
+| `src/lib/secureStore.ts`              | 네이티브 SecureStore·웹 sessionStorage 토큰 저장 |
 | `scripts/check-auth-api-contract.mjs` | Swagger 인증 계약 검사             |
 
 ## 데이터 타입

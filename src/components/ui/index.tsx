@@ -33,6 +33,11 @@ import Animated, {
 import { theme } from "../../constants/theme";
 import { MotionPressable, useMotionPresence } from "./motion";
 
+export { DetailAction, DetailMiniAction } from "./detail-actions";
+export { DetailBadge } from "./detail-badge";
+export { ModalFormSection, SectionDivider } from "./modal-form-layout";
+export { UnderlineTabs } from "./underline-tabs";
+
 export { MotionPressable } from "./motion";
 
 type IconName = ComponentProps<typeof MaterialIcons>["name"];

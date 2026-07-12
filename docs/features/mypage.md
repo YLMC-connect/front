@@ -1,6 +1,6 @@
 # mypage (MY / 성도 프로필)
 
-> 마지막 갱신: 2026-07-11 | 담당 Phase: P4/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-12 | 담당 Phase: P4/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- MY 활동 내역 underline tab 공통화와 메뉴 href 타입 보강 — 기존 탭 geometry·query 이동을 유지하고 `as never` 우회를 제거
 - MY 화면 고도화 — `app/(tabs)/mypage/index.tsx`
 - MY 타입 구현 — `src/types/mypage.ts`
 - 프로필 수정 mock, 내 활동 탭, 관심 목록, FAQ accordion, 로그아웃 확인, 탈퇴 요청 mock 구현

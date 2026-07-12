@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import type { ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
-import { Button, Card, TopBar } from "../../../src/components/ui";
+import { Button, Card, DetailBadge, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 
@@ -93,10 +93,12 @@ export default function LifeStudyDetailScreen() {
         <ScrollView contentContainerStyle={styles.body}>
           <View style={styles.hero}>
             <View style={styles.badgeRow}>
-              <Badge tone={enrolled ? "primary" : "warn"}>
+              <DetailBadge bordered tone={enrolled ? "primary" : "warn"}>
                 {enrolled ? "진행중" : "신청 가능"}
-              </Badge>
-              <Badge>{enrolled ? "4주차" : "개설 예정"}</Badge>
+              </DetailBadge>
+              <DetailBadge bordered>
+                {enrolled ? "4주차" : "개설 예정"}
+              </DetailBadge>
               <Text style={styles.caption}>13주 · 매주 수요일 19:30</Text>
             </View>
 
@@ -142,7 +144,9 @@ function EnrolledContent() {
         {notices.map((notice) => (
           <Card key={notice.title} style={styles.noticeCard}>
             <View style={styles.badgeRow}>
-              <Badge tone="warn">{notice.scope}</Badge>
+              <DetailBadge bordered tone="warn">
+                {notice.scope}
+              </DetailBadge>
               <Text style={styles.caption}>{notice.read}</Text>
             </View>
             <Text style={styles.noticeTitle}>{notice.title}</Text>
@@ -196,9 +200,12 @@ function EnrolledContent() {
               <Text style={styles.caption}>{item.week}</Text>
               <Text style={styles.assignmentTitle}>{item.title}</Text>
             </View>
-            <Badge tone={item.state === "제출 확인" ? "primary" : "warn"}>
+            <DetailBadge
+              bordered
+              tone={item.state === "제출 확인" ? "primary" : "warn"}
+            >
               {item.state}
-            </Badge>
+            </DetailBadge>
           </Card>
         ))}
       </Section>
@@ -287,9 +294,12 @@ function ScheduleRow({
         <Text style={styles.rowTitle}>{item.title}</Text>
         <Text style={styles.caption}>{item.date}</Text>
       </View>
-      <Badge tone={item.attendance === "출석 예정" ? "mute" : tone}>
+      <DetailBadge
+        bordered
+        tone={item.attendance === "출석 예정" ? "mute" : tone}
+      >
         {item.attendance}
-      </Badge>
+      </DetailBadge>
     </View>
   );
 }
@@ -340,35 +350,11 @@ function CurriculumRow({
           {item.title}
         </Text>
       </View>
-      {current ? <Badge tone="primary">이번주</Badge> : null}
-    </View>
-  );
-}
-
-function Badge({
-  children,
-  tone = "mute",
-}: {
-  children: ReactNode;
-  tone?: "primary" | "mute" | "warn";
-}) {
-  return (
-    <View
-      style={[
-        styles.badge,
-        tone === "primary" ? styles.badgePrimary : null,
-        tone === "warn" ? styles.badgeWarn : null,
-      ]}
-    >
-      <Text
-        style={[
-          styles.badgeText,
-          tone === "primary" ? styles.badgeTextPrimary : null,
-          tone === "warn" ? styles.badgeTextWarn : null,
-        ]}
-      >
-        {children}
-      </Text>
+      {current ? (
+        <DetailBadge bordered tone="primary">
+          이번주
+        </DetailBadge>
+      ) : null}
     </View>
   );
 }
@@ -395,33 +381,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexWrap: "wrap",
     gap: 8,
-  },
-  badge: {
-    borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.surface2,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-  },
-  badgePrimary: {
-    borderColor: "transparent",
-    backgroundColor: theme.colors.primary,
-  },
-  badgeWarn: {
-    borderColor: "transparent",
-    backgroundColor: theme.colors.amberSoft,
-  },
-  badgeText: {
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.xs,
-    fontWeight: theme.fontWeight.bold,
-  },
-  badgeTextPrimary: {
-    color: theme.colors.white,
-  },
-  badgeTextWarn: {
-    color: "#9B6B20",
   },
   caption: {
     color: theme.colors.inkMute,

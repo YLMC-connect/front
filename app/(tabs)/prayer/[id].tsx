@@ -3,7 +3,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import type { ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
-import { Card, TopBar } from "../../../src/components/ui";
+import {
+  Card,
+  DetailBadge,
+  TopBar,
+  UnderlineTabs,
+} from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 
@@ -87,27 +92,15 @@ export default function PrayerDetailScreen() {
       <View style={styles.root}>
         <TopBar title="월요일 오전 기도방" back onBack={() => router.back()} />
         <View style={styles.badges}>
-          <Badge label="참여중" tone="primary" />
-          <Badge label="멤버 45명" />
-          <Badge label="오늘 긴급 1건" tone="warn" />
-          {isCompleted ? <Badge label="오늘 완료" tone="primary" /> : null}
+          <DetailBadge tone="primary">참여중</DetailBadge>
+          <DetailBadge>멤버 45명</DetailBadge>
+          <DetailBadge tone="warn">오늘 긴급 1건</DetailBadge>
+          {isCompleted ? (
+            <DetailBadge tone="primary">오늘 완료</DetailBadge>
+          ) : null}
         </View>
 
-        <View style={styles.tabs}>
-          {tabs.map((tab) => {
-            const selected = tab.key === activeTab;
-            return (
-              <View key={tab.key} style={styles.tab}>
-                <Text
-                  style={[styles.tabText, selected ? styles.tabTextOn : null]}
-                >
-                  {tab.label}
-                </Text>
-                {selected ? <View style={styles.tabLine} /> : null}
-              </View>
-            );
-          })}
-        </View>
+        <UnderlineTabs items={tabs} active={activeTab} />
 
         <ScrollView
           contentContainerStyle={[
@@ -369,34 +362,6 @@ function Stat({
   );
 }
 
-function Badge({
-  label,
-  tone = "mute",
-}: {
-  label: string;
-  tone?: "primary" | "mute" | "warn";
-}) {
-  return (
-    <View
-      style={[
-        styles.badge,
-        tone === "primary" ? styles.badgePrimary : null,
-        tone === "warn" ? styles.badgeWarn : null,
-      ]}
-    >
-      <Text
-        style={[
-          styles.badgeText,
-          tone === "primary" ? styles.badgeTextPrimary : null,
-          tone === "warn" ? styles.badgeTextWarn : null,
-        ]}
-      >
-        {label}
-      </Text>
-    </View>
-  );
-}
-
 function EmptyMessage({
   icon,
   title,
@@ -429,59 +394,6 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 18,
     paddingBottom: 12,
-  },
-  badge: {
-    borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.surface2,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  badgePrimary: {
-    backgroundColor: theme.colors.primary,
-  },
-  badgeWarn: {
-    backgroundColor: theme.colors.amberSoft,
-  },
-  badgeText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
-    fontWeight: theme.fontWeight.bold,
-  },
-  badgeTextPrimary: {
-    color: theme.colors.white,
-  },
-  badgeTextWarn: {
-    color: "#9B6B20",
-  },
-  tabs: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
-    paddingHorizontal: 18,
-  },
-  tab: {
-    flex: 1,
-    alignItems: "center",
-    minHeight: 44,
-    justifyContent: "center",
-  },
-  tabText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.md,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  tabTextOn: {
-    color: theme.colors.primaryDeep,
-    fontWeight: theme.fontWeight.bold,
-  },
-  tabLine: {
-    position: "absolute",
-    left: 16,
-    right: 16,
-    bottom: -1,
-    height: 2,
-    borderRadius: 1,
-    backgroundColor: theme.colors.primary,
   },
   body: {
     paddingHorizontal: 18,

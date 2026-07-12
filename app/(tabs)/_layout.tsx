@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Tabs, usePathname, useRouter } from "expo-router";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { Tabs, usePathname, useRouter, type Router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, {
@@ -15,29 +16,61 @@ import { theme } from "../../src/constants/theme";
 
 type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
-const tabIcons: Record<string, { off: IconName; on: IconName }> = {
-  index: { off: "home-outline", on: "home" },
-  "market/index": { off: "shopping-outline", on: "shopping" },
-  "group/index": { off: "account-multiple-outline", on: "account-multiple" },
-  "prayer/index": { off: "hands-pray", on: "hands-pray" },
-  "life-study/index": {
-    off: "book-open-page-variant-outline",
-    on: "book-open-page-variant",
+const rootTabs = [
+  {
+    name: "index",
+    title: "홈",
+    href: "/",
+    testID: "tab-home",
+    icon: { off: "home-outline", on: "home" },
   },
-};
+  {
+    name: "market/index",
+    title: "나눔",
+    href: "/market",
+    testID: "tab-market",
+    icon: { off: "shopping-outline", on: "shopping" },
+  },
+  {
+    name: "group/index",
+    title: "동행",
+    href: "/group",
+    testID: "tab-group",
+    icon: { off: "account-multiple-outline", on: "account-multiple" },
+  },
+  {
+    name: "prayer/index",
+    title: "기도",
+    href: "/prayer",
+    testID: "tab-prayer",
+    icon: { off: "hands-pray", on: "hands-pray" },
+  },
+  {
+    name: "life-study/index",
+    title: "삶공부",
+    href: "/life-study",
+    testID: "tab-life-study",
+    icon: {
+      off: "book-open-page-variant-outline",
+      on: "book-open-page-variant",
+    },
+  },
+] as const satisfies readonly {
+  name: string;
+  title: string;
+  href: "/" | "/market" | "/group" | "/prayer" | "/life-study";
+  testID: string;
+  icon: { off: IconName; on: IconName };
+}[];
 
-const tabHrefs: Record<
-  string,
-  "/" | "/market" | "/group" | "/prayer" | "/life-study"
-> = {
-  index: "/",
-  "market/index": "/market",
-  "group/index": "/group",
-  "prayer/index": "/prayer",
-  "life-study/index": "/life-study",
-};
+type RootTab = (typeof rootTabs)[number];
+type TabRoute = BottomTabBarProps["state"]["routes"][number];
 
-const rootTabPaths = new Set<string>(Object.values(tabHrefs));
+const rootTabPaths = new Set<string>(rootTabs.map((tab) => tab.href));
+
+function findRootTab(routeName: string): RootTab | undefined {
+  return rootTabs.find((tab) => tab.name === routeName);
+}
 
 export default function TabsLayout() {
   return (
@@ -45,35 +78,25 @@ export default function TabsLayout() {
       tabBar={(props) => <AppTabBar {...props} />}
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarIcon: ({ color, size }) => (
-          <MaterialCommunityIcons
-            name={tabIcons[route.name]?.off ?? "circle-outline"}
-            size={size}
-            color={color}
-          />
-        ),
+        tabBarIcon: ({ color, size }) => {
+          const tab = findRootTab(route.name);
+          return (
+            <MaterialCommunityIcons
+              name={tab?.icon.off ?? "circle-outline"}
+              size={size}
+              color={color}
+            />
+          );
+        },
       })}
     >
-      <Tabs.Screen
-        name="index"
-        options={{ title: "홈", tabBarButtonTestID: "tab-home" }}
-      />
-      <Tabs.Screen
-        name="market/index"
-        options={{ title: "나눔", tabBarButtonTestID: "tab-market" }}
-      />
-      <Tabs.Screen
-        name="group/index"
-        options={{ title: "동행", tabBarButtonTestID: "tab-group" }}
-      />
-      <Tabs.Screen
-        name="prayer/index"
-        options={{ title: "기도", tabBarButtonTestID: "tab-prayer" }}
-      />
-      <Tabs.Screen
-        name="life-study/index"
-        options={{ title: "삶공부", tabBarButtonTestID: "tab-life-study" }}
-      />
+      {rootTabs.map((tab) => (
+        <Tabs.Screen
+          key={tab.name}
+          name={tab.name}
+          options={{ title: tab.title, tabBarButtonTestID: tab.testID }}
+        />
+      ))}
       <Tabs.Screen name="market/[id]" options={{ href: null }} />
       <Tabs.Screen name="group/[id]" options={{ href: null }} />
       <Tabs.Screen name="group/notices" options={{ href: null }} />
@@ -98,7 +121,7 @@ export default function TabsLayout() {
   );
 }
 
-function AppTabBar({ state, descriptors, navigation }: any) {
+function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const currentRoute = state.routes[state.index];
@@ -108,7 +131,7 @@ function AppTabBar({ state, descriptors, navigation }: any) {
     return null;
   }
 
-  const routes = state.routes.filter((route: any) => {
+  const routes = state.routes.filter((route) => {
     const options = descriptors[route.key]?.options;
     return options?.tabBarButtonTestID;
   });
@@ -130,13 +153,15 @@ function VisibleTabBar({
   navigation,
   router,
   routes,
-}: any) {
+}: Pick<BottomTabBarProps, "state" | "descriptors" | "navigation"> & {
+  router: Router;
+  routes: TabRoute[];
+}) {
   const reduceMotion = useReducedMotion();
   const [itemWidth, setItemWidth] = useState(0);
   const selectedIndex = routes.findIndex(
-    (route: any) =>
-      state.routes.findIndex((item: any) => item.key === route.key) ===
-      state.index,
+    (route) =>
+      state.routes.findIndex((item) => item.key === route.key) === state.index,
   );
   const indicatorIndex = useSharedValue(Math.max(selectedIndex, 0));
   const didMount = useRef(false);
@@ -173,10 +198,8 @@ function VisibleTabBar({
         testID="tab-active-indicator"
         style={[styles.tabIndicator, indicatorStyle]}
       />
-      {routes.map((route: any) => {
-        const index = state.routes.findIndex(
-          (item: any) => item.key === route.key,
-        );
+      {routes.map((route) => {
+        const index = state.routes.findIndex((item) => item.key === route.key);
         const focused = state.index === index;
         const options = descriptors[route.key].options;
         const label = options.title ?? route.name;
@@ -189,9 +212,9 @@ function VisibleTabBar({
             focused={focused}
             testID={options.tabBarButtonTestID}
             onPress={() => {
-              const href = tabHrefs[route.name];
-              if (href) {
-                router.replace(href);
+              const tab = findRootTab(route.name);
+              if (tab) {
+                router.replace(tab.href);
                 return;
               }
 
@@ -204,7 +227,19 @@ function VisibleTabBar({
   );
 }
 
-function AppTabButton({ route, label, focused, testID, onPress }: any) {
+function AppTabButton({
+  route,
+  label,
+  focused,
+  testID,
+  onPress,
+}: {
+  route: TabRoute;
+  label: string;
+  focused: boolean;
+  testID?: string;
+  onPress: () => void;
+}) {
   const reduceMotion = useReducedMotion();
   const iconScale = useSharedValue(1);
   const didMount = useRef(false);
@@ -232,6 +267,7 @@ function AppTabButton({ route, label, focused, testID, onPress }: any) {
   const iconStyle = useAnimatedStyle(() => ({
     transform: [{ scale: iconScale.value }],
   }));
+  const tab = findRootTab(route.name);
 
   return (
     <MotionPressable
@@ -245,8 +281,8 @@ function AppTabButton({ route, label, focused, testID, onPress }: any) {
         <MaterialCommunityIcons
           name={
             focused
-              ? (tabIcons[route.name]?.on ?? "circle")
-              : (tabIcons[route.name]?.off ?? "circle-outline")
+              ? (tab?.icon.on ?? "circle")
+              : (tab?.icon.off ?? "circle-outline")
           }
           size={20}
           color={color}

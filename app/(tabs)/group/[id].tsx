@@ -14,6 +14,8 @@ import {
   Avatar,
   Card,
   ConfirmDialog,
+  DetailAction,
+  DetailMiniAction,
   ErrorState,
   TopBar,
 } from "../../../src/components/ui";
@@ -151,19 +153,19 @@ export default function GroupDetailScreen() {
           <View style={styles.actionWrap}>
             {isLeader ? (
               <Card style={styles.actionCard}>
-                <Action icon="edit" label="수정" />
-                <Action
+                <DetailAction icon="edit" label="수정" />
+                <DetailAction
                   testID="group-notice-open-create"
                   icon="campaign"
                   label="공지"
                   onPress={() => router.push(`/group/notices?id=${id}`)}
                 />
-                <Action
+                <DetailAction
                   icon="groups"
                   label="멤버"
                   onPress={() => router.push(`/group/members?id=${id}`)}
                 />
-                <Action icon="delete-outline" label="삭제" danger />
+                <DetailAction icon="delete-outline" label="삭제" danger />
               </Card>
             ) : isMember ? (
               <Pressable
@@ -231,7 +233,7 @@ export default function GroupDetailScreen() {
                 <Text style={styles.noticeWhen}>{notice.createdLabel}</Text>
                 {isLeader ? (
                   <View style={styles.noticeActions}>
-                    <MiniAction
+                    <DetailMiniAction
                       testID={`group-notice-edit-${notice.id}`}
                       icon="edit"
                       label="수정"
@@ -241,7 +243,7 @@ export default function GroupDetailScreen() {
                         )
                       }
                     />
-                    <MiniAction
+                    <DetailMiniAction
                       testID={`group-notice-delete-${notice.id}`}
                       icon="delete-outline"
                       label="삭제"
@@ -283,70 +285,6 @@ export default function GroupDetailScreen() {
         />
       </View>
     </Screen>
-  );
-}
-
-function Action({
-  icon,
-  label,
-  danger = false,
-  onPress,
-  testID,
-}: {
-  icon: keyof typeof MaterialIcons.glyphMap;
-  label: string;
-  danger?: boolean;
-  onPress?: () => void;
-  testID?: string;
-}) {
-  return (
-    <Pressable
-      testID={testID}
-      accessibilityRole="button"
-      onPress={onPress}
-      style={styles.action}
-    >
-      <MaterialIcons
-        name={icon}
-        size={18}
-        color={danger ? theme.colors.danger : theme.colors.ink}
-      />
-      <Text style={[styles.actionText, danger ? styles.dangerText : null]}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-function MiniAction({
-  icon,
-  label,
-  danger = false,
-  onPress,
-  testID,
-}: {
-  icon: keyof typeof MaterialIcons.glyphMap;
-  label: string;
-  danger?: boolean;
-  onPress?: () => void;
-  testID?: string;
-}) {
-  return (
-    <Pressable
-      testID={testID}
-      accessibilityRole={onPress ? "button" : undefined}
-      onPress={onPress}
-      style={styles.miniAction}
-    >
-      <MaterialIcons
-        name={icon}
-        size={14}
-        color={danger ? theme.colors.danger : theme.colors.inkMute}
-      />
-      <Text style={[styles.miniActionText, danger ? styles.dangerText : null]}>
-        {label}
-      </Text>
-    </Pressable>
   );
 }
 
@@ -479,23 +417,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     padding: 4,
   },
-  action: {
-    flex: 1,
-    minHeight: 44,
-    borderRadius: theme.radius.md,
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    gap: 6,
-  },
-  actionText: {
-    color: theme.colors.ink,
-    fontSize: 13.5,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  dangerText: {
-    color: theme.colors.danger,
-  },
   outlineButton: {
     minHeight: 52,
     borderRadius: theme.radius.pill,
@@ -608,16 +529,6 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     flexDirection: "row",
     gap: 14,
-  },
-  miniAction: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  miniActionText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.semibold,
   },
   exception: {
     flex: 1,

@@ -1,6 +1,6 @@
 # life-study (삶공부)
 
-> 마지막 갱신: 2026-07-10 | 담당 Phase: P5/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-12 | 담당 Phase: P5/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 삶공부 상세 로컬 badge 제거 — 기존 bordered geometry와 tone을 공통 `DetailBadge`로 이동
 - 삶공부 목록/상세 화면 구현 — `app/(tabs)/life-study/index.tsx`, `app/(tabs)/life-study/[id].tsx`
 - 삶공부 타입, mock 데이터, 목록 service, TanStack Query 목록 hook 구현 — `src/types/lifeStudy.ts`, `src/mocks/lifeStudy.ts`, `src/services/lifeStudyService.ts`, `src/hooks/useLifeStudyCourses.ts`
 - 과정 상태 필터, 신청/취소 mutation, 진도/커리큘럼/수강 이력 UI 구현

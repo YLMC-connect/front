@@ -1,6 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import type { ReactNode } from "react";
 import {
   Pressable,
   ScrollView,
@@ -9,7 +8,11 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { VisualThumb } from "../../src/components/ui";
+import {
+  ModalFormSection as Section,
+  SectionDivider as Divider,
+  VisualThumb,
+} from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { readDesignVariant } from "../../src/lib/designVariant";
 
@@ -199,35 +202,6 @@ export default function MarketNewModal() {
   );
 }
 
-function Section({
-  label,
-  required = false,
-  hint,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  hint?: string;
-  children: ReactNode;
-}) {
-  return (
-    <View style={styles.section}>
-      <View style={styles.sectionHead}>
-        <Text style={styles.sectionLabel}>
-          {label}
-          {required ? <Text style={styles.required}> *</Text> : null}
-        </Text>
-        {hint ? <Text style={styles.sectionHint}>{hint}</Text> : null}
-      </View>
-      {children}
-    </View>
-  );
-}
-
-function Divider() {
-  return <View style={styles.divider} />;
-}
-
 const styles = StyleSheet.create({
   root: {
     flex: 1,
@@ -330,34 +304,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(20,30,18,0.70)",
-  },
-  divider: {
-    height: 8,
-    backgroundColor: "rgba(20,30,18,0.04)",
-  },
-  section: {
-    paddingVertical: 16,
-  },
-  sectionHead: {
-    minHeight: 22,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 22,
-    marginBottom: 10,
-  },
-  sectionLabel: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-    fontWeight: theme.fontWeight.bold,
-  },
-  required: {
-    color: theme.colors.danger,
-  },
-  sectionHint: {
-    color: theme.colors.inkHint,
-    fontSize: theme.fontSize.xs,
-    fontWeight: theme.fontWeight.semibold,
   },
   chips: {
     flexDirection: "row",

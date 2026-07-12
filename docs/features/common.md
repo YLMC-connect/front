@@ -16,6 +16,7 @@
 - 공통 모션 시스템 적용 — Reanimated 기반 140~220ms 모션 토큰, 동작 줄이기 대응, `MotionPressable`, 선택 적용 Card 등장, Dialog/Sheet/Toast presence 전환을 공통 UI에 반영
 - 탭 선택 indicator 공통화 — 하단 5탭은 이동 indicator와 선택 아이콘 pop을 사용하고, 나눔 상태 탭·동행 소모임/봉사·기도 작성 선택 탭은 공통 `SegmentedTabs` 이동 indicator를 공유
 - 하단 탭 shell 불투명 흰색 고정 — floating shell의 테두리·그림자는 유지하고 반투명 alpha를 제거해 뒤 화면이 비치지 않는 흰 배경으로 표시
+- Expo Web 라이트 모드 충돌 해소 — NativeWind dark mode 제어 방식을 `class`로 맞춰 Gluestack의 `mode="light"` 강제 설정이 CSS interop의 `media` 정책과 충돌하지 않도록 수정
 - Codex 작업 규칙 진입점 정리 — `AGENTS.md`, `CLAUDE.md`, `README.md`, `docs/INDEX.md`, `docs/MAINTENANCE.md`
 - Expo SDK 55 앱 기반 생성 — `package.json`, `app.config.ts`, `eas.json`, `tsconfig.json`, `babel.config.js`, `metro.config.js`, `tailwind.config.js`, `global.css`, `nativewind-env.d.ts`
 - 공통 런타임/디자인 기반 생성 — `src/lib/queryClient.ts`, `src/lib/queryKeys.ts`, `src/lib/secureStore.ts`, `src/constants/theme.ts`, `src/components/ui/index.tsx`, `src/components/layout/Screen.tsx`
@@ -103,6 +104,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-12) **앱 색상 모드는 라이트로 고정한다** — `GluestackUIProvider mode="light"`를 유지하고 Tailwind의 `darkMode: "class"`는 수동 모드 제어 허용에만 사용합니다. 다크 테마나 시스템 모드 전환은 추가하지 않습니다.
 - (2026-07-12) **하단 탭 shell은 불투명한 흰 배경을 사용한다** — floating 캡슐의 테두리·그림자는 유지하되 배경 alpha는 사용하지 않아 뒤 화면이 비치지 않도록 합니다.
 - (2026-07-12) **짧은 상호작용 모션은 공통 토큰과 Reanimated로 관리한다** — 140~220ms 범위의 press/선택/overlay 전환을 사용하고 시스템 동작 줄이기 설정에서는 이동·확대를 생략합니다. 화면별 카드·목록 등장 효과는 자동 적용하지 않고 명시적으로 선택합니다.
 - (2026-07-12) **화면 내부 선택 탭은 공통 `SegmentedTabs`를 사용한다** — 나눔의 전체/나눔중/예약중/나눔완료와 동행의 소모임/봉사, 기도 작성의 작성자 표시를 같은 이동 indicator와 접근성 상태로 관리합니다.

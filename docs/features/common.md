@@ -1,6 +1,6 @@
 # common (공통 인프라)
 
-> 마지막 갱신: 2026-07-10 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-12 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -13,6 +13,8 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- 공통 모션 시스템 적용 — Reanimated 기반 140~220ms 모션 토큰, 동작 줄이기 대응, `MotionPressable`, 선택 적용 Card 등장, Dialog/Sheet/Toast presence 전환을 공통 UI에 반영
+- 탭 선택 indicator 공통화 — 하단 5탭은 이동 indicator와 선택 아이콘 pop을 사용하고, 나눔 상태 탭·동행 소모임/봉사·기도 작성 선택 탭은 공통 `SegmentedTabs` 이동 indicator를 공유
 - Codex 작업 규칙 진입점 정리 — `AGENTS.md`, `CLAUDE.md`, `README.md`, `docs/INDEX.md`, `docs/MAINTENANCE.md`
 - Expo SDK 55 앱 기반 생성 — `package.json`, `app.config.ts`, `eas.json`, `tsconfig.json`, `babel.config.js`, `metro.config.js`, `tailwind.config.js`, `global.css`, `nativewind-env.d.ts`
 - 공통 런타임/디자인 기반 생성 — `src/lib/queryClient.ts`, `src/lib/queryKeys.ts`, `src/lib/secureStore.ts`, `src/constants/theme.ts`, `src/components/ui/index.tsx`, `src/components/layout/Screen.tsx`
@@ -79,6 +81,7 @@
 | `app/(tabs)/life-study/index.tsx`                             | Downloads `삶공부` 하단 탭 루트. 삶공부 목록 화면 렌더링                                                                                                                                                                                   |
 | `src/components/faith/FaithSectionsScreen.tsx`                | 기도/삶공부 목록의 공유 렌더러. route가 아니라 `/prayer`, `/life-study`에서 section prop으로 사용                                                                                                                                          |
 | `src/components/ui/index.tsx`                                 | ZIP 토큰 기준 Button, Card, Badge, Chip, form, modal/dialog, sheet, toast, FAB 등 공통 UI                                                                                                                                                  |
+| `src/components/ui/motion.tsx`                                | Reanimated 기반 공통 press scale과 overlay presence 제어. 시스템 동작 줄이기 설정을 반영                                                                                                                                                  |
 | `src/components/gluestack-ui/gluestack-ui-provider/index.tsx` | gluestack overlay/toast provider. 앱 루트에서 light mode로 사용                                                                                                                                                                            |
 | `src/constants/theme.ts`                                      | `열린문커넥트.zip` 기준 color, radius, font, lineHeight, weight, shadow 디자인 토큰                                                                                                                                                        |
 | `jest.setup.ts`                                               | Jest mock 설정과 Expo Router/native module 테스트 어댑터                                                                                                                                                                                   |
@@ -99,6 +102,8 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-12) **짧은 상호작용 모션은 공통 토큰과 Reanimated로 관리한다** — 140~220ms 범위의 press/선택/overlay 전환을 사용하고 시스템 동작 줄이기 설정에서는 이동·확대를 생략합니다. 화면별 카드·목록 등장 효과는 자동 적용하지 않고 명시적으로 선택합니다.
+- (2026-07-12) **화면 내부 선택 탭은 공통 `SegmentedTabs`를 사용한다** — 나눔의 전체/나눔중/예약중/나눔완료와 동행의 소모임/봉사, 기도 작성의 작성자 표시를 같은 이동 indicator와 접근성 상태로 관리합니다.
 - (2026-07-10) **CI의 peer dependency 요구는 lockfile 우회 없이 명시한다** — gluestack 전이 의존성이 요구하는 `@react-spectrum/provider@3.11.1`을 직접 고정합니다. `npm ci --legacy-peer-deps`로 검증을 약화하지 않고 Node 20.19.4/npm 10.8.2 기준 깨끗한 설치를 유지합니다.
 - (2026-06-29) **archive 문서는 이관 안내만 유지한다** — 작업 목록은 GitHub Issues, 변경 이력은 PR description이 단일 출처이므로 `docs/_archive/LOG.md`와 `docs/_archive/TASKS.md`는 긴 과거 본문 대신 조회 안내만 둡니다.
 - (2026-06-27) **탭 IA는 Downloads preview 기준을 따른다** — 하단 탭은 `홈/나눔/동행/기도/삶공부`입니다. `MY`는 하단 탭에서 제거하고 홈 상단 `내 정보 보기` 카드로 진입합니다. `동행` 탭 내부는 Downloads `ScreenGroupList`/`ScreenServiceList`처럼 `소모임/봉사` segment를 둡니다.
@@ -162,7 +167,7 @@
 ## 의존성
 
 - GitHub Issues / PR description 기반 작업 추적 규칙에 의존합니다.
-- Expo SDK 55, Expo Dev Client, TanStack Query, Zustand, NativeWind, `expo-image-picker`, `expo-image`, `@react-spectrum/provider@3.11.1`에 의존합니다.
+- Expo SDK 55, Expo Dev Client, Reanimated 4, TanStack Query, Zustand, NativeWind, `expo-image-picker`, `expo-image`, `@react-spectrum/provider@3.11.1`에 의존합니다.
 
 ## 관련 ADR
 

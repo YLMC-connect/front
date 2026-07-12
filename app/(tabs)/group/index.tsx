@@ -7,6 +7,7 @@ import {
   Card,
   ErrorState,
   FloatingActionButton,
+  SegmentedTabs,
   VisualCover,
   VisualThumb,
 } from "../../../src/components/ui";
@@ -28,6 +29,11 @@ const sections = [
   { key: "groups", label: "소모임" },
   { key: "service", label: "봉사" },
 ] as const;
+
+const sectionHrefs = {
+  groups: "/group",
+  service: "/group?variant=service",
+} as const;
 
 const groups = [
   {
@@ -173,35 +179,13 @@ export default function GroupScreen() {
           </View>
         </View>
 
-        <View style={styles.segmented}>
-          {sections.map((item) => {
-            const selected = item.key === section;
-            return (
-              <Pressable
-                key={item.key}
-                accessibilityRole="tab"
-                accessibilityState={selected ? { selected: true } : {}}
-                onPress={() =>
-                  router.replace(
-                    item.key === "service"
-                      ? "/group?variant=service"
-                      : "/group",
-                  )
-                }
-                style={[styles.segment, selected ? styles.segmentOn : null]}
-              >
-                <Text
-                  style={[
-                    styles.segmentText,
-                    selected ? styles.segmentTextOn : null,
-                  ]}
-                >
-                  {item.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        <SegmentedTabs
+          items={sections}
+          active={section}
+          onChange={(nextSection) => router.replace(sectionHrefs[nextSection])}
+          style={styles.segmented}
+          testIDPrefix="group-section"
+        />
 
         <ScrollView contentContainerStyle={styles.body}>
           {isError ? (
@@ -405,30 +389,6 @@ const styles = StyleSheet.create({
   segmented: {
     marginHorizontal: 18,
     marginBottom: 10,
-    borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.ring,
-    padding: 4,
-    flexDirection: "row",
-  },
-  segment: {
-    flex: 1,
-    minHeight: 38,
-    borderRadius: theme.radius.pill,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  segmentOn: {
-    backgroundColor: theme.colors.surface,
-    ...theme.shadow.card,
-  },
-  segmentText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  segmentTextOn: {
-    color: theme.colors.ink,
-    fontWeight: theme.fontWeight.bold,
   },
   body: {
     paddingBottom: 100,

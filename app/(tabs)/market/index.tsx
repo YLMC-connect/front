@@ -5,6 +5,7 @@ import {
   EmptyState,
   ErrorState,
   FloatingActionButton,
+  SegmentedTabs,
   VisualThumb,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
@@ -17,6 +18,13 @@ const statusTabs: readonly { key: Status; label: string }[] = [
   { key: "reserved", label: "예약중" },
   { key: "done", label: "나눔완료" },
 ];
+
+const statusHrefs = {
+  all: "/market?variant=tab-all",
+  sharing: "/market",
+  reserved: "/market?variant=tab-reserved",
+  done: "/market?variant=tab-done",
+} as const;
 
 const categories = [
   "전체",
@@ -110,26 +118,13 @@ export default function MarketScreen() {
           <Text style={styles.title}>나눔</Text>
         </View>
 
-        <View style={styles.statusTabs}>
-          {statusTabs.map((tab) => {
-            const selected = tab.key === activeStatus;
-            return (
-              <View
-                key={tab.key}
-                style={[styles.statusTab, selected ? styles.statusTabOn : null]}
-              >
-                <Text
-                  style={[
-                    styles.statusText,
-                    selected ? styles.statusTextOn : null,
-                  ]}
-                >
-                  {tab.label}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
+        <SegmentedTabs
+          items={statusTabs}
+          active={activeStatus}
+          onChange={(status) => router.replace(statusHrefs[status])}
+          style={styles.statusTabs}
+          testIDPrefix="market-status"
+        />
 
         <ScrollView
           horizontal
@@ -286,30 +281,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 18,
     marginTop: 4,
     marginBottom: 10,
-    borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.ring,
-    padding: 4,
-    flexDirection: "row",
-  },
-  statusTab: {
-    flex: 1,
-    minHeight: 38,
-    borderRadius: theme.radius.pill,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  statusTabOn: {
-    backgroundColor: theme.colors.surface,
-    ...theme.shadow.card,
-  },
-  statusText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  statusTextOn: {
-    color: theme.colors.ink,
-    fontWeight: theme.fontWeight.bold,
   },
   categoryScroll: {
     flexGrow: 0,

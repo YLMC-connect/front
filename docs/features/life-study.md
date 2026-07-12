@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 삶공부 디자인 시스템 적용 — 학습경로 progress를 대표 요소로 유지하면서 신청 가능 과정만 강조 카드, 전체 과정은 flat list로 구분하고 역할형 typography·Skeleton·검색 empty·오류 재시도를 적용
 - 삶공부 루트 탐색 연결 — 과정명/강사 검색, 검색 결과 없음 상태, 과정 카드 상세 이동, overview 오류 재시도와 하단 탭 위 스크롤 여백을 적용
 - 삶공부 상세 로컬 badge 제거 — 기존 bordered geometry와 tone을 공통 `DetailBadge`로 이동
 - 삶공부 목록/상세 화면 구현 — `app/(tabs)/life-study/index.tsx`, `app/(tabs)/life-study/[id].tsx`
@@ -49,6 +50,8 @@
 `LifeStudyCourse`는 `status`, `sessions`, `currentSession`, `capacity`, `enrolledCount`, `isEnrolled`, `isCompleted`, `curriculum`을 포함합니다. `LifeStudyHistory`는 수강 회차와 수료증 발급 여부를 포함합니다. 루트 화면 전용 `LifeStudyOverview`는 필수 과정 진행 경로, 신청 가능한 과정, 전체 과정 요약을 가지며 추후 API DTO mapper의 출력 모델로 사용합니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-07-12) **삶공부는 학습경로와 신청 가능 과정만 강조한다** — 필수 진행률·다음 추천을 대표 surface로 두고 신청 가능한 과정은 card, 전체 과정은 구분선 기반 flat list로 표시해 카드 중첩을 줄입니다.
 
 - (2026-07-12) **삶공부 검색은 overview view model 안에서 수행한다** — API 검색 endpoint를 추측하지 않고 현재 조회된 신청 가능/전체 과정의 제목·강사만 로컬 필터링하며 과정 선택은 기존 `/life-study/[id]` 상세 route로 이동합니다.
 

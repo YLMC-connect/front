@@ -37,6 +37,16 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("내 활동 요약")).toBeTruthy();
   });
 
+  it("opens a home activity from the flat summary list", () => {
+    const push = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({ push } as never);
+    renderWithClient(<HomeScreen />);
+
+    fireEvent.press(screen.getByText("청년 1부 큐티모임 외 2개"));
+
+    expect(push).toHaveBeenCalledWith("/group");
+  });
+
   it("renders the market screen", async () => {
     renderWithClient(<MarketScreen />);
 
@@ -306,6 +316,7 @@ describe("v1 tab smoke screens", () => {
 
     expect(screen.getByText("함께 기도하고 응답을 나눠요")).toBeTruthy();
     expect(await screen.findByText("내 기도방")).toBeTruthy();
+    expect(screen.getByText("오늘의 기도 진행")).toBeTruthy();
     expect(screen.queryByText("삶공부")).toBeNull();
   });
 

@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 인증 typography·접근성 정리 — 로그인/회원가입의 display·제목·본문·보조·오류 문구를 역할형 `AppText`와 semantic tone으로 정리하고 양쪽 비밀번호 입력에 44px 표시/숨김 버튼을 적용
 - 로그인 보조 동작 연결 — 비밀번호 표시/숨기기를 접근 가능한 버튼으로 연결하고 MVP 제외 상태인 비밀번호 찾기는 무반응 링크 대신 준비 중 피드백을 표시
 - 인증 route guard와 웹 세션 저장 경계 추가 — 복원 중 route를 숨기고 anonymous/unavailable은 auth만, authenticated는 app/modal만 허용하며, 네이티브 SecureStore를 유지한 채 웹은 탭 단위 sessionStorage를 사용하도록 테스트로 고정
 - Mock 회원가입/로그인 화면 구현 — `app/(auth)/signup.tsx`, `app/(auth)/login.tsx`
@@ -73,6 +74,8 @@
 `LoginInput`, `SignupInput`, `MemberDuplicateInput`, `MemberAvailability`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리합니다. 중복확인 요청은 Swagger의 `searchType: id | phone`, `searchValue` 계약을 따르며 화면에는 `available` 도메인 결과만 노출합니다. 실제 HTTP 응답 mapper는 `data.available`이 성공 schema에 명시된 뒤 활성화합니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-07-12) **인증 화면은 display와 입력 흐름만 강하게 강조한다** — 브랜드 제목·가입 display 외 설명/label/hint는 body·caption 역할로 제한하고, 작은 문구는 `textMuted` 이상 대비를 사용합니다. 로그인/회원가입 secure field는 동일한 44px visibility 조작을 제공합니다.
 
 - (2026-07-12) **MVP 제외 기능도 가짜 affordance로 남기지 않는다** — 비밀번호 찾기는 실제 복구 계약이 생기기 전까지 이동을 추측하지 않고 `준비 중` 피드백을 표시하며, 비밀번호 visibility는 로컬 UI 상태로 즉시 전환합니다.
 

@@ -31,12 +31,15 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { theme } from "../../constants/theme";
+import { AppText } from "./app-text";
 import { MotionPressable, useMotionPresence } from "./motion";
 
 export { DetailAction, DetailMiniAction } from "./detail-actions";
 export { DetailBadge } from "./detail-badge";
 export { ModalFormSection, SectionDivider } from "./modal-form-layout";
 export { UnderlineTabs } from "./underline-tabs";
+export { AppText, type AppTextTone, type AppTextVariant } from "./app-text";
+export { ListSkeleton, Skeleton } from "./skeleton";
 
 export { MotionPressable } from "./motion";
 
@@ -561,14 +564,20 @@ export function TopBar({
               size={22}
               color={theme.colors.inkSoft}
             />
-            <Text style={styles.backButtonText}>{backLabel}</Text>
+            <AppText variant="caption" tone="secondary">
+              {backLabel}
+            </AppText>
           </Pressable>
         ) : null}
         <View style={styles.topTextWrap}>
-          <Text numberOfLines={1} style={styles.topTitle}>
+          <AppText numberOfLines={1} variant="sectionTitle">
             {title}
-          </Text>
-          {subtitle ? <Text style={styles.topSubtitle}>{subtitle}</Text> : null}
+          </AppText>
+          {subtitle ? (
+            <AppText variant="caption" tone="muted" style={styles.topSubtitle}>
+              {subtitle}
+            </AppText>
+          ) : null}
         </View>
       </View>
       {right}
@@ -580,18 +589,39 @@ export function EmptyState({
   title,
   description,
   icon = "inbox",
+  actionLabel,
+  onAction,
 }: {
   title: string;
   description?: string;
   icon?: IconName;
+  actionLabel?: string;
+  onAction?: () => void;
 }) {
   return (
     <View style={styles.state}>
       <View style={styles.stateIcon}>
         <MaterialIcons name={icon} size={42} color={theme.colors.inkHint} />
       </View>
-      <Text style={styles.stateTitle}>{title}</Text>
-      {description ? <Text style={styles.stateText}>{description}</Text> : null}
+      <AppText variant="cardTitle" tone="secondary" style={styles.stateTitle}>
+        {title}
+      </AppText>
+      {description ? (
+        <AppText variant="caption" tone="muted" style={styles.stateText}>
+          {description}
+        </AppText>
+      ) : null}
+      {actionLabel && onAction ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onAction}
+          style={styles.stateAction}
+        >
+          <AppText variant="caption" tone="brand">
+            {actionLabel}
+          </AppText>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -612,8 +642,12 @@ export function ErrorState({
           color={theme.colors.inkHint}
         />
       </View>
-      <Text style={styles.stateTitle}>불러오지 못했습니다</Text>
-      <Text style={styles.stateText}>{message}</Text>
+      <AppText variant="cardTitle" tone="secondary" style={styles.stateTitle}>
+        불러오지 못했습니다
+      </AppText>
+      <AppText variant="caption" tone="muted" style={styles.stateText}>
+        {message}
+      </AppText>
       {onRetry ? (
         <Pressable
           accessibilityRole="button"
@@ -621,6 +655,43 @@ export function ErrorState({
           style={styles.retryButton}
         >
           <Text style={styles.retryButtonText}>다시 시도</Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+export function SuccessState({
+  title,
+  description,
+  actionLabel,
+  onAction,
+}: {
+  title: string;
+  description?: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}) {
+  return (
+    <View style={styles.state}>
+      <View style={[styles.stateIcon, styles.successStateIcon]}>
+        <MaterialIcons name="check" size={38} color={theme.colors.success} />
+      </View>
+      <AppText variant="cardTitle">{title}</AppText>
+      {description ? (
+        <AppText variant="caption" tone="muted" style={styles.stateText}>
+          {description}
+        </AppText>
+      ) : null}
+      {actionLabel && onAction ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onAction}
+          style={styles.stateAction}
+        >
+          <AppText variant="caption" tone="brand">
+            {actionLabel}
+          </AppText>
         </Pressable>
       ) : null}
     </View>
@@ -1139,8 +1210,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.lg,
     padding: 16,
-    borderWidth: 1,
-    borderColor: theme.colors.ring,
+    borderWidth: 0,
     ...theme.shadow.card,
   },
   fab: {
@@ -1148,11 +1218,11 @@ const styles = StyleSheet.create({
     right: 18,
     bottom: 86,
     zIndex: 20,
-    minWidth: 56,
-    height: 56,
+    minWidth: 52,
+    height: 52,
     borderRadius: theme.radius.pill,
-    paddingLeft: 16,
-    paddingRight: 18,
+    paddingLeft: 14,
+    paddingRight: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -1161,7 +1231,7 @@ const styles = StyleSheet.create({
     ...theme.shadow.fab,
   },
   fabCompact: {
-    width: 56,
+    width: 52,
     paddingLeft: 0,
     paddingRight: 0,
   },
@@ -1274,7 +1344,7 @@ const styles = StyleSheet.create({
   },
   topBar: {
     minHeight: 58,
-    paddingHorizontal: 18,
+    paddingHorizontal: theme.layout.screenX,
     paddingTop: 8,
     paddingBottom: 10,
     flexDirection: "row",
@@ -1283,32 +1353,19 @@ const styles = StyleSheet.create({
   },
   topTitleWrap: { flexDirection: "row", alignItems: "center", flex: 1, gap: 4 },
   topTextWrap: { flex: 1, minWidth: 0 },
-  topTitle: {
-    color: theme.colors.ink,
-    fontWeight: theme.fontWeight.bold,
-    fontSize: 20,
-  },
   topSubtitle: {
-    color: theme.colors.inkMute,
     marginTop: 2,
-    fontSize: theme.fontSize.sm,
-    lineHeight: theme.lineHeight.sm,
   },
   backButton: {
-    height: 36,
+    height: theme.layout.touchTarget,
     paddingLeft: 8,
     paddingRight: 14,
-    borderRadius: 18,
+    borderRadius: theme.radius.pill,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
     gap: 2,
     backgroundColor: "rgba(20,30,18,0.05)",
-  },
-  backButtonText: {
-    color: theme.colors.inkSoft,
-    fontSize: 14.5,
-    fontWeight: theme.fontWeight.semibold,
   },
   visualThumb: {
     borderRadius: theme.radius.md,
@@ -1373,16 +1430,24 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface2,
   },
   stateTitle: {
-    color: theme.colors.inkSoft,
-    fontWeight: "800",
-    fontSize: 16,
     textAlign: "center",
   },
   stateText: {
-    color: theme.colors.inkMute,
-    fontSize: 13,
     textAlign: "center",
-    lineHeight: 19,
+  },
+  stateAction: {
+    minHeight: theme.layout.touchTarget,
+    marginTop: theme.spacing[1],
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: theme.colors.lineStrong,
+    backgroundColor: theme.colors.surface,
+    paddingHorizontal: theme.spacing[5],
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  successStateIcon: {
+    backgroundColor: "#EDF5EA",
   },
   retryButton: {
     minHeight: 44,

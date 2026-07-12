@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native";
 import { Screen } from "../../src/components/layout/Screen";
-import { TopBar } from "../../src/components/ui";
+import { AppText, TopBar } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { authApiErrorMessages } from "../../src/constants/apiErrorMessages";
 import { useAuth } from "../../src/hooks/useAuth";
@@ -156,15 +156,15 @@ export default function SignupScreen() {
           contentContainerStyle={styles.body}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.display}>정보를 입력해주세요</Text>
+          <AppText variant="display">정보를 입력해주세요</AppText>
 
           <View style={styles.avatarPreview}>
             <AutoAvatar name={values.userName} />
-            <Text style={styles.avatarCaption}>
+            <AppText variant="caption" tone="muted">
               {values.userName
                 ? "이름 두 글자로 자동 생성된 프로필"
                 : "이름을 입력하면 미리보기가 표시됩니다"}
-            </Text>
+            </AppText>
           </View>
 
           <View style={styles.form}>
@@ -291,9 +291,9 @@ export default function SignupScreen() {
               size={17}
               color={theme.colors.primaryDeep}
             />
-            <Text style={styles.infoText}>
+            <AppText variant="caption" tone="brand" style={styles.infoText}>
               목장과 부서는 가입 후 관리자가 확인하여 배정해드려요.
-            </Text>
+            </AppText>
           </View>
 
           {signup.error ? (
@@ -380,6 +380,7 @@ function SignupInput({
   secureTextEntry?: boolean;
   keyboardType?: "default" | "phone-pad";
 }) {
+  const [passwordVisible, setPasswordVisible] = useState(false);
   return (
     <View
       style={[
@@ -394,16 +395,26 @@ function SignupInput({
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={theme.colors.inkMute}
-        secureTextEntry={secureTextEntry}
+        secureTextEntry={secureTextEntry && !passwordVisible}
         keyboardType={keyboardType}
         style={styles.input}
       />
       {secureTextEntry ? (
-        <MaterialIcons
-          name="visibility-off"
-          size={20}
-          color={theme.colors.inkMute}
-        />
+        <Pressable
+          accessibilityLabel={
+            passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"
+          }
+          accessibilityRole="button"
+          hitSlop={8}
+          onPress={() => setPasswordVisible((visible) => !visible)}
+          style={styles.visibilityButton}
+        >
+          <MaterialIcons
+            name={passwordVisible ? "visibility" : "visibility-off"}
+            size={20}
+            color={theme.colors.inkMute}
+          />
+        </Pressable>
       ) : null}
     </View>
   );
@@ -427,21 +438,19 @@ function InlineError({ children }: { children?: ReactNode }) {
 }
 
 function FieldHint({ children }: { children: ReactNode }) {
-  return <Text style={styles.hint}>{children}</Text>;
+  return (
+    <AppText variant="caption" tone="muted" style={styles.hint}>
+      {children}
+    </AppText>
+  );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
   scroll: { flex: 1 },
   body: {
-    paddingHorizontal: 24,
+    paddingHorizontal: theme.layout.screenX,
     paddingBottom: 8,
-  },
-  display: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.display,
-    lineHeight: theme.lineHeight.display,
-    fontWeight: "900",
   },
   avatarPreview: {
     marginTop: 22,
@@ -474,11 +483,6 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "900",
   },
-  avatarCaption: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-    lineHeight: theme.lineHeight.sm,
-  },
   form: {
     marginTop: 28,
     gap: 20,
@@ -506,6 +510,13 @@ const styles = StyleSheet.create({
   },
   inputWrapWithIcon: {
     paddingRight: 10,
+  },
+  visibilityButton: {
+    width: theme.layout.touchTarget,
+    height: theme.layout.touchTarget,
+    marginRight: -8,
+    alignItems: "center",
+    justifyContent: "center",
   },
   inputWrapError: {
     borderColor: theme.colors.danger,
@@ -548,9 +559,6 @@ const styles = StyleSheet.create({
   },
   hint: {
     marginTop: 6,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-    lineHeight: theme.lineHeight.sm,
   },
   infoBox: {
     marginTop: 24,
@@ -563,9 +571,6 @@ const styles = StyleSheet.create({
   },
   infoText: {
     flex: 1,
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 18,
   },
   bottomFlat: {
     paddingHorizontal: 16,

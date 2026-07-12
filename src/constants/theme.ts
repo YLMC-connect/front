@@ -1,56 +1,6 @@
-const colors = {
-  primary: "#5B7AB0",
-  primaryDeep: "#47608E",
-  primarySoft: "rgba(91, 122, 176, 0.12)",
-  primaryTint: "#ECF0F7",
-  bg: "#F6F7F2",
-  surface: "#FFFFFF",
-  surface2: "#FAFBF7",
-  ink: "#1E2920",
-  inkSoft: "rgba(30, 41, 32, 0.72)",
-  inkMute: "rgba(30, 41, 32, 0.50)",
-  inkHint: "rgba(30, 41, 32, 0.30)",
-  line: "rgba(30, 41, 32, 0.08)",
-  lineStrong: "rgba(30, 41, 32, 0.14)",
-  ring: "rgba(20, 30, 18, 0.04)",
-  glass: "rgba(255,255,255,0.82)",
-  glassBorder: "rgba(255,255,255,0.60)",
-  overlay: "rgba(20,22,28,0.50)",
-  sheetOverlay: "rgba(20,22,28,0.45)",
-  toast: "rgba(28,38,30,0.94)",
-  warn: "#D2A24C",
-  danger: "#C97C6E",
-  success: "#6B9F5C",
-  white: "#FFFFFF",
-  amberSoft: "#F3EFE5",
-  sage: "#8FA882",
-  sageSoft: "#E0E9DE",
-  taupe: "#C7B89D",
-  taupeSoft: "#F3E8D7",
-};
+import designTokens from "./designTokens.json";
 
-const spacing = {
-  1: 4,
-  2: 8,
-  3: 12,
-  4: 16,
-  5: 20,
-  6: 24,
-  7: 28,
-  8: 32,
-  10: 40,
-  12: 48,
-};
-
-const radius = {
-  xs: 8,
-  sm: 12,
-  md: 16,
-  lg: 20,
-  xl: 24,
-  "2xl": 32,
-  pill: 9999,
-};
+const { colors, spacing, radius } = designTokens;
 
 const fontSize = {
   xs: 11,
@@ -75,10 +25,53 @@ const lineHeight = {
 };
 
 const fontWeight = {
+  regular: "400",
   medium: "500",
   semibold: "600",
   bold: "700",
   extrabold: "800",
+} as const;
+
+const typography = {
+  display: {
+    fontSize: 28,
+    lineHeight: 36,
+    fontWeight: fontWeight.extrabold,
+  },
+  screenTitle: {
+    fontSize: 22,
+    lineHeight: 30,
+    fontWeight: fontWeight.extrabold,
+  },
+  sectionTitle: {
+    fontSize: 17,
+    lineHeight: 24,
+    fontWeight: fontWeight.bold,
+  },
+  cardTitle: {
+    fontSize: 16,
+    lineHeight: 23,
+    fontWeight: fontWeight.bold,
+  },
+  body: {
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: fontWeight.regular,
+  },
+  caption: {
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: fontWeight.medium,
+  },
+} as const;
+
+const layout = {
+  screenX: 20,
+  sectionGap: 32,
+  cardPadding: 16,
+  contentGap: 8,
+  listGap: 12,
+  touchTarget: 44,
 } as const;
 
 const motion = {
@@ -106,8 +99,8 @@ const shadow = {
   card: {
     shadowColor: "rgba(20,30,18,0.18)",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
     elevation: 1,
   },
   raised: {
@@ -120,16 +113,16 @@ const shadow = {
   float: {
     shadowColor: "rgba(20,30,18,0.22)",
     shadowOffset: { width: 0, height: 14 },
-    shadowOpacity: 0.2,
-    shadowRadius: 18,
-    elevation: 8,
+    shadowOpacity: 0.14,
+    shadowRadius: 16,
+    elevation: 6,
   },
   fab: {
     shadowColor: "rgba(20,30,18,0.30)",
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.26,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOpacity: 0.18,
+    shadowRadius: 14,
+    elevation: 6,
   },
   primary: {
     shadowColor: "rgba(107,130,96,0.60)",
@@ -168,6 +161,8 @@ export const theme = {
   fontSize,
   lineHeight,
   fontWeight,
+  typography,
+  layout,
   motion,
   shadow,
 } as const;

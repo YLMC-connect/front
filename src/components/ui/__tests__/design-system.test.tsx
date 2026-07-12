@@ -1,0 +1,50 @@
+import { render, screen } from "@testing-library/react-native";
+import { StyleSheet } from "react-native";
+import designTokens from "../../../constants/designTokens.json";
+import { theme } from "../../../constants/theme";
+import { AppText, ListSkeleton, Skeleton } from "../index";
+
+describe("design system foundations", () => {
+  it("keeps semantic colors and radii on the shared token source", () => {
+    expect(theme.colors).toEqual(designTokens.colors);
+    expect(theme.radius).toEqual(designTokens.radius);
+    expect(Object.keys(theme.typography)).toEqual([
+      "display",
+      "screenTitle",
+      "sectionTitle",
+      "cardTitle",
+      "body",
+      "caption",
+    ]);
+  });
+
+  it("renders role typography and semantic color through AppText", () => {
+    render(
+      <AppText variant="sectionTitle" tone="brand">
+        내 활동 요약
+      </AppText>,
+    );
+
+    const style = StyleSheet.flatten(
+      screen.getByText("내 활동 요약").props.style,
+    );
+    expect(style).toMatchObject({
+      ...theme.typography.sectionTitle,
+      color: theme.colors.primaryDeep,
+    });
+  });
+
+  it("exposes list loading as one accessible progress state", () => {
+    render(
+      <>
+        <Skeleton testID="single-skeleton" width={80} height={20} />
+        <ListSkeleton rows={2} />
+      </>,
+    );
+
+    expect(screen.getByTestId("list-skeleton")).toBeTruthy();
+    expect(
+      screen.getByLabelText("콘텐츠 불러오는 중").props.accessibilityRole,
+    ).toBe("progressbar");
+  });
+});

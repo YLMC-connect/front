@@ -328,13 +328,13 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: theme.colors.primary,
     shadowColor: "rgba(91, 122, 176, 0.74)",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.28,
-    shadowRadius: 18,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.16,
+    shadowRadius: 12,
+    elevation: 3,
   },
   tabLabel: {
-    fontSize: 11,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: "700",
   },
 });

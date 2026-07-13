@@ -5,6 +5,7 @@ import {
   BottomSheet,
   Card,
   ConfirmDialog,
+  FilterChips,
   MotionPressable,
   SegmentedTabs,
 } from "../index";
@@ -91,6 +92,47 @@ describe("common motion", () => {
 
     fireEvent.press(screen.getByTestId("status-reserved"));
     expect(onChange).toHaveBeenCalledWith("reserved");
+  });
+
+  it("shares a moving indicator across variable-width filter chips", () => {
+    const onChange = jest.fn();
+    const items = [
+      { key: "all", label: "전체" },
+      { key: "books", label: "도서·문구" },
+    ] as const;
+    const screen = render(
+      <FilterChips
+        items={items}
+        active="all"
+        onChange={onChange}
+        testIDPrefix="category"
+      />,
+    );
+
+    fireEvent(screen.getByTestId("category-all"), "layout", {
+      nativeEvent: { layout: { height: 44, width: 54, x: 20, y: 0 } },
+    });
+    fireEvent(screen.getByTestId("category-books"), "layout", {
+      nativeEvent: { layout: { height: 44, width: 82, x: 82, y: 0 } },
+    });
+
+    expect(screen.getByTestId("category-indicator")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("category-all"));
+    expect(onChange).not.toHaveBeenCalled();
+
+    fireEvent.press(screen.getByTestId("category-books"));
+    expect(onChange).toHaveBeenCalledWith("books");
+    screen.rerender(
+      <FilterChips
+        items={items}
+        active="books"
+        onChange={onChange}
+        testIDPrefix="category"
+      />,
+    );
+    expect(
+      screen.getByTestId("category-books").props.accessibilityState,
+    ).toEqual({ selected: true });
   });
 
   it("keeps a dialog mounted for exit and unmounts after it finishes", async () => {

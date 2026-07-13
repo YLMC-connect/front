@@ -60,12 +60,15 @@ describe("v1 tab smoke screens", () => {
   });
 
   it("filters and searches market posts", async () => {
+    const setParams = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({ setParams } as never);
     renderWithClient(<MarketScreen />);
     await screen.findByText(
       "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
     );
 
     fireEvent.press(screen.getByText("도서·문구"));
+    expect(setParams).toHaveBeenCalledWith({ category: "book" });
     expect(screen.getByText("어린이 동화책 30권 묶음 나눔")).toBeTruthy();
     expect(
       screen.queryByText("아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)"),
@@ -74,6 +77,53 @@ describe("v1 tab smoke screens", () => {
     fireEvent.press(screen.getByLabelText("나눔 검색"));
     fireEvent.changeText(screen.getByLabelText("나눔 검색어"), "동화책");
     expect(screen.getByText("어린이 동화책 30권 묶음 나눔")).toBeTruthy();
+  });
+
+  it("restores a market category from the list route", async () => {
+    jest.mocked(useLocalSearchParams).mockReturnValue({ category: "book" });
+    renderWithClient(<MarketScreen />);
+
+    expect(
+      await screen.findByText("어린이 동화책 30권 묶음 나눔"),
+    ).toBeTruthy();
+    expect(
+      screen.getByTestId("market-category-book").props.accessibilityState,
+    ).toEqual({ selected: true });
+    expect(
+      screen.queryByText("아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)"),
+    ).toBeNull();
+
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
+  });
+
+  it("replaces filter routes while keeping detail navigation on the back stack", async () => {
+    const navigation = {
+      back: jest.fn(),
+      push: jest.fn(),
+      replace: jest.fn(),
+    };
+    jest.mocked(useRouter).mockReturnValue(navigation as never);
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
+    const list = renderWithClient(<MarketScreen />);
+
+    await screen.findByText(
+      "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
+    );
+    fireEvent.press(screen.getByTestId("market-status-reserved"));
+    expect(navigation.replace).toHaveBeenCalledWith("/market?status=reserved");
+
+    fireEvent.press(
+      screen.getByText("아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)"),
+    );
+    expect(navigation.push).toHaveBeenCalledWith("/market/1");
+
+    list.unmount();
+    jest.mocked(useLocalSearchParams).mockReturnValue({ id: "1" });
+    renderWithClient(<MarketDetailScreen />);
+    fireEvent.press(await screen.findByLabelText("뒤로"));
+    expect(navigation.back).toHaveBeenCalledTimes(1);
+
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
   });
 
   it("renders the market detail screen", async () => {

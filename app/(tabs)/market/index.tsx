@@ -16,6 +16,7 @@ import {
   AppText,
   FloatingActionButton,
   ListSkeleton,
+  ScreenHeader,
   SegmentedTabs,
   VisualThumb,
 } from "../../../src/components/ui";
@@ -89,24 +90,26 @@ export default function MarketScreen() {
   return (
     <Screen scroll={false} padded={false} testID="screen-market">
       <View style={styles.root}>
-        <View style={styles.topBar}>
-          <AppText variant="screenTitle">나눔</AppText>
-          <Pressable
-            accessibilityLabel={searchOpen ? "나눔 검색 닫기" : "나눔 검색"}
-            accessibilityRole="button"
-            onPress={() => {
-              setSearchOpen((open) => !open);
-              if (searchOpen) setSearch("");
-            }}
-            style={styles.searchButton}
-          >
-            <MaterialIcons
-              name={searchOpen ? "close" : "search"}
-              size={22}
-              color={theme.colors.inkSoft}
-            />
-          </Pressable>
-        </View>
+        <ScreenHeader
+          title="나눔"
+          right={
+            <Pressable
+              accessibilityLabel={searchOpen ? "나눔 검색 닫기" : "나눔 검색"}
+              accessibilityRole="button"
+              onPress={() => {
+                setSearchOpen((open) => !open);
+                if (searchOpen) setSearch("");
+              }}
+              style={styles.searchButton}
+            >
+              <MaterialIcons
+                name={searchOpen ? "close" : "search"}
+                size={22}
+                color={theme.colors.inkSoft}
+              />
+            </Pressable>
+          }
+        />
 
         {searchOpen ? (
           <View style={styles.searchWrap}>
@@ -294,13 +297,6 @@ function MarketEmptyState({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-  },
-  topBar: {
-    minHeight: 56,
-    paddingHorizontal: theme.layout.screenX,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
   },
   searchButton: {
     width: 44,

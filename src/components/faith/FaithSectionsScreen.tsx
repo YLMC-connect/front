@@ -29,6 +29,7 @@ import {
   ErrorState,
   FloatingActionButton,
   ListSkeleton,
+  ScreenHeader,
 } from "../ui";
 
 type FaithSection = "pray" | "study";
@@ -39,37 +40,35 @@ export function FaithSectionsScreen({ section }: { section: FaithSection }) {
   return (
     <Screen scroll={false} padded={false} testID="screen-faith">
       <View style={styles.root}>
-        <View style={styles.topBar}>
-          <View style={styles.topText}>
-            <AppText variant="screenTitle">
-              {section === "study" ? "삶공부" : "기도"}
-            </AppText>
-            <AppText variant="caption" tone="secondary" style={styles.subtitle}>
-              {section === "study"
-                ? "말씀으로 배우고 삶으로 자라가요"
-                : "함께 기도하고 응답을 나눠요"}
-            </AppText>
-          </View>
-          {section === "study" ? (
-            <Pressable
-              accessibilityLabel={
-                searchOpen ? "삶공부 검색 닫기" : "삶공부 검색"
-              }
-              accessibilityRole="button"
-              onPress={() => {
-                setSearchOpen((open) => !open);
-                if (searchOpen) setSearch("");
-              }}
-              style={styles.searchButton}
-            >
-              <MaterialIcons
-                name={searchOpen ? "close" : "search"}
-                size={22}
-                color={theme.colors.inkSoft}
-              />
-            </Pressable>
-          ) : null}
-        </View>
+        <ScreenHeader
+          title={section === "study" ? "삶공부" : "기도"}
+          subtitle={
+            section === "study"
+              ? "말씀으로 배우고 삶으로 자라가요"
+              : "함께 기도하고 응답을 나눠요"
+          }
+          right={
+            section === "study" ? (
+              <Pressable
+                accessibilityLabel={
+                  searchOpen ? "삶공부 검색 닫기" : "삶공부 검색"
+                }
+                accessibilityRole="button"
+                onPress={() => {
+                  setSearchOpen((open) => !open);
+                  if (searchOpen) setSearch("");
+                }}
+                style={styles.searchButton}
+              >
+                <MaterialIcons
+                  name={searchOpen ? "close" : "search"}
+                  size={22}
+                  color={theme.colors.inkSoft}
+                />
+              </Pressable>
+            ) : undefined
+          }
+        />
 
         {section === "study" && searchOpen ? (
           <View style={styles.searchWrap}>
@@ -520,20 +519,6 @@ const lifeStudyStatusLabels: Record<LifeStudyOverviewStatus, string> = {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-  },
-  topBar: {
-    minHeight: 56,
-    paddingHorizontal: theme.layout.screenX,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  topText: {
-    flex: 1,
-    minWidth: 0,
-  },
-  subtitle: {
-    marginTop: 2,
   },
   searchButton: {
     width: 44,

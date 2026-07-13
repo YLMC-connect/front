@@ -1,6 +1,6 @@
 # market (나눔)
 
-> 마지막 갱신: 2026-07-12 | 담당 Phase: P1/P2/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-14 | 담당 Phase: P1/P2/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,7 +10,8 @@
 
 ## ✅ 완료
 
-- 나눔 목록 디자인 시스템 적용 — 화면/카드/보조문구 typography, 20px 화면 여백, 96px 기존 추상 썸네일, Skeleton 로딩, 행동 가능한 empty state와 오류 재시도, 절제된 FAB를 적용하고 flat row 구조를 유지
+- 나눔 목록 카드·댓글 입력 배경 정리 — 상태 탭·카테고리 필터는 44px 터치 높이와 12px 구획 간격을 보장하고, 목록 항목을 흰 surface·옅은 경계·약한 그림자의 독립 카드로 통일해 행 구분선을 제거했으며, 상세 댓글 composer와 입력창은 기존 geometry를 유지한 채 배경만 투명하게 변경
+- 나눔 목록 디자인 시스템 적용 — 화면/카드/보조문구 typography, 20px 화면 여백, 96px 기존 추상 썸네일, Skeleton 로딩, 행동 가능한 empty state와 오류 재시도, 절제된 FAB를 적용
 - 나눔 작성·탐색 mock 흐름 연결 — 사진/카테고리/상태/제목/설명/수령 장소를 실제 입력·검증해 mock service에 저장하고 상세 이동·목록 재조회까지 연결했으며, 목록 카테고리 필터와 제목/작성자 검색을 활성화
 - 나눔 상세 action·mini action과 작성 폼 section/divider 공통화 — 기존 geometry·testID·댓글 CRUD 동작을 유지하면서 공통 UI 파일로 이동
 - 나눔 목록/상세/작성 화면 구현 — `app/(tabs)/market/index.tsx`, `app/(tabs)/market/[id].tsx`, `app/modal/market-new.tsx`
@@ -67,7 +68,9 @@
 
 ## 결정 사항 (최신 위)
 
-- (2026-07-12) **나눔은 사진 asset 추가 없이 정보 계층만 개선한다** — 사용자 요청에 따라 기존 `VisualThumb`를 유지하되 제목·작성자/시간의 역할을 분리하고 목록은 flat row로 표시합니다. 실제 물품 사진은 업로드/API 계약 작업에서 다룹니다.
+- (2026-07-14) **나눔 탐색 구획은 터치 영역을 분리한다** — 상태 탭과 카테고리 필터는 각각 44px 높이를 유지하고 flex 축소를 막으며, 상태 탭-필터-첫 카드와 카드 사이는 12px 간격으로 분리해 인접 터치 영역이 겹치지 않게 합니다. 목록 카드는 흰 surface, 옅은 1px 경계, 둥근 모서리와 약한 그림자를 사용하고 행 divider는 두지 않습니다.
+- (2026-07-14) **댓글 입력 영역은 배경만 투명하게 한다** — 고정 composer와 pill 입력창의 크기·위치·테두리·전송 버튼은 유지하고 배경 alpha만 제거합니다. 이미 투명한 신고 입력과 고정 surface를 쓰는 검색·작성 폼은 변경하지 않습니다.
+- (2026-07-12) **부분 폐기됨: 나눔은 사진 asset 추가 없이 정보 계층만 개선한다** — 기존 `VisualThumb`와 제목·작성자/시간 계층, 이미지 작업 제외 결정은 유지하지만 flat row는 2026-07-14 카드 결정으로 대체합니다. 실제 물품 사진은 업로드/API 계약 작업에서 다룹니다.
 
 - (2026-07-12) **나눔 작성은 API 계약 전에도 service mutation 경계를 통과한다** — 작성 화면은 fixture를 직접 변경하지 않고 `useCreateMarketPost → createMarketPost → MarketDataSource`를 사용합니다. 생성 결과는 runtime mock 목록/상세에 유지하고 실제 API 연결 시 data source/mapper만 교체합니다.
 
@@ -92,12 +95,12 @@
 - (2026-05-27) **나눔 상세 text/chip은 ZIP 전용 metric을 따른다** — 상세 제목은 공용 `titleText`가 아니라 ZIP `20px/700/1.35`에 맞춘 전용 style을 쓰고, 카테고리/상태 chip도 dark selected chip이 아닌 ZIP `chip soft` 톤으로 렌더링합니다.
 - (2026-05-27) **나눔 목록 FAB는 ZIP fixed root layer를 따른다** — `ScreenMarketList`의 글쓰기 FAB는 list ScrollView 안 요소가 아니라 ZIP `Phone` root의 absolute pill button으로 관리합니다. 공통 `FloatingActionButton`은 정적 surface를 사용해 Android 캡처에서 pill 배경과 위치가 유지되도록 합니다.
 - (2026-05-27) **나눔 thumbnail은 ZIP `Thumb` proportional geometry를 따른다** — 목록 86px thumb, 상세 360px hero, 작성/관심 목록 thumb 모두 같은 공통 `VisualThumb`를 쓰므로, circle 위치/크기/opacity는 ZIP `lib.jsx`의 `Thumb` SVG viewBox 수식을 size 비례로 번역합니다.
-- (2026-05-27) **나눔 목록은 ZIP full-width row를 따른다** — `ScreenMarketList` 원본은 카드형 리스트가 아니라 `padding 14/22`, 86px thumb, row divider, status overlay를 쓰는 compact row 구조이므로 reference 목록에서는 공통 `Card` wrapper를 사용하지 않습니다.
+- (2026-05-27, 2026-07-14 폐기) **나눔 목록은 ZIP full-width row를 따른다** — row divider 구조는 사용자 확인에 따라 독립 카드 구조로 대체했습니다. 썸네일과 status overlay는 유지합니다.
 - (2026-05-27) **나눔 상세 action은 ZIP `ActionBtn` inline 구조를 따른다** — 수정/삭제/상태 변경/신고/차단 action은 큰 원형 icon tile이 아니라 ZIP `screens-market.jsx`의 44px transparent inline icon+label button으로 번역합니다.
 - (2026-05-27) **나눔 작성은 ZIP section form 구조를 따른다** — 작성/수정 reference는 카드형 폼이 아니라 ZIP 원본의 상단 `닫기`/등록 action, horizontal photo rail, 8px divider section, 7개 카테고리 chip, 상태 segmented button, 안내 박스를 기준으로 번역합니다.
 - (2026-05-26) **나눔 상세 geometry는 ZIP phone frame 기준으로 본다** — Android native safe-area를 그대로 쓰는 대신 ZIP `phone-status` 44px와 bottom fixed composer 위치를 기준으로 맞춰야 원본 상세의 hero, 작성자, composer 위치가 일치합니다.
 - (2026-05-26) **나눔 상세 toast는 ZIP `CheckToast offset={106}`을 따른다** — 하단 comment composer가 있는 나눔 상세의 중복 신고 toast는 기본 offset이 아니라 ZIP 원본처럼 bottom action area 위에 뜨도록 `offset=106`을 적용하고, 문구도 `이미 신고한 게시글입니다`로 맞춥니다.
-- (2026-05-26) **나눔 상세 reference는 ZIP 고정 comment composer를 따른다** — 상세 화면의 댓글 입력은 카드형 textarea가 아니라 ZIP 원본의 하단 glass `bottom-bar` composer이며, 멀티라인 입력 상태는 composer 위 preview card로 표현합니다.
+- (2026-05-26, 2026-07-14 부분 폐기) **나눔 상세 reference는 ZIP 고정 comment composer를 따른다** — 하단 고정 위치와 멀티라인 preview card는 유지하지만 glass 배경은 제거해 composer와 입력창 모두 투명하게 표시합니다.
 - (2026-05-26) **나눔 상세 hero는 ZIP `Thumb`를 직접 번역한다** — `VisualCover` 기반 wide cover 대신 ZIP의 정사각 `Thumb size=360 seed=0` 구조를 사용하고, 기본 `Thumb`에는 아이콘을 표시하지 않습니다.
 - (2026-05-23) **나눔 상세는 full-bleed hero를 기준으로 한다** — 상세 reference 화면은 공통 TopBar 카드형 layout보다 ZIP 원본의 사진 hero + overlay back button + status banner 구조를 우선합니다.
 - (2026-05-23) **나눔 원본 상태는 `variant` 라우트로 검증** — 현재 서비스 기반 화면을 유지하되 `?variant=...`가 있으면 ZIP 원본의 목록/상세/작성 상태를 mock-first reference 화면으로 렌더링합니다.

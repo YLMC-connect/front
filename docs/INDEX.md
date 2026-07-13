@@ -30,8 +30,8 @@
 | market (나눔장터) | 3 | 6 | 2026-07-13 | [features/market.md](features/market.md) |
 | group (소모임) | 3 | 6 | 2026-07-13 | [features/group.md](features/group.md) |
 | mypage (MY) | 1 | 3 | 2026-07-12 | [features/mypage.md](features/mypage.md) |
-| life-study (삶공부) | 2 | 5 | 2026-07-12 | [features/life-study.md](features/life-study.md) |
-| prayer (중보기도) | 2 | 5 | 2026-07-12 | [features/prayer.md](features/prayer.md) |
+| life-study (삶공부) | 3 | 5 | 2026-07-13 | [features/life-study.md](features/life-study.md) |
+| prayer (중보기도) | 3 | 5 | 2026-07-13 | [features/prayer.md](features/prayer.md) |
 
 <!-- AUTO-GENERATED-END: domain-status -->
 

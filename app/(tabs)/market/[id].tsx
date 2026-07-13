@@ -612,6 +612,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 2,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
     backgroundColor: "rgba(255,255,255,0.92)",
     ...theme.shadow.card,
   },

@@ -365,31 +365,44 @@ function GroupCard({
       onPress={onPress}
       style={[styles.groupCard, closed ? styles.closedCard : null]}
     >
-      <View style={styles.cardTop}>
-        <AppText numberOfLines={1} variant="cardTitle" style={styles.cardTitle}>
-          {group.name}
+      <VisualThumb size={96} seed={group.coverSeed} />
+      <View style={styles.groupCardBody}>
+        <View style={styles.cardTop}>
+          <AppText
+            numberOfLines={1}
+            variant="cardTitle"
+            style={styles.cardTitle}
+          >
+            {group.name}
+          </AppText>
+          <RecruitBadge closed={closed} />
+        </View>
+        <AppText
+          numberOfLines={2}
+          variant="body"
+          tone="secondary"
+          style={styles.desc}
+        >
+          {group.description}
         </AppText>
-        <RecruitBadge closed={closed} />
-      </View>
-      <View style={styles.categoryPill}>
-        <Text style={styles.categoryPillText}>
-          {categoryOf(group.category)}
-        </Text>
-      </View>
-      <AppText
-        numberOfLines={2}
-        variant="body"
-        tone="secondary"
-        style={styles.desc}
-      >
-        {group.description}
-      </AppText>
-      <View style={styles.memberRow}>
-        <MaterialIcons name="groups" size={14} color={theme.colors.inkMute} />
-        <AppText variant="caption" tone="muted">
-          현재 <Text style={styles.memberCount}>{group.currentMembers}</Text> /
-          최대 {group.maxMembers}
-        </AppText>
+        <View style={styles.cardMetaRow}>
+          <View style={styles.categoryPill}>
+            <Text style={styles.categoryPillText}>
+              {categoryOf(group.category)}
+            </Text>
+          </View>
+          <View style={styles.memberRow}>
+            <MaterialIcons
+              name="groups"
+              size={14}
+              color={theme.colors.inkMute}
+            />
+            <AppText variant="caption" tone="muted">
+              <Text style={styles.memberCount}>{group.currentMembers}</Text> /
+              {group.maxMembers}명
+            </AppText>
+          </View>
+        </View>
       </View>
     </Pressable>
   );
@@ -440,8 +453,11 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
   },
   segmented: {
+    flexShrink: 0,
+    height: 44,
     marginHorizontal: theme.layout.screenX,
-    marginBottom: 10,
+    marginTop: 4,
+    marginBottom: theme.layout.listGap,
   },
   body: {
     paddingBottom: 164,
@@ -494,7 +510,9 @@ const styles = StyleSheet.create({
   },
   categoryScroll: {
     flexGrow: 0,
-    marginBottom: 6,
+    flexShrink: 0,
+    height: 44,
+    marginBottom: theme.layout.listGap,
   },
   categories: {
     paddingHorizontal: theme.layout.screenX,
@@ -524,7 +542,6 @@ const styles = StyleSheet.create({
   },
   groupList: {
     paddingHorizontal: theme.layout.screenX,
-    paddingTop: 6,
     paddingBottom: 12,
     gap: theme.spacing[3],
   },
@@ -575,6 +592,8 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing[2],
   },
   groupCard: {
+    flexDirection: "row",
+    gap: theme.layout.listGap,
     borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,
@@ -582,11 +601,15 @@ const styles = StyleSheet.create({
     padding: theme.spacing[4],
     ...theme.shadow.card,
   },
+  groupCardBody: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: "space-between",
+  },
   closedCard: {
     opacity: 0.5,
   },
   cardTop: {
-    marginBottom: 6,
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
@@ -629,10 +652,15 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.semibold,
   },
   desc: {
-    marginTop: 10,
+    marginVertical: 4,
+  },
+  cardMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
   },
   memberRow: {
-    marginTop: 12,
     flexDirection: "row",
     alignItems: "center",
     gap: 6,

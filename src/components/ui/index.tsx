@@ -1368,6 +1368,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "row",
     gap: 2,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface2,
   },
   visualThumb: {
     borderRadius: theme.radius.md,

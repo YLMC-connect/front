@@ -92,6 +92,14 @@ describe("shared maintenance UI", () => {
       paddingHorizontal: theme.layout.screenX,
     });
     expect(screen.getByText("뒤로")).toBeTruthy();
+    expect(
+      StyleSheet.flatten(screen.getByLabelText("뒤로").props.style),
+    ).toMatchObject({
+      height: theme.layout.touchTarget,
+      borderWidth: 1,
+      borderColor: theme.colors.line,
+      backgroundColor: theme.colors.surface2,
+    });
 
     fireEvent.press(screen.getByLabelText("뒤로"));
     expect(onBack).toHaveBeenCalledTimes(1);

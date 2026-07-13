@@ -74,10 +74,10 @@ describe("auth smoke screens", () => {
   it("stores the login session before entering the home screen", async () => {
     renderWithClient(<LoginScreenRoute />);
 
-    fireEvent.changeText(screen.getByTestId("login-id-input"), "gracekim");
+    fireEvent.changeText(screen.getByTestId("login-id-input"), "admin");
     fireEvent.changeText(
       screen.getByTestId("login-password-input"),
-      "password",
+      "admin123",
     );
     fireEvent.press(screen.getByText("로그인"));
 
@@ -98,6 +98,23 @@ describe("auth smoke screens", () => {
       isLoggedIn: true,
       status: "authenticated",
     });
+  });
+
+  it("rejects the previous mock login credentials", async () => {
+    renderWithClient(<LoginScreenRoute />);
+
+    fireEvent.changeText(screen.getByTestId("login-id-input"), "gracekim");
+    fireEvent.changeText(
+      screen.getByTestId("login-password-input"),
+      "password",
+    );
+    fireEvent.press(screen.getByText("로그인"));
+
+    expect(
+      await screen.findByText("아이디 또는 비밀번호가 올바르지 않습니다"),
+    ).toBeTruthy();
+    expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
+    expect(router.replace).not.toHaveBeenCalledWith("/");
   });
 
   it("shows that a new member id is available", async () => {
@@ -128,7 +145,7 @@ describe("auth smoke screens", () => {
   it("shows that a known member id is unavailable", async () => {
     renderWithClient(<SignupScreenRoute />);
 
-    fireEvent.changeText(screen.getByPlaceholderText("아이디"), "gracekim");
+    fireEvent.changeText(screen.getByPlaceholderText("아이디"), "admin");
     fireEvent.press(screen.getByText("중복 확인"));
 
     await waitFor(() =>

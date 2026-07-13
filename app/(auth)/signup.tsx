@@ -80,7 +80,7 @@ export default function SignupScreen() {
           email: "",
         }
       : {
-          id: "gracekim",
+          id: "admin",
           password: isPwError ? "1234" : "spring2026!",
           passwordConfirm: isPwError ? "spring2026" : "spring2026!",
           userName: "김은혜",

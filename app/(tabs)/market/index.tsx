@@ -177,11 +177,10 @@ export default function MarketScreen() {
               onCreate={() => router.push("/modal/market-new")}
             />
           ) : (
-            visiblePosts.map((post, index) => (
+            visiblePosts.map((post) => (
               <PostRow
                 key={post.id}
                 post={post}
-                last={index === visiblePosts.length - 1}
                 onPress={() => router.push(`/market/${post.id}`)}
               />
             ))
@@ -201,22 +200,16 @@ export default function MarketScreen() {
 
 function PostRow({
   post,
-  last,
   onPress,
 }: {
   post: MarketOverviewItem;
-  last: boolean;
   onPress: () => void;
 }) {
   const done = post.status === "done";
   const reserved = post.status === "reserved";
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={[styles.row, last ? styles.rowLast : null]}
-    >
+    <Pressable accessibilityRole="button" onPress={onPress} style={styles.row}>
       <View style={styles.thumbWrap}>
         <VisualThumb size={96} seed={post.thumbSeed} />
         {done ? (
@@ -334,13 +327,17 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
   },
   statusTabs: {
+    flexShrink: 0,
+    height: 44,
     marginHorizontal: theme.layout.screenX,
     marginTop: 4,
-    marginBottom: 10,
+    marginBottom: theme.layout.listGap,
   },
   categoryScroll: {
     flexGrow: 0,
-    marginBottom: 6,
+    flexShrink: 0,
+    height: 44,
+    marginBottom: theme.layout.listGap,
   },
   categories: {
     paddingHorizontal: theme.layout.screenX,
@@ -369,6 +366,7 @@ const styles = StyleSheet.create({
     color: theme.colors.white,
   },
   list: {
+    gap: theme.spacing[3],
     paddingBottom: 164,
   },
   loading: {
@@ -377,13 +375,13 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     gap: theme.layout.listGap,
-    paddingHorizontal: theme.layout.screenX,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
-  },
-  rowLast: {
-    borderBottomWidth: 0,
+    marginHorizontal: theme.layout.screenX,
+    padding: theme.spacing[4],
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.surface,
+    ...theme.shadow.card,
   },
   thumbWrap: {
     width: 96,

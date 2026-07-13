@@ -18,6 +18,7 @@ import {
   ErrorState,
   FloatingActionButton,
   ListSkeleton,
+  ScreenHeader,
   SegmentedTabs,
   VisualCover,
   VisualThumb,
@@ -73,21 +74,25 @@ export default function GroupScreen() {
     return (
       <Screen scroll={false} padded={false} testID="screen-group">
         <View style={styles.root}>
-          <View style={styles.topBar}>
-            <AppText variant="screenTitle">내 소모임</AppText>
-            <Pressable
-              accessibilityLabel="내 소모임 닫기"
-              accessibilityRole="button"
-              onPress={() => (isMyFull ? router.back() : setShowMyFull(false))}
-              style={styles.searchButton}
-            >
-              <MaterialIcons
-                name="close"
-                size={22}
-                color={theme.colors.inkSoft}
-              />
-            </Pressable>
-          </View>
+          <ScreenHeader
+            title="내 소모임"
+            right={
+              <Pressable
+                accessibilityLabel="내 소모임 닫기"
+                accessibilityRole="button"
+                onPress={() =>
+                  isMyFull ? router.back() : setShowMyFull(false)
+                }
+                style={styles.searchButton}
+              >
+                <MaterialIcons
+                  name="close"
+                  size={22}
+                  color={theme.colors.inkSoft}
+                />
+              </Pressable>
+            }
+          />
           <ScrollView contentContainerStyle={styles.fullList}>
             {isLoading ? (
               <View style={styles.loading}>
@@ -111,24 +116,26 @@ export default function GroupScreen() {
   return (
     <Screen scroll={false} padded={false} testID="screen-group">
       <View style={styles.root}>
-        <View style={styles.topBar}>
-          <AppText variant="screenTitle">동행</AppText>
-          <Pressable
-            accessibilityLabel={searchOpen ? "동행 검색 닫기" : "동행 검색"}
-            accessibilityRole="button"
-            onPress={() => {
-              setSearchOpen((open) => !open);
-              if (searchOpen) setSearch("");
-            }}
-            style={styles.searchButton}
-          >
-            <MaterialIcons
-              name={searchOpen ? "close" : "search"}
-              size={22}
-              color={theme.colors.inkSoft}
-            />
-          </Pressable>
-        </View>
+        <ScreenHeader
+          title="동행"
+          right={
+            <Pressable
+              accessibilityLabel={searchOpen ? "동행 검색 닫기" : "동행 검색"}
+              accessibilityRole="button"
+              onPress={() => {
+                setSearchOpen((open) => !open);
+                if (searchOpen) setSearch("");
+              }}
+              style={styles.searchButton}
+            >
+              <MaterialIcons
+                name={searchOpen ? "close" : "search"}
+                size={22}
+                color={theme.colors.inkSoft}
+              />
+            </Pressable>
+          }
+        />
 
         {searchOpen ? (
           <View style={styles.searchWrap}>
@@ -407,13 +414,6 @@ function categoryOf(key: string) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-  },
-  topBar: {
-    minHeight: 56,
-    paddingHorizontal: theme.layout.screenX,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
   },
   searchButton: {
     width: 44,

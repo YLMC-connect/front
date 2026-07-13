@@ -13,6 +13,7 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- 루트 탭·뒤로가기 상단 geometry 통일 — 홈/나눔/동행/기도/삶공부에 64px `ScreenHeader`를 적용해 제목을 좌측 20px·상단 6px로 맞추고, 일반 상세와 나눔 상세의 `아이콘 + 뒤로` 버튼을 `x=8`, `68x44px`로 통일하며 140ms press scale과 동작 줄이기를 적용
 - 입력 배경 투명도 점검 — 반투명 alpha가 실제 입력 surface에 쓰인 나눔 상세 댓글 composer와 입력창만 투명하게 변경하고, 고정 surface 입력·상태 overlay·Skeleton은 유지
 - 핵심 목록 카드 경계 복구 — 홈 활동 요약과 공통 `Card`에 흰 surface·둥근 모서리·옅은 1px 경계를 복구하고 역할형 typography·20px 여백·절제된 shadow·상태 UI는 유지
 - 공통 디자인 시스템 2차 정리 — JSON 단일 소스의 semantic color·spacing·radius, 6단계 역할형 typography, layout·절제된 shadow 토큰과 `AppText`, pulse Skeleton/ListSkeleton, action 지원 Empty/Error/Success 상태를 구축하고 홈·핵심 탭·인증에 적용
@@ -103,6 +104,7 @@
 | `app/(tabs)/life-study/index.tsx`                             | Downloads `삶공부` 하단 탭 루트. 삶공부 목록 화면 렌더링                                                                                                                                                                                   |
 | `src/components/faith/FaithSectionsScreen.tsx`                | 기도/삶공부 목록의 공유 렌더러. route가 아니라 `/prayer`, `/life-study`에서 section prop으로 사용                                                                                                                                          |
 | `src/components/ui/index.tsx`                                 | ZIP 토큰 기준 Button, Card, Badge, Chip, form, modal/dialog, sheet, toast, FAB 등 공통 UI                                                                                                                                                  |
+| `src/components/ui/screen-header.tsx`                         | 루트 탭 5개 화면의 64px 상단 높이, 좌측 제목·subtitle·우측 action geometry를 통일하는 공통 헤더                                                                                                                                             |
 | `src/components/ui/motion.tsx`                                | Reanimated 기반 공통 press scale과 overlay presence 제어. 시스템 동작 줄이기 설정을 반영                                                                                                                                                   |
 | `src/components/ui/detail-actions.tsx`                        | 나눔·동행 상세의 action/mini action 공통 구현                                                                                                                                                                                              |
 | `src/components/ui/detail-badge.tsx`                          | 기도·삶공부 상세 badge geometry 공통 구현                                                                                                                                                                                                  |
@@ -141,6 +143,8 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-14) **루트 탭은 고정 geometry의 공통 `ScreenHeader`를 사용한다** — 홈/나눔/동행/기도/삶공부 헤더는 safe-area 아래 64px 높이, 좌측 20px, 상단 6px에서 제목을 시작합니다. subtitle 유무와 우측 검색 action이 제목 위치나 본문 시작점을 바꾸지 않게 합니다.
+- (2026-07-14) **뒤로가기는 아이콘과 한글 label을 함께 표시한다** — 50~60대 사용자가 기능을 바로 인지할 수 있도록 `chevron-left + 뒤로`를 유지하고, 일반 상세는 투명 surface, 이미지 위는 대비용 흰 surface를 사용합니다. 두 형태 모두 화면 기준 `x=8`, `68x44px`와 `MotionPressable`의 140ms·0.97 press scale을 공유하며 동작 줄이기 설정을 따릅니다.
 - (2026-07-14) **입력 배경의 alpha 제거는 반투명 surface에만 적용한다** — 나눔 댓글처럼 alpha 배경을 쓰는 입력은 투명하게 만들되, 검색·작성 폼의 고정 surface와 입력이 아닌 overlay·Skeleton opacity는 변경하지 않습니다.
 - (2026-07-14) **탭 루트의 주요 탐색 항목은 카드 경계를 유지한다** — 홈 활동·나눔·동행 전체 모임·기도방/기도제목·삶공부 전체 과정은 흰 surface, 둥근 모서리, 옅은 border와 약한 shadow를 사용합니다.
 - (2026-07-12, 2026-07-14 폐기) **나눔처럼 이미지 중심인 기존 row list는 유지한다** — 나눔 목록도 사용자 확인에 따라 독립 카드 경계로 통일했습니다.
@@ -200,7 +204,7 @@
 - (2026-05-26) **`VisualThumb` 기본형은 ZIP `Thumb`처럼 icon-less** — ZIP 공통 JSX의 `Thumb`는 `icon`을 넘긴 경우에만 아이콘을 표시하므로, RN `VisualThumb`도 기본 `redeem` 아이콘을 제거하고 호출부가 명시적으로 요청할 때만 아이콘을 렌더링합니다.
 - (2026-05-26) **Dev Client smoke는 서버 선택 화면도 조건부 처리한다** — Android Emulator에서 앱 상태를 clear하면 Expo Dev Client가 `DEVELOPMENT SERVERS` 화면에 남을 수 있으므로, `.maestro/smoke.yml`은 해당 화면이 보일 때 개발 서버 row를 탭하고 `Reload` 메뉴를 닫은 뒤 앱 루트 딥링크 검증을 진행합니다.
 - (2026-05-25) **공통 UI 토큰은 ZIP app-level tokens를 우선 번역한다** — `app-tokens.css`의 primary/surface/ink/line/radius/shadow/type, `halo-tokens.css`의 glass/elevation/type 기준을 `theme.ts`에 반영하고, Button/Card/Badge/Chip/SegmentedTabs/TopBar/Dialog/Sheet/Toast/FAB/Input은 화면별 땜질보다 공통 컴포넌트에서 먼저 맞춥니다. RN에서 직접 표현이 어려운 CSS blur/box-shadow는 `borderColor`, `shadow*`, `elevation` 조합으로 번역합니다.
-- (2026-05-25) **상세 TopBar와 Avatar는 ZIP 공통 JSX를 따른다** — `TopBar` back affordance는 원형 아이콘이 아니라 `뒤로` text pill이며, `Avatar` 색상은 이름/seed 해시 기반 ZIP 팔레트를 사용합니다. gradient는 새 라이브러리 없이 solid swatch로 번역합니다.
+- (2026-05-25, 2026-07-14 부분 폐기) **상세 TopBar와 Avatar는 ZIP 공통 JSX를 따른다** — `뒤로` label과 `Avatar` 팔레트는 유지하지만, 일반 상세의 고정 배경 pill은 제거하고 이미지 위에서만 대비 surface를 사용합니다.
 - (2026-05-25) **폐기됨: 탭 구조는 ZIP 5탭 기준으로 한다** — 루트 탭 홈/나눔/소모임/동행/MY와 기도/삶공부 동행 segment 결정은 Downloads preview 확인 후 폐기했습니다.
 - (2026-05-23) **시각 검증은 JSX + Dev Client 캡처를 함께 본다** — ZIP의 JSX를 화면 구조/컴포넌트 원천으로 보고, 스크린샷은 실제 렌더링 확인용으로 사용합니다. 원본 PNG가 단색 빈 화면이면 `compare` report의 `originalFlat`를 근거로 pixel diff를 품질 판단에서 제외하고 JSX 소스를 우선합니다.
 - (2026-05-23) **루트 탭과 숨김 route의 하단 여백을 분리한다** — Expo Router tabs state는 상세 route에서도 루트 탭을 유지할 수 있으므로, floating tab bar와 `Screen` 하단 padding은 `usePathname()`의 실제 path 기준으로 적용합니다.

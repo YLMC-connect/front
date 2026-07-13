@@ -2,7 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter, type Href } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Screen } from "../../src/components/layout/Screen";
-import { AppText, Avatar } from "../../src/components/ui";
+import { AppText, Avatar, ScreenHeader } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 
 const activityItems = [
@@ -34,10 +34,8 @@ export default function HomeScreen() {
 
   return (
     <Screen padded={false} testID="screen-home">
+      <ScreenHeader title="홈" subtitle="열린문 커넥트" />
       <View style={styles.top}>
-        <AppText variant="caption" tone="brand" style={styles.brand}>
-          열린문 커넥트
-        </AppText>
         <Pressable
           testID="home-open-mypage"
           accessibilityLabel="내 정보 보기"
@@ -145,11 +143,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   top: {
     paddingHorizontal: theme.layout.screenX,
-    paddingTop: 8,
     paddingBottom: 14,
-  },
-  brand: {
-    marginBottom: 10,
   },
   profileCard: {
     minHeight: 68,

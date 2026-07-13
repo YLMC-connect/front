@@ -37,6 +37,7 @@ import { MotionPressable, useMotionPresence } from "./motion";
 export { DetailAction, DetailMiniAction } from "./detail-actions";
 export { DetailBadge } from "./detail-badge";
 export { ModalFormSection, SectionDivider } from "./modal-form-layout";
+export { ScreenHeader } from "./screen-header";
 export { UnderlineTabs } from "./underline-tabs";
 export { AppText, type AppTextTone, type AppTextVariant } from "./app-text";
 export { ListSkeleton, Skeleton } from "./skeleton";
@@ -554,7 +555,8 @@ export function TopBar({
     <View testID={testID} style={styles.topBar}>
       <View style={styles.topTitleWrap}>
         {back ? (
-          <Pressable
+          <MotionPressable
+            accessibilityLabel={backLabel}
             accessibilityRole="button"
             onPress={onBack}
             style={styles.backButton}
@@ -567,7 +569,7 @@ export function TopBar({
             <AppText variant="caption" tone="secondary">
               {backLabel}
             </AppText>
-          </Pressable>
+          </MotionPressable>
         ) : null}
         <View style={styles.topTextWrap}>
           <AppText numberOfLines={1} variant="sectionTitle">
@@ -1344,29 +1346,28 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.bold,
   },
   topBar: {
-    minHeight: 58,
+    height: 56,
     paddingHorizontal: theme.layout.screenX,
-    paddingTop: 8,
-    paddingBottom: 10,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  topTitleWrap: { flexDirection: "row", alignItems: "center", flex: 1, gap: 4 },
+  topTitleWrap: { flexDirection: "row", alignItems: "center", flex: 1 },
   topTextWrap: { flex: 1, minWidth: 0 },
   topSubtitle: {
     marginTop: 2,
   },
   backButton: {
+    minWidth: 68,
     height: theme.layout.touchTarget,
-    paddingLeft: 8,
-    paddingRight: 14,
+    marginLeft: -12,
+    marginRight: 4,
+    paddingHorizontal: 8,
     borderRadius: theme.radius.pill,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
     gap: 2,
-    backgroundColor: "rgba(20,30,18,0.05)",
   },
   visualThumb: {
     borderRadius: theme.radius.md,

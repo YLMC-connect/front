@@ -19,6 +19,7 @@ import {
   DetailAction,
   DetailMiniAction,
   ErrorState,
+  MotionPressable,
   RadioSheet,
   Toast,
   Skeleton,
@@ -257,7 +258,8 @@ export default function MarketDetailScreen() {
               style={styles.heroThumb}
             />
             <View style={styles.heroScrim} />
-            <Pressable
+            <MotionPressable
+              accessibilityLabel="뒤로"
               accessibilityRole="button"
               onPress={() => router.back()}
               style={styles.backButton}
@@ -268,7 +270,7 @@ export default function MarketDetailScreen() {
                 color={theme.colors.ink}
               />
               <Text style={styles.backText}>뒤로</Text>
-            </Pressable>
+            </MotionPressable>
             {isReserved ? <CenterBadge label="예약중" /> : null}
             {isDone ? (
               <>
@@ -600,14 +602,16 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    top: 20,
-    left: 16,
-    minHeight: 36,
-    borderRadius: 18,
+    top: 6,
+    left: 8,
+    minWidth: 68,
+    height: theme.layout.touchTarget,
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 8,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: 2,
-    paddingHorizontal: 10,
     backgroundColor: "rgba(255,255,255,0.92)",
     ...theme.shadow.card,
   },

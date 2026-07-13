@@ -1,6 +1,6 @@
 # auth (인증)
 
-> 마지막 갱신: 2026-07-12 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-14 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 기본 mock 로그인 계정 변경 — 개발·테스트 계정을 `admin / admin123`으로 통일하고 mock adapter가 해당 자격증명만 허용하도록 고정
 - 인증 typography·접근성 정리 — 로그인/회원가입의 display·제목·본문·보조·오류 문구를 역할형 `AppText`와 semantic tone으로 정리하고 양쪽 비밀번호 입력에 44px 표시/숨김 버튼을 적용
 - 로그인 보조 동작 연결 — 비밀번호 표시/숨기기를 접근 가능한 버튼으로 연결하고 MVP 제외 상태인 비밀번호 찾기는 무반응 링크 대신 준비 중 피드백을 표시
 - 인증 route guard와 웹 세션 저장 경계 추가 — 복원 중 route를 숨기고 anonymous/unavailable은 auth만, authenticated는 app/modal만 허용하며, 네이티브 SecureStore를 유지한 채 웹은 탭 단위 sessionStorage를 사용하도록 테스트로 고정
@@ -37,7 +38,7 @@
 - 회원 중복확인 mock 경계와 화면 연결 — `id | phone` 요청과 `available` 도메인 결과를 auth adapter/service/hook으로 격리하고, 기존 아이디 중복확인 버튼·가입 전 확인 gate를 실제 mutation에 연결
 - 인증 오류 코드 메시지 경계 추가 — Swagger에 문서화된 `MEM001~MEM006`을 고정 사용자 문구로 매핑하고 미등록 API 코드는 안전한 fallback을 사용
 - 로그인 화면·세션 통합 검증 추가 — 입력 검증 후 `useAuth → authService → authSessionService → SecureStore`로 access/refresh token을 저장하고 `authenticated` 상태가 된 뒤 홈으로 이동하는 순서를 화면 테스트로 고정
-- 핵심 Maestro 로그인 선행 — 앱 데이터를 초기화한 Dev Client에서 `/login`에 진입해 `gracekim/password`로 로그인한 뒤 나눔·동행·기도·삶공부 스모크를 실행하도록 골든 패스를 연결
+- 핵심 Maestro 로그인 선행 — 앱 데이터를 초기화한 Dev Client에서 `/login`에 진입해 `admin/admin123`으로 로그인한 뒤 나눔·동행·기도·삶공부 스모크를 실행하도록 골든 패스를 연결
 - 회원가입 화면·세션 통합 검증 추가 — 현재 아이디의 사용 가능 응답을 받은 뒤 전체 입력을 제출하고, signup session의 토큰 저장·신규 사용자 인증 상태·홈 이동을 화면 테스트로 고정
 - 회원가입 중복확인 결과 무효화 검증 — 사용 가능 확인 후 아이디가 바뀌면 이전 결과를 폐기하고 재확인 전 제출·토큰 저장을 차단하는 회귀 테스트 추가
 - 핵심 Maestro 회원가입 선행 — 앱 상태 초기화 후 회원가입 중복확인→전체 입력→홈 진입을 완료하고 다시 로그인한 뒤 도메인 스모크를 실행하도록 인증 골든 패스 확장
@@ -62,7 +63,7 @@
 | `src/hooks/useAuth.ts`                | 인증 액션 hook                     |
 | `src/types/auth.ts`                   | 인증 입력/응답 타입                |
 | `src/types/api.ts`                    | 공통 `ApiResponse<T>` envelope     |
-| `src/mocks/auth.ts`                   | mock 사용자/성도 데이터            |
+| `src/mocks/auth.ts`                   | mock 로그인 계정과 사용자/성도 데이터 |
 | `src/lib/apiClient.ts`                | 공통 응답·오류·Authorization 처리  |
 | `src/lib/apiErrorMessage.ts`          | API 오류 코드→사용자 문구 변환     |
 | `src/constants/apiErrorMessages.ts`   | 문서화된 인증 오류 코드 메시지 표  |
@@ -75,6 +76,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-14) **개발용 기본 계정은 `admin / admin123`으로 고정한다** — mock adapter는 빈 값만 검사하지 않고 정확한 자격증명을 확인하며, 해당 아이디는 회원가입 중복확인에서도 사용 중으로 처리합니다. 실제 HTTP adapter 활성화 시 서버 인증 계약이 이 값을 대체합니다.
 - (2026-07-12) **인증 화면은 display와 입력 흐름만 강하게 강조한다** — 브랜드 제목·가입 display 외 설명/label/hint는 body·caption 역할로 제한하고, 작은 문구는 `textMuted` 이상 대비를 사용합니다. 로그인/회원가입 secure field는 동일한 44px visibility 조작을 제공합니다.
 
 - (2026-07-12) **MVP 제외 기능도 가짜 affordance로 남기지 않는다** — 비밀번호 찾기는 실제 복구 계약이 생기기 전까지 이동을 추측하지 않고 `준비 중` 피드백을 표시하며, 비밀번호 visibility는 로컬 UI 상태로 즉시 전환합니다.

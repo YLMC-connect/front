@@ -1,4 +1,10 @@
 import type { Member } from "../types/common";
+import type { LoginInput } from "../types/auth";
+
+export const MOCK_LOGIN_CREDENTIALS: Readonly<LoginInput> = {
+  id: "admin",
+  password: "admin123",
+};
 
 export const MOCK_USER: Member = {
   id: "member-001",

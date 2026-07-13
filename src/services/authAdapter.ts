@@ -1,4 +1,4 @@
-import { MOCK_USER } from "../mocks/auth";
+import { MOCK_LOGIN_CREDENTIALS, MOCK_USER } from "../mocks/auth";
 import type {
   AuthSession,
   LoginInput,
@@ -9,7 +9,7 @@ import type {
 import type { Member } from "../types/common";
 
 const MOCK_DUPLICATE_VALUES = {
-  id: new Set(["gracekim"]),
+  id: new Set([MOCK_LOGIN_CREDENTIALS.id]),
   phone: new Set(["010-2345-6789"]),
 };
 
@@ -31,8 +31,16 @@ export const mockAuthAdapter: AuthAdapter = {
   },
 
   async login(input) {
-    if (!input.id.trim() || !input.password.trim()) {
+    const id = input.id.trim();
+    const password = input.password.trim();
+    if (!id || !password) {
       throw new Error("아이디와 비밀번호를 입력해주세요.");
+    }
+    if (
+      id !== MOCK_LOGIN_CREDENTIALS.id ||
+      password !== MOCK_LOGIN_CREDENTIALS.password
+    ) {
+      throw new Error("아이디 또는 비밀번호가 올바르지 않습니다");
     }
 
     return {

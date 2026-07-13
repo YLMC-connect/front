@@ -14,6 +14,7 @@ import { authApiErrorMessages } from "../../src/constants/apiErrorMessages";
 import { useAuth } from "../../src/hooks/useAuth";
 import { getApiErrorMessage } from "../../src/lib/apiErrorMessage";
 import { readDesignVariant } from "../../src/lib/designVariant";
+import { MOCK_LOGIN_CREDENTIALS } from "../../src/mocks/auth";
 
 type FormValues = {
   id: string;
@@ -37,8 +38,8 @@ export default function LoginScreen() {
   const isToast = variant === "toast";
   const { login } = useAuth();
   const [values, setValues] = useState<FormValues>({
-    id: isDefault ? "" : "gracekim",
-    password: isDefault ? "" : "password",
+    id: isDefault ? "" : MOCK_LOGIN_CREDENTIALS.id,
+    password: isDefault ? "" : MOCK_LOGIN_CREDENTIALS.password,
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [passwordVisible, setPasswordVisible] = useState(false);

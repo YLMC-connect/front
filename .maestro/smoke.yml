@@ -112,10 +112,10 @@ tags:
     timeout: 5000
 - tapOn:
     id: login-id-input
-- inputText: gracekim
+- inputText: admin
 - tapOn:
     id: login-password-input
-- inputText: password
+- inputText: admin123
 - hideKeyboard
 - tapOn: 로그인
 - extendedWaitUntil:

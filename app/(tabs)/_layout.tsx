@@ -25,28 +25,28 @@ const rootTabs = [
     icon: { off: "home-outline", on: "home" },
   },
   {
-    name: "market/index",
+    name: "market",
     title: "나눔",
     href: "/market",
     testID: "tab-market",
     icon: { off: "shopping-outline", on: "shopping" },
   },
   {
-    name: "group/index",
+    name: "group",
     title: "동행",
     href: "/group",
     testID: "tab-group",
     icon: { off: "account-multiple-outline", on: "account-multiple" },
   },
   {
-    name: "prayer/index",
+    name: "prayer",
     title: "기도",
     href: "/prayer",
     testID: "tab-prayer",
     icon: { off: "hands-pray", on: "hands-pray" },
   },
   {
-    name: "life-study/index",
+    name: "life-study",
     title: "삶공부",
     href: "/life-study",
     testID: "tab-life-study",
@@ -97,16 +97,6 @@ export default function TabsLayout() {
           options={{ title: tab.title, tabBarButtonTestID: tab.testID }}
         />
       ))}
-      <Tabs.Screen name="market/[id]" options={{ href: null }} />
-      <Tabs.Screen name="group/[id]" options={{ href: null }} />
-      <Tabs.Screen name="group/notices" options={{ href: null }} />
-      <Tabs.Screen name="group/members" options={{ href: null }} />
-      <Tabs.Screen name="life-study/[id]" options={{ href: null }} />
-      <Tabs.Screen name="life-study/apply" options={{ href: null }} />
-      <Tabs.Screen name="life-study/history" options={{ href: null }} />
-      <Tabs.Screen name="prayer/[id]" options={{ href: null }} />
-      <Tabs.Screen name="prayer/apply" options={{ href: null }} />
-      <Tabs.Screen name="prayer/request" options={{ href: null }} />
       <Tabs.Screen name="notifications" options={{ href: null }} />
       <Tabs.Screen name="mypage/index" options={{ href: null }} />
       <Tabs.Screen name="mypage/edit" options={{ href: null }} />

@@ -13,6 +13,7 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- 카테고리 필터 이동 모션·탭별 상세 Stack 보정 — 가변 너비 `FilterChips`가 실제 항목 위치·너비까지 200ms로 이동하고, 나눔·동행·기도·삶공부 상세는 각 탭 중첩 Stack에 쌓여 뒤로가기 시 직전 목록으로 복귀하도록 정리
 - 뒤로가기 구분성과 나눔·동행 카드 톤 보정 — 일반 상세의 `아이콘 + 뒤로`에 옅은 surface·1px 경계를 적용하고, 동행 전체 모임을 나눔과 같은 96px 썸네일·16px padding/radius·1px 경계·동일 shadow의 가로 카드로 맞춤
 - 루트 탭·뒤로가기 상단 geometry 통일 — 홈/나눔/동행/기도/삶공부에 64px `ScreenHeader`를 적용해 제목을 좌측 20px·상단 6px로 맞추고, 일반 상세와 나눔 상세의 `아이콘 + 뒤로` 버튼을 `x=8`, `68x44px`로 통일하며 140ms press scale과 동작 줄이기를 적용
 - 입력 배경 투명도 점검 — 반투명 alpha가 실제 입력 surface에 쓰인 나눔 상세 댓글 composer와 입력창만 투명하게 변경하고, 고정 surface 입력·상태 overlay·Skeleton은 유지
@@ -99,6 +100,7 @@
 | `app/_layout.tsx`                                             | QueryClient, SafeArea, Router Provider 루트                                                                                                                                                                                                |
 | `src/components/auth/AuthRouteNavigator.tsx`                  | 세션 복원 상태와 인증 여부에 따라 auth/app/modal route 접근을 분리하는 보호 navigator                                                                                                                                                      |
 | `app/(tabs)/_layout.tsx`                                      | Downloads preview 기준 홈/나눔/동행/기도/삶공부 5탭 layout와 glass custom floating tab bar                                                                                                                                                 |
+| `app/(tabs)/{market,group,prayer,life-study}/_layout.tsx`     | 루트 탭별 목록 위에 상세·보조 화면을 쌓고 뒤로가기 시 탭 목록으로 복귀시키는 중첩 Stack                                                                                                                                                   |
 | `app/(tabs)/index.tsx`                                        | 디자인 번역 기반 홈 화면. 홈 프로필 카드에서 숨김 MY route로 진입                                                                                                                                                                          |
 | `app/(tabs)/group/index.tsx`                                  | Downloads `동행` 탭 루트. 내부에서 소모임/봉사 segment 전환                                                                                                                                                                                |
 | `app/(tabs)/prayer/index.tsx`                                 | Downloads `기도` 하단 탭 루트. 기도 목록 화면 렌더링                                                                                                                                                                                       |
@@ -107,6 +109,7 @@
 | `src/components/ui/index.tsx`                                 | ZIP 토큰 기준 Button, Card, Badge, Chip, form, modal/dialog, sheet, toast, FAB 등 공통 UI                                                                                                                                                  |
 | `src/components/ui/screen-header.tsx`                         | 루트 탭 5개 화면의 64px 상단 높이, 좌측 제목·subtitle·우측 action geometry를 통일하는 공통 헤더                                                                                                                                             |
 | `src/components/ui/motion.tsx`                                | Reanimated 기반 공통 press scale과 overlay presence 제어. 시스템 동작 줄이기 설정을 반영                                                                                                                                                   |
+| `src/components/ui/filter-chips.tsx`                          | 가변 너비 카테고리 필터의 측정 기반 200ms 이동 indicator, press feedback, 접근성 상태 관리                                                                                                                                                 |
 | `src/components/ui/detail-actions.tsx`                        | 나눔·동행 상세의 action/mini action 공통 구현                                                                                                                                                                                              |
 | `src/components/ui/detail-badge.tsx`                          | 기도·삶공부 상세 badge geometry 공통 구현                                                                                                                                                                                                  |
 | `src/components/ui/modal-form-layout.tsx`                     | 나눔·동행 작성 화면 section/divider 공통 구현                                                                                                                                                                                              |
@@ -144,6 +147,8 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-14) **가변 너비 카테고리 필터도 하나의 이동 indicator를 공유한다** — 나눔·동행 필터는 각 항목의 실제 `x/width`를 측정해 200ms로 선택 배경을 이동하고 140ms press feedback과 동작 줄이기 설정을 따릅니다. 최초 배치와 같은 항목 재선택은 이동·콜백을 반복하지 않습니다.
+- (2026-07-14) **하단 루트 탭의 상세·보조 화면은 탭별 중첩 Stack에 둔다** — 나눔·동행·기도·삶공부의 목록 경로는 하단 탭으로 유지하고 하위 상세는 해당 탭 Stack에 push합니다. 상세 back은 직전 목록을 pop하며 하단 탭·상태 segment는 불필요한 방문 이력을 쌓지 않습니다.
 - (2026-07-14) **루트 탭은 고정 geometry의 공통 `ScreenHeader`를 사용한다** — 홈/나눔/동행/기도/삶공부 헤더는 safe-area 아래 64px 높이, 좌측 20px, 상단 6px에서 제목을 시작합니다. subtitle 유무와 우측 검색 action이 제목 위치나 본문 시작점을 바꾸지 않게 합니다.
 - (2026-07-14) **뒤로가기는 아이콘과 한글 label, 구분 가능한 surface를 함께 표시한다** — 50~60대 사용자가 기능을 바로 인지할 수 있도록 `chevron-left + 뒤로`를 유지하고, 일반 상세는 `surface2`와 1px 경계, 이미지 위는 대비용 흰 surface와 1px 경계를 사용합니다. 두 형태 모두 화면 기준 `x=8`, `68x44px`와 `MotionPressable`의 140ms·0.97 press scale을 공유하며 동작 줄이기 설정을 따릅니다.
 - (2026-07-14) **나눔과 동행의 전체 탐색 카드는 같은 외곽 규칙을 사용한다** — 두 화면 모두 96px 썸네일, 16px padding/radius, 1px 경계, 동일 shadow와 12px 목록 간격을 사용합니다. 도메인 정보 차이로 카드 높이는 소폭 달라도 내 소모임 가로 영역과 상태·인원 정보는 유지합니다.

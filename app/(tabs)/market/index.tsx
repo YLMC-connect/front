@@ -5,7 +5,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from "react-native";
@@ -14,6 +13,7 @@ import {
   EmptyState,
   ErrorState,
   AppText,
+  FilterChips,
   FloatingActionButton,
   ListSkeleton,
   ScreenHeader,
@@ -45,13 +45,19 @@ const statusHrefs = {
 export default function MarketScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
+    category?: string;
     designVariant?: string;
     status?: string;
   }>();
   const variant = readDesignVariant(params.designVariant);
   const overview = useMarketOverview();
-  const [category, setCategory] =
-    useState<(typeof MARKET_CATEGORIES)[number]["key"]>("all");
+  const [category, setCategory] = useState<
+    (typeof MARKET_CATEGORIES)[number]["key"]
+  >(
+    () =>
+      MARKET_CATEGORIES.find((item) => item.key === params.category)?.key ??
+      "all",
+  );
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
   const isError = variant === "network-error" || overview.isError;
@@ -138,31 +144,18 @@ export default function MarketScreen() {
           testIDPrefix="market-status"
         />
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categories}
+        <FilterChips
+          items={MARKET_CATEGORIES}
+          active={category}
+          onChange={(nextCategory) => {
+            setCategory(nextCategory);
+            router.setParams({
+              category: nextCategory === "all" ? undefined : nextCategory,
+            });
+          }}
           style={styles.categoryScroll}
-        >
-          {MARKET_CATEGORIES.map((item) => {
-            const selected = item.key === category;
-            return (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
-                onPress={() => setCategory(item.key)}
-                key={item.key}
-                style={[styles.chip, selected ? styles.chipOn : null]}
-              >
-                <Text
-                  style={[styles.chipText, selected ? styles.chipTextOn : null]}
-                >
-                  {item.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+          testIDPrefix="market-category"
+        />
 
         <ScrollView contentContainerStyle={styles.list}>
           {isLoading ? (
@@ -334,32 +327,6 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     height: 44,
     marginBottom: theme.layout.listGap,
-  },
-  categories: {
-    paddingHorizontal: theme.layout.screenX,
-    gap: 8,
-  },
-  chip: {
-    minHeight: 44,
-    borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.surface,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    paddingHorizontal: 13,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  chipOn: {
-    backgroundColor: theme.colors.ink,
-    borderColor: theme.colors.ink,
-  },
-  chipText: {
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  chipTextOn: {
-    color: theme.colors.white,
   },
   list: {
     gap: theme.spacing[3],

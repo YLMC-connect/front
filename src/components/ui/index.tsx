@@ -36,6 +36,7 @@ import { MotionPressable, useMotionPresence } from "./motion";
 
 export { DetailAction, DetailMiniAction } from "./detail-actions";
 export { DetailBadge } from "./detail-badge";
+export { FilterChips } from "./filter-chips";
 export { ModalFormSection, SectionDivider } from "./modal-form-layout";
 export { ScreenHeader } from "./screen-header";
 export { UnderlineTabs } from "./underline-tabs";

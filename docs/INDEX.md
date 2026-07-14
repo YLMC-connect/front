@@ -28,7 +28,7 @@
 | common (공통 인프라) | 6 | 18 | 2026-07-14 | [features/common.md](features/common.md) |
 | auth (인증) | 2 | 5 | 2026-07-13 | [features/auth.md](features/auth.md) |
 | market (나눔장터) | 2 | 16 | 2026-07-14 | [features/market.md](features/market.md) |
-| group (소모임) | 3 | 15 | 2026-07-14 | [features/group.md](features/group.md) |
+| group (소모임) | 2 | 16 | 2026-07-14 | [features/group.md](features/group.md) |
 | mypage (MY) | 1 | 3 | 2026-07-12 | [features/mypage.md](features/mypage.md) |
 | life-study (삶공부) | 2 | 8 | 2026-07-14 | [features/life-study.md](features/life-study.md) |
 | prayer (중보기도) | 2 | 9 | 2026-07-14 | [features/prayer.md](features/prayer.md) |

@@ -18,7 +18,7 @@ import {
   GalleryAdd,
   HandHeart,
   Heart,
-  HeartShine,
+  Hearts,
   History,
   Home2,
   House,
@@ -44,7 +44,7 @@ import {
 } from "@solar-icons/react-native/Linear";
 import {
   Book2 as Book2Bold,
-  HeartShine as HeartShineBold,
+  Hearts as HeartsBold,
   Home2 as Home2Bold,
   Shop as ShopBold,
   UsersGroupRounded as UsersGroupRoundedBold,
@@ -117,7 +117,7 @@ const linearIcons = {
   "error-outline": DangerCircle,
   favorite: Heart,
   groups: UsersGroupRounded,
-  "hands-pray": HeartShine,
+  "hands-pray": Hearts,
   "help-outline": QuestionCircle,
   history: History,
   home: Home2,
@@ -154,7 +154,7 @@ export type AppIconName = keyof typeof linearIcons;
 const boldIcons: Partial<Record<AppIconName, SolarIconComponent>> = {
   "book-open-page-variant": Book2Bold,
   "book-open-page-variant-outline": Book2Bold,
-  "hands-pray": HeartShineBold,
+  "hands-pray": HeartsBold,
   home: Home2Bold,
   "home-outline": Home2Bold,
   shopping: ShopBold,

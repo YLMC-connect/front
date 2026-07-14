@@ -436,13 +436,31 @@ describe("v1 tab smoke screens", () => {
   });
 
   it("updates the group segment without replacing the screen", async () => {
+    const push = jest.fn();
     const setParams = jest.fn();
-    jest.mocked(useRouter).mockReturnValue({ setParams } as never);
+    jest.mocked(useRouter).mockReturnValue({ push, setParams } as never);
     renderWithClient(<GroupScreen />);
     await screen.findByText("내 소모임");
+    const groupCardStyle = StyleSheet.flatten(
+      screen.getByTestId("group-card-1").props.style,
+    );
 
     fireEvent.press(screen.getByTestId("group-section-service"));
 
+    const serviceCard = await screen.findByTestId(
+      "group-service-card-service-1",
+    );
+    expect(StyleSheet.flatten(serviceCard.props.style)).toEqual(groupCardStyle);
+    expect(groupCardStyle).toMatchObject({ minHeight: 133 });
+    expect(screen.getByText("주방 봉사팀")).toBeTruthy();
+    expect(screen.getByText("주일 10:30")).toBeTruthy();
+    const serviceCount = screen.getByTestId(
+      "group-service-card-service-1-member-count",
+    );
+    expect(within(serviceCount).getByText("18")).toBeTruthy();
+    expect(within(serviceCount).getByText(/24명/)).toBeTruthy();
+    fireEvent.press(serviceCard);
+    expect(push).toHaveBeenCalledWith("/group/5");
     await waitFor(() =>
       expect(setParams).toHaveBeenCalledWith({ section: "service" }),
     );

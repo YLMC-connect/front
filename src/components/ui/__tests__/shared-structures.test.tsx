@@ -14,6 +14,7 @@ import { GlassBackdrop } from "../glass-backdrop";
 import {
   DetailAction,
   DetailBadge,
+  FloatingActionButton,
   ModalFormSection,
   ScreenHeader,
   SectionHeader,
@@ -57,6 +58,15 @@ describe("shared maintenance UI", () => {
 
     fireEvent.press(screen.getByTestId("detail-action"));
 
+    expect(onPress).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses the floating action label as visible text and its accessible name", () => {
+    const onPress = jest.fn();
+    render(<FloatingActionButton label="기도제목 작성" onPress={onPress} />);
+
+    expect(screen.getByText("기도제목 작성")).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("기도제목 작성"));
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 

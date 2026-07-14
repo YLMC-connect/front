@@ -1,4 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -257,7 +258,19 @@ export default function MarketDetailScreen() {
               seed={market.thumbSeed}
               style={styles.heroThumb}
             />
-            <View style={styles.heroScrim} />
+            <LinearGradient
+              colors={[
+                "rgba(20,30,18,0.22)",
+                "rgba(20,30,18,0.10)",
+                "rgba(20,30,18,0)",
+              ]}
+              end={{ x: 0.5, y: 1 }}
+              locations={[0, 0.52, 1]}
+              pointerEvents="none"
+              start={{ x: 0.5, y: 0 }}
+              style={styles.heroScrim}
+              testID="market-hero-scrim"
+            />
             <MotionPressable
               accessibilityLabel="뒤로"
               accessibilityRole="button"
@@ -597,8 +610,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 130,
-    backgroundColor: "rgba(20,30,18,0.24)",
+    height: 88,
   },
   backButton: {
     position: "absolute",

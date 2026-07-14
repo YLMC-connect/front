@@ -166,6 +166,28 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByPlaceholderText("댓글을 입력해주세요")).toBeTruthy();
   });
 
+  it("uses a compact vertical gradient on the market detail hero", async () => {
+    renderWithClient(<MarketDetailScreen />);
+    await screen.findByText(
+      "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
+    );
+
+    const scrim = screen.getByTestId("market-hero-scrim");
+    expect(scrim.props.colors).toEqual([
+      "rgba(20,30,18,0.22)",
+      "rgba(20,30,18,0.10)",
+      "rgba(20,30,18,0)",
+    ]);
+    expect(scrim.props.locations).toEqual([0, 0.52, 1]);
+    expect(StyleSheet.flatten(scrim.props.style)).toMatchObject({ height: 88 });
+    expect(
+      StyleSheet.flatten(screen.getByLabelText("뒤로").props.style),
+    ).toMatchObject({
+      minWidth: 68,
+      height: 44,
+    });
+  });
+
   it("creates a comment from the market detail screen", async () => {
     renderWithClient(<MarketDetailScreen />);
 

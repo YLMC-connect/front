@@ -1,8 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
-import { StyleSheet, Text } from "react-native";
+import { createRef } from "react";
+import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { theme } from "../../../constants/theme";
 import { StickyHeaderScreen } from "../../layout/StickyHeaderScreen";
+import { TabBlurTargetContext } from "../../layout/TabBlurTargetContext";
+import { GlassBackdrop } from "../glass-backdrop";
 import {
   DetailAction,
   DetailBadge,
@@ -14,6 +17,27 @@ import {
 } from "../index";
 
 describe("shared maintenance UI", () => {
+  it("supports a distinct white glass tint for the bottom tab capsule", () => {
+    render(
+      <GlassBackdrop
+        testID="bottom-glass"
+        tintColor={theme.colors.white}
+        tintOpacity={0.56}
+      />,
+    );
+
+    expect(screen.getByTestId("bottom-glass-blur").props).toMatchObject({
+      blurMethod: "dimezisBlurViewSdk31Plus",
+      intensity: 32,
+    });
+    expect(
+      StyleSheet.flatten(screen.getByTestId("bottom-glass-tint").props.style),
+    ).toMatchObject({
+      backgroundColor: theme.colors.white,
+      opacity: 0.56,
+    });
+  });
+
   it("keeps detail action press behavior in the shared component", () => {
     const onPress = jest.fn();
     render(
@@ -110,6 +134,8 @@ describe("shared maintenance UI", () => {
   });
 
   it("covers the safe-area padding with the shared sticky glass header", () => {
+    const sharedBlurTarget = createRef<View>();
+
     render(
       <SafeAreaProvider
         initialMetrics={{
@@ -117,9 +143,11 @@ describe("shared maintenance UI", () => {
           insets: { top: 0, left: 0, right: 0, bottom: 0 },
         }}
       >
-        <StickyHeaderScreen testID="sticky-screen" title="나눔">
-          <Text>스크롤 콘텐츠</Text>
-        </StickyHeaderScreen>
+        <TabBlurTargetContext.Provider value={sharedBlurTarget}>
+          <StickyHeaderScreen testID="sticky-screen" title="나눔">
+            <Text>스크롤 콘텐츠</Text>
+          </StickyHeaderScreen>
+        </TabBlurTargetContext.Provider>
       </SafeAreaProvider>,
     );
 
@@ -136,6 +164,12 @@ describe("shared maintenance UI", () => {
       zIndex: 20,
     });
     expect(headerStyle).not.toHaveProperty("borderBottomWidth");
+    expect(screen.getByTestId("screen-header-blur").props).toMatchObject({
+      blurMethod: "dimezisBlurViewSdk31Plus",
+      blurTarget: sharedBlurTarget,
+      intensity: 32,
+      tint: "light",
+    });
     expect(
       StyleSheet.flatten(
         screen.getByTestId("sticky-screen-scroll").props.contentContainerStyle,

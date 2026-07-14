@@ -26,7 +26,7 @@
 - 공통 모션 시스템 적용 — Reanimated 기반 140~220ms 모션 토큰, 동작 줄이기 대응, `MotionPressable`, 선택 적용 Card 등장, Dialog/Sheet/Toast presence 전환을 공통 UI에 반영
 - 라우팅·공통 UI 유지보수 경계 정리 — 하단 5탭 metadata를 단일 설정으로 통합하고 navigator `any`를 제거했으며, 상세 action/badge, modal form section, underline tab을 역할별 공통 파일로 분리
 - 탭 선택 indicator 공통화 — 하단 5탭은 이동 indicator와 선택 아이콘 pop을 사용하고, 나눔 상태 탭·동행 소모임/봉사·기도 작성 선택 탭은 공통 `SegmentedTabs` 이동 indicator를 공유
-- 하단 탭 shell 불투명 흰색 고정 — floating shell의 테두리·그림자는 유지하고 반투명 alpha를 제거해 뒤 화면이 비치지 않는 흰 배경으로 표시
+- 하단 탭 glass shell 적용 — floating 캡슐 안에 흰 tint 56%·intensity 32 blur를 적용해 배경과 구분하고, 캡슐 하단과 14px 겹치는 28px 영역에는 intensity 12 blur와 투명→흰색 46% 세로 gradient를 적용해 geometry·그림자·선택 indicator를 유지
 - Expo Web 라이트 모드 충돌 해소 — NativeWind dark mode 제어 방식을 `class`로 맞춰 Gluestack의 `mode="light"` 강제 설정이 CSS interop의 `media` 정책과 충돌하지 않도록 수정
 - Codex 작업 규칙 진입점 정리 — `AGENTS.md`, `CLAUDE.md`, `README.md`, `docs/INDEX.md`, `docs/MAINTENANCE.md`
 - Expo SDK 55 앱 기반 생성 — `package.json`, `app.config.ts`, `eas.json`, `tsconfig.json`, `babel.config.js`, `metro.config.js`, `tailwind.config.js`, `global.css`, `nativewind-env.d.ts`
@@ -110,7 +110,9 @@
 | `src/components/faith/FaithSectionsScreen.tsx`                | 기도/삶공부 목록의 공유 렌더러. route가 아니라 `/prayer`, `/life-study`에서 section prop으로 사용                                                                                                                                          |
 | `src/components/ui/index.tsx`                                 | ZIP 토큰 기준 Button, Card, Badge, Chip, form, modal/dialog, sheet, toast, FAB 등 공통 UI                                                                                                                                                  |
 | `src/components/ui/screen-header.tsx`                         | 루트 탭 5개 화면의 기본 배경색 glass, 89px 높이, 위·아래 20px 여백, 제목·subtitle·우측 action geometry를 통일하는 sticky 헤더                                                                                                              |
+| `src/components/ui/glass-backdrop.tsx`                        | 상단 sticky 헤더와 하단 floating tab bar가 공유하며 화면별 tint 색상·투명도를 지정할 수 있는 intensity 32 blur layer                                                                                                                       |
 | `src/components/layout/StickyHeaderScreen.tsx`                | 실제 safe-area까지 blur target에 포함하고 검색·필터·목록을 헤더 뒤로 통과시키는 루트 탭 공통 스크롤 layout                                                                                                                                 |
+| `src/components/layout/TabBlurTargetContext.ts`               | 현재 루트 화면의 Android blur target ref를 하단 tab bar까지 전달                                                                                                                                                                           |
 | `src/components/ui/motion.tsx`                                | Reanimated 기반 공통 press scale과 overlay presence 제어. 시스템 동작 줄이기 설정을 반영                                                                                                                                                   |
 | `src/components/ui/filter-chips.tsx`                          | 가변 너비 카테고리 필터의 측정 기반 200ms 이동 indicator, press feedback, 접근성 상태 관리                                                                                                                                                 |
 | `src/hooks/useMotionRouteParam.ts`                            | 필터·세그먼트 선택은 즉시 반영하고 route query는 모션 종료 후 반영해 URL 갱신 remount가 이동을 끊지 않도록 관리                                                                                                                            |
@@ -171,7 +173,7 @@
 - (2026-07-12) **고정 overlay 화면은 마지막 콘텐츠가 완전히 위로 스크롤되어야 한다** — FAB·하단 탭·댓글 composer의 위치는 유지하되 내부 ScrollView의 bottom padding으로 최종 카드와 입력 영역이 가려지지 않게 합니다. 오류 상태는 query가 refetch를 제공할 때만 `다시 시도`를 노출합니다.
 
 - (2026-07-12) **앱 색상 모드는 라이트로 고정한다** — `GluestackUIProvider mode="light"`를 유지하고 Tailwind의 `darkMode: "class"`는 수동 모드 제어 허용에만 사용합니다. 다크 테마나 시스템 모드 전환은 추가하지 않습니다.
-- (2026-07-12) **하단 탭 shell은 불투명한 흰 배경을 사용한다** — floating 캡슐의 테두리·그림자는 유지하되 배경 alpha는 사용하지 않아 뒤 화면이 비치지 않도록 합니다.
+- (2026-07-12, 2026-07-14 변경) **하단 탭은 캡슐 중심의 흰 glass와 gradient 하단 blur를 사용한다** — 사용자 후속 요청에 따라 불투명 흰 배경과 기본 배경색 tint 결정을 폐기합니다. floating 캡슐은 흰 tint 56%·intensity 32 blur·90% border로 구분하고, 캡슐 하단과 14px 겹치는 28px 영역에는 intensity 12 blur와 투명→흰색 46% 세로 gradient를 사용해 딱딱한 수평 경계를 제거합니다. geometry·그림자·선택 indicator는 유지하며 Android는 현재 루트 화면의 `BlurTargetView` ref를 context로 전달합니다.
 - (2026-07-12) **짧은 상호작용 모션은 공통 토큰과 Reanimated로 관리한다** — 140~220ms 범위의 press/선택/overlay 전환을 사용하고 시스템 동작 줄이기 설정에서는 이동·확대를 생략합니다. 화면별 카드·목록 등장 효과는 자동 적용하지 않고 명시적으로 선택합니다.
 - (2026-07-12) **화면 내부 선택 탭은 공통 `SegmentedTabs`를 사용한다** — 나눔의 전체/나눔중/예약중/나눔완료와 동행의 소모임/봉사, 기도 작성의 작성자 표시를 같은 이동 indicator와 접근성 상태로 관리합니다.
 - (2026-07-11) **RadioSheet는 표시 전용과 제어형 입력을 모두 지원한다** — `onValueChange`가 있으면 option을 접근 가능한 radio Pressable로 렌더링하고, 없으면 기존 reference 표시 동작을 유지합니다. 비동기/필수 입력 상태는 `confirmDisabled`로 footer에서 차단합니다.

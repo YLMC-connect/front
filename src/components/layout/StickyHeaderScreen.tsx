@@ -8,6 +8,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTabBlurTarget } from "./TabBlurTargetContext";
 import { SCREEN_HEADER_HEIGHT, ScreenHeader } from "../ui/screen-header";
 import { Screen } from "./Screen";
 
@@ -28,7 +29,9 @@ export function StickyHeaderScreen({
   contentContainerStyle?: StyleProp<ViewStyle>;
   testID: string;
 }) {
-  const blurTarget = useRef<View | null>(null);
+  const localBlurTarget = useRef<View | null>(null);
+  const sharedBlurTarget = useTabBlurTarget();
+  const blurTarget = sharedBlurTarget ?? localBlurTarget;
   const insets = useSafeAreaInsets();
   const topInset = insets.top;
 

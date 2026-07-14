@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { LinearGradient } from "expo-linear-gradient";
 import { Tabs, usePathname, useRouter, type Router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -12,6 +13,11 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { MotionPressable } from "../../src/components/ui";
+import {
+  TabBlurTargetContext,
+  useTabBlurTarget,
+} from "../../src/components/layout/TabBlurTargetContext";
+import { GlassBackdrop } from "../../src/components/ui/glass-backdrop";
 import { theme } from "../../src/constants/theme";
 
 type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
@@ -73,41 +79,45 @@ function findRootTab(routeName: string): RootTab | undefined {
 }
 
 export default function TabsLayout() {
+  const blurTarget = useRef<View | null>(null);
+
   return (
-    <Tabs
-      tabBar={(props) => <AppTabBar {...props} />}
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarIcon: ({ color, size }) => {
-          const tab = findRootTab(route.name);
-          return (
-            <MaterialCommunityIcons
-              name={tab?.icon.off ?? "circle-outline"}
-              size={size}
-              color={color}
-            />
-          );
-        },
-      })}
-    >
-      {rootTabs.map((tab) => (
-        <Tabs.Screen
-          key={tab.name}
-          name={tab.name}
-          options={{ title: tab.title, tabBarButtonTestID: tab.testID }}
-        />
-      ))}
-      <Tabs.Screen name="notifications" options={{ href: null }} />
-      <Tabs.Screen name="mypage/index" options={{ href: null }} />
-      <Tabs.Screen name="mypage/edit" options={{ href: null }} />
-      <Tabs.Screen name="mypage/activity" options={{ href: null }} />
-      <Tabs.Screen name="mypage/blocked" options={{ href: null }} />
-      <Tabs.Screen name="mypage/faq" options={{ href: null }} />
-      <Tabs.Screen name="mypage/terms" options={{ href: null }} />
-      <Tabs.Screen name="mypage/privacy" options={{ href: null }} />
-      <Tabs.Screen name="mypage/withdraw" options={{ href: null }} />
-      <Tabs.Screen name="mypage/user/[id]" options={{ href: null }} />
-    </Tabs>
+    <TabBlurTargetContext.Provider value={blurTarget}>
+      <Tabs
+        tabBar={(props) => <AppTabBar {...props} />}
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => {
+            const tab = findRootTab(route.name);
+            return (
+              <MaterialCommunityIcons
+                name={tab?.icon.off ?? "circle-outline"}
+                size={size}
+                color={color}
+              />
+            );
+          },
+        })}
+      >
+        {rootTabs.map((tab) => (
+          <Tabs.Screen
+            key={tab.name}
+            name={tab.name}
+            options={{ title: tab.title, tabBarButtonTestID: tab.testID }}
+          />
+        ))}
+        <Tabs.Screen name="notifications" options={{ href: null }} />
+        <Tabs.Screen name="mypage/index" options={{ href: null }} />
+        <Tabs.Screen name="mypage/edit" options={{ href: null }} />
+        <Tabs.Screen name="mypage/activity" options={{ href: null }} />
+        <Tabs.Screen name="mypage/blocked" options={{ href: null }} />
+        <Tabs.Screen name="mypage/faq" options={{ href: null }} />
+        <Tabs.Screen name="mypage/terms" options={{ href: null }} />
+        <Tabs.Screen name="mypage/privacy" options={{ href: null }} />
+        <Tabs.Screen name="mypage/withdraw" options={{ href: null }} />
+        <Tabs.Screen name="mypage/user/[id]" options={{ href: null }} />
+      </Tabs>
+    </TabBlurTargetContext.Provider>
   );
 }
 
@@ -147,6 +157,7 @@ function VisibleTabBar({
   router: Router;
   routes: TabRoute[];
 }) {
+  const blurTarget = useTabBlurTarget();
   const reduceMotion = useReducedMotion();
   const [itemWidth, setItemWidth] = useState(0);
   const selectedIndex = routes.findIndex(
@@ -176,44 +187,82 @@ function VisibleTabBar({
   }));
 
   return (
-    <View
-      style={styles.tabShell}
-      onLayout={(event) => {
-        const contentWidth = Math.max(event.nativeEvent.layout.width - 12, 0);
-        setItemWidth(routes.length > 0 ? contentWidth / routes.length : 0);
-      }}
-    >
-      <Animated.View
+    <>
+      <View
         pointerEvents="none"
-        testID="tab-active-indicator"
-        style={[styles.tabIndicator, indicatorStyle]}
-      />
-      {routes.map((route) => {
-        const index = state.routes.findIndex((item) => item.key === route.key);
-        const focused = state.index === index;
-        const options = descriptors[route.key].options;
-        const label = options.title ?? route.name;
-
-        return (
-          <AppTabButton
-            key={route.key}
-            route={route}
-            label={label}
-            focused={focused}
-            testID={options.tabBarButtonTestID}
-            onPress={() => {
-              const tab = findRootTab(route.name);
-              if (tab) {
-                router.replace(tab.href);
-                return;
-              }
-
-              navigation.navigate(route.name);
-            }}
+        style={styles.tabBottomBlurArea}
+        testID="tab-bar-bottom-blur-area"
+      >
+        <GlassBackdrop
+          blurTarget={blurTarget ?? undefined}
+          intensity={12}
+          testID="tab-bar-bottom"
+          tintColor={theme.colors.white}
+          tintOpacity={0}
+        />
+        <LinearGradient
+          colors={["rgba(255,255,255,0)", "rgba(255,255,255,0.46)"]}
+          locations={[0, 1]}
+          pointerEvents="none"
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={StyleSheet.absoluteFill}
+          testID="tab-bar-bottom-gradient"
+        />
+      </View>
+      <View style={styles.tabShell} testID="tab-bar-shell">
+        <View
+          style={styles.tabSurface}
+          testID="tab-bar-surface"
+          onLayout={(event) => {
+            const contentWidth = Math.max(
+              event.nativeEvent.layout.width - 12,
+              0,
+            );
+            setItemWidth(routes.length > 0 ? contentWidth / routes.length : 0);
+          }}
+        >
+          <GlassBackdrop
+            blurTarget={blurTarget ?? undefined}
+            testID="tab-bar"
+            tintColor={theme.colors.white}
+            tintOpacity={0.56}
           />
-        );
-      })}
-    </View>
+          <Animated.View
+            pointerEvents="none"
+            testID="tab-active-indicator"
+            style={[styles.tabIndicator, indicatorStyle]}
+          />
+          {routes.map((route) => {
+            const index = state.routes.findIndex(
+              (item) => item.key === route.key,
+            );
+            const focused = state.index === index;
+            const options = descriptors[route.key].options;
+            const label = options.title ?? route.name;
+
+            return (
+              <AppTabButton
+                key={route.key}
+                route={route}
+                label={label}
+                focused={focused}
+                testID={options.tabBarButtonTestID}
+                onPress={() => {
+                  const tab = findRootTab(route.name);
+                  if (tab) {
+                    router.replace(tab.href);
+                    return;
+                  }
+
+                  navigation.navigate(route.name);
+                }}
+              />
+            );
+          })}
+        </View>
+      </View>
+    </>
   );
 }
 
@@ -284,20 +333,31 @@ function AppTabButton({
 }
 
 const styles = StyleSheet.create({
+  tabBottomBlurArea: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 28,
+    overflow: "hidden",
+  },
   tabShell: {
     position: "absolute",
     left: 14,
     right: 14,
     bottom: 14,
+    borderRadius: 999,
+    ...theme.shadow.float,
+  },
+  tabSurface: {
     minHeight: 64,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.72)",
-    backgroundColor: theme.colors.white,
+    borderColor: "rgba(255,255,255,0.9)",
     paddingHorizontal: 6,
     paddingVertical: 7,
     flexDirection: "row",
-    ...theme.shadow.float,
+    overflow: "hidden",
   },
   tabItem: {
     flex: 1,

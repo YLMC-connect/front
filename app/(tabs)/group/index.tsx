@@ -5,9 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Animated, { FadeIn, useReducedMotion } from "react-native-reanimated";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
-  Badge,
   AppText,
-  Card,
   EmptyState,
   ErrorState,
   FilterChips,
@@ -26,7 +24,10 @@ import { GROUP_CATEGORIES } from "../../../src/constants/domainOptions";
 import { useGroupOverview } from "../../../src/hooks/useGroups";
 import { useMotionRouteParam } from "../../../src/hooks/useMotionRouteParam";
 import { readDesignVariant } from "../../../src/lib/designVariant";
-import type { GroupOverviewItem } from "../../../src/types/group";
+import type {
+  GroupOverviewItem,
+  GroupServiceOverviewItem,
+} from "../../../src/types/group";
 
 const sections = [
   { key: "groups", label: "소모임" },
@@ -135,9 +136,10 @@ export default function GroupScreen() {
           </View>
         ) : (
           myGroups.map((group) => (
-            <GroupCard
+            <CompanionCard
               key={group.id}
-              group={group}
+              kind="group"
+              item={group}
               onPress={() => router.push(`/group/${group.id}`)}
             />
           ))
@@ -242,54 +244,12 @@ export default function GroupScreen() {
               />
             ) : (
               serviceItems.map((item) => (
-                <Pressable
+                <CompanionCard
                   key={item.id}
-                  accessibilityRole="button"
+                  kind="service"
+                  item={item}
                   onPress={() => router.push(`/group/${item.linkedGroupId}`)}
-                >
-                  <Card style={styles.serviceCard}>
-                    <View style={styles.serviceRow}>
-                      <VisualThumb
-                        size={62}
-                        seed={item.coverSeed}
-                        icon="volunteer-activism"
-                      />
-                      <View style={styles.serviceBody}>
-                        <View style={styles.serviceMetaRow}>
-                          <Badge>{item.statusLabel}</Badge>
-                          <Text style={styles.serviceSchedule}>
-                            {item.schedule}
-                          </Text>
-                        </View>
-                        <AppText
-                          variant="cardTitle"
-                          style={styles.serviceTitle}
-                        >
-                          {item.name}
-                        </AppText>
-                        <AppText
-                          variant="body"
-                          tone="secondary"
-                          style={styles.serviceDesc}
-                        >
-                          {item.description}
-                        </AppText>
-                        <AppText
-                          variant="caption"
-                          tone="muted"
-                          style={styles.serviceCount}
-                        >
-                          참여 {item.currentMembers}/{item.maxMembers}명
-                        </AppText>
-                      </View>
-                      <AppIcon
-                        name="chevron-right"
-                        size={20}
-                        color={theme.colors.inkMute}
-                      />
-                    </View>
-                  </Card>
-                </Pressable>
+                />
               ))
             )}
           </View>
@@ -380,9 +340,10 @@ export default function GroupScreen() {
                 />
               ) : (
                 groups.map((group) => (
-                  <GroupCard
+                  <CompanionCard
                     key={group.id}
-                    group={group}
+                    kind="group"
+                    item={group}
                     onPress={() => router.push(`/group/${group.id}`)}
                   />
                 ))
@@ -395,22 +356,45 @@ export default function GroupScreen() {
   );
 }
 
-function GroupCard({
-  group,
-  onPress,
-}: {
-  group: GroupOverviewItem;
-  onPress: () => void;
-}) {
-  const closed = group.status === "closed";
+function CompanionCard(
+  props:
+    | {
+        kind: "group";
+        item: GroupOverviewItem;
+        onPress: () => void;
+      }
+    | {
+        kind: "service";
+        item: GroupServiceOverviewItem;
+        onPress: () => void;
+      },
+) {
+  const isService = props.kind === "service";
+  const closed = props.kind === "group" && props.item.status === "closed";
+  const testID = isService
+    ? `group-service-card-${props.item.id}`
+    : `group-card-${props.item.id}`;
+  const statusLabel = isService
+    ? props.item.statusLabel
+    : closed
+      ? "모집완료"
+      : "모집중";
+  const metaLabel = isService
+    ? props.item.schedule
+    : categoryOf(props.item.category);
 
   return (
     <Pressable
+      testID={testID}
       accessibilityRole="button"
-      onPress={onPress}
+      onPress={props.onPress}
       style={[styles.groupCard, closed ? styles.closedCard : null]}
     >
-      <VisualThumb size={96} seed={group.coverSeed} />
+      <VisualThumb
+        size={96}
+        seed={props.item.coverSeed}
+        icon={isService ? "volunteer-activism" : undefined}
+      />
       <View style={styles.groupCardBody}>
         <View style={styles.cardTop}>
           <AppText
@@ -418,9 +402,12 @@ function GroupCard({
             variant="cardTitle"
             style={styles.cardTitle}
           >
-            {group.name}
+            {props.item.name}
           </AppText>
-          <RecruitBadge closed={closed} />
+          <StatusBadge
+            label={statusLabel}
+            muted={isService ? props.item.statusLabel !== "모집중" : closed}
+          />
         </View>
         <AppText
           numberOfLines={2}
@@ -428,19 +415,24 @@ function GroupCard({
           tone="secondary"
           style={styles.desc}
         >
-          {group.description}
+          {props.item.description}
         </AppText>
         <View style={styles.cardMetaRow}>
           <View style={styles.categoryPill}>
-            <Text style={styles.categoryPillText}>
-              {categoryOf(group.category)}
-            </Text>
+            <Text style={styles.categoryPillText}>{metaLabel}</Text>
           </View>
-          <View style={styles.memberRow}>
-            <AppIcon name="groups" size={14} color={theme.colors.inkMute} />
+          <View testID={`${testID}-member-count`} style={styles.memberRow}>
+            <AppIcon
+              name={isService ? "volunteer-activism" : "groups"}
+              size={14}
+              color={theme.colors.inkMute}
+            />
             <AppText variant="caption" tone="muted">
-              <Text style={styles.memberCount}>{group.currentMembers}</Text> /
-              {group.maxMembers}명
+              {isService ? "참여 " : null}
+              <Text style={styles.memberCount}>
+                {props.item.currentMembers}
+              </Text>{" "}
+              /{props.item.maxMembers}명
             </AppText>
           </View>
         </View>
@@ -449,11 +441,11 @@ function GroupCard({
   );
 }
 
-function RecruitBadge({ closed }: { closed: boolean }) {
+function StatusBadge({ label, muted }: { label: string; muted: boolean }) {
   return (
-    <View style={[styles.badge, closed ? styles.badgeClosed : null]}>
-      <Text style={[styles.badgeText, closed ? styles.badgeTextClosed : null]}>
-        {closed ? "모집완료" : "모집중"}
+    <View style={[styles.badge, muted ? styles.badgeClosed : null]}>
+      <Text style={[styles.badgeText, muted ? styles.badgeTextClosed : null]}>
+        {label}
       </Text>
     </View>
   );
@@ -527,41 +519,10 @@ const styles = StyleSheet.create({
     gap: theme.spacing[3],
   },
   serviceList: {
-    marginHorizontal: theme.layout.screenX,
+    paddingHorizontal: theme.layout.screenX,
     paddingTop: 6,
     paddingBottom: 12,
-    gap: 12,
-  },
-  serviceCard: {
-    padding: 16,
-  },
-  serviceRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-  },
-  serviceBody: {
-    flex: 1,
-    minWidth: 0,
-  },
-  serviceMetaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: 6,
-  },
-  serviceSchedule: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
-  },
-  serviceTitle: {
-    marginTop: 7,
-  },
-  serviceDesc: {
-    marginTop: 5,
-  },
-  serviceCount: {
-    marginTop: 8,
+    gap: theme.spacing[3],
   },
   fullList: {
     paddingHorizontal: theme.layout.screenX,
@@ -574,6 +535,7 @@ const styles = StyleSheet.create({
   groupCard: {
     flexDirection: "row",
     gap: theme.layout.listGap,
+    minHeight: 133,
     borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,

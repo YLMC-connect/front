@@ -13,6 +13,7 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- 동행 소모임·봉사 카드 프레임 통일 — 동행 루트의 두 세그먼트가 화면 전용 `CompanionCard`를 공유해 96px 썸네일·16px padding/radius·경계·shadow와 정보 계층을 맞추고 도메인별 메타만 분리
 - 상세 뒤로가기 surface 통일 — 나눔 이미지 hero의 흰색 RGBA·카드 그림자 예외를 제거해 일반 상세와 같은 `surface2`·1px 경계를 사용하고 공통 68×44px geometry·label·press motion을 유지
 - 페이지 뒤로·화면 내부 닫기 의미 보완 — 홈에서 진입하는 MY와 인증 약관 page에 공통 `chevron-left + 뒤로`를 연결하고 약관 전문 sheet의 icon-only action을 `close + 닫기`로 보완했으며 확인 dialog의 `취소` 선택 문구는 유지
 - Solar 의미·기본 action glyph 보정 — 기도 탭을 `Hearts` Linear/Bold로 표시하고 Solar에 단독 형태가 없는 추가·닫기는 공통 `AppIcon` 내부의 원 없는 2px rounded stroke로 표시해 기존 크기·색상·문구·접근성·모션을 유지
@@ -166,6 +167,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-15) **같은 화면의 동급 목록 카드는 외곽 프레임을 공유하고 메타만 분리한다** — 동행의 전체 소모임·봉사는 같은 `CompanionCard`로 썸네일·surface·경계·shadow·텍스트 위치를 공유하며 카테고리/일정, 인원/참여 인원처럼 도메인 정보만 props로 구분합니다. 내 소모임 가로 cover 카드는 역할이 달라 기존 구조를 유지합니다.
 - (2026-07-15) **상세 뒤로가기 surface는 배경 이미지 유무와 관계없이 `surface2`로 통일한다** — 일반 상세와 나눔 이미지 hero 모두 1px `line` 경계와 `surface2`를 사용하며, 이미지 위 전용 흰색 RGBA·카드 그림자 예외는 사용하지 않습니다. `chevron-left + 뒤로`, 68×44px geometry와 press motion은 유지합니다.
 - (2026-07-15) **중보기도 탭은 Solar `Hearts`를 사용한다** — 기존 `HeartShine`보다 중보기도의 함께하는 의미가 직접 드러나는 `Hearts`로 교체하며 기본 `Linear`·선택 `Bold`, 기존 크기·색상·접근성·탭 모션은 유지합니다.
 - (2026-07-15, 기도 아이콘 선택만 폐기) **기도 탭은 `HeartShine`, 기본 추가·닫기는 외곽선 없는 glyph를 사용한다** — 기도 아이콘은 후속 결정으로 `Hearts`가 대체했습니다. Solar 패키지에 원·사각형 없는 단독 추가·닫기가 없어 이 두 형태만 `AppIcon` 내부의 24px viewBox·2px round stroke SVG로 보완하며 화면의 아이콘 크기·색상·label·접근성·터치 영역은 유지합니다.

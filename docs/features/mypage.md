@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 홈 진입 MY 뒤로가기 보완 — 하단 탭이 아닌 홈 `내 정보 보기`에서 push되는 `/mypage` 루트에도 공통 `chevron-left + 뒤로`를 표시하고 `router.back()`으로 홈에 복귀
 - 공통 TopBar 디자인 시스템 반영 — MY 상세 화면이 역할형 section title·caption subtitle과 44px back target, semantic text 대비를 공통으로 상속
 
 - MY 활동 내역 underline tab 공통화와 메뉴 href 타입 보강 — 기존 탭 geometry·query 이동을 유지하고 `as never` 우회를 제거
@@ -59,6 +60,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-15) **MY 루트도 홈에서 push되는 별도 page이므로 뒤로가기를 표시한다** — 하단 탭에서 제거된 `/mypage`는 홈 프로필 카드가 진입점이므로 공통 `TopBar back`으로 직전 홈 화면에 복귀합니다.
 - (2026-07-12) **MY 상세 제목은 공통 TopBar 역할형 typography를 상속한다** — 화면별 로컬 title 크기를 추가하지 않고 공통 sectionTitle/caption과 44px back affordance를 사용합니다.
 
 - (2026-07-11) **MY 로그아웃은 저장소 정리 결과와 무관하게 로그인 화면으로 이동한다** — 실제 토큰 삭제와 인증 상태 전이는 auth session manager가 소유하고, MY 화면은 성공·실패 모두 `/login`으로 이동합니다. 마이페이지 기본 화면 부분 재캡처 residual은 `mean=12.09`입니다.

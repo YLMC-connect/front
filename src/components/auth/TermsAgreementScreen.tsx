@@ -1,4 +1,5 @@
 import { AppIcon } from "@/components/ui/app-icon";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../layout/Screen";
@@ -57,6 +58,7 @@ export function TermsAgreementScreen({
 }: {
   initialSheet?: TermKey | null;
 }) {
+  const router = useRouter();
   const [agreed, setAgreed] = useState<Record<TermKey, boolean>>({
     tos: false,
     privacy: false,
@@ -77,7 +79,7 @@ export function TermsAgreementScreen({
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
-        <TopBar title="서비스 이용 동의" back={false} />
+        <TopBar title="서비스 이용 동의" back onBack={() => router.back()} />
         <ScrollView contentContainerStyle={styles.body}>
           <Text style={styles.display}>약관에 동의해주세요</Text>
           <Text style={styles.description}>
@@ -198,12 +200,13 @@ function TermsSheet({
         <View style={styles.sheetHeader}>
           <Text style={styles.sheetTitle}>{term.title}</Text>
           <Pressable
-            accessibilityLabel="close"
+            accessibilityLabel="닫기"
             accessibilityRole="button"
             onPress={onClose}
             style={styles.closeButton}
           >
             <AppIcon name="close" size={18} color={theme.colors.inkSoft} />
+            <Text style={styles.closeText}>닫기</Text>
           </Pressable>
         </View>
         <ScrollView contentContainerStyle={styles.sheetBody}>
@@ -364,12 +367,20 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.extrabold,
   },
   closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    minWidth: 64,
+    height: theme.layout.touchTarget,
+    paddingHorizontal: 8,
+    borderRadius: theme.radius.pill,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: 4,
     backgroundColor: theme.colors.surface,
+  },
+  closeText: {
+    color: theme.colors.inkSoft,
+    fontSize: theme.fontSize.md,
+    fontWeight: theme.fontWeight.semibold,
   },
   sheetBody: {
     paddingHorizontal: 20,

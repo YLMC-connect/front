@@ -78,7 +78,7 @@ export default function MyPageScreen() {
 
   return (
     <Screen>
-      <TopBar title="마이페이지" back={false} />
+      <TopBar title="마이페이지" back onBack={() => router.back()} />
 
       <Card style={styles.profileCard}>
         <Avatar name="김은혜" size={60} seed="김은혜" />

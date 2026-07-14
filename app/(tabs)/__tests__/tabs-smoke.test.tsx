@@ -667,11 +667,15 @@ describe("v1 tab smoke screens", () => {
   });
 
   it("renders the my page screen", () => {
+    const back = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({ back } as never);
     renderWithClient(<MyPageScreen />);
 
     expect(screen.getByText("마이페이지")).toBeTruthy();
     expect(screen.getByText("활동 관리")).toBeTruthy();
     expect(screen.getByText("개인정보 처리방침")).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("뒤로"));
+    expect(back).toHaveBeenCalledTimes(1);
   });
 
   it("clears the session before leaving my page on logout", async () => {

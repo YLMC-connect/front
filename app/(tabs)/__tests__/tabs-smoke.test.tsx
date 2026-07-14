@@ -401,6 +401,31 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByTestId("group-category-anchor")).toBeTruthy();
   });
 
+  it("applies the group category filter only to the all-groups list", async () => {
+    const setParams = jest.fn();
+    jest
+      .mocked(useRouter)
+      .mockReturnValue({ push: jest.fn(), setParams } as never);
+    renderWithClient(<GroupScreen />);
+    await screen.findByText("내 소모임");
+
+    const mySection = screen.getByTestId("group-my-section");
+    expect(within(mySection).getByText("토요 산악회")).toBeTruthy();
+    expect(within(mySection).getByText("독서 나눔")).toBeTruthy();
+    expect(within(mySection).getByText("엄마들의 수다방")).toBeTruthy();
+
+    fireEvent.press(screen.getByTestId("group-category-pray"));
+
+    expect(within(mySection).getByText("토요 산악회")).toBeTruthy();
+    expect(within(mySection).getByText("독서 나눔")).toBeTruthy();
+    expect(within(mySection).getByText("엄마들의 수다방")).toBeTruthy();
+    expect(screen.getByText("화요 새벽기도회")).toBeTruthy();
+    expect(screen.queryByText("찬양 동아리")).toBeNull();
+    await waitFor(() =>
+      expect(setParams).toHaveBeenCalledWith({ category: "pray" }),
+    );
+  });
+
   it("updates the group segment without replacing the screen", async () => {
     const setParams = jest.fn();
     jest.mocked(useRouter).mockReturnValue({ setParams } as never);

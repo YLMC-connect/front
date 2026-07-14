@@ -22,13 +22,12 @@ import { useMotionRouteParam } from "../../../src/hooks/useMotionRouteParam";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 import type { MarketOverviewItem } from "../../../src/types/market";
 
-type Status = "all" | "sharing" | "reserved" | "done";
+type MarketSegment = "all" | "sharing" | "mine";
 
-const statusTabs: readonly { key: Status; label: string }[] = [
+const statusTabs: readonly { key: MarketSegment; label: string }[] = [
   { key: "all", label: "전체" },
   { key: "sharing", label: "나눔중" },
-  { key: "reserved", label: "예약중" },
-  { key: "done", label: "나눔완료" },
+  { key: "mine", label: "내 나눔" },
 ];
 
 const MARKET_STICKY_CONTROLS_HEIGHT = 116;
@@ -49,20 +48,15 @@ export default function MarketScreen() {
   const routeStatus =
     params.status === "all" ||
     params.status === "sharing" ||
-    params.status === "reserved" ||
-    params.status === "done"
+    params.status === "mine"
       ? params.status
       : variant === "tab-all"
         ? "all"
-        : variant === "tab-reserved"
-          ? "reserved"
-          : variant === "tab-done"
-            ? "done"
-            : "sharing";
+        : "sharing";
   const routeCategory =
     MARKET_CATEGORIES.find((item) => item.key === params.category)?.key ??
     "all";
-  const [activeStatus, setActiveStatus] = useMotionRouteParam<Status>(
+  const [activeStatus, setActiveStatus] = useMotionRouteParam<MarketSegment>(
     routeStatus,
     (status) => {
       router.setParams({ status: status === "sharing" ? undefined : status });
@@ -81,9 +75,11 @@ export default function MarketScreen() {
       ? []
       : activeStatus === "all"
         ? (overview.data?.items ?? [])
-        : (overview.data?.items ?? []).filter(
-            (post) => post.status === activeStatus,
-          );
+        : activeStatus === "mine"
+          ? (overview.data?.items ?? []).filter((post) => post.isMine)
+          : (overview.data?.items ?? []).filter(
+              (post) => post.status === "sharing",
+            );
   const normalizedSearch = search.trim().toLocaleLowerCase();
   const visiblePosts = statusPosts.filter(
     (post) =>
@@ -236,31 +232,27 @@ function MarketEmptyState({
   status,
   onCreate,
 }: {
-  status: Status | null;
+  status: MarketSegment | null;
   onCreate: () => void;
 }) {
   const message =
-    status === "reserved"
+    status === "mine"
       ? {
-          title: "예약중인 나눔이 없어요",
-          description: "관심 있는 나눔이 있다면\n댓글로 먼저 연락해보세요.",
+          title: "아직 등록한 나눔이 없어요",
+          description:
+            "내가 올린 물건과 진행 상태를\n이곳에서 확인할 수 있어요.",
         }
-      : status === "done"
+      : status === "sharing"
         ? {
-            title: "아직 완료된 나눔이 없어요",
-            description: "완료된 나눔은 이곳에서\n다시 확인할 수 있어요.",
+            title: "진행 중인 나눔이 없어요",
+            description:
+              "첫 나눔을 시작해보세요.\n받는 분께 사랑을 전할 수 있어요.",
           }
-        : status === "sharing"
-          ? {
-              title: "진행 중인 나눔이 없어요",
-              description:
-                "첫 나눔을 시작해보세요.\n받는 분께 사랑을 전할 수 있어요.",
-            }
-          : {
-              title: "아직 나눔 게시글이 없습니다",
-              description:
-                "첫 나눔을 시작해보세요.\n받는 분께 사랑을 전할 수 있어요.",
-            };
+        : {
+            title: "아직 나눔 게시글이 없습니다",
+            description:
+              "첫 나눔을 시작해보세요.\n받는 분께 사랑을 전할 수 있어요.",
+          };
 
   return (
     <View style={styles.emptyWrap}>

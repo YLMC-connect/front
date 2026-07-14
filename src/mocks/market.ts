@@ -6,10 +6,11 @@ export const mockMarketOverview: MarketOverview = {
       id: "1",
       thumbSeed: 0,
       title: "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
-      authorName: "박정아",
+      authorName: "김은혜",
       createdLabel: "1시간 전",
       status: "sharing",
       category: "baby",
+      isMine: true,
     },
     {
       id: "2",
@@ -19,6 +20,7 @@ export const mockMarketOverview: MarketOverview = {
       createdLabel: "3시간 전",
       status: "reserved",
       category: "home",
+      isMine: false,
     },
     {
       id: "3",
@@ -28,6 +30,7 @@ export const mockMarketOverview: MarketOverview = {
       createdLabel: "어제",
       status: "sharing",
       category: "baby",
+      isMine: false,
     },
     {
       id: "4",
@@ -37,6 +40,7 @@ export const mockMarketOverview: MarketOverview = {
       createdLabel: "어제",
       status: "sharing",
       category: "book",
+      isMine: false,
     },
     {
       id: "5",
@@ -46,6 +50,7 @@ export const mockMarketOverview: MarketOverview = {
       createdLabel: "2일 전",
       status: "done",
       category: "home",
+      isMine: false,
     },
     {
       id: "6",
@@ -55,6 +60,7 @@ export const mockMarketOverview: MarketOverview = {
       createdLabel: "3일 전",
       status: "sharing",
       category: "cloth",
+      isMine: false,
     },
   ],
 };

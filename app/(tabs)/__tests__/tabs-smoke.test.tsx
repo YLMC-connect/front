@@ -65,7 +65,7 @@ describe("v1 tab smoke screens", () => {
       screen.getByText("이웃과 물건을 나누며 따뜻함을 전해요"),
     ).toBeTruthy();
     expect(screen.getByTestId("market-status-all")).toBeTruthy();
-    fireEvent.press(screen.getByLabelText("글쓰기"));
+    fireEvent.press(screen.getByLabelText("나눔하기"));
     expect(push).toHaveBeenCalledWith("/modal/market-new");
     expect(screen.getByTestId("market-status-sharing")).toBeTruthy();
     expect(screen.getByTestId("market-status-mine")).toBeTruthy();

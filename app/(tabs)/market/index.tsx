@@ -142,7 +142,7 @@ export default function MarketScreen() {
       }
       overlay={
         <FloatingActionButton
-          label="글쓰기"
+          label="나눔하기"
           icon="add"
           style={styles.fab}
           onPress={() => router.push("/modal/market-new")}

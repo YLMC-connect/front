@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 중보기도 신청 아이콘 구분 — 하단 기도 탭의 `Hearts`와 신청 카드의 기존 `HandHeart`가 겹쳐 보이지 않도록 신청 카드만 Solar `UserPlusRounded`로 변경하고 기존 카드 geometry·색상·`/prayer/apply` 이동을 유지
 - 기도 플로팅 버튼 행동 문구 명확화 — 대상명뿐인 `기도제목`을 `기도제목 작성`으로 바꾸고 기존 `/modal/prayer-new` 이동·`+` 아이콘·고정 위치를 유지
 - 내 기도제목 전체보기 배치 통일 — 섹션 아래의 큰 outline 버튼을 제거하고 제목 오른쪽에 공통 `전체보기 + chevron-right` action을 배치하되 기존 `/prayer/request` 이동은 유지
 - 기도 glass sticky 헤더 — 오늘 진행·기도방·기도제목·신청 영역을 하나의 스크롤로 묶고 기본 배경색 기반 blur 타이틀 뒤로 지나가게 적용하며 FAB 위치는 유지
@@ -58,6 +59,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-15) **중보기도 신청 카드는 Solar `UserPlusRounded`를 사용한다** — 하단 기도 탭은 `Hearts`, 참여 신청 카드는 사람과 추가 표시가 함께 보이는 `UserPlusRounded`로 역할을 구분합니다. 공통 `volunteer-activism` 매핑은 바꾸지 않아 홈·봉사·기도 빈 상태 등 다른 화면의 `HandHeart`는 유지합니다.
 - (2026-07-15) **기도 FAB는 `기도제목 작성`으로 실행 행동을 표시한다** — `기도제목`만 표시해 목록·작성 의미가 모호했던 문구를 행동형으로 바꾸되 기존 `/modal/prayer-new` 이동과 geometry는 유지합니다.
 - (2026-07-14) **내 기도제목 전체보기는 섹션 제목 오른쪽에 둔다** — 큰 독립 버튼 대신 공통 `SectionHeader`를 사용해 동행과 같은 `전체보기 + chevron-right`로 표시하고, action은 기존 `/prayer/request` Stack 경로를 그대로 push합니다.
 - (2026-07-14) **기도 루트 콘텐츠는 기본 배경색 glass 타이틀 아래 하나의 스크롤을 사용한다** — 실제 safe-area와 20px 상단 여백을 포함한 공통 sticky blur를 사용하고 하단 border 없이 콘텐츠가 뒤를 통과하며 fixed FAB는 유지합니다.

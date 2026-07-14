@@ -39,6 +39,7 @@ import {
   TransferHorizontal,
   TrashBin2,
   UserMinusRounded,
+  UserPlusRounded,
   UserRounded,
   UsersGroupRounded,
 } from "@solar-icons/react-native/Linear";
@@ -132,6 +133,7 @@ const linearIcons = {
   "outlined-flag": Flag2,
   "person-outline": UserRounded,
   "person-remove": UserMinusRounded,
+  "prayer-apply": UserPlusRounded,
   schedule: ClockCircle,
   search: Magnifer,
   "search-off": Magnifer,

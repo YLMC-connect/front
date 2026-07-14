@@ -78,6 +78,16 @@ jest.mock("expo-blur", () => {
   };
 });
 
+jest.mock("expo-linear-gradient", () => {
+  const React = require("react");
+  const { View } = require("react-native");
+
+  return {
+    LinearGradient: (props: Record<string, unknown>) =>
+      React.createElement(View, props),
+  };
+});
+
 jest.mock("expo-image-picker", () => ({
   MediaTypeOptions: {
     Images: "Images",

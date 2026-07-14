@@ -1,12 +1,13 @@
-import { BlurView } from "expo-blur";
 import type { ReactNode, RefObject } from "react";
 import { StyleSheet, View } from "react-native";
 import { theme } from "../../constants/theme";
 import { AppText } from "./app-text";
+import { GlassBackdrop } from "./glass-backdrop";
 
-export const SCREEN_HEADER_HEIGHT = 78;
-const SCREEN_HEADER_TOP_PADDING = 20;
-const SCREEN_HEADER_ACTION_TOP = 13;
+export const SCREEN_HEADER_HEIGHT = 89;
+const SCREEN_HEADER_VERTICAL_PADDING = 20;
+const SCREEN_HEADER_ACTION_TOP =
+  (SCREEN_HEADER_HEIGHT - theme.layout.touchTarget) / 2;
 
 export function ScreenHeader({
   title,
@@ -30,24 +31,12 @@ export function ScreenHeader({
         styles.header,
         {
           height: SCREEN_HEADER_HEIGHT + topInset,
-          paddingTop: SCREEN_HEADER_TOP_PADDING + topInset,
+          paddingTop: SCREEN_HEADER_VERTICAL_PADDING + topInset,
+          paddingBottom: SCREEN_HEADER_VERTICAL_PADDING,
         },
       ]}
     >
-      <BlurView
-        blurMethod="dimezisBlurViewSdk31Plus"
-        blurTarget={blurTarget}
-        intensity={32}
-        pointerEvents="none"
-        style={StyleSheet.absoluteFill}
-        testID={`${testID}-blur`}
-        tint="light"
-      />
-      <View
-        pointerEvents="none"
-        style={styles.tint}
-        testID={`${testID}-tint`}
-      />
+      <GlassBackdrop blurTarget={blurTarget} testID={testID} />
       <View style={[styles.text, right ? styles.textWithAction : null]}>
         <AppText variant="screenTitle">{title}</AppText>
         {subtitle ? (
@@ -76,11 +65,7 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 20,
     overflow: "hidden",
-  },
-  tint: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: theme.colors.bg,
-    opacity: 0.72,
+    justifyContent: "center",
   },
   text: {
     minWidth: 0,

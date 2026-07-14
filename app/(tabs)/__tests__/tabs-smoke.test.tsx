@@ -51,6 +51,9 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<MarketScreen />);
 
     expect(screen.getByText("나눔")).toBeTruthy();
+    expect(
+      screen.getByText("이웃과 물건을 나누며 따뜻함을 전해요"),
+    ).toBeTruthy();
     expect(screen.getByText("나눔중")).toBeTruthy();
     expect(
       await screen.findByText(
@@ -238,6 +241,7 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<GroupScreen />);
 
     expect(screen.getByText("동행")).toBeTruthy();
+    expect(screen.getByText("소모임과 봉사로 함께 걸어가요")).toBeTruthy();
     expect(screen.getAllByText("소모임").length).toBeGreaterThan(0);
     expect(screen.getAllByText("봉사").length).toBeGreaterThan(0);
     expect(await screen.findByText("내 소모임")).toBeTruthy();

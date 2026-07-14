@@ -39,6 +39,8 @@ export { DetailBadge } from "./detail-badge";
 export { FilterChips } from "./filter-chips";
 export { ModalFormSection, SectionDivider } from "./modal-form-layout";
 export { ScreenHeader } from "./screen-header";
+export { SearchField, SEARCH_FIELD_STICKY_HEIGHT } from "./search-field";
+export { SearchToggleButton } from "./search-toggle-button";
 export { UnderlineTabs } from "./underline-tabs";
 export { AppText, type AppTextTone, type AppTextVariant } from "./app-text";
 export { ListSkeleton, Skeleton } from "./skeleton";

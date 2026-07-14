@@ -247,4 +247,34 @@ describe("shared maintenance UI", () => {
         .pointerEvents,
     ).toBe("auto");
   });
+
+  it("keeps sticky controls visible when an intentional action pins them", () => {
+    render(
+      <SafeAreaProvider
+        initialMetrics={{
+          frame: { x: 0, y: 0, width: 430, height: 932 },
+          insets: { top: 0, left: 0, right: 0, bottom: 0 },
+        }}
+      >
+        <StickyHeaderScreen
+          stickyControls={<Text>검색</Text>}
+          stickyControlsAlwaysVisible
+          stickyControlsHeight={56}
+          testID="pinned-controls-screen"
+          title="나눔"
+        >
+          <Text>스크롤 콘텐츠</Text>
+        </StickyHeaderScreen>
+      </SafeAreaProvider>,
+    );
+
+    fireEvent.scroll(screen.getByTestId("pinned-controls-screen-scroll"), {
+      nativeEvent: { contentOffset: { y: 13 } },
+    });
+
+    expect(
+      screen.getByTestId("pinned-controls-screen-sticky-controls").props
+        .pointerEvents,
+    ).toBe("auto");
+  });
 });

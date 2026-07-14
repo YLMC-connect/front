@@ -1,7 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { theme } from "../../constants/theme";
 import { useLifeStudyOverview } from "../../hooks/useLifeStudyCourses";
 import { usePrayerOverview } from "../../hooks/usePrayers";
@@ -22,6 +22,9 @@ import {
   ErrorState,
   FloatingActionButton,
   ListSkeleton,
+  SearchField,
+  SEARCH_FIELD_STICKY_HEIGHT,
+  SearchToggleButton,
 } from "../ui";
 
 type FaithSection = "pray" | "study";
@@ -42,23 +45,33 @@ export function FaithSectionsScreen({ section }: { section: FaithSection }) {
           ? "말씀으로 배우고 삶으로 자라가요"
           : "함께 기도하고 응답을 나눠요"
       }
+      stickyControls={
+        section === "study" && searchOpen ? (
+          <SearchField
+            autoFocus
+            accessibilityLabel="삶공부 검색어"
+            value={search}
+            onChangeText={setSearch}
+            placeholder="과정명 또는 강사 검색"
+            testID="life-study-search-field"
+          />
+        ) : undefined
+      }
+      stickyControlsAlwaysVisible={searchOpen}
+      stickyControlsHeight={
+        section === "study" && searchOpen ? SEARCH_FIELD_STICKY_HEIGHT : 0
+      }
       right={
         section === "study" ? (
-          <Pressable
+          <SearchToggleButton
             accessibilityLabel={searchOpen ? "삶공부 검색 닫기" : "삶공부 검색"}
-            accessibilityRole="button"
             onPress={() => {
               setSearchOpen((open) => !open);
               if (searchOpen) setSearch("");
             }}
-            style={styles.searchButton}
-          >
-            <MaterialIcons
-              name={searchOpen ? "close" : "search"}
-              size={22}
-              color={theme.colors.inkSoft}
-            />
-          </Pressable>
+            open={searchOpen}
+            testID="life-study-search-toggle"
+          />
         ) : undefined
       }
       overlay={
@@ -72,21 +85,6 @@ export function FaithSectionsScreen({ section }: { section: FaithSection }) {
         ) : undefined
       }
     >
-      {section === "study" && searchOpen ? (
-        <View style={styles.searchWrap}>
-          <MaterialIcons name="search" size={19} color={theme.colors.inkMute} />
-          <TextInput
-            autoFocus
-            accessibilityLabel="삶공부 검색어"
-            value={search}
-            onChangeText={setSearch}
-            placeholder="과정명 또는 강사 검색"
-            placeholderTextColor={theme.colors.inkMute}
-            style={styles.searchInput}
-          />
-        </View>
-      ) : null}
-
       {section === "study" ? (
         <StudyContent search={search} />
       ) : (
@@ -498,30 +496,6 @@ const lifeStudyStatusLabels: Record<LifeStudyOverviewStatus, string> = {
 };
 
 const styles = StyleSheet.create({
-  searchButton: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  searchWrap: {
-    minHeight: 46,
-    marginHorizontal: theme.layout.screenX,
-    marginBottom: 10,
-    paddingHorizontal: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.lineStrong,
-    backgroundColor: theme.colors.surface,
-  },
-  searchInput: {
-    flex: 1,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-  },
   segmented: {
     marginHorizontal: theme.layout.screenX,
     marginBottom: 10,

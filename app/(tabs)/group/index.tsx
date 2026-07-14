@@ -1,14 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Animated, { FadeIn, useReducedMotion } from "react-native-reanimated";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
@@ -20,6 +13,9 @@ import {
   FilterChips,
   FloatingActionButton,
   ListSkeleton,
+  SearchField,
+  SEARCH_FIELD_STICKY_HEIGHT,
+  SearchToggleButton,
   SegmentedTabs,
   VisualCover,
   VisualThumb,
@@ -121,18 +117,12 @@ export default function GroupScreen() {
         testID="screen-group"
         title="내 소모임"
         right={
-          <Pressable
+          <SearchToggleButton
             accessibilityLabel="내 소모임 닫기"
-            accessibilityRole="button"
             onPress={() => (isMyFull ? router.back() : setShowMyFull(false))}
-            style={styles.searchButton}
-          >
-            <MaterialIcons
-              name="close"
-              size={22}
-              color={theme.colors.inkSoft}
-            />
-          </Pressable>
+            open
+            testID="group-my-list-close"
+          />
         }
       >
         {isLoading ? (
@@ -161,6 +151,16 @@ export default function GroupScreen() {
       onScrollOffsetChange={handleScrollOffsetChange}
       stickyControls={
         <View testID="group-sticky-controls-content">
+          {searchOpen ? (
+            <SearchField
+              autoFocus
+              accessibilityLabel="동행 검색어"
+              value={search}
+              onChangeText={setSearch}
+              placeholder="소모임 또는 봉사 검색"
+              testID="group-search-field"
+            />
+          ) : null}
           <SegmentedTabs
             items={sections}
             active={section}
@@ -189,27 +189,26 @@ export default function GroupScreen() {
         </View>
       }
       stickyControlsHeight={
-        showStickyFilter
+        (showStickyFilter
           ? GROUP_COMBINED_STICKY_HEIGHT
-          : GROUP_SEGMENT_STICKY_HEIGHT
+          : GROUP_SEGMENT_STICKY_HEIGHT) +
+        (searchOpen ? SEARCH_FIELD_STICKY_HEIGHT : 0)
       }
-      stickyControlsInset={GROUP_SEGMENT_STICKY_HEIGHT}
+      stickyControlsInset={
+        GROUP_SEGMENT_STICKY_HEIGHT +
+        (searchOpen ? SEARCH_FIELD_STICKY_HEIGHT : 0)
+      }
+      stickyControlsAlwaysVisible={searchOpen}
       right={
-        <Pressable
+        <SearchToggleButton
           accessibilityLabel={searchOpen ? "동행 검색 닫기" : "동행 검색"}
-          accessibilityRole="button"
           onPress={() => {
             setSearchOpen((open) => !open);
             if (searchOpen) setSearch("");
           }}
-          style={styles.searchButton}
-        >
-          <MaterialIcons
-            name={searchOpen ? "close" : "search"}
-            size={22}
-            color={theme.colors.inkSoft}
-          />
-        </Pressable>
+          open={searchOpen}
+          testID="group-search-toggle"
+        />
       }
       overlay={
         <FloatingActionButton
@@ -221,25 +220,6 @@ export default function GroupScreen() {
       }
     >
       <View testID="group-scroll-content">
-        {searchOpen ? (
-          <View style={styles.searchWrap}>
-            <MaterialIcons
-              name="search"
-              size={19}
-              color={theme.colors.inkMute}
-            />
-            <TextInput
-              autoFocus
-              accessibilityLabel="동행 검색어"
-              value={search}
-              onChangeText={setSearch}
-              placeholder="소모임 또는 봉사 검색"
-              placeholderTextColor={theme.colors.inkMute}
-              style={styles.searchInput}
-            />
-          </View>
-        ) : null}
-
         {isLoading ? (
           <View style={styles.loading}>
             <ListSkeleton rows={4} thumbnail={false} />
@@ -492,30 +472,6 @@ function categoryOf(key: string) {
 }
 
 const styles = StyleSheet.create({
-  searchButton: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  searchWrap: {
-    minHeight: 46,
-    marginHorizontal: theme.layout.screenX,
-    marginBottom: 10,
-    paddingHorizontal: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.lineStrong,
-    backgroundColor: theme.colors.surface,
-  },
-  searchInput: {
-    flex: 1,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-  },
   segmented: {
     flexShrink: 0,
     height: 44,

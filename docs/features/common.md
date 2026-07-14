@@ -13,6 +13,7 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- 뒤로가기 헤더 중앙 정렬·라벨 통일 — 공통 `TopBar`가 왼쪽 68px 뒤로 버튼과 우측 action 유무에 관계없이 제목 중심을 화면 중심에 고정하고, 전체 화면을 이전 스택으로 닫는 action은 `chevron-left + 뒤로`로 통일하되 검색·패널·dialog·sheet의 내부 닫기는 유지
 - 공통 검색 입력·헤더 action 정리 — 내부 웹 outline을 제거하고 검색 surface 전체에 단일 2px focus border를 적용했으며, 검색/닫기를 아이콘+텍스트로 표시하고 검색 중에는 숨겨진 sticky control을 다시 노출
 - 공통 sticky 세그먼트·필터 레이어 — 상단 타이틀과 같은 `theme.colors.bg` 72%·intensity 32 glass를 재사용하고, 아래 스크롤 숨김·짧은 위 스크롤 200ms 재표시와 동작 줄이기를 지원
 - 루트 탭 glass sticky 헤더 — 홈·나눔·동행·기도·삶공부의 검색·필터·목록을 하나의 스크롤로 묶고, 기본 배경색 기반 반투명 blur 헤더를 화면 상단에 고정해 콘텐츠가 뒤로 지나가도록 적용
@@ -157,6 +158,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-14) **전체 화면의 이전 경로 이동은 `뒤로`, 현재 화면 내부 UI 해제는 `닫기`로 구분한다** — `TopBar back`의 label은 `chevron-left + 뒤로`로 고정하고 제목은 좌우 88px 안전 영역 안에서 화면 정중앙에 둡니다. 검색·패널·dialog·sheet처럼 route를 pop하지 않는 닫기는 의미가 다르므로 유지합니다.
 - (2026-07-14) **검색 포커스와 명시적 검색 action은 공통 UI가 소유한다** — 웹 기본 TextInput outline은 끄고 아이콘을 포함한 바깥 surface에 단일 2px border만 표시합니다. 루트 검색 action은 `검색/닫기` 아이콘과 한글 label을 함께 사용하고, 검색이 열린 동안에는 스크롤로 숨었던 sticky control을 다시 표시해 입력창 접근을 보장합니다.
 - (2026-07-14) **상단 sticky control은 타이틀과 같은 glass와 방향형 노출 정책을 공유한다** — 나눔·동행의 세그먼트·필터 영역은 `theme.colors.bg` 72%와 intensity 32를 사용하고, 아래 12px 스크롤에서 숨은 뒤 위 4px에서 200ms로 재표시합니다. 동작 줄이기에서는 위치 전환을 즉시 반영합니다.
 - (2026-07-14) **모든 루트 탭 sticky 헤더는 기본 배경색 glass를 사용한다** — 홈·나눔·동행·기도·삶공부는 `theme.colors.bg`를 72%로 덧입힌 32 intensity blur를 공유하고 흰색 surface나 하단 border는 사용하지 않습니다. 웹은 위·아래 20px 여백과 89px 헤더, 네이티브는 실제 safe-area를 추가하며 검색·필터·목록은 하나의 스크롤로 헤더 뒤를 통과합니다.

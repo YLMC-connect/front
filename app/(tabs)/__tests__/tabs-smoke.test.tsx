@@ -412,6 +412,8 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<GroupNoticesScreen />);
 
     expect(screen.getByText("공지 작성")).toBeTruthy();
+    expect(screen.getByLabelText("뒤로")).toBeTruthy();
+    expect(screen.queryByText("닫기")).toBeNull();
     expect(screen.getByText("소모임 멤버에게만 공개됩니다.")).toBeTruthy();
     expect(screen.getByPlaceholderText("공지 제목 (최대 30자)")).toBeTruthy();
   });

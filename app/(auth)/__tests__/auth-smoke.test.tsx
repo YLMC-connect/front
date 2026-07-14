@@ -31,18 +31,27 @@ describe("auth smoke screens", () => {
   });
 
   it("renders the terms agreement screen", () => {
+    const back = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({ back } as never);
     renderWithClient(<TermsScreenRoute />);
 
     expect(screen.getByText("약관에 동의해주세요")).toBeTruthy();
     expect(screen.getByText("전체 동의하기")).toBeTruthy();
     expect(screen.getAllByText("전문 보기").length).toBe(4);
+    fireEvent.press(screen.getByLabelText("뒤로"));
+    expect(back).toHaveBeenCalledTimes(1);
   });
 
   it("renders the terms sheet screen", () => {
+    const back = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({ back } as never);
     renderWithClient(<TermsSheetScreenRoute />);
 
     expect(screen.getAllByText("서비스 이용약관").length).toBeGreaterThan(0);
     expect(screen.getByText("시행일자: 2026년 1월 1일")).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("닫기"));
+    expect(screen.queryByText("시행일자: 2026년 1월 1일")).toBeNull();
+    expect(back).not.toHaveBeenCalled();
   });
 
   it("validates login inputs before calling the session service", () => {

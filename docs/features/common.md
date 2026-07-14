@@ -13,6 +13,7 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- 페이지 뒤로·화면 내부 닫기 의미 보완 — 홈에서 진입하는 MY와 인증 약관 page에 공통 `chevron-left + 뒤로`를 연결하고 약관 전문 sheet의 icon-only action을 `close + 닫기`로 보완했으며 확인 dialog의 `취소` 선택 문구는 유지
 - Solar 의미·기본 action glyph 보정 — 기도 탭을 `Hearts` Linear/Bold로 표시하고 Solar에 단독 형태가 없는 추가·닫기는 공통 `AppIcon` 내부의 원 없는 2px rounded stroke로 표시해 기존 크기·색상·문구·접근성·모션을 유지
 - Solar Icons 전환 — 29개 앱·공통 파일의 Material 아이콘을 공통 `AppIcon` 기반 Solar Linear/Bold SVG로 교체하고 하단 탭 선택 상태만 Bold로 강조했으며 기존 접근성 label·문구·크기·모션을 유지
 - 플로팅 버튼 행동 문구 명확화 — 공통 `FloatingActionButton`의 label을 필수로 만들고 화면 텍스트와 기본 접근성 이름에 함께 사용해 나눔 `나눔하기`, 동행 `소모임 개설`, 기도 `기도제목 작성`으로 통일
@@ -169,7 +170,7 @@
 - (2026-07-15) **앱 아이콘은 공통 `AppIcon`을 통해 Solar Icons로 렌더링한다** — 기본 아이콘은 `Linear`, 하단 탭의 선택 상태는 `Bold`를 사용하고 화면은 Solar 패키지를 직접 참조하지 않습니다. 기존 아이콘 의미·크기·색상과 `뒤로`·`검색/닫기`·FAB의 한글 label, 접근성 이름, press motion은 유지하며 미사용 `@expo/vector-icons` 직접 의존성은 제거합니다.
 - (2026-07-15) **플로팅 버튼은 대상만이 아니라 실행 행동을 label로 표시한다** — `FloatingActionButton`의 label은 필수이며 화면 텍스트와 접근성 이름의 기본값을 함께 담당합니다. 나눔은 `나눔하기`, 동행은 `소모임 개설`, 기도는 `기도제목 작성`을 사용하고 기존 아이콘·위치·라우팅은 유지합니다.
 - (2026-07-14) **섹션 전체보기는 제목 오른쪽의 공통 action으로 표시한다** — 독립된 큰 버튼 대신 `SectionHeader`의 `전체보기 + chevron-right`를 사용하고 최소 44px 터치 영역, 140ms press motion, `<섹션명> 전체보기` 접근성 label을 공유합니다. 작성·신청처럼 주요 행동을 시작하는 CTA는 이 규칙에 포함하지 않습니다.
-- (2026-07-14) **전체 화면의 이전 경로 이동은 `뒤로`, 현재 화면 내부 UI 해제는 `닫기`로 구분한다** — `TopBar back`의 label은 `chevron-left + 뒤로`로 고정하고 제목은 좌우 88px 안전 영역 안에서 화면 정중앙에 둡니다. 검색·패널·dialog·sheet처럼 route를 pop하지 않는 닫기는 의미가 다르므로 유지합니다.
+- (2026-07-14, 2026-07-15 보완) **전체 화면의 이전 경로 이동은 `뒤로`, 현재 화면 내부 UI 해제는 `닫기`로 구분한다** — `TopBar back`의 label은 `chevron-left + 뒤로`로 고정하고 제목은 좌우 88px 안전 영역 안에서 화면 정중앙에 둡니다. 검색·펼침 목록·패널·sheet처럼 현재 화면의 일부만 해제하는 action은 `close + 닫기`를 사용하며, 확인 dialog의 `취소`는 선택을 철회하는 별도 의미로 유지합니다.
 - (2026-07-14) **검색 포커스와 명시적 검색 action은 공통 UI가 소유한다** — 웹 기본 TextInput outline은 끄고 아이콘을 포함한 바깥 surface에 단일 2px border만 표시합니다. 루트 검색 action은 `검색/닫기` 아이콘과 한글 label을 함께 사용하고, 검색이 열린 동안에는 스크롤로 숨었던 sticky control을 다시 표시해 입력창 접근을 보장합니다.
 - (2026-07-14) **상단 sticky control은 타이틀과 같은 glass와 방향형 노출 정책을 공유한다** — 나눔·동행의 세그먼트·필터 영역은 `theme.colors.bg` 72%와 intensity 32를 사용하고, 아래 12px 스크롤에서 숨은 뒤 위 4px에서 200ms로 재표시합니다. 동작 줄이기에서는 위치 전환을 즉시 반영합니다.
 - (2026-07-14) **모든 루트 탭 sticky 헤더는 기본 배경색 glass를 사용한다** — 홈·나눔·동행·기도·삶공부는 `theme.colors.bg`를 72%로 덧입힌 32 intensity blur를 공유하고 흰색 surface나 하단 border는 사용하지 않습니다. 웹은 위·아래 20px 여백과 89px 헤더, 네이티브는 실제 safe-area를 추가하며 검색·필터·목록은 하나의 스크롤로 헤더 뒤를 통과합니다.

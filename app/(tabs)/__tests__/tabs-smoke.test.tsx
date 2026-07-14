@@ -196,10 +196,15 @@ describe("v1 tab smoke screens", () => {
   });
 
   it("centers the market detail error state in the available screen", async () => {
+    const back = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({ back } as never);
     jest.mocked(useLocalSearchParams).mockReturnValue({ id: "missing" });
     renderWithClient(<MarketDetailScreen />);
 
-    expect(await screen.findByText("불러오지 못했습니다")).toBeTruthy();
+    expect(await screen.findByText("나눔 상세")).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("뒤로"));
+    expect(back).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("불러오지 못했습니다")).toBeTruthy();
     expect(screen.getByText("나눔 정보를 다시 불러와주세요.")).toBeTruthy();
     expect(screen.getByText("다시 시도")).toBeTruthy();
     expect(

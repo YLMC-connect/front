@@ -78,15 +78,18 @@ export default function GroupScreen() {
     !normalizedSearch ||
     name.toLocaleLowerCase().includes(normalizedSearch) ||
     description.toLocaleLowerCase().includes(normalizedSearch);
-  const groups = (overview.data?.groups ?? []).filter(
-    (group) =>
-      (category === "all" || group.category === category) &&
-      matchesSearch(group.name, group.description),
+  const searchedGroups = (overview.data?.groups ?? []).filter((group) =>
+    matchesSearch(group.name, group.description),
+  );
+  const groups = searchedGroups.filter(
+    (group) => category === "all" || group.category === category,
   );
   const serviceItems = (overview.data?.services ?? []).filter((item) =>
     matchesSearch(item.name, item.description),
   );
-  const myGroups = isError ? [] : groups.filter((group) => group.isJoined);
+  const myGroups = isError
+    ? []
+    : searchedGroups.filter((group) => group.isJoined);
   const isLoading = overview.isPending && !isError;
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -42,7 +42,7 @@ export default function GroupDetailScreen() {
       <Screen>
         <TopBar title="소모임" back onBack={() => router.back()} />
         <View style={styles.exception}>
-          <MaterialIcons
+          <AppIcon
             name="error-outline"
             size={42}
             color={theme.colors.inkHint}
@@ -127,11 +127,7 @@ export default function GroupDetailScreen() {
             <AppText variant="screenTitle">{group.name}</AppText>
 
             <View style={styles.memberMeta}>
-              <MaterialIcons
-                name="groups"
-                size={15}
-                color={theme.colors.inkSoft}
-              />
+              <AppIcon name="groups" size={15} color={theme.colors.inkSoft} />
               <Text style={styles.memberMetaText}>
                 현재 <Text style={styles.memberCount}>{current}</Text> / 최대{" "}
                 {group.maxMembers}
@@ -206,7 +202,7 @@ export default function GroupDetailScreen() {
                   <Avatar name={name} size={48} />
                   {index === 0 ? (
                     <View style={styles.crown}>
-                      <MaterialIcons
+                      <AppIcon
                         name="star"
                         size={10}
                         color={theme.colors.white}

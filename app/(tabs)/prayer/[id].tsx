@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -126,7 +126,7 @@ export default function PrayerDetailScreen() {
                 isCompleted ? styles.prayButtonDone : null,
               ]}
             >
-              <MaterialIcons
+              <AppIcon
                 name="check"
                 size={18}
                 color={
@@ -315,7 +315,7 @@ function PrayerItem({
       <View style={styles.prayerFooter}>
         <Text style={styles.smallMuted}>{item.author}</Text>
         <View style={styles.pillAction}>
-          <MaterialIcons
+          <AppIcon
             name={answer ? "check" : "favorite"}
             size={14}
             color={theme.colors.primaryDeep}
@@ -333,7 +333,7 @@ function PersonRow({ name, done = false }: { name: string; done?: boolean }) {
   return (
     <View style={styles.personRow}>
       <View style={[styles.personDot, done ? styles.personDotDone : null]}>
-        <MaterialIcons
+        <AppIcon
           name={done ? "check" : "schedule"}
           size={13}
           color={done ? theme.colors.white : theme.colors.inkMute}
@@ -368,14 +368,14 @@ function EmptyMessage({
   desc,
   compact = false,
 }: {
-  icon: keyof typeof MaterialIcons.glyphMap;
+  icon: AppIconName;
   title: string;
   desc: string;
   compact?: boolean;
 }) {
   return (
     <View style={[styles.empty, compact ? styles.emptyCompact : null]}>
-      <MaterialIcons
+      <AppIcon
         name={icon}
         size={compact ? 26 : 36}
         color={theme.colors.inkHint}

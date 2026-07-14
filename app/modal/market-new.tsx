@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
@@ -234,11 +234,7 @@ export default function MarketNewModal() {
         </Section>
 
         <View style={styles.infoBox}>
-          <MaterialIcons
-            name="info"
-            size={16}
-            color={theme.colors.primaryDeep}
-          />
+          <AppIcon name="info" size={16} color={theme.colors.primaryDeep} />
           <Text style={styles.infoText}>
             직거래 시 안전한 장소(교회 로비 등)에서 만나주세요.
           </Text>

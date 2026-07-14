@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { router, useLocalSearchParams } from "expo-router";
 import { type ReactNode, useState } from "react";
 import {
@@ -286,11 +286,7 @@ export default function SignupScreen() {
           </View>
 
           <View style={styles.infoBox}>
-            <MaterialIcons
-              name="info"
-              size={17}
-              color={theme.colors.primaryDeep}
-            />
+            <AppIcon name="info" size={17} color={theme.colors.primaryDeep} />
             <AppText variant="caption" tone="brand" style={styles.infoText}>
               목장과 부서는 가입 후 관리자가 확인하여 배정해드려요.
             </AppText>
@@ -344,11 +340,7 @@ function AutoAvatar({ name }: { name?: string }) {
       {trimmed ? (
         <Text style={styles.avatarInitials}>{initials}</Text>
       ) : (
-        <MaterialIcons
-          name="person-outline"
-          size={34}
-          color={theme.colors.inkHint}
-        />
+        <AppIcon name="person-outline" size={34} color={theme.colors.inkHint} />
       )}
     </View>
   );
@@ -409,7 +401,7 @@ function SignupInput({
           onPress={() => setPasswordVisible((visible) => !visible)}
           style={styles.visibilityButton}
         >
-          <MaterialIcons
+          <AppIcon
             name={passwordVisible ? "visibility" : "visibility-off"}
             size={20}
             color={theme.colors.inkMute}
@@ -427,11 +419,7 @@ function InlineError({ children }: { children?: ReactNode }) {
 
   return (
     <View style={styles.errorRow}>
-      <MaterialIcons
-        name="error-outline"
-        size={14}
-        color={theme.colors.danger}
-      />
+      <AppIcon name="error-outline" size={14} color={theme.colors.danger} />
       <Text style={styles.inlineError}>{children}</Text>
     </View>
   );

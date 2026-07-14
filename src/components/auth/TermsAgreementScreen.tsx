@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../layout/Screen";
@@ -132,7 +132,7 @@ export function TermsAgreementScreen({
                   style={styles.detailButton}
                 >
                   <Text style={styles.detailText}>전문 보기</Text>
-                  <MaterialIcons
+                  <AppIcon
                     name="chevron-right"
                     size={16}
                     color={theme.colors.inkSoft}
@@ -173,9 +173,7 @@ function CheckCircle({ on, big = false }: { on: boolean; big?: boolean }) {
         on ? styles.checkOn : null,
       ]}
     >
-      {on ? (
-        <MaterialIcons name="check" size={size * 0.66} color="#fff" />
-      ) : null}
+      {on ? <AppIcon name="check" size={size * 0.66} color="#fff" /> : null}
     </View>
   );
 }
@@ -205,11 +203,7 @@ function TermsSheet({
             onPress={onClose}
             style={styles.closeButton}
           >
-            <MaterialIcons
-              name="close"
-              size={18}
-              color={theme.colors.inkSoft}
-            />
+            <AppIcon name="close" size={18} color={theme.colors.inkSoft} />
           </Pressable>
         </View>
         <ScrollView contentContainerStyle={styles.sheetBody}>

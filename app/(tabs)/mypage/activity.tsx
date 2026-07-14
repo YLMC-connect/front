@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
@@ -197,7 +197,7 @@ function CommentRow({
     <View style={[styles.commentRow, last ? styles.rowLast : null]}>
       <Text style={styles.commentText}>{comment.content}</Text>
       <View style={styles.sourceBox}>
-        <MaterialIcons name="star" size={12} color={theme.colors.inkHint} />
+        <AppIcon name="star" size={12} color={theme.colors.inkHint} />
         <Text numberOfLines={1} style={styles.sourceText}>
           {comment.src}
         </Text>

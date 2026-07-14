@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
@@ -195,7 +195,7 @@ function PrayerContent() {
                     : `${room.participationRate}%`}
                 </AppText>
               </View>
-              <MaterialIcons
+              <AppIcon
                 name="chevron-right"
                 size={18}
                 color={theme.colors.inkMute}
@@ -242,7 +242,7 @@ function PrayerContent() {
                   {item.description}
                 </AppText>
               </View>
-              <MaterialIcons
+              <AppIcon
                 name="chevron-right"
                 size={18}
                 color={theme.colors.inkMute}
@@ -262,7 +262,7 @@ function PrayerContent() {
           style={styles.applyCard}
         >
           <View style={styles.applyIcon}>
-            <MaterialIcons
+            <AppIcon
               name="volunteer-activism"
               size={24}
               color={theme.colors.primaryDeep}

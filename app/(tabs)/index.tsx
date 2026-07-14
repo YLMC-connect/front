@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useRouter, type Href } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
 import { StickyHeaderScreen } from "../../src/components/layout/StickyHeaderScreen";
@@ -55,7 +55,7 @@ export default function HomeScreen() {
             <AppText variant="caption" tone="brand">
               내 정보 보기
             </AppText>
-            <MaterialIcons
+            <AppIcon
               name="chevron-right"
               size={20}
               color={theme.colors.primaryDeep}
@@ -67,7 +67,7 @@ export default function HomeScreen() {
       <View style={styles.body}>
         <View style={styles.prayerCard}>
           <View style={styles.prayerOrb} />
-          <MaterialIcons
+          <AppIcon
             name="volunteer-activism"
             size={56}
             color="rgba(255,255,255,0.22)"
@@ -130,7 +130,7 @@ export default function HomeScreen() {
                     {item.desc}
                   </AppText>
                 </View>
-                <MaterialIcons
+                <AppIcon
                   name="chevron-right"
                   size={18}
                   color={theme.colors.inkMute}

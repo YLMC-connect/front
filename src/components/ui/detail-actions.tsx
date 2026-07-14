@@ -1,10 +1,10 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
 import { StyleSheet, Text } from "react-native";
 import { theme } from "../../constants/theme";
 import { MotionPressable } from "./motion";
 
 type DetailActionProps = {
-  icon: keyof typeof MaterialIcons.glyphMap;
+  icon: AppIconName;
   label: string;
   danger?: boolean;
   onPress?: () => void;
@@ -30,7 +30,7 @@ export function DetailAction({
       onPress={onPress}
       style={styles.action}
     >
-      <MaterialIcons name={icon} size={18} color={color} />
+      <AppIcon name={icon} size={18} color={color} />
       <Text style={[styles.actionText, danger ? styles.dangerText : null]}>
         {label}
       </Text>
@@ -54,7 +54,7 @@ export function DetailMiniAction({
       onPress={onPress}
       style={styles.miniAction}
     >
-      <MaterialIcons
+      <AppIcon
         name={icon}
         size={14}
         color={danger ? theme.colors.danger : theme.colors.inkMute}

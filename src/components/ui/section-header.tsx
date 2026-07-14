@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { StyleSheet, type StyleProp, View, type ViewStyle } from "react-native";
 import { theme } from "../../constants/theme";
 import { AppText } from "./app-text";
@@ -29,7 +29,7 @@ export function SectionHeader({
           <AppText variant="caption" tone="brand">
             전체보기
           </AppText>
-          <MaterialIcons
+          <AppIcon
             name="chevron-right"
             size={18}
             color={theme.colors.primaryDeep}

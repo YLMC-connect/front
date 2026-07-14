@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -143,11 +143,7 @@ function SelectRow({
       </Text>
       <View style={styles.selectedTextWrap}>
         {selected ? (
-          <MaterialIcons
-            name="check"
-            size={13}
-            color={theme.colors.primaryDeep}
-          />
+          <AppIcon name="check" size={13} color={theme.colors.primaryDeep} />
         ) : null}
         <Text
           style={[styles.selectedText, selected ? styles.selectedTextOn : null]}

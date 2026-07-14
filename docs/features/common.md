@@ -13,6 +13,7 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- Solar Icons 전환 — 29개 앱·공통 파일의 Material 아이콘을 공통 `AppIcon` 기반 Solar Linear/Bold SVG로 교체하고 하단 탭 선택 상태만 Bold로 강조했으며 기존 접근성 label·문구·크기·모션을 유지
 - 플로팅 버튼 행동 문구 명확화 — 공통 `FloatingActionButton`의 label을 필수로 만들고 화면 텍스트와 기본 접근성 이름에 함께 사용해 나눔 `글쓰기`, 동행 `소모임 개설`, 기도 `기도제목 작성`으로 통일
 - 섹션 전체보기 action 공통화 — 제목 오른쪽에 `전체보기 + chevron-right`를 표시하는 44px `SectionHeader`를 추가하고 press motion·접근성 label을 통일해 기도와 동행에서 재사용
 - 뒤로가기 헤더 중앙 정렬·라벨 통일 — 공통 `TopBar`가 왼쪽 68px 뒤로 버튼과 우측 action 유무에 관계없이 제목 중심을 화면 중심에 고정하고, 전체 화면을 이전 스택으로 닫는 action은 `chevron-left + 뒤로`로 통일하되 검색·패널·dialog·sheet의 내부 닫기는 유지
@@ -114,7 +115,8 @@
 | `app/(tabs)/life-study/index.tsx`                             | Downloads `삶공부` 하단 탭 루트. 삶공부 목록 화면 렌더링                                                                                                                                                                                   |
 | `src/components/faith/FaithSectionsScreen.tsx`                | 기도/삶공부 목록의 공유 렌더러. route가 아니라 `/prayer`, `/life-study`에서 section prop으로 사용                                                                                                                                          |
 | `src/components/ui/index.tsx`                                 | ZIP 토큰 기준 Button, Card, Badge, Chip, form, modal/dialog, sheet, toast, FAB 등 공통 UI                                                                                                                                                  |
-| `src/components/ui/section-header.tsx`                        | 섹션 제목과 선택적 `전체보기 + chevron-right` action의 배치·44px 터치 영역·press motion을 공유                                                                                                                                            |
+| `src/components/ui/app-icon.tsx`                              | Solar Icons의 의미별 대응과 기본 Linear·선택 Bold 스타일을 관리하는 공통 아이콘 경계                                                                                                                                                       |
+| `src/components/ui/section-header.tsx`                        | 섹션 제목과 선택적 `전체보기 + chevron-right` action의 배치·44px 터치 영역·press motion을 공유                                                                                                                                             |
 | `src/components/ui/screen-header.tsx`                         | 루트 탭 5개 화면의 기본 배경색 glass, 89px 높이, 위·아래 20px 여백, 제목·subtitle·우측 action geometry를 통일하는 sticky 헤더                                                                                                              |
 | `src/components/ui/glass-backdrop.tsx`                        | 상단 sticky 헤더와 하단 floating tab bar가 공유하며 화면별 tint 색상·투명도를 지정할 수 있는 intensity 32 blur layer                                                                                                                       |
 | `src/components/layout/StickyHeaderScreen.tsx`                | 실제 safe-area까지 blur target에 포함하고 검색·필터·목록을 헤더 뒤로 통과시키며, 동일 glass의 sticky control과 스크롤 방향 숨김·200ms 재표시를 관리하는 루트 탭 공통 layout                                                                |
@@ -161,6 +163,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-15) **앱 아이콘은 공통 `AppIcon`을 통해 Solar Icons로 렌더링한다** — 기본 아이콘은 `Linear`, 하단 탭의 선택 상태는 `Bold`를 사용하고 화면은 Solar 패키지를 직접 참조하지 않습니다. 기존 아이콘 의미·크기·색상과 `뒤로`·`검색/닫기`·FAB의 한글 label, 접근성 이름, press motion은 유지하며 미사용 `@expo/vector-icons` 직접 의존성은 제거합니다.
 - (2026-07-15) **플로팅 버튼은 대상만이 아니라 실행 행동을 label로 표시한다** — `FloatingActionButton`의 label은 필수이며 화면 텍스트와 접근성 이름의 기본값을 함께 담당합니다. 나눔은 `글쓰기`, 동행은 `소모임 개설`, 기도는 `기도제목 작성`을 사용하고 기존 아이콘·위치·라우팅은 유지합니다.
 - (2026-07-14) **섹션 전체보기는 제목 오른쪽의 공통 action으로 표시한다** — 독립된 큰 버튼 대신 `SectionHeader`의 `전체보기 + chevron-right`를 사용하고 최소 44px 터치 영역, 140ms press motion, `<섹션명> 전체보기` 접근성 label을 공유합니다. 작성·신청처럼 주요 행동을 시작하는 CTA는 이 규칙에 포함하지 않습니다.
 - (2026-07-14) **전체 화면의 이전 경로 이동은 `뒤로`, 현재 화면 내부 UI 해제는 `닫기`로 구분한다** — `TopBar back`의 label은 `chevron-left + 뒤로`로 고정하고 제목은 좌우 88px 안전 영역 안에서 화면 정중앙에 둡니다. 검색·패널·dialog·sheet처럼 route를 pop하지 않는 닫기는 의미가 다르므로 유지합니다.
@@ -266,7 +269,7 @@
 ## 의존성
 
 - GitHub Issues / PR description 기반 작업 추적 규칙에 의존합니다.
-- Expo SDK 55, Expo Dev Client, Reanimated 4, TanStack Query, Zustand, NativeWind, `expo-image-picker`, `expo-image`, `@react-spectrum/provider@3.11.1`에 의존합니다.
+- Expo SDK 55, Expo Dev Client, Reanimated 4, TanStack Query, Zustand, NativeWind, `@solar-icons/react-native`, `react-native-svg`, `expo-image-picker`, `expo-image`, `@react-spectrum/provider@3.11.1`에 의존합니다.
 
 ## 관련 ADR
 

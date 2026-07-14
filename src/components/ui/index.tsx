@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import {
@@ -48,7 +48,7 @@ export { ListSkeleton, Skeleton } from "./skeleton";
 
 export { MotionPressable } from "./motion";
 
-type IconName = ComponentProps<typeof MaterialIcons>["name"];
+type IconName = ComponentProps<typeof AppIcon>["name"];
 const SEGMENT_GAP = 4;
 const SEGMENT_PADDING = 4;
 
@@ -122,7 +122,7 @@ export function Button({
       ) : (
         <>
           {icon ? (
-            <MaterialIcons
+            <AppIcon
               name={icon}
               size={20}
               color={
@@ -196,7 +196,7 @@ export function FloatingActionButton({
       {...pressableProps}
       style={fabStyle}
     >
-      <MaterialIcons name={icon} size={20} color="#fff" />
+      <AppIcon name={icon} size={20} color="#fff" />
       <Text style={styles.fabText}>{label}</Text>
     </MotionPressable>
   );
@@ -306,11 +306,7 @@ export function VisualThumb({
         ]}
       />
       {icon ? (
-        <MaterialIcons
-          name={icon}
-          size={Math.max(22, size * 0.34)}
-          color="#fff"
-        />
+        <AppIcon name={icon} size={Math.max(22, size * 0.34)} color="#fff" />
       ) : null}
     </View>
   );
@@ -351,7 +347,7 @@ export function VisualCover({
       <View style={[styles.coverCircle, { backgroundColor: palette.tint }]} />
       {label ? (
         <View style={styles.coverLabel}>
-          <MaterialIcons name={icon} size={16} color={palette.fg} />
+          <AppIcon name={icon} size={16} color={palette.fg} />
           <Text style={[styles.coverLabelText, { color: palette.fg }]}>
             {label}
           </Text>
@@ -563,11 +559,7 @@ export function TopBar({
           onPress={onBack}
           style={styles.backButton}
         >
-          <MaterialIcons
-            name="chevron-left"
-            size={22}
-            color={theme.colors.inkSoft}
-          />
+          <AppIcon name="chevron-left" size={22} color={theme.colors.inkSoft} />
           <AppText variant="caption" tone="secondary">
             뒤로
           </AppText>
@@ -608,7 +600,7 @@ export function EmptyState({
   return (
     <View style={styles.state}>
       <View style={styles.stateIcon}>
-        <MaterialIcons name={icon} size={42} color={theme.colors.inkHint} />
+        <AppIcon name={icon} size={42} color={theme.colors.inkHint} />
       </View>
       <AppText variant="cardTitle" tone="secondary" style={styles.stateTitle}>
         {title}
@@ -643,11 +635,7 @@ export function ErrorState({
   return (
     <View style={styles.state}>
       <View style={styles.stateIcon}>
-        <MaterialIcons
-          name="error-outline"
-          size={42}
-          color={theme.colors.inkHint}
-        />
+        <AppIcon name="error-outline" size={42} color={theme.colors.inkHint} />
       </View>
       <AppText variant="cardTitle" tone="secondary" style={styles.stateTitle}>
         불러오지 못했습니다
@@ -682,7 +670,7 @@ export function SuccessState({
   return (
     <View style={styles.state}>
       <View style={[styles.stateIcon, styles.successStateIcon]}>
-        <MaterialIcons name="check" size={38} color={theme.colors.success} />
+        <AppIcon name="check" size={38} color={theme.colors.success} />
       </View>
       <AppText variant="cardTitle">{title}</AppText>
       {description ? (
@@ -738,7 +726,7 @@ export function Toast({
       testID="motion-toast"
       style={[styles.toast, { bottom: offset }, animatedStyle]}
     >
-      <MaterialIcons name={icon} size={18} color="#fff" />
+      <AppIcon name={icon} size={18} color="#fff" />
       <Text style={styles.toastText}>{contentRef.current}</Text>
     </Animated.View>
   );
@@ -1087,7 +1075,7 @@ export function ImagePickerField({
         onPress={pickImages}
         style={[styles.imagePicker, !canAdd && styles.disabled]}
       >
-        <MaterialIcons
+        <AppIcon
           name="add-photo-alternate"
           size={28}
           color={theme.colors.primaryDeep}
@@ -1115,7 +1103,7 @@ export function ImagePickerField({
                 onPress={() => removeImage(uri)}
                 style={styles.imageRemoveButton}
               >
-                <MaterialIcons name="close" size={16} color="#fff" />
+                <AppIcon name="close" size={16} color="#fff" />
               </Pressable>
             </View>
           ))}

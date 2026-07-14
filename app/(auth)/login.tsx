@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
@@ -61,7 +61,7 @@ export default function LoginScreen() {
       <View style={styles.root}>
         <View style={styles.hero}>
           <View style={styles.logo}>
-            <MaterialIcons name="door-front" size={38} color="#fff" />
+            <AppIcon name="door-front" size={38} color="#fff" />
           </View>
           <AppText variant="screenTitle" style={styles.title}>
             열린문 커넥트
@@ -170,7 +170,7 @@ function AuthField({
   secureTextEntry?: boolean;
   error?: string;
   hasError?: boolean;
-  trailingIcon?: keyof typeof MaterialIcons.glyphMap;
+  trailingIcon?: AppIconName;
   trailingLabel?: string;
   onTrailingPress?: () => void;
 }) {
@@ -197,7 +197,7 @@ function AuthField({
             onPress={onTrailingPress}
             style={styles.trailingButton}
           >
-            <MaterialIcons
+            <AppIcon
               name={trailingIcon}
               size={20}
               color={theme.colors.inkMute}

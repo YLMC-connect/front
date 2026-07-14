@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -282,7 +282,7 @@ export default function GroupScreen() {
                           참여 {item.currentMembers}/{item.maxMembers}명
                         </AppText>
                       </View>
-                      <MaterialIcons
+                      <AppIcon
                         name="chevron-right"
                         size={20}
                         color={theme.colors.inkMute}
@@ -437,11 +437,7 @@ function GroupCard({
             </Text>
           </View>
           <View style={styles.memberRow}>
-            <MaterialIcons
-              name="groups"
-              size={14}
-              color={theme.colors.inkMute}
-            />
+            <AppIcon name="groups" size={14} color={theme.colors.inkMute} />
             <AppText variant="caption" tone="muted">
               <Text style={styles.memberCount}>{group.currentMembers}</Text> /
               {group.maxMembers}명

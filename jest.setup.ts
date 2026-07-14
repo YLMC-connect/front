@@ -64,6 +64,20 @@ jest.mock("expo-image", () => {
   return { Image };
 });
 
+jest.mock("expo-blur", () => {
+  const React = require("react");
+  const { View } = require("react-native");
+
+  return {
+    BlurView: (props: Record<string, unknown>) =>
+      React.createElement(View, props),
+    BlurTargetView: React.forwardRef(
+      (props: Record<string, unknown>, ref: React.Ref<unknown>) =>
+        React.createElement(View, { ...props, ref }),
+    ),
+  };
+});
+
 jest.mock("expo-image-picker", () => ({
   MediaTypeOptions: {
     Images: "Images",

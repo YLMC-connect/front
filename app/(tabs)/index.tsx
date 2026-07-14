@@ -1,8 +1,8 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter, type Href } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
-import { Screen } from "../../src/components/layout/Screen";
-import { AppText, Avatar, ScreenHeader } from "../../src/components/ui";
+import { StickyHeaderScreen } from "../../src/components/layout/StickyHeaderScreen";
+import { AppText, Avatar } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 
 const activityItems = [
@@ -33,8 +33,12 @@ export default function HomeScreen() {
   const router = useRouter();
 
   return (
-    <Screen padded={false} testID="screen-home">
-      <ScreenHeader title="홈" subtitle="열린문 커넥트" />
+    <StickyHeaderScreen
+      contentContainerStyle={styles.content}
+      subtitle="열린문 커넥트"
+      testID="screen-home"
+      title="홈"
+    >
       <View style={styles.top}>
         <Pressable
           testID="home-open-mypage"
@@ -136,11 +140,14 @@ export default function HomeScreen() {
           </View>
         </View>
       </View>
-    </Screen>
+    </StickyHeaderScreen>
   );
 }
 
 const styles = StyleSheet.create({
+  content: {
+    paddingBottom: 100,
+  },
   top: {
     paddingHorizontal: theme.layout.screenX,
     paddingBottom: 14,

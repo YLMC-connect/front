@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 기도 glass sticky 헤더 — 오늘 진행·기도방·기도제목·신청 영역을 하나의 스크롤로 묶고 기본 배경색 기반 blur 타이틀 뒤로 지나가게 적용하며 FAB 위치는 유지
 - 기도 탭 상세 Stack 적용 — 기도방 상세·참여 신청·내 기도제목을 기도 목록 위에 push하고 뒤로가기 시 `/prayer`로 복귀하도록 탭별 중첩 Stack 추가
 - 기도 목록 카드 형태 복구 — 오늘의 기도 진행률은 유지하고 기도방·기도제목을 흰 surface, 둥근 경계, 12px 간격의 독립 카드로 복구
 - 기도 대표 요소·상태 UI 적용 — 참여 중인 방의 완료 인원을 합산한 오늘의 기도 진행 카드와 progress를 추가하고 기도방/기도제목은 flat list, loading은 Skeleton, error는 재시도로 정리
@@ -36,7 +37,7 @@
 
 | 경로                                           | 역할                                            |
 | ---------------------------------------------- | ----------------------------------------------- |
-| `app/(tabs)/prayer/_layout.tsx`                | 기도 목록·상세·신청·요청 중첩 Stack            |
+| `app/(tabs)/prayer/_layout.tsx`                | 기도 목록·상세·신청·요청 중첩 Stack             |
 | `app/(tabs)/prayer/index.tsx`                  | Downloads 하단 `기도` 탭 루트                   |
 | `src/components/faith/FaithSectionsScreen.tsx` | 기도 목록 공유 렌더러                           |
 | `app/(tabs)/prayer/[id].tsx`                   | 기도방 상세, 기도제목, 응답 기록                |
@@ -55,6 +56,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-14) **기도 루트 콘텐츠는 기본 배경색 glass 타이틀 아래 하나의 스크롤을 사용한다** — 실제 safe-area와 20px 상단 여백을 포함한 공통 sticky blur를 사용하고 하단 border 없이 콘텐츠가 뒤를 통과하며 fixed FAB는 유지합니다.
 - (2026-07-14) **기도 상세·보조 화면은 기도 탭 Stack에 쌓는다** — `/prayer/[id]`, `/prayer/apply`, `/prayer/request`는 기도 목록 위에 push하고 back으로 `/prayer`에 복귀합니다.
 - (2026-07-12) **기도 루트의 내 기도방·내 기도제목은 카드로 구분한다** — 오늘 진행률 대표 surface 아래의 실제 이동 항목은 흰 surface, 16px radius, 옅은 border와 약한 shadow를 사용해 각 항목의 터치 경계를 분명히 합니다.
 - (2026-07-12) **기도 루트 대표 요소는 오늘 참여 진행이다** — overview의 참여 중 기도방 `completedCount/memberCount`를 합산해 오늘 완료 인원과 비율을 표시하며 새 서버 필드를 만들지 않습니다. 상세 목록의 차분한 icon/color는 유지하고 flat row만 카드 형태로 복구했습니다.

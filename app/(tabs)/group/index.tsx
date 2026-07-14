@@ -9,7 +9,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Screen } from "../../../src/components/layout/Screen";
+import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   Badge,
   AppText,
@@ -19,7 +19,6 @@ import {
   FilterChips,
   FloatingActionButton,
   ListSkeleton,
-  ScreenHeader,
   SegmentedTabs,
   VisualCover,
   VisualThumb,
@@ -87,260 +86,244 @@ export default function GroupScreen() {
 
   if (isMyFull || showMyFull) {
     return (
-      <Screen scroll={false} padded={false} testID="screen-group">
-        <View style={styles.root}>
-          <ScreenHeader
-            title="내 소모임"
-            right={
-              <Pressable
-                accessibilityLabel="내 소모임 닫기"
-                accessibilityRole="button"
-                onPress={() =>
-                  isMyFull ? router.back() : setShowMyFull(false)
-                }
-                style={styles.searchButton}
-              >
-                <MaterialIcons
-                  name="close"
-                  size={22}
-                  color={theme.colors.inkSoft}
-                />
-              </Pressable>
-            }
-          />
-          <ScrollView contentContainerStyle={styles.fullList}>
-            {isLoading ? (
-              <View style={styles.loading}>
-                <ListSkeleton rows={3} thumbnail={false} />
-              </View>
-            ) : (
-              myGroups.map((group) => (
-                <GroupCard
-                  key={group.id}
-                  group={group}
-                  onPress={() => router.push(`/group/${group.id}`)}
-                />
-              ))
-            )}
-          </ScrollView>
-        </View>
-      </Screen>
+      <StickyHeaderScreen
+        contentContainerStyle={styles.fullList}
+        testID="screen-group"
+        title="내 소모임"
+        right={
+          <Pressable
+            accessibilityLabel="내 소모임 닫기"
+            accessibilityRole="button"
+            onPress={() => (isMyFull ? router.back() : setShowMyFull(false))}
+            style={styles.searchButton}
+          >
+            <MaterialIcons
+              name="close"
+              size={22}
+              color={theme.colors.inkSoft}
+            />
+          </Pressable>
+        }
+      >
+        {isLoading ? (
+          <View style={styles.loading}>
+            <ListSkeleton rows={3} thumbnail={false} />
+          </View>
+        ) : (
+          myGroups.map((group) => (
+            <GroupCard
+              key={group.id}
+              group={group}
+              onPress={() => router.push(`/group/${group.id}`)}
+            />
+          ))
+        )}
+      </StickyHeaderScreen>
     );
   }
 
   return (
-    <Screen scroll={false} padded={false} testID="screen-group">
-      <View style={styles.root}>
-        <ScreenHeader
-          title="동행"
-          right={
-            <Pressable
-              accessibilityLabel={searchOpen ? "동행 검색 닫기" : "동행 검색"}
-              accessibilityRole="button"
-              onPress={() => {
-                setSearchOpen((open) => !open);
-                if (searchOpen) setSearch("");
-              }}
-              style={styles.searchButton}
-            >
-              <MaterialIcons
-                name={searchOpen ? "close" : "search"}
-                size={22}
-                color={theme.colors.inkSoft}
-              />
-            </Pressable>
-          }
-        />
-
-        {searchOpen ? (
-          <View style={styles.searchWrap}>
-            <MaterialIcons
-              name="search"
-              size={19}
-              color={theme.colors.inkMute}
-            />
-            <TextInput
-              autoFocus
-              accessibilityLabel="동행 검색어"
-              value={search}
-              onChangeText={setSearch}
-              placeholder="소모임 또는 봉사 검색"
-              placeholderTextColor={theme.colors.inkMute}
-              style={styles.searchInput}
-            />
-          </View>
-        ) : null}
-
-        <SegmentedTabs
-          items={sections}
-          active={section}
-          onChange={setSection}
-          style={styles.segmented}
-          testIDPrefix="group-section"
-        />
-
-        <ScrollView contentContainerStyle={styles.body}>
-          {isLoading ? (
-            <View style={styles.loading}>
-              <ListSkeleton rows={4} thumbnail={false} />
-            </View>
-          ) : isError ? (
-            <ErrorState
-              message="네트워크 연결을 확인하고 다시 시도해주세요."
-              onRetry={() => overview.refetch()}
-            />
-          ) : section === "service" ? (
-            <View style={styles.serviceList}>
-              {serviceItems.length === 0 ? (
-                <EmptyState
-                  title="검색 결과가 없어요"
-                  description="다른 검색어로 다시 찾아보세요."
-                />
-              ) : (
-                serviceItems.map((item) => (
-                  <Pressable
-                    key={item.id}
-                    accessibilityRole="button"
-                    onPress={() => router.push(`/group/${item.linkedGroupId}`)}
-                  >
-                    <Card style={styles.serviceCard}>
-                      <View style={styles.serviceRow}>
-                        <VisualThumb
-                          size={62}
-                          seed={item.coverSeed}
-                          icon="volunteer-activism"
-                        />
-                        <View style={styles.serviceBody}>
-                          <View style={styles.serviceMetaRow}>
-                            <Badge>{item.statusLabel}</Badge>
-                            <Text style={styles.serviceSchedule}>
-                              {item.schedule}
-                            </Text>
-                          </View>
-                          <AppText
-                            variant="cardTitle"
-                            style={styles.serviceTitle}
-                          >
-                            {item.name}
-                          </AppText>
-                          <AppText
-                            variant="body"
-                            tone="secondary"
-                            style={styles.serviceDesc}
-                          >
-                            {item.description}
-                          </AppText>
-                          <AppText
-                            variant="caption"
-                            tone="muted"
-                            style={styles.serviceCount}
-                          >
-                            참여 {item.currentMembers}/{item.maxMembers}명
-                          </AppText>
-                        </View>
-                        <MaterialIcons
-                          name="chevron-right"
-                          size={20}
-                          color={theme.colors.inkMute}
-                        />
-                      </View>
-                    </Card>
-                  </Pressable>
-                ))
-              )}
-            </View>
-          ) : (
-            <>
-              <View style={styles.section}>
-                <View style={styles.sectionHead}>
-                  <AppText variant="sectionTitle">내 소모임</AppText>
-                  <Pressable
-                    accessibilityRole="button"
-                    onPress={() => setShowMyFull(true)}
-                    style={styles.moreButton}
-                  >
-                    <AppText variant="caption" tone="brand">
-                      전체보기
-                    </AppText>
-                  </Pressable>
-                </View>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.mineList}
-                  style={styles.mineScroll}
-                  snapToInterval={226}
-                  decelerationRate="fast"
-                >
-                  {myGroups.map((group) => (
-                    <Pressable
-                      key={group.id}
-                      accessibilityRole="button"
-                      style={styles.mineCard}
-                      onPress={() => router.push(`/group/${group.id}`)}
-                    >
-                      <VisualCover height={78} seed={group.coverSeed} />
-                      <AppText
-                        numberOfLines={1}
-                        variant="cardTitle"
-                        style={styles.mineTitle}
-                      >
-                        {group.name}
-                      </AppText>
-                      <AppText
-                        numberOfLines={1}
-                        variant="caption"
-                        tone="muted"
-                        style={styles.mineMeta}
-                      >
-                        멤버 {group.currentMembers}명 ·{" "}
-                        {categoryOf(group.category)}
-                      </AppText>
-                    </Pressable>
-                  ))}
-                </ScrollView>
-              </View>
-
-              <View style={styles.section}>
-                <AppText variant="sectionTitle" style={styles.allSectionTitle}>
-                  전체 모임
-                </AppText>
-                <FilterChips
-                  items={GROUP_CATEGORIES}
-                  active={category}
-                  onChange={setCategory}
-                  style={styles.categoryScroll}
-                  testIDPrefix="group-category"
-                />
-                <View style={styles.groupList}>
-                  {groups.length === 0 ? (
-                    <EmptyState
-                      title="검색 결과가 없어요"
-                      description="카테고리나 검색어를 바꿔보세요."
-                    />
-                  ) : (
-                    groups.map((group) => (
-                      <GroupCard
-                        key={group.id}
-                        group={group}
-                        onPress={() => router.push(`/group/${group.id}`)}
-                      />
-                    ))
-                  )}
-                </View>
-              </View>
-            </>
-          )}
-        </ScrollView>
-
+    <StickyHeaderScreen
+      contentContainerStyle={styles.body}
+      testID="screen-group"
+      title="동행"
+      right={
+        <Pressable
+          accessibilityLabel={searchOpen ? "동행 검색 닫기" : "동행 검색"}
+          accessibilityRole="button"
+          onPress={() => {
+            setSearchOpen((open) => !open);
+            if (searchOpen) setSearch("");
+          }}
+          style={styles.searchButton}
+        >
+          <MaterialIcons
+            name={searchOpen ? "close" : "search"}
+            size={22}
+            color={theme.colors.inkSoft}
+          />
+        </Pressable>
+      }
+      overlay={
         <FloatingActionButton
           label="개설"
           icon="add"
           style={styles.fab}
           onPress={() => router.push("/modal/group-new")}
         />
-      </View>
-    </Screen>
+      }
+    >
+      {searchOpen ? (
+        <View style={styles.searchWrap}>
+          <MaterialIcons name="search" size={19} color={theme.colors.inkMute} />
+          <TextInput
+            autoFocus
+            accessibilityLabel="동행 검색어"
+            value={search}
+            onChangeText={setSearch}
+            placeholder="소모임 또는 봉사 검색"
+            placeholderTextColor={theme.colors.inkMute}
+            style={styles.searchInput}
+          />
+        </View>
+      ) : null}
+
+      <SegmentedTabs
+        items={sections}
+        active={section}
+        onChange={setSection}
+        style={styles.segmented}
+        testIDPrefix="group-section"
+      />
+
+      {isLoading ? (
+        <View style={styles.loading}>
+          <ListSkeleton rows={4} thumbnail={false} />
+        </View>
+      ) : isError ? (
+        <ErrorState
+          message="네트워크 연결을 확인하고 다시 시도해주세요."
+          onRetry={() => overview.refetch()}
+        />
+      ) : section === "service" ? (
+        <View style={styles.serviceList}>
+          {serviceItems.length === 0 ? (
+            <EmptyState
+              title="검색 결과가 없어요"
+              description="다른 검색어로 다시 찾아보세요."
+            />
+          ) : (
+            serviceItems.map((item) => (
+              <Pressable
+                key={item.id}
+                accessibilityRole="button"
+                onPress={() => router.push(`/group/${item.linkedGroupId}`)}
+              >
+                <Card style={styles.serviceCard}>
+                  <View style={styles.serviceRow}>
+                    <VisualThumb
+                      size={62}
+                      seed={item.coverSeed}
+                      icon="volunteer-activism"
+                    />
+                    <View style={styles.serviceBody}>
+                      <View style={styles.serviceMetaRow}>
+                        <Badge>{item.statusLabel}</Badge>
+                        <Text style={styles.serviceSchedule}>
+                          {item.schedule}
+                        </Text>
+                      </View>
+                      <AppText variant="cardTitle" style={styles.serviceTitle}>
+                        {item.name}
+                      </AppText>
+                      <AppText
+                        variant="body"
+                        tone="secondary"
+                        style={styles.serviceDesc}
+                      >
+                        {item.description}
+                      </AppText>
+                      <AppText
+                        variant="caption"
+                        tone="muted"
+                        style={styles.serviceCount}
+                      >
+                        참여 {item.currentMembers}/{item.maxMembers}명
+                      </AppText>
+                    </View>
+                    <MaterialIcons
+                      name="chevron-right"
+                      size={20}
+                      color={theme.colors.inkMute}
+                    />
+                  </View>
+                </Card>
+              </Pressable>
+            ))
+          )}
+        </View>
+      ) : (
+        <>
+          <View style={styles.section}>
+            <View style={styles.sectionHead}>
+              <AppText variant="sectionTitle">내 소모임</AppText>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => setShowMyFull(true)}
+                style={styles.moreButton}
+              >
+                <AppText variant="caption" tone="brand">
+                  전체보기
+                </AppText>
+              </Pressable>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.mineList}
+              style={styles.mineScroll}
+              snapToInterval={226}
+              decelerationRate="fast"
+            >
+              {myGroups.map((group) => (
+                <Pressable
+                  key={group.id}
+                  accessibilityRole="button"
+                  style={styles.mineCard}
+                  onPress={() => router.push(`/group/${group.id}`)}
+                >
+                  <VisualCover height={78} seed={group.coverSeed} />
+                  <AppText
+                    numberOfLines={1}
+                    variant="cardTitle"
+                    style={styles.mineTitle}
+                  >
+                    {group.name}
+                  </AppText>
+                  <AppText
+                    numberOfLines={1}
+                    variant="caption"
+                    tone="muted"
+                    style={styles.mineMeta}
+                  >
+                    멤버 {group.currentMembers}명 · {categoryOf(group.category)}
+                  </AppText>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+
+          <View style={styles.section}>
+            <AppText variant="sectionTitle" style={styles.allSectionTitle}>
+              전체 모임
+            </AppText>
+            <FilterChips
+              items={GROUP_CATEGORIES}
+              active={category}
+              onChange={setCategory}
+              style={styles.categoryScroll}
+              testIDPrefix="group-category"
+            />
+            <View style={styles.groupList}>
+              {groups.length === 0 ? (
+                <EmptyState
+                  title="검색 결과가 없어요"
+                  description="카테고리나 검색어를 바꿔보세요."
+                />
+              ) : (
+                groups.map((group) => (
+                  <GroupCard
+                    key={group.id}
+                    group={group}
+                    onPress={() => router.push(`/group/${group.id}`)}
+                  />
+                ))
+              )}
+            </View>
+          </View>
+        </>
+      )}
+    </StickyHeaderScreen>
   );
 }
 
@@ -419,9 +402,6 @@ function categoryOf(key: string) {
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
   searchButton: {
     width: 44,
     height: 44,
@@ -552,7 +532,6 @@ const styles = StyleSheet.create({
   },
   fullList: {
     paddingHorizontal: theme.layout.screenX,
-    paddingTop: 6,
     paddingBottom: 28,
     gap: 12,
   },

@@ -87,6 +87,18 @@ describe("common motion", () => {
     );
 
     expect(screen.getByTestId("status-indicator")).toBeTruthy();
+    expect(
+      StyleSheet.flatten(screen.getByTestId("status-sharing").props.style),
+    ).toMatchObject({
+      height: 36,
+      alignItems: "center",
+      justifyContent: "center",
+    });
+    expect(
+      StyleSheet.flatten(screen.getByText("나눔중").props.style),
+    ).toMatchObject({
+      lineHeight: 18,
+    });
     fireEvent.press(screen.getByTestId("status-sharing"));
     expect(onChange).not.toHaveBeenCalled();
 

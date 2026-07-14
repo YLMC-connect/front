@@ -1322,7 +1322,7 @@ const styles = StyleSheet.create({
   },
   segment: {
     flex: 1,
-    minHeight: 36,
+    height: 36,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: theme.radius.pill,
@@ -1341,6 +1341,7 @@ const styles = StyleSheet.create({
     color: theme.colors.inkMute,
     fontWeight: theme.fontWeight.semibold,
     fontSize: 13,
+    lineHeight: 18,
   },
   segmentTextSelected: {
     color: theme.colors.ink,

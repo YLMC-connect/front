@@ -5,7 +5,7 @@ import {
   within,
 } from "@testing-library/react-native";
 import { router, useLocalSearchParams, useRouter } from "expo-router";
-import { Alert } from "react-native";
+import { Alert, StyleSheet } from "react-native";
 import GroupDetailScreen from "../group/[id]";
 import GroupMembersScreen from "../group/members";
 import GroupScreen from "../group";
@@ -269,6 +269,18 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getAllByText("봉사").length).toBeGreaterThan(0);
     expect(await screen.findByText("내 소모임")).toBeTruthy();
     expect(screen.getByText("전체 모임")).toBeTruthy();
+  });
+
+  it("does not stack extra spacing below the group segment", async () => {
+    renderWithClient(<GroupScreen />);
+    await screen.findByText("내 소모임");
+
+    expect(screen.getByTestId("group-my-section").props.style).toBeUndefined();
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("group-my-section-header").props.style,
+      ),
+    ).not.toHaveProperty("paddingTop");
   });
 
   it("joins the group category filter to sticky controls at its content anchor", async () => {

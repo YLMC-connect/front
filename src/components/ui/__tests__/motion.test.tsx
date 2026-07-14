@@ -1,5 +1,5 @@
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
-import { Text } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { theme } from "../../../constants/theme";
 import {
   BottomSheet,
@@ -110,12 +110,20 @@ describe("common motion", () => {
     );
 
     fireEvent(screen.getByTestId("category-all"), "layout", {
-      nativeEvent: { layout: { height: 44, width: 54, x: 20, y: 0 } },
+      nativeEvent: { layout: { height: 44, width: 54, x: 0, y: 0 } },
     });
     fireEvent(screen.getByTestId("category-books"), "layout", {
-      nativeEvent: { layout: { height: 44, width: 82, x: 82, y: 0 } },
+      nativeEvent: { layout: { height: 44, width: 82, x: 62, y: 0 } },
     });
 
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("category-scroll").props.contentContainerStyle,
+      ),
+    ).toMatchObject({ paddingHorizontal: theme.layout.screenX });
+    expect(
+      StyleSheet.flatten(screen.getByTestId("category-track").props.style),
+    ).not.toHaveProperty("paddingHorizontal");
     expect(screen.getByTestId("category-indicator")).toBeTruthy();
     fireEvent.press(screen.getByTestId("category-all"));
     expect(onChange).not.toHaveBeenCalled();

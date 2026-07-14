@@ -1,6 +1,5 @@
 import type { IconProps } from "@solar-icons/react-native";
 import {
-  AddCircle,
   AltArrowLeft,
   AltArrowRight,
   Bag,
@@ -9,7 +8,6 @@ import {
   Box,
   CheckCircle,
   ClockCircle,
-  CloseCircle,
   DangerCircle,
   DangerTriangle,
   DocumentText,
@@ -20,6 +18,7 @@ import {
   GalleryAdd,
   HandHeart,
   Heart,
+  HeartShine,
   History,
   Home2,
   House,
@@ -45,17 +44,58 @@ import {
 } from "@solar-icons/react-native/Linear";
 import {
   Book2 as Book2Bold,
-  HandHeart as HandHeartBold,
+  HeartShine as HeartShineBold,
   Home2 as Home2Bold,
   Shop as ShopBold,
   UsersGroupRounded as UsersGroupRoundedBold,
 } from "@solar-icons/react-native/Bold";
 import type { ComponentType } from "react";
+import { G, Path, Svg } from "react-native-svg";
 
 type SolarIconComponent = ComponentType<IconProps>;
 
+function PlusIcon({
+  size = 24,
+  color = "currentColor",
+  mirrored = false,
+  ...props
+}: IconProps) {
+  return (
+    <Svg {...props} width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <G transform={mirrored ? "translate(24 0) scale(-1 1)" : undefined}>
+        <Path
+          d="M12 5V19M5 12H19"
+          stroke={color}
+          strokeWidth={2}
+          strokeLinecap="round"
+        />
+      </G>
+    </Svg>
+  );
+}
+
+function CloseIcon({
+  size = 24,
+  color = "currentColor",
+  mirrored = false,
+  ...props
+}: IconProps) {
+  return (
+    <Svg {...props} width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <G transform={mirrored ? "translate(24 0) scale(-1 1)" : undefined}>
+        <Path
+          d="M6 6L18 18M18 6L6 18"
+          stroke={color}
+          strokeWidth={2}
+          strokeLinecap="round"
+        />
+      </G>
+    </Svg>
+  );
+}
+
 const linearIcons = {
-  add: AddCircle,
+  add: PlusIcon,
   "add-photo-alternate": GalleryAdd,
   "account-multiple": UsersGroupRounded,
   "account-multiple-outline": UsersGroupRounded,
@@ -69,7 +109,7 @@ const linearIcons = {
   "chevron-right": AltArrowRight,
   circle: RecordCircle,
   "circle-outline": RecordCircle,
-  close: CloseCircle,
+  close: CloseIcon,
   "delete-outline": TrashBin2,
   description: DocumentText,
   "door-front": House,
@@ -77,7 +117,7 @@ const linearIcons = {
   "error-outline": DangerCircle,
   favorite: Heart,
   groups: UsersGroupRounded,
-  "hands-pray": HandHeart,
+  "hands-pray": HeartShine,
   "help-outline": QuestionCircle,
   history: History,
   home: Home2,
@@ -114,7 +154,7 @@ export type AppIconName = keyof typeof linearIcons;
 const boldIcons: Partial<Record<AppIconName, SolarIconComponent>> = {
   "book-open-page-variant": Book2Bold,
   "book-open-page-variant-outline": Book2Bold,
-  "hands-pray": HandHeartBold,
+  "hands-pray": HeartShineBold,
   home: Home2Bold,
   "home-outline": Home2Bold,
   shopping: ShopBold,

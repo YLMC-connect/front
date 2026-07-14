@@ -30,6 +30,7 @@ import PrayerDetailScreen from "../prayer/[id]";
 import PrayerApplyScreenRoute from "../prayer/apply";
 import PrayerScreen from "../prayer";
 import PrayerRequestScreenRoute from "../prayer/request";
+import { theme } from "../../../src/constants/theme";
 import { renderWithClient } from "../../../src/test/renderWithClient";
 import * as authService from "../../../src/services/authService";
 
@@ -233,12 +234,17 @@ describe("v1 tab smoke screens", () => {
     ]);
     expect(scrim.props.locations).toEqual([0, 0.52, 1]);
     expect(StyleSheet.flatten(scrim.props.style)).toMatchObject({ height: 88 });
-    expect(
-      StyleSheet.flatten(screen.getByLabelText("뒤로").props.style),
-    ).toMatchObject({
+    const backStyle = StyleSheet.flatten(
+      screen.getByLabelText("뒤로").props.style,
+    );
+    expect(backStyle).toMatchObject({
       minWidth: 68,
       height: 44,
+      borderColor: theme.colors.line,
+      backgroundColor: theme.colors.surface2,
     });
+    expect(backStyle.shadowOpacity).toBeUndefined();
+    expect(backStyle.elevation).toBeUndefined();
   });
 
   it("creates a comment from the market detail screen", async () => {

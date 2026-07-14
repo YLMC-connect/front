@@ -13,6 +13,7 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- 상세 뒤로가기 surface 통일 — 나눔 이미지 hero의 흰색 RGBA·카드 그림자 예외를 제거해 일반 상세와 같은 `surface2`·1px 경계를 사용하고 공통 68×44px geometry·label·press motion을 유지
 - 페이지 뒤로·화면 내부 닫기 의미 보완 — 홈에서 진입하는 MY와 인증 약관 page에 공통 `chevron-left + 뒤로`를 연결하고 약관 전문 sheet의 icon-only action을 `close + 닫기`로 보완했으며 확인 dialog의 `취소` 선택 문구는 유지
 - Solar 의미·기본 action glyph 보정 — 기도 탭을 `Hearts` Linear/Bold로 표시하고 Solar에 단독 형태가 없는 추가·닫기는 공통 `AppIcon` 내부의 원 없는 2px rounded stroke로 표시해 기존 크기·색상·문구·접근성·모션을 유지
 - Solar Icons 전환 — 29개 앱·공통 파일의 Material 아이콘을 공통 `AppIcon` 기반 Solar Linear/Bold SVG로 교체하고 하단 탭 선택 상태만 Bold로 강조했으며 기존 접근성 label·문구·크기·모션을 유지
@@ -165,6 +166,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-15) **상세 뒤로가기 surface는 배경 이미지 유무와 관계없이 `surface2`로 통일한다** — 일반 상세와 나눔 이미지 hero 모두 1px `line` 경계와 `surface2`를 사용하며, 이미지 위 전용 흰색 RGBA·카드 그림자 예외는 사용하지 않습니다. `chevron-left + 뒤로`, 68×44px geometry와 press motion은 유지합니다.
 - (2026-07-15) **중보기도 탭은 Solar `Hearts`를 사용한다** — 기존 `HeartShine`보다 중보기도의 함께하는 의미가 직접 드러나는 `Hearts`로 교체하며 기본 `Linear`·선택 `Bold`, 기존 크기·색상·접근성·탭 모션은 유지합니다.
 - (2026-07-15, 기도 아이콘 선택만 폐기) **기도 탭은 `HeartShine`, 기본 추가·닫기는 외곽선 없는 glyph를 사용한다** — 기도 아이콘은 후속 결정으로 `Hearts`가 대체했습니다. Solar 패키지에 원·사각형 없는 단독 추가·닫기가 없어 이 두 형태만 `AppIcon` 내부의 24px viewBox·2px round stroke SVG로 보완하며 화면의 아이콘 크기·색상·label·접근성·터치 영역은 유지합니다.
 - (2026-07-15) **앱 아이콘은 공통 `AppIcon`을 통해 Solar Icons로 렌더링한다** — 기본 아이콘은 `Linear`, 하단 탭의 선택 상태는 `Bold`를 사용하고 화면은 Solar 패키지를 직접 참조하지 않습니다. 기존 아이콘 의미·크기·색상과 `뒤로`·`검색/닫기`·FAB의 한글 label, 접근성 이름, press motion은 유지하며 미사용 `@expo/vector-icons` 직접 의존성은 제거합니다.
@@ -179,7 +181,7 @@
 - (2026-07-14) **가변 너비 카테고리 필터도 하나의 이동 indicator를 공유한다** — 나눔·동행 필터는 각 항목의 실제 `x/width`를 측정해 200ms로 선택 배경을 이동하고 140ms press feedback과 동작 줄이기 설정을 따릅니다. 최초 배치와 같은 항목 재선택은 이동·콜백을 반복하지 않습니다.
 - (2026-07-14) **하단 루트 탭의 상세·보조 화면은 탭별 중첩 Stack에 둔다** — 나눔·동행·기도·삶공부의 목록 경로는 하단 탭으로 유지하고 하위 상세는 해당 탭 Stack에 push합니다. 상세 back은 직전 목록을 pop하며 하단 탭·상태 segment는 불필요한 방문 이력을 쌓지 않습니다.
 - (2026-07-14) **루트 탭은 고정 geometry의 공통 `ScreenHeader`를 사용한다** — 홈/나눔/동행/기도/삶공부 헤더는 웹에서 89px 높이와 좌측 20px·위아래 20px 기준을 사용하고, 네이티브에서는 실제 safe-area를 위에 더합니다. title/subtitle 묶음과 우측 검색 action은 남는 공간 안에서 수직 중앙에 두고 본문 시작점을 동일하게 유지합니다.
-- (2026-07-14) **뒤로가기는 아이콘과 한글 label, 구분 가능한 surface를 함께 표시한다** — 50~60대 사용자가 기능을 바로 인지할 수 있도록 `chevron-left + 뒤로`를 유지하고, 일반 상세는 `surface2`와 1px 경계, 이미지 위는 대비용 흰 surface와 1px 경계를 사용합니다. 두 형태 모두 화면 기준 `x=8`, `68x44px`와 `MotionPressable`의 140ms·0.97 press scale을 공유하며 동작 줄이기 설정을 따릅니다.
+- (2026-07-14, 2026-07-15 흰 surface 예외 폐기) **뒤로가기는 아이콘과 한글 label, 구분 가능한 surface를 함께 표시한다** — 50~60대 사용자가 기능을 바로 인지할 수 있도록 `chevron-left + 뒤로`를 유지하고 `surface2`와 1px 경계를 사용합니다. 일반·이미지 상세 모두 화면 기준 `x=8`, `68x44px`와 `MotionPressable`의 140ms·0.97 press scale을 공유하며 동작 줄이기 설정을 따릅니다.
 - (2026-07-14) **나눔과 동행의 전체 탐색 카드는 같은 외곽 규칙을 사용한다** — 두 화면 모두 96px 썸네일, 16px padding/radius, 1px 경계, 동일 shadow와 12px 목록 간격을 사용합니다. 도메인 정보 차이로 카드 높이는 소폭 달라도 내 소모임 가로 영역과 상태·인원 정보는 유지합니다.
 - (2026-07-14) **입력 배경의 alpha 제거는 반투명 surface에만 적용한다** — 나눔 댓글처럼 alpha 배경을 쓰는 입력은 투명하게 만들되, 검색·작성 폼의 고정 surface와 입력이 아닌 overlay·Skeleton opacity는 변경하지 않습니다.
 - (2026-07-14) **탭 루트의 주요 탐색 항목은 카드 경계를 유지한다** — 홈 활동·나눔·동행 전체 모임·기도방/기도제목·삶공부 전체 과정은 흰 surface, 둥근 모서리, 옅은 border와 약한 shadow를 사용합니다.
@@ -240,7 +242,7 @@
 - (2026-05-26) **`VisualThumb` 기본형은 ZIP `Thumb`처럼 icon-less** — ZIP 공통 JSX의 `Thumb`는 `icon`을 넘긴 경우에만 아이콘을 표시하므로, RN `VisualThumb`도 기본 `redeem` 아이콘을 제거하고 호출부가 명시적으로 요청할 때만 아이콘을 렌더링합니다.
 - (2026-05-26) **Dev Client smoke는 서버 선택 화면도 조건부 처리한다** — Android Emulator에서 앱 상태를 clear하면 Expo Dev Client가 `DEVELOPMENT SERVERS` 화면에 남을 수 있으므로, `.maestro/smoke.yml`은 해당 화면이 보일 때 개발 서버 row를 탭하고 `Reload` 메뉴를 닫은 뒤 앱 루트 딥링크 검증을 진행합니다.
 - (2026-05-25) **공통 UI 토큰은 ZIP app-level tokens를 우선 번역한다** — `app-tokens.css`의 primary/surface/ink/line/radius/shadow/type, `halo-tokens.css`의 glass/elevation/type 기준을 `theme.ts`에 반영하고, Button/Card/Badge/Chip/SegmentedTabs/TopBar/Dialog/Sheet/Toast/FAB/Input은 화면별 땜질보다 공통 컴포넌트에서 먼저 맞춥니다. RN에서 직접 표현이 어려운 CSS blur/box-shadow는 `borderColor`, `shadow*`, `elevation` 조합으로 번역합니다.
-- (2026-05-25, 2026-07-14 부분 폐기) **상세 TopBar와 Avatar는 ZIP 공통 JSX를 따른다** — `뒤로` label과 `Avatar` 팔레트는 유지하지만, 일반 상세의 고정 배경 pill은 제거하고 이미지 위에서만 대비 surface를 사용합니다.
+- (2026-05-25, 2026-07-14 부분 폐기, 2026-07-15 surface 예외 폐기) **상세 TopBar와 Avatar는 ZIP 공통 JSX를 따른다** — `뒤로` label과 `Avatar` 팔레트는 유지하지만, 상세 뒤로가기 surface는 배경 이미지 유무와 관계없이 공통 `surface2`를 사용합니다.
 - (2026-05-25) **폐기됨: 탭 구조는 ZIP 5탭 기준으로 한다** — 루트 탭 홈/나눔/소모임/동행/MY와 기도/삶공부 동행 segment 결정은 Downloads preview 확인 후 폐기했습니다.
 - (2026-05-23) **시각 검증은 JSX + Dev Client 캡처를 함께 본다** — ZIP의 JSX를 화면 구조/컴포넌트 원천으로 보고, 스크린샷은 실제 렌더링 확인용으로 사용합니다. 원본 PNG가 단색 빈 화면이면 `compare` report의 `originalFlat`를 근거로 pixel diff를 품질 판단에서 제외하고 JSX 소스를 우선합니다.
 - (2026-05-23) **루트 탭과 숨김 route의 하단 여백을 분리한다** — Expo Router tabs state는 상세 route에서도 루트 탭을 유지할 수 있으므로, floating tab bar와 `Screen` 하단 padding은 `usePathname()`의 실제 path 기준으로 적용합니다.

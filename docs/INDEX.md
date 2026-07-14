@@ -31,7 +31,7 @@
 | group (소모임) | 2 | 17 | 2026-07-14 | [features/group.md](features/group.md) |
 | mypage (MY) | 1 | 4 | 2026-07-14 | [features/mypage.md](features/mypage.md) |
 | life-study (삶공부) | 2 | 8 | 2026-07-14 | [features/life-study.md](features/life-study.md) |
-| prayer (중보기도) | 2 | 11 | 2026-07-14 | [features/prayer.md](features/prayer.md) |
+| prayer (중보기도) | 3 | 11 | 2026-07-14 | [features/prayer.md](features/prayer.md) |
 
 <!-- AUTO-GENERATED-END: domain-status -->
 

@@ -332,6 +332,11 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getAllByText("소모임").length).toBeGreaterThan(0);
     expect(screen.getAllByText("봉사").length).toBeGreaterThan(0);
     expect(await screen.findByText("내 소모임")).toBeTruthy();
+    expect(
+      within(screen.getByLabelText("내 소모임 전체보기")).getByText(
+        "chevron-right",
+      ),
+    ).toBeTruthy();
     expect(screen.getByText("전체 모임")).toBeTruthy();
   });
 
@@ -541,6 +546,11 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("함께 기도하고 응답을 나눠요")).toBeTruthy();
     expect(await screen.findByText("내 기도방")).toBeTruthy();
     expect(screen.getByText("오늘의 기도 진행")).toBeTruthy();
+    expect(
+      within(screen.getByLabelText("내 기도제목 전체보기")).getByText(
+        "chevron-right",
+      ),
+    ).toBeTruthy();
     expect(screen.queryByText("삶공부")).toBeNull();
   });
 
@@ -555,6 +565,8 @@ describe("v1 tab smoke screens", () => {
     );
     fireEvent.press(screen.getAllByText("중보기도 신청").at(-1)!);
     expect(router.push).toHaveBeenCalledWith("/prayer/apply");
+    fireEvent.press(screen.getByLabelText("내 기도제목 전체보기"));
+    expect(router.push).toHaveBeenCalledWith("/prayer/request");
   });
 
   it("renders the prayer apply screen", () => {

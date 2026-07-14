@@ -25,6 +25,7 @@ import {
   SearchField,
   SEARCH_FIELD_STICKY_HEIGHT,
   SearchToggleButton,
+  SectionHeader,
 } from "../ui";
 
 type FaithSection = "pray" | "study";
@@ -205,9 +206,12 @@ function PrayerContent() {
       </View>
 
       <View style={styles.section}>
-        <AppText variant="sectionTitle" style={styles.sectionTitle}>
-          내 기도제목
-        </AppText>
+        <SectionHeader
+          title="내 기도제목"
+          onViewAll={() => router.push("/prayer/request")}
+          style={styles.sectionHeader}
+          testID="prayer-request-section-header"
+        />
         <View style={styles.stack}>
           {data.requests.map((item) => (
             <Pressable
@@ -245,13 +249,6 @@ function PrayerContent() {
               />
             </Pressable>
           ))}
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.push("/prayer/request")}
-            style={styles.outlineButton}
-          >
-            <Text style={styles.outlineButtonText}>내 기도제목 전체보기</Text>
-          </Pressable>
         </View>
       </View>
 
@@ -568,6 +565,11 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing[5],
     paddingBottom: theme.spacing[3],
   },
+  sectionHeader: {
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: theme.spacing[5],
+    paddingBottom: theme.spacing[3],
+  },
   stack: {
     paddingHorizontal: theme.layout.screenX,
     gap: theme.spacing[3],
@@ -663,21 +665,6 @@ const styles = StyleSheet.create({
   },
   requestTitle: {
     marginTop: 8,
-  },
-  outlineButton: {
-    minHeight: 48,
-    marginTop: theme.spacing[3],
-    borderRadius: theme.radius.pill,
-    borderWidth: 1.5,
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  outlineButtonText: {
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.md,
-    fontWeight: theme.fontWeight.bold,
   },
   applyCard: {
     marginHorizontal: theme.layout.screenX,

@@ -119,6 +119,14 @@ describe("shared maintenance UI", () => {
       height: 56,
       paddingHorizontal: theme.layout.screenX,
     });
+    expect(
+      StyleSheet.flatten(screen.getByTestId("detail-header-title").props.style),
+    ).toMatchObject({
+      position: "absolute",
+      left: theme.layout.screenX + 68,
+      right: theme.layout.screenX + 68,
+      alignItems: "center",
+    });
     expect(screen.getByText("뒤로")).toBeTruthy();
     expect(
       StyleSheet.flatten(screen.getByLabelText("뒤로").props.style),

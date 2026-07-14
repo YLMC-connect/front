@@ -541,7 +541,6 @@ export function TopBar({
   title,
   subtitle,
   back,
-  backLabel = "뒤로",
   right,
   onBack,
   testID,
@@ -549,43 +548,44 @@ export function TopBar({
   title: string;
   subtitle?: string;
   back?: boolean;
-  backLabel?: string;
   right?: ReactNode;
   onBack?: () => void;
   testID?: string;
 }) {
   return (
     <View testID={testID} style={styles.topBar}>
-      <View style={styles.topTitleWrap}>
-        {back ? (
-          <MotionPressable
-            accessibilityLabel={backLabel}
-            accessibilityRole="button"
-            onPress={onBack}
-            style={styles.backButton}
-          >
-            <MaterialIcons
-              name="chevron-left"
-              size={22}
-              color={theme.colors.inkSoft}
-            />
-            <AppText variant="caption" tone="secondary">
-              {backLabel}
-            </AppText>
-          </MotionPressable>
-        ) : null}
-        <View style={styles.topTextWrap}>
-          <AppText numberOfLines={1} variant="sectionTitle">
-            {title}
+      {back ? (
+        <MotionPressable
+          accessibilityLabel="뒤로"
+          accessibilityRole="button"
+          onPress={onBack}
+          style={styles.backButton}
+        >
+          <MaterialIcons
+            name="chevron-left"
+            size={22}
+            color={theme.colors.inkSoft}
+          />
+          <AppText variant="caption" tone="secondary">
+            뒤로
           </AppText>
-          {subtitle ? (
-            <AppText variant="caption" tone="muted" style={styles.topSubtitle}>
-              {subtitle}
-            </AppText>
-          ) : null}
-        </View>
+        </MotionPressable>
+      ) : null}
+      <View
+        testID={testID ? `${testID}-title` : undefined}
+        pointerEvents={back ? "none" : "auto"}
+        style={[styles.topTextWrap, back ? styles.topTextWrapCentered : null]}
+      >
+        <AppText numberOfLines={1} variant="sectionTitle">
+          {title}
+        </AppText>
+        {subtitle ? (
+          <AppText variant="caption" tone="muted" style={styles.topSubtitle}>
+            {subtitle}
+          </AppText>
+        ) : null}
       </View>
-      {right}
+      {right ? <View style={styles.topRight}>{right}</View> : null}
     </View>
   );
 }
@@ -1355,9 +1355,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    position: "relative",
   },
-  topTitleWrap: { flexDirection: "row", alignItems: "center", flex: 1 },
   topTextWrap: { flex: 1, minWidth: 0 },
+  topTextWrapCentered: {
+    position: "absolute",
+    left: theme.layout.screenX + 68,
+    right: theme.layout.screenX + 68,
+    alignItems: "center",
+  },
+  topRight: { marginLeft: 8, zIndex: 1 },
   topSubtitle: {
     marginTop: 2,
   },

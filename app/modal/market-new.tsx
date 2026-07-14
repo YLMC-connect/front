@@ -18,6 +18,7 @@ import {
   ModalFormSection as Section,
   SectionDivider as Divider,
   Toast,
+  TopBar,
 } from "../../src/components/ui";
 import { MARKET_CATEGORIES } from "../../src/constants/domainOptions";
 import { theme } from "../../src/constants/theme";
@@ -105,21 +106,12 @@ export default function MarketNewModal() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.root}
     >
-      <View style={styles.topBar}>
-        <Pressable
-          accessibilityLabel="나눔 등록 닫기"
-          accessibilityRole="button"
-          onPress={close}
-          style={styles.closeButton}
-        >
-          <MaterialIcons name="close" size={22} color={theme.colors.inkSoft} />
-          <Text style={styles.closeText}>닫기</Text>
-        </Pressable>
-        <Text style={styles.topTitle}>
-          {isEdit ? "나눔 수정" : "나눔 등록"}
-        </Text>
-        <View style={styles.topSpacer} />
-      </View>
+      <TopBar
+        title={isEdit ? "나눔 수정" : "나눔 등록"}
+        back
+        onBack={close}
+        testID="market-form-header"
+      />
 
       <ScrollView
         keyboardShouldPersistTaps="handled"
@@ -287,33 +279,6 @@ export default function MarketNewModal() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: theme.colors.bg },
-  topBar: {
-    minHeight: 56,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-    paddingTop: 8,
-  },
-  closeButton: {
-    minWidth: 68,
-    minHeight: 44,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 2,
-  },
-  closeText: {
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  topTitle: {
-    flex: 1,
-    textAlign: "center",
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.lg,
-    fontWeight: theme.fontWeight.bold,
-  },
-  topSpacer: { width: 68 },
   body: { paddingBottom: 24 },
   fieldInset: { paddingHorizontal: theme.layout.screenX },
   chips: {

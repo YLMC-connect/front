@@ -93,8 +93,8 @@ export default function GroupNoticesScreenRoute() {
         <TopBar
           title={isEdit ? "공지 수정" : "공지 작성"}
           back
-          backLabel="닫기"
           onBack={() => router.back()}
+          testID="group-notice-header"
           right={
             <View style={styles.actions}>
               {isEdit ? (

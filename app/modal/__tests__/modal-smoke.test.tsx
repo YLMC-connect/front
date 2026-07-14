@@ -17,6 +17,8 @@ describe("modal smoke screens", () => {
     renderWithClient(<MarketNewModal />);
 
     expect(screen.getAllByText("나눔 등록")).toHaveLength(2);
+    expect(screen.getByLabelText("뒤로")).toBeTruthy();
+    expect(screen.queryByText("닫기")).toBeNull();
     expect(screen.getByText("사진 0/5")).toBeTruthy();
     expect(screen.getByText("사용감 있음")).toBeTruthy();
     expect(
@@ -28,6 +30,8 @@ describe("modal smoke screens", () => {
     renderWithClient(<GroupNewModal />);
 
     expect(screen.getAllByText("소모임 개설")).toHaveLength(2);
+    expect(screen.getByLabelText("뒤로")).toBeTruthy();
+    expect(screen.queryByText("닫기")).toBeNull();
     expect(screen.getByText("운동·건강")).toBeTruthy();
     expect(
       screen.getByPlaceholderText("소모임 이름을 입력해주세요 (최대 20자)"),

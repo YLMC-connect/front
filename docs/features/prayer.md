@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 내 기도제목 전체보기 배치 통일 — 섹션 아래의 큰 outline 버튼을 제거하고 제목 오른쪽에 공통 `전체보기 + chevron-right` action을 배치하되 기존 `/prayer/request` 이동은 유지
 - 기도 glass sticky 헤더 — 오늘 진행·기도방·기도제목·신청 영역을 하나의 스크롤로 묶고 기본 배경색 기반 blur 타이틀 뒤로 지나가게 적용하며 FAB 위치는 유지
 - 기도 탭 상세 Stack 적용 — 기도방 상세·참여 신청·내 기도제목을 기도 목록 위에 push하고 뒤로가기 시 `/prayer`로 복귀하도록 탭별 중첩 Stack 추가
 - 기도 목록 카드 형태 복구 — 오늘의 기도 진행률은 유지하고 기도방·기도제목을 흰 surface, 둥근 경계, 12px 간격의 독립 카드로 복구
@@ -56,6 +57,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-14) **내 기도제목 전체보기는 섹션 제목 오른쪽에 둔다** — 큰 독립 버튼 대신 공통 `SectionHeader`를 사용해 동행과 같은 `전체보기 + chevron-right`로 표시하고, action은 기존 `/prayer/request` Stack 경로를 그대로 push합니다.
 - (2026-07-14) **기도 루트 콘텐츠는 기본 배경색 glass 타이틀 아래 하나의 스크롤을 사용한다** — 실제 safe-area와 20px 상단 여백을 포함한 공통 sticky blur를 사용하고 하단 border 없이 콘텐츠가 뒤를 통과하며 fixed FAB는 유지합니다.
 - (2026-07-14) **기도 상세·보조 화면은 기도 탭 Stack에 쌓는다** — `/prayer/[id]`, `/prayer/apply`, `/prayer/request`는 기도 목록 위에 push하고 back으로 `/prayer`에 복귀합니다.
 - (2026-07-12) **기도 루트의 내 기도방·내 기도제목은 카드로 구분한다** — 오늘 진행률 대표 surface 아래의 실제 이동 항목은 흰 surface, 16px radius, 옅은 border와 약한 shadow를 사용해 각 항목의 터치 경계를 분명히 합니다.

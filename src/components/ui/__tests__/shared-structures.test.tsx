@@ -1,4 +1,9 @@
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import {
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react-native";
 import { createRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -11,6 +16,7 @@ import {
   DetailBadge,
   ModalFormSection,
   ScreenHeader,
+  SectionHeader,
   SectionDivider,
   TopBar,
   UnderlineTabs,
@@ -139,6 +145,35 @@ describe("shared maintenance UI", () => {
 
     fireEvent.press(screen.getByLabelText("뒤로"));
     expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders section view-all actions with a chevron and shared touch size", () => {
+    const onViewAll = jest.fn();
+    render(
+      <SectionHeader
+        title="내 기도제목"
+        onViewAll={onViewAll}
+        testID="request-section"
+      />,
+    );
+
+    expect(screen.getByText("전체보기")).toBeTruthy();
+    expect(
+      within(screen.getByTestId("request-section-view-all")).getByText(
+        "chevron-right",
+      ),
+    ).toBeTruthy();
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("request-section-view-all").props.style,
+      ),
+    ).toMatchObject({
+      minHeight: theme.layout.touchTarget,
+      flexDirection: "row",
+    });
+
+    fireEvent.press(screen.getByLabelText("내 기도제목 전체보기"));
+    expect(onViewAll).toHaveBeenCalledTimes(1);
   });
 
   it("covers the safe-area padding with the shared sticky glass header", () => {

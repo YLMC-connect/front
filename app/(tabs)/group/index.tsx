@@ -17,6 +17,7 @@ import {
   SEARCH_FIELD_STICKY_HEIGHT,
   SearchToggleButton,
   SegmentedTabs,
+  SectionHeader,
   VisualCover,
   VisualThumb,
 } from "../../../src/components/ui";
@@ -292,18 +293,12 @@ export default function GroupScreen() {
         ) : (
           <>
             <View testID="group-my-section">
-              <View style={styles.sectionHead} testID="group-my-section-header">
-                <AppText variant="sectionTitle">내 소모임</AppText>
-                <Pressable
-                  accessibilityRole="button"
-                  onPress={() => setShowMyFull(true)}
-                  style={styles.moreButton}
-                >
-                  <AppText variant="caption" tone="brand">
-                    전체보기
-                  </AppText>
-                </Pressable>
-              </View>
+              <SectionHeader
+                title="내 소모임"
+                onViewAll={() => setShowMyFull(true)}
+                style={styles.sectionHead}
+                testID="group-my-section-header"
+              />
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -488,20 +483,11 @@ const styles = StyleSheet.create({
   sectionHead: {
     paddingHorizontal: theme.layout.screenX,
     paddingBottom: theme.spacing[3],
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
   },
   allSectionTitle: {
     paddingHorizontal: theme.layout.screenX,
     paddingTop: theme.spacing[4],
     paddingBottom: theme.spacing[3],
-  },
-  moreButton: {
-    minHeight: 44,
-    justifyContent: "center",
-    paddingHorizontal: 8,
-    marginVertical: -8,
   },
   mineScroll: {
     flexGrow: 0,

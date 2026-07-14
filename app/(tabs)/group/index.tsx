@@ -291,8 +291,8 @@ export default function GroupScreen() {
           </View>
         ) : (
           <>
-            <View style={styles.section}>
-              <View style={styles.sectionHead}>
+            <View testID="group-my-section">
+              <View style={styles.sectionHead} testID="group-my-section-header">
                 <AppText variant="sectionTitle">내 소모임</AppText>
                 <Pressable
                   accessibilityRole="button"
@@ -482,15 +482,11 @@ const styles = StyleSheet.create({
   body: {
     paddingBottom: 164,
   },
-  section: {
-    marginTop: theme.spacing[3],
-  },
   allSectionHeader: {
     marginTop: theme.spacing[3],
   },
   sectionHead: {
     paddingHorizontal: theme.layout.screenX,
-    paddingTop: theme.spacing[4],
     paddingBottom: theme.spacing[3],
     flexDirection: "row",
     alignItems: "center",

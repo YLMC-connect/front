@@ -24,6 +24,7 @@ import {
   RadioSheet,
   Toast,
   Skeleton,
+  TopBar,
   VisualThumb,
 } from "../../../src/components/ui";
 import { MARKET_REPORT_REASONS } from "../../../src/constants/domainOptions";
@@ -145,11 +146,17 @@ export default function MarketDetailScreen() {
   if (detail.isError || !detail.data) {
     return (
       <Screen padded={false} scroll={false} testID="screen-market-detail-error">
-        <View style={styles.centeredError} testID="market-detail-error-center">
-          <ErrorState
-            message="나눔 정보를 다시 불러와주세요."
-            onRetry={() => detail.refetch()}
-          />
+        <View style={styles.root}>
+          <TopBar title="나눔 상세" back onBack={() => router.back()} />
+          <View
+            style={styles.centeredError}
+            testID="market-detail-error-center"
+          >
+            <ErrorState
+              message="나눔 정보를 다시 불러와주세요."
+              onRetry={() => detail.refetch()}
+            />
+          </View>
         </View>
       </Screen>
     );

@@ -94,6 +94,7 @@ export default function MarketScreen() {
     <StickyHeaderScreen
       testID="screen-market"
       title="나눔"
+      subtitle="이웃과 물건을 나누며 따뜻함을 전해요"
       right={
         <Pressable
           accessibilityLabel={searchOpen ? "나눔 검색 닫기" : "나눔 검색"}

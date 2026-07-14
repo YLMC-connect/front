@@ -127,6 +127,7 @@ export default function GroupScreen() {
       contentContainerStyle={styles.body}
       testID="screen-group"
       title="동행"
+      subtitle="소모임과 봉사로 함께 걸어가요"
       right={
         <Pressable
           accessibilityLabel={searchOpen ? "동행 검색 닫기" : "동행 검색"}

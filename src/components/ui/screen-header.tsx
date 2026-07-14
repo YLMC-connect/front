@@ -4,9 +4,10 @@ import { StyleSheet, View } from "react-native";
 import { theme } from "../../constants/theme";
 import { AppText } from "./app-text";
 
-export const SCREEN_HEADER_HEIGHT = 78;
-const SCREEN_HEADER_TOP_PADDING = 20;
-const SCREEN_HEADER_ACTION_TOP = 13;
+export const SCREEN_HEADER_HEIGHT = 89;
+const SCREEN_HEADER_VERTICAL_PADDING = 20;
+const SCREEN_HEADER_ACTION_TOP =
+  (SCREEN_HEADER_HEIGHT - theme.layout.touchTarget) / 2;
 
 export function ScreenHeader({
   title,
@@ -30,7 +31,8 @@ export function ScreenHeader({
         styles.header,
         {
           height: SCREEN_HEADER_HEIGHT + topInset,
-          paddingTop: SCREEN_HEADER_TOP_PADDING + topInset,
+          paddingTop: SCREEN_HEADER_VERTICAL_PADDING + topInset,
+          paddingBottom: SCREEN_HEADER_VERTICAL_PADDING,
         },
       ]}
     >
@@ -76,6 +78,7 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 20,
     overflow: "hidden",
+    justifyContent: "center",
   },
   tint: {
     ...StyleSheet.absoluteFillObject,

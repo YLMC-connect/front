@@ -17,7 +17,7 @@
 - 필터·세그먼트 indicator·정렬 보정 — 화면 좌우 20px 여백을 측정 track 밖으로 이동해 가변 필터 배경을 실제 칩 경계에 정렬하고, 세그먼트는 위·아래 4px 여백과 18px line-height로 수직 중앙을 맞춘 채 화면을 교체하지 않는 query 갱신으로 200ms 이동을 유지
 - 카테고리 필터 이동 모션·탭별 상세 Stack 보정 — 가변 너비 `FilterChips`가 실제 항목 위치·너비까지 200ms로 이동하고, 나눔·동행·기도·삶공부 상세는 각 탭 중첩 Stack에 쌓여 뒤로가기 시 직전 목록으로 복귀하도록 정리
 - 뒤로가기 구분성과 나눔·동행 카드 톤 보정 — 일반 상세의 `아이콘 + 뒤로`에 옅은 surface·1px 경계를 적용하고, 동행 전체 모임을 나눔과 같은 96px 썸네일·16px padding/radius·1px 경계·동일 shadow의 가로 카드로 맞춤
-- 루트 탭·뒤로가기 상단 geometry 통일 — 홈/나눔/동행/기도/삶공부에 78px `ScreenHeader`를 적용해 제목을 좌측·상단 20px 기준으로 맞추고, 일반 상세와 나눔 상세의 `아이콘 + 뒤로` 버튼을 `x=8`, `68x44px`로 통일하며 140ms press scale과 동작 줄이기를 적용
+- 루트 탭·뒤로가기 상단 geometry 통일 — 홈/나눔/동행/기도/삶공부에 89px `ScreenHeader`를 적용해 제목 영역의 위·아래 여백을 20px로 맞추고, 일반 상세와 나눔 상세의 `아이콘 + 뒤로` 버튼을 `x=8`, `68x44px`로 통일하며 140ms press scale과 동작 줄이기를 적용
 - 입력 배경 투명도 점검 — 반투명 alpha가 실제 입력 surface에 쓰인 나눔 상세 댓글 composer와 입력창만 투명하게 변경하고, 고정 surface 입력·상태 overlay·Skeleton은 유지
 - 핵심 목록 카드 경계 복구 — 홈 활동 요약과 공통 `Card`에 흰 surface·둥근 모서리·옅은 1px 경계를 복구하고 역할형 typography·20px 여백·절제된 shadow·상태 UI는 유지
 - 공통 디자인 시스템 2차 정리 — JSON 단일 소스의 semantic color·spacing·radius, 6단계 역할형 typography, layout·절제된 shadow 토큰과 `AppText`, pulse Skeleton/ListSkeleton, action 지원 Empty/Error/Success 상태를 구축하고 홈·핵심 탭·인증에 적용
@@ -109,7 +109,7 @@
 | `app/(tabs)/life-study/index.tsx`                             | Downloads `삶공부` 하단 탭 루트. 삶공부 목록 화면 렌더링                                                                                                                                                                                   |
 | `src/components/faith/FaithSectionsScreen.tsx`                | 기도/삶공부 목록의 공유 렌더러. route가 아니라 `/prayer`, `/life-study`에서 section prop으로 사용                                                                                                                                          |
 | `src/components/ui/index.tsx`                                 | ZIP 토큰 기준 Button, Card, Badge, Chip, form, modal/dialog, sheet, toast, FAB 등 공통 UI                                                                                                                                                  |
-| `src/components/ui/screen-header.tsx`                         | 루트 탭 5개 화면의 기본 배경색 glass, 78px 높이, 20px 상단 여백, 제목·subtitle·우측 action geometry를 통일하는 sticky 헤더                                                                                                                 |
+| `src/components/ui/screen-header.tsx`                         | 루트 탭 5개 화면의 기본 배경색 glass, 89px 높이, 위·아래 20px 여백, 제목·subtitle·우측 action geometry를 통일하는 sticky 헤더                                                                                                              |
 | `src/components/layout/StickyHeaderScreen.tsx`                | 실제 safe-area까지 blur target에 포함하고 검색·필터·목록을 헤더 뒤로 통과시키는 루트 탭 공통 스크롤 layout                                                                                                                                 |
 | `src/components/ui/motion.tsx`                                | Reanimated 기반 공통 press scale과 overlay presence 제어. 시스템 동작 줄이기 설정을 반영                                                                                                                                                   |
 | `src/components/ui/filter-chips.tsx`                          | 가변 너비 카테고리 필터의 측정 기반 200ms 이동 indicator, press feedback, 접근성 상태 관리                                                                                                                                                 |
@@ -151,12 +151,12 @@
 
 ## 결정 사항 (최신 위)
 
-- (2026-07-14) **모든 루트 탭 sticky 헤더는 기본 배경색 glass를 사용한다** — 홈·나눔·동행·기도·삶공부는 `theme.colors.bg`를 72%로 덧입힌 32 intensity blur를 공유하고 흰색 surface나 하단 border는 사용하지 않습니다. 웹은 20px 상단 여백과 78px 헤더, 네이티브는 실제 safe-area를 추가하며 검색·필터·목록은 하나의 스크롤로 헤더 뒤를 통과합니다.
+- (2026-07-14) **모든 루트 탭 sticky 헤더는 기본 배경색 glass를 사용한다** — 홈·나눔·동행·기도·삶공부는 `theme.colors.bg`를 72%로 덧입힌 32 intensity blur를 공유하고 흰색 surface나 하단 border는 사용하지 않습니다. 웹은 위·아래 20px 여백과 89px 헤더, 네이티브는 실제 safe-area를 추가하며 검색·필터·목록은 하나의 스크롤로 헤더 뒤를 통과합니다.
 - (2026-07-14) **필터 화면 여백과 indicator 좌표 track을 분리하고 세그먼트 탭을 수직 중앙에 둔다** — `FilterChips`의 좌우 20px 화면 여백은 ScrollView content가 담당하고, 항목 측정과 absolute indicator는 padding이 없는 같은 track을 기준으로 삼아 웹·네이티브 좌표 원점 차이를 제거합니다. 공통 `SegmentedTabs`는 44px 바깥 높이 안에 36px 탭을 두어 위·아래 4px를 같게 하고 텍스트 line-height를 18px로 고정합니다.
 - (2026-07-14) **필터·세그먼트 query는 모션 종료 후 현재 route에 반영한다** — 나눔·동행 선택 상태는 즉시 바꾸고 200ms 뒤 `setParams`로 query를 갱신해 URL remount가 indicator 이동을 끊지 않게 합니다. 빠른 반복 입력은 이전 예약을 취소하고 마지막 선택만 반영하며 동작 줄이기에서는 즉시 반영합니다.
 - (2026-07-14) **가변 너비 카테고리 필터도 하나의 이동 indicator를 공유한다** — 나눔·동행 필터는 각 항목의 실제 `x/width`를 측정해 200ms로 선택 배경을 이동하고 140ms press feedback과 동작 줄이기 설정을 따릅니다. 최초 배치와 같은 항목 재선택은 이동·콜백을 반복하지 않습니다.
 - (2026-07-14) **하단 루트 탭의 상세·보조 화면은 탭별 중첩 Stack에 둔다** — 나눔·동행·기도·삶공부의 목록 경로는 하단 탭으로 유지하고 하위 상세는 해당 탭 Stack에 push합니다. 상세 back은 직전 목록을 pop하며 하단 탭·상태 segment는 불필요한 방문 이력을 쌓지 않습니다.
-- (2026-07-14) **루트 탭은 고정 geometry의 공통 `ScreenHeader`를 사용한다** — 홈/나눔/동행/기도/삶공부 헤더는 웹에서 78px 높이와 좌측·상단 20px 기준을 사용하고, 네이티브에서는 실제 safe-area를 위에 더합니다. subtitle 유무와 우측 검색 action이 본문 시작점을 바꾸지 않게 합니다.
+- (2026-07-14) **루트 탭은 고정 geometry의 공통 `ScreenHeader`를 사용한다** — 홈/나눔/동행/기도/삶공부 헤더는 웹에서 89px 높이와 좌측 20px·위아래 20px 기준을 사용하고, 네이티브에서는 실제 safe-area를 위에 더합니다. title/subtitle 묶음과 우측 검색 action은 남는 공간 안에서 수직 중앙에 두고 본문 시작점을 동일하게 유지합니다.
 - (2026-07-14) **뒤로가기는 아이콘과 한글 label, 구분 가능한 surface를 함께 표시한다** — 50~60대 사용자가 기능을 바로 인지할 수 있도록 `chevron-left + 뒤로`를 유지하고, 일반 상세는 `surface2`와 1px 경계, 이미지 위는 대비용 흰 surface와 1px 경계를 사용합니다. 두 형태 모두 화면 기준 `x=8`, `68x44px`와 `MotionPressable`의 140ms·0.97 press scale을 공유하며 동작 줄이기 설정을 따릅니다.
 - (2026-07-14) **나눔과 동행의 전체 탐색 카드는 같은 외곽 규칙을 사용한다** — 두 화면 모두 96px 썸네일, 16px padding/radius, 1px 경계, 동일 shadow와 12px 목록 간격을 사용합니다. 도메인 정보 차이로 카드 높이는 소폭 달라도 내 소모임 가로 영역과 상태·인원 정보는 유지합니다.
 - (2026-07-14) **입력 배경의 alpha 제거는 반투명 surface에만 적용한다** — 나눔 댓글처럼 alpha 배경을 쓰는 입력은 투명하게 만들되, 검색·작성 폼의 고정 surface와 입력이 아닌 overlay·Skeleton opacity는 변경하지 않습니다.

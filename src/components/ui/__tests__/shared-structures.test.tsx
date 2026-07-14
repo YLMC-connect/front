@@ -83,9 +83,11 @@ describe("shared maintenance UI", () => {
     expect(
       StyleSheet.flatten(screen.getByTestId("root-header").props.style),
     ).toMatchObject({
-      height: 78,
+      height: 89,
       paddingHorizontal: theme.layout.screenX,
       paddingTop: 20,
+      paddingBottom: 20,
+      justifyContent: "center",
     });
     expect(
       StyleSheet.flatten(screen.getByTestId("detail-header").props.style),
@@ -127,8 +129,10 @@ describe("shared maintenance UI", () => {
     expect(headerStyle).toMatchObject({
       position: "absolute",
       top: 0,
-      height: 78,
+      height: 89,
       paddingTop: 20,
+      paddingBottom: 20,
+      justifyContent: "center",
       zIndex: 20,
     });
     expect(headerStyle).not.toHaveProperty("borderBottomWidth");
@@ -136,7 +140,7 @@ describe("shared maintenance UI", () => {
       StyleSheet.flatten(
         screen.getByTestId("sticky-screen-scroll").props.contentContainerStyle,
       ),
-    ).toMatchObject({ paddingTop: 78 });
+    ).toMatchObject({ paddingTop: 89 });
     expect(
       StyleSheet.flatten(screen.getByTestId("screen-header-tint").props.style),
     ).toMatchObject({

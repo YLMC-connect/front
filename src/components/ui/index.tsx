@@ -179,7 +179,7 @@ export function FloatingActionButton({
   style,
   ...pressableProps
 }: PressableProps & {
-  label?: string;
+  label: string;
   icon?: IconName;
   compact?: boolean;
 }) {
@@ -191,12 +191,13 @@ export function FloatingActionButton({
 
   return (
     <MotionPressable
+      accessibilityLabel={label}
       accessibilityRole="button"
       {...pressableProps}
       style={fabStyle}
     >
       <MaterialIcons name={icon} size={20} color="#fff" />
-      {label ? <Text style={styles.fabText}>{label}</Text> : null}
+      <Text style={styles.fabText}>{label}</Text>
     </MotionPressable>
   );
 }

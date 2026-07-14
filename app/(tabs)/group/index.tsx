@@ -213,7 +213,7 @@ export default function GroupScreen() {
       }
       overlay={
         <FloatingActionButton
-          label="개설"
+          label="소모임 개설"
           icon="add"
           style={styles.fab}
           onPress={() => router.push("/modal/group-new")}

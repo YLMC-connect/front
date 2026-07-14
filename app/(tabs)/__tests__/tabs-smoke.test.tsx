@@ -53,6 +53,10 @@ describe("v1 tab smoke screens", () => {
   });
 
   it("renders the market screen", async () => {
+    const push = jest.fn();
+    jest
+      .mocked(useRouter)
+      .mockReturnValue({ push, setParams: jest.fn() } as never);
     renderWithClient(<MarketScreen />);
 
     expect(screen.getByText("나눔")).toBeTruthy();
@@ -61,6 +65,8 @@ describe("v1 tab smoke screens", () => {
       screen.getByText("이웃과 물건을 나누며 따뜻함을 전해요"),
     ).toBeTruthy();
     expect(screen.getByTestId("market-status-all")).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("글쓰기"));
+    expect(push).toHaveBeenCalledWith("/modal/market-new");
     expect(screen.getByTestId("market-status-sharing")).toBeTruthy();
     expect(screen.getByTestId("market-status-mine")).toBeTruthy();
     expect(screen.queryByTestId("market-status-reserved")).toBeNull();
@@ -325,6 +331,10 @@ describe("v1 tab smoke screens", () => {
   });
 
   it("renders the group screen", async () => {
+    const push = jest.fn();
+    jest
+      .mocked(useRouter)
+      .mockReturnValue({ push, setParams: jest.fn() } as never);
     renderWithClient(<GroupScreen />);
 
     expect(screen.getByText("동행")).toBeTruthy();
@@ -332,6 +342,8 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getAllByText("소모임").length).toBeGreaterThan(0);
     expect(screen.getAllByText("봉사").length).toBeGreaterThan(0);
     expect(await screen.findByText("내 소모임")).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("소모임 개설"));
+    expect(push).toHaveBeenCalledWith("/modal/group-new");
     expect(
       within(screen.getByLabelText("내 소모임 전체보기")).getByText(
         "chevron-right",
@@ -541,11 +553,14 @@ describe("v1 tab smoke screens", () => {
   });
 
   it("renders the direct prayer screen", async () => {
+    jest.mocked(router.push).mockClear();
     renderWithClient(<PrayerScreen />);
 
     expect(screen.getByText("함께 기도하고 응답을 나눠요")).toBeTruthy();
     expect(await screen.findByText("내 기도방")).toBeTruthy();
     expect(screen.getByText("오늘의 기도 진행")).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("기도제목 작성"));
+    expect(router.push).toHaveBeenCalledWith("/modal/prayer-new");
     expect(
       within(screen.getByLabelText("내 기도제목 전체보기")).getByText(
         "chevron-right",

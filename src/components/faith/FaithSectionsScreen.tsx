@@ -78,7 +78,7 @@ export function FaithSectionsScreen({ section }: { section: FaithSection }) {
       overlay={
         section === "pray" ? (
           <FloatingActionButton
-            label="기도제목"
+            label="기도제목 작성"
             icon="add"
             style={styles.fab}
             onPress={() => router.push("/modal/prayer-new")}

@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Text } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { theme } from "../../../constants/theme";
+import { StickyHeaderScreen } from "../../layout/StickyHeaderScreen";
 import {
   DetailAction,
   DetailBadge,
@@ -81,9 +83,9 @@ describe("shared maintenance UI", () => {
     expect(
       StyleSheet.flatten(screen.getByTestId("root-header").props.style),
     ).toMatchObject({
-      height: 64,
+      height: 78,
       paddingHorizontal: theme.layout.screenX,
-      paddingTop: 6,
+      paddingTop: 20,
     });
     expect(
       StyleSheet.flatten(screen.getByTestId("detail-header").props.style),
@@ -103,5 +105,43 @@ describe("shared maintenance UI", () => {
 
     fireEvent.press(screen.getByLabelText("뒤로"));
     expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it("covers the safe-area padding with the shared sticky glass header", () => {
+    render(
+      <SafeAreaProvider
+        initialMetrics={{
+          frame: { x: 0, y: 0, width: 430, height: 932 },
+          insets: { top: 0, left: 0, right: 0, bottom: 0 },
+        }}
+      >
+        <StickyHeaderScreen testID="sticky-screen" title="나눔">
+          <Text>스크롤 콘텐츠</Text>
+        </StickyHeaderScreen>
+      </SafeAreaProvider>,
+    );
+
+    const headerStyle = StyleSheet.flatten(
+      screen.getByTestId("screen-header").props.style,
+    );
+    expect(headerStyle).toMatchObject({
+      position: "absolute",
+      top: 0,
+      height: 78,
+      paddingTop: 20,
+      zIndex: 20,
+    });
+    expect(headerStyle).not.toHaveProperty("borderBottomWidth");
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("sticky-screen-scroll").props.contentContainerStyle,
+      ),
+    ).toMatchObject({ paddingTop: 78 });
+    expect(
+      StyleSheet.flatten(screen.getByTestId("screen-header-tint").props.style),
+    ).toMatchObject({
+      backgroundColor: theme.colors.bg,
+      opacity: 0.72,
+    });
   });
 });

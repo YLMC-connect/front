@@ -1,14 +1,8 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
-import { Screen } from "../../../src/components/layout/Screen";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   EmptyState,
   ErrorState,
@@ -16,7 +10,6 @@ import {
   FilterChips,
   FloatingActionButton,
   ListSkeleton,
-  ScreenHeader,
   SegmentedTabs,
   VisualThumb,
 } from "../../../src/components/ui";
@@ -98,98 +91,92 @@ export default function MarketScreen() {
   const isLoading = overview.isPending && !isError && !isEmpty;
 
   return (
-    <Screen scroll={false} padded={false} testID="screen-market">
-      <View style={styles.root}>
-        <ScreenHeader
-          title="나눔"
-          right={
-            <Pressable
-              accessibilityLabel={searchOpen ? "나눔 검색 닫기" : "나눔 검색"}
-              accessibilityRole="button"
-              onPress={() => {
-                setSearchOpen((open) => !open);
-                if (searchOpen) setSearch("");
-              }}
-              style={styles.searchButton}
-            >
-              <MaterialIcons
-                name={searchOpen ? "close" : "search"}
-                size={22}
-                color={theme.colors.inkSoft}
-              />
-            </Pressable>
-          }
-        />
-
-        {searchOpen ? (
-          <View style={styles.searchWrap}>
-            <MaterialIcons
-              name="search"
-              size={19}
-              color={theme.colors.inkMute}
-            />
-            <TextInput
-              autoFocus
-              accessibilityLabel="나눔 검색어"
-              value={search}
-              onChangeText={setSearch}
-              placeholder="제목 또는 작성자 검색"
-              placeholderTextColor={theme.colors.inkMute}
-              style={styles.searchInput}
-            />
-          </View>
-        ) : null}
-
-        <SegmentedTabs
-          items={statusTabs}
-          active={activeStatus}
-          onChange={setActiveStatus}
-          style={styles.statusTabs}
-          testIDPrefix="market-status"
-        />
-
-        <FilterChips
-          items={MARKET_CATEGORIES}
-          active={category}
-          onChange={setCategory}
-          style={styles.categoryScroll}
-          testIDPrefix="market-category"
-        />
-
-        <ScrollView contentContainerStyle={styles.list}>
-          {isLoading ? (
-            <View style={styles.loading}>
-              <ListSkeleton rows={4} />
-            </View>
-          ) : isError ? (
-            <ErrorState
-              message="네트워크 연결을 확인하고 다시 시도해주세요."
-              onRetry={() => overview.refetch()}
-            />
-          ) : visiblePosts.length === 0 ? (
-            <MarketEmptyState
-              status={isEmpty ? null : activeStatus}
-              onCreate={() => router.push("/modal/market-new")}
-            />
-          ) : (
-            visiblePosts.map((post) => (
-              <PostRow
-                key={post.id}
-                post={post}
-                onPress={() => router.push(`/market/${post.id}`)}
-              />
-            ))
-          )}
-        </ScrollView>
-
+    <StickyHeaderScreen
+      testID="screen-market"
+      title="나눔"
+      right={
+        <Pressable
+          accessibilityLabel={searchOpen ? "나눔 검색 닫기" : "나눔 검색"}
+          accessibilityRole="button"
+          onPress={() => {
+            setSearchOpen((open) => !open);
+            if (searchOpen) setSearch("");
+          }}
+          style={styles.searchButton}
+        >
+          <MaterialIcons
+            name={searchOpen ? "close" : "search"}
+            size={22}
+            color={theme.colors.inkSoft}
+          />
+        </Pressable>
+      }
+      overlay={
         <FloatingActionButton
           label="글쓰기"
           icon="add"
           style={styles.fab}
           onPress={() => router.push("/modal/market-new")}
         />
+      }
+    >
+      {searchOpen ? (
+        <View style={styles.searchWrap}>
+          <MaterialIcons name="search" size={19} color={theme.colors.inkMute} />
+          <TextInput
+            autoFocus
+            accessibilityLabel="나눔 검색어"
+            value={search}
+            onChangeText={setSearch}
+            placeholder="제목 또는 작성자 검색"
+            placeholderTextColor={theme.colors.inkMute}
+            style={styles.searchInput}
+          />
+        </View>
+      ) : null}
+
+      <SegmentedTabs
+        items={statusTabs}
+        active={activeStatus}
+        onChange={setActiveStatus}
+        style={styles.statusTabs}
+        testIDPrefix="market-status"
+      />
+
+      <FilterChips
+        items={MARKET_CATEGORIES}
+        active={category}
+        onChange={setCategory}
+        style={styles.categoryScroll}
+        testIDPrefix="market-category"
+      />
+
+      <View style={styles.list}>
+        {isLoading ? (
+          <View style={styles.loading}>
+            <ListSkeleton rows={4} />
+          </View>
+        ) : isError ? (
+          <ErrorState
+            message="네트워크 연결을 확인하고 다시 시도해주세요."
+            onRetry={() => overview.refetch()}
+          />
+        ) : visiblePosts.length === 0 ? (
+          <MarketEmptyState
+            status={isEmpty ? null : activeStatus}
+            onCreate={() => router.push("/modal/market-new")}
+          />
+        ) : (
+          visiblePosts.map((post) => (
+            <PostRow
+              key={post.id}
+              post={post}
+              onPress={() => router.push(`/market/${post.id}`)}
+            />
+          ))
+        )}
       </View>
-    </Screen>
+    </StickyHeaderScreen>
   );
 }
 
@@ -287,9 +274,6 @@ function MarketEmptyState({
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
   searchButton: {
     width: 44,
     height: 44,

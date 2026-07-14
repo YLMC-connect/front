@@ -17,11 +17,13 @@ export function Screen({
   children,
   scroll = true,
   padded = true,
+  applyTopInset = true,
   testID,
 }: {
   children: ReactNode;
   scroll?: boolean;
   padded?: boolean;
+  applyTopInset?: boolean;
   testID?: string;
 }) {
   const pathname = usePathname();
@@ -35,7 +37,9 @@ export function Screen({
       testID={testID}
       style={[
         styles.safe,
-        { paddingTop: Math.max(insets.top, designStatusBarHeight) },
+        applyTopInset
+          ? { paddingTop: Math.max(insets.top, designStatusBarHeight) }
+          : null,
       ]}
     >
       {scroll ? (

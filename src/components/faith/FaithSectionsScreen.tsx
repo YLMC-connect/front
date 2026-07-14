@@ -1,14 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { theme } from "../../constants/theme";
 import { useLifeStudyOverview } from "../../hooks/useLifeStudyCourses";
 import { usePrayerOverview } from "../../hooks/usePrayers";
@@ -22,14 +15,13 @@ import type {
   PrayerRequestStatus,
   PrayerWeekday,
 } from "../../types/prayer";
-import { Screen } from "../layout/Screen";
+import { StickyHeaderScreen } from "../layout/StickyHeaderScreen";
 import {
   AppText,
   EmptyState,
   ErrorState,
   FloatingActionButton,
   ListSkeleton,
-  ScreenHeader,
 } from "../ui";
 
 type FaithSection = "pray" | "study";
@@ -38,80 +30,69 @@ export function FaithSectionsScreen({ section }: { section: FaithSection }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
   return (
-    <Screen scroll={false} padded={false} testID="screen-faith">
-      <View style={styles.root}>
-        <ScreenHeader
-          title={section === "study" ? "삶공부" : "기도"}
-          subtitle={
-            section === "study"
-              ? "말씀으로 배우고 삶으로 자라가요"
-              : "함께 기도하고 응답을 나눠요"
-          }
-          right={
-            section === "study" ? (
-              <Pressable
-                accessibilityLabel={
-                  searchOpen ? "삶공부 검색 닫기" : "삶공부 검색"
-                }
-                accessibilityRole="button"
-                onPress={() => {
-                  setSearchOpen((open) => !open);
-                  if (searchOpen) setSearch("");
-                }}
-                style={styles.searchButton}
-              >
-                <MaterialIcons
-                  name={searchOpen ? "close" : "search"}
-                  size={22}
-                  color={theme.colors.inkSoft}
-                />
-              </Pressable>
-            ) : undefined
-          }
-        />
-
-        {section === "study" && searchOpen ? (
-          <View style={styles.searchWrap}>
+    <StickyHeaderScreen
+      contentContainerStyle={[
+        styles.body,
+        section === "pray" ? styles.bodyWithFab : styles.bodyWithTab,
+      ]}
+      testID="screen-faith"
+      title={section === "study" ? "삶공부" : "기도"}
+      subtitle={
+        section === "study"
+          ? "말씀으로 배우고 삶으로 자라가요"
+          : "함께 기도하고 응답을 나눠요"
+      }
+      right={
+        section === "study" ? (
+          <Pressable
+            accessibilityLabel={searchOpen ? "삶공부 검색 닫기" : "삶공부 검색"}
+            accessibilityRole="button"
+            onPress={() => {
+              setSearchOpen((open) => !open);
+              if (searchOpen) setSearch("");
+            }}
+            style={styles.searchButton}
+          >
             <MaterialIcons
-              name="search"
-              size={19}
-              color={theme.colors.inkMute}
+              name={searchOpen ? "close" : "search"}
+              size={22}
+              color={theme.colors.inkSoft}
             />
-            <TextInput
-              autoFocus
-              accessibilityLabel="삶공부 검색어"
-              value={search}
-              onChangeText={setSearch}
-              placeholder="과정명 또는 강사 검색"
-              placeholderTextColor={theme.colors.inkMute}
-              style={styles.searchInput}
-            />
-          </View>
-        ) : null}
-
-        <ScrollView
-          contentContainerStyle={[
-            styles.body,
-            section === "pray" ? styles.bodyWithFab : styles.bodyWithTab,
-          ]}
-        >
-          {section === "study" ? (
-            <StudyContent search={search} />
-          ) : (
-            <PrayerContent />
-          )}
-        </ScrollView>
-
-        {section === "pray" ? (
+          </Pressable>
+        ) : undefined
+      }
+      overlay={
+        section === "pray" ? (
           <FloatingActionButton
             label="기도제목"
             icon="add"
             style={styles.fab}
             onPress={() => router.push("/modal/prayer-new")}
           />
-        ) : null}
-      </View>
-    </Screen>
+        ) : undefined
+      }
+    >
+      {section === "study" && searchOpen ? (
+        <View style={styles.searchWrap}>
+          <MaterialIcons name="search" size={19} color={theme.colors.inkMute} />
+          <TextInput
+            autoFocus
+            accessibilityLabel="삶공부 검색어"
+            value={search}
+            onChangeText={setSearch}
+            placeholder="과정명 또는 강사 검색"
+            placeholderTextColor={theme.colors.inkMute}
+            style={styles.searchInput}
+          />
+        </View>
+      ) : null}
+
+      {section === "study" ? (
+        <StudyContent search={search} />
+      ) : (
+        <PrayerContent />
+      )}
+    </StickyHeaderScreen>
   );
 }
 
@@ -517,9 +498,6 @@ const lifeStudyStatusLabels: Record<LifeStudyOverviewStatus, string> = {
 };
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
   searchButton: {
     width: 44,
     height: 44,

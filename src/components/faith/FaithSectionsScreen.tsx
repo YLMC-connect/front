@@ -263,7 +263,7 @@ function PrayerContent() {
         >
           <View style={styles.applyIcon}>
             <AppIcon
-              name="volunteer-activism"
+              name="prayer-apply"
               size={24}
               color={theme.colors.primaryDeep}
             />

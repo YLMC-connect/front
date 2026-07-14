@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useRouter, type Href } from "expo-router";
 import type { ComponentProps } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
@@ -7,7 +7,7 @@ import { Avatar, Card, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import { useAuth } from "../../../src/hooks/useAuth";
 
-type IconName = ComponentProps<typeof MaterialIcons>["name"];
+type IconName = ComponentProps<typeof AppIcon>["name"];
 
 type MenuItem = {
   label: string;
@@ -164,15 +164,11 @@ function MenuRow({
       onPress={onPress}
       style={[styles.menuRow, last ? styles.menuRowLast : null]}
     >
-      <MaterialIcons name={item.icon} size={20} color={color} />
+      <AppIcon name={item.icon} size={20} color={color} />
       <Text style={[styles.menuLabel, item.danger ? styles.dangerText : null]}>
         {item.label}
       </Text>
-      <MaterialIcons
-        name="chevron-right"
-        size={20}
-        color={theme.colors.inkHint}
-      />
+      <AppIcon name="chevron-right" size={20} color={theme.colors.inkHint} />
     </Pressable>
   );
 }

@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
 import { useRouter } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../src/components/layout/Screen";
@@ -70,10 +70,7 @@ const earlier: NotificationItem[] = [
   },
 ];
 
-const iconByType: Record<
-  NotificationItem["type"],
-  keyof typeof MaterialIcons.glyphMap
-> = {
+const iconByType: Record<NotificationItem["type"], AppIconName> = {
   group: "groups",
   pray: "favorite",
   market: "shopping-bag",
@@ -116,7 +113,7 @@ function NotificationRow({ item }: { item: NotificationItem }) {
   return (
     <View style={[styles.row, item.unread ? styles.rowUnread : null]}>
       <View style={[styles.iconCircle, item.unread ? styles.iconUnread : null]}>
-        <MaterialIcons
+        <AppIcon
           name={iconByType[item.type]}
           size={18}
           color={item.unread ? theme.colors.white : theme.colors.inkMute}

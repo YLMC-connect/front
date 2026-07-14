@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { type ReactNode, useEffect, useState } from "react";
 import {
@@ -127,11 +127,7 @@ export default function GroupNoticesScreenRoute() {
 
         <ScrollView contentContainerStyle={styles.body}>
           <View style={styles.noticeBox}>
-            <MaterialIcons
-              name="info"
-              size={16}
-              color={theme.colors.primaryDeep}
-            />
+            <AppIcon name="info" size={16} color={theme.colors.primaryDeep} />
             <Text style={styles.noticeText}>소모임 멤버에게만 공개됩니다.</Text>
           </View>
 

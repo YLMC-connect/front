@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../../src/components/layout/Screen";
@@ -41,11 +41,7 @@ export default function UserProfileScreen() {
         <TopBar title="프로필" back onBack={() => router.back()} />
         <View style={styles.centerBody}>
           <View style={styles.blockedIcon}>
-            <MaterialIcons
-              name="block"
-              size={38}
-              color={theme.colors.inkHint}
-            />
+            <AppIcon name="block" size={38} color={theme.colors.inkHint} />
           </View>
           <Text style={styles.blockedTitle}>확인할 수 없는 프로필입니다</Text>
           <Text style={styles.blockedText}>
@@ -90,11 +86,7 @@ export default function UserProfileScreen() {
 
           {!isWithdrawn ? (
             <Pressable accessibilityRole="button" style={styles.blockButton}>
-              <MaterialIcons
-                name="block"
-                size={18}
-                color={theme.colors.inkSoft}
-              />
+              <AppIcon name="block" size={18} color={theme.colors.inkSoft} />
               <Text style={styles.blockButtonText}>차단</Text>
             </Pressable>
           ) : null}

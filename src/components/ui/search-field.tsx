@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useState } from "react";
 import { StyleSheet, TextInput, type TextInputProps, View } from "react-native";
 import { theme } from "../../constants/theme";
@@ -23,7 +23,7 @@ export function SearchField({ testID, ...inputProps }: SearchFieldProps) {
       style={[styles.container, focused ? styles.containerFocused : null]}
       testID={testID ? `${testID}-container` : undefined}
     >
-      <MaterialIcons name="search" size={19} color={theme.colors.inkMute} />
+      <AppIcon name="search" size={19} color={theme.colors.inkMute} />
       <TextInput
         {...inputProps}
         onBlur={() => setFocused(false)}

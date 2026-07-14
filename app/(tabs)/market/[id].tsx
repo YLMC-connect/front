@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -107,7 +107,7 @@ export default function MarketDetailScreen() {
     return (
       <Screen>
         <View style={styles.exception}>
-          <MaterialIcons
+          <AppIcon
             name={variant === "deleted" ? "inventory-2" : "block"}
             size={42}
             color={theme.colors.inkHint}
@@ -279,11 +279,7 @@ export default function MarketDetailScreen() {
               onPress={() => router.back()}
               style={styles.backButton}
             >
-              <MaterialIcons
-                name="chevron-left"
-                size={22}
-                color={theme.colors.ink}
-              />
+              <AppIcon name="chevron-left" size={22} color={theme.colors.ink} />
               <Text style={styles.backText}>뒤로</Text>
             </MotionPressable>
             {isReserved ? <CenterBadge label="예약중" /> : null}
@@ -421,7 +417,7 @@ export default function MarketDetailScreen() {
             {isCommentPending ? (
               <ActivityIndicator size="small" color={theme.colors.white} />
             ) : (
-              <MaterialIcons name="send" size={18} color={theme.colors.white} />
+              <AppIcon name="send" size={18} color={theme.colors.white} />
             )}
           </Pressable>
         </View>
@@ -497,7 +493,7 @@ function StatusBanner({
   return (
     <View style={[styles.banner, warn ? styles.bannerWarn : null]}>
       <View style={[styles.bannerIcon, warn ? styles.bannerIconWarn : null]}>
-        <MaterialIcons name={icon} size={16} color={theme.colors.white} />
+        <AppIcon name={icon} size={16} color={theme.colors.white} />
       </View>
       <View style={styles.bannerTextWrap}>
         <Text

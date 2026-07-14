@@ -345,9 +345,7 @@ describe("v1 tab smoke screens", () => {
     fireEvent.press(screen.getByLabelText("소모임 개설"));
     expect(push).toHaveBeenCalledWith("/modal/group-new");
     expect(
-      within(screen.getByLabelText("내 소모임 전체보기")).getByText(
-        "chevron-right",
-      ),
+      screen.getByTestId("group-my-section-header-view-all-icon"),
     ).toBeTruthy();
     expect(screen.getByText("전체 모임")).toBeTruthy();
   });
@@ -587,9 +585,7 @@ describe("v1 tab smoke screens", () => {
     fireEvent.press(screen.getByLabelText("기도제목 작성"));
     expect(router.push).toHaveBeenCalledWith("/modal/prayer-new");
     expect(
-      within(screen.getByLabelText("내 기도제목 전체보기")).getByText(
-        "chevron-right",
-      ),
+      screen.getByTestId("prayer-request-section-header-view-all-icon"),
     ).toBeTruthy();
     expect(screen.queryByText("삶공부")).toBeNull();
   });

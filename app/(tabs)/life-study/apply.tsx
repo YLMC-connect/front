@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useRouter } from "expo-router";
 import {
   Pressable,
@@ -86,11 +86,7 @@ export default function LifeStudyApplyScreenRoute() {
 
             <View style={styles.promiseBox}>
               <View style={styles.checkBox}>
-                <MaterialIcons
-                  name="check"
-                  size={14}
-                  color={theme.colors.white}
-                />
+                <AppIcon name="check" size={14} color={theme.colors.white} />
               </View>
               <Text style={styles.promiseText}>
                 <Text style={styles.promiseStrong}>수강 약속에 동의합니다</Text>

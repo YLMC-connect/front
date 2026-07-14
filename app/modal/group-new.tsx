@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
@@ -237,11 +237,7 @@ export default function GroupNewModal() {
         </Section>
 
         <View style={styles.infoBox}>
-          <MaterialIcons
-            name="info"
-            size={16}
-            color={theme.colors.primaryDeep}
-          />
+          <AppIcon name="info" size={16} color={theme.colors.primaryDeep} />
           <Text style={styles.infoText}>
             비슷한 목적의 소모임이 이미 있다면 기존 소모임 참여를 먼저
             고려해주세요.

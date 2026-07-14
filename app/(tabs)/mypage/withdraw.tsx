@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
@@ -32,7 +32,7 @@ export default function WithdrawScreen() {
 
           <View style={styles.cautionBox}>
             <View style={styles.cautionHead}>
-              <MaterialIcons
+              <AppIcon
                 name="warning-amber"
                 size={16}
                 color={theme.colors.danger}

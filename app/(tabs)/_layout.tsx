@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { LinearGradient } from "expo-linear-gradient";
 import { Tabs, usePathname, useRouter, type Router } from "expo-router";
@@ -20,7 +20,7 @@ import {
 import { GlassBackdrop } from "../../src/components/ui/glass-backdrop";
 import { theme } from "../../src/constants/theme";
 
-type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
+type IconName = AppIconName;
 
 const rootTabs = [
   {
@@ -90,7 +90,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => {
             const tab = findRootTab(route.name);
             return (
-              <MaterialCommunityIcons
+              <AppIcon
                 name={tab?.icon.off ?? "circle-outline"}
                 size={size}
                 color={color}
@@ -317,7 +317,7 @@ function AppTabButton({
       style={styles.tabItem}
     >
       <Animated.View style={iconStyle}>
-        <MaterialCommunityIcons
+        <AppIcon
           name={
             focused
               ? (tab?.icon.on ?? "circle")
@@ -325,6 +325,7 @@ function AppTabButton({
           }
           size={20}
           color={color}
+          weight={focused ? "bold" : "linear"}
         />
       </Animated.View>
       <Text style={[styles.tabLabel, { color }]}>{label}</Text>

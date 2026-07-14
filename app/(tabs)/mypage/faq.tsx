@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
@@ -36,7 +36,7 @@ export default function FaqScreen() {
         {empty ? (
           <View style={styles.empty}>
             <View style={styles.emptyIcon}>
-              <MaterialIcons
+              <AppIcon
                 name="help-outline"
                 size={38}
                 color={theme.colors.inkHint}
@@ -79,7 +79,7 @@ export default function FaqScreen() {
                     <Text style={styles.qText}>Q</Text>
                   </View>
                   <Text style={styles.question}>{faq.question}</Text>
-                  <MaterialIcons
+                  <AppIcon
                     name="chevron-right"
                     size={18}
                     color={theme.colors.inkMute}

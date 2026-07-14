@@ -1,9 +1,4 @@
-import {
-  fireEvent,
-  render,
-  screen,
-  within,
-} from "@testing-library/react-native";
+import { fireEvent, render, screen } from "@testing-library/react-native";
 import { createRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -168,11 +163,7 @@ describe("shared maintenance UI", () => {
     );
 
     expect(screen.getByText("전체보기")).toBeTruthy();
-    expect(
-      within(screen.getByTestId("request-section-view-all")).getByText(
-        "chevron-right",
-      ),
-    ).toBeTruthy();
+    expect(screen.getByTestId("request-section-view-all-icon")).toBeTruthy();
     expect(
       StyleSheet.flatten(
         screen.getByTestId("request-section-view-all").props.style,

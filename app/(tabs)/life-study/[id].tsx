@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -81,7 +81,7 @@ export default function LifeStudyDetailScreen() {
           onBack={() => router.back()}
           right={
             <Pressable accessibilityRole="button" style={styles.iconButton}>
-              <MaterialIcons
+              <AppIcon
                 name="ios-share"
                 size={21}
                 color={theme.colors.inkSoft}
@@ -326,11 +326,7 @@ function CurriculumRow({
         ]}
       >
         {done && !current ? (
-          <MaterialIcons
-            name="check"
-            size={14}
-            color={theme.colors.primaryDeep}
-          />
+          <AppIcon name="check" size={14} color={theme.colors.primaryDeep} />
         ) : (
           <Text
             style={[styles.weekNumber, current ? styles.weekNumberOn : null]}

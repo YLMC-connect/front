@@ -44,19 +44,45 @@ jest.mock("expo-router", () => {
   };
 });
 
-jest.mock("@expo/vector-icons", () => {
-  const React = require("react");
-  const { Text } = require("react-native");
+jest.mock(
+  "@solar-icons/react-native/Linear",
+  () => {
+    const React = require("react");
+    const { View } = require("react-native");
 
-  const MaterialIcons = ({ name }: { name: string }) =>
-    React.createElement(Text, null, name);
-  MaterialIcons.glyphMap = {};
-  const MaterialCommunityIcons = ({ name }: { name: string }) =>
-    React.createElement(Text, null, name);
-  MaterialCommunityIcons.glyphMap = {};
+    return new Proxy(
+      { __esModule: true },
+      {
+        get: (target, property) =>
+          property in target
+            ? target[property as keyof typeof target]
+            : (props: Record<string, unknown>) =>
+                React.createElement(View, props),
+      },
+    );
+  },
+  { virtual: true },
+);
 
-  return { MaterialCommunityIcons, MaterialIcons };
-});
+jest.mock(
+  "@solar-icons/react-native/Bold",
+  () => {
+    const React = require("react");
+    const { View } = require("react-native");
+
+    return new Proxy(
+      { __esModule: true },
+      {
+        get: (target, property) =>
+          property in target
+            ? target[property as keyof typeof target]
+            : (props: Record<string, unknown>) =>
+                React.createElement(View, props),
+      },
+    );
+  },
+  { virtual: true },
+);
 
 jest.mock("expo-image", () => {
   const { Image } = require("react-native");

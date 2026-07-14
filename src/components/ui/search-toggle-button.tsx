@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { StyleSheet, Text } from "react-native";
 import { theme } from "../../constants/theme";
 import { MotionPressable } from "./motion";
@@ -22,7 +22,7 @@ export function SearchToggleButton({
       style={styles.button}
       testID={testID}
     >
-      <MaterialIcons
+      <AppIcon
         name={open ? "close" : "search"}
         size={20}
         color={theme.colors.inkSoft}

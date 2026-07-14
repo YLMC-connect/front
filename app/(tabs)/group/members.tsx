@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ActivityIndicator,
@@ -53,7 +53,7 @@ export default function GroupMembersScreenRoute() {
             <ErrorState message="멤버 정보를 다시 불러와주세요." />
           ) : isTransfer ? (
             <View style={styles.warningBox}>
-              <MaterialIcons
+              <AppIcon
                 name="warning-amber"
                 size={16}
                 color={theme.colors.danger}
@@ -149,7 +149,7 @@ function MemberRow({
       </View>
       {!transfer && !member.isLeader ? (
         <Pressable accessibilityRole="button" style={styles.kickButton}>
-          <MaterialIcons name="close" size={12} color={theme.colors.danger} />
+          <AppIcon name="close" size={12} color={theme.colors.danger} />
           <Text style={styles.kickText}>강퇴</Text>
         </Pressable>
       ) : null}

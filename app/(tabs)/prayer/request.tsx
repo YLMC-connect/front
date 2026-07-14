@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useRouter } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
@@ -88,7 +88,7 @@ export default function PrayerRequestScreenRoute() {
                     <Text style={styles.title}>{request.title}</Text>
                     <Text style={styles.desc}>{request.desc}</Text>
                   </View>
-                  <MaterialIcons
+                  <AppIcon
                     name="chevron-right"
                     size={18}
                     color={theme.colors.inkHint}

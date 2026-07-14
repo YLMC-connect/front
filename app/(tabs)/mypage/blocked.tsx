@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
@@ -44,7 +44,7 @@ export default function BlockedScreen() {
             {users.length === 0 ? (
               <View style={styles.empty}>
                 <View style={styles.emptyIcon}>
-                  <MaterialIcons
+                  <AppIcon
                     name="block"
                     size={38}
                     color={theme.colors.inkHint}
@@ -70,7 +70,7 @@ export default function BlockedScreen() {
                     <Text style={styles.when}>{user.when} 차단</Text>
                   </View>
                   <Pressable accessibilityRole="button" style={styles.release}>
-                    <MaterialIcons
+                    <AppIcon
                       name="check"
                       size={14}
                       color={theme.colors.primaryDeep}

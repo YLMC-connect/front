@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 동행 필터·세그먼트 모션 보정 — 카테고리 선택 배경의 20px 위치 오차를 제거하고 section query를 현재 화면에서 갱신해 `소모임·봉사` indicator 이동을 유지
 - 동행 카테고리 이동 필터·상세 Stack 적용 — 가변 너비 선택 배경을 200ms로 이동하고 category query를 목록 주소에 보존하며, 상세·공지·멤버 화면을 동행 탭 Stack에 쌓아 뒤로가기 시 같은 필터·목록으로 복귀
 - 동행 전체 모임 카드·탐색 geometry 통일 — 전체 모임을 나눔과 같은 96px 썸네일 가로 카드로 바꾸고 16px padding/radius·1px 경계·동일 shadow를 적용했으며, 세그먼트·카테고리 필터는 44px 높이와 12px 간격으로 맞추고 내 소모임 가로 목록은 유지
 - 동행 목록 카드 형태 복구 — 내 소모임 가로 카드의 기존 크기·cover geometry와 전체 모임의 흰 surface·둥근 경계·12px 간격을 복구하고 검색·필터·전체보기·Skeleton은 유지
@@ -49,20 +50,20 @@
 
 ## 주요 파일 (도메인 파일 지도)
 
-| 경로                             | 역할                               |
-| -------------------------------- | ---------------------------------- |
-| `app/(tabs)/group/_layout.tsx`   | 동행 목록·상세·공지·멤버 중첩 Stack |
-| `app/(tabs)/group/index.tsx`     | 동행 탭 루트, 소모임/봉사 segment  |
-| `app/(tabs)/group/[id].tsx`      | 소모임 상세, 공지 작성·인라인 삭제, 멤버 |
-| `app/(tabs)/group/notices.tsx`   | 소모임 공지 작성/수정/삭제          |
-| `app/(tabs)/group/members.tsx`   | 소모임 멤버 관리와 소모임장 이관   |
-| `app/modal/group-new.tsx`        | 소모임 개설 모달                   |
-| `src/mocks/groups.ts`            | 소모임 mock 데이터                 |
-| `src/services/groupService.ts`   | 교체 가능한 동행 조회·공지 CUD data source 경계 |
-| `src/hooks/useGroups.ts`         | 동행 조회와 공지 CUD TanStack Query hook |
-| `src/constants/domainOptions.ts` | 소모임 카테고리/상태 필터 옵션     |
-| `src/types/group.ts`             | 소모임 타입                        |
-| `scripts/check-group-api-contract.mjs` | 동행 Swagger endpoint·화면/관리 계약 검사 |
+| 경로                                   | 역할                                            |
+| -------------------------------------- | ----------------------------------------------- |
+| `app/(tabs)/group/_layout.tsx`         | 동행 목록·상세·공지·멤버 중첩 Stack             |
+| `app/(tabs)/group/index.tsx`           | 동행 탭 루트, 소모임/봉사 segment               |
+| `app/(tabs)/group/[id].tsx`            | 소모임 상세, 공지 작성·인라인 삭제, 멤버        |
+| `app/(tabs)/group/notices.tsx`         | 소모임 공지 작성/수정/삭제                      |
+| `app/(tabs)/group/members.tsx`         | 소모임 멤버 관리와 소모임장 이관                |
+| `app/modal/group-new.tsx`              | 소모임 개설 모달                                |
+| `src/mocks/groups.ts`                  | 소모임 mock 데이터                              |
+| `src/services/groupService.ts`         | 교체 가능한 동행 조회·공지 CUD data source 경계 |
+| `src/hooks/useGroups.ts`               | 동행 조회와 공지 CUD TanStack Query hook        |
+| `src/constants/domainOptions.ts`       | 소모임 카테고리/상태 필터 옵션                  |
+| `src/types/group.ts`                   | 소모임 타입                                     |
+| `scripts/check-group-api-contract.mjs` | 동행 Swagger endpoint·화면/관리 계약 검사       |
 
 ## 데이터 타입
 
@@ -70,6 +71,8 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-14) **동행 카테고리 indicator는 padding 없는 공통 track 좌표를 사용한다** — 화면 좌우 20px 여백은 ScrollView content로 분리하고 필터와 indicator의 좌표 원점을 일치시켜 선택 배경의 20px 오프셋을 제거합니다.
+- (2026-07-14) **동행 필터·세그먼트 query는 200ms 모션 뒤 갱신한다** — 선택 UI와 목록은 즉시 전환하고 category/section query는 indicator 이동 종료 뒤 `setParams`로 반영해 URL remount가 모션을 끊지 않으며 다른 query를 유지합니다.
 - (2026-07-14) **동행 카테고리는 이동 indicator와 route query를 함께 사용한다** — 44px 가변 너비 필터의 선택 배경은 200ms로 이동하고 `category` query는 현재 목록 route에만 반영해 상세 뒤로가기에서 선택과 결과를 복원하되 별도 방문 이력을 늘리지 않습니다.
 - (2026-07-14) **동행 전체 모임은 나눔과 같은 썸네일 가로 카드 구조를 사용한다** — 96px `VisualThumb`, 16px padding/radius, 1px 경계, 동일 shadow와 12px 간격을 사용하고 제목·모집 상태·설명·카테고리·인원 정보는 오른쪽 영역에 유지합니다. 내 소모임은 기존 214px cover 카드로 구분합니다.
 - (2026-07-14) **동행 탐색 control은 나눔과 같은 geometry를 사용한다** — 소모임/봉사 segment와 카테고리 filter는 44px 높이와 12px 하단 간격을 유지해 인접 영역의 터치와 시각 구획이 겹치지 않게 합니다.

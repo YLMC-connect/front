@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 나눔 필터·상태 탭 모션 보정 — 카테고리 선택 배경의 20px 위치 오차를 제거하고 상태 query를 현재 화면에서 갱신해 `전체·나눔중·예약중·나눔완료` indicator 이동을 유지
 - 나눔 카테고리 이동 필터·상세 Stack 적용 — 가변 너비 선택 배경을 200ms로 이동하고 category query를 목록 주소에 보존하며, 상세를 나눔 탭 Stack에 push해 뒤로가기 시 같은 필터·목록으로 복귀
 - 나눔 상세 뒤로가기 구분성·동행 카드 기준 동기화 — 이미지 위 `아이콘 + 뒤로`의 68x44px 대비 surface에 1px 경계를 추가하고, 나눔의 96px 썸네일·16px padding/radius·경계·shadow를 동행 전체 모임 카드의 공통 기준으로 사용
 - 나눔 목록 카드·댓글 입력 배경 정리 — 상태 탭·카테고리 필터는 44px 터치 높이와 12px 구획 간격을 보장하고, 목록 항목을 흰 surface·옅은 경계·약한 그림자의 독립 카드로 통일해 행 구분선을 제거했으며, 상세 댓글 composer와 입력창은 기존 geometry를 유지한 채 배경만 투명하게 변경
@@ -52,18 +53,18 @@
 
 ## 주요 파일 (도메인 파일 지도)
 
-| 경로                             | 역할                              |
-| -------------------------------- | --------------------------------- |
-| `app/(tabs)/market/_layout.tsx`  | 나눔 목록·상세 중첩 Stack         |
-| `app/(tabs)/market/index.tsx`    | 나눔 목록, 상태/카테고리 필터     |
-| `app/(tabs)/market/[id].tsx`     | 나눔 상세, 게시글 삭제, 댓글, 신고 |
-| `app/modal/market-new.tsx`       | 나눔 작성 모달                    |
-| `src/mocks/market.ts`            | 나눔 mock 데이터                  |
-| `src/services/marketService.ts`  | 교체 가능한 나눔 조회·게시글 삭제·댓글 CUD·신고 data source 경계 |
-| `src/hooks/useMarket.ts`         | 나눔 query와 게시글 삭제·댓글 CUD·신고 mutation hook |
-| `src/constants/domainOptions.ts` | 나눔 카테고리/상태/신고 사유 옵션 |
-| `src/types/market.ts`            | 나눔 타입                         |
-| `scripts/check-market-api-contract.mjs` | 나눔 Swagger endpoint·화면 요구 필드 검사 |
+| 경로                                    | 역할                                                             |
+| --------------------------------------- | ---------------------------------------------------------------- |
+| `app/(tabs)/market/_layout.tsx`         | 나눔 목록·상세 중첩 Stack                                        |
+| `app/(tabs)/market/index.tsx`           | 나눔 목록, 상태/카테고리 필터                                    |
+| `app/(tabs)/market/[id].tsx`            | 나눔 상세, 게시글 삭제, 댓글, 신고                               |
+| `app/modal/market-new.tsx`              | 나눔 작성 모달                                                   |
+| `src/mocks/market.ts`                   | 나눔 mock 데이터                                                 |
+| `src/services/marketService.ts`         | 교체 가능한 나눔 조회·게시글 삭제·댓글 CUD·신고 data source 경계 |
+| `src/hooks/useMarket.ts`                | 나눔 query와 게시글 삭제·댓글 CUD·신고 mutation hook             |
+| `src/constants/domainOptions.ts`        | 나눔 카테고리/상태/신고 사유 옵션                                |
+| `src/types/market.ts`                   | 나눔 타입                                                        |
+| `scripts/check-market-api-contract.mjs` | 나눔 Swagger endpoint·화면 요구 필드 검사                        |
 
 ## 데이터 타입
 
@@ -71,6 +72,8 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-14) **나눔 카테고리 indicator는 padding 없는 공통 track 좌표를 사용한다** — 화면 좌우 20px 여백은 ScrollView content로 분리하고 필터와 indicator의 좌표 원점을 일치시켜 선택 배경의 20px 오프셋을 제거합니다.
+- (2026-07-14) **나눔 필터·상태 query는 200ms 모션 뒤 갱신한다** — 선택 UI와 목록은 즉시 전환하고 category/status query는 indicator 이동 종료 뒤 `setParams`로 반영해 URL remount가 모션을 끊지 않으며 다른 query를 유지합니다.
 - (2026-07-14) **나눔 카테고리는 이동 indicator와 route query를 함께 사용한다** — 44px 가변 너비 필터의 선택 배경은 200ms로 이동하고 `category` query는 현재 목록 route에만 반영해 상세 뒤로가기에서 선택과 결과를 복원하되 별도 방문 이력을 늘리지 않습니다.
 - (2026-07-14) **나눔 전체 카드는 동행 전체 모임과 외곽 geometry를 공유한다** — 96px 썸네일, 16px padding/radius, 1px 경계, 동일 shadow와 12px 간격을 공통 기준으로 사용하며 상품 제목·작성자 정보는 나눔 도메인에 맞게 유지합니다.
 - (2026-07-14) **나눔 탐색 구획은 터치 영역을 분리한다** — 상태 탭과 카테고리 필터는 각각 44px 높이를 유지하고 flex 축소를 막으며, 상태 탭-필터-첫 카드와 카드 사이는 12px 간격으로 분리해 인접 터치 영역이 겹치지 않게 합니다. 목록 카드는 흰 surface, 옅은 1px 경계, 둥근 모서리와 약한 그림자를 사용하고 행 divider는 두지 않습니다.

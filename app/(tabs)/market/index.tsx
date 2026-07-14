@@ -23,6 +23,7 @@ import {
 import { theme } from "../../../src/constants/theme";
 import { MARKET_CATEGORIES } from "../../../src/constants/domainOptions";
 import { useMarketOverview } from "../../../src/hooks/useMarket";
+import { useMotionRouteParam } from "../../../src/hooks/useMotionRouteParam";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 import type { MarketOverviewItem } from "../../../src/types/market";
 
@@ -35,13 +36,6 @@ const statusTabs: readonly { key: Status; label: string }[] = [
   { key: "done", label: "나눔완료" },
 ];
 
-const statusHrefs = {
-  all: "/market?status=all",
-  sharing: "/market",
-  reserved: "/market?status=reserved",
-  done: "/market?status=done",
-} as const;
-
 export default function MarketScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
@@ -51,18 +45,11 @@ export default function MarketScreen() {
   }>();
   const variant = readDesignVariant(params.designVariant);
   const overview = useMarketOverview();
-  const [category, setCategory] = useState<
-    (typeof MARKET_CATEGORIES)[number]["key"]
-  >(
-    () =>
-      MARKET_CATEGORIES.find((item) => item.key === params.category)?.key ??
-      "all",
-  );
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
   const isError = variant === "network-error" || overview.isError;
   const isEmpty = variant === "empty";
-  const activeStatus =
+  const routeStatus =
     params.status === "all" ||
     params.status === "sharing" ||
     params.status === "reserved" ||
@@ -75,6 +62,23 @@ export default function MarketScreen() {
           : variant === "tab-done"
             ? "done"
             : "sharing";
+  const routeCategory =
+    MARKET_CATEGORIES.find((item) => item.key === params.category)?.key ??
+    "all";
+  const [activeStatus, setActiveStatus] = useMotionRouteParam<Status>(
+    routeStatus,
+    (status) => {
+      router.setParams({ status: status === "sharing" ? undefined : status });
+    },
+  );
+  const [category, setCategory] = useMotionRouteParam(
+    routeCategory,
+    (nextCategory) => {
+      router.setParams({
+        category: nextCategory === "all" ? undefined : nextCategory,
+      });
+    },
+  );
   const statusPosts =
     isError || isEmpty
       ? []
@@ -139,7 +143,7 @@ export default function MarketScreen() {
         <SegmentedTabs
           items={statusTabs}
           active={activeStatus}
-          onChange={(status) => router.replace(statusHrefs[status])}
+          onChange={setActiveStatus}
           style={styles.statusTabs}
           testIDPrefix="market-status"
         />
@@ -147,12 +151,7 @@ export default function MarketScreen() {
         <FilterChips
           items={MARKET_CATEGORIES}
           active={category}
-          onChange={(nextCategory) => {
-            setCategory(nextCategory);
-            router.setParams({
-              category: nextCategory === "all" ? undefined : nextCategory,
-            });
-          }}
+          onChange={setCategory}
           style={styles.categoryScroll}
           testIDPrefix="market-category"
         />

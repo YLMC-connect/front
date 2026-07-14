@@ -27,6 +27,7 @@ import {
 import { theme } from "../../../src/constants/theme";
 import { GROUP_CATEGORIES } from "../../../src/constants/domainOptions";
 import { useGroupOverview } from "../../../src/hooks/useGroups";
+import { useMotionRouteParam } from "../../../src/hooks/useMotionRouteParam";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 import type { GroupOverviewItem } from "../../../src/types/group";
 
@@ -35,10 +36,6 @@ const sections = [
   { key: "service", label: "봉사" },
 ] as const;
 
-const sectionHrefs = {
-  groups: "/group",
-  service: "/group?section=service",
-} as const;
 export default function GroupScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
@@ -48,17 +45,28 @@ export default function GroupScreen() {
   }>();
   const variant = readDesignVariant(params.designVariant);
   const overview = useGroupOverview();
-  const [category, setCategory] = useState<
-    (typeof GROUP_CATEGORIES)[number]["key"]
-  >(
-    () =>
-      GROUP_CATEGORIES.find((item) => item.key === params.category)?.key ??
-      "all",
-  );
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [showMyFull, setShowMyFull] = useState(false);
-  const section = params.section === "service" ? "service" : "groups";
+  const routeSection = params.section === "service" ? "service" : "groups";
+  const routeCategory =
+    GROUP_CATEGORIES.find((item) => item.key === params.category)?.key ?? "all";
+  const [section, setSection] = useMotionRouteParam(
+    routeSection,
+    (nextSection) => {
+      router.setParams({
+        section: nextSection === "groups" ? undefined : nextSection,
+      });
+    },
+  );
+  const [category, setCategory] = useMotionRouteParam(
+    routeCategory,
+    (nextCategory) => {
+      router.setParams({
+        category: nextCategory === "all" ? undefined : nextCategory,
+      });
+    },
+  );
   const isMyFull = variant === "my-full";
   const isError = variant === "network-error" || overview.isError;
   const normalizedSearch = search.trim().toLocaleLowerCase();
@@ -166,7 +174,7 @@ export default function GroupScreen() {
         <SegmentedTabs
           items={sections}
           active={section}
-          onChange={(nextSection) => router.replace(sectionHrefs[nextSection])}
+          onChange={setSection}
           style={styles.segmented}
           testIDPrefix="group-section"
         />
@@ -300,13 +308,7 @@ export default function GroupScreen() {
                 <FilterChips
                   items={GROUP_CATEGORIES}
                   active={category}
-                  onChange={(nextCategory) => {
-                    setCategory(nextCategory);
-                    router.setParams({
-                      category:
-                        nextCategory === "all" ? undefined : nextCategory,
-                    });
-                  }}
+                  onChange={setCategory}
                   style={styles.categoryScroll}
                   testIDPrefix="group-category"
                 />

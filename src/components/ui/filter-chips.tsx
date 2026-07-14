@@ -72,8 +72,17 @@ export function FilterChips<T extends string>({
   }));
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={style}>
-      <View style={styles.track}>
+    <ScrollView
+      contentContainerStyle={styles.content}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={style}
+      testID={testIDPrefix ? `${testIDPrefix}-scroll` : undefined}
+    >
+      <View
+        style={styles.track}
+        testID={testIDPrefix ? `${testIDPrefix}-track` : undefined}
+      >
         {ready
           ? items.map((item) => {
               const layout = layouts[item.key];
@@ -135,12 +144,14 @@ export function FilterChips<T extends string>({
 }
 
 const styles = StyleSheet.create({
+  content: {
+    paddingHorizontal: theme.layout.screenX,
+  },
   track: {
     position: "relative",
     flexDirection: "row",
     alignSelf: "flex-start",
     gap: theme.spacing[2],
-    paddingHorizontal: theme.layout.screenX,
   },
   surface: {
     position: "absolute",

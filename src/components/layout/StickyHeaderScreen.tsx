@@ -40,6 +40,7 @@ export function StickyHeaderScreen({
   stickyControls,
   stickyControlsHeight = 0,
   stickyControlsInset = stickyControlsHeight,
+  stickyControlsAlwaysVisible = false,
   onScrollOffsetChange,
   contentContainerStyle,
   testID,
@@ -52,6 +53,7 @@ export function StickyHeaderScreen({
   stickyControls?: ReactNode;
   stickyControlsHeight?: number;
   stickyControlsInset?: number;
+  stickyControlsAlwaysVisible?: boolean;
   onScrollOffsetChange?: (offsetY: number) => void;
   contentContainerStyle?: StyleProp<ViewStyle>;
   testID: string;
@@ -122,7 +124,7 @@ export function StickyHeaderScreen({
           <StickyControlsLayer
             blurTarget={blurTarget}
             height={stickyControlsHeight}
-            hidden={controlsHidden}
+            hidden={controlsHidden && !stickyControlsAlwaysVisible}
             testID={`${testID}-sticky-controls`}
             top={SCREEN_HEADER_HEIGHT + topInset}
           >

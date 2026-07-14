@@ -1,7 +1,6 @@
-import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   EmptyState,
@@ -10,6 +9,9 @@ import {
   FilterChips,
   FloatingActionButton,
   ListSkeleton,
+  SearchField,
+  SEARCH_FIELD_STICKY_HEIGHT,
+  SearchToggleButton,
   SegmentedTabs,
   VisualThumb,
 } from "../../../src/components/ui";
@@ -99,6 +101,16 @@ export default function MarketScreen() {
       subtitle="이웃과 물건을 나누며 따뜻함을 전해요"
       stickyControls={
         <View testID="market-sticky-controls-content">
+          {searchOpen ? (
+            <SearchField
+              autoFocus
+              accessibilityLabel="나눔 검색어"
+              value={search}
+              onChangeText={setSearch}
+              placeholder="제목 또는 작성자 검색"
+              testID="market-search-field"
+            />
+          ) : null}
           <SegmentedTabs
             items={statusTabs}
             active={activeStatus}
@@ -116,23 +128,21 @@ export default function MarketScreen() {
           />
         </View>
       }
-      stickyControlsHeight={MARKET_STICKY_CONTROLS_HEIGHT}
+      stickyControlsHeight={
+        MARKET_STICKY_CONTROLS_HEIGHT +
+        (searchOpen ? SEARCH_FIELD_STICKY_HEIGHT : 0)
+      }
+      stickyControlsAlwaysVisible={searchOpen}
       right={
-        <Pressable
+        <SearchToggleButton
           accessibilityLabel={searchOpen ? "나눔 검색 닫기" : "나눔 검색"}
-          accessibilityRole="button"
           onPress={() => {
             setSearchOpen((open) => !open);
             if (searchOpen) setSearch("");
           }}
-          style={styles.searchButton}
-        >
-          <MaterialIcons
-            name={searchOpen ? "close" : "search"}
-            size={22}
-            color={theme.colors.inkSoft}
-          />
-        </Pressable>
+          open={searchOpen}
+          testID="market-search-toggle"
+        />
       }
       overlay={
         <FloatingActionButton
@@ -143,21 +153,6 @@ export default function MarketScreen() {
         />
       }
     >
-      {searchOpen ? (
-        <View style={styles.searchWrap}>
-          <MaterialIcons name="search" size={19} color={theme.colors.inkMute} />
-          <TextInput
-            autoFocus
-            accessibilityLabel="나눔 검색어"
-            value={search}
-            onChangeText={setSearch}
-            placeholder="제목 또는 작성자 검색"
-            placeholderTextColor={theme.colors.inkMute}
-            style={styles.searchInput}
-          />
-        </View>
-      ) : null}
-
       <View style={styles.list}>
         {isLoading ? (
           <View style={styles.loading}>
@@ -281,30 +276,6 @@ function MarketEmptyState({
 }
 
 const styles = StyleSheet.create({
-  searchButton: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  searchWrap: {
-    minHeight: 46,
-    marginHorizontal: theme.layout.screenX,
-    marginBottom: 10,
-    paddingHorizontal: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.lineStrong,
-    backgroundColor: theme.colors.surface,
-  },
-  searchInput: {
-    flex: 1,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-  },
   statusTabs: {
     flexShrink: 0,
     height: 44,

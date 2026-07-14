@@ -13,6 +13,7 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- 공통 검색 입력·헤더 action 정리 — 내부 웹 outline을 제거하고 검색 surface 전체에 단일 2px focus border를 적용했으며, 검색/닫기를 아이콘+텍스트로 표시하고 검색 중에는 숨겨진 sticky control을 다시 노출
 - 공통 sticky 세그먼트·필터 레이어 — 상단 타이틀과 같은 `theme.colors.bg` 72%·intensity 32 glass를 재사용하고, 아래 스크롤 숨김·짧은 위 스크롤 200ms 재표시와 동작 줄이기를 지원
 - 루트 탭 glass sticky 헤더 — 홈·나눔·동행·기도·삶공부의 검색·필터·목록을 하나의 스크롤로 묶고, 기본 배경색 기반 반투명 blur 헤더를 화면 상단에 고정해 콘텐츠가 뒤로 지나가도록 적용
 - 필터·세그먼트 indicator·정렬 보정 — 화면 좌우 20px 여백을 측정 track 밖으로 이동해 가변 필터 배경을 실제 칩 경계에 정렬하고, 세그먼트는 위·아래 4px 여백과 18px line-height로 수직 중앙을 맞춘 채 화면을 교체하지 않는 query 갱신으로 200ms 이동을 유지
@@ -112,7 +113,9 @@
 | `src/components/ui/index.tsx`                                 | ZIP 토큰 기준 Button, Card, Badge, Chip, form, modal/dialog, sheet, toast, FAB 등 공통 UI                                                                                                                                                  |
 | `src/components/ui/screen-header.tsx`                         | 루트 탭 5개 화면의 기본 배경색 glass, 89px 높이, 위·아래 20px 여백, 제목·subtitle·우측 action geometry를 통일하는 sticky 헤더                                                                                                              |
 | `src/components/ui/glass-backdrop.tsx`                        | 상단 sticky 헤더와 하단 floating tab bar가 공유하며 화면별 tint 색상·투명도를 지정할 수 있는 intensity 32 blur layer                                                                                                                       |
-| `src/components/layout/StickyHeaderScreen.tsx`                | 실제 safe-area까지 blur target에 포함하고 검색·필터·목록을 헤더 뒤로 통과시키며, 동일 glass의 sticky control과 스크롤 방향 숨김·200ms 재표시를 관리하는 루트 탭 공통 layout                                                                   |
+| `src/components/layout/StickyHeaderScreen.tsx`                | 실제 safe-area까지 blur target에 포함하고 검색·필터·목록을 헤더 뒤로 통과시키며, 동일 glass의 sticky control과 스크롤 방향 숨김·200ms 재표시를 관리하는 루트 탭 공통 layout                                                                |
+| `src/components/ui/search-field.tsx`                          | 검색 아이콘과 입력을 하나의 surface로 묶고 웹 focus border·공통 sticky 높이를 관리하는 검색 입력                                                                                                                                           |
+| `src/components/ui/search-toggle-button.tsx`                  | 헤더의 검색/닫기 아이콘과 명시적 한글 label, press motion을 공유하는 action                                                                                                                                                                |
 | `src/components/layout/TabBlurTargetContext.ts`               | 현재 루트 화면의 Android blur target ref를 하단 tab bar까지 전달                                                                                                                                                                           |
 | `src/components/ui/motion.tsx`                                | Reanimated 기반 공통 press scale과 overlay presence 제어. 시스템 동작 줄이기 설정을 반영                                                                                                                                                   |
 | `src/components/ui/filter-chips.tsx`                          | 가변 너비 카테고리 필터의 측정 기반 200ms 이동 indicator, press feedback, 접근성 상태 관리                                                                                                                                                 |
@@ -154,6 +157,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-14) **검색 포커스와 명시적 검색 action은 공통 UI가 소유한다** — 웹 기본 TextInput outline은 끄고 아이콘을 포함한 바깥 surface에 단일 2px border만 표시합니다. 루트 검색 action은 `검색/닫기` 아이콘과 한글 label을 함께 사용하고, 검색이 열린 동안에는 스크롤로 숨었던 sticky control을 다시 표시해 입력창 접근을 보장합니다.
 - (2026-07-14) **상단 sticky control은 타이틀과 같은 glass와 방향형 노출 정책을 공유한다** — 나눔·동행의 세그먼트·필터 영역은 `theme.colors.bg` 72%와 intensity 32를 사용하고, 아래 12px 스크롤에서 숨은 뒤 위 4px에서 200ms로 재표시합니다. 동작 줄이기에서는 위치 전환을 즉시 반영합니다.
 - (2026-07-14) **모든 루트 탭 sticky 헤더는 기본 배경색 glass를 사용한다** — 홈·나눔·동행·기도·삶공부는 `theme.colors.bg`를 72%로 덧입힌 32 intensity blur를 공유하고 흰색 surface나 하단 border는 사용하지 않습니다. 웹은 위·아래 20px 여백과 89px 헤더, 네이티브는 실제 safe-area를 추가하며 검색·필터·목록은 하나의 스크롤로 헤더 뒤를 통과합니다.
 - (2026-07-14) **필터 화면 여백과 indicator 좌표 track을 분리하고 세그먼트 탭을 수직 중앙에 둔다** — `FilterChips`의 좌우 20px 화면 여백은 ScrollView content가 담당하고, 항목 측정과 absolute indicator는 padding이 없는 같은 track을 기준으로 삼아 웹·네이티브 좌표 원점 차이를 제거합니다. 공통 `SegmentedTabs`는 44px 바깥 높이 안에 36px 탭을 두어 위·아래 4px를 같게 하고 텍스트 line-height를 18px로 고정합니다.

@@ -1,4 +1,9 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react-native";
+import {
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react-native";
 import { router, useLocalSearchParams, useRouter } from "expo-router";
 import { Alert } from "react-native";
 import GroupDetailScreen from "../group/[id]";
@@ -80,7 +85,24 @@ describe("v1 tab smoke screens", () => {
       screen.queryByText("아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)"),
     ).toBeNull();
 
+    fireEvent.scroll(screen.getByTestId("screen-market-scroll"), {
+      nativeEvent: { contentOffset: { y: 13 } },
+    });
+    expect(
+      screen.getByTestId("screen-market-sticky-controls", {
+        includeHiddenElements: true,
+      }).props.pointerEvents,
+    ).toBe("none");
+
     fireEvent.press(screen.getByLabelText("나눔 검색"));
+    expect(
+      screen.getByTestId("screen-market-sticky-controls").props.pointerEvents,
+    ).toBe("auto");
+    expect(
+      within(screen.getByTestId("market-sticky-controls-content")).getByTestId(
+        "market-search-field-container",
+      ),
+    ).toBeTruthy();
     fireEvent.changeText(screen.getByLabelText("나눔 검색어"), "동화책");
     expect(screen.getByText("어린이 동화책 30권 묶음 나눔")).toBeTruthy();
   });
@@ -303,7 +325,24 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<GroupScreen />);
     await screen.findByText("내 소모임");
 
+    fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
+      nativeEvent: { contentOffset: { y: 13 } },
+    });
+    expect(
+      screen.getByTestId("screen-group-sticky-controls", {
+        includeHiddenElements: true,
+      }).props.pointerEvents,
+    ).toBe("none");
+
     fireEvent.press(screen.getByLabelText("동행 검색"));
+    expect(
+      screen.getByTestId("screen-group-sticky-controls").props.pointerEvents,
+    ).toBe("auto");
+    expect(
+      within(screen.getByTestId("group-sticky-controls-content")).getByTestId(
+        "group-search-field-container",
+      ),
+    ).toBeTruthy();
     fireEvent.changeText(screen.getByLabelText("동행 검색어"), "없는 모임");
     expect(screen.getAllByText("검색 결과가 없어요").length).toBeGreaterThan(0);
   });

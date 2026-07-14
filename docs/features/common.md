@@ -13,6 +13,7 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- Solar 의미·기본 action glyph 보정 — 기도 탭을 `HeartShine` Linear/Bold로 변경하고 Solar에 단독 형태가 없는 추가·닫기는 공통 `AppIcon` 내부의 원 없는 2px rounded stroke로 표시해 기존 크기·색상·문구·접근성·모션을 유지
 - Solar Icons 전환 — 29개 앱·공통 파일의 Material 아이콘을 공통 `AppIcon` 기반 Solar Linear/Bold SVG로 교체하고 하단 탭 선택 상태만 Bold로 강조했으며 기존 접근성 label·문구·크기·모션을 유지
 - 플로팅 버튼 행동 문구 명확화 — 공통 `FloatingActionButton`의 label을 필수로 만들고 화면 텍스트와 기본 접근성 이름에 함께 사용해 나눔 `글쓰기`, 동행 `소모임 개설`, 기도 `기도제목 작성`으로 통일
 - 섹션 전체보기 action 공통화 — 제목 오른쪽에 `전체보기 + chevron-right`를 표시하는 44px `SectionHeader`를 추가하고 press motion·접근성 label을 통일해 기도와 동행에서 재사용
@@ -163,6 +164,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-15) **기도 탭은 `HeartShine`, 기본 추가·닫기는 외곽선 없는 glyph를 사용한다** — 기도는 기본 `Linear`·선택 `Bold`의 Solar `HeartShine`으로 구분합니다. Solar 패키지에 원·사각형 없는 단독 추가·닫기가 없어 이 두 형태만 `AppIcon` 내부의 24px viewBox·2px round stroke SVG로 보완하며 화면의 아이콘 크기·색상·label·접근성·터치 영역은 유지합니다.
 - (2026-07-15) **앱 아이콘은 공통 `AppIcon`을 통해 Solar Icons로 렌더링한다** — 기본 아이콘은 `Linear`, 하단 탭의 선택 상태는 `Bold`를 사용하고 화면은 Solar 패키지를 직접 참조하지 않습니다. 기존 아이콘 의미·크기·색상과 `뒤로`·`검색/닫기`·FAB의 한글 label, 접근성 이름, press motion은 유지하며 미사용 `@expo/vector-icons` 직접 의존성은 제거합니다.
 - (2026-07-15) **플로팅 버튼은 대상만이 아니라 실행 행동을 label로 표시한다** — `FloatingActionButton`의 label은 필수이며 화면 텍스트와 접근성 이름의 기본값을 함께 담당합니다. 나눔은 `글쓰기`, 동행은 `소모임 개설`, 기도는 `기도제목 작성`을 사용하고 기존 아이콘·위치·라우팅은 유지합니다.
 - (2026-07-14) **섹션 전체보기는 제목 오른쪽의 공통 action으로 표시한다** — 독립된 큰 버튼 대신 `SectionHeader`의 `전체보기 + chevron-right`를 사용하고 최소 44px 터치 영역, 140ms press motion, `<섹션명> 전체보기` 접근성 label을 공유합니다. 작성·신청처럼 주요 행동을 시작하는 CTA는 이 규칙에 포함하지 않습니다.

@@ -166,6 +166,25 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByPlaceholderText("댓글을 입력해주세요")).toBeTruthy();
   });
 
+  it("centers the market detail error state in the available screen", async () => {
+    jest.mocked(useLocalSearchParams).mockReturnValue({ id: "missing" });
+    renderWithClient(<MarketDetailScreen />);
+
+    expect(await screen.findByText("불러오지 못했습니다")).toBeTruthy();
+    expect(screen.getByText("나눔 정보를 다시 불러와주세요.")).toBeTruthy();
+    expect(screen.getByText("다시 시도")).toBeTruthy();
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("market-detail-error-center").props.style,
+      ),
+    ).toMatchObject({
+      flex: 1,
+      justifyContent: "center",
+    });
+
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
+  });
+
   it("uses a compact vertical gradient on the market detail hero", async () => {
     renderWithClient(<MarketDetailScreen />);
     await screen.findByText(

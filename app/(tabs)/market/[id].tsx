@@ -144,11 +144,13 @@ export default function MarketDetailScreen() {
 
   if (detail.isError || !detail.data) {
     return (
-      <Screen>
-        <ErrorState
-          message="나눔 정보를 다시 불러와주세요."
-          onRetry={() => detail.refetch()}
-        />
+      <Screen padded={false} scroll={false} testID="screen-market-detail-error">
+        <View style={styles.centeredError} testID="market-detail-error-center">
+          <ErrorState
+            message="나눔 정보를 다시 불러와주세요."
+            onRetry={() => detail.refetch()}
+          />
+        </View>
       </Screen>
     );
   }
@@ -594,6 +596,10 @@ const styles = StyleSheet.create({
   loadingBody: {
     padding: theme.layout.screenX,
     gap: theme.layout.listGap,
+  },
+  centeredError: {
+    flex: 1,
+    justifyContent: "center",
   },
   content: { paddingBottom: 152 },
   hero: {

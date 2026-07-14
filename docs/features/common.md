@@ -15,7 +15,7 @@
 
 - Solar 의미·기본 action glyph 보정 — 기도 탭을 `Hearts` Linear/Bold로 표시하고 Solar에 단독 형태가 없는 추가·닫기는 공통 `AppIcon` 내부의 원 없는 2px rounded stroke로 표시해 기존 크기·색상·문구·접근성·모션을 유지
 - Solar Icons 전환 — 29개 앱·공통 파일의 Material 아이콘을 공통 `AppIcon` 기반 Solar Linear/Bold SVG로 교체하고 하단 탭 선택 상태만 Bold로 강조했으며 기존 접근성 label·문구·크기·모션을 유지
-- 플로팅 버튼 행동 문구 명확화 — 공통 `FloatingActionButton`의 label을 필수로 만들고 화면 텍스트와 기본 접근성 이름에 함께 사용해 나눔 `글쓰기`, 동행 `소모임 개설`, 기도 `기도제목 작성`으로 통일
+- 플로팅 버튼 행동 문구 명확화 — 공통 `FloatingActionButton`의 label을 필수로 만들고 화면 텍스트와 기본 접근성 이름에 함께 사용해 나눔 `나눔하기`, 동행 `소모임 개설`, 기도 `기도제목 작성`으로 통일
 - 섹션 전체보기 action 공통화 — 제목 오른쪽에 `전체보기 + chevron-right`를 표시하는 44px `SectionHeader`를 추가하고 press motion·접근성 label을 통일해 기도와 동행에서 재사용
 - 뒤로가기 헤더 중앙 정렬·라벨 통일 — 공통 `TopBar`가 왼쪽 68px 뒤로 버튼과 우측 action 유무에 관계없이 제목 중심을 화면 중심에 고정하고, 전체 화면을 이전 스택으로 닫는 action은 `chevron-left + 뒤로`로 통일하되 검색·패널·dialog·sheet의 내부 닫기는 유지
 - 공통 검색 입력·헤더 action 정리 — 내부 웹 outline을 제거하고 검색 surface 전체에 단일 2px focus border를 적용했으며, 검색/닫기를 아이콘+텍스트로 표시하고 검색 중에는 숨겨진 sticky control을 다시 노출
@@ -167,7 +167,7 @@
 - (2026-07-15) **중보기도 탭은 Solar `Hearts`를 사용한다** — 기존 `HeartShine`보다 중보기도의 함께하는 의미가 직접 드러나는 `Hearts`로 교체하며 기본 `Linear`·선택 `Bold`, 기존 크기·색상·접근성·탭 모션은 유지합니다.
 - (2026-07-15, 기도 아이콘 선택만 폐기) **기도 탭은 `HeartShine`, 기본 추가·닫기는 외곽선 없는 glyph를 사용한다** — 기도 아이콘은 후속 결정으로 `Hearts`가 대체했습니다. Solar 패키지에 원·사각형 없는 단독 추가·닫기가 없어 이 두 형태만 `AppIcon` 내부의 24px viewBox·2px round stroke SVG로 보완하며 화면의 아이콘 크기·색상·label·접근성·터치 영역은 유지합니다.
 - (2026-07-15) **앱 아이콘은 공통 `AppIcon`을 통해 Solar Icons로 렌더링한다** — 기본 아이콘은 `Linear`, 하단 탭의 선택 상태는 `Bold`를 사용하고 화면은 Solar 패키지를 직접 참조하지 않습니다. 기존 아이콘 의미·크기·색상과 `뒤로`·`검색/닫기`·FAB의 한글 label, 접근성 이름, press motion은 유지하며 미사용 `@expo/vector-icons` 직접 의존성은 제거합니다.
-- (2026-07-15) **플로팅 버튼은 대상만이 아니라 실행 행동을 label로 표시한다** — `FloatingActionButton`의 label은 필수이며 화면 텍스트와 접근성 이름의 기본값을 함께 담당합니다. 나눔은 `글쓰기`, 동행은 `소모임 개설`, 기도는 `기도제목 작성`을 사용하고 기존 아이콘·위치·라우팅은 유지합니다.
+- (2026-07-15) **플로팅 버튼은 대상만이 아니라 실행 행동을 label로 표시한다** — `FloatingActionButton`의 label은 필수이며 화면 텍스트와 접근성 이름의 기본값을 함께 담당합니다. 나눔은 `나눔하기`, 동행은 `소모임 개설`, 기도는 `기도제목 작성`을 사용하고 기존 아이콘·위치·라우팅은 유지합니다.
 - (2026-07-14) **섹션 전체보기는 제목 오른쪽의 공통 action으로 표시한다** — 독립된 큰 버튼 대신 `SectionHeader`의 `전체보기 + chevron-right`를 사용하고 최소 44px 터치 영역, 140ms press motion, `<섹션명> 전체보기` 접근성 label을 공유합니다. 작성·신청처럼 주요 행동을 시작하는 CTA는 이 규칙에 포함하지 않습니다.
 - (2026-07-14) **전체 화면의 이전 경로 이동은 `뒤로`, 현재 화면 내부 UI 해제는 `닫기`로 구분한다** — `TopBar back`의 label은 `chevron-left + 뒤로`로 고정하고 제목은 좌우 88px 안전 영역 안에서 화면 정중앙에 둡니다. 검색·패널·dialog·sheet처럼 route를 pop하지 않는 닫기는 의미가 다르므로 유지합니다.
 - (2026-07-14) **검색 포커스와 명시적 검색 action은 공통 UI가 소유한다** — 웹 기본 TextInput outline은 끄고 아이콘을 포함한 바깥 surface에 단일 2px border만 표시합니다. 루트 검색 action은 `검색/닫기` 아이콘과 한글 label을 함께 사용하고, 검색이 열린 동안에는 스크롤로 숨었던 sticky control을 다시 표시해 입력창 접근을 보장합니다.

@@ -29,6 +29,8 @@ const statusTabs: readonly { key: Status; label: string }[] = [
   { key: "done", label: "나눔완료" },
 ];
 
+const MARKET_STICKY_CONTROLS_HEIGHT = 116;
+
 export default function MarketScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
@@ -95,6 +97,26 @@ export default function MarketScreen() {
       testID="screen-market"
       title="나눔"
       subtitle="이웃과 물건을 나누며 따뜻함을 전해요"
+      stickyControls={
+        <View testID="market-sticky-controls-content">
+          <SegmentedTabs
+            items={statusTabs}
+            active={activeStatus}
+            onChange={setActiveStatus}
+            style={styles.statusTabs}
+            testIDPrefix="market-status"
+          />
+
+          <FilterChips
+            items={MARKET_CATEGORIES}
+            active={category}
+            onChange={setCategory}
+            style={styles.categoryScroll}
+            testIDPrefix="market-category"
+          />
+        </View>
+      }
+      stickyControlsHeight={MARKET_STICKY_CONTROLS_HEIGHT}
       right={
         <Pressable
           accessibilityLabel={searchOpen ? "나눔 검색 닫기" : "나눔 검색"}
@@ -135,22 +157,6 @@ export default function MarketScreen() {
           />
         </View>
       ) : null}
-
-      <SegmentedTabs
-        items={statusTabs}
-        active={activeStatus}
-        onChange={setActiveStatus}
-        style={styles.statusTabs}
-        testIDPrefix="market-status"
-      />
-
-      <FilterChips
-        items={MARKET_CATEGORIES}
-        active={category}
-        onChange={setCategory}
-        style={styles.categoryScroll}
-        testIDPrefix="market-category"
-      />
 
       <View style={styles.list}>
         {isLoading ? (

@@ -51,6 +51,7 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<MarketScreen />);
 
     expect(screen.getByText("나눔")).toBeTruthy();
+    expect(screen.getByTestId("screen-market-sticky-controls")).toBeTruthy();
     expect(
       screen.getByText("이웃과 물건을 나누며 따뜻함을 전해요"),
     ).toBeTruthy();
@@ -246,6 +247,43 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getAllByText("봉사").length).toBeGreaterThan(0);
     expect(await screen.findByText("내 소모임")).toBeTruthy();
     expect(screen.getByText("전체 모임")).toBeTruthy();
+  });
+
+  it("joins the group category filter to sticky controls at its content anchor", async () => {
+    renderWithClient(<GroupScreen />);
+    await screen.findByText("내 소모임");
+
+    fireEvent(screen.getByTestId("group-category-anchor"), "layout", {
+      nativeEvent: { layout: { x: 0, y: 300, width: 430, height: 56 } },
+    });
+    fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
+      nativeEvent: { contentOffset: { y: 299 } },
+    });
+    expect(screen.queryByTestId("group-sticky-controls-filter")).toBeNull();
+
+    fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
+      nativeEvent: { contentOffset: { y: 300 } },
+    });
+    expect(
+      screen.getByTestId("screen-group-sticky-controls", {
+        includeHiddenElements: true,
+      }).props.pointerEvents,
+    ).toBe("none");
+    expect(
+      screen.getByTestId("group-sticky-controls-filter", {
+        includeHiddenElements: true,
+      }),
+    ).toBeTruthy();
+
+    fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
+      nativeEvent: { contentOffset: { y: 295 } },
+    });
+    expect(screen.queryByTestId("group-sticky-controls-filter")).toBeNull();
+    expect(screen.getByTestId("group-content-filter")).toBeTruthy();
+    expect(
+      screen.getByTestId("screen-group-sticky-controls").props.pointerEvents,
+    ).toBe("auto");
+    expect(screen.getByTestId("group-category-anchor")).toBeTruthy();
   });
 
   it("updates the group segment without replacing the screen", async () => {

@@ -45,6 +45,7 @@ export interface MarketOverviewItem {
   createdLabel: string;
   status: MarketStatus;
   category: Exclude<MarketCategory, "all">;
+  isMine: boolean;
 }
 
 export interface MarketOverview {

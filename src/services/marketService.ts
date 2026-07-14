@@ -110,6 +110,7 @@ export const mockMarketDataSource: MarketDataSource = {
       createdLabel: detail.createdLabel,
       status: detail.status,
       category: input.category,
+      isMine: true,
     });
     mockComments.set(id, []);
     return detail;

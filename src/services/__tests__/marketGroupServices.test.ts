@@ -37,6 +37,14 @@ describe("market and group service boundaries", () => {
       "done",
       "sharing",
     ]);
+    expect(overview.items.map((item) => item.isMine)).toEqual([
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+    ]);
     expect(detail).toMatchObject({
       id: "1",
       status: "sharing",
@@ -228,7 +236,10 @@ describe("market and group service boundaries", () => {
       content: "필요한 분께 나누고 싶습니다.",
       isMine: true,
     });
-    expect(overview.items[0]).toMatchObject({ id: created.id });
+    expect(overview.items[0]).toMatchObject({
+      id: created.id,
+      isMine: true,
+    });
   });
 
   it("returns group overview and detail through the default data source", async () => {

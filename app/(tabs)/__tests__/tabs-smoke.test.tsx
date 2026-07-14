@@ -60,7 +60,11 @@ describe("v1 tab smoke screens", () => {
     expect(
       screen.getByText("이웃과 물건을 나누며 따뜻함을 전해요"),
     ).toBeTruthy();
-    expect(screen.getByText("나눔중")).toBeTruthy();
+    expect(screen.getByTestId("market-status-all")).toBeTruthy();
+    expect(screen.getByTestId("market-status-sharing")).toBeTruthy();
+    expect(screen.getByTestId("market-status-mine")).toBeTruthy();
+    expect(screen.queryByTestId("market-status-reserved")).toBeNull();
+    expect(screen.queryByTestId("market-status-done")).toBeNull();
     expect(
       await screen.findByText(
         "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
@@ -124,6 +128,23 @@ describe("v1 tab smoke screens", () => {
     jest.mocked(useLocalSearchParams).mockReturnValue({});
   });
 
+  it("shows only owned posts in the my market segment", async () => {
+    jest.mocked(useLocalSearchParams).mockReturnValue({ status: "mine" });
+    renderWithClient(<MarketScreen />);
+
+    expect(
+      await screen.findByText(
+        "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
+      ),
+    ).toBeTruthy();
+    expect(
+      screen.getByTestId("market-status-mine").props.accessibilityState,
+    ).toEqual({ selected: true });
+    expect(screen.queryByText("유아용 카시트 (사용감 있음)")).toBeNull();
+
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
+  });
+
   it("updates filter params while keeping detail navigation on the back stack", async () => {
     const navigation = {
       back: jest.fn(),
@@ -137,13 +158,15 @@ describe("v1 tab smoke screens", () => {
     await screen.findByText(
       "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
     );
-    fireEvent.press(screen.getByTestId("market-status-reserved"));
+    fireEvent.press(screen.getByTestId("market-status-mine"));
     await waitFor(() =>
-      expect(navigation.setParams).toHaveBeenCalledWith({ status: "reserved" }),
+      expect(navigation.setParams).toHaveBeenCalledWith({ status: "mine" }),
     );
 
-    fireEvent.press(screen.getByText("토스터기·전기주전자 세트 나눔해요"));
-    expect(navigation.push).toHaveBeenCalledWith("/market/2");
+    fireEvent.press(
+      screen.getByText("아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)"),
+    );
+    expect(navigation.push).toHaveBeenCalledWith("/market/1");
 
     list.unmount();
     jest.mocked(useLocalSearchParams).mockReturnValue({ id: "1" });

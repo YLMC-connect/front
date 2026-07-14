@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 나눔 3단 세그먼트·내 나눔 목록 — 상단을 `전체 / 나눔중 / 내 나눔`으로 재구성하고 목록 조회 모델의 `isMine`을 기준으로 내가 올린 물건을 상태와 관계없이 모아 표시하며 기존 카테고리·검색·상태 badge·200ms indicator·상세 Stack을 유지
 - 나눔 작성 헤더 공통화 — 작성·수정 modal의 개별 `닫기` 헤더를 공통 `TopBar`의 `chevron-left + 뒤로`로 교체하고 제목을 430px 웹 화면 중심 `x=215px`에 맞추며 기존 dirty form 확인과 `router.back()` 동작은 유지
 - 나눔 상세 오류 화면 중앙 정렬 — 상세 조회 실패 분기만 비스크롤 전체 높이 컨테이너로 전환해 430×932 웹에서 가용 영역과 안내 묶음 중심을 `y=488px`로 일치시키고 공통 ErrorState·다른 화면 배치는 유지
 - 나눔 상세 hero scrim 보정 — 이미지 상단 단색 어두운 영역을 130px에서 88px로 줄이고 `rgba 0.22 → 0.10 → 0` 세로 그라데이션으로 변경해 뒤로가기 68×44px·상태 overlay·페이지 indicator geometry는 유지
@@ -74,10 +75,11 @@
 
 ## 데이터 타입
 
-`MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. 화면 조회 모델 `MarketOverview`/`MarketDetail`은 목록 표시값, 작성자 소유 여부, 댓글 상태를 포함하며 API DTO mapper의 출력 경계입니다. 게시글 삭제 대상은 `MarketPostTarget`, 댓글 CUD는 `MarketCommentInput`, `MarketCommentUpdateInput`, `MarketCommentTarget`으로 게시글 ID와 댓글 ID를 구분하고 결과는 목록/상세 제거 또는 `MarketDetailComment` 삭제 tombstone으로 정규화합니다. 신고는 `MarketReportInput`에서 게시글/댓글 대상, 프런트 사유, 선택 상세를 분리하며 서버 enum이 확정되면 HTTP mapper가 코드 변환을 소유합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
+`MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. 화면 조회 모델 `MarketOverview`/`MarketDetail`은 목록 표시값, 작성자 소유 여부, 댓글 상태를 포함하며 API DTO mapper의 출력 경계입니다. `MarketOverviewItem.isMine`은 `내 나눔` 목록 필터의 기준이며 새 mock 작성 결과에도 `true`로 저장됩니다. 게시글 삭제 대상은 `MarketPostTarget`, 댓글 CUD는 `MarketCommentInput`, `MarketCommentUpdateInput`, `MarketCommentTarget`으로 게시글 ID와 댓글 ID를 구분하고 결과는 목록/상세 제거 또는 `MarketDetailComment` 삭제 tombstone으로 정규화합니다. 신고는 `MarketReportInput`에서 게시글/댓글 대상, 프런트 사유, 선택 상세를 분리하며 서버 enum이 확정되면 HTTP mapper가 코드 변환을 소유합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-14) **나눔 상단 탐색은 `전체 / 나눔중 / 내 나눔` 3개로 구성한다** — `전체`는 모든 글, `나눔중`은 `sharing`, `내 나눔`은 `MarketOverviewItem.isMine`인 글을 `sharing/reserved/done` 상태와 관계없이 표시합니다. 예약중·나눔완료는 독립 세그먼트에서 제거하되 카드의 상태 badge/overlay로 계속 구분합니다.
 - (2026-07-14) **나눔 작성·수정 modal도 공통 뒤로가기 헤더를 사용한다** — 화면을 pop하는 기존 `닫기` action은 `뒤로`로 표기하고 공통 `TopBar`의 화면 중앙 제목 geometry를 사용하며, 입력 변경 시 이탈 확인 절차는 그대로 유지합니다.
 - (2026-07-14) **나눔 상세 조회 실패는 화면 가용 높이의 중앙에 배치한다** — 오류 분기는 기본 ScrollView 대신 safe area 아래 전체 높이를 채우는 비스크롤 컨테이너와 `justifyContent: center`를 사용합니다. 공통 ErrorState와 목록·다른 도메인의 embedded 오류 배치는 변경하지 않습니다.
 - (2026-07-14) **나눔 상세 hero의 일반 scrim은 버튼 주변만 짧게 덮는다** — 상단 88px 안에서 `rgba(20,30,18,0.22)`를 시작으로 52% 지점의 0.10을 거쳐 하단 완전 투명으로 전환합니다. 뒤로가기 버튼·hero 높이·페이지 indicator와 예약중/나눔완료 상태 overlay는 별도 geometry로 유지합니다.
@@ -132,7 +134,7 @@
 
 ## 미결 / 추적
 
-- Swagger 목록 작성자명·대표 이미지·검색, 상세/작성 장소, 입력·응답·신고 enum, 제목/본문/사진 제한, 이미지 필수, 상태 변경·이미지 업로드 endpoint, 핵심 흐름 오류 코드 38건 확정 필요. 장소를 백엔드 계약에 추가할지 최신 기획에서 제거할지도 명시적으로 결정해야 합니다. 단일 출처는 Issue #19이며 `npm run test:api:contract:market`으로 확인합니다.
+- Swagger 목록 작성자명·대표 이미지·검색·현재 사용자 소유 여부(`isMine`), 상세/작성 장소, 입력·응답·신고 enum, 제목/본문/사진 제한, 이미지 필수, 상태 변경·이미지 업로드 endpoint, 핵심 흐름 오류 코드 확정 필요. 장소를 백엔드 계약에 추가할지 최신 기획에서 제거할지도 명시적으로 결정해야 합니다. 단일 출처는 Issue #19이며 `npm run test:api:contract:market`으로 확인합니다.
 - 신고 처리 후 블라인드/관리자 큐 정책은 API/운영 정책 확정 후 반영.
 - 나눔 작성 residual은 topbar/chip/control typography 정렬 후 `market-create-limit mean=14.62`, `market-create-fill mean=13.69`, `market-edit mean=13.70`, `market-create mean=12.22`, `market-create-back mean=7.72`입니다. 빈 작성/뒤로가기 화면은 status bar/time, RN font metrics, confirm overlay geometry 차이로 소폭 상승했지만 화면군 합계는 감소했습니다.
 - 나눔 목록 residual은 FAB root overlay 정렬 후 `market-list-all mean=13.75`, `market-list mean=10.64`, `market-list-reserved mean=6.79`, `market-list-done mean=6.31`입니다. 남은 차이는 native status bar/time, RN font metrics, tab bar geometry와 목록 row text metric 차이로 추적합니다.

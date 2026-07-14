@@ -25,10 +25,10 @@
 
 | 도메인 | 진행 중 | 완료 | 마지막 갱신 | 상세 |
 |---|---|---|---|---|
-| common (공통 인프라) | 6 | 26 | 2026-07-14 | [features/common.md](features/common.md) |
+| common (공통 인프라) | 7 | 26 | 2026-07-14 | [features/common.md](features/common.md) |
 | auth (인증) | 2 | 6 | 2026-07-14 | [features/auth.md](features/auth.md) |
 | market (나눔장터) | 2 | 19 | 2026-07-14 | [features/market.md](features/market.md) |
-| group (소모임) | 2 | 16 | 2026-07-14 | [features/group.md](features/group.md) |
+| group (소모임) | 3 | 16 | 2026-07-14 | [features/group.md](features/group.md) |
 | mypage (MY) | 1 | 4 | 2026-07-14 | [features/mypage.md](features/mypage.md) |
 | life-study (삶공부) | 2 | 8 | 2026-07-14 | [features/life-study.md](features/life-study.md) |
 | prayer (중보기도) | 2 | 11 | 2026-07-14 | [features/prayer.md](features/prayer.md) |

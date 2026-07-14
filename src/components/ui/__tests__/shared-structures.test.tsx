@@ -182,4 +182,69 @@ describe("shared maintenance UI", () => {
       opacity: 0.72,
     });
   });
+
+  it("uses the same glass treatment and scroll-direction visibility for sticky controls", () => {
+    const sharedBlurTarget = createRef<View>();
+
+    render(
+      <SafeAreaProvider
+        initialMetrics={{
+          frame: { x: 0, y: 0, width: 430, height: 932 },
+          insets: { top: 0, left: 0, right: 0, bottom: 0 },
+        }}
+      >
+        <TabBlurTargetContext.Provider value={sharedBlurTarget}>
+          <StickyHeaderScreen
+            stickyControls={<Text>세그먼트와 필터</Text>}
+            stickyControlsHeight={60}
+            testID="sticky-controls-screen"
+            title="동행"
+          >
+            <Text>스크롤 콘텐츠</Text>
+          </StickyHeaderScreen>
+        </TabBlurTargetContext.Provider>
+      </SafeAreaProvider>,
+    );
+
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("sticky-controls-screen-scroll").props
+          .contentContainerStyle,
+      ),
+    ).toMatchObject({ paddingTop: 149 });
+    expect(
+      screen.getByTestId("sticky-controls-screen-sticky-controls-glass-blur")
+        .props,
+    ).toMatchObject({
+      blurTarget: sharedBlurTarget,
+      intensity: 32,
+      tint: "light",
+    });
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("sticky-controls-screen-sticky-controls-glass-tint")
+          .props.style,
+      ),
+    ).toMatchObject({
+      backgroundColor: theme.colors.bg,
+      opacity: 0.72,
+    });
+
+    fireEvent.scroll(screen.getByTestId("sticky-controls-screen-scroll"), {
+      nativeEvent: { contentOffset: { y: 13 } },
+    });
+    expect(
+      screen.getByTestId("sticky-controls-screen-sticky-controls", {
+        includeHiddenElements: true,
+      }).props.pointerEvents,
+    ).toBe("none");
+
+    fireEvent.scroll(screen.getByTestId("sticky-controls-screen-scroll"), {
+      nativeEvent: { contentOffset: { y: 9 } },
+    });
+    expect(
+      screen.getByTestId("sticky-controls-screen-sticky-controls").props
+        .pointerEvents,
+    ).toBe("auto");
+  });
 });

@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import Animated, { FadeIn, useReducedMotion } from "react-native-reanimated";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   Badge,
@@ -35,6 +36,9 @@ const sections = [
   { key: "service", label: "봉사" },
 ] as const;
 
+const GROUP_SEGMENT_STICKY_HEIGHT = 60;
+const GROUP_COMBINED_STICKY_HEIGHT = 116;
+
 export default function GroupScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
@@ -47,6 +51,10 @@ export default function GroupScreen() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [showMyFull, setShowMyFull] = useState(false);
+  const [categoryAnchorY, setCategoryAnchorY] = useState<number | null>(null);
+  const [categorySticky, setCategorySticky] = useState(false);
+  const currentScrollY = useRef(0);
+  const reduceMotion = useReducedMotion();
   const routeSection = params.section === "service" ? "service" : "groups";
   const routeCategory =
     GROUP_CATEGORIES.find((item) => item.key === params.category)?.key ?? "all";
@@ -83,6 +91,28 @@ export default function GroupScreen() {
   );
   const myGroups = isError ? [] : groups.filter((group) => group.isJoined);
   const isLoading = overview.isPending && !isError;
+
+  useEffect(() => {
+    const nextSticky =
+      section === "groups" &&
+      categoryAnchorY !== null &&
+      currentScrollY.current >= categoryAnchorY;
+    setCategorySticky((current) =>
+      current === nextSticky ? current : nextSticky,
+    );
+  }, [categoryAnchorY, section]);
+
+  const handleScrollOffsetChange = (offsetY: number) => {
+    currentScrollY.current = offsetY;
+    const nextSticky =
+      section === "groups" &&
+      categoryAnchorY !== null &&
+      offsetY >= categoryAnchorY;
+    setCategorySticky((current) =>
+      current === nextSticky ? current : nextSticky,
+    );
+  };
+  const showStickyFilter = section === "groups" && categorySticky;
 
   if (isMyFull || showMyFull) {
     return (
@@ -128,6 +158,42 @@ export default function GroupScreen() {
       testID="screen-group"
       title="동행"
       subtitle="소모임과 봉사로 함께 걸어가요"
+      onScrollOffsetChange={handleScrollOffsetChange}
+      stickyControls={
+        <View testID="group-sticky-controls-content">
+          <SegmentedTabs
+            items={sections}
+            active={section}
+            onChange={setSection}
+            style={styles.segmented}
+            testIDPrefix="group-section"
+          />
+          {showStickyFilter ? (
+            <Animated.View
+              entering={
+                reduceMotion
+                  ? undefined
+                  : FadeIn.duration(theme.motion.duration.fast)
+              }
+              testID="group-sticky-controls-filter"
+            >
+              <FilterChips
+                items={GROUP_CATEGORIES}
+                active={category}
+                onChange={setCategory}
+                style={styles.categoryScroll}
+                testIDPrefix="group-category"
+              />
+            </Animated.View>
+          ) : null}
+        </View>
+      }
+      stickyControlsHeight={
+        showStickyFilter
+          ? GROUP_COMBINED_STICKY_HEIGHT
+          : GROUP_SEGMENT_STICKY_HEIGHT
+      }
+      stickyControlsInset={GROUP_SEGMENT_STICKY_HEIGHT}
       right={
         <Pressable
           accessibilityLabel={searchOpen ? "동행 검색 닫기" : "동행 검색"}
@@ -154,157 +220,180 @@ export default function GroupScreen() {
         />
       }
     >
-      {searchOpen ? (
-        <View style={styles.searchWrap}>
-          <MaterialIcons name="search" size={19} color={theme.colors.inkMute} />
-          <TextInput
-            autoFocus
-            accessibilityLabel="동행 검색어"
-            value={search}
-            onChangeText={setSearch}
-            placeholder="소모임 또는 봉사 검색"
-            placeholderTextColor={theme.colors.inkMute}
-            style={styles.searchInput}
-          />
-        </View>
-      ) : null}
-
-      <SegmentedTabs
-        items={sections}
-        active={section}
-        onChange={setSection}
-        style={styles.segmented}
-        testIDPrefix="group-section"
-      />
-
-      {isLoading ? (
-        <View style={styles.loading}>
-          <ListSkeleton rows={4} thumbnail={false} />
-        </View>
-      ) : isError ? (
-        <ErrorState
-          message="네트워크 연결을 확인하고 다시 시도해주세요."
-          onRetry={() => overview.refetch()}
-        />
-      ) : section === "service" ? (
-        <View style={styles.serviceList}>
-          {serviceItems.length === 0 ? (
-            <EmptyState
-              title="검색 결과가 없어요"
-              description="다른 검색어로 다시 찾아보세요."
+      <View testID="group-scroll-content">
+        {searchOpen ? (
+          <View style={styles.searchWrap}>
+            <MaterialIcons
+              name="search"
+              size={19}
+              color={theme.colors.inkMute}
             />
-          ) : (
-            serviceItems.map((item) => (
-              <Pressable
-                key={item.id}
-                accessibilityRole="button"
-                onPress={() => router.push(`/group/${item.linkedGroupId}`)}
-              >
-                <Card style={styles.serviceCard}>
-                  <View style={styles.serviceRow}>
-                    <VisualThumb
-                      size={62}
-                      seed={item.coverSeed}
-                      icon="volunteer-activism"
-                    />
-                    <View style={styles.serviceBody}>
-                      <View style={styles.serviceMetaRow}>
-                        <Badge>{item.statusLabel}</Badge>
-                        <Text style={styles.serviceSchedule}>
-                          {item.schedule}
-                        </Text>
-                      </View>
-                      <AppText variant="cardTitle" style={styles.serviceTitle}>
-                        {item.name}
-                      </AppText>
-                      <AppText
-                        variant="body"
-                        tone="secondary"
-                        style={styles.serviceDesc}
-                      >
-                        {item.description}
-                      </AppText>
-                      <AppText
-                        variant="caption"
-                        tone="muted"
-                        style={styles.serviceCount}
-                      >
-                        참여 {item.currentMembers}/{item.maxMembers}명
-                      </AppText>
-                    </View>
-                    <MaterialIcons
-                      name="chevron-right"
-                      size={20}
-                      color={theme.colors.inkMute}
-                    />
-                  </View>
-                </Card>
-              </Pressable>
-            ))
-          )}
-        </View>
-      ) : (
-        <>
-          <View style={styles.section}>
-            <View style={styles.sectionHead}>
-              <AppText variant="sectionTitle">내 소모임</AppText>
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => setShowMyFull(true)}
-                style={styles.moreButton}
-              >
-                <AppText variant="caption" tone="brand">
-                  전체보기
-                </AppText>
-              </Pressable>
-            </View>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.mineList}
-              style={styles.mineScroll}
-              snapToInterval={226}
-              decelerationRate="fast"
-            >
-              {myGroups.map((group) => (
+            <TextInput
+              autoFocus
+              accessibilityLabel="동행 검색어"
+              value={search}
+              onChangeText={setSearch}
+              placeholder="소모임 또는 봉사 검색"
+              placeholderTextColor={theme.colors.inkMute}
+              style={styles.searchInput}
+            />
+          </View>
+        ) : null}
+
+        {isLoading ? (
+          <View style={styles.loading}>
+            <ListSkeleton rows={4} thumbnail={false} />
+          </View>
+        ) : isError ? (
+          <ErrorState
+            message="네트워크 연결을 확인하고 다시 시도해주세요."
+            onRetry={() => overview.refetch()}
+          />
+        ) : section === "service" ? (
+          <View style={styles.serviceList}>
+            {serviceItems.length === 0 ? (
+              <EmptyState
+                title="검색 결과가 없어요"
+                description="다른 검색어로 다시 찾아보세요."
+              />
+            ) : (
+              serviceItems.map((item) => (
                 <Pressable
-                  key={group.id}
+                  key={item.id}
                   accessibilityRole="button"
-                  style={styles.mineCard}
-                  onPress={() => router.push(`/group/${group.id}`)}
+                  onPress={() => router.push(`/group/${item.linkedGroupId}`)}
                 >
-                  <VisualCover height={78} seed={group.coverSeed} />
-                  <AppText
-                    numberOfLines={1}
-                    variant="cardTitle"
-                    style={styles.mineTitle}
-                  >
-                    {group.name}
-                  </AppText>
-                  <AppText
-                    numberOfLines={1}
-                    variant="caption"
-                    tone="muted"
-                    style={styles.mineMeta}
-                  >
-                    멤버 {group.currentMembers}명 · {categoryOf(group.category)}
+                  <Card style={styles.serviceCard}>
+                    <View style={styles.serviceRow}>
+                      <VisualThumb
+                        size={62}
+                        seed={item.coverSeed}
+                        icon="volunteer-activism"
+                      />
+                      <View style={styles.serviceBody}>
+                        <View style={styles.serviceMetaRow}>
+                          <Badge>{item.statusLabel}</Badge>
+                          <Text style={styles.serviceSchedule}>
+                            {item.schedule}
+                          </Text>
+                        </View>
+                        <AppText
+                          variant="cardTitle"
+                          style={styles.serviceTitle}
+                        >
+                          {item.name}
+                        </AppText>
+                        <AppText
+                          variant="body"
+                          tone="secondary"
+                          style={styles.serviceDesc}
+                        >
+                          {item.description}
+                        </AppText>
+                        <AppText
+                          variant="caption"
+                          tone="muted"
+                          style={styles.serviceCount}
+                        >
+                          참여 {item.currentMembers}/{item.maxMembers}명
+                        </AppText>
+                      </View>
+                      <MaterialIcons
+                        name="chevron-right"
+                        size={20}
+                        color={theme.colors.inkMute}
+                      />
+                    </View>
+                  </Card>
+                </Pressable>
+              ))
+            )}
+          </View>
+        ) : (
+          <>
+            <View style={styles.section}>
+              <View style={styles.sectionHead}>
+                <AppText variant="sectionTitle">내 소모임</AppText>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => setShowMyFull(true)}
+                  style={styles.moreButton}
+                >
+                  <AppText variant="caption" tone="brand">
+                    전체보기
                   </AppText>
                 </Pressable>
-              ))}
-            </ScrollView>
-          </View>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.mineList}
+                style={styles.mineScroll}
+                snapToInterval={226}
+                decelerationRate="fast"
+              >
+                {myGroups.map((group) => (
+                  <Pressable
+                    key={group.id}
+                    accessibilityRole="button"
+                    style={styles.mineCard}
+                    onPress={() => router.push(`/group/${group.id}`)}
+                  >
+                    <VisualCover height={78} seed={group.coverSeed} />
+                    <AppText
+                      numberOfLines={1}
+                      variant="cardTitle"
+                      style={styles.mineTitle}
+                    >
+                      {group.name}
+                    </AppText>
+                    <AppText
+                      numberOfLines={1}
+                      variant="caption"
+                      tone="muted"
+                      style={styles.mineMeta}
+                    >
+                      멤버 {group.currentMembers}명 ·{" "}
+                      {categoryOf(group.category)}
+                    </AppText>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
 
-          <View style={styles.section}>
-            <AppText variant="sectionTitle" style={styles.allSectionTitle}>
-              전체 모임
-            </AppText>
-            <FilterChips
-              items={GROUP_CATEGORIES}
-              active={category}
-              onChange={setCategory}
-              style={styles.categoryScroll}
-              testIDPrefix="group-category"
-            />
+            <View style={styles.allSectionHeader}>
+              <AppText variant="sectionTitle" style={styles.allSectionTitle}>
+                전체 모임
+              </AppText>
+            </View>
+            <View
+              onLayout={(event) => {
+                const nextAnchorY = event.nativeEvent.layout.y;
+                setCategoryAnchorY(nextAnchorY);
+                setCategorySticky(currentScrollY.current >= nextAnchorY);
+              }}
+              style={styles.categoryAnchor}
+              testID="group-category-anchor"
+            >
+              {showStickyFilter ? null : (
+                <Animated.View
+                  entering={
+                    reduceMotion
+                      ? undefined
+                      : FadeIn.duration(theme.motion.duration.fast)
+                  }
+                  testID="group-content-filter"
+                >
+                  <FilterChips
+                    items={GROUP_CATEGORIES}
+                    active={category}
+                    onChange={setCategory}
+                    style={styles.categoryScroll}
+                    testIDPrefix="group-category"
+                  />
+                </Animated.View>
+              )}
+            </View>
             <View style={styles.groupList}>
               {groups.length === 0 ? (
                 <EmptyState
@@ -321,9 +410,9 @@ export default function GroupScreen() {
                 ))
               )}
             </View>
-          </View>
-        </>
-      )}
+          </>
+        )}
+      </View>
     </StickyHeaderScreen>
   );
 }
@@ -440,6 +529,9 @@ const styles = StyleSheet.create({
   section: {
     marginTop: theme.spacing[3],
   },
+  allSectionHeader: {
+    marginTop: theme.spacing[3],
+  },
   sectionHead: {
     paddingHorizontal: theme.layout.screenX,
     paddingTop: theme.spacing[4],
@@ -488,6 +580,9 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     height: 44,
     marginBottom: theme.layout.listGap,
+  },
+  categoryAnchor: {
+    height: GROUP_COMBINED_STICKY_HEIGHT - GROUP_SEGMENT_STICKY_HEIGHT,
   },
   groupList: {
     paddingHorizontal: theme.layout.screenX,

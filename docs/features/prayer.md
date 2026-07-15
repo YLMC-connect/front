@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 기도 루트 카드 이동 의미 구분 — 상세 이동이 없는 내 기도제목 개별 카드는 버튼 역할·이동·화살표를 제거하고, 상세로 이동하는 내 기도방 카드에는 `기도방 보기 + chevron-right`를 명시하며 섹션 전체보기와 기존 경로는 유지
 - 중보기도 신청 아이콘 구분 — 하단 기도 탭의 `Hearts`와 신청 카드의 기존 `HandHeart`가 겹쳐 보이지 않도록 신청 카드만 Solar `UserPlusRounded`로 변경하고 기존 카드 geometry·색상·`/prayer/apply` 이동을 유지
 - 기도 플로팅 버튼 행동 문구 명확화 — 대상명뿐인 `기도제목`을 `기도제목 작성`으로 바꾸고 기존 `/modal/prayer-new` 이동·`+` 아이콘·고정 위치를 유지
 - 내 기도제목 전체보기 배치 통일 — 섹션 아래의 큰 outline 버튼을 제거하고 제목 오른쪽에 공통 `전체보기 + chevron-right` action을 배치하되 기존 `/prayer/request` 이동은 유지
@@ -17,7 +18,7 @@
 - 기도 탭 상세 Stack 적용 — 기도방 상세·참여 신청·내 기도제목을 기도 목록 위에 push하고 뒤로가기 시 `/prayer`로 복귀하도록 탭별 중첩 Stack 추가
 - 기도 목록 카드 형태 복구 — 오늘의 기도 진행률은 유지하고 기도방·기도제목을 흰 surface, 둥근 경계, 12px 간격의 독립 카드로 복구
 - 기도 대표 요소·상태 UI 적용 — 참여 중인 방의 완료 인원을 합산한 오늘의 기도 진행 카드와 progress를 추가하고 기도방/기도제목은 flat list, loading은 Skeleton, error는 재시도로 정리
-- 기도 루트 무반응 요소 연결 — 기도방 카드는 상세, 기도제목 카드·전체보기는 요청 목록, 중보기도 신청 카드는 신청 화면으로 이동하고 오류 상태 재시도와 FAB 하단 스크롤 여백을 적용
+- 기도 루트 무반응 요소 연결 — 기도방 카드는 상세, 기도제목 전체보기는 요청 목록, 중보기도 신청 카드는 신청 화면으로 이동하고 오류 상태 재시도와 FAB 하단 스크롤 여백을 적용
 - 기도 상세 로컬 badge·underline tab 제거 — 기존 geometry와 선택 상태를 공통 `DetailBadge`·`UnderlineTabs`로 이동
 - 중보기도 목록/상세/등록 화면 구현 — `app/(tabs)/prayer/index.tsx`, `app/(tabs)/prayer/[id].tsx`, `app/modal/prayer-new.tsx`
 - 중보기도 타입, mock 데이터, 기도제목 생성 service, TanStack Query mutation hook 구현 — `src/types/prayer.ts`, `src/mocks/prayers.ts`, `src/services/prayerService.ts`, `src/hooks/usePrayers.ts`
@@ -59,15 +60,16 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-15) **기도 루트는 이동 가능한 카드에만 행동 문구와 화살표를 표시한다** — 내 기도제목 개별 요약에는 별도 상세가 없으므로 정적 카드로 두고 섹션 `전체보기`만 `/prayer/request`로 이동합니다. 상세가 있는 내 기도방 카드는 `기도방 보기 + chevron-right`를 표시하고 기존 `/prayer/[id]` 이동을 유지합니다.
 - (2026-07-15) **중보기도 신청 카드는 Solar `UserPlusRounded`를 사용한다** — 하단 기도 탭은 `Hearts`, 참여 신청 카드는 사람과 추가 표시가 함께 보이는 `UserPlusRounded`로 역할을 구분합니다. 공통 `volunteer-activism` 매핑은 바꾸지 않아 홈·봉사·기도 빈 상태 등 다른 화면의 `HandHeart`는 유지합니다.
 - (2026-07-15) **기도 FAB는 `기도제목 작성`으로 실행 행동을 표시한다** — `기도제목`만 표시해 목록·작성 의미가 모호했던 문구를 행동형으로 바꾸되 기존 `/modal/prayer-new` 이동과 geometry는 유지합니다.
 - (2026-07-14) **내 기도제목 전체보기는 섹션 제목 오른쪽에 둔다** — 큰 독립 버튼 대신 공통 `SectionHeader`를 사용해 동행과 같은 `전체보기 + chevron-right`로 표시하고, action은 기존 `/prayer/request` Stack 경로를 그대로 push합니다.
 - (2026-07-14) **기도 루트 콘텐츠는 기본 배경색 glass 타이틀 아래 하나의 스크롤을 사용한다** — 실제 safe-area와 20px 상단 여백을 포함한 공통 sticky blur를 사용하고 하단 border 없이 콘텐츠가 뒤를 통과하며 fixed FAB는 유지합니다.
 - (2026-07-14) **기도 상세·보조 화면은 기도 탭 Stack에 쌓는다** — `/prayer/[id]`, `/prayer/apply`, `/prayer/request`는 기도 목록 위에 push하고 back으로 `/prayer`에 복귀합니다.
-- (2026-07-12) **기도 루트의 내 기도방·내 기도제목은 카드로 구분한다** — 오늘 진행률 대표 surface 아래의 실제 이동 항목은 흰 surface, 16px radius, 옅은 border와 약한 shadow를 사용해 각 항목의 터치 경계를 분명히 합니다.
+- (2026-07-12, 2026-07-15 상호작용 의미 보완) **기도 루트의 내 기도방·내 기도제목은 카드로 구분한다** — 오늘 진행률 대표 surface 아래에서 흰 surface, 16px radius, 옅은 border와 약한 shadow를 공유합니다. 기도방만 전체 카드가 이동 요소이고 기도제목 요약은 정적 카드로 사용합니다.
 - (2026-07-12) **기도 루트 대표 요소는 오늘 참여 진행이다** — overview의 참여 중 기도방 `completedCount/memberCount`를 합산해 오늘 완료 인원과 비율을 표시하며 새 서버 필드를 만들지 않습니다. 상세 목록의 차분한 icon/color는 유지하고 flat row만 카드 형태로 복구했습니다.
 
-- (2026-07-12) **기도 루트의 카드형 affordance는 기존 실제 route로 이동한다** — 새 상세 계약을 추측하지 않고 현재 존재하는 `/prayer/[id]`, `/prayer/request`, `/prayer/apply`로 연결하며 query 오류는 같은 overview를 refetch합니다.
+- (2026-07-12, 2026-07-15 기도제목 개별 카드 이동 폐기) **기도 루트의 카드형 affordance는 기존 실제 route로 이동한다** — 기도방·신청과 기도제목 섹션 전체보기만 현재 존재하는 `/prayer/[id]`, `/prayer/apply`, `/prayer/request`로 연결합니다. 별도 상세가 없는 기도제목 개별 요약은 정적 카드로 바꾸고 query 오류는 같은 overview를 refetch합니다.
 
 - (2026-07-10) **기도 상세 디자인 상태는 development 전용이다** — 기도 완료·empty·현황·응답 캡처는 `designVariant`만 사용하고 production에서는 무시합니다. 실제 상태는 mock/API service 결과가 결정합니다.
 - (2026-07-10) **기도 루트는 overview query만 소비한다** — `FaithSectionsScreen`은 fixture를 직접 소유하지 않고 `usePrayerOverview → fetchPrayerOverview → mockPrayerOverview` 경계를 사용합니다. 사용자 API가 생기면 service/mapper만 교체하며 화면 문구와 상태 label은 view model mapping으로 유지합니다.

@@ -195,11 +195,19 @@ function PrayerContent() {
                     : `${room.participationRate}%`}
                 </AppText>
               </View>
-              <AppIcon
-                name="chevron-right"
-                size={18}
-                color={theme.colors.inkMute}
-              />
+              <View
+                testID={`prayer-room-${room.id}-action`}
+                style={styles.roomAction}
+              >
+                <AppText variant="caption" tone="brand">
+                  기도방 보기
+                </AppText>
+                <AppIcon
+                  name="chevron-right"
+                  size={18}
+                  color={theme.colors.primaryDeep}
+                />
+              </View>
             </Pressable>
           ))}
         </View>
@@ -214,10 +222,9 @@ function PrayerContent() {
         />
         <View style={styles.stack}>
           {data.requests.map((item) => (
-            <Pressable
+            <View
               key={item.id}
-              accessibilityRole="button"
-              onPress={() => router.push("/prayer/request")}
+              testID={`prayer-request-card-${item.id}`}
               style={styles.requestCard}
             >
               <View style={styles.cardText}>
@@ -242,12 +249,7 @@ function PrayerContent() {
                   {item.description}
                 </AppText>
               </View>
-              <AppIcon
-                name="chevron-right"
-                size={18}
-                color={theme.colors.inkMute}
-              />
-            </Pressable>
+            </View>
           ))}
         </View>
       </View>
@@ -585,6 +587,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     ...theme.shadow.card,
+  },
+  roomAction: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    flexShrink: 0,
   },
   dayBadge: {
     width: 48,

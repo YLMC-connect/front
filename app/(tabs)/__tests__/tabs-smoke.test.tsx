@@ -389,15 +389,33 @@ describe("v1 tab smoke screens", () => {
       nativeEvent: { contentOffset: { y: 300 } },
     });
     expect(
+      screen.getByTestId("screen-group-sticky-controls").props.pointerEvents,
+    ).toBe("auto");
+    expect(screen.getByTestId("group-sticky-controls-filter")).toBeTruthy();
+
+    fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
+      nativeEvent: { contentOffset: { y: 311 } },
+    });
+    expect(
+      screen.getByTestId("screen-group-sticky-controls").props.pointerEvents,
+    ).toBe("auto");
+
+    fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
+      nativeEvent: { contentOffset: { y: 312 } },
+    });
+    expect(
       screen.getByTestId("screen-group-sticky-controls", {
         includeHiddenElements: true,
       }).props.pointerEvents,
     ).toBe("none");
+
+    fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
+      nativeEvent: { contentOffset: { y: 308 } },
+    });
     expect(
-      screen.getByTestId("group-sticky-controls-filter", {
-        includeHiddenElements: true,
-      }),
-    ).toBeTruthy();
+      screen.getByTestId("screen-group-sticky-controls").props.pointerEvents,
+    ).toBe("auto");
+    expect(screen.getByTestId("group-sticky-controls-filter")).toBeTruthy();
 
     fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
       nativeEvent: { contentOffset: { y: 295 } },

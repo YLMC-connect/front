@@ -205,6 +205,9 @@ export default function GroupScreen() {
         (searchOpen ? SEARCH_FIELD_STICKY_HEIGHT : 0)
       }
       stickyControlsAlwaysVisible={searchOpen}
+      stickyControlsRevealKey={
+        showStickyFilter ? "segment-with-filter" : "segment-only"
+      }
       right={
         <SearchToggleButton
           accessibilityLabel={searchOpen ? "동행 검색 닫기" : "동행 검색"}

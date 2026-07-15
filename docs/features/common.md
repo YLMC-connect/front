@@ -13,6 +13,7 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- sticky controls 구성 전환 재표시 기준 — 공통 `StickyHeaderScreen`이 선택적 reveal key 변경 시 숨김 상태와 방향 누적값을 초기화하도록 지원해 동행의 세그먼트·필터 결합 직후 메뉴를 먼저 표시하면서 다른 화면의 기존 12px/4px 정책은 유지
 - 동행 소모임·봉사 카드 프레임 통일 — 동행 루트의 두 세그먼트가 화면 전용 `CompanionCard`를 공유해 96px 썸네일·16px padding/radius·경계·shadow와 정보 계층을 맞추고 도메인별 메타만 분리
 - 상세 뒤로가기 surface 통일 — 나눔 이미지 hero의 흰색 RGBA·카드 그림자 예외를 제거해 일반 상세와 같은 `surface2`·1px 경계를 사용하고 공통 68×44px geometry·label·press motion을 유지
 - 페이지 뒤로·화면 내부 닫기 의미 보완 — 홈에서 진입하는 MY와 인증 약관 page에 공통 `chevron-left + 뒤로`를 연결하고 약관 전문 sheet의 icon-only action을 `close + 닫기`로 보완했으며 확인 dialog의 `취소` 선택 문구는 유지
@@ -167,6 +168,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-15) **sticky controls의 내용 구성이 바뀌면 화면이 명시한 시점에 다시 표시할 수 있다** — 공통 기본 방향 정책은 아래 12px 숨김·위 4px 재표시로 유지하고, 선택적 reveal key가 바뀔 때만 숨김 상태와 누적 거리를 초기화합니다. 동행처럼 스크롤 중 control 높이와 내용이 함께 바뀌는 화면이 이전 하강량을 새 구성에 이어받지 않도록 사용합니다.
 - (2026-07-15) **같은 화면의 동급 목록 카드는 외곽 프레임을 공유하고 메타만 분리한다** — 동행의 전체 소모임·봉사는 같은 `CompanionCard`로 썸네일·surface·경계·shadow·텍스트 위치를 공유하며 카테고리/일정, 인원/참여 인원처럼 도메인 정보만 props로 구분합니다. 내 소모임 가로 cover 카드는 역할이 달라 기존 구조를 유지합니다.
 - (2026-07-15) **상세 뒤로가기 surface는 배경 이미지 유무와 관계없이 `surface2`로 통일한다** — 일반 상세와 나눔 이미지 hero 모두 1px `line` 경계와 `surface2`를 사용하며, 이미지 위 전용 흰색 RGBA·카드 그림자 예외는 사용하지 않습니다. `chevron-left + 뒤로`, 68×44px geometry와 press motion은 유지합니다.
 - (2026-07-15) **중보기도 탭은 Solar `Hearts`를 사용한다** — 기존 `HeartShine`보다 중보기도의 함께하는 의미가 직접 드러나는 `Hearts`로 교체하며 기본 `Linear`·선택 `Bold`, 기존 크기·색상·접근성·탭 모션은 유지합니다.

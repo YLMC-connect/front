@@ -41,6 +41,7 @@ export function StickyHeaderScreen({
   stickyControlsHeight = 0,
   stickyControlsInset = stickyControlsHeight,
   stickyControlsAlwaysVisible = false,
+  stickyControlsRevealKey,
   onScrollOffsetChange,
   contentContainerStyle,
   testID,
@@ -54,6 +55,7 @@ export function StickyHeaderScreen({
   stickyControlsHeight?: number;
   stickyControlsInset?: number;
   stickyControlsAlwaysVisible?: boolean;
+  stickyControlsRevealKey?: string | number;
   onScrollOffsetChange?: (offsetY: number) => void;
   contentContainerStyle?: StyleProp<ViewStyle>;
   testID: string;
@@ -68,6 +70,14 @@ export function StickyHeaderScreen({
   const downwardDistance = useRef(0);
   const upwardDistance = useRef(0);
   const hasStickyControls = Boolean(stickyControls && stickyControlsHeight > 0);
+
+  useEffect(() => {
+    if (stickyControlsRevealKey === undefined) return;
+
+    downwardDistance.current = 0;
+    upwardDistance.current = 0;
+    setControlsHidden(false);
+  }, [stickyControlsRevealKey]);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = Math.max(event.nativeEvent.contentOffset.y, 0);

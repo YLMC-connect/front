@@ -196,7 +196,7 @@ export function FloatingActionButton({
       {...pressableProps}
       style={fabStyle}
     >
-      <AppIcon name={icon} size={20} color="#fff" />
+      <AppIcon name={icon} size={18} color="#fff" />
       <Text style={styles.fabText}>{label}</Text>
     </MotionPressable>
   );
@@ -493,6 +493,7 @@ export function SegmentedTabs<T extends string>({
   return (
     <View
       style={[styles.segmented, style]}
+      testID={testIDPrefix ? `${testIDPrefix}-track` : undefined}
       onLayout={(event) => {
         const gapWidth = Math.max(items.length - 1, 0) * SEGMENT_GAP;
         const contentWidth = Math.max(
@@ -514,6 +515,7 @@ export function SegmentedTabs<T extends string>({
             key={item.key}
             accessibilityRole="tab"
             accessibilityState={selected ? { selected: true } : {}}
+            hitSlop={{ top: 6, bottom: 6 }}
             testID={testIDPrefix ? `${testIDPrefix}-${item.key}` : undefined}
             onPress={() => {
               if (!selected) onChange(item.key);
@@ -1214,26 +1216,26 @@ const styles = StyleSheet.create({
     right: 18,
     bottom: 86,
     zIndex: 20,
-    minWidth: 52,
-    height: 52,
+    minWidth: 46,
+    height: 46,
     borderRadius: theme.radius.pill,
-    paddingLeft: 14,
-    paddingRight: 16,
+    paddingLeft: 12,
+    paddingRight: 14,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: 6,
     backgroundColor: theme.colors.primary,
     ...theme.shadow.fab,
   },
   fabCompact: {
-    width: 52,
+    width: 46,
     paddingLeft: 0,
     paddingRight: 0,
   },
   fabText: {
     color: theme.colors.white,
-    fontSize: theme.fontSize.md,
+    fontSize: 13,
     fontWeight: theme.fontWeight.bold,
   },
   badge: {
@@ -1307,6 +1309,7 @@ const styles = StyleSheet.create({
   segmented: {
     position: "relative",
     flexDirection: "row",
+    height: 40,
     gap: SEGMENT_GAP,
     padding: SEGMENT_PADDING,
     backgroundColor: "rgba(30,41,32,0.05)",
@@ -1314,7 +1317,7 @@ const styles = StyleSheet.create({
   },
   segment: {
     flex: 1,
-    height: 36,
+    height: 32,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: theme.radius.pill,

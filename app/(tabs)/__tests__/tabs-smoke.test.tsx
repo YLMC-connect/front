@@ -624,6 +624,11 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<PrayerScreen />);
     await screen.findByText("내 기도방");
 
+    expect(screen.getAllByText("기도방 보기")).toHaveLength(2);
+    expect(
+      screen.getByTestId("prayer-room-prayer-overview-room-mon-am-action"),
+    ).toBeTruthy();
+
     fireEvent.press(screen.getByText("월요일 오전"));
     expect(router.push).toHaveBeenCalledWith(
       "/prayer/prayer-overview-room-mon-am",
@@ -632,6 +637,12 @@ describe("v1 tab smoke screens", () => {
     expect(router.push).toHaveBeenCalledWith("/prayer/apply");
     fireEvent.press(screen.getByLabelText("내 기도제목 전체보기"));
     expect(router.push).toHaveBeenCalledWith("/prayer/request");
+
+    const requestCard = screen.getByTestId(
+      "prayer-request-card-prayer-overview-request-1",
+    );
+    expect(requestCard.props.accessibilityRole).toBeUndefined();
+    expect(requestCard.props.onPress).toBeUndefined();
   });
 
   it("renders the prayer apply screen", () => {

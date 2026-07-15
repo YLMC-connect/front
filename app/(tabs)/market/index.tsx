@@ -270,10 +270,10 @@ function MarketEmptyState({
 const styles = StyleSheet.create({
   statusTabs: {
     flexShrink: 0,
-    height: 44,
+    height: 40,
     marginHorizontal: theme.layout.screenX,
     marginTop: 4,
-    marginBottom: theme.layout.listGap,
+    marginBottom: 16,
   },
   categoryScroll: {
     flexGrow: 0,

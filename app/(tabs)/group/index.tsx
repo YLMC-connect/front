@@ -463,10 +463,10 @@ function categoryOf(key: string) {
 const styles = StyleSheet.create({
   segmented: {
     flexShrink: 0,
-    height: 44,
+    height: 40,
     marginHorizontal: theme.layout.screenX,
     marginTop: 4,
-    marginBottom: theme.layout.listGap,
+    marginBottom: 16,
   },
   body: {
     paddingBottom: 164,

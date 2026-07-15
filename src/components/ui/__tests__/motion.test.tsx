@@ -88,11 +88,19 @@ describe("common motion", () => {
 
     expect(screen.getByTestId("status-indicator")).toBeTruthy();
     expect(
+      StyleSheet.flatten(screen.getByTestId("status-track").props.style),
+    ).toMatchObject({ height: 40, borderRadius: theme.radius.pill });
+    expect(
       StyleSheet.flatten(screen.getByTestId("status-sharing").props.style),
     ).toMatchObject({
-      height: 36,
+      height: 32,
+      borderRadius: theme.radius.pill,
       alignItems: "center",
       justifyContent: "center",
+    });
+    expect(screen.getByTestId("status-sharing").props.hitSlop).toEqual({
+      top: 6,
+      bottom: 6,
     });
     expect(
       StyleSheet.flatten(screen.getByText("나눔중").props.style),
@@ -122,10 +130,10 @@ describe("common motion", () => {
     );
 
     fireEvent(screen.getByTestId("category-all"), "layout", {
-      nativeEvent: { layout: { height: 44, width: 54, x: 0, y: 0 } },
+      nativeEvent: { layout: { height: 36, width: 54, x: 0, y: 0 } },
     });
     fireEvent(screen.getByTestId("category-books"), "layout", {
-      nativeEvent: { layout: { height: 44, width: 82, x: 62, y: 0 } },
+      nativeEvent: { layout: { height: 36, width: 82, x: 62, y: 0 } },
     });
 
     expect(
@@ -136,7 +144,16 @@ describe("common motion", () => {
     expect(
       StyleSheet.flatten(screen.getByTestId("category-track").props.style),
     ).not.toHaveProperty("paddingHorizontal");
-    expect(screen.getByTestId("category-indicator")).toBeTruthy();
+    expect(
+      StyleSheet.flatten(screen.getByTestId("category-indicator").props.style),
+    ).toMatchObject({ height: 36, borderRadius: theme.radius.pill });
+    expect(
+      StyleSheet.flatten(screen.getByTestId("category-all").props.style),
+    ).toMatchObject({ height: 36, borderRadius: theme.radius.pill });
+    expect(screen.getByTestId("category-all").props.hitSlop).toEqual({
+      top: 4,
+      bottom: 4,
+    });
     fireEvent.press(screen.getByTestId("category-all"));
     expect(onChange).not.toHaveBeenCalled();
 

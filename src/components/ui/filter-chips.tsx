@@ -21,6 +21,9 @@ type FilterChipLayout = {
   x: number;
 };
 
+const FILTER_CHIP_HEIGHT = 36;
+const FILTER_CHIP_HIT_SLOP = 4;
+
 export function FilterChips<T extends string>({
   items,
   active,
@@ -109,6 +112,10 @@ export function FilterChips<T extends string>({
             <MotionPressable
               accessibilityRole="button"
               accessibilityState={{ selected }}
+              hitSlop={{
+                top: FILTER_CHIP_HIT_SLOP,
+                bottom: FILTER_CHIP_HIT_SLOP,
+              }}
               key={item.key}
               onLayout={(event) => {
                 const { width, x } = event.nativeEvent.layout;
@@ -155,8 +162,8 @@ const styles = StyleSheet.create({
   },
   surface: {
     position: "absolute",
-    top: 0,
-    height: theme.layout.touchTarget,
+    top: FILTER_CHIP_HIT_SLOP,
+    height: FILTER_CHIP_HEIGHT,
     borderRadius: theme.radius.pill,
     borderWidth: 1,
     borderColor: theme.colors.line,
@@ -164,14 +171,15 @@ const styles = StyleSheet.create({
   },
   indicator: {
     position: "absolute",
-    top: 0,
-    height: theme.layout.touchTarget,
+    top: FILTER_CHIP_HIT_SLOP,
+    height: FILTER_CHIP_HEIGHT,
     zIndex: 1,
     borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.ink,
   },
   chip: {
-    minHeight: theme.layout.touchTarget,
+    height: FILTER_CHIP_HEIGHT,
+    marginVertical: FILTER_CHIP_HIT_SLOP,
     zIndex: 2,
     paddingHorizontal: 13,
     alignItems: "center",

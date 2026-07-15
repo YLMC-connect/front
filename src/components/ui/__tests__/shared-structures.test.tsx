@@ -60,6 +60,18 @@ describe("shared maintenance UI", () => {
     const onPress = jest.fn();
     render(<FloatingActionButton label="기도제목 작성" onPress={onPress} />);
 
+    expect(
+      StyleSheet.flatten(screen.getByLabelText("기도제목 작성").props.style),
+    ).toMatchObject({
+      minWidth: 46,
+      height: 46,
+      paddingLeft: 12,
+      paddingRight: 14,
+      gap: 6,
+    });
+    expect(
+      StyleSheet.flatten(screen.getByText("기도제목 작성").props.style),
+    ).toMatchObject({ fontSize: 13 });
     expect(screen.getByText("기도제목 작성")).toBeTruthy();
     fireEvent.press(screen.getByLabelText("기도제목 작성"));
     expect(onPress).toHaveBeenCalledTimes(1);

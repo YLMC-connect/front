@@ -1,8 +1,12 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import Animated, { FadeIn, useReducedMotion } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+} from "react-native-reanimated";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   AppText,
@@ -36,6 +40,8 @@ const sections = [
 
 const GROUP_SEGMENT_STICKY_HEIGHT = 60;
 const GROUP_COMBINED_STICKY_HEIGHT = 116;
+const GROUP_FILTER_DOCK_DISTANCE = 12;
+const GROUP_FILTER_TRANSLATE_DISTANCE = 4;
 
 export default function GroupScreen() {
   const router = useRouter();
@@ -51,8 +57,30 @@ export default function GroupScreen() {
   const [showMyFull, setShowMyFull] = useState(false);
   const [categoryAnchorY, setCategoryAnchorY] = useState<number | null>(null);
   const [categorySticky, setCategorySticky] = useState(false);
+  const [stickyFilterInteractive, setStickyFilterInteractive] = useState(false);
   const currentScrollY = useRef(0);
   const reduceMotion = useReducedMotion();
+  const categoryDockProgress = useSharedValue(0);
+  const contentFilterAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: 1 - categoryDockProgress.value,
+    transform: [
+      {
+        translateY:
+          categoryDockProgress.value === 0
+            ? 0
+            : -GROUP_FILTER_TRANSLATE_DISTANCE * categoryDockProgress.value,
+      },
+    ],
+  }));
+  const stickyFilterAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: categoryDockProgress.value,
+    transform: [
+      {
+        translateY:
+          GROUP_FILTER_TRANSLATE_DISTANCE * (1 - categoryDockProgress.value),
+      },
+    ],
+  }));
   const routeSection = params.section === "service" ? "service" : "groups";
   const routeCategory =
     GROUP_CATEGORIES.find((item) => item.key === params.category)?.key ?? "all";
@@ -93,25 +121,35 @@ export default function GroupScreen() {
     : searchedGroups.filter((group) => group.isJoined);
   const isLoading = overview.isPending && !isError;
 
+  const updateCategoryDockState = useCallback(
+    (offsetY: number, anchorY = categoryAnchorY) => {
+      const activeAnchorY = section === "groups" ? anchorY : null;
+      const nextProgress = resolveCategoryDockProgress(
+        offsetY,
+        activeAnchorY,
+        reduceMotion,
+      );
+      const nextInteractive = nextProgress >= 0.5;
+      const nextSticky = activeAnchorY !== null && offsetY >= activeAnchorY;
+
+      categoryDockProgress.value = nextProgress;
+      setStickyFilterInteractive((current) =>
+        current === nextInteractive ? current : nextInteractive,
+      );
+      setCategorySticky((current) =>
+        current === nextSticky ? current : nextSticky,
+      );
+    },
+    [categoryAnchorY, categoryDockProgress, reduceMotion, section],
+  );
+
   useEffect(() => {
-    const nextSticky =
-      section === "groups" &&
-      categoryAnchorY !== null &&
-      currentScrollY.current >= categoryAnchorY;
-    setCategorySticky((current) =>
-      current === nextSticky ? current : nextSticky,
-    );
-  }, [categoryAnchorY, section]);
+    updateCategoryDockState(currentScrollY.current);
+  }, [updateCategoryDockState]);
 
   const handleScrollOffsetChange = (offsetY: number) => {
     currentScrollY.current = offsetY;
-    const nextSticky =
-      section === "groups" &&
-      categoryAnchorY !== null &&
-      offsetY >= categoryAnchorY;
-    setCategorySticky((current) =>
-      current === nextSticky ? current : nextSticky,
-    );
+    updateCategoryDockState(offsetY);
   };
   const showStickyFilter = section === "groups" && categorySticky;
 
@@ -176,11 +214,12 @@ export default function GroupScreen() {
           />
           {showStickyFilter ? (
             <Animated.View
-              entering={
-                reduceMotion
-                  ? undefined
-                  : FadeIn.duration(theme.motion.duration.fast)
+              accessibilityElementsHidden={!stickyFilterInteractive}
+              importantForAccessibility={
+                stickyFilterInteractive ? "auto" : "no-hide-descendants"
               }
+              pointerEvents={stickyFilterInteractive ? "auto" : "none"}
+              style={stickyFilterAnimatedStyle}
               testID="group-sticky-controls-filter"
             >
               <FilterChips
@@ -188,7 +227,7 @@ export default function GroupScreen() {
                 active={category}
                 onChange={setCategory}
                 style={styles.categoryScroll}
-                testIDPrefix="group-category"
+                testIDPrefix="group-sticky-category"
               />
             </Animated.View>
           ) : null}
@@ -311,29 +350,28 @@ export default function GroupScreen() {
               onLayout={(event) => {
                 const nextAnchorY = event.nativeEvent.layout.y;
                 setCategoryAnchorY(nextAnchorY);
-                setCategorySticky(currentScrollY.current >= nextAnchorY);
+                updateCategoryDockState(currentScrollY.current, nextAnchorY);
               }}
               style={styles.categoryAnchor}
               testID="group-category-anchor"
             >
-              {showStickyFilter ? null : (
-                <Animated.View
-                  entering={
-                    reduceMotion
-                      ? undefined
-                      : FadeIn.duration(theme.motion.duration.fast)
-                  }
-                  testID="group-content-filter"
-                >
-                  <FilterChips
-                    items={GROUP_CATEGORIES}
-                    active={category}
-                    onChange={setCategory}
-                    style={styles.categoryScroll}
-                    testIDPrefix="group-category"
-                  />
-                </Animated.View>
-              )}
+              <Animated.View
+                accessibilityElementsHidden={stickyFilterInteractive}
+                importantForAccessibility={
+                  stickyFilterInteractive ? "no-hide-descendants" : "auto"
+                }
+                pointerEvents={stickyFilterInteractive ? "none" : "auto"}
+                style={contentFilterAnimatedStyle}
+                testID="group-content-filter"
+              >
+                <FilterChips
+                  items={GROUP_CATEGORIES}
+                  active={category}
+                  onChange={setCategory}
+                  style={styles.categoryScroll}
+                  testIDPrefix="group-category"
+                />
+              </Animated.View>
             </View>
             <View style={styles.groupList}>
               {groups.length === 0 ? (
@@ -458,6 +496,17 @@ function categoryOf(key: string) {
   return (
     GROUP_CATEGORIES.find((category) => category.key === key)?.label ?? "기타"
   );
+}
+
+function resolveCategoryDockProgress(
+  offsetY: number,
+  anchorY: number | null,
+  reduceMotion: boolean,
+) {
+  if (anchorY === null || offsetY < anchorY) return 0;
+  if (reduceMotion) return 1;
+
+  return Math.min((offsetY - anchorY) / GROUP_FILTER_DOCK_DISTANCE, 1);
 }
 
 const styles = StyleSheet.create({

@@ -384,6 +384,11 @@ describe("v1 tab smoke screens", () => {
       nativeEvent: { contentOffset: { y: 299 } },
     });
     expect(screen.queryByTestId("group-sticky-controls-filter")).toBeNull();
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("group-content-filter").props.style,
+      ),
+    ).toMatchObject({ opacity: 1, transform: [{ translateY: 0 }] });
 
     fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
       nativeEvent: { contentOffset: { y: 300 } },
@@ -391,7 +396,32 @@ describe("v1 tab smoke screens", () => {
     expect(
       screen.getByTestId("screen-group-sticky-controls").props.pointerEvents,
     ).toBe("auto");
-    expect(screen.getByTestId("group-sticky-controls-filter")).toBeTruthy();
+    const hiddenStickyFilter = screen.getByTestId(
+      "group-sticky-controls-filter",
+      { includeHiddenElements: true },
+    );
+    expect(hiddenStickyFilter).toBeTruthy();
+    expect(StyleSheet.flatten(hiddenStickyFilter.props.style)).toMatchObject({
+      opacity: 0,
+      transform: [{ translateY: 4 }],
+    });
+    expect(screen.getByTestId("group-content-filter")).toBeTruthy();
+    expect(hiddenStickyFilter.props.pointerEvents).toBe("none");
+    expect(screen.getByTestId("group-content-filter").props.pointerEvents).toBe(
+      "auto",
+    );
+
+    fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
+      nativeEvent: { contentOffset: { y: 306 } },
+    });
+    expect(
+      screen.getByTestId("group-sticky-controls-filter").props.pointerEvents,
+    ).toBe("auto");
+    expect(
+      screen.getByTestId("group-content-filter", {
+        includeHiddenElements: true,
+      }).props.pointerEvents,
+    ).toBe("none");
 
     fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
       nativeEvent: { contentOffset: { y: 311 } },

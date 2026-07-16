@@ -10,7 +10,7 @@
 
 ## ✅ 완료
 
-- 동행 상세 복귀 첫 프레임 위치 고정 — 상세 이동 전에 목록 ScrollView와 sticky 내부 상태를 새 epoch로 재생성하고 clean commit 뒤 Stack에 push하며, 상세에 가려진 동안 전달되는 0px layout·지연 scroll을 차단해 복귀 첫 프레임부터 본문 필터만 원래 위치에 표시하면서 일반 200ms Cross Fade·Translate는 유지
+- 동행 상세 복귀 미세 잔상 제거 — 목록·세그먼트·필터를 재생성하지 않고 유지한 채 웹은 카드 입력 이벤트 안에서 기존 ScrollView를 `y=0`으로 맞춘 직후 같은 Stack에 직접 push하고, 네이티브는 push 전환이 끝난 뒤 숨은 목록을 초기화해 복귀 첫 프레임부터 본문 필터만 원래 위치에 표시하면서 일반 200ms Cross Fade·Translate는 유지
 - 소모임 상세·개설 상단 패딩 통일 — 상세는 공통 `Screen`의 `safe area + 20px` 기준을 상속하고 별도 `KeyboardAvoidingView`를 쓰는 개설 modal도 같은 계산식을 적용해 루트 동행 헤더와 시작점을 맞춤
 - 소모임 개설 폼 구획·포커스 통일 — 카테고리부터 모임 장소까지 이어지는 8px 회색 section divider를 제거하고, 소모임명·설명·최대인원·일정·장소 입력을 나눔 등록과 같은 공통 `ModalFormTextInput`으로 전환해 primary 2px 포커스와 기존 입력·개설 동작을 유지
 - 동행 sticky 필터 시간 기반 Cross Fade·Translate — 전체 모임 필터가 anchor를 통과하면 본문과 sticky에 함께 렌더링된 채 200ms 동안 반대 opacity와 ±4px 이동으로 붙고 복귀하며, 중간 시점에 터치·접근성 대상을 교대하고 종료 뒤 sticky 복제본을 제거하면서 기존 숨김·검색·필터 동작은 유지
@@ -76,7 +76,7 @@
 | `src/mocks/groups.ts`                          | 소모임 mock 데이터                              |
 | `src/services/groupService.ts`                 | 교체 가능한 동행 조회·공지 CUD data source 경계 |
 | `src/hooks/useGroups.ts`                       | 동행 조회와 공지 CUD TanStack Query hook        |
-| `src/components/layout/StickyHeaderScreen.tsx` | sticky scroll guard와 높이 gate                 |
+| `src/components/layout/StickyHeaderScreen.tsx` | sticky scroll guard와 내부 상태 reset 경계      |
 | `src/components/ui/motion.tsx`                 | presence 모션과 즉시 종료 경계                  |
 | `src/constants/domainOptions.ts`               | 소모임 카테고리/상태 필터 옵션                  |
 | `src/types/group.ts`                           | 소모임 타입                                     |
@@ -88,7 +88,7 @@
 
 ## 결정 사항 (최신 위)
 
-- (2026-07-16, 원인 재확정) **상세 복귀 상태는 focus에서 고치지 않고 상세 이동 전에 clean commit한다** — Stack은 목록을 다시 표시한 뒤 passive focus를 전달하므로 focus 시점의 state reset은 첫 프레임을 보장하지 못합니다. 상세 action은 sticky/presence를 즉시 종료하고 `StickyHeaderScreen`을 새 epoch로 재생성한 뒤 `useLayoutEffect`에서 새 ScrollView의 `y=0`을 확정하고 Stack에 push합니다. 상세에 가려진 동안 들어오는 지연 scroll과 `display:none`에서 발생한 0px anchor layout은 무시하고, focus는 이미 정리된 목록의 입력 차단만 해제합니다. 이 경계는 웹·Android·iOS에 공통 적용하며 timeout이나 이중 `requestAnimationFrame`은 사용하지 않습니다. 430x932 웹의 화면 뒤로가기와 browser history 뒤로가기에서 첫 복귀 frame `scrollTop=0`, 본문 필터 `top=422/opacity=1`, sticky 복제본 없음, layer `height=60`과 이후 재도킹 `height=116`을 확인했습니다.
+- (2026-07-16, 최종 원인) **상세 복귀 첫 프레임은 목록 subtree를 재생성하지 않고 플랫폼 전환 시점에 맞춰 초기화한다** — 웹 native-stack은 비활성 route를 `display:none`으로 전환하며 숨은 ScrollView의 `scrollTop=0` 측정값은 실제 보존 위치를 뜻하지 않아, 숨긴 뒤의 scroll reset만으로는 복귀 위치를 보장하지 못합니다. 웹은 카드 입력 이벤트 안에서 기존 ScrollView를 `y=0`으로 맞추고 `StackActions.push("[id]")`를 바로 dispatch해 다음 paint 전에 목록을 숨깁니다. Android·iOS는 이전 목록이 push 애니메이션 중 보이므로 사전 이동하지 않고 `transitionEnd(closing=true)` 뒤 초기화합니다. ScrollView·세그먼트·필터 indicator·blur layer는 같은 인스턴스를 유지하고 reset key는 sticky 내부 방향 누적값만 정리합니다. 430x932 웹에서 화면의 뒤로가기와 browser history 뒤로가기 모두 진입 전 `scrollTop=396`, sticky `height=116` 상태에서 복귀 직후와 300ms 뒤 `scrollTop=0`, 본문 필터 `opacity=1`, sticky 복제본 없음, layer `height=60`을 확인했습니다.
 - (2026-07-16) **소모임 상세와 개설 화면은 루트 동행과 같은 상단 기준을 사용한다** — 상세·오류·멤버·공지 화면은 공통 `Screen`의 `top inset + 20px`을 상속하고, `Screen` 밖의 소모임 개설 modal도 같은 계산식을 적용합니다. 화면 내부 section 여백과 기존 `TopBar` geometry는 변경하지 않습니다.
 - (2026-07-16) **소모임 개설 폼은 회색 divider 없이 내부 여백으로 구획하고 공통 작성 입력을 사용한다** — 카테고리·소모임명·설명·최대인원·일정·장소 사이의 8px divider를 제거하되 section padding은 유지합니다. 다섯 입력은 나눔 등록과 같은 `ModalFormTextInput`을 사용해 브라우저 기본 outline 대신 primary 2px 포커스를 표시하고 최대인원만 기존 width·가운데 정렬을 추가합니다.
 - (2026-07-16) **전체 모임 필터 도킹은 200ms 시간 기반 presence Cross Fade + Translate로 실행한다** — 스크롤은 anchor 통과 여부만 결정하고 공통 `useMotionPresence`가 본문 `opacity 1→0`·최대 4px 상승과 sticky `opacity 0→1`·`4→0px` 이동을 실행합니다. 복귀도 같은 progress를 역방향으로 재생한 뒤 sticky 복제본을 제거하며, 중간 시점에 터치·접근성 대상을 교대하고 동작 줄이기에서는 즉시 전환합니다.

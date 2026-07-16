@@ -16,6 +16,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import Animated, {
+  cancelAnimation,
   type SharedValue,
   useAnimatedStyle,
   useReducedMotion,
@@ -45,6 +46,7 @@ export function StickyHeaderScreen({
   stickyControlsInset = stickyControlsHeight,
   stickyControlsAlwaysVisible = false,
   stickyControlsRevealKey,
+  scrollStateResetKey,
   onScrollOffsetChange,
   scrollRef,
   shouldHandleScroll,
@@ -63,6 +65,7 @@ export function StickyHeaderScreen({
   stickyControlsInset?: number;
   stickyControlsAlwaysVisible?: boolean;
   stickyControlsRevealKey?: string | number;
+  scrollStateResetKey?: string | number;
   onScrollOffsetChange?: (offsetY: number) => void;
   scrollRef?: RefObject<ScrollView | null>;
   shouldHandleScroll?: () => boolean;
@@ -87,6 +90,15 @@ export function StickyHeaderScreen({
     upwardDistance.current = 0;
     setControlsHidden(false);
   }, [stickyControlsRevealKey]);
+
+  useEffect(() => {
+    if (scrollStateResetKey === undefined) return;
+
+    lastScrollY.current = 0;
+    downwardDistance.current = 0;
+    upwardDistance.current = 0;
+    setControlsHidden(false);
+  }, [scrollStateResetKey]);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = Math.max(event.nativeEvent.contentOffset.y, 0);
@@ -149,6 +161,7 @@ export function StickyHeaderScreen({
             height={stickyControlsHeight}
             heightProgress={stickyControlsHeightProgress}
             hidden={controlsHidden && !stickyControlsAlwaysVisible}
+            resetKey={scrollStateResetKey}
             testID={`${testID}-sticky-controls`}
             top={SCREEN_HEADER_HEIGHT + topInset}
           >
@@ -174,6 +187,7 @@ function StickyControlsLayer({
   collapsedHeight = height,
   heightProgress,
   hidden,
+  resetKey,
   testID,
   top,
 }: {
@@ -183,6 +197,7 @@ function StickyControlsLayer({
   height: number;
   heightProgress?: SharedValue<number>;
   hidden: boolean;
+  resetKey?: string | number;
   testID: string;
   top: number;
 }) {
@@ -199,6 +214,13 @@ function StickyControlsLayer({
         ? nextValue
         : withTiming(nextValue, { duration: theme.motion.duration.base });
   }, [height, hidden, reduceMotion, translateY]);
+
+  useEffect(() => {
+    if (resetKey === undefined) return;
+
+    cancelAnimation(translateY);
+    translateY.value = 0;
+  }, [resetKey, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     height: heightProgress

@@ -10,7 +10,7 @@
 
 ## ✅ 완료
 
-- 동행 상세 진입 임시 우회 제거 — 웹 Stack 복귀 첫 프레임의 Reanimated 선택 배경 재합성 현상을 앱 공통 sticky 상태 문제로 오인해 추가했던 50ms 지연·스크롤 강제 초기화·render gate를 제거하고 즉시 상세 이동과 기존 Cross Fade·Translate를 복구
+- 동행 상세 복귀 첫 프레임 위치 고정 — 웹 Native Stack이 숨긴 목록에서 늦게 전달하는 스크롤과 stale presence를 상세 진입부터 복귀 focus까지 차단하고, shared render gate로 원래 필터와 sticky 높이를 먼저 확정해 상단 복제 필터가 보였다 내려오는 현상을 제거하면서 즉시 Stack 이동과 일반 200ms Cross Fade·Translate는 유지
 - 소모임 상세·개설 상단 패딩 통일 — 상세는 공통 `Screen`의 `safe area + 20px` 기준을 상속하고 별도 `KeyboardAvoidingView`를 쓰는 개설 modal도 같은 계산식을 적용해 루트 동행 헤더와 시작점을 맞춤
 - 소모임 개설 폼 구획·포커스 통일 — 카테고리부터 모임 장소까지 이어지는 8px 회색 section divider를 제거하고, 소모임명·설명·최대인원·일정·장소 입력을 나눔 등록과 같은 공통 `ModalFormTextInput`으로 전환해 primary 2px 포커스와 기존 입력·개설 동작을 유지
 - 동행 sticky 필터 시간 기반 Cross Fade·Translate — 전체 모임 필터가 anchor를 통과하면 본문과 sticky에 함께 렌더링된 채 200ms 동안 반대 opacity와 ±4px 이동으로 붙고 복귀하며, 중간 시점에 터치·접근성 대상을 교대하고 종료 뒤 sticky 복제본을 제거하면서 기존 숨김·검색·필터 동작은 유지
@@ -65,20 +65,22 @@
 
 ## 주요 파일 (도메인 파일 지도)
 
-| 경로                                   | 역할                                            |
-| -------------------------------------- | ----------------------------------------------- |
-| `app/(tabs)/group/_layout.tsx`         | 동행 목록·상세·공지·멤버 중첩 Stack             |
-| `app/(tabs)/group/index.tsx`           | 동행 탭 루트, 소모임/봉사 segment               |
-| `app/(tabs)/group/[id].tsx`            | 소모임 상세, 공지 작성·인라인 삭제, 멤버        |
-| `app/(tabs)/group/notices.tsx`         | 소모임 공지 작성/수정/삭제                      |
-| `app/(tabs)/group/members.tsx`         | 소모임 멤버 관리와 소모임장 이관                |
-| `app/modal/group-new.tsx`              | 소모임 개설 모달                                |
-| `src/mocks/groups.ts`                  | 소모임 mock 데이터                              |
-| `src/services/groupService.ts`         | 교체 가능한 동행 조회·공지 CUD data source 경계 |
-| `src/hooks/useGroups.ts`               | 동행 조회와 공지 CUD TanStack Query hook        |
-| `src/constants/domainOptions.ts`       | 소모임 카테고리/상태 필터 옵션                  |
-| `src/types/group.ts`                   | 소모임 타입                                     |
-| `scripts/check-group-api-contract.mjs` | 동행 Swagger endpoint·화면/관리 계약 검사       |
+| 경로                                           | 역할                                            |
+| ---------------------------------------------- | ----------------------------------------------- |
+| `app/(tabs)/group/_layout.tsx`                 | 동행 목록·상세·공지·멤버 중첩 Stack             |
+| `app/(tabs)/group/index.tsx`                   | 동행 탭 루트, 소모임/봉사 segment               |
+| `app/(tabs)/group/[id].tsx`                    | 소모임 상세, 공지 작성·인라인 삭제, 멤버        |
+| `app/(tabs)/group/notices.tsx`                 | 소모임 공지 작성/수정/삭제                      |
+| `app/(tabs)/group/members.tsx`                 | 소모임 멤버 관리와 소모임장 이관                |
+| `app/modal/group-new.tsx`                      | 소모임 개설 모달                                |
+| `src/mocks/groups.ts`                          | 소모임 mock 데이터                              |
+| `src/services/groupService.ts`                 | 교체 가능한 동행 조회·공지 CUD data source 경계 |
+| `src/hooks/useGroups.ts`                       | 동행 조회와 공지 CUD TanStack Query hook        |
+| `src/components/layout/StickyHeaderScreen.tsx` | sticky scroll guard와 높이 gate                 |
+| `src/components/ui/motion.tsx`                 | presence 모션과 즉시 종료 경계                  |
+| `src/constants/domainOptions.ts`               | 소모임 카테고리/상태 필터 옵션                  |
+| `src/types/group.ts`                           | 소모임 타입                                     |
+| `scripts/check-group-api-contract.mjs`         | 동행 Swagger endpoint·화면/관리 계약 검사       |
 
 ## 데이터 타입
 
@@ -86,7 +88,7 @@
 
 ## 결정 사항 (최신 위)
 
-- (2026-07-16, 원인 정정) **웹 화면 재활성화 깜빡임을 앱 공통 상세 진입 로직으로 우회하지 않는다** — 웹 Native Stack이 목록을 `display:none`에서 `flex`로 복구하는 첫 프레임에 세그먼트·카테고리·하단 탭의 Reanimated 선택 배경이 함께 늦게 그려지는 현상이며 sticky 좌표나 결합 높이 문제는 아닙니다. 앱에도 적용되던 50ms 상세 진입 지연, 진입 전 스크롤 초기화, 도킹 억제와 render gate는 제거하고 기존 200ms Cross Fade·Translate와 Stack 이동을 유지합니다. Android·iOS에서 별도 증상이 재현될 때 네이티브 원인으로 다시 추적합니다.
+- (2026-07-16, 원인 재확정) **웹 상세 복귀는 `blur → hidden scroll 차단 → focus` 구간을 하나의 복원 경계로 처리한다** — 웹 Native Stack은 동행 목록을 unmount하지 않고 숨기므로 상세 진입 전의 `categorySticky=true`와 늦은 ScrollView 복원 이벤트가 복귀 첫 프레임에 상단 복제 필터를 다시 만듭니다. 웹에서만 상세 이동과 같은 입력 batch에서 스크롤·presence를 초기화하고, 실제 blur 뒤 focus가 돌아오기 전까지 hidden scroll을 무시하며, shared gate로 원래 필터 opacity와 60px sticky 높이를 먼저 고정합니다. 상세 이동 지연은 없고 Android·iOS 경로 및 일반 스크롤의 200ms Cross Fade·Translate는 변경하지 않습니다. 430x932 웹에서 첫 복귀 frame `scrollTop=0`, 본문 필터 `top=422/opacity=1`, sticky 복제본 없음, layer `height=60`과 이후 재도킹 `height=116`을 확인했습니다.
 - (2026-07-16) **소모임 상세와 개설 화면은 루트 동행과 같은 상단 기준을 사용한다** — 상세·오류·멤버·공지 화면은 공통 `Screen`의 `top inset + 20px`을 상속하고, `Screen` 밖의 소모임 개설 modal도 같은 계산식을 적용합니다. 화면 내부 section 여백과 기존 `TopBar` geometry는 변경하지 않습니다.
 - (2026-07-16) **소모임 개설 폼은 회색 divider 없이 내부 여백으로 구획하고 공통 작성 입력을 사용한다** — 카테고리·소모임명·설명·최대인원·일정·장소 사이의 8px divider를 제거하되 section padding은 유지합니다. 다섯 입력은 나눔 등록과 같은 `ModalFormTextInput`을 사용해 브라우저 기본 outline 대신 primary 2px 포커스를 표시하고 최대인원만 기존 width·가운데 정렬을 추가합니다.
 - (2026-07-16) **전체 모임 필터 도킹은 200ms 시간 기반 presence Cross Fade + Translate로 실행한다** — 스크롤은 anchor 통과 여부만 결정하고 공통 `useMotionPresence`가 본문 `opacity 1→0`·최대 4px 상승과 sticky `opacity 0→1`·`4→0px` 이동을 실행합니다. 복귀도 같은 progress를 역방향으로 재생한 뒤 sticky 복제본을 제거하며, 중간 시점에 터치·접근성 대상을 교대하고 동작 줄이기에서는 즉시 전환합니다.

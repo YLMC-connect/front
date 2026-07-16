@@ -1,11 +1,17 @@
 import {
+  act,
   fireEvent,
   screen,
   waitFor,
   within,
 } from "@testing-library/react-native";
-import { router, useLocalSearchParams, useRouter } from "expo-router";
-import { Alert, StyleSheet } from "react-native";
+import {
+  router,
+  useLocalSearchParams,
+  useNavigation,
+  useRouter,
+} from "expo-router";
+import { Alert, Platform, StyleSheet } from "react-native";
 import GroupDetailScreen from "../group/[id]";
 import GroupMembersScreen from "../group/members";
 import GroupScreen from "../group";
@@ -465,32 +471,97 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByTestId("group-category-anchor")).toBeTruthy();
   });
 
-  it("opens a group detail without resetting the sticky filter first", async () => {
+  it("resets the web sticky filter in the detail navigation interaction", async () => {
+    const nativeOS = Platform.OS;
     const push = jest.fn();
+    let blurGroupList: (() => void) | undefined;
+    let focusGroupList: (() => void) | undefined;
+    const addListener = jest.fn((event: string, listener: () => void) => {
+      if (event === "blur") blurGroupList = listener;
+      if (event === "focus") focusGroupList = listener;
+      return jest.fn();
+    });
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: "web",
+    });
     jest
-      .mocked(useRouter)
-      .mockReturnValue({ push, setParams: jest.fn() } as never);
-    renderWithClient(<GroupScreen />);
-    await screen.findByText("내 소모임");
+      .mocked(useNavigation)
+      .mockReturnValue({ addListener, isFocused: () => true } as never);
 
-    fireEvent(screen.getByTestId("group-category-anchor"), "layout", {
-      nativeEvent: { layout: { x: 0, y: 300, width: 430, height: 56 } },
-    });
-    fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
-      nativeEvent: { contentOffset: { y: 300 } },
-    });
-    await waitFor(() =>
+    try {
+      jest
+        .mocked(useRouter)
+        .mockReturnValue({ push, setParams: jest.fn() } as never);
+      renderWithClient(<GroupScreen />);
+      await screen.findByText("내 소모임");
+
+      fireEvent(screen.getByTestId("group-category-anchor"), "layout", {
+        nativeEvent: { layout: { x: 0, y: 300, width: 430, height: 56 } },
+      });
+      fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
+        nativeEvent: { contentOffset: { y: 300 } },
+      });
+      await waitFor(() =>
+        expect(
+          screen.getByTestId("group-sticky-controls-filter").props
+            .pointerEvents,
+        ).toBe("auto"),
+      );
+
+      fireEvent.press(screen.getByTestId("group-card-1"));
+
+      expect(push).toHaveBeenCalledWith("/group/1");
+
+      await waitFor(() =>
+        expect(
+          StyleSheet.flatten(
+            screen.getByTestId("group-content-filter").props.style,
+          ),
+        ).toMatchObject({ opacity: 1, transform: [{ translateY: 0 }] }),
+      );
+      await waitFor(() =>
+        expect(
+          screen.queryByTestId("group-sticky-controls-filter", {
+            includeHiddenElements: true,
+          }),
+        ).toBeNull(),
+      );
+      fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
+        nativeEvent: { contentOffset: { y: 0 } },
+      });
+      expect(blurGroupList).toBeDefined();
+      expect(focusGroupList).toBeDefined();
+
+      act(() => blurGroupList?.());
+      fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
+        nativeEvent: { contentOffset: { y: 300 } },
+      });
       expect(
-        screen.getByTestId("group-sticky-controls-filter").props.pointerEvents,
-      ).toBe("auto"),
-    );
+        screen.queryByTestId("group-sticky-controls-filter", {
+          includeHiddenElements: true,
+        }),
+      ).toBeNull();
 
-    fireEvent.press(screen.getByTestId("group-card-1"));
-
-    expect(push).toHaveBeenCalledWith("/group/1");
-    expect(
-      screen.getByTestId("group-sticky-controls-filter").props.pointerEvents,
-    ).toBe("auto");
+      act(() => focusGroupList?.());
+      fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
+        nativeEvent: { contentOffset: { y: 0 } },
+      });
+      expect(
+        StyleSheet.flatten(
+          screen.getByTestId("screen-group-sticky-controls").props.style,
+        ),
+      ).toMatchObject({ height: 60 });
+    } finally {
+      jest.mocked(useNavigation).mockReturnValue({
+        addListener: () => () => undefined,
+        isFocused: () => true,
+      } as never);
+      Object.defineProperty(Platform, "OS", {
+        configurable: true,
+        value: nativeOS,
+      });
+    }
   });
 
   it("applies the group category filter only to the all-groups list", async () => {

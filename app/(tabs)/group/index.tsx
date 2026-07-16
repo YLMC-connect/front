@@ -1,8 +1,18 @@
 import { AppIcon } from "@/components/ui/app-icon";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import Animated, { useAnimatedStyle } from "react-native-reanimated";
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import { useMotionPresence } from "../../../src/components/ui/motion";
 import {
@@ -41,6 +51,7 @@ const GROUP_FILTER_TRANSLATE_DISTANCE = 4;
 
 export default function GroupScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const params = useLocalSearchParams<{
     category?: string;
     section?: string;
@@ -54,34 +65,57 @@ export default function GroupScreen() {
   const [categoryAnchorY, setCategoryAnchorY] = useState<number | null>(null);
   const [categorySticky, setCategorySticky] = useState(false);
   const [stickyFilterInteractive, setStickyFilterInteractive] = useState(false);
+  const listScrollRef = useRef<ScrollView | null>(null);
+  const categoryDockSuspended = useRef(false);
+  const categoryDockWasBlurred = useRef(false);
+  const categoryDockCanResume = useRef(false);
   const currentScrollY = useRef(0);
+  const categoryDockRenderGate = useSharedValue(1);
   const {
+    hideImmediately: hideStickyFilterImmediately,
     mounted: stickyFilterMounted,
     progress: categoryDockProgress,
     reduceMotion,
   } = useMotionPresence(categorySticky, {
     duration: theme.motion.duration.base,
   });
-  const contentFilterAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: 1 - categoryDockProgress.value,
-    transform: [
-      {
-        translateY:
-          categoryDockProgress.value === 0
-            ? 0
-            : -GROUP_FILTER_TRANSLATE_DISTANCE * categoryDockProgress.value,
-      },
-    ],
-  }));
-  const stickyFilterAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: categoryDockProgress.value,
-    transform: [
-      {
-        translateY:
-          GROUP_FILTER_TRANSLATE_DISTANCE * (1 - categoryDockProgress.value),
-      },
-    ],
-  }));
+  const contentFilterAnimatedStyle = useAnimatedStyle(() => {
+    const dockProgress =
+      categoryDockProgress.value * categoryDockRenderGate.value;
+
+    return {
+      opacity: 1 - dockProgress,
+      transform: [
+        {
+          translateY:
+            dockProgress === 0
+              ? 0
+              : -GROUP_FILTER_TRANSLATE_DISTANCE * dockProgress,
+        },
+      ],
+    };
+  });
+  const stickyFilterAnimatedStyle = useAnimatedStyle(() => {
+    const dockProgress =
+      categoryDockProgress.value * categoryDockRenderGate.value;
+
+    return {
+      opacity: dockProgress,
+      transform: [
+        {
+          translateY: GROUP_FILTER_TRANSLATE_DISTANCE * (1 - dockProgress),
+        },
+      ],
+    };
+  });
+  const resetCategoryDockAfterDetailNavigation = useCallback(() => {
+    categoryDockRenderGate.value = 0;
+    listScrollRef.current?.scrollTo({ y: 0, animated: false });
+    currentScrollY.current = 0;
+    setCategorySticky(false);
+    setStickyFilterInteractive(false);
+    hideStickyFilterImmediately();
+  }, [categoryDockRenderGate, hideStickyFilterImmediately]);
   const routeSection = params.section === "service" ? "service" : "groups";
   const routeCategory =
     GROUP_CATEGORIES.find((item) => item.key === params.category)?.key ?? "all";
@@ -139,6 +173,34 @@ export default function GroupScreen() {
   }, [updateCategoryDockState]);
 
   useEffect(() => {
+    const unsubscribeBlur = navigation.addListener("blur", () => {
+      if (categoryDockSuspended.current) {
+        categoryDockWasBlurred.current = true;
+      }
+    });
+    const unsubscribeFocus = navigation.addListener("focus", () => {
+      if (categoryDockSuspended.current && categoryDockWasBlurred.current) {
+        categoryDockCanResume.current = true;
+        resetCategoryDockAfterDetailNavigation();
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            categoryDockRenderGate.value = 1;
+          });
+        });
+      }
+    });
+
+    return () => {
+      unsubscribeBlur();
+      unsubscribeFocus();
+    };
+  }, [
+    categoryDockRenderGate,
+    navigation,
+    resetCategoryDockAfterDetailNavigation,
+  ]);
+
+  useEffect(() => {
     if (reduceMotion) {
       setStickyFilterInteractive(categorySticky);
       return;
@@ -156,6 +218,27 @@ export default function GroupScreen() {
     currentScrollY.current = offsetY;
     updateCategoryDockState(offsetY);
   };
+  const shouldHandleGroupScroll = useCallback(() => {
+    if (Platform.OS !== "web" || !categoryDockSuspended.current) return true;
+    if (!categoryDockCanResume.current) return false;
+
+    categoryDockSuspended.current = false;
+    categoryDockWasBlurred.current = false;
+    categoryDockCanResume.current = false;
+    return true;
+  }, []);
+  const openGroupDetail = useCallback(
+    (id: string) => {
+      if (Platform.OS === "web") {
+        categoryDockSuspended.current = true;
+        categoryDockWasBlurred.current = false;
+        categoryDockCanResume.current = false;
+        resetCategoryDockAfterDetailNavigation();
+      }
+      router.push(`/group/${id}`);
+    },
+    [resetCategoryDockAfterDetailNavigation, router],
+  );
   const showStickyFilter = section === "groups" && stickyFilterMounted;
 
   if (isMyFull || showMyFull) {
@@ -183,7 +266,7 @@ export default function GroupScreen() {
               key={group.id}
               kind="group"
               item={group}
-              onPress={() => router.push(`/group/${group.id}`)}
+              onPress={() => openGroupDetail(group.id)}
             />
           ))
         )}
@@ -198,6 +281,8 @@ export default function GroupScreen() {
       title="동행"
       subtitle="소모임과 봉사로 함께 걸어가요"
       onScrollOffsetChange={handleScrollOffsetChange}
+      scrollRef={listScrollRef}
+      shouldHandleScroll={shouldHandleGroupScroll}
       stickyControls={
         <View testID="group-sticky-controls-content">
           {searchOpen ? (
@@ -244,6 +329,11 @@ export default function GroupScreen() {
           : GROUP_SEGMENT_STICKY_HEIGHT) +
         (searchOpen ? SEARCH_FIELD_STICKY_HEIGHT : 0)
       }
+      stickyControlsCollapsedHeight={
+        GROUP_SEGMENT_STICKY_HEIGHT +
+        (searchOpen ? SEARCH_FIELD_STICKY_HEIGHT : 0)
+      }
+      stickyControlsHeightProgress={categoryDockRenderGate}
       stickyControlsInset={
         GROUP_SEGMENT_STICKY_HEIGHT +
         (searchOpen ? SEARCH_FIELD_STICKY_HEIGHT : 0)
@@ -295,7 +385,7 @@ export default function GroupScreen() {
                   key={item.id}
                   kind="service"
                   item={item}
-                  onPress={() => router.push(`/group/${item.linkedGroupId}`)}
+                  onPress={() => openGroupDetail(item.linkedGroupId)}
                 />
               ))
             )}
@@ -322,7 +412,7 @@ export default function GroupScreen() {
                     key={group.id}
                     accessibilityRole="button"
                     style={styles.mineCard}
-                    onPress={() => router.push(`/group/${group.id}`)}
+                    onPress={() => openGroupDetail(group.id)}
                   >
                     <VisualCover height={78} seed={group.coverSeed} />
                     <AppText
@@ -390,7 +480,7 @@ export default function GroupScreen() {
                     key={group.id}
                     kind="group"
                     item={group}
-                    onPress={() => router.push(`/group/${group.id}`)}
+                    onPress={() => openGroupDetail(group.id)}
                   />
                 ))
               )}

@@ -5,6 +5,7 @@ import {
   type PressableStateCallbackType,
 } from "react-native";
 import Animated, {
+  cancelAnimation,
   runOnJS,
   useAnimatedStyle,
   useReducedMotion,
@@ -81,6 +82,12 @@ export function useMotionPresence(
     mountedRef.current = false;
     setMounted(false);
   }, []);
+  const hideImmediately = useCallback(() => {
+    cancelAnimation(progress);
+    progress.value = 0;
+    mountedRef.current = false;
+    setMounted(false);
+  }, [progress]);
 
   useEffect(() => {
     if (visible) {
@@ -111,5 +118,5 @@ export function useMotionPresence(
     });
   }, [duration, enterReady, finishUnmount, progress, reduceMotion, visible]);
 
-  return { mounted, progress, reduceMotion };
+  return { hideImmediately, mounted, progress, reduceMotion };
 }

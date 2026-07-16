@@ -37,7 +37,11 @@ import { MotionPressable, useMotionPresence } from "./motion";
 export { DetailAction, DetailMiniAction } from "./detail-actions";
 export { DetailBadge } from "./detail-badge";
 export { FilterChips } from "./filter-chips";
-export { ModalFormSection, SectionDivider } from "./modal-form-layout";
+export {
+  ModalFormSection,
+  ModalFormTextInput,
+  SectionDivider,
+} from "./modal-form-layout";
 export { ScreenHeader } from "./screen-header";
 export { SearchField, SEARCH_FIELD_STICKY_HEIGHT } from "./search-field";
 export { SearchToggleButton } from "./search-toggle-button";

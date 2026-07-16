@@ -13,6 +13,7 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- 공통 작성 폼 입력 포커스 — `ModalFormTextInput`이 나눔 등록·소모임 개설의 단일/멀티라인/숫자 입력 surface를 공유하고 웹 기본 outline을 제거한 뒤 검색 입력과 같은 primary 2px 포커스를 적용하며 기존 크기·placeholder·입력 이벤트를 유지
 - 동행 sticky 필터 Cross Fade 전환 — 본문·sticky 필터를 12px 스크롤 구간에서 함께 유지하고 반대 opacity와 ±4px translate를 적용해 붙기·원위치 복귀를 양방향으로 연결하며 기존 방향형 숨김·검색 노출·동작 줄이기 정책은 유지
 - 공통 탐색 control·FAB 비율 보정 — `SegmentedTabs`와 `FilterChips`의 full pill은 유지하면서 시각 높이를 각각 40/32px·36px로 낮추고 hitSlop으로 44px 터치 범위를 보장했으며, 행동형 FAB는 46px·18px 아이콘으로 축소해 64px 하단 탭보다 작게 정리
 - sticky controls 구성 전환 재표시 기준 — 공통 `StickyHeaderScreen`이 선택적 reveal key 변경 시 숨김 상태와 방향 누적값을 초기화하도록 지원해 동행의 세그먼트·필터 결합 직후 메뉴를 먼저 표시하면서 다른 화면의 기존 12px/4px 정책은 유지
@@ -128,6 +129,7 @@
 | `src/components/ui/glass-backdrop.tsx`                        | 상단 sticky 헤더와 하단 floating tab bar가 공유하며 화면별 tint 색상·투명도를 지정할 수 있는 intensity 32 blur layer                                                                                                                       |
 | `src/components/layout/StickyHeaderScreen.tsx`                | 실제 safe-area까지 blur target에 포함하고 검색·필터·목록을 헤더 뒤로 통과시키며, 동일 glass의 sticky control과 스크롤 방향 숨김·200ms 재표시를 관리하는 루트 탭 공통 layout                                                                |
 | `src/components/ui/search-field.tsx`                          | 검색 아이콘과 입력을 하나의 surface로 묶고 웹 focus border·공통 sticky 높이를 관리하는 검색 입력                                                                                                                                           |
+| `src/components/ui/modal-form-layout.tsx`                     | 나눔 등록·소모임 개설의 section label과 단일/멀티라인/숫자 입력 surface·primary 2px focus border를 공유                                                                                                                                    |
 | `src/components/ui/search-toggle-button.tsx`                  | 헤더의 검색/닫기 아이콘과 명시적 한글 label, press motion을 공유하는 action                                                                                                                                                                |
 | `src/components/layout/TabBlurTargetContext.ts`               | 현재 루트 화면의 Android blur target ref를 하단 tab bar까지 전달                                                                                                                                                                           |
 | `src/components/ui/motion.tsx`                                | Reanimated 기반 공통 press scale과 overlay presence 제어. 시스템 동작 줄이기 설정을 반영                                                                                                                                                   |
@@ -170,6 +172,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-16) **나눔 등록과 소모임 개설의 텍스트 입력은 공통 `ModalFormTextInput`이 소유한다** — 단일행·멀티라인·숫자 입력의 surface, placeholder 색상, 웹 outline 제거, primary 2px 포커스와 padding 보정을 공통 컴포넌트에 두고 화면은 값·제약·전용 width만 전달합니다. 나눔·동행·삶공부 검색은 기존 공통 `SearchField`의 동일한 primary 2px 외곽 포커스를 유지합니다.
 - (2026-07-16) **본문 control이 sticky 위치에 합류할 때는 스크롤 연동 progress로 두 복사본을 교차 전환한다** — 동행 카테고리 필터는 anchor 이후 12px에서 본문 `opacity 1→0 / translateY 0→-4`, sticky `opacity 0→1 / translateY 4→0`을 반대로 적용하고 위 스크롤에서는 같은 값을 역방향으로 사용합니다. 전환 중 필터 자리 높이는 유지하고 progress 0.5를 기준으로 한쪽만 터치·접근성 대상이 되며 동작 줄이기에서는 즉시 교체합니다.
 - (2026-07-15) **탐색 control은 full pill을 유지하되 surface 높이로 납작하게 구분한다** — 공통 `SegmentedTabs`는 40px track 안에 32px 선택 영역과 상하 6px hitSlop, `FilterChips`는 36px surface와 상하 4px hitSlop을 사용해 실제 터치 범위는 44px 이상 유지합니다. 공통 행동형 FAB는 46px 높이·18px 아이콘·13px label로 줄여 64px 하단 탭보다 작게 두며 라우팅·모션·접근성은 변경하지 않습니다.
 - (2026-07-15) **sticky controls의 내용 구성이 바뀌면 화면이 명시한 시점에 다시 표시할 수 있다** — 공통 기본 방향 정책은 아래 12px 숨김·위 4px 재표시로 유지하고, 선택적 reveal key가 바뀔 때만 숨김 상태와 누적 거리를 초기화합니다. 동행처럼 스크롤 중 control 높이와 내용이 함께 바뀌는 화면이 이전 하강량을 새 구성에 이어받지 않도록 사용합니다.

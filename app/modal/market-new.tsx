@@ -1,6 +1,7 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -8,7 +9,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import {
@@ -16,10 +16,11 @@ import {
   ConfirmDialog,
   ImagePickerField,
   ModalFormSection as Section,
-  SectionDivider as Divider,
+  ModalFormTextInput as FormInput,
   Toast,
   TopBar,
 } from "../../src/components/ui";
+import { SCREEN_HEADER_VERTICAL_PADDING } from "../../src/components/ui/screen-header";
 import { MARKET_CATEGORIES } from "../../src/constants/domainOptions";
 import { theme } from "../../src/constants/theme";
 import { useCreateMarketPost } from "../../src/hooks/useMarket";
@@ -53,6 +54,7 @@ const emptyValues: MarketInput = {
 
 export default function MarketNewModal() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ designVariant?: string }>();
   const variant = readDesignVariant(params.designVariant) ?? "create";
   const isEdit = variant === "edit";
@@ -104,7 +106,11 @@ export default function MarketNewModal() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.root}
+      style={[
+        styles.root,
+        { paddingTop: insets.top + SCREEN_HEADER_VERTICAL_PADDING },
+      ]}
+      testID="market-form-screen"
     >
       <TopBar
         title={isEdit ? "나눔 수정" : "나눔 등록"}
@@ -126,8 +132,6 @@ export default function MarketNewModal() {
             />
           </View>
         </Section>
-
-        <Divider />
 
         <Section label="카테고리" required>
           <View style={styles.chips}>
@@ -155,21 +159,15 @@ export default function MarketNewModal() {
           </View>
         </Section>
 
-        <Divider />
-
         <Section label="제목" required hint={`${values.title.length}/30`}>
-          <TextInput
+          <FormInput
             accessibilityLabel="나눔 제목"
             value={values.title}
             onChangeText={(title) => update("title", title)}
             maxLength={30}
             placeholder="제목을 입력해주세요 (최대 30자)"
-            placeholderTextColor={theme.colors.inkMute}
-            style={styles.input}
           />
         </Section>
-
-        <Divider />
 
         <Section label="물품 상태" required>
           <View style={styles.conditionRow}>
@@ -200,36 +198,28 @@ export default function MarketNewModal() {
           </View>
         </Section>
 
-        <Divider />
-
         <Section
           label="상세 설명"
           required
           hint={`${values.description.length}/500`}
         >
-          <TextInput
+          <FormInput
             accessibilityLabel="나눔 상세 설명"
             multiline
             value={values.description}
             onChangeText={(description) => update("description", description)}
             maxLength={500}
             placeholder="물품 상태, 수령 방법, 일정 등을 자세히 적어주세요"
-            placeholderTextColor={theme.colors.inkMute}
-            style={[styles.input, styles.textarea]}
             textAlignVertical="top"
           />
         </Section>
 
-        <Divider />
-
         <Section label="수령 장소" required>
-          <TextInput
+          <FormInput
             accessibilityLabel="나눔 수령 장소"
             value={values.location}
             onChangeText={(location) => update("location", location)}
             placeholder="예: 교회 1층 로비"
-            placeholderTextColor={theme.colors.inkMute}
-            style={styles.input}
           />
         </Section>
 
@@ -302,18 +292,6 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.semibold,
   },
   chipTextOn: { color: theme.colors.white },
-  input: {
-    minHeight: 48,
-    marginHorizontal: theme.layout.screenX,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: 14,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-  },
-  textarea: { minHeight: 132, paddingTop: 12, lineHeight: 22 },
   conditionRow: {
     flexDirection: "row",
     gap: 8,

@@ -1,6 +1,7 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -17,6 +18,7 @@ import {
   ModalFormTextInput as FormInput,
   TopBar,
 } from "../../src/components/ui";
+import { SCREEN_HEADER_VERTICAL_PADDING } from "../../src/components/ui/screen-header";
 import { GROUP_CATEGORIES } from "../../src/constants/domainOptions";
 import { theme } from "../../src/constants/theme";
 import { useCreateGroup } from "../../src/hooks/useGroups";
@@ -49,6 +51,7 @@ const emptyValues: GroupInput = {
 
 export default function GroupNewModal() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ designVariant?: string }>();
   const variant = readDesignVariant(params.designVariant) ?? "create";
   const isEdit = ["edit", "range-error", "member-error"].includes(variant);
@@ -107,7 +110,11 @@ export default function GroupNewModal() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.root}
+      style={[
+        styles.root,
+        { paddingTop: insets.top + SCREEN_HEADER_VERTICAL_PADDING },
+      ]}
+      testID="group-form-screen"
     >
       <TopBar
         title={isEdit ? "소모임 수정" : "소모임 개설"}

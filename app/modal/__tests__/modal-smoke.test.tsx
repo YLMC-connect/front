@@ -47,6 +47,9 @@ describe("modal smoke screens", () => {
     expect(screen.getAllByText("소모임 개설")).toHaveLength(2);
     expect(screen.getByLabelText("뒤로")).toBeTruthy();
     expect(screen.queryByText("닫기")).toBeNull();
+    expect(
+      StyleSheet.flatten(screen.getByTestId("group-form-screen").props.style),
+    ).toMatchObject({ paddingTop: 24 + SCREEN_HEADER_VERTICAL_PADDING });
     expect(screen.getByText("운동·건강")).toBeTruthy();
     expect(
       screen.getByPlaceholderText("소모임 이름을 입력해주세요 (최대 20자)"),

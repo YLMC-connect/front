@@ -3,6 +3,7 @@ import { createRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { theme } from "../../../constants/theme";
+import { Screen } from "../../layout/Screen";
 import { StickyHeaderScreen } from "../../layout/StickyHeaderScreen";
 import { TabBlurTargetContext } from "../../layout/TabBlurTargetContext";
 import { GlassBackdrop } from "../glass-backdrop";
@@ -19,6 +20,25 @@ import {
 } from "../index";
 
 describe("shared maintenance UI", () => {
+  it("uses the same safe-area plus 20px top spacing on shared screens", () => {
+    render(
+      <SafeAreaProvider
+        initialMetrics={{
+          frame: { x: 0, y: 0, width: 430, height: 932 },
+          insets: { top: 0, left: 0, right: 0, bottom: 0 },
+        }}
+      >
+        <Screen scroll={false} padded={false} testID="detail-screen">
+          <Text>상세 화면</Text>
+        </Screen>
+      </SafeAreaProvider>,
+    );
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId("detail-screen").props.style),
+    ).toMatchObject({ paddingTop: 20 });
+  });
+
   it("supports a distinct white glass tint for the bottom tab capsule", () => {
     render(
       <GlassBackdrop

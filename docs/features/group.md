@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 소모임 상세·개설 상단 패딩 통일 — 상세는 공통 `Screen`의 `safe area + 20px` 기준을 상속하고 별도 `KeyboardAvoidingView`를 쓰는 개설 modal도 같은 계산식을 적용해 루트 동행 헤더와 시작점을 맞춤
 - 소모임 개설 폼 구획·포커스 통일 — 카테고리부터 모임 장소까지 이어지는 8px 회색 section divider를 제거하고, 소모임명·설명·최대인원·일정·장소 입력을 나눔 등록과 같은 공통 `ModalFormTextInput`으로 전환해 primary 2px 포커스와 기존 입력·개설 동작을 유지
 - 동행 sticky 필터 시간 기반 Cross Fade·Translate — 전체 모임 필터가 anchor를 통과하면 본문과 sticky에 함께 렌더링된 채 200ms 동안 반대 opacity와 ±4px 이동으로 붙고 복귀하며, 중간 시점에 터치·접근성 대상을 교대하고 종료 뒤 sticky 복제본을 제거하면서 기존 숨김·검색·필터 동작은 유지
 - 동행 탐색 control·FAB 비율 보정 — 소모임/봉사 세그먼트와 전체 모임 필터의 full pill을 유지한 채 시각 높이를 낮추고 44px 터치 범위를 보존했으며 `소모임 개설` FAB를 46px로 축소해 하단 탭과 위계를 분리
@@ -84,6 +85,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-16) **소모임 상세와 개설 화면은 루트 동행과 같은 상단 기준을 사용한다** — 상세·오류·멤버·공지 화면은 공통 `Screen`의 `top inset + 20px`을 상속하고, `Screen` 밖의 소모임 개설 modal도 같은 계산식을 적용합니다. 화면 내부 section 여백과 기존 `TopBar` geometry는 변경하지 않습니다.
 - (2026-07-16) **소모임 개설 폼은 회색 divider 없이 내부 여백으로 구획하고 공통 작성 입력을 사용한다** — 카테고리·소모임명·설명·최대인원·일정·장소 사이의 8px divider를 제거하되 section padding은 유지합니다. 다섯 입력은 나눔 등록과 같은 `ModalFormTextInput`을 사용해 브라우저 기본 outline 대신 primary 2px 포커스를 표시하고 최대인원만 기존 width·가운데 정렬을 추가합니다.
 - (2026-07-16) **전체 모임 필터 도킹은 200ms 시간 기반 presence Cross Fade + Translate로 실행한다** — 스크롤은 anchor 통과 여부만 결정하고 공통 `useMotionPresence`가 본문 `opacity 1→0`·최대 4px 상승과 sticky `opacity 0→1`·`4→0px` 이동을 실행합니다. 복귀도 같은 progress를 역방향으로 재생한 뒤 sticky 복제본을 제거하며, 중간 시점에 터치·접근성 대상을 교대하고 동작 줄이기에서는 즉시 전환합니다.
 - (2026-07-16, 후속 폐기) **전체 모임 필터는 조건부 FadeIn 대신 12px 스크롤 연동 Cross Fade + Translate로 결합한다** — 12px 구간은 실제 휠·터치 입력 한 번에 진행값이 `0→1`로 건너뛰어 순간 교체처럼 보이므로 시간 기반 presence 전환으로 대체했습니다. anchor 위치와 기존 sticky 숨김·재표시·검색·필터 동작은 유지합니다.

@@ -1,12 +1,8 @@
 import { AppIcon } from "@/components/ui/app-icon";
-import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import Animated, {
-  cancelAnimation,
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated";
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import { useMotionPresence } from "../../../src/components/ui/motion";
 import {
@@ -42,11 +38,9 @@ const sections = [
 const GROUP_SEGMENT_STICKY_HEIGHT = 60;
 const GROUP_COMBINED_STICKY_HEIGHT = 116;
 const GROUP_FILTER_TRANSLATE_DISTANCE = 4;
-const DETAIL_NAVIGATION_RESET_MS = 50;
 
 export default function GroupScreen() {
   const router = useRouter();
-  const pathname = usePathname();
   const params = useLocalSearchParams<{
     category?: string;
     section?: string;
@@ -60,10 +54,7 @@ export default function GroupScreen() {
   const [categoryAnchorY, setCategoryAnchorY] = useState<number | null>(null);
   const [categorySticky, setCategorySticky] = useState(false);
   const [stickyFilterInteractive, setStickyFilterInteractive] = useState(false);
-  const listScrollRef = useRef<ScrollView | null>(null);
-  const categoryDockSuspended = useRef(false);
   const currentScrollY = useRef(0);
-  const categoryDockRenderGate = useSharedValue(1);
   const {
     mounted: stickyFilterMounted,
     progress: categoryDockProgress,
@@ -71,35 +62,26 @@ export default function GroupScreen() {
   } = useMotionPresence(categorySticky, {
     duration: theme.motion.duration.base,
   });
-  const contentFilterAnimatedStyle = useAnimatedStyle(() => {
-    const dockProgress =
-      categoryDockProgress.value * categoryDockRenderGate.value;
-
-    return {
-      opacity: 1 - dockProgress,
-      transform: [
-        {
-          translateY:
-            dockProgress === 0
-              ? 0
-              : -GROUP_FILTER_TRANSLATE_DISTANCE * dockProgress,
-        },
-      ],
-    };
-  });
-  const stickyFilterAnimatedStyle = useAnimatedStyle(() => {
-    const dockProgress =
-      categoryDockProgress.value * categoryDockRenderGate.value;
-
-    return {
-      opacity: dockProgress,
-      transform: [
-        {
-          translateY: GROUP_FILTER_TRANSLATE_DISTANCE * (1 - dockProgress),
-        },
-      ],
-    };
-  });
+  const contentFilterAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: 1 - categoryDockProgress.value,
+    transform: [
+      {
+        translateY:
+          categoryDockProgress.value === 0
+            ? 0
+            : -GROUP_FILTER_TRANSLATE_DISTANCE * categoryDockProgress.value,
+      },
+    ],
+  }));
+  const stickyFilterAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: categoryDockProgress.value,
+    transform: [
+      {
+        translateY:
+          GROUP_FILTER_TRANSLATE_DISTANCE * (1 - categoryDockProgress.value),
+      },
+    ],
+  }));
   const routeSection = params.section === "service" ? "service" : "groups";
   const routeCategory =
     GROUP_CATEGORIES.find((item) => item.key === params.category)?.key ?? "all";
@@ -157,19 +139,6 @@ export default function GroupScreen() {
   }, [updateCategoryDockState]);
 
   useEffect(() => {
-    if (pathname !== "/group") return;
-
-    listScrollRef.current?.scrollTo({ y: 0, animated: false });
-    currentScrollY.current = 0;
-    cancelAnimation(categoryDockProgress);
-    categoryDockProgress.value = 0;
-    categoryDockRenderGate.value = 1;
-    setCategorySticky(false);
-    setStickyFilterInteractive(false);
-    categoryDockSuspended.current = false;
-  }, [categoryDockProgress, categoryDockRenderGate, pathname]);
-
-  useEffect(() => {
     if (reduceMotion) {
       setStickyFilterInteractive(categorySticky);
       return;
@@ -184,23 +153,8 @@ export default function GroupScreen() {
   }, [categorySticky, reduceMotion]);
 
   const handleScrollOffsetChange = (offsetY: number) => {
-    if (categoryDockSuspended.current) return;
-
     currentScrollY.current = offsetY;
     updateCategoryDockState(offsetY);
-  };
-  const openGroupDetail = (id: string) => {
-    if (categoryDockSuspended.current) return;
-
-    categoryDockSuspended.current = true;
-    categoryDockRenderGate.value = 0;
-    listScrollRef.current?.scrollTo({ y: 0, animated: false });
-    currentScrollY.current = 0;
-    cancelAnimation(categoryDockProgress);
-    categoryDockProgress.value = 0;
-    setCategorySticky(false);
-    setStickyFilterInteractive(false);
-    setTimeout(() => router.push(`/group/${id}`), DETAIL_NAVIGATION_RESET_MS);
   };
   const showStickyFilter = section === "groups" && stickyFilterMounted;
 
@@ -229,7 +183,7 @@ export default function GroupScreen() {
               key={group.id}
               kind="group"
               item={group}
-              onPress={() => openGroupDetail(group.id)}
+              onPress={() => router.push(`/group/${group.id}`)}
             />
           ))
         )}
@@ -244,7 +198,6 @@ export default function GroupScreen() {
       title="동행"
       subtitle="소모임과 봉사로 함께 걸어가요"
       onScrollOffsetChange={handleScrollOffsetChange}
-      scrollRef={listScrollRef}
       stickyControls={
         <View testID="group-sticky-controls-content">
           {searchOpen ? (
@@ -342,7 +295,7 @@ export default function GroupScreen() {
                   key={item.id}
                   kind="service"
                   item={item}
-                  onPress={() => openGroupDetail(item.linkedGroupId)}
+                  onPress={() => router.push(`/group/${item.linkedGroupId}`)}
                 />
               ))
             )}
@@ -369,7 +322,7 @@ export default function GroupScreen() {
                     key={group.id}
                     accessibilityRole="button"
                     style={styles.mineCard}
-                    onPress={() => openGroupDetail(group.id)}
+                    onPress={() => router.push(`/group/${group.id}`)}
                   >
                     <VisualCover height={78} seed={group.coverSeed} />
                     <AppText
@@ -437,7 +390,7 @@ export default function GroupScreen() {
                     key={group.id}
                     kind="group"
                     item={group}
-                    onPress={() => openGroupDetail(group.id)}
+                    onPress={() => router.push(`/group/${group.id}`)}
                   />
                 ))
               )}

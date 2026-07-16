@@ -43,7 +43,6 @@ export function StickyHeaderScreen({
   stickyControlsAlwaysVisible = false,
   stickyControlsRevealKey,
   onScrollOffsetChange,
-  scrollRef,
   contentContainerStyle,
   testID,
 }: {
@@ -58,7 +57,6 @@ export function StickyHeaderScreen({
   stickyControlsAlwaysVisible?: boolean;
   stickyControlsRevealKey?: string | number;
   onScrollOffsetChange?: (offsetY: number) => void;
-  scrollRef?: RefObject<ScrollView | null>;
   contentContainerStyle?: StyleProp<ViewStyle>;
   testID: string;
 }) {
@@ -114,7 +112,6 @@ export function StickyHeaderScreen({
       <View style={styles.root}>
         <BlurTargetView ref={blurTarget} style={styles.target}>
           <ScrollView
-            ref={scrollRef}
             contentContainerStyle={[
               styles.content,
               contentContainerStyle,

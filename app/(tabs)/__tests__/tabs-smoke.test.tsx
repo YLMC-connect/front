@@ -465,7 +465,7 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByTestId("group-category-anchor")).toBeTruthy();
   });
 
-  it("clears the stale sticky filter before opening a group detail", async () => {
+  it("opens a group detail without resetting the sticky filter first", async () => {
     const push = jest.fn();
     jest
       .mocked(useRouter)
@@ -486,28 +486,11 @@ describe("v1 tab smoke screens", () => {
     );
 
     fireEvent.press(screen.getByTestId("group-card-1"));
-    expect(
-      screen.queryByTestId("group-sticky-controls-filter", {
-        includeHiddenElements: true,
-      }),
-    ).toBeNull();
-    expect(
-      StyleSheet.flatten(
-        screen.getByTestId("group-content-filter").props.style,
-      ),
-    ).toMatchObject({ opacity: 1, transform: [{ translateY: 0 }] });
-    fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
-      nativeEvent: { contentOffset: { y: 300 } },
-    });
 
-    await waitFor(() => expect(push).toHaveBeenCalledWith("/group/1"));
-    await waitFor(() =>
-      expect(
-        screen.queryByTestId("group-sticky-controls-filter", {
-          includeHiddenElements: true,
-        }),
-      ).toBeNull(),
-    );
+    expect(push).toHaveBeenCalledWith("/group/1");
+    expect(
+      screen.getByTestId("group-sticky-controls-filter").props.pointerEvents,
+    ).toBe("auto");
   });
 
   it("applies the group category filter only to the all-groups list", async () => {

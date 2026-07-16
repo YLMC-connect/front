@@ -10,7 +10,7 @@
 
 ## ✅ 완료
 
-- 동행 상세 복귀 sticky 필터 잔상 제거 — 상세 진입 중 도킹 재계산을 중지하고 실제 ScrollView를 맨 위로 복원하며 전용 render gate로 정지된 presence의 마지막 프레임을 차단해, 뒤로가기 첫 프레임부터 본문 필터가 원래 위치에 표시되고 선택 카테고리는 유지
+- 동행 상세 진입 임시 우회 제거 — 웹 Stack 복귀 첫 프레임의 Reanimated 선택 배경 재합성 현상을 앱 공통 sticky 상태 문제로 오인해 추가했던 50ms 지연·스크롤 강제 초기화·render gate를 제거하고 즉시 상세 이동과 기존 Cross Fade·Translate를 복구
 - 소모임 상세·개설 상단 패딩 통일 — 상세는 공통 `Screen`의 `safe area + 20px` 기준을 상속하고 별도 `KeyboardAvoidingView`를 쓰는 개설 modal도 같은 계산식을 적용해 루트 동행 헤더와 시작점을 맞춤
 - 소모임 개설 폼 구획·포커스 통일 — 카테고리부터 모임 장소까지 이어지는 8px 회색 section divider를 제거하고, 소모임명·설명·최대인원·일정·장소 입력을 나눔 등록과 같은 공통 `ModalFormTextInput`으로 전환해 primary 2px 포커스와 기존 입력·개설 동작을 유지
 - 동행 sticky 필터 시간 기반 Cross Fade·Translate — 전체 모임 필터가 anchor를 통과하면 본문과 sticky에 함께 렌더링된 채 200ms 동안 반대 opacity와 ±4px 이동으로 붙고 복귀하며, 중간 시점에 터치·접근성 대상을 교대하고 종료 뒤 sticky 복제본을 제거하면서 기존 숨김·검색·필터 동작은 유지
@@ -86,7 +86,7 @@
 
 ## 결정 사항 (최신 위)
 
-- (2026-07-16, 실제 모바일 웹 검증 보완) **상세 진입 시 목록의 실제 스크롤과 sticky presence를 함께 종료한다** — 동행 목록은 Stack 뒤에서 Reanimated 종료 모션이 멈출 수 있으므로 상세 이동 중 도킹 계산을 중지하고 실제 ScrollView를 `y=0`으로 옮긴 뒤, 별도 shared render gate를 `0`으로 내려 남은 progress와 관계없이 본문 `opacity=1`·sticky `opacity=0`을 강제합니다. 초기화 렌더를 50ms 먼저 커밋한 후 상세로 이동하고 `/group` 복귀 초기화 뒤 gate를 다시 엽니다. 카테고리·세그먼트·검색 조건은 유지하며, 430×932 웹에서 상세 뒤 DOM과 복귀 후 0~400ms 동안 본문 필터 `top=422`, `opacity=1`, sticky 미노출을 확인했습니다.
+- (2026-07-16, 원인 정정) **웹 화면 재활성화 깜빡임을 앱 공통 상세 진입 로직으로 우회하지 않는다** — 웹 Native Stack이 목록을 `display:none`에서 `flex`로 복구하는 첫 프레임에 세그먼트·카테고리·하단 탭의 Reanimated 선택 배경이 함께 늦게 그려지는 현상이며 sticky 좌표나 결합 높이 문제는 아닙니다. 앱에도 적용되던 50ms 상세 진입 지연, 진입 전 스크롤 초기화, 도킹 억제와 render gate는 제거하고 기존 200ms Cross Fade·Translate와 Stack 이동을 유지합니다. Android·iOS에서 별도 증상이 재현될 때 네이티브 원인으로 다시 추적합니다.
 - (2026-07-16) **소모임 상세와 개설 화면은 루트 동행과 같은 상단 기준을 사용한다** — 상세·오류·멤버·공지 화면은 공통 `Screen`의 `top inset + 20px`을 상속하고, `Screen` 밖의 소모임 개설 modal도 같은 계산식을 적용합니다. 화면 내부 section 여백과 기존 `TopBar` geometry는 변경하지 않습니다.
 - (2026-07-16) **소모임 개설 폼은 회색 divider 없이 내부 여백으로 구획하고 공통 작성 입력을 사용한다** — 카테고리·소모임명·설명·최대인원·일정·장소 사이의 8px divider를 제거하되 section padding은 유지합니다. 다섯 입력은 나눔 등록과 같은 `ModalFormTextInput`을 사용해 브라우저 기본 outline 대신 primary 2px 포커스를 표시하고 최대인원만 기존 width·가운데 정렬을 추가합니다.
 - (2026-07-16) **전체 모임 필터 도킹은 200ms 시간 기반 presence Cross Fade + Translate로 실행한다** — 스크롤은 anchor 통과 여부만 결정하고 공통 `useMotionPresence`가 본문 `opacity 1→0`·최대 4px 상승과 sticky `opacity 0→1`·`4→0px` 이동을 실행합니다. 복귀도 같은 progress를 역방향으로 재생한 뒤 sticky 복제본을 제거하며, 중간 시점에 터치·접근성 대상을 교대하고 동작 줄이기에서는 즉시 전환합니다.

@@ -411,17 +411,16 @@ describe("v1 tab smoke screens", () => {
       "auto",
     );
 
-    fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
-      nativeEvent: { contentOffset: { y: 306 } },
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("group-sticky-controls-filter").props.pointerEvents,
+      ).toBe("auto");
+      expect(
+        screen.getByTestId("group-content-filter", {
+          includeHiddenElements: true,
+        }).props.pointerEvents,
+      ).toBe("none");
     });
-    expect(
-      screen.getByTestId("group-sticky-controls-filter").props.pointerEvents,
-    ).toBe("auto");
-    expect(
-      screen.getByTestId("group-content-filter", {
-        includeHiddenElements: true,
-      }).props.pointerEvents,
-    ).toBe("none");
 
     fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
       nativeEvent: { contentOffset: { y: 311 } },
@@ -450,8 +449,16 @@ describe("v1 tab smoke screens", () => {
     fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
       nativeEvent: { contentOffset: { y: 295 } },
     });
-    expect(screen.queryByTestId("group-sticky-controls-filter")).toBeNull();
-    expect(screen.getByTestId("group-content-filter")).toBeTruthy();
+    await waitFor(() =>
+      expect(screen.getByTestId("group-content-filter")).toBeTruthy(),
+    );
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("group-sticky-controls-filter", {
+          includeHiddenElements: true,
+        }),
+      ).toBeNull(),
+    );
     expect(
       screen.getByTestId("screen-group-sticky-controls").props.pointerEvents,
     ).toBe("auto");

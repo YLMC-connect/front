@@ -465,6 +465,51 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByTestId("group-category-anchor")).toBeTruthy();
   });
 
+  it("clears the stale sticky filter before opening a group detail", async () => {
+    const push = jest.fn();
+    jest
+      .mocked(useRouter)
+      .mockReturnValue({ push, setParams: jest.fn() } as never);
+    renderWithClient(<GroupScreen />);
+    await screen.findByText("내 소모임");
+
+    fireEvent(screen.getByTestId("group-category-anchor"), "layout", {
+      nativeEvent: { layout: { x: 0, y: 300, width: 430, height: 56 } },
+    });
+    fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
+      nativeEvent: { contentOffset: { y: 300 } },
+    });
+    await waitFor(() =>
+      expect(
+        screen.getByTestId("group-sticky-controls-filter").props.pointerEvents,
+      ).toBe("auto"),
+    );
+
+    fireEvent.press(screen.getByTestId("group-card-1"));
+    expect(
+      screen.queryByTestId("group-sticky-controls-filter", {
+        includeHiddenElements: true,
+      }),
+    ).toBeNull();
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("group-content-filter").props.style,
+      ),
+    ).toMatchObject({ opacity: 1, transform: [{ translateY: 0 }] });
+    fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
+      nativeEvent: { contentOffset: { y: 300 } },
+    });
+
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/group/1"));
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("group-sticky-controls-filter", {
+          includeHiddenElements: true,
+        }),
+      ).toBeNull(),
+    );
+  });
+
   it("applies the group category filter only to the all-groups list", async () => {
     const setParams = jest.fn();
     jest

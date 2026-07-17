@@ -386,6 +386,9 @@ describe("v1 tab smoke screens", () => {
     fireEvent(screen.getByTestId("group-category-anchor"), "layout", {
       nativeEvent: { layout: { x: 0, y: 300, width: 430, height: 56 } },
     });
+    fireEvent(screen.getByTestId("group-category-anchor"), "layout", {
+      nativeEvent: { layout: { x: 0, y: 0, width: 0, height: 0 } },
+    });
     fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
       nativeEvent: { contentOffset: { y: 299 } },
     });

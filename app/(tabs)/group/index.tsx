@@ -464,7 +464,13 @@ export default function GroupScreen() {
               onLayout={(event) => {
                 if (detailNavigationSuspended.current) return;
 
-                const nextAnchorY = event.nativeEvent.layout.y;
+                const {
+                  height,
+                  width,
+                  y: nextAnchorY,
+                } = event.nativeEvent.layout;
+                if (width <= 0 || height <= 0) return;
+
                 setCategoryAnchorY(nextAnchorY);
                 updateCategoryDockState(currentScrollY.current, nextAnchorY);
               }}

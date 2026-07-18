@@ -1,6 +1,7 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -8,16 +9,16 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import {
   Button,
   ConfirmDialog,
   ModalFormSection as Section,
-  SectionDivider as Divider,
+  ModalFormTextInput as FormInput,
   TopBar,
 } from "../../src/components/ui";
+import { SCREEN_HEADER_VERTICAL_PADDING } from "../../src/components/ui/screen-header";
 import { GROUP_CATEGORIES } from "../../src/constants/domainOptions";
 import { theme } from "../../src/constants/theme";
 import { useCreateGroup } from "../../src/hooks/useGroups";
@@ -50,6 +51,7 @@ const emptyValues: GroupInput = {
 
 export default function GroupNewModal() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ designVariant?: string }>();
   const variant = readDesignVariant(params.designVariant) ?? "create";
   const isEdit = ["edit", "range-error", "member-error"].includes(variant);
@@ -108,7 +110,11 @@ export default function GroupNewModal() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.root}
+      style={[
+        styles.root,
+        { paddingTop: insets.top + SCREEN_HEADER_VERTICAL_PADDING },
+      ]}
+      testID="group-form-screen"
     >
       <TopBar
         title={isEdit ? "소모임 수정" : "소모임 개설"}
@@ -147,45 +153,35 @@ export default function GroupNewModal() {
           </View>
         </Section>
 
-        <Divider />
-
         <Section label="소모임명" required hint={`${values.name.length}/20`}>
-          <TextInput
+          <FormInput
             accessibilityLabel="소모임 이름"
             value={values.name}
             onChangeText={(name) => update("name", name)}
             maxLength={20}
             placeholder="소모임 이름을 입력해주세요 (최대 20자)"
-            placeholderTextColor={theme.colors.inkMute}
-            style={styles.input}
           />
         </Section>
-
-        <Divider />
 
         <Section
           label="설명"
           required
           hint={`${values.description.length}/200`}
         >
-          <TextInput
+          <FormInput
             accessibilityLabel="소모임 설명"
             multiline
             value={values.description}
             onChangeText={(description) => update("description", description)}
             maxLength={200}
             placeholder="어떤 소모임인지, 어떻게 모이는지 알려주세요"
-            placeholderTextColor={theme.colors.inkMute}
-            style={[styles.input, styles.textarea]}
             textAlignVertical="top"
           />
         </Section>
 
-        <Divider />
-
         <Section label="최대인원" required>
           <View style={styles.capacityRow}>
-            <TextInput
+            <FormInput
               accessibilityLabel="소모임 최대인원"
               keyboardType="number-pad"
               value={capacity}
@@ -194,7 +190,6 @@ export default function GroupNewModal() {
                 update("maxMembers", Number(text) || 0);
               }}
               placeholder="숫자"
-              placeholderTextColor={theme.colors.inkMute}
               style={styles.capacityInput}
             />
             <Text style={styles.capacityUnit}>명</Text>
@@ -210,29 +205,21 @@ export default function GroupNewModal() {
           ) : null}
         </Section>
 
-        <Divider />
-
         <Section label="모임 일정" required>
-          <TextInput
+          <FormInput
             accessibilityLabel="소모임 일정"
             value={values.schedule}
             onChangeText={(schedule) => update("schedule", schedule)}
             placeholder="예: 매주 토요일 오전 10시"
-            placeholderTextColor={theme.colors.inkMute}
-            style={styles.input}
           />
         </Section>
 
-        <Divider />
-
         <Section label="모임 장소" required>
-          <TextInput
+          <FormInput
             accessibilityLabel="소모임 장소"
             value={values.location}
             onChangeText={(location) => update("location", location)}
             placeholder="예: 교육관 2층"
-            placeholderTextColor={theme.colors.inkMute}
-            style={styles.input}
           />
         </Section>
 
@@ -297,18 +284,6 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.semibold,
   },
   chipTextOn: { color: theme.colors.white },
-  input: {
-    minHeight: 48,
-    marginHorizontal: theme.layout.screenX,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: 14,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-  },
-  textarea: { minHeight: 132, paddingTop: 12, lineHeight: 22 },
   capacityRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -317,13 +292,7 @@ const styles = StyleSheet.create({
   },
   capacityInput: {
     width: 120,
-    minHeight: 48,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
+    marginHorizontal: 0,
     textAlign: "center",
   },
   capacityUnit: { color: theme.colors.inkSoft, fontSize: theme.fontSize.md },

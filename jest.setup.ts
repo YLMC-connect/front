@@ -39,6 +39,10 @@ jest.mock("expo-router", () => {
       setParams: jest.fn(),
     })),
     useLocalSearchParams: jest.fn(() => ({})),
+    useNavigation: jest.fn(() => ({
+      addListener: () => () => undefined,
+      isFocused: () => true,
+    })),
     usePathname: jest.fn(() => "/"),
     Stack,
   };

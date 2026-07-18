@@ -114,6 +114,41 @@ describe("common motion", () => {
     expect(onChange).toHaveBeenCalledWith("reserved");
   });
 
+  it("keeps the segmented indicator geometry through a zero layout", () => {
+    const items = [
+      { key: "sharing", label: "나눔중" },
+      { key: "reserved", label: "예약중" },
+    ] as const;
+    const screen = render(
+      <SegmentedTabs
+        items={items}
+        active="reserved"
+        onChange={jest.fn()}
+        testIDPrefix="status"
+      />,
+    );
+
+    fireEvent(screen.getByTestId("status-track"), "layout", {
+      nativeEvent: { layout: { height: 40, width: 212, x: 0, y: 0 } },
+    });
+    const measuredIndicatorStyle = StyleSheet.flatten(
+      screen.getByTestId("status-indicator").props.style,
+    );
+    expect(measuredIndicatorStyle).toMatchObject({
+      opacity: 1,
+      width: 100,
+      transform: [{ translateX: 104 }],
+    });
+
+    fireEvent(screen.getByTestId("status-track"), "layout", {
+      nativeEvent: { layout: { height: 0, width: 0, x: 0, y: 0 } },
+    });
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId("status-indicator").props.style),
+    ).toEqual(measuredIndicatorStyle);
+  });
+
   it("shares a moving indicator across variable-width filter chips", () => {
     const onChange = jest.fn();
     const items = [
@@ -135,6 +170,23 @@ describe("common motion", () => {
     fireEvent(screen.getByTestId("category-books"), "layout", {
       nativeEvent: { layout: { height: 36, width: 82, x: 62, y: 0 } },
     });
+    const measuredBookSurfaceStyle = StyleSheet.flatten(
+      screen.getByTestId("category-surface-books").props.style,
+    );
+
+    fireEvent(screen.getByTestId("category-all"), "layout", {
+      nativeEvent: { layout: { height: 0, width: 0, x: 0, y: 0 } },
+    });
+    fireEvent(screen.getByTestId("category-books"), "layout", {
+      nativeEvent: { layout: { height: 0, width: 0, x: 0, y: 0 } },
+    });
+
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("category-surface-books").props.style,
+      ),
+    ).toEqual(measuredBookSurfaceStyle);
+    expect(measuredBookSurfaceStyle).toMatchObject({ left: 62, width: 82 });
 
     expect(
       StyleSheet.flatten(

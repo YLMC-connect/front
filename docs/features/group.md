@@ -1,6 +1,6 @@
 # group (소모임)
 
-> 마지막 갱신: 2026-07-16 | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-17 | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,7 +10,11 @@
 
 ## ✅ 완료
 
-- 동행 sticky 필터 Cross Fade·Translate — 전체 모임 필터가 anchor를 지난 12px 동안 본문과 sticky에 함께 렌더링되며 반대 opacity와 ±4px 이동으로 붙고 복귀하고, 중간 지점에서 터치·접근성 대상을 교대하면서 56px 자리·기존 숨김·검색·필터 동작은 유지
+- 동행 상세 복귀 세그먼트·필터 깜빡임 제거 — 숨은 목록에서 들어오는 세그먼트·필터의 `0×0` layout과 카테고리 anchor의 0 크기 측정을 버려 마지막 정상 위치를 유지하고, 430×932 웹에서 상세 뒤로가기 직후부터 250ms까지 세그먼트 189px·필터 49px geometry와 opacity 1이 한 프레임도 무너지지 않음을 확인
+- 동행 상세 복귀 미세 잔상 제거 — 목록·세그먼트·필터를 재생성하지 않고 유지한 채 웹은 카드 입력 이벤트 안에서 기존 ScrollView를 `y=0`으로 맞춘 직후 같은 Stack에 직접 push하고, 네이티브는 push 전환이 끝난 뒤 숨은 목록을 초기화해 복귀 첫 프레임부터 본문 필터만 원래 위치에 표시하면서 일반 200ms Cross Fade·Translate는 유지
+- 소모임 상세·개설 상단 패딩 통일 — 상세는 공통 `Screen`의 `safe area + 20px` 기준을 상속하고 별도 `KeyboardAvoidingView`를 쓰는 개설 modal도 같은 계산식을 적용해 루트 동행 헤더와 시작점을 맞춤
+- 소모임 개설 폼 구획·포커스 통일 — 카테고리부터 모임 장소까지 이어지는 8px 회색 section divider를 제거하고, 소모임명·설명·최대인원·일정·장소 입력을 나눔 등록과 같은 공통 `ModalFormTextInput`으로 전환해 primary 2px 포커스와 기존 입력·개설 동작을 유지
+- 동행 sticky 필터 시간 기반 Cross Fade·Translate — 전체 모임 필터가 anchor를 통과하면 본문과 sticky에 함께 렌더링된 채 200ms 동안 반대 opacity와 ±4px 이동으로 붙고 복귀하며, 중간 시점에 터치·접근성 대상을 교대하고 종료 뒤 sticky 복제본을 제거하면서 기존 숨김·검색·필터 동작은 유지
 - 동행 탐색 control·FAB 비율 보정 — 소모임/봉사 세그먼트와 전체 모임 필터의 full pill을 유지한 채 시각 높이를 낮추고 44px 터치 범위를 보존했으며 `소모임 개설` FAB를 46px로 축소해 하단 탭과 위계를 분리
 - 전체 모임 sticky 전환 직후 메뉴 유지 — 카테고리 필터가 원래 위치에서 세그먼트와 합쳐지는 순간 누적 하강 거리를 초기화해 메뉴를 먼저 보여주고, 이후 추가 12px 하강에서 숨김·4px 상승에서 재표시하며 본문 복귀 동작은 유지
 - 동행 소모임·봉사 카드 통일 — 전체 소모임과 봉사가 같은 화면 전용 `CompanionCard`를 사용해 96px 썸네일·16px padding/radius·1px 경계·동일 shadow와 정보 배치를 공유하고, 봉사 일정·모집 상태·참여 인원·아이콘·연결 상세 이동은 유지
@@ -62,20 +66,22 @@
 
 ## 주요 파일 (도메인 파일 지도)
 
-| 경로                                   | 역할                                            |
-| -------------------------------------- | ----------------------------------------------- |
-| `app/(tabs)/group/_layout.tsx`         | 동행 목록·상세·공지·멤버 중첩 Stack             |
-| `app/(tabs)/group/index.tsx`           | 동행 탭 루트, 소모임/봉사 segment               |
-| `app/(tabs)/group/[id].tsx`            | 소모임 상세, 공지 작성·인라인 삭제, 멤버        |
-| `app/(tabs)/group/notices.tsx`         | 소모임 공지 작성/수정/삭제                      |
-| `app/(tabs)/group/members.tsx`         | 소모임 멤버 관리와 소모임장 이관                |
-| `app/modal/group-new.tsx`              | 소모임 개설 모달                                |
-| `src/mocks/groups.ts`                  | 소모임 mock 데이터                              |
-| `src/services/groupService.ts`         | 교체 가능한 동행 조회·공지 CUD data source 경계 |
-| `src/hooks/useGroups.ts`               | 동행 조회와 공지 CUD TanStack Query hook        |
-| `src/constants/domainOptions.ts`       | 소모임 카테고리/상태 필터 옵션                  |
-| `src/types/group.ts`                   | 소모임 타입                                     |
-| `scripts/check-group-api-contract.mjs` | 동행 Swagger endpoint·화면/관리 계약 검사       |
+| 경로                                           | 역할                                            |
+| ---------------------------------------------- | ----------------------------------------------- |
+| `app/(tabs)/group/_layout.tsx`                 | 동행 목록·상세·공지·멤버 중첩 Stack             |
+| `app/(tabs)/group/index.tsx`                   | 동행 탭 루트, 소모임/봉사 segment               |
+| `app/(tabs)/group/[id].tsx`                    | 소모임 상세, 공지 작성·인라인 삭제, 멤버        |
+| `app/(tabs)/group/notices.tsx`                 | 소모임 공지 작성/수정/삭제                      |
+| `app/(tabs)/group/members.tsx`                 | 소모임 멤버 관리와 소모임장 이관                |
+| `app/modal/group-new.tsx`                      | 소모임 개설 모달                                |
+| `src/mocks/groups.ts`                          | 소모임 mock 데이터                              |
+| `src/services/groupService.ts`                 | 교체 가능한 동행 조회·공지 CUD data source 경계 |
+| `src/hooks/useGroups.ts`                       | 동행 조회와 공지 CUD TanStack Query hook        |
+| `src/components/layout/StickyHeaderScreen.tsx` | sticky scroll guard와 내부 상태 reset 경계      |
+| `src/components/ui/motion.tsx`                 | presence 모션과 즉시 종료 경계                  |
+| `src/constants/domainOptions.ts`               | 소모임 카테고리/상태 필터 옵션                  |
+| `src/types/group.ts`                           | 소모임 타입                                     |
+| `scripts/check-group-api-contract.mjs`         | 동행 Swagger endpoint·화면/관리 계약 검사       |
 
 ## 데이터 타입
 
@@ -83,7 +89,12 @@
 
 ## 결정 사항 (최신 위)
 
-- (2026-07-16) **전체 모임 필터는 조건부 FadeIn 대신 12px 스크롤 연동 Cross Fade + Translate로 결합한다** — 본문 필터는 `opacity 1→0`과 최대 4px 상승, sticky 필터는 반대 opacity와 `4→0px` 이동을 사용하고 위 스크롤에서는 동일 progress를 역으로 적용합니다. 두 필터는 전환 구간에 함께 존재하되 progress 0.5 전후로 터치·접근성 대상만 교대하고 anchor의 56px 공간, 세그먼트 결합 위치, 아래 12px 숨김·위 4px 재표시와 검색 강제 노출은 유지합니다.
+- (2026-07-17) **동행의 카테고리 도킹 기준은 0 크기 anchor 측정으로 덮어쓰지 않는다** — 상세 push로 목록 route가 숨을 때 발생하는 `width=0` 또는 `height=0` layout은 원래 필터 위치가 아니므로 마지막 정상 anchor를 유지합니다. 공통 세그먼트·필터도 마지막 양수 geometry를 유지해 복귀 첫 프레임에 선택 배경이 0폭에서 다시 측정되는 동시 깜빡임을 막습니다.
+- (2026-07-16, 최종 원인) **상세 복귀 첫 프레임은 목록 subtree를 재생성하지 않고 플랫폼 전환 시점에 맞춰 초기화한다** — 웹 native-stack은 비활성 route를 `display:none`으로 전환하며 숨은 ScrollView의 `scrollTop=0` 측정값은 실제 보존 위치를 뜻하지 않아, 숨긴 뒤의 scroll reset만으로는 복귀 위치를 보장하지 못합니다. 웹은 카드 입력 이벤트 안에서 기존 ScrollView를 `y=0`으로 맞추고 `StackActions.push("[id]")`를 바로 dispatch해 다음 paint 전에 목록을 숨깁니다. Android·iOS는 이전 목록이 push 애니메이션 중 보이므로 사전 이동하지 않고 `transitionEnd(closing=true)` 뒤 초기화합니다. ScrollView·세그먼트·필터 indicator·blur layer는 같은 인스턴스를 유지하고 reset key는 sticky 내부 방향 누적값만 정리합니다. 430x932 웹에서 화면의 뒤로가기와 browser history 뒤로가기 모두 진입 전 `scrollTop=396`, sticky `height=116` 상태에서 복귀 직후와 300ms 뒤 `scrollTop=0`, 본문 필터 `opacity=1`, sticky 복제본 없음, layer `height=60`을 확인했습니다.
+- (2026-07-16) **소모임 상세와 개설 화면은 루트 동행과 같은 상단 기준을 사용한다** — 상세·오류·멤버·공지 화면은 공통 `Screen`의 `top inset + 20px`을 상속하고, `Screen` 밖의 소모임 개설 modal도 같은 계산식을 적용합니다. 화면 내부 section 여백과 기존 `TopBar` geometry는 변경하지 않습니다.
+- (2026-07-16) **소모임 개설 폼은 회색 divider 없이 내부 여백으로 구획하고 공통 작성 입력을 사용한다** — 카테고리·소모임명·설명·최대인원·일정·장소 사이의 8px divider를 제거하되 section padding은 유지합니다. 다섯 입력은 나눔 등록과 같은 `ModalFormTextInput`을 사용해 브라우저 기본 outline 대신 primary 2px 포커스를 표시하고 최대인원만 기존 width·가운데 정렬을 추가합니다.
+- (2026-07-16) **전체 모임 필터 도킹은 200ms 시간 기반 presence Cross Fade + Translate로 실행한다** — 스크롤은 anchor 통과 여부만 결정하고 공통 `useMotionPresence`가 본문 `opacity 1→0`·최대 4px 상승과 sticky `opacity 0→1`·`4→0px` 이동을 실행합니다. 복귀도 같은 progress를 역방향으로 재생한 뒤 sticky 복제본을 제거하며, 중간 시점에 터치·접근성 대상을 교대하고 동작 줄이기에서는 즉시 전환합니다.
+- (2026-07-16, 후속 폐기) **전체 모임 필터는 조건부 FadeIn 대신 12px 스크롤 연동 Cross Fade + Translate로 결합한다** — 12px 구간은 실제 휠·터치 입력 한 번에 진행값이 `0→1`로 건너뛰어 순간 교체처럼 보이므로 시간 기반 presence 전환으로 대체했습니다. anchor 위치와 기존 sticky 숨김·재표시·검색·필터 동작은 유지합니다.
 - (2026-07-15) **동행 탐색 control은 full pill과 44px 터치 범위를 유지하면서 시각 높이만 낮춘다** — 소모임/봉사 세그먼트는 40px track·32px 선택 영역, 전체 모임 필터는 36px surface를 사용하고 상하 hitSlop으로 44px 터치 범위를 보장합니다. `소모임 개설` FAB는 공통 46px geometry를 사용하며 기존 sticky 합류 기준·간격·모션·라우팅은 유지합니다.
 - (2026-07-15) **전체 모임 필터가 sticky로 결합된 순간에는 메뉴를 먼저 표시한다** — 결합 전의 하강 누적값으로 새 `세그먼트 + 필터` 레이어가 즉시 사라지지 않도록 전환 순간 표시 상태와 방향 거리를 초기화합니다. 결합 뒤 추가 12px 하강 숨김, 4px 상승 재표시와 필터의 본문 원위치 복귀 기준은 유지합니다.
 - (2026-07-15) **동행의 전체 소모임과 봉사는 같은 카드 프레임을 사용한다** — 화면 전용 `CompanionCard`가 96px 썸네일, 16px padding/radius, 1px 경계, shadow와 제목·설명·하단 메타 위치를 소유합니다. 소모임은 카테고리·인원, 봉사는 일정·참여 인원과 봉사 아이콘만 주입하며 봉사는 기존 `linkedGroupId` 상세로 이동합니다.

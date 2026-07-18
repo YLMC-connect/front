@@ -3,6 +3,7 @@ import { usePathname } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { theme } from "../../constants/theme";
+import { SCREEN_HEADER_VERTICAL_PADDING } from "../ui/screen-header";
 
 const rootTabPaths = new Set([
   "/",
@@ -11,8 +12,6 @@ const rootTabPaths = new Set([
   "/prayer",
   "/life-study",
 ]);
-const designStatusBarHeight = 44;
-
 export function Screen({
   children,
   scroll = true,
@@ -38,7 +37,7 @@ export function Screen({
       style={[
         styles.safe,
         applyTopInset
-          ? { paddingTop: Math.max(insets.top, designStatusBarHeight) }
+          ? { paddingTop: insets.top + SCREEN_HEADER_VERTICAL_PADDING }
           : null,
       ]}
     >

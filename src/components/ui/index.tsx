@@ -37,7 +37,11 @@ import { MotionPressable, useMotionPresence } from "./motion";
 export { DetailAction, DetailMiniAction } from "./detail-actions";
 export { DetailBadge } from "./detail-badge";
 export { FilterChips } from "./filter-chips";
-export { ModalFormSection, SectionDivider } from "./modal-form-layout";
+export {
+  ModalFormSection,
+  ModalFormTextInput,
+  SectionDivider,
+} from "./modal-form-layout";
 export { ScreenHeader } from "./screen-header";
 export { SearchField, SEARCH_FIELD_STICKY_HEIGHT } from "./search-field";
 export { SearchToggleButton } from "./search-toggle-button";
@@ -462,7 +466,10 @@ export function SegmentedTabs<T extends string>({
   testIDPrefix?: string;
 }) {
   const reduceMotion = useReducedMotion();
-  const [itemWidth, setItemWidth] = useState(0);
+  const [trackWidth, setTrackWidth] = useState(0);
+  const gapWidth = Math.max(items.length - 1, 0) * SEGMENT_GAP;
+  const contentWidth = Math.max(trackWidth - SEGMENT_PADDING * 2 - gapWidth, 0);
+  const itemWidth = items.length > 0 ? contentWidth / items.length : 0;
   const selectedIndex = Math.max(
     items.findIndex((item) => item.key === active),
     0,
@@ -495,12 +502,10 @@ export function SegmentedTabs<T extends string>({
       style={[styles.segmented, style]}
       testID={testIDPrefix ? `${testIDPrefix}-track` : undefined}
       onLayout={(event) => {
-        const gapWidth = Math.max(items.length - 1, 0) * SEGMENT_GAP;
-        const contentWidth = Math.max(
-          event.nativeEvent.layout.width - SEGMENT_PADDING * 2 - gapWidth,
-          0,
-        );
-        setItemWidth(items.length > 0 ? contentWidth / items.length : 0);
+        const { width } = event.nativeEvent.layout;
+        if (!Number.isFinite(width) || width <= 0) return;
+
+        setTrackWidth((current) => (current === width ? current : width));
       }}
     >
       <Animated.View

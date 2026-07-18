@@ -16,6 +16,8 @@ import {
   type ViewStyle,
 } from "react-native";
 import Animated, {
+  cancelAnimation,
+  type SharedValue,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -38,11 +40,16 @@ export function StickyHeaderScreen({
   children,
   overlay,
   stickyControls,
+  stickyControlsCollapsedHeight,
   stickyControlsHeight = 0,
+  stickyControlsHeightProgress,
   stickyControlsInset = stickyControlsHeight,
   stickyControlsAlwaysVisible = false,
   stickyControlsRevealKey,
+  scrollStateResetKey,
   onScrollOffsetChange,
+  scrollRef,
+  shouldHandleScroll,
   contentContainerStyle,
   testID,
 }: {
@@ -52,11 +59,16 @@ export function StickyHeaderScreen({
   children: ReactNode;
   overlay?: ReactNode;
   stickyControls?: ReactNode;
+  stickyControlsCollapsedHeight?: number;
   stickyControlsHeight?: number;
+  stickyControlsHeightProgress?: SharedValue<number>;
   stickyControlsInset?: number;
   stickyControlsAlwaysVisible?: boolean;
   stickyControlsRevealKey?: string | number;
+  scrollStateResetKey?: string | number;
   onScrollOffsetChange?: (offsetY: number) => void;
+  scrollRef?: RefObject<ScrollView | null>;
+  shouldHandleScroll?: () => boolean;
   contentContainerStyle?: StyleProp<ViewStyle>;
   testID: string;
 }) {
@@ -79,8 +91,19 @@ export function StickyHeaderScreen({
     setControlsHidden(false);
   }, [stickyControlsRevealKey]);
 
+  useEffect(() => {
+    if (scrollStateResetKey === undefined) return;
+
+    lastScrollY.current = 0;
+    downwardDistance.current = 0;
+    upwardDistance.current = 0;
+    setControlsHidden(false);
+  }, [scrollStateResetKey]);
+
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = Math.max(event.nativeEvent.contentOffset.y, 0);
+    if (shouldHandleScroll && !shouldHandleScroll()) return;
+
     const delta = offsetY - lastScrollY.current;
 
     if (offsetY <= 1) {
@@ -112,6 +135,7 @@ export function StickyHeaderScreen({
       <View style={styles.root}>
         <BlurTargetView ref={blurTarget} style={styles.target}>
           <ScrollView
+            ref={scrollRef}
             contentContainerStyle={[
               styles.content,
               contentContainerStyle,
@@ -133,8 +157,11 @@ export function StickyHeaderScreen({
         {hasStickyControls ? (
           <StickyControlsLayer
             blurTarget={blurTarget}
+            collapsedHeight={stickyControlsCollapsedHeight}
             height={stickyControlsHeight}
+            heightProgress={stickyControlsHeightProgress}
             hidden={controlsHidden && !stickyControlsAlwaysVisible}
+            resetKey={scrollStateResetKey}
             testID={`${testID}-sticky-controls`}
             top={SCREEN_HEADER_HEIGHT + topInset}
           >
@@ -157,14 +184,20 @@ function StickyControlsLayer({
   blurTarget,
   children,
   height,
+  collapsedHeight = height,
+  heightProgress,
   hidden,
+  resetKey,
   testID,
   top,
 }: {
   blurTarget: RefObject<View | null>;
   children: ReactNode;
+  collapsedHeight?: number;
   height: number;
+  heightProgress?: SharedValue<number>;
   hidden: boolean;
+  resetKey?: string | number;
   testID: string;
   top: number;
 }) {
@@ -182,7 +215,17 @@ function StickyControlsLayer({
         : withTiming(nextValue, { duration: theme.motion.duration.base });
   }, [height, hidden, reduceMotion, translateY]);
 
+  useEffect(() => {
+    if (resetKey === undefined) return;
+
+    cancelAnimation(translateY);
+    translateY.value = 0;
+  }, [resetKey, translateY]);
+
   const animatedStyle = useAnimatedStyle(() => ({
+    height: heightProgress
+      ? collapsedHeight + (height - collapsedHeight) * heightProgress.value
+      : height,
     transform: [{ translateY: translateY.value }],
   }));
 

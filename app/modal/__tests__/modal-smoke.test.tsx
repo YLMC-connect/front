@@ -1,8 +1,11 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import { StyleSheet } from "react-native";
 import GroupNewModal from "../group-new";
 import MarketNewModal from "../market-new";
+import { SCREEN_HEADER_VERTICAL_PADDING } from "../../../src/components/ui/screen-header";
+import { theme } from "../../../src/constants/theme";
 import { renderWithClient } from "../../../src/test/renderWithClient";
 
 describe("modal smoke screens", () => {
@@ -19,11 +22,23 @@ describe("modal smoke screens", () => {
     expect(screen.getAllByText("나눔 등록")).toHaveLength(2);
     expect(screen.getByLabelText("뒤로")).toBeTruthy();
     expect(screen.queryByText("닫기")).toBeNull();
+    expect(
+      StyleSheet.flatten(screen.getByTestId("market-form-screen").props.style),
+    ).toMatchObject({ paddingTop: 24 + SCREEN_HEADER_VERTICAL_PADDING });
     expect(screen.getByText("사진 0/5")).toBeTruthy();
     expect(screen.getByText("사용감 있음")).toBeTruthy();
     expect(
       screen.getByPlaceholderText("제목을 입력해주세요 (최대 30자)"),
     ).toBeTruthy();
+
+    const titleInput = screen.getByLabelText("나눔 제목");
+    fireEvent(titleInput, "focus");
+    expect(StyleSheet.flatten(titleInput.props.style)).toMatchObject({
+      borderColor: theme.colors.primary,
+      borderWidth: 2,
+      outlineColor: "transparent",
+      outlineWidth: 0,
+    });
   });
 
   it("renders the group create modal", () => {
@@ -32,10 +47,22 @@ describe("modal smoke screens", () => {
     expect(screen.getAllByText("소모임 개설")).toHaveLength(2);
     expect(screen.getByLabelText("뒤로")).toBeTruthy();
     expect(screen.queryByText("닫기")).toBeNull();
+    expect(
+      StyleSheet.flatten(screen.getByTestId("group-form-screen").props.style),
+    ).toMatchObject({ paddingTop: 24 + SCREEN_HEADER_VERTICAL_PADDING });
     expect(screen.getByText("운동·건강")).toBeTruthy();
     expect(
       screen.getByPlaceholderText("소모임 이름을 입력해주세요 (최대 20자)"),
     ).toBeTruthy();
+
+    const nameInput = screen.getByLabelText("소모임 이름");
+    fireEvent(nameInput, "focus");
+    expect(StyleSheet.flatten(nameInput.props.style)).toMatchObject({
+      borderColor: theme.colors.primary,
+      borderWidth: 2,
+      outlineColor: "transparent",
+      outlineWidth: 0,
+    });
   });
 
   it("submits a valid market form and opens the created detail", async () => {

@@ -97,6 +97,11 @@ export function FilterChips<T extends string>({
                     styles.surface,
                     { left: layout.x, width: layout.width },
                   ]}
+                  testID={
+                    testIDPrefix
+                      ? `${testIDPrefix}-surface-${item.key}`
+                      : undefined
+                  }
                 />
               ) : null;
             })
@@ -119,6 +124,14 @@ export function FilterChips<T extends string>({
               key={item.key}
               onLayout={(event) => {
                 const { width, x } = event.nativeEvent.layout;
+                if (
+                  !Number.isFinite(width) ||
+                  width <= 0 ||
+                  !Number.isFinite(x)
+                ) {
+                  return;
+                }
+
                 setLayouts((current) => {
                   const previous = current[item.key];
                   if (previous?.width === width && previous.x === x) {

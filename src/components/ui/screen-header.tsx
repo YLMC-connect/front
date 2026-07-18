@@ -5,7 +5,7 @@ import { AppText } from "./app-text";
 import { GlassBackdrop } from "./glass-backdrop";
 
 export const SCREEN_HEADER_HEIGHT = 89;
-const SCREEN_HEADER_VERTICAL_PADDING = 20;
+export const SCREEN_HEADER_VERTICAL_PADDING = 20;
 const SCREEN_HEADER_ACTION_TOP =
   (SCREEN_HEADER_HEIGHT - theme.layout.touchTarget) / 2;
 

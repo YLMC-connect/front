@@ -1,6 +1,6 @@
 # common (공통 인프라)
 
-> 마지막 갱신: 2026-07-16 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-17 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -13,6 +13,9 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- 숨김 화면 탭·필터 geometry 보존 — 웹 Stack이 비활성 화면을 `display:none`으로 바꾸며 전달하는 `0×0` layout은 무시하고 공통 `SegmentedTabs`·`FilterChips`가 마지막 정상 너비와 위치를 유지해 상세 복귀 시 선택 배경이 사라졌다 다시 나타나는 깜빡임을 제거하면서 이후 양수 크기 변경은 계속 반영
+- 상세·하위 화면 상단 패딩 통일 — 공통 `Screen`과 별도 작성 modal이 루트 탭 헤더와 같은 `safe area + 20px` 상단 기준을 사용해 소모임 상세를 포함한 인증·상세·알림·MY·작성 화면의 시작점을 맞추고 이미지 hero overlay 예외는 유지
+- 공통 작성 폼 입력 포커스 — `ModalFormTextInput`이 나눔 등록·소모임 개설의 단일/멀티라인/숫자 입력 surface를 공유하고 웹 기본 outline을 제거한 뒤 검색 입력과 같은 primary 2px 포커스를 적용하며 기존 크기·placeholder·입력 이벤트를 유지
 - 동행 sticky 필터 Cross Fade 전환 — 본문·sticky 필터를 12px 스크롤 구간에서 함께 유지하고 반대 opacity와 ±4px translate를 적용해 붙기·원위치 복귀를 양방향으로 연결하며 기존 방향형 숨김·검색 노출·동작 줄이기 정책은 유지
 - 공통 탐색 control·FAB 비율 보정 — `SegmentedTabs`와 `FilterChips`의 full pill은 유지하면서 시각 높이를 각각 40/32px·36px로 낮추고 hitSlop으로 44px 터치 범위를 보장했으며, 행동형 FAB는 46px·18px 아이콘으로 축소해 64px 하단 탭보다 작게 정리
 - sticky controls 구성 전환 재표시 기준 — 공통 `StickyHeaderScreen`이 선택적 reveal key 변경 시 숨김 상태와 방향 누적값을 초기화하도록 지원해 동행의 세그먼트·필터 결합 직후 메뉴를 먼저 표시하면서 다른 화면의 기존 12px/4px 정책은 유지
@@ -60,7 +63,7 @@
 - ZIP `Thumb` 공통 패턴 정렬 — `VisualThumb`는 ZIP JSX처럼 icon prop이 있을 때만 아이콘을 렌더링하고, 기본 썸네일은 추상 도형만 표시
 - Dev Client Maestro smoke 서버 선택 보강 — Dev Client가 `DEVELOPMENT SERVERS` 화면에 머물면 `.maestro/smoke.yml`에서 개발 서버를 먼저 선택한 뒤 v1 탭 smoke를 실행
 - 디자인 viewport 기반 부분 캡처 옵션 추가 — `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT=1` 사용 시 Android Emulator를 1080x2160@480으로 임시 조정해 ZIP 360x720 논리 viewport에 맞춰 캡처하고, 캡처 후 원래 size/density로 복원
-- ZIP frame safe-area 정렬 — `Screen`은 ZIP `phone-status` 44px frame을 기준으로 top offset을 맞추고, 하단 fixed action/tab 계열은 ZIP처럼 bottom inset 위로 과도하게 뜨지 않도록 bottom safe-area padding을 제거
+- 공통 Screen safe-area 정렬 — `Screen`은 실제 top safe-area에 20px을 더해 루트 탭 헤더와 시작점을 맞추고, 하단 fixed action/tab 계열은 bottom inset 위로 과도하게 뜨지 않도록 기존 bottom padding 정책을 유지
 - ZIP RadioSheet compact/footer 정렬 — 긴 radio 목록은 ZIP 신고 sheet처럼 20px radio mark와 12px row padding을 사용하고, sheet footer는 48px pill 버튼으로 맞춤
 - RadioSheet 실제 선택 경계 추가 — 선택 callback·접근성 radio state·confirm disabled를 공통화해 디자인 reference와 실제 mutation form이 같은 sheet를 사용
 - ZIP visual artifact 재생성 자동화 — `npm run test:visual:prepare`로 ZIP standalone HTML에서 110개 inventory/manifest/original PNG를 다시 만들고, full `npm run test:visual:compare`를 `screens=110`, `missing=0`으로 복구
@@ -128,6 +131,7 @@
 | `src/components/ui/glass-backdrop.tsx`                        | 상단 sticky 헤더와 하단 floating tab bar가 공유하며 화면별 tint 색상·투명도를 지정할 수 있는 intensity 32 blur layer                                                                                                                       |
 | `src/components/layout/StickyHeaderScreen.tsx`                | 실제 safe-area까지 blur target에 포함하고 검색·필터·목록을 헤더 뒤로 통과시키며, 동일 glass의 sticky control과 스크롤 방향 숨김·200ms 재표시를 관리하는 루트 탭 공통 layout                                                                |
 | `src/components/ui/search-field.tsx`                          | 검색 아이콘과 입력을 하나의 surface로 묶고 웹 focus border·공통 sticky 높이를 관리하는 검색 입력                                                                                                                                           |
+| `src/components/ui/modal-form-layout.tsx`                     | 나눔 등록·소모임 개설의 section label과 단일/멀티라인/숫자 입력 surface·primary 2px focus border를 공유                                                                                                                                    |
 | `src/components/ui/search-toggle-button.tsx`                  | 헤더의 검색/닫기 아이콘과 명시적 한글 label, press motion을 공유하는 action                                                                                                                                                                |
 | `src/components/layout/TabBlurTargetContext.ts`               | 현재 루트 화면의 Android blur target ref를 하단 tab bar까지 전달                                                                                                                                                                           |
 | `src/components/ui/motion.tsx`                                | Reanimated 기반 공통 press scale과 overlay presence 제어. 시스템 동작 줄이기 설정을 반영                                                                                                                                                   |
@@ -170,6 +174,9 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-17) **숨겨진 route의 0 크기 layout은 탐색 control의 유효 geometry로 사용하지 않는다** — 웹 native-stack의 비활성 화면은 `display:none` 동안 공통 `SegmentedTabs` track과 `FilterChips` 항목에 `0×0` layout을 전달할 수 있으므로 마지막 양수 너비·위치를 유지합니다. 최초 정상 측정 전에는 indicator를 숨기고, 화면 회전·viewport 변경처럼 이후 들어오는 양수 측정과 세그먼트 항목 수 변경은 정상 재계산합니다.
+- (2026-07-16) **화면 상단은 실제 safe-area 뒤에 20px을 공통으로 둔다** — 루트 `ScreenHeader`, 일반 `Screen + TopBar`, 나눔·소모임 작성 modal은 모두 `top inset + 20px`을 사용합니다. 공통 `Screen` 변경으로 인증·상세·알림·MY 하위 화면까지 함께 맞추며, 이미지 안에 뒤로가기를 배치하는 나눔 상세 성공 화면은 의도된 overlay라 예외로 유지합니다.
+- (2026-07-16) **나눔 등록과 소모임 개설의 텍스트 입력은 공통 `ModalFormTextInput`이 소유한다** — 단일행·멀티라인·숫자 입력의 surface, placeholder 색상, 웹 outline 제거, primary 2px 포커스와 padding 보정을 공통 컴포넌트에 두고 화면은 값·제약·전용 width만 전달합니다. 나눔·동행·삶공부 검색은 기존 공통 `SearchField`의 동일한 primary 2px 외곽 포커스를 유지합니다.
 - (2026-07-16) **본문 control이 sticky 위치에 합류할 때는 스크롤 연동 progress로 두 복사본을 교차 전환한다** — 동행 카테고리 필터는 anchor 이후 12px에서 본문 `opacity 1→0 / translateY 0→-4`, sticky `opacity 0→1 / translateY 4→0`을 반대로 적용하고 위 스크롤에서는 같은 값을 역방향으로 사용합니다. 전환 중 필터 자리 높이는 유지하고 progress 0.5를 기준으로 한쪽만 터치·접근성 대상이 되며 동작 줄이기에서는 즉시 교체합니다.
 - (2026-07-15) **탐색 control은 full pill을 유지하되 surface 높이로 납작하게 구분한다** — 공통 `SegmentedTabs`는 40px track 안에 32px 선택 영역과 상하 6px hitSlop, `FilterChips`는 36px surface와 상하 4px hitSlop을 사용해 실제 터치 범위는 44px 이상 유지합니다. 공통 행동형 FAB는 46px 높이·18px 아이콘·13px label로 줄여 64px 하단 탭보다 작게 두며 라우팅·모션·접근성은 변경하지 않습니다.
 - (2026-07-15) **sticky controls의 내용 구성이 바뀌면 화면이 명시한 시점에 다시 표시할 수 있다** — 공통 기본 방향 정책은 아래 12px 숨김·위 4px 재표시로 유지하고, 선택적 reveal key가 바뀔 때만 숨김 상태와 누적 거리를 초기화합니다. 동행처럼 스크롤 중 control 높이와 내용이 함께 바뀌는 화면이 이전 하강량을 새 구성에 이어받지 않도록 사용합니다.
@@ -244,7 +251,7 @@
 - (2026-05-27) **Maestro smoke는 루트 딥링크 이후 Dev Client 메뉴도 닫는다** — Expo Dev Client developer menu가 앱 루트 로딩 뒤 늦게 표시되면 `tab-home`을 가려 false negative가 발생하므로, `.maestro/smoke.yml`은 `openLink` 이후에도 `Continue`/`Reload`를 한 번 더 조건부 처리합니다.
 - (2026-05-27) **ZIP 원본 캡처는 animation settle 이후 저장한다** — `BottomSheet`, `TermsSheet`, toast처럼 ZIP JSX가 CSS animation을 쓰는 화면은 렌더 직후 2 rAF만 기다리면 중간 프레임이 원본 PNG로 저장됩니다. `test:visual:prepare`는 기본 320ms settle 이후 캡처하며, 필요 시 `YLMC_PREPARE_RENDER_SETTLE_MS`로 조정합니다.
 - (2026-05-26) **visual compare 원본은 ZIP에서 재생성한다** — `/private/tmp` 산출물이 정리되면 기본 `npm run test:visual:compare`가 inventory 없이 실패하므로, `test:visual:prepare`가 ZIP `app.jsx` artboard 105개와 extra MY 5개를 합쳐 110개 inventory/manifest를 만들고, standalone HTML을 headless Chrome으로 렌더링해 원본 PNG를 재생성합니다.
-- (2026-05-26) **`Screen` safe-area는 ZIP phone frame을 기준으로 번역한다** — Android native status inset(약 24dp)을 그대로 쓰면 ZIP의 44px `phone-status`보다 콘텐츠가 위로 붙고, bottom inset을 적용하면 comment composer가 ZIP보다 위로 뜹니다. `Screen`은 top을 최소 44dp로 보정하고 bottom inset은 fixed action geometry에 포함하지 않습니다.
+- (2026-05-26, 2026-07-16 상단 기준 폐기) **`Screen` safe-area는 ZIP phone frame을 기준으로 번역한다** — 최소 44dp 상단 보정은 루트 탭과 웹·노치 기기에서 시작점이 달라져 `top inset + 20px` 공통 기준으로 대체했습니다. bottom inset을 fixed action geometry에 포함하지 않는 정책은 유지합니다.
 - (2026-05-26) **긴 `RadioSheet`는 compact row를 사용한다** — 신고처럼 항목이 많은 bottom sheet는 ZIP `ReportSheet`와 같이 20px radio mark, 12px row padding, 48px footer pill 버튼을 사용합니다. 짧은 상태 변경 sheet는 기존 generic rhythm을 유지합니다.
 - (2026-05-26) **visual capture는 필요 시 ZIP 논리 viewport에 맞춘다** — Android Emulator 기본 해상도(1080x2400@420)는 ZIP 원본 360x720과 논리 viewport가 달라 layout diff를 키우므로, 부분 visual compare에서는 `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT=1`로 1080x2160@480을 임시 적용해 360x720dp 기준에 맞춥니다. 스크립트는 캡처 후 원래 `wm size/density`를 복원합니다.
 - (2026-05-26) **`VisualThumb` 기본형은 ZIP `Thumb`처럼 icon-less** — ZIP 공통 JSX의 `Thumb`는 `icon`을 넘긴 경우에만 아이콘을 표시하므로, RN `VisualThumb`도 기본 `redeem` 아이콘을 제거하고 호출부가 명시적으로 요청할 때만 아이콘을 렌더링합니다.

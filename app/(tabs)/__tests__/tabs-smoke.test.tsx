@@ -1,10 +1,16 @@
 import {
+  act,
   fireEvent,
   screen,
   waitFor,
   within,
 } from "@testing-library/react-native";
-import { router, useLocalSearchParams, useRouter } from "expo-router";
+import {
+  router,
+  useLocalSearchParams,
+  useNavigation,
+  useRouter,
+} from "expo-router";
 import { Alert, StyleSheet } from "react-native";
 import GroupDetailScreen from "../group/[id]";
 import GroupMembersScreen from "../group/members";
@@ -380,6 +386,9 @@ describe("v1 tab smoke screens", () => {
     fireEvent(screen.getByTestId("group-category-anchor"), "layout", {
       nativeEvent: { layout: { x: 0, y: 300, width: 430, height: 56 } },
     });
+    fireEvent(screen.getByTestId("group-category-anchor"), "layout", {
+      nativeEvent: { layout: { x: 0, y: 0, width: 0, height: 0 } },
+    });
     fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
       nativeEvent: { contentOffset: { y: 299 } },
     });
@@ -411,17 +420,16 @@ describe("v1 tab smoke screens", () => {
       "auto",
     );
 
-    fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
-      nativeEvent: { contentOffset: { y: 306 } },
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("group-sticky-controls-filter").props.pointerEvents,
+      ).toBe("auto");
+      expect(
+        screen.getByTestId("group-content-filter", {
+          includeHiddenElements: true,
+        }).props.pointerEvents,
+      ).toBe("none");
     });
-    expect(
-      screen.getByTestId("group-sticky-controls-filter").props.pointerEvents,
-    ).toBe("auto");
-    expect(
-      screen.getByTestId("group-content-filter", {
-        includeHiddenElements: true,
-      }).props.pointerEvents,
-    ).toBe("none");
 
     fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
       nativeEvent: { contentOffset: { y: 311 } },
@@ -450,12 +458,185 @@ describe("v1 tab smoke screens", () => {
     fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
       nativeEvent: { contentOffset: { y: 295 } },
     });
-    expect(screen.queryByTestId("group-sticky-controls-filter")).toBeNull();
-    expect(screen.getByTestId("group-content-filter")).toBeTruthy();
+    await waitFor(() =>
+      expect(screen.getByTestId("group-content-filter")).toBeTruthy(),
+    );
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("group-sticky-controls-filter", {
+          includeHiddenElements: true,
+        }),
+      ).toBeNull(),
+    );
     expect(
       screen.getByTestId("screen-group-sticky-controls").props.pointerEvents,
     ).toBe("auto");
     expect(screen.getByTestId("group-category-anchor")).toBeTruthy();
+  });
+
+  it("resets the existing group list without remounting it for detail", async () => {
+    const dispatch = jest.fn();
+    let blurGroupList: (() => void) | undefined;
+    let focusGroupList: (() => void) | undefined;
+    let finishGroupTransition:
+      | ((event: { data: { closing: boolean } }) => void)
+      | undefined;
+    const addListener = jest.fn((event: string, listener: never) => {
+      if (event === "blur") blurGroupList = listener;
+      if (event === "focus") focusGroupList = listener;
+      if (event === "transitionEnd") finishGroupTransition = listener;
+      return jest.fn();
+    });
+    jest.mocked(useNavigation).mockReturnValue({
+      addListener,
+      dispatch,
+      isFocused: () => true,
+    } as never);
+    jest
+      .mocked(useRouter)
+      .mockReturnValue({ push: jest.fn(), setParams: jest.fn() } as never);
+    try {
+      renderWithClient(<GroupScreen />);
+      await screen.findByText("내 소모임");
+
+      fireEvent(screen.getByTestId("group-category-anchor"), "layout", {
+        nativeEvent: { layout: { x: 0, y: 300, width: 430, height: 56 } },
+      });
+      const previousScroll = screen.getByTestId("screen-group-scroll");
+      const previousSegmentIndicator = screen.getByTestId(
+        "group-section-indicator",
+      );
+      const previousContentFilterIndicator = screen.getByTestId(
+        "group-category-indicator",
+        { includeHiddenElements: true },
+      );
+      fireEvent.scroll(previousScroll, {
+        nativeEvent: { contentOffset: { y: 300 } },
+      });
+      await waitFor(() =>
+        expect(
+          screen.getByTestId("group-sticky-controls-filter").props
+            .pointerEvents,
+        ).toBe("auto"),
+      );
+      const outgoingContentFilterStyle = StyleSheet.flatten(
+        screen.getByTestId("group-content-filter", {
+          includeHiddenElements: true,
+        }).props.style,
+      );
+      const outgoingControlsStyle = StyleSheet.flatten(
+        screen.getByTestId("screen-group-sticky-controls").props.style,
+      );
+
+      dispatch.mockImplementation(() => {
+        expect(screen.getByTestId("screen-group-scroll")).toBe(previousScroll);
+        expect(screen.getByTestId("group-section-indicator")).toBe(
+          previousSegmentIndicator,
+        );
+        expect(
+          screen.getByTestId("group-category-indicator", {
+            includeHiddenElements: true,
+          }),
+        ).toBe(previousContentFilterIndicator);
+        expect(
+          StyleSheet.flatten(
+            screen.getByTestId("group-content-filter", {
+              includeHiddenElements: true,
+            }).props.style,
+          ),
+        ).toEqual(outgoingContentFilterStyle);
+        expect(screen.getByTestId("group-sticky-controls-filter")).toBeTruthy();
+        expect(
+          StyleSheet.flatten(
+            screen.getByTestId("screen-group-sticky-controls").props.style,
+          ),
+        ).toEqual(outgoingControlsStyle);
+      });
+
+      fireEvent.press(screen.getByTestId("group-card-1"));
+
+      expect(dispatch).toHaveBeenCalledWith({
+        type: "PUSH",
+        payload: { name: "[id]", params: { id: "1" } },
+      });
+      expect(blurGroupList).toBeDefined();
+      expect(focusGroupList).toBeDefined();
+      expect(finishGroupTransition).toBeDefined();
+
+      act(() => blurGroupList?.());
+      act(() => finishGroupTransition?.({ data: { closing: true } }));
+      await waitFor(() =>
+        expect(
+          screen.queryByTestId("group-sticky-controls-filter", {
+            includeHiddenElements: true,
+          }),
+        ).toBeNull(),
+      );
+      expect(screen.getByTestId("screen-group-scroll")).toBe(previousScroll);
+      expect(screen.getByTestId("group-section-indicator")).toBe(
+        previousSegmentIndicator,
+      );
+      expect(
+        screen.getByTestId("group-category-indicator", {
+          includeHiddenElements: true,
+        }),
+      ).toBe(previousContentFilterIndicator);
+      expect(
+        StyleSheet.flatten(
+          screen.getByTestId("group-content-filter").props.style,
+        ),
+      ).toMatchObject({ opacity: 1, transform: [{ translateY: 0 }] });
+      expect(
+        StyleSheet.flatten(
+          screen.getByTestId("screen-group-sticky-controls").props.style,
+        ),
+      ).toMatchObject({ height: 60, transform: [{ translateY: 0 }] });
+
+      fireEvent(screen.getByTestId("group-category-anchor"), "layout", {
+        nativeEvent: { layout: { x: 0, y: 0, width: 0, height: 0 } },
+      });
+      fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
+        nativeEvent: { contentOffset: { y: 300 } },
+      });
+      expect(
+        screen.queryByTestId("group-sticky-controls-filter", {
+          includeHiddenElements: true,
+        }),
+      ).toBeNull();
+
+      const cleanScroll = screen.getByTestId("screen-group-scroll");
+      const cleanControlsStyle = StyleSheet.flatten(
+        screen.getByTestId("screen-group-sticky-controls").props.style,
+      );
+      act(() => focusGroupList?.());
+      expect(screen.getByTestId("screen-group-scroll")).toBe(cleanScroll);
+      expect(
+        StyleSheet.flatten(
+          screen.getByTestId("screen-group-sticky-controls").props.style,
+        ),
+      ).toEqual(cleanControlsStyle);
+      expect(
+        screen.queryByTestId("group-sticky-controls-filter", {
+          includeHiddenElements: true,
+        }),
+      ).toBeNull();
+
+      fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
+        nativeEvent: { contentOffset: { y: 0 } },
+      });
+      fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
+        nativeEvent: { contentOffset: { y: 300 } },
+      });
+      await waitFor(() =>
+        expect(screen.getByTestId("group-sticky-controls-filter")).toBeTruthy(),
+      );
+    } finally {
+      jest.mocked(useNavigation).mockReturnValue({
+        addListener: () => () => undefined,
+        dispatch: jest.fn(),
+        isFocused: () => true,
+      } as never);
+    }
   });
 
   it("applies the group category filter only to the all-groups list", async () => {
@@ -484,9 +665,14 @@ describe("v1 tab smoke screens", () => {
   });
 
   it("updates the group segment without replacing the screen", async () => {
-    const push = jest.fn();
+    const dispatch = jest.fn();
     const setParams = jest.fn();
-    jest.mocked(useRouter).mockReturnValue({ push, setParams } as never);
+    jest.mocked(useNavigation).mockReturnValue({
+      addListener: () => () => undefined,
+      dispatch,
+      isFocused: () => true,
+    } as never);
+    jest.mocked(useRouter).mockReturnValue({ setParams } as never);
     renderWithClient(<GroupScreen />);
     await screen.findByText("내 소모임");
     const groupCardStyle = StyleSheet.flatten(
@@ -508,7 +694,10 @@ describe("v1 tab smoke screens", () => {
     expect(within(serviceCount).getByText("18")).toBeTruthy();
     expect(within(serviceCount).getByText(/24명/)).toBeTruthy();
     fireEvent.press(serviceCard);
-    expect(push).toHaveBeenCalledWith("/group/5");
+    expect(dispatch).toHaveBeenCalledWith({
+      type: "PUSH",
+      payload: { name: "[id]", params: { id: "5" } },
+    });
     await waitFor(() =>
       expect(setParams).toHaveBeenCalledWith({ section: "service" }),
     );

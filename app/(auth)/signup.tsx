@@ -9,9 +9,9 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
+import { AuthInput } from "../../src/components/auth/auth-input";
 import { Screen } from "../../src/components/layout/Screen";
 import { AppText, TopBar } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
@@ -387,41 +387,34 @@ function SignupInput({
 }) {
   const [passwordVisible, setPasswordVisible] = useState(false);
   return (
-    <View
-      style={[
-        styles.inputWrap,
-        hasError ? styles.inputWrapError : null,
-        secureTextEntry ? styles.inputWrapWithIcon : null,
-      ]}
-    >
-      <TextInput
-        testID={testID}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={theme.colors.inkMute}
-        secureTextEntry={secureTextEntry && !passwordVisible}
-        keyboardType={keyboardType}
-        style={styles.input}
-      />
-      {secureTextEntry ? (
-        <Pressable
-          accessibilityLabel={
-            passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"
-          }
-          accessibilityRole="button"
-          hitSlop={8}
-          onPress={() => setPasswordVisible((visible) => !visible)}
-          style={styles.visibilityButton}
-        >
-          <AppIcon
-            name={passwordVisible ? "visibility" : "visibility-off"}
-            size={20}
-            color={theme.colors.inkMute}
-          />
-        </Pressable>
-      ) : null}
-    </View>
+    <AuthInput
+      testID={testID}
+      value={value}
+      onChangeText={onChangeText}
+      placeholder={placeholder}
+      secureTextEntry={secureTextEntry && !passwordVisible}
+      keyboardType={keyboardType}
+      hasError={hasError}
+      trailing={
+        secureTextEntry ? (
+          <Pressable
+            accessibilityLabel={
+              passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"
+            }
+            accessibilityRole="button"
+            hitSlop={8}
+            onPress={() => setPasswordVisible((visible) => !visible)}
+            style={styles.visibilityButton}
+          >
+            <AppIcon
+              name={passwordVisible ? "visibility" : "visibility-off"}
+              size={20}
+              color={theme.colors.inkMute}
+            />
+          </Pressable>
+        ) : null
+      }
+    />
   );
 }
 
@@ -500,36 +493,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   idInputWrap: { flex: 1, minWidth: 0 },
-  inputWrap: {
-    height: 48,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface2,
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  inputWrapWithIcon: {
-    paddingRight: 10,
-  },
   visibilityButton: {
     width: theme.layout.touchTarget,
     height: theme.layout.touchTarget,
     marginRight: -8,
     alignItems: "center",
     justifyContent: "center",
-  },
-  inputWrapError: {
-    borderColor: theme.colors.danger,
-    backgroundColor: "#FDF4F1",
-  },
-  input: {
-    flex: 1,
-    height: "100%",
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-    padding: 0,
   },
   checkButton: {
     height: 48,

@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 로그인·회원가입 입력 포커스 통일 — 인증 전용 공통 `AuthInput`으로 전체 입력 surface를 공유하고 웹 기본 내부 outline을 제거한 뒤 나눔·동행 검색·작성 입력과 같은 primary 2px focus border를 적용하며 오류 테두리는 danger 색상을 우선
 - 로그인 비밀번호 보기 아이콘 Material 복원 — 로그인 secure field의 `visibility / visibility-off`만 기존 Material Icons로 렌더링하고 나머지 앱 아이콘과 회원가입 아이콘은 Solar 체계를 유지
 - 로그인·회원가입 세로 배치 정리 — 로그인은 hero·입력·CTA를 하나의 스크롤 가능한 묶음으로 중앙보다 약간 위에 배치하고 저작권 문구를 하단 흐름에 유지했으며, 회원가입은 헤더 아래 24px에서 시작해 기존 스크롤·하단 가입 버튼을 유지하면서 iOS·Android 키보드 높이에 대응
 - 약관 뒤로·닫기 의미 구분 — 약관 동의 page에는 공통 `chevron-left + 뒤로`와 `router.back()`을 연결하고 같은 화면의 약관 전문 sheet에는 `close + 닫기`를 표시해 sheet state만 해제
@@ -59,6 +60,7 @@
 | `app/(auth)/terms-sheet.tsx`          | 약관 전문 bottom sheet 실제 화면   |
 | `app/(auth)/login.tsx`                | 로그인 입력·오류·세션 시작 화면    |
 | `app/(auth)/signup.tsx`               | 회원가입 화면                      |
+| `src/components/auth/auth-input.tsx`  | 로그인·회원가입 공통 focus input surface |
 | `src/store/authStore.ts`              | Zustand 인증 상태                  |
 | `src/services/authService.ts`         | 인증 mock service                  |
 | `src/services/authSessionService.ts`  | 토큰 저장·복원·재발급·로그아웃 상태 전이 |
@@ -79,6 +81,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-18) **인증 입력은 전체 surface에 공통 focus border를 표시한다** — 로그인·회원가입의 내부 `TextInput` 웹 outline은 제거하고 공통 `AuthInput` 외곽에 primary 2px를 표시하며, 오류가 함께 있으면 danger 색상을 우선합니다.
 - (2026-07-18) **로그인 비밀번호 보기 아이콘은 Material Icons를 사용한다** — 로그인 입력칸의 익숙한 `visibility / visibility-off` glyph만 기존 Material 구현으로 되돌리고, 공통 `AppIcon`의 Solar 매핑과 회원가입 화면은 변경하지 않습니다.
 - (2026-07-18) **로그인은 중앙보다 약간 위, 회원가입은 상단 시작을 기본 세로 배치로 사용한다** — 로그인은 `flexGrow` 기반 가운데 정렬에 더 큰 하단 여백을 둬 핵심 묶음을 위로 보정하고 가용 높이가 부족하면 같은 `ScrollView`가 스크롤합니다. 회원가입은 `TopBar` 아래 24px에서 display와 필드를 시작하며 긴 입력 목록·고정 가입 버튼·safe area·기존 mutation은 유지합니다. 두 화면은 iOS `padding`, Android `height` 방식으로 키보드 높이에 대응합니다.
 - (2026-07-15) **약관 page 이동과 전문 sheet 해제를 다른 action으로 표시한다** — `/terms`와 `/terms-sheet`의 기본 page header는 공통 `뒤로`로 이전 경로를 pop하고, 약관 전문 overlay는 명시적인 `닫기`로 local sheet state만 해제합니다.

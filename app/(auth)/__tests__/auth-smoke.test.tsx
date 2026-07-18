@@ -65,6 +65,15 @@ describe("auth smoke screens", () => {
 
     expect(screen.getByText("아이디를 입력해주세요.")).toBeTruthy();
     expect(screen.getByText("비밀번호를 입력해주세요.")).toBeTruthy();
+    fireEvent(screen.getByTestId("login-id-input"), "focus");
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("login-id-input-focus-ring").props.style,
+      ),
+    ).toMatchObject({
+      borderColor: theme.colors.danger,
+      borderWidth: 2,
+    });
     expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
   });
 
@@ -80,6 +89,30 @@ describe("auth smoke screens", () => {
       flexGrow: 1,
       justifyContent: "center",
       paddingBottom: 72,
+    });
+  });
+
+  it("draws login focus on the full input surface", () => {
+    renderWithClient(<LoginScreenRoute />);
+
+    const input = screen.getByTestId("login-id-input");
+    const container = screen.getByTestId("login-id-input-container");
+
+    expect(StyleSheet.flatten(input.props.style)).toMatchObject({
+      outlineColor: "transparent",
+      outlineWidth: 0,
+    });
+    fireEvent(input, "focus");
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("login-id-input-focus-ring").props.style,
+      ),
+    ).toMatchObject({
+      borderColor: theme.colors.primary,
+      borderWidth: 2,
+    });
+    expect(StyleSheet.flatten(container.props.style)).toMatchObject({
+      height: 48,
     });
   });
 
@@ -163,6 +196,30 @@ describe("auth smoke screens", () => {
       StyleSheet.flatten(signupScroll.props.contentContainerStyle),
     ).toMatchObject({
       paddingTop: theme.spacing[6],
+    });
+  });
+
+  it("draws signup focus on the full input surface", () => {
+    renderWithClient(<SignupScreenRoute />);
+
+    const input = screen.getByTestId("signup-id-input");
+    const container = screen.getByTestId("signup-id-input-container");
+
+    expect(StyleSheet.flatten(input.props.style)).toMatchObject({
+      outlineColor: "transparent",
+      outlineWidth: 0,
+    });
+    fireEvent(input, "focus");
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("signup-id-input-focus-ring").props.style,
+      ),
+    ).toMatchObject({
+      borderColor: theme.colors.primary,
+      borderWidth: 2,
+    });
+    expect(StyleSheet.flatten(container.props.style)).toMatchObject({
+      height: 48,
     });
   });
 

@@ -8,9 +8,9 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  TextInput as NativeTextInput,
   View,
 } from "react-native";
+import { AuthInput } from "../../src/components/auth/auth-input";
 import { Screen } from "../../src/components/layout/Screen";
 import { AppText, Button, Toast } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
@@ -204,32 +204,31 @@ function AuthField({
       <AppText variant="caption" tone="secondary" style={styles.fieldLabel}>
         {label}
       </AppText>
-      <View style={[styles.inputBox, hasError ? styles.inputBoxError : null]}>
-        <NativeTextInput
-          testID={testID}
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={theme.colors.inkMute}
-          secureTextEntry={secureTextEntry}
-          style={styles.input}
-        />
-        {trailingIcon ? (
-          <Pressable
-            accessibilityLabel={trailingLabel}
-            accessibilityRole="button"
-            hitSlop={8}
-            onPress={onTrailingPress}
-            style={styles.trailingButton}
-          >
-            <MaterialIcons
-              name={trailingIcon}
-              size={20}
-              color={theme.colors.inkMute}
-            />
-          </Pressable>
-        ) : null}
-      </View>
+      <AuthInput
+        testID={testID}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        secureTextEntry={secureTextEntry}
+        hasError={hasError || Boolean(error)}
+        trailing={
+          trailingIcon ? (
+            <Pressable
+              accessibilityLabel={trailingLabel}
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={onTrailingPress}
+              style={styles.trailingButton}
+            >
+              <MaterialIcons
+                name={trailingIcon}
+                size={20}
+                color={theme.colors.inkMute}
+              />
+            </Pressable>
+          ) : null
+        }
+      />
       {error ? (
         <AppText variant="caption" tone="danger" style={styles.fieldError}>
           {error}
@@ -274,27 +273,6 @@ const styles = StyleSheet.create({
   form: { gap: 14, marginTop: 36 },
   fieldLabel: {
     marginBottom: 6,
-  },
-  inputBox: {
-    minHeight: 48,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface2,
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  inputBoxError: {
-    borderColor: theme.colors.danger,
-    backgroundColor: "#FDF4F1",
-  },
-  input: {
-    flex: 1,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-    padding: 0,
   },
   trailingButton: {
     width: 40,

@@ -2,7 +2,10 @@ import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   TextInput as NativeTextInput,
   View,
@@ -58,89 +61,110 @@ export default function LoginScreen() {
 
   return (
     <Screen scroll={false} padded={false}>
-      <View style={styles.root}>
-        <View style={styles.hero}>
-          <View style={styles.logo}>
-            <AppIcon name="door-front" size={38} color="#fff" />
-          </View>
-          <AppText variant="screenTitle" style={styles.title}>
-            열린문 커넥트
-          </AppText>
-          <AppText variant="body" tone="secondary" style={styles.subtitle}>
-            교회 가족과 함께하는 일상
-          </AppText>
-        </View>
+      <KeyboardAvoidingView
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : Platform.OS === "android"
+              ? "height"
+              : undefined
+        }
+        style={styles.keyboard}
+      >
+        <ScrollView
+          testID="login-scroll"
+          contentContainerStyle={styles.root}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View testID="login-content" style={styles.content}>
+            <View style={styles.hero}>
+              <View style={styles.logo}>
+                <AppIcon name="door-front" size={38} color="#fff" />
+              </View>
+              <AppText variant="screenTitle" style={styles.title}>
+                열린문 커넥트
+              </AppText>
+              <AppText variant="body" tone="secondary" style={styles.subtitle}>
+                교회 가족과 함께하는 일상
+              </AppText>
+            </View>
 
-        <View style={styles.form}>
-          <AuthField
-            testID="login-id-input"
-            label="아이디"
-            value={values.id}
-            onChangeText={(id) => setValues((current) => ({ ...current, id }))}
-            placeholder="아이디를 입력해주세요"
-            error={errors.id}
-            hasError={isError}
-          />
-          <AuthField
-            testID="login-password-input"
-            label="비밀번호"
-            value={values.password}
-            onChangeText={(password) =>
-              setValues((current) => ({ ...current, password }))
-            }
-            placeholder="비밀번호를 입력해주세요"
-            secureTextEntry={!passwordVisible}
-            error={errors.password}
-            hasError={isError}
-            trailingIcon={passwordVisible ? "visibility" : "visibility-off"}
-            trailingLabel={
-              passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"
-            }
-            onTrailingPress={() => setPasswordVisible((visible) => !visible)}
-          />
-          {login.error || isError ? (
-            <AppText variant="caption" tone="danger">
-              {login.error
-                ? getApiErrorMessage(
-                    login.error,
-                    authApiErrorMessages,
-                    "아이디 또는 비밀번호를 확인해주세요.",
-                  )
-                : "아이디 또는 비밀번호가 올바르지 않습니다"}
-            </AppText>
-          ) : null}
-          <Button
-            onPress={onSubmit}
-            loading={login.isPending || isLoading}
-            disabled={!isFilled && isDefault}
-          >
-            로그인
-          </Button>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => setFeedback("비밀번호 찾기는 준비 중입니다")}
-            style={styles.findPassword}
-          >
-            <AppText variant="caption" tone="muted">
-              비밀번호 찾기
-            </AppText>
-          </Pressable>
-          <View style={styles.dividerRow}>
-            <View style={styles.divider} />
-            <AppText variant="caption" tone="disabled">
-              처음이신가요?
-            </AppText>
-            <View style={styles.divider} />
+            <View style={styles.form}>
+              <AuthField
+                testID="login-id-input"
+                label="아이디"
+                value={values.id}
+                onChangeText={(id) =>
+                  setValues((current) => ({ ...current, id }))
+                }
+                placeholder="아이디를 입력해주세요"
+                error={errors.id}
+                hasError={isError}
+              />
+              <AuthField
+                testID="login-password-input"
+                label="비밀번호"
+                value={values.password}
+                onChangeText={(password) =>
+                  setValues((current) => ({ ...current, password }))
+                }
+                placeholder="비밀번호를 입력해주세요"
+                secureTextEntry={!passwordVisible}
+                error={errors.password}
+                hasError={isError}
+                trailingIcon={passwordVisible ? "visibility" : "visibility-off"}
+                trailingLabel={
+                  passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"
+                }
+                onTrailingPress={() =>
+                  setPasswordVisible((visible) => !visible)
+                }
+              />
+              {login.error || isError ? (
+                <AppText variant="caption" tone="danger">
+                  {login.error
+                    ? getApiErrorMessage(
+                        login.error,
+                        authApiErrorMessages,
+                        "아이디 또는 비밀번호를 확인해주세요.",
+                      )
+                    : "아이디 또는 비밀번호가 올바르지 않습니다"}
+                </AppText>
+              ) : null}
+              <Button
+                onPress={onSubmit}
+                loading={login.isPending || isLoading}
+                disabled={!isFilled && isDefault}
+              >
+                로그인
+              </Button>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => setFeedback("비밀번호 찾기는 준비 중입니다")}
+                style={styles.findPassword}
+              >
+                <AppText variant="caption" tone="muted">
+                  비밀번호 찾기
+                </AppText>
+              </Pressable>
+              <View style={styles.dividerRow}>
+                <View style={styles.divider} />
+                <AppText variant="caption" tone="disabled">
+                  처음이신가요?
+                </AppText>
+                <View style={styles.divider} />
+              </View>
+              <Link href="/signup" style={styles.signupButton}>
+                회원가입
+              </Link>
+            </View>
           </View>
-          <Link href="/signup" style={styles.signupButton}>
-            회원가입
-          </Link>
-        </View>
-        <View style={styles.spacer} />
-        <AppText variant="caption" tone="disabled" style={styles.copy}>
-          © 열린문교회
-        </AppText>
-      </View>
+          <AppText variant="caption" tone="disabled" style={styles.copy}>
+            © 열린문교회
+          </AppText>
+        </ScrollView>
+      </KeyboardAvoidingView>
       <Toast
         message={feedback || (isToast ? "네트워크 연결을 확인해주세요" : "")}
         icon={feedback ? "info" : "sync"}
@@ -215,12 +239,20 @@ function AuthField({
 }
 
 const styles = StyleSheet.create({
+  keyboard: { flex: 1 },
   root: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: theme.layout.screenX,
     paddingTop: theme.spacing[5],
+    paddingBottom: theme.spacing[3],
   },
-  hero: { alignItems: "center", marginTop: 28 },
+  content: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingTop: theme.spacing[5],
+    paddingBottom: 72,
+  },
+  hero: { alignItems: "center" },
   logo: {
     width: 76,
     height: 76,
@@ -294,10 +326,8 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.lineStrong,
     backgroundColor: theme.colors.surface,
   },
-  spacer: { flex: 1 },
   copy: {
     textAlign: "center",
-    paddingVertical: 12,
-    paddingBottom: 28,
+    paddingVertical: theme.spacing[3],
   },
 });

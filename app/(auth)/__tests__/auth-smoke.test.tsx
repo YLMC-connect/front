@@ -1,6 +1,7 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { router, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
+import { StyleSheet } from "react-native";
 import MyPageScreen from "../../(tabs)/mypage";
 import LoginScreenRoute from "../login";
 import SignupScreenRoute from "../signup";
@@ -8,6 +9,7 @@ import SplashScreenRoute from "../splash";
 import TermsSheetScreenRoute from "../terms-sheet";
 import TermsScreenRoute from "../terms";
 import { renderWithClient } from "../../../src/test/renderWithClient";
+import { theme } from "../../../src/constants/theme";
 import { MOCK_USER } from "../../../src/mocks/auth";
 import { useAuthStore } from "../../../src/store/authStore";
 
@@ -64,6 +66,21 @@ describe("auth smoke screens", () => {
     expect(screen.getByText("아이디를 입력해주세요.")).toBeTruthy();
     expect(screen.getByText("비밀번호를 입력해주세요.")).toBeTruthy();
     expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
+  });
+
+  it("places the login flow slightly above center with a scroll fallback", () => {
+    renderWithClient(<LoginScreenRoute />);
+
+    expect(screen.getByTestId("login-scroll").props).toMatchObject({
+      keyboardShouldPersistTaps: "handled",
+    });
+    expect(
+      StyleSheet.flatten(screen.getByTestId("login-content").props.style),
+    ).toMatchObject({
+      flexGrow: 1,
+      justifyContent: "center",
+      paddingBottom: 72,
+    });
   });
 
   it("toggles password visibility and explains the unavailable recovery flow", () => {
@@ -135,6 +152,18 @@ describe("auth smoke screens", () => {
     await waitFor(() =>
       expect(screen.getByText("사용 가능한 아이디입니다")).toBeTruthy(),
     );
+  });
+
+  it("starts the signup form below the header with a scroll fallback", () => {
+    renderWithClient(<SignupScreenRoute />);
+
+    const signupScroll = screen.getByTestId("signup-scroll");
+    expect(signupScroll.props.keyboardShouldPersistTaps).toBe("handled");
+    expect(
+      StyleSheet.flatten(signupScroll.props.contentContainerStyle),
+    ).toMatchObject({
+      paddingTop: theme.spacing[6],
+    });
   });
 
   it("toggles signup password visibility with accessible controls", () => {

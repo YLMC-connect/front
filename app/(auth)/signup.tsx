@@ -3,6 +3,8 @@ import { router, useLocalSearchParams } from "expo-router";
 import { type ReactNode, useState } from "react";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -149,11 +151,22 @@ export default function SignupScreen() {
 
   return (
     <Screen scroll={false} padded={false}>
-      <View style={styles.root}>
+      <KeyboardAvoidingView
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : Platform.OS === "android"
+              ? "height"
+              : undefined
+        }
+        style={styles.root}
+      >
         <TopBar title="회원가입" back onBack={() => router.back()} />
         <ScrollView
+          testID="signup-scroll"
           style={styles.scroll}
           contentContainerStyle={styles.body}
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           <AppText variant="display">정보를 입력해주세요</AppText>
@@ -321,7 +334,7 @@ export default function SignupScreen() {
             )}
           </Pressable>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Screen>
   );
 }
@@ -438,6 +451,7 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   body: {
     paddingHorizontal: theme.layout.screenX,
+    paddingTop: theme.spacing[6],
     paddingBottom: 8,
   },
   avatarPreview: {

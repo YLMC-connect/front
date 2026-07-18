@@ -1,4 +1,5 @@
-import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
+import { AppIcon } from "@/components/ui/app-icon";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
@@ -194,7 +195,7 @@ function AuthField({
   secureTextEntry?: boolean;
   error?: string;
   hasError?: boolean;
-  trailingIcon?: AppIconName;
+  trailingIcon?: "visibility" | "visibility-off";
   trailingLabel?: string;
   onTrailingPress?: () => void;
 }) {
@@ -221,7 +222,7 @@ function AuthField({
             onPress={onTrailingPress}
             style={styles.trailingButton}
           >
-            <AppIcon
+            <MaterialIcons
               name={trailingIcon}
               size={20}
               color={theme.colors.inkMute}

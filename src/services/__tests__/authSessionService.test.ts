@@ -49,11 +49,11 @@ describe("authSessionService", () => {
   it("stores tokens before marking a login as authenticated", async () => {
     const { adapter, tokenStore, state, manager } = setup();
 
-    await manager.login({ id: "admin", password: "admin123" });
+    await manager.login({ id: "admin", password: "admin" });
 
     expect(adapter.login).toHaveBeenCalledWith({
       id: "admin",
-      password: "admin123",
+      password: "admin",
     });
     expect(tokenStore.setTokens).toHaveBeenCalledWith(
       "access-token",
@@ -70,7 +70,7 @@ describe("authSessionService", () => {
     tokenStore.setTokens.mockRejectedValue(new Error("keystore write failed"));
 
     await expect(
-      manager.login({ id: "admin", password: "admin123" }),
+      manager.login({ id: "admin", password: "admin" }),
     ).rejects.toThrow("keystore write failed");
 
     expect(tokenStore.clear).toHaveBeenCalledTimes(1);

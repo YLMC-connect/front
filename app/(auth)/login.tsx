@@ -1,14 +1,26 @@
-import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
-import { Link, router, useLocalSearchParams } from "expo-router";
+import { AppIcon } from "@/components/ui/app-icon";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
-  Pressable,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
-  TextInput as NativeTextInput,
   View,
 } from "react-native";
+import { AuthInput } from "../../src/components/auth/auth-input";
 import { Screen } from "../../src/components/layout/Screen";
-import { AppText, Button, Toast } from "../../src/components/ui";
+import {
+  AppText,
+  Button,
+  MotionEnter,
+  MotionFadeIn,
+  MotionPressable,
+  MotionShake,
+  Toast,
+  motionStaggerDelay,
+} from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { authApiErrorMessages } from "../../src/constants/apiErrorMessages";
 import { useAuth } from "../../src/hooks/useAuth";
@@ -36,6 +48,7 @@ export default function LoginScreen() {
   const isError = variant === "error";
   const isLoading = variant === "loading";
   const isToast = variant === "toast";
+  const enterMotion = isDefault;
   const { login } = useAuth();
   const [values, setValues] = useState<FormValues>({
     id: isDefault ? "" : MOCK_LOGIN_CREDENTIALS.id,
@@ -45,6 +58,15 @@ export default function LoginScreen() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [feedback, setFeedback] = useState("");
   const isFilled = values.id.length > 0 && values.password.length > 0;
+  const formErrorMessage = login.error
+    ? getApiErrorMessage(
+        login.error,
+        authApiErrorMessages,
+        "아이디 또는 비밀번호를 확인해주세요.",
+      )
+    : isError
+      ? "아이디 또는 비밀번호가 올바르지 않습니다"
+      : "";
 
   const onSubmit = () => {
     const nextErrors = validateLogin(values);
@@ -58,89 +80,141 @@ export default function LoginScreen() {
 
   return (
     <Screen scroll={false} padded={false}>
-      <View style={styles.root}>
-        <View style={styles.hero}>
-          <View style={styles.logo}>
-            <AppIcon name="door-front" size={38} color="#fff" />
-          </View>
-          <AppText variant="screenTitle" style={styles.title}>
-            열린문 커넥트
-          </AppText>
-          <AppText variant="body" tone="secondary" style={styles.subtitle}>
-            교회 가족과 함께하는 일상
-          </AppText>
-        </View>
+      <KeyboardAvoidingView
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : Platform.OS === "android"
+              ? "height"
+              : undefined
+        }
+        style={styles.keyboard}
+      >
+        <ScrollView
+          testID="login-scroll"
+          contentContainerStyle={styles.root}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View testID="login-content" style={styles.content}>
+            <View style={styles.hero}>
+              <MotionEnter
+                enabled={enterMotion}
+                mode="settle"
+                delay={motionStaggerDelay(0)}
+              >
+                <View style={styles.logo}>
+                  <AppIcon name="door-front" size={38} color="#fff" />
+                </View>
+              </MotionEnter>
+              <MotionEnter
+                enabled={enterMotion}
+                delay={motionStaggerDelay(1)}
+                style={styles.heroCopy}
+              >
+                <AppText variant="screenTitle" style={styles.title}>
+                  열린문 커넥트
+                </AppText>
+                <AppText variant="body" tone="secondary" style={styles.subtitle}>
+                  교회 가족과 함께하는 일상
+                </AppText>
+              </MotionEnter>
+            </View>
 
-        <View style={styles.form}>
-          <AuthField
-            testID="login-id-input"
-            label="아이디"
-            value={values.id}
-            onChangeText={(id) => setValues((current) => ({ ...current, id }))}
-            placeholder="아이디를 입력해주세요"
-            error={errors.id}
-            hasError={isError}
-          />
-          <AuthField
-            testID="login-password-input"
-            label="비밀번호"
-            value={values.password}
-            onChangeText={(password) =>
-              setValues((current) => ({ ...current, password }))
-            }
-            placeholder="비밀번호를 입력해주세요"
-            secureTextEntry={!passwordVisible}
-            error={errors.password}
-            hasError={isError}
-            trailingIcon={passwordVisible ? "visibility" : "visibility-off"}
-            trailingLabel={
-              passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"
-            }
-            onTrailingPress={() => setPasswordVisible((visible) => !visible)}
-          />
-          {login.error || isError ? (
-            <AppText variant="caption" tone="danger">
-              {login.error
-                ? getApiErrorMessage(
-                    login.error,
-                    authApiErrorMessages,
-                    "아이디 또는 비밀번호를 확인해주세요.",
-                  )
-                : "아이디 또는 비밀번호가 올바르지 않습니다"}
-            </AppText>
-          ) : null}
-          <Button
-            onPress={onSubmit}
-            loading={login.isPending || isLoading}
-            disabled={!isFilled && isDefault}
-          >
-            로그인
-          </Button>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => setFeedback("비밀번호 찾기는 준비 중입니다")}
-            style={styles.findPassword}
-          >
-            <AppText variant="caption" tone="muted">
-              비밀번호 찾기
-            </AppText>
-          </Pressable>
-          <View style={styles.dividerRow}>
-            <View style={styles.divider} />
-            <AppText variant="caption" tone="disabled">
-              처음이신가요?
-            </AppText>
-            <View style={styles.divider} />
+            <MotionEnter
+              enabled={enterMotion}
+              delay={motionStaggerDelay(2)}
+              style={styles.form}
+            >
+              <AuthField
+                testID="login-id-input"
+                label="아이디"
+                value={values.id}
+                onChangeText={(id) =>
+                  setValues((current) => ({ ...current, id }))
+                }
+                placeholder="아이디를 입력해주세요"
+                error={errors.id}
+                hasError={isError}
+              />
+              <AuthField
+                testID="login-password-input"
+                label="비밀번호"
+                value={values.password}
+                onChangeText={(password) =>
+                  setValues((current) => ({ ...current, password }))
+                }
+                placeholder="비밀번호를 입력해주세요"
+                secureTextEntry={!passwordVisible}
+                error={errors.password}
+                hasError={isError}
+                trailingIcon={passwordVisible ? "visibility" : "visibility-off"}
+                trailingLabel={
+                  passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"
+                }
+                onTrailingPress={() =>
+                  setPasswordVisible((visible) => !visible)
+                }
+              />
+              {formErrorMessage ? (
+                <MotionShake trigger={formErrorMessage}>
+                  <MotionFadeIn>
+                    <AppText variant="caption" tone="danger">
+                      {formErrorMessage}
+                    </AppText>
+                  </MotionFadeIn>
+                </MotionShake>
+              ) : null}
+            </MotionEnter>
+
+            <MotionEnter
+              enabled={enterMotion}
+              delay={motionStaggerDelay(3)}
+              style={styles.ctaBlock}
+            >
+              <Button
+                onPress={onSubmit}
+                loading={login.isPending || isLoading}
+                disabled={!isFilled && isDefault}
+              >
+                로그인
+              </Button>
+              <MotionPressable
+                accessibilityRole="button"
+                onPress={() => setFeedback("비밀번호 찾기는 준비 중입니다")}
+                style={styles.findPassword}
+              >
+                <AppText variant="caption" tone="muted">
+                  비밀번호 찾기
+                </AppText>
+              </MotionPressable>
+              <View style={styles.dividerRow}>
+                <View style={styles.divider} />
+                <AppText variant="caption" tone="disabled">
+                  처음이신가요?
+                </AppText>
+                <View style={styles.divider} />
+              </View>
+              <MotionPressable
+                accessibilityRole="link"
+                onPress={() => router.push("/signup")}
+                style={styles.signupButton}
+              >
+                <AppText
+                  variant="body"
+                  tone="brand"
+                  style={styles.signupButtonText}
+                >
+                  회원가입
+                </AppText>
+              </MotionPressable>
+            </MotionEnter>
           </View>
-          <Link href="/signup" style={styles.signupButton}>
-            회원가입
-          </Link>
-        </View>
-        <View style={styles.spacer} />
-        <AppText variant="caption" tone="disabled" style={styles.copy}>
-          © 열린문교회
-        </AppText>
-      </View>
+          <AppText variant="caption" tone="disabled" style={styles.copy}>
+            © 열린문교회
+          </AppText>
+        </ScrollView>
+      </KeyboardAvoidingView>
       <Toast
         message={feedback || (isToast ? "네트워크 연결을 확인해주세요" : "")}
         icon={feedback ? "info" : "sync"}
@@ -170,98 +244,86 @@ function AuthField({
   secureTextEntry?: boolean;
   error?: string;
   hasError?: boolean;
-  trailingIcon?: AppIconName;
+  trailingIcon?: "visibility" | "visibility-off";
   trailingLabel?: string;
   onTrailingPress?: () => void;
 }) {
+  const shakeTrigger = error ?? (hasError ? "error" : undefined);
+
   return (
-    <View>
+    <MotionShake trigger={shakeTrigger}>
       <AppText variant="caption" tone="secondary" style={styles.fieldLabel}>
         {label}
       </AppText>
-      <View style={[styles.inputBox, hasError ? styles.inputBoxError : null]}>
-        <NativeTextInput
-          testID={testID}
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={theme.colors.inkMute}
-          secureTextEntry={secureTextEntry}
-          style={styles.input}
-        />
-        {trailingIcon ? (
-          <Pressable
-            accessibilityLabel={trailingLabel}
-            accessibilityRole="button"
-            hitSlop={8}
-            onPress={onTrailingPress}
-            style={styles.trailingButton}
-          >
-            <AppIcon
-              name={trailingIcon}
-              size={20}
-              color={theme.colors.inkMute}
-            />
-          </Pressable>
-        ) : null}
-      </View>
+      <AuthInput
+        testID={testID}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        secureTextEntry={secureTextEntry}
+        hasError={hasError || Boolean(error)}
+        trailing={
+          trailingIcon ? (
+            <MotionPressable
+              accessibilityLabel={trailingLabel}
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={onTrailingPress}
+              style={styles.trailingButton}
+            >
+              <MaterialIcons
+                name={trailingIcon}
+                size={20}
+                color={theme.colors.inkMute}
+              />
+            </MotionPressable>
+          ) : null
+        }
+      />
       {error ? (
-        <AppText variant="caption" tone="danger" style={styles.fieldError}>
-          {error}
-        </AppText>
+        <MotionFadeIn>
+          <AppText variant="caption" tone="danger" style={styles.fieldError}>
+            {error}
+          </AppText>
+        </MotionFadeIn>
       ) : null}
-    </View>
+    </MotionShake>
   );
 }
 
 const styles = StyleSheet.create({
+  keyboard: { flex: 1 },
   root: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: theme.layout.screenX,
     paddingTop: theme.spacing[5],
+    paddingBottom: theme.spacing[3],
   },
-  hero: { alignItems: "center", marginTop: 28 },
+  content: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingTop: theme.spacing[5],
+    paddingBottom: 72,
+  },
+  hero: { alignItems: "center" },
+  heroCopy: { alignItems: "center" },
   logo: {
-    width: 76,
-    height: 76,
-    borderRadius: 22,
+    width: 72,
+    height: 72,
+    borderRadius: theme.radius.lg,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: theme.colors.primary,
-    shadowColor: "rgba(91,122,176,0.55)",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.28,
-    shadowRadius: 18,
-    elevation: 6,
+    ...theme.shadow.primary,
   },
   title: {
-    marginTop: 16,
+    marginTop: theme.spacing[4],
   },
-  subtitle: { marginTop: theme.spacing[1] },
-  form: { gap: 14, marginTop: 36 },
+  subtitle: { marginTop: theme.spacing[2] },
+  form: { gap: theme.spacing[4], marginTop: theme.spacing[8] },
+  ctaBlock: { gap: theme.spacing[3], marginTop: theme.spacing[4] },
   fieldLabel: {
     marginBottom: 6,
-  },
-  inputBox: {
-    minHeight: 48,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface2,
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  inputBoxError: {
-    borderColor: theme.colors.danger,
-    backgroundColor: "#FDF4F1",
-  },
-  input: {
-    flex: 1,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-    padding: 0,
   },
   trailingButton: {
     width: 40,
@@ -285,19 +347,20 @@ const styles = StyleSheet.create({
   },
   divider: { flex: 1, height: 1, backgroundColor: theme.colors.line },
   signupButton: {
-    color: theme.colors.primaryDeep,
-    textAlign: "center",
-    fontWeight: "800",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 15,
     borderRadius: 999,
     borderWidth: 1,
     borderColor: theme.colors.lineStrong,
     backgroundColor: theme.colors.surface,
   },
-  spacer: { flex: 1 },
+  signupButtonText: {
+    color: theme.colors.primaryDeep,
+    fontWeight: theme.fontWeight.semibold,
+  },
   copy: {
     textAlign: "center",
-    paddingVertical: 12,
-    paddingBottom: 28,
+    paddingVertical: theme.spacing[3],
   },
 });

@@ -50,7 +50,14 @@ export { UnderlineTabs } from "./underline-tabs";
 export { AppText, type AppTextTone, type AppTextVariant } from "./app-text";
 export { ListSkeleton, Skeleton } from "./skeleton";
 
-export { MotionPressable } from "./motion";
+export {
+  MotionEnter,
+  MotionFadeIn,
+  MotionPop,
+  MotionPressable,
+  MotionShake,
+  motionStaggerDelay,
+} from "./motion";
 
 type IconName = ComponentProps<typeof AppIcon>["name"];
 const SEGMENT_GAP = 4;
@@ -1201,20 +1208,20 @@ const styles = StyleSheet.create({
   buttonDanger: { backgroundColor: theme.colors.danger },
   buttonText: {
     color: theme.colors.white,
-    fontWeight: theme.fontWeight.bold,
+    fontWeight: theme.fontWeight.semibold,
     fontSize: theme.fontSize.base,
   },
   buttonTextSoft: { color: theme.colors.primaryDeep },
   buttonTextInverse: { color: theme.colors.white },
   disabled: { opacity: 0.45 },
   pressed: { opacity: 0.75 },
+  /** Quiet list card: surface + hairline only (no drop shadow). */
   card: {
     backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.lg,
     padding: 16,
     borderWidth: 1,
     borderColor: theme.colors.line,
-    ...theme.shadow.card,
   },
   fab: {
     position: "absolute",

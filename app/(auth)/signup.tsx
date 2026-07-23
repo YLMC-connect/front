@@ -1,17 +1,35 @@
 import { AppIcon } from "@/components/ui/app-icon";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router, useLocalSearchParams } from "expo-router";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Pressable,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import { AuthInput } from "../../src/components/auth/auth-input";
 import { Screen } from "../../src/components/layout/Screen";
-import { AppText, TopBar } from "../../src/components/ui";
+import {
+  AppText,
+  MotionEnter,
+  MotionFadeIn,
+  MotionPop,
+  MotionPressable,
+  MotionShake,
+  TopBar,
+  motionStaggerDelay,
+} from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { authApiErrorMessages } from "../../src/constants/apiErrorMessages";
 import { useAuth } from "../../src/hooks/useAuth";
@@ -34,6 +52,21 @@ type IdAvailability = {
 };
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const softEasing = Easing.out(Easing.cubic);
+
+/** Korean mobile display: digits only → 010-XXXX-XXXX (max 11 digits). */
+function formatPhoneNumber(input: string): string {
+  const digits = input.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) {
+    return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  }
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
+
+function phoneDigits(phone: string): string {
+  return phone.replace(/\D/g, "");
+}
 
 function validateSignup(values: FormValues) {
   const errors: FormErrors = {};
@@ -51,7 +84,7 @@ function validateSignup(values: FormValues) {
   if (values.userName.trim().length < 2) {
     errors.userName = "이름을 입력해주세요.";
   }
-  if (values.phone.trim().length < 10) {
+  if (phoneDigits(values.phone).length < 10) {
     errors.phone = "연락처를 입력해주세요.";
   }
   if (values.email && !emailPattern.test(values.email)) {
@@ -65,6 +98,7 @@ export default function SignupScreen() {
   const { checkAvailability, signup } = useAuth();
   const variant = readDesignVariant(params.designVariant) ?? "default";
   const isDefault = variant === "default";
+  const enterMotion = isDefault;
   const isPwError = variant === "pw-error";
   const isPhoneError = variant === "phone-error";
   const isPhoneDup = variant === "phone-dup";
@@ -100,7 +134,8 @@ export default function SignupScreen() {
   const setField =
     (field: keyof FormValues) =>
     (value: string): void => {
-      setValues((current) => ({ ...current, [field]: value }));
+      const nextValue = field === "phone" ? formatPhoneNumber(value) : value;
+      setValues((current) => ({ ...current, [field]: nextValue }));
       if (field === "id") setIdAvailability(null);
     };
 
@@ -146,115 +181,182 @@ export default function SignupScreen() {
     values.phone,
   );
   const isSubmitDisabled = !allFilled && isDefault;
+  const idErrorMessage =
+    errors.id ??
+    (currentIdAvailability === false || variant === "id-dup"
+      ? "이미 사용 중인 아이디입니다"
+      : undefined);
+  const passwordErrorMessage = isPwError
+    ? "비밀번호는 8자 이상, 영문·숫자를 모두 포함해야 합니다"
+    : errors.password;
+  const passwordConfirmErrorMessage = isPwError
+    ? "비밀번호가 일치하지 않습니다"
+    : errors.passwordConfirm;
+  const phoneErrorMessage = isPhoneError
+    ? "연락처는 010-XXXX-XXXX 형식으로 입력해주세요"
+    : isPhoneDup
+      ? "이미 가입된 연락처입니다"
+      : errors.phone;
 
   return (
     <Screen scroll={false} padded={false}>
-      <View style={styles.root}>
-        <TopBar title="회원가입" back onBack={() => router.back()} />
+      <KeyboardAvoidingView
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : Platform.OS === "android"
+              ? "height"
+              : undefined
+        }
+        style={styles.root}
+      >
+        <TopBar
+          title="회원가입"
+          back
+          onBack={() => {
+            // Web refresh / deep link can open /signup with an empty stack.
+            if (router.canGoBack()) {
+              router.back();
+              return;
+            }
+            router.replace("/login");
+          }}
+        />
         <ScrollView
+          testID="signup-scroll"
           style={styles.scroll}
           contentContainerStyle={styles.body}
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <AppText variant="display">정보를 입력해주세요</AppText>
+          <MotionEnter enabled={enterMotion} delay={motionStaggerDelay(0)}>
+            <AppText variant="display">정보를 입력해주세요</AppText>
+          </MotionEnter>
 
-          <View style={styles.avatarPreview}>
+          <MotionEnter
+            enabled={enterMotion}
+            delay={motionStaggerDelay(1)}
+            style={styles.avatarPreview}
+          >
             <AutoAvatar name={values.userName} />
             <AppText variant="caption" tone="muted">
               {values.userName
                 ? "이름 두 글자로 자동 생성된 프로필"
                 : "이름을 입력하면 미리보기가 표시됩니다"}
             </AppText>
-          </View>
+          </MotionEnter>
 
-          <View style={styles.form}>
+          <MotionEnter
+            enabled={enterMotion}
+            delay={motionStaggerDelay(2)}
+            style={styles.form}
+          >
             <Field label="아이디">
-              <View style={styles.idRow}>
-                <View style={styles.idInputWrap}>
-                  <SignupInput
-                    testID="signup-id-input"
-                    value={values.id}
-                    onChangeText={setField("id")}
-                    placeholder="아이디"
-                    hasError={
-                      currentIdAvailability === false ||
-                      variant === "id-dup" ||
-                      Boolean(errors.id)
-                    }
-                  />
-                </View>
-                <Pressable
-                  testID="signup-check-id"
-                  accessibilityRole="button"
-                  onPress={onCheckIdAvailability}
-                  disabled={checkAvailability.isPending}
-                  style={styles.checkButton}
-                >
-                  {checkAvailability.isPending ? (
-                    <ActivityIndicator
-                      size="small"
-                      color={theme.colors.primaryDeep}
+              <MotionShake trigger={idErrorMessage}>
+                <View style={styles.idRow}>
+                  <View style={styles.idInputWrap}>
+                    <SignupInput
+                      testID="signup-id-input"
+                      value={values.id}
+                      onChangeText={setField("id")}
+                      placeholder="아이디"
+                      hasError={
+                        currentIdAvailability === false ||
+                        variant === "id-dup" ||
+                        Boolean(errors.id)
+                      }
                     />
-                  ) : (
-                    <Text style={styles.checkButtonText}>중복 확인</Text>
-                  )}
-                </Pressable>
-              </View>
-              <InlineError>
-                {errors.id ??
-                  (currentIdAvailability === false || variant === "id-dup"
-                    ? "이미 사용 중인 아이디입니다"
-                    : undefined)}
-              </InlineError>
+                  </View>
+                  <MotionPressable
+                    testID="signup-check-id"
+                    accessibilityRole="button"
+                    onPress={onCheckIdAvailability}
+                    disabled={checkAvailability.isPending}
+                    style={styles.checkButton}
+                  >
+                    {checkAvailability.isPending ? (
+                      <ActivityIndicator
+                        size="small"
+                        color={theme.colors.primaryDeep}
+                      />
+                    ) : (
+                      <Text style={styles.checkButtonText}>중복 확인</Text>
+                    )}
+                  </MotionPressable>
+                </View>
+              </MotionShake>
+              <InlineError>{idErrorMessage}</InlineError>
               {currentIdAvailability === true ? (
-                <FieldHint>사용 가능한 아이디입니다</FieldHint>
+                <MotionPop>
+                  <View style={styles.successRow}>
+                    <AppIcon
+                      name="check-circle"
+                      size={14}
+                      color={theme.colors.success}
+                    />
+                    <AppText
+                      variant="caption"
+                      tone="success"
+                      style={styles.successHint}
+                    >
+                      사용 가능한 아이디입니다
+                    </AppText>
+                  </View>
+                </MotionPop>
               ) : null}
             </Field>
 
             <Field label="비밀번호">
-              <SignupInput
-                testID="signup-password-input"
-                value={values.password}
-                onChangeText={setField("password")}
-                placeholder="비밀번호"
-                secureTextEntry
-                hasError={isPwError || Boolean(errors.password)}
-              />
+              <MotionShake
+                trigger={
+                  passwordErrorMessage ?? (isPwError ? "pw-error" : undefined)
+                }
+              >
+                <SignupInput
+                  testID="signup-password-input"
+                  value={values.password}
+                  onChangeText={setField("password")}
+                  placeholder="비밀번호"
+                  secureTextEntry
+                  hasError={isPwError || Boolean(errors.password)}
+                />
+              </MotionShake>
               {isPwError || errors.password ? (
-                <InlineError>
-                  {isPwError
-                    ? "비밀번호는 8자 이상, 영문·숫자를 모두 포함해야 합니다"
-                    : errors.password}
-                </InlineError>
+                <InlineError>{passwordErrorMessage}</InlineError>
               ) : (
                 <FieldHint>8자 이상, 영문·숫자 조합</FieldHint>
               )}
             </Field>
 
             <Field label="비밀번호 확인">
-              <SignupInput
-                testID="signup-password-confirm-input"
-                value={values.passwordConfirm}
-                onChangeText={setField("passwordConfirm")}
-                placeholder="비밀번호 확인"
-                secureTextEntry
-                hasError={isPwError || Boolean(errors.passwordConfirm)}
-              />
-              <InlineError>
-                {isPwError
-                  ? "비밀번호가 일치하지 않습니다"
-                  : errors.passwordConfirm}
-              </InlineError>
+              <MotionShake
+                trigger={
+                  passwordConfirmErrorMessage ??
+                  (isPwError ? "pw-confirm-error" : undefined)
+                }
+              >
+                <SignupInput
+                  testID="signup-password-confirm-input"
+                  value={values.passwordConfirm}
+                  onChangeText={setField("passwordConfirm")}
+                  placeholder="비밀번호 확인"
+                  secureTextEntry
+                  hasError={isPwError || Boolean(errors.passwordConfirm)}
+                />
+              </MotionShake>
+              <InlineError>{passwordConfirmErrorMessage}</InlineError>
             </Field>
 
             <Field label="이름">
-              <SignupInput
-                testID="signup-name-input"
-                value={values.userName}
-                onChangeText={setField("userName")}
-                placeholder="실명을 입력해주세요"
-                hasError={Boolean(errors.userName)}
-              />
+              <MotionShake trigger={errors.userName}>
+                <SignupInput
+                  testID="signup-name-input"
+                  value={values.userName}
+                  onChangeText={setField("userName")}
+                  placeholder="실명을 입력해주세요"
+                  hasError={Boolean(errors.userName)}
+                />
+              </MotionShake>
               <InlineError>{errors.userName}</InlineError>
               {!errors.userName ? (
                 <FieldHint>2~10자, 특수문자는 사용할 수 없어요</FieldHint>
@@ -262,87 +364,141 @@ export default function SignupScreen() {
             </Field>
 
             <Field label="연락처">
-              <SignupInput
-                testID="signup-phone-input"
-                value={values.phone}
-                onChangeText={setField("phone")}
-                placeholder="010-XXXX-XXXX"
-                keyboardType="phone-pad"
-                hasError={isPhoneError || isPhoneDup || Boolean(errors.phone)}
-              />
-              <InlineError>
-                {isPhoneError
-                  ? "연락처는 010-XXXX-XXXX 형식으로 입력해주세요"
-                  : isPhoneDup
-                    ? "이미 가입된 연락처입니다"
-                    : errors.phone}
-              </InlineError>
-              {!isPhoneError && !isPhoneDup && !errors.phone ? (
-                <FieldHint>
-                  숫자만 입력하면 자동으로 하이픈이 추가돼요
-                </FieldHint>
-              ) : null}
+              <MotionShake
+                trigger={
+                  phoneErrorMessage ??
+                  (isPhoneError || isPhoneDup ? "phone-error" : undefined)
+                }
+              >
+                <SignupInput
+                  testID="signup-phone-input"
+                  value={values.phone}
+                  onChangeText={setField("phone")}
+                  placeholder="010-XXXX-XXXX"
+                  keyboardType="phone-pad"
+                  hasError={
+                    isPhoneError || isPhoneDup || Boolean(errors.phone)
+                  }
+                />
+              </MotionShake>
+              <InlineError>{phoneErrorMessage}</InlineError>
             </Field>
-          </View>
-
-          <View style={styles.infoBox}>
-            <AppIcon name="info" size={17} color={theme.colors.primaryDeep} />
-            <AppText variant="caption" tone="brand" style={styles.infoText}>
-              목장과 부서는 가입 후 관리자가 확인하여 배정해드려요.
-            </AppText>
-          </View>
+          </MotionEnter>
 
           {signup.error ? (
-            <Text style={styles.error}>
-              {getApiErrorMessage(
-                signup.error,
-                authApiErrorMessages,
-                "회원가입에 실패했습니다. 입력 정보를 확인해주세요.",
-              )}
-            </Text>
+            <MotionFadeIn>
+              <Text style={styles.error}>
+                {getApiErrorMessage(
+                  signup.error,
+                  authApiErrorMessages,
+                  "회원가입에 실패했습니다. 입력 정보를 확인해주세요.",
+                )}
+              </Text>
+            </MotionFadeIn>
           ) : null}
         </ScrollView>
 
-        <View style={styles.bottomFlat}>
-          <Pressable
-            testID="signup-submit"
-            accessibilityRole="button"
-            onPress={onSubmit}
-            disabled={isSubmitDisabled || signup.isPending || isLoading}
-            style={[
-              styles.submitButton,
-              isSubmitDisabled ? styles.submitButtonDisabled : null,
-            ]}
-          >
-            {signup.isPending || isLoading ? (
-              <ActivityIndicator size="small" color={theme.colors.white} />
-            ) : (
-              <Text style={styles.submitText}>가입 완료</Text>
-            )}
-          </Pressable>
-        </View>
-      </View>
+        <MotionEnter enabled={enterMotion} delay={motionStaggerDelay(3)}>
+          <View style={styles.bottomFlat}>
+            <SubmitButton
+              disabled={isSubmitDisabled || signup.isPending || isLoading}
+              loading={signup.isPending || isLoading}
+              onPress={onSubmit}
+            />
+          </View>
+        </MotionEnter>
+      </KeyboardAvoidingView>
     </Screen>
+  );
+}
+
+function SubmitButton({
+  disabled,
+  loading,
+  onPress,
+}: {
+  disabled: boolean;
+  loading: boolean;
+  onPress: () => void;
+}) {
+  const reduceMotion = useReducedMotion();
+  const enabledProgress = useSharedValue(disabled ? 0 : 1);
+  const wasDisabled = useRef(disabled);
+
+  useEffect(() => {
+    const becameEnabled = wasDisabled.current && !disabled;
+    wasDisabled.current = disabled;
+
+    if (reduceMotion) {
+      enabledProgress.value = disabled ? 0 : 1;
+      return;
+    }
+
+    if (becameEnabled) {
+      enabledProgress.value = 0;
+      enabledProgress.value = withTiming(1, {
+        duration: theme.motion.duration.base,
+        easing: softEasing,
+      });
+      return;
+    }
+
+    enabledProgress.value = withTiming(disabled ? 0 : 1, {
+      duration: theme.motion.duration.fast,
+      easing: softEasing,
+    });
+  }, [disabled, enabledProgress, reduceMotion]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: 0.4 + enabledProgress.value * 0.6,
+    transform: [
+      {
+        scale: 0.98 + enabledProgress.value * 0.02,
+      },
+    ],
+  }));
+
+  return (
+    <Animated.View style={animatedStyle}>
+      <MotionPressable
+        testID="signup-submit"
+        accessibilityRole="button"
+        onPress={onPress}
+        disabled={disabled}
+        style={styles.submitButton}
+      >
+        {loading ? (
+          <ActivityIndicator size="small" color={theme.colors.white} />
+        ) : (
+          <Text style={styles.submitText}>가입 완료</Text>
+        )}
+      </MotionPressable>
+    </Animated.View>
   );
 }
 
 function AutoAvatar({ name }: { name?: string }) {
   const trimmed = name?.trim() ?? "";
-  const initials = trimmed ? trimmed.slice(-2) : "";
+  const filled = trimmed.length > 0;
+  const initials = filled ? trimmed.slice(-2) : "";
+
+  // Single layer only — dual empty/filled opacity layers stacked poorly on web.
+  if (!filled) {
+    return (
+      <View style={[styles.avatar, styles.avatarEmpty]}>
+        <AppIcon name="person-outline" size={34} color={theme.colors.inkHint} />
+      </View>
+    );
+  }
 
   return (
-    <View
-      style={[
-        styles.avatar,
-        trimmed ? styles.avatarFilled : styles.avatarEmpty,
-      ]}
-    >
-      {trimmed ? (
-        <Text style={styles.avatarInitials}>{initials}</Text>
-      ) : (
-        <AppIcon name="person-outline" size={34} color={theme.colors.inkHint} />
-      )}
-    </View>
+    <MotionPop key="avatar-filled">
+      <View style={[styles.avatar, styles.avatarFilled]}>
+        <MotionFadeIn key={initials}>
+          <Text style={styles.avatarInitials}>{initials}</Text>
+        </MotionFadeIn>
+      </View>
+    </MotionPop>
   );
 }
 
@@ -374,41 +530,34 @@ function SignupInput({
 }) {
   const [passwordVisible, setPasswordVisible] = useState(false);
   return (
-    <View
-      style={[
-        styles.inputWrap,
-        hasError ? styles.inputWrapError : null,
-        secureTextEntry ? styles.inputWrapWithIcon : null,
-      ]}
-    >
-      <TextInput
-        testID={testID}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={theme.colors.inkMute}
-        secureTextEntry={secureTextEntry && !passwordVisible}
-        keyboardType={keyboardType}
-        style={styles.input}
-      />
-      {secureTextEntry ? (
-        <Pressable
-          accessibilityLabel={
-            passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"
-          }
-          accessibilityRole="button"
-          hitSlop={8}
-          onPress={() => setPasswordVisible((visible) => !visible)}
-          style={styles.visibilityButton}
-        >
-          <AppIcon
-            name={passwordVisible ? "visibility" : "visibility-off"}
-            size={20}
-            color={theme.colors.inkMute}
-          />
-        </Pressable>
-      ) : null}
-    </View>
+    <AuthInput
+      testID={testID}
+      value={value}
+      onChangeText={onChangeText}
+      placeholder={placeholder}
+      secureTextEntry={secureTextEntry && !passwordVisible}
+      keyboardType={keyboardType}
+      hasError={hasError}
+      trailing={
+        secureTextEntry ? (
+          <MotionPressable
+            accessibilityLabel={
+              passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"
+            }
+            accessibilityRole="button"
+            hitSlop={8}
+            onPress={() => setPasswordVisible((visible) => !visible)}
+            style={styles.visibilityButton}
+          >
+            <MaterialIcons
+              name={passwordVisible ? "visibility" : "visibility-off"}
+              size={20}
+              color={theme.colors.inkMute}
+            />
+          </MotionPressable>
+        ) : null
+      }
+    />
   );
 }
 
@@ -418,10 +567,12 @@ function InlineError({ children }: { children?: ReactNode }) {
   }
 
   return (
-    <View style={styles.errorRow}>
-      <AppIcon name="error-outline" size={14} color={theme.colors.danger} />
-      <Text style={styles.inlineError}>{children}</Text>
-    </View>
+    <MotionFadeIn>
+      <View style={styles.errorRow}>
+        <AppIcon name="error-outline" size={14} color={theme.colors.danger} />
+        <Text style={styles.inlineError}>{children}</Text>
+      </View>
+    </MotionFadeIn>
   );
 }
 
@@ -438,12 +589,18 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   body: {
     paddingHorizontal: theme.layout.screenX,
-    paddingBottom: 8,
+    paddingTop: theme.spacing[5],
+    paddingBottom: theme.spacing[4],
+  },
+  bottomFlat: {
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: theme.spacing[3],
+    paddingBottom: theme.spacing[7],
   },
   avatarPreview: {
-    marginTop: 22,
+    marginTop: theme.spacing[5],
     alignItems: "center",
-    gap: 8,
+    gap: theme.spacing[2],
   },
   avatar: {
     width: 88,
@@ -472,50 +629,26 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
   form: {
-    marginTop: 28,
-    gap: 20,
+    marginTop: theme.spacing[6],
+    gap: theme.spacing[5],
   },
   label: {
-    marginBottom: 6,
+    marginBottom: theme.spacing[2],
     color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm + 1,
-    fontWeight: theme.fontWeight.semibold,
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.medium,
   },
   idRow: {
     flexDirection: "row",
     gap: 8,
   },
   idInputWrap: { flex: 1, minWidth: 0 },
-  inputWrap: {
-    height: 48,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface2,
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  inputWrapWithIcon: {
-    paddingRight: 10,
-  },
   visibilityButton: {
     width: theme.layout.touchTarget,
     height: theme.layout.touchTarget,
     marginRight: -8,
     alignItems: "center",
     justifyContent: "center",
-  },
-  inputWrapError: {
-    borderColor: theme.colors.danger,
-    backgroundColor: "#FDF4F1",
-  },
-  input: {
-    flex: 1,
-    height: "100%",
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-    padding: 0,
   },
   checkButton: {
     height: 48,
@@ -545,25 +678,17 @@ const styles = StyleSheet.create({
     lineHeight: theme.lineHeight.sm,
     fontWeight: theme.fontWeight.medium,
   },
-  hint: {
+  successRow: {
     marginTop: 6,
-  },
-  infoBox: {
-    marginTop: 24,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primarySoft,
     flexDirection: "row",
-    gap: 10,
+    alignItems: "center",
+    gap: 6,
   },
-  infoText: {
+  successHint: {
     flex: 1,
   },
-  bottomFlat: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 30,
+  hint: {
+    marginTop: 6,
   },
   submitButton: {
     height: 52,
@@ -573,11 +698,10 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     ...theme.shadow.primary,
   },
-  submitButtonDisabled: { opacity: 0.4 },
   submitText: {
     color: theme.colors.white,
     fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.bold,
+    fontWeight: theme.fontWeight.semibold,
   },
   error: { color: theme.colors.danger, fontSize: 13 },
 });

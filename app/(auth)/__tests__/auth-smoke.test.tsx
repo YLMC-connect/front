@@ -1,6 +1,7 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { router, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
+import { StyleSheet } from "react-native";
 import MyPageScreen from "../../(tabs)/mypage";
 import LoginScreenRoute from "../login";
 import SignupScreenRoute from "../signup";
@@ -8,6 +9,7 @@ import SplashScreenRoute from "../splash";
 import TermsSheetScreenRoute from "../terms-sheet";
 import TermsScreenRoute from "../terms";
 import { renderWithClient } from "../../../src/test/renderWithClient";
+import { theme } from "../../../src/constants/theme";
 import { MOCK_USER } from "../../../src/mocks/auth";
 import { useAuthStore } from "../../../src/store/authStore";
 
@@ -63,7 +65,55 @@ describe("auth smoke screens", () => {
 
     expect(screen.getByText("아이디를 입력해주세요.")).toBeTruthy();
     expect(screen.getByText("비밀번호를 입력해주세요.")).toBeTruthy();
+    fireEvent(screen.getByTestId("login-id-input"), "focus");
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("login-id-input-focus-ring").props.style,
+      ),
+    ).toMatchObject({
+      borderColor: theme.colors.danger,
+      borderWidth: 2,
+    });
     expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
+  });
+
+  it("places the login flow slightly above center with a scroll fallback", () => {
+    renderWithClient(<LoginScreenRoute />);
+
+    expect(screen.getByTestId("login-scroll").props).toMatchObject({
+      keyboardShouldPersistTaps: "handled",
+    });
+    expect(
+      StyleSheet.flatten(screen.getByTestId("login-content").props.style),
+    ).toMatchObject({
+      flexGrow: 1,
+      justifyContent: "center",
+      paddingBottom: 72,
+    });
+  });
+
+  it("draws login focus on the full input surface", () => {
+    renderWithClient(<LoginScreenRoute />);
+
+    const input = screen.getByTestId("login-id-input");
+    const container = screen.getByTestId("login-id-input-container");
+
+    expect(StyleSheet.flatten(input.props.style)).toMatchObject({
+      outlineColor: "transparent",
+      outlineWidth: 0,
+    });
+    fireEvent(input, "focus");
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("login-id-input-focus-ring").props.style,
+      ),
+    ).toMatchObject({
+      borderColor: theme.colors.primary,
+      borderWidth: 2,
+    });
+    expect(StyleSheet.flatten(container.props.style)).toMatchObject({
+      height: 48,
+    });
   });
 
   it("toggles password visibility and explains the unavailable recovery flow", () => {
@@ -86,7 +136,7 @@ describe("auth smoke screens", () => {
     fireEvent.changeText(screen.getByTestId("login-id-input"), "admin");
     fireEvent.changeText(
       screen.getByTestId("login-password-input"),
-      "admin123",
+      "admin",
     );
     fireEvent.press(screen.getByText("로그인"));
 
@@ -137,6 +187,42 @@ describe("auth smoke screens", () => {
     );
   });
 
+  it("starts the signup form below the header with a scroll fallback", () => {
+    renderWithClient(<SignupScreenRoute />);
+
+    const signupScroll = screen.getByTestId("signup-scroll");
+    expect(signupScroll.props.keyboardShouldPersistTaps).toBe("handled");
+    expect(
+      StyleSheet.flatten(signupScroll.props.contentContainerStyle),
+    ).toMatchObject({
+      paddingTop: theme.spacing[5],
+    });
+  });
+
+  it("draws signup focus on the full input surface", () => {
+    renderWithClient(<SignupScreenRoute />);
+
+    const input = screen.getByTestId("signup-id-input");
+    const container = screen.getByTestId("signup-id-input-container");
+
+    expect(StyleSheet.flatten(input.props.style)).toMatchObject({
+      outlineColor: "transparent",
+      outlineWidth: 0,
+    });
+    fireEvent(input, "focus");
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("signup-id-input-focus-ring").props.style,
+      ),
+    ).toMatchObject({
+      borderColor: theme.colors.primary,
+      borderWidth: 2,
+    });
+    expect(StyleSheet.flatten(container.props.style)).toMatchObject({
+      height: 48,
+    });
+  });
+
   it("toggles signup password visibility with accessible controls", () => {
     renderWithClient(<SignupScreenRoute />);
     const visibilityButtons = screen.getAllByLabelText("비밀번호 보기");
@@ -185,6 +271,9 @@ describe("auth smoke screens", () => {
     fireEvent.changeText(
       screen.getByTestId("signup-phone-input"),
       "01012345678",
+    );
+    expect(screen.getByTestId("signup-phone-input").props.value).toBe(
+      "010-1234-5678",
     );
     fireEvent.press(screen.getByTestId("signup-submit"));
 

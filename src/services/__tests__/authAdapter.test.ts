@@ -34,7 +34,7 @@ describe("mockAuthAdapter", () => {
 
   it("logs in with the configured mock credentials", async () => {
     await expect(
-      mockAuthAdapter.login({ id: "admin", password: "admin123" }),
+      mockAuthAdapter.login({ id: "admin", password: "admin" }),
     ).resolves.toMatchObject({ member: MOCK_USER });
   });
 

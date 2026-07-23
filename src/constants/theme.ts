@@ -33,25 +33,26 @@ const fontWeight = {
 } as const;
 
 const typography = {
+  /** One strong page lead — bold, not extrabold (calmer product tone). */
   display: {
     fontSize: 28,
     lineHeight: 36,
-    fontWeight: fontWeight.extrabold,
+    fontWeight: fontWeight.bold,
   },
   screenTitle: {
     fontSize: 22,
     lineHeight: 30,
-    fontWeight: fontWeight.extrabold,
+    fontWeight: fontWeight.bold,
   },
   sectionTitle: {
     fontSize: 17,
     lineHeight: 24,
-    fontWeight: fontWeight.bold,
+    fontWeight: fontWeight.semibold,
   },
   cardTitle: {
     fontSize: 16,
     lineHeight: 23,
-    fontWeight: fontWeight.bold,
+    fontWeight: fontWeight.semibold,
   },
   body: {
     fontSize: 15,
@@ -79,15 +80,22 @@ const motion = {
     fast: 140,
     base: 200,
     overlay: 220,
+    /** Soft screen enter — a bit longer than base so fade-up reads calmly. */
+    enter: 280,
   },
   distance: {
     xs: 4,
     sm: 8,
+    md: 12,
   },
   scale: {
     pressed: 0.97,
     tabIcon: 1.12,
+    enterFrom: 0.92,
+    popFrom: 0.9,
   },
+  /** Gap between staggered enter blocks (logo → title → form → cta). */
+  stagger: 60,
   spring: {
     damping: 18,
     stiffness: 260,
@@ -96,40 +104,41 @@ const motion = {
 } as const;
 
 const shadow = {
+  /** List cards use border only; keep a near-flat token for rare call sites. */
   card: {
-    shadowColor: "rgba(20,30,18,0.18)",
+    shadowColor: "rgba(20,30,18,0.12)",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
   },
   raised: {
     shadowColor: "rgba(20,30,18,0.18)",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.16,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 3,
   },
   float: {
     shadowColor: "rgba(20,30,18,0.22)",
-    shadowOffset: { width: 0, height: 14 },
-    shadowOpacity: 0.14,
-    shadowRadius: 16,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.12,
+    shadowRadius: 14,
+    elevation: 5,
   },
   fab: {
-    shadowColor: "rgba(20,30,18,0.30)",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.18,
-    shadowRadius: 14,
-    elevation: 6,
+    shadowColor: "rgba(20,30,18,0.28)",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.16,
+    shadowRadius: 12,
+    elevation: 5,
   },
   primary: {
-    shadowColor: "rgba(107,130,96,0.60)",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowColor: "rgba(91,122,176,0.35)",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.16,
+    shadowRadius: 8,
+    elevation: 2,
   },
   dialog: {
     shadowColor: "rgba(0,0,0,0.40)",

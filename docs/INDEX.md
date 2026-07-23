@@ -25,8 +25,8 @@
 
 | 도메인 | 진행 중 | 완료 | 마지막 갱신 | 상세 |
 |---|---|---|---|---|
-| common (공통 인프라) | 10 | 31 | 2026-07-23 | [features/common.md](features/common.md) |
-| auth (인증) | 5 | 6 | 2026-07-23 | [features/auth.md](features/auth.md) |
+| common (공통 인프라) | 9 | 32 | 2026-07-23 | [features/common.md](features/common.md) |
+| auth (인증) | 2 | 9 | 2026-07-23 | [features/auth.md](features/auth.md) |
 | market (나눔장터) | 3 | 20 | 2026-07-16 | [features/market.md](features/market.md) |
 | group (소모임) | 5 | 21 | 2026-07-18 | [features/group.md](features/group.md) |
 | mypage (MY) | 1 | 4 | 2026-07-14 | [features/mypage.md](features/mypage.md) |

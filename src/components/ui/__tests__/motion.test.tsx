@@ -6,8 +6,13 @@ import {
   Card,
   ConfirmDialog,
   FilterChips,
+  MotionEnter,
+  MotionFadeIn,
+  MotionPop,
   MotionPressable,
+  MotionShake,
   SegmentedTabs,
+  motionStaggerDelay,
 } from "../index";
 
 describe("common motion", () => {
@@ -16,9 +21,55 @@ describe("common motion", () => {
       fast: 140,
       base: 200,
       overlay: 220,
+      enter: 280,
     });
-    expect(theme.motion.scale).toEqual({ pressed: 0.97, tabIcon: 1.12 });
-    expect(theme.motion.distance).toEqual({ xs: 4, sm: 8 });
+    expect(theme.motion.scale).toEqual({
+      pressed: 0.97,
+      tabIcon: 1.12,
+      enterFrom: 0.92,
+      popFrom: 0.9,
+    });
+    expect(theme.motion.distance).toEqual({ xs: 4, sm: 8, md: 12 });
+    expect(theme.motion.stagger).toBe(60);
+  });
+
+  it("exposes enter helpers used by auth screens", () => {
+    expect(motionStaggerDelay(3)).toBe(180);
+
+    const enter = render(
+      <MotionEnter testID="enter-block" delay={0}>
+        <Text>진입</Text>
+      </MotionEnter>,
+    );
+    expect(enter.getByTestId("enter-block")).toBeTruthy();
+    expect(enter.getByText("진입")).toBeTruthy();
+
+    const shake = render(
+      <MotionShake testID="shake-block" trigger="error-a">
+        <Text>오류</Text>
+      </MotionShake>,
+    );
+    expect(shake.getByTestId("shake-block")).toBeTruthy();
+    shake.rerender(
+      <MotionShake testID="shake-block" trigger="error-b">
+        <Text>오류</Text>
+      </MotionShake>,
+    );
+    expect(shake.getByText("오류")).toBeTruthy();
+
+    const fade = render(
+      <MotionFadeIn testID="fade-block">
+        <Text>힌트</Text>
+      </MotionFadeIn>,
+    );
+    expect(fade.getByTestId("fade-block")).toBeTruthy();
+
+    const pop = render(
+      <MotionPop testID="pop-block">
+        <Text>성공</Text>
+      </MotionPop>,
+    );
+    expect(pop.getByTestId("pop-block")).toBeTruthy();
   });
 
   it("preserves press callbacks and skips them while disabled", () => {

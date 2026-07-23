@@ -1,6 +1,6 @@
 # auth (인증)
 
-> 마지막 갱신: 2026-07-18 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-23 (조용한 톤 Phase 1–2) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,11 +10,13 @@
 
 ## ✅ 완료
 
+- 조용한 톤 인증 여백·위계 — 로그인 로고 그림자 완화·여백 토큰화, 회원가입 필드 간격·라벨 weight 정리, CTA 라벨 semibold; glass 하단 바 실험은 단순 `bottomFlat`으로 유지
+- 로그인·회원가입 절제 모션 (C-set) — 진입 stagger fade-up, 로고 1회 settle, 필드 검증 shake·인라인 에러 fade, 가입 아바타 empty↔filled morph, 중복확인 성공 체크 pop, CTA `MotionPressable`, 가입 버튼 enable soft 활성, auth Stack slide/fade. `designVariant=default`·`useReducedMotion`에서 진입 애니는 static
 - 로그인·회원가입 입력 포커스 통일 — 인증 전용 공통 `AuthInput`으로 전체 입력 surface를 공유하고 웹 기본 내부 outline을 제거한 뒤 나눔·동행 검색·작성 입력과 같은 primary 2px focus border를 적용하며 오류 테두리는 danger 색상을 우선
 - 로그인 비밀번호 보기 아이콘 Material 복원 — 로그인 secure field의 `visibility / visibility-off`만 기존 Material Icons로 렌더링하고 나머지 앱 아이콘과 회원가입 아이콘은 Solar 체계를 유지
 - 로그인·회원가입 세로 배치 정리 — 로그인은 hero·입력·CTA를 하나의 스크롤 가능한 묶음으로 중앙보다 약간 위에 배치하고 저작권 문구를 하단 흐름에 유지했으며, 회원가입은 헤더 아래 24px에서 시작해 기존 스크롤·하단 가입 버튼을 유지하면서 iOS·Android 키보드 높이에 대응
 - 약관 뒤로·닫기 의미 구분 — 약관 동의 page에는 공통 `chevron-left + 뒤로`와 `router.back()`을 연결하고 같은 화면의 약관 전문 sheet에는 `close + 닫기`를 표시해 sheet state만 해제
-- 기본 mock 로그인 계정 변경 — 개발·테스트 계정을 `admin / admin123`으로 통일하고 mock adapter가 해당 자격증명만 허용하도록 고정
+- 기본 mock 로그인 계정 변경 — 개발·테스트 계정을 `admin / admin`으로 통일하고 mock adapter가 해당 자격증명만 허용하도록 고정
 - 인증 typography·접근성 정리 — 로그인/회원가입의 display·제목·본문·보조·오류 문구를 역할형 `AppText`와 semantic tone으로 정리하고 양쪽 비밀번호 입력에 44px 표시/숨김 버튼을 적용
 - 로그인 보조 동작 연결 — 비밀번호 표시/숨기기를 접근 가능한 버튼으로 연결하고 MVP 제외 상태인 비밀번호 찾기는 무반응 링크 대신 준비 중 피드백을 표시
 - 인증 route guard와 웹 세션 저장 경계 추가 — 복원 중 route를 숨기고 anonymous/unavailable은 auth만, authenticated는 app/modal만 허용하며, 네이티브 SecureStore를 유지한 채 웹은 탭 단위 sessionStorage를 사용하도록 테스트로 고정
@@ -42,7 +44,7 @@
 - 회원 중복확인 mock 경계와 화면 연결 — `id | phone` 요청과 `available` 도메인 결과를 auth adapter/service/hook으로 격리하고, 기존 아이디 중복확인 버튼·가입 전 확인 gate를 실제 mutation에 연결
 - 인증 오류 코드 메시지 경계 추가 — Swagger에 문서화된 `MEM001~MEM006`을 고정 사용자 문구로 매핑하고 미등록 API 코드는 안전한 fallback을 사용
 - 로그인 화면·세션 통합 검증 추가 — 입력 검증 후 `useAuth → authService → authSessionService → SecureStore`로 access/refresh token을 저장하고 `authenticated` 상태가 된 뒤 홈으로 이동하는 순서를 화면 테스트로 고정
-- 핵심 Maestro 로그인 선행 — 앱 데이터를 초기화한 Dev Client에서 `/login`에 진입해 `admin/admin123`으로 로그인한 뒤 나눔·동행·기도·삶공부 스모크를 실행하도록 골든 패스를 연결
+- 핵심 Maestro 로그인 선행 — 앱 데이터를 초기화한 Dev Client에서 `/login`에 진입해 `admin/admin`으로 로그인한 뒤 나눔·동행·기도·삶공부 스모크를 실행하도록 골든 패스를 연결
 - 회원가입 화면·세션 통합 검증 추가 — 현재 아이디의 사용 가능 응답을 받은 뒤 전체 입력을 제출하고, signup session의 토큰 저장·신규 사용자 인증 상태·홈 이동을 화면 테스트로 고정
 - 회원가입 중복확인 결과 무효화 검증 — 사용 가능 확인 후 아이디가 바뀌면 이전 결과를 폐기하고 재확인 전 제출·토큰 저장을 차단하는 회귀 테스트 추가
 - 핵심 Maestro 회원가입 선행 — 앱 상태 초기화 후 회원가입 중복확인→전체 입력→홈 진입을 완료하고 다시 로그인한 뒤 도메인 스모크를 실행하도록 인증 골든 패스 확장
@@ -53,7 +55,8 @@
 
 | 경로                                  | 역할                               |
 | ------------------------------------- | ---------------------------------- |
-| `app/(auth)/_layout.tsx`              | 인증 스택 layout                   |
+| `app/(auth)/_layout.tsx`              | 인증 스택 layout (slide/fade 전환) |
+| `src/components/ui/motion.tsx`        | 진입·shake·fade·pop 공통 모션 프리미티브 (auth 사용) |
 | `src/components/auth/AuthRouteNavigator.tsx` | 인증 상태별 auth/app route 보호    |
 | `app/(auth)/splash.tsx`               | Splash 실제 화면                   |
 | `app/(auth)/terms.tsx`                | 약관 동의 실제 화면                |
@@ -81,11 +84,18 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-23) **인증 화면도 공통 “조용한 깔끔함” 톤을 따른다** — 로고·CTA 그림자는 `theme.shadow.primary` 수준으로 약하게, 여백은 spacing 토큰, 라벨/버튼 weight는 medium·semibold. Issue #105.
+- (2026-07-23) **인증 화면 모션은 soft timing + 짧은 stagger 로 절제한다** — duration `enter 280ms`, distance `md 12px`, stagger `60ms`, easing은 완만한 bezier(앞당김 적은 soft out). 웹 겹침 방지를 위해 layout `entering` 대신 in-flow opacity/transform 을 쓰고, spring/pulse 루프·shared element·confetti는 쓰지 않습니다. 로고는 1회 settle(`scale enterFrom 0.92→1`)만 허용하고, 검증 오류는 shake 1회(`±distance.xs~5px`), 가입 아바타는 empty↔filled 단일 레이어 전환입니다. `useReducedMotion`과 `designVariant !== default` 캡처 화면에서는 진입 애니는 static이며 피드백 모션도 reduce 시 즉시 표시합니다. 공통 프리미티브는 `MotionEnter` / `MotionShake` / `MotionFadeIn` / `MotionPop` 입니다.
 - (2026-07-18) **인증 입력은 전체 surface에 공통 focus border를 표시한다** — 로그인·회원가입의 내부 `TextInput` 웹 outline은 제거하고 공통 `AuthInput` 외곽에 primary 2px를 표시하며, 오류가 함께 있으면 danger 색상을 우선합니다.
-- (2026-07-18) **로그인 비밀번호 보기 아이콘은 Material Icons를 사용한다** — 로그인 입력칸의 익숙한 `visibility / visibility-off` glyph만 기존 Material 구현으로 되돌리고, 공통 `AppIcon`의 Solar 매핑과 회원가입 화면은 변경하지 않습니다.
+- (2026-07-23) **회원가입 화면에서 목장·부서 배정 안내 배지와 연락처 하이픈 안내 문구는 두지 않는다** — 하단 info 배지(“목장과 부서는 가입 후…”)와 연락처 힌트는 제거하고, 연락처 하이픈 자동 포맷은 조용히 유지합니다.
+- (2026-07-23) **회원가입 연락처는 숫자만 받아 010-XXXX-XXXX 하이픈을 자동 삽입한다** — 입력은 최대 11자리 숫자로 제한하고 표시·제출 값은 `010-1234-5678` 형식을 쓰며, 검증은 하이픈을 제외한 숫자 길이(10자 이상)로 판단합니다.
+- (2026-07-23) **로그인·회원가입 비밀번호 보기 아이콘은 Material Icons를 사용한다** — secure field의 `visibility / visibility-off`만 Material Icons로 렌더링하고, 나머지 앱 아이콘과 회원가입의 기타 아이콘(아바타·에러·info 등)은 Solar/`AppIcon` 체계를 유지합니다.
+- (2026-07-18) **로그인 비밀번호 보기 아이콘은 Material Icons를 사용한다** — (2026-07-23에 회원가입 secure field까지 동일 정책으로 확장)
 - (2026-07-18) **로그인은 중앙보다 약간 위, 회원가입은 상단 시작을 기본 세로 배치로 사용한다** — 로그인은 `flexGrow` 기반 가운데 정렬에 더 큰 하단 여백을 둬 핵심 묶음을 위로 보정하고 가용 높이가 부족하면 같은 `ScrollView`가 스크롤합니다. 회원가입은 `TopBar` 아래 24px에서 display와 필드를 시작하며 긴 입력 목록·고정 가입 버튼·safe area·기존 mutation은 유지합니다. 두 화면은 iOS `padding`, Android `height` 방식으로 키보드 높이에 대응합니다.
 - (2026-07-15) **약관 page 이동과 전문 sheet 해제를 다른 action으로 표시한다** — `/terms`와 `/terms-sheet`의 기본 page header는 공통 `뒤로`로 이전 경로를 pop하고, 약관 전문 overlay는 명시적인 `닫기`로 local sheet state만 해제합니다.
-- (2026-07-14) **개발용 기본 계정은 `admin / admin123`으로 고정한다** — mock adapter는 빈 값만 검사하지 않고 정확한 자격증명을 확인하며, 해당 아이디는 회원가입 중복확인에서도 사용 중으로 처리합니다. 실제 HTTP adapter 활성화 시 서버 인증 계약이 이 값을 대체합니다.
+- (2026-07-23) **개발용 기본 계정은 `admin / admin`으로 고정한다** — mock adapter는 빈 값만 검사하지 않고 정확한 자격증명을 확인하며, 해당 아이디는 회원가입 중복확인에서도 사용 중으로 처리합니다. 실제 HTTP adapter 활성화 시 서버 인증 계약이 이 값을 대체합니다.
+- (2026-07-23) **회원가입 하단 CTA glass/블러 실험은 철회하고 단순 bottomFlat으로 되돌린다** — 탭 glass와 동일 비주얼을 맞추기 어려워 `BlurTargetView`/`GlassBackdrop`/soft edge 오버레이를 제거하고, 기존처럼 하단 고정 패딩 바에 primary 가입 버튼만 둔다.
+- (2026-07-14) **개발용 기본 계정은 `admin / admin123`으로 고정한다** — (2026-07-23에 `admin / admin`으로 변경)
 - (2026-07-12) **인증 화면은 display와 입력 흐름만 강하게 강조한다** — 브랜드 제목·가입 display 외 설명/label/hint는 body·caption 역할로 제한하고, 작은 문구는 `textMuted` 이상 대비를 사용합니다. 로그인/회원가입 secure field는 동일한 44px visibility 조작을 제공합니다.
 
 - (2026-07-12) **MVP 제외 기능도 가짜 affordance로 남기지 않는다** — 비밀번호 찾기는 실제 복구 계약이 생기기 전까지 이동을 추측하지 않고 `준비 중` 피드백을 표시하며, 비밀번호 visibility는 로컬 UI 상태로 즉시 전환합니다.

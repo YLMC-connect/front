@@ -136,7 +136,7 @@ describe("auth smoke screens", () => {
     fireEvent.changeText(screen.getByTestId("login-id-input"), "admin");
     fireEvent.changeText(
       screen.getByTestId("login-password-input"),
-      "admin123",
+      "admin",
     );
     fireEvent.press(screen.getByText("로그인"));
 
@@ -195,7 +195,7 @@ describe("auth smoke screens", () => {
     expect(
       StyleSheet.flatten(signupScroll.props.contentContainerStyle),
     ).toMatchObject({
-      paddingTop: theme.spacing[6],
+      paddingTop: theme.spacing[5],
     });
   });
 
@@ -271,6 +271,9 @@ describe("auth smoke screens", () => {
     fireEvent.changeText(
       screen.getByTestId("signup-phone-input"),
       "01012345678",
+    );
+    expect(screen.getByTestId("signup-phone-input").props.value).toBe(
+      "010-1234-5678",
     );
     fireEvent.press(screen.getByTestId("signup-submit"));
 

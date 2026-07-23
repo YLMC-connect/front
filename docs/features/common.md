@@ -1,6 +1,6 @@
 # common (공통 인프라)
 
-> 마지막 갱신: 2026-07-17 | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-23 (조용한 톤 Phase 1) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -13,6 +13,8 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- 조용한 톤 Phase 1 — 타이포 무게 하향(display/screenTitle bold, section/card semibold), radius 스케일 한 단계 완화, 공통 `Card`는 border-only(shadow 제거), primary/float shadow 완화, 버튼 라벨 semibold
+- 공통 모션 프리미티브 확장 — `theme.motion`에 `enter/md/enterFrom/popFrom/stagger`를 추가하고 `MotionEnter`·`MotionShake`·`MotionFadeIn`·`MotionPop`·`motionStaggerDelay`를 제공해 인증 화면 등에서 soft timing·reduce-motion 패턴을 재사용
 - 숨김 화면 탭·필터 geometry 보존 — 웹 Stack이 비활성 화면을 `display:none`으로 바꾸며 전달하는 `0×0` layout은 무시하고 공통 `SegmentedTabs`·`FilterChips`가 마지막 정상 너비와 위치를 유지해 상세 복귀 시 선택 배경이 사라졌다 다시 나타나는 깜빡임을 제거하면서 이후 양수 크기 변경은 계속 반영
 - 상세·하위 화면 상단 패딩 통일 — 공통 `Screen`과 별도 작성 modal이 루트 탭 헤더와 같은 `safe area + 20px` 상단 기준을 사용해 소모임 상세를 포함한 인증·상세·알림·MY·작성 화면의 시작점을 맞추고 이미지 hero overlay 예외는 유지
 - 공통 작성 폼 입력 포커스 — `ModalFormTextInput`이 나눔 등록·소모임 개설의 단일/멀티라인/숫자 입력 surface를 공유하고 웹 기본 outline을 제거한 뒤 검색 입력과 같은 primary 2px 포커스를 적용하며 기존 크기·placeholder·입력 이벤트를 유지
@@ -134,7 +136,7 @@
 | `src/components/ui/modal-form-layout.tsx`                     | 나눔 등록·소모임 개설의 section label과 단일/멀티라인/숫자 입력 surface·primary 2px focus border를 공유                                                                                                                                    |
 | `src/components/ui/search-toggle-button.tsx`                  | 헤더의 검색/닫기 아이콘과 명시적 한글 label, press motion을 공유하는 action                                                                                                                                                                |
 | `src/components/layout/TabBlurTargetContext.ts`               | 현재 루트 화면의 Android blur target ref를 하단 tab bar까지 전달                                                                                                                                                                           |
-| `src/components/ui/motion.tsx`                                | Reanimated 기반 공통 press scale과 overlay presence 제어. 시스템 동작 줄이기 설정을 반영                                                                                                                                                   |
+| `src/components/ui/motion.tsx`                                | Reanimated 기반 press scale, overlay presence, enter stagger(`MotionEnter`), shake/fade/pop 피드백. 시스템 동작 줄이기 설정을 반영                                                                                                          |
 | `src/components/ui/filter-chips.tsx`                          | 가변 너비 카테고리 필터의 측정 기반 200ms 이동 indicator, press feedback, 접근성 상태 관리                                                                                                                                                 |
 | `src/hooks/useMotionRouteParam.ts`                            | 필터·세그먼트 선택은 즉시 반영하고 route query는 모션 종료 후 반영해 URL 갱신 remount가 이동을 끊지 않도록 관리                                                                                                                            |
 | `src/components/ui/detail-actions.tsx`                        | 나눔·동행 상세의 action/mini action 공통 구현                                                                                                                                                                                              |
@@ -174,6 +176,8 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-23) **UI 톤은 “조용한 깔끔함”을 기본으로 한다** — 제목 extrabold를 줄이고( display/screenTitle=`bold`, section/card=`semibold` ), 목록 `Card`는 hairline border만 쓰고 drop shadow를 쓰지 않으며, radius는 sm10/md14/lg16 등 한 단계 완화합니다. primary 그림자는 파란 계열로 약하게, ZIP 픽셀 맞춤보다 톤 일관성을 우선합니다. Issue #105.
+- (2026-07-23) **짧은 진입·피드백 모션 토큰을 공통 `theme.motion`에 둔다** — `duration.enter(280)`·`distance.md(12)`·`scale.enterFrom(0.92)`·`scale.popFrom(0.9)`·`stagger(60)`을 추가하고, 화면은 in-flow soft timing 전용 `MotionEnter`/`MotionShake`/`MotionFadeIn`/`MotionPop`을 재사용합니다(레이아웃 `entering` 미사용). pulse 루프·대형 인트로·shared element는 공통 범위에 넣지 않으며 `useReducedMotion`이면 즉시 최종 상태를 표시합니다.
 - (2026-07-17) **숨겨진 route의 0 크기 layout은 탐색 control의 유효 geometry로 사용하지 않는다** — 웹 native-stack의 비활성 화면은 `display:none` 동안 공통 `SegmentedTabs` track과 `FilterChips` 항목에 `0×0` layout을 전달할 수 있으므로 마지막 양수 너비·위치를 유지합니다. 최초 정상 측정 전에는 indicator를 숨기고, 화면 회전·viewport 변경처럼 이후 들어오는 양수 측정과 세그먼트 항목 수 변경은 정상 재계산합니다.
 - (2026-07-16) **화면 상단은 실제 safe-area 뒤에 20px을 공통으로 둔다** — 루트 `ScreenHeader`, 일반 `Screen + TopBar`, 나눔·소모임 작성 modal은 모두 `top inset + 20px`을 사용합니다. 공통 `Screen` 변경으로 인증·상세·알림·MY 하위 화면까지 함께 맞추며, 이미지 안에 뒤로가기를 배치하는 나눔 상세 성공 화면은 의도된 overlay라 예외로 유지합니다.
 - (2026-07-16) **나눔 등록과 소모임 개설의 텍스트 입력은 공통 `ModalFormTextInput`이 소유한다** — 단일행·멀티라인·숫자 입력의 surface, placeholder 색상, 웹 outline 제거, primary 2px 포커스와 padding 보정을 공통 컴포넌트에 두고 화면은 값·제약·전용 width만 전달합니다. 나눔·동행·삶공부 검색은 기존 공통 `SearchField`의 동일한 primary 2px 외곽 포커스를 유지합니다.

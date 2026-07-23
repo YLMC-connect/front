@@ -3,7 +3,7 @@ import type { LoginInput } from "../types/auth";
 
 export const MOCK_LOGIN_CREDENTIALS: Readonly<LoginInput> = {
   id: "admin",
-  password: "admin123",
+  password: "admin",
 };
 
 export const MOCK_USER: Member = {

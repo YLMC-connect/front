@@ -1,18 +1,26 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { Link, router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   View,
 } from "react-native";
 import { AuthInput } from "../../src/components/auth/auth-input";
 import { Screen } from "../../src/components/layout/Screen";
-import { AppText, Button, Toast } from "../../src/components/ui";
+import {
+  AppText,
+  Button,
+  MotionEnter,
+  MotionFadeIn,
+  MotionPressable,
+  MotionShake,
+  Toast,
+  motionStaggerDelay,
+} from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { authApiErrorMessages } from "../../src/constants/apiErrorMessages";
 import { useAuth } from "../../src/hooks/useAuth";
@@ -40,6 +48,7 @@ export default function LoginScreen() {
   const isError = variant === "error";
   const isLoading = variant === "loading";
   const isToast = variant === "toast";
+  const enterMotion = isDefault;
   const { login } = useAuth();
   const [values, setValues] = useState<FormValues>({
     id: isDefault ? "" : MOCK_LOGIN_CREDENTIALS.id,
@@ -49,6 +58,15 @@ export default function LoginScreen() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [feedback, setFeedback] = useState("");
   const isFilled = values.id.length > 0 && values.password.length > 0;
+  const formErrorMessage = login.error
+    ? getApiErrorMessage(
+        login.error,
+        authApiErrorMessages,
+        "아이디 또는 비밀번호를 확인해주세요.",
+      )
+    : isError
+      ? "아이디 또는 비밀번호가 올바르지 않습니다"
+      : "";
 
   const onSubmit = () => {
     const nextErrors = validateLogin(values);
@@ -80,18 +98,34 @@ export default function LoginScreen() {
         >
           <View testID="login-content" style={styles.content}>
             <View style={styles.hero}>
-              <View style={styles.logo}>
-                <AppIcon name="door-front" size={38} color="#fff" />
-              </View>
-              <AppText variant="screenTitle" style={styles.title}>
-                열린문 커넥트
-              </AppText>
-              <AppText variant="body" tone="secondary" style={styles.subtitle}>
-                교회 가족과 함께하는 일상
-              </AppText>
+              <MotionEnter
+                enabled={enterMotion}
+                mode="settle"
+                delay={motionStaggerDelay(0)}
+              >
+                <View style={styles.logo}>
+                  <AppIcon name="door-front" size={38} color="#fff" />
+                </View>
+              </MotionEnter>
+              <MotionEnter
+                enabled={enterMotion}
+                delay={motionStaggerDelay(1)}
+                style={styles.heroCopy}
+              >
+                <AppText variant="screenTitle" style={styles.title}>
+                  열린문 커넥트
+                </AppText>
+                <AppText variant="body" tone="secondary" style={styles.subtitle}>
+                  교회 가족과 함께하는 일상
+                </AppText>
+              </MotionEnter>
             </View>
 
-            <View style={styles.form}>
+            <MotionEnter
+              enabled={enterMotion}
+              delay={motionStaggerDelay(2)}
+              style={styles.form}
+            >
               <AuthField
                 testID="login-id-input"
                 label="아이디"
@@ -122,17 +156,22 @@ export default function LoginScreen() {
                   setPasswordVisible((visible) => !visible)
                 }
               />
-              {login.error || isError ? (
-                <AppText variant="caption" tone="danger">
-                  {login.error
-                    ? getApiErrorMessage(
-                        login.error,
-                        authApiErrorMessages,
-                        "아이디 또는 비밀번호를 확인해주세요.",
-                      )
-                    : "아이디 또는 비밀번호가 올바르지 않습니다"}
-                </AppText>
+              {formErrorMessage ? (
+                <MotionShake trigger={formErrorMessage}>
+                  <MotionFadeIn>
+                    <AppText variant="caption" tone="danger">
+                      {formErrorMessage}
+                    </AppText>
+                  </MotionFadeIn>
+                </MotionShake>
               ) : null}
+            </MotionEnter>
+
+            <MotionEnter
+              enabled={enterMotion}
+              delay={motionStaggerDelay(3)}
+              style={styles.ctaBlock}
+            >
               <Button
                 onPress={onSubmit}
                 loading={login.isPending || isLoading}
@@ -140,7 +179,7 @@ export default function LoginScreen() {
               >
                 로그인
               </Button>
-              <Pressable
+              <MotionPressable
                 accessibilityRole="button"
                 onPress={() => setFeedback("비밀번호 찾기는 준비 중입니다")}
                 style={styles.findPassword}
@@ -148,7 +187,7 @@ export default function LoginScreen() {
                 <AppText variant="caption" tone="muted">
                   비밀번호 찾기
                 </AppText>
-              </Pressable>
+              </MotionPressable>
               <View style={styles.dividerRow}>
                 <View style={styles.divider} />
                 <AppText variant="caption" tone="disabled">
@@ -156,10 +195,20 @@ export default function LoginScreen() {
                 </AppText>
                 <View style={styles.divider} />
               </View>
-              <Link href="/signup" style={styles.signupButton}>
-                회원가입
-              </Link>
-            </View>
+              <MotionPressable
+                accessibilityRole="link"
+                onPress={() => router.push("/signup")}
+                style={styles.signupButton}
+              >
+                <AppText
+                  variant="body"
+                  tone="brand"
+                  style={styles.signupButtonText}
+                >
+                  회원가입
+                </AppText>
+              </MotionPressable>
+            </MotionEnter>
           </View>
           <AppText variant="caption" tone="disabled" style={styles.copy}>
             © 열린문교회
@@ -199,8 +248,10 @@ function AuthField({
   trailingLabel?: string;
   onTrailingPress?: () => void;
 }) {
+  const shakeTrigger = error ?? (hasError ? "error" : undefined);
+
   return (
-    <View>
+    <MotionShake trigger={shakeTrigger}>
       <AppText variant="caption" tone="secondary" style={styles.fieldLabel}>
         {label}
       </AppText>
@@ -213,7 +264,7 @@ function AuthField({
         hasError={hasError || Boolean(error)}
         trailing={
           trailingIcon ? (
-            <Pressable
+            <MotionPressable
               accessibilityLabel={trailingLabel}
               accessibilityRole="button"
               hitSlop={8}
@@ -225,16 +276,18 @@ function AuthField({
                 size={20}
                 color={theme.colors.inkMute}
               />
-            </Pressable>
+            </MotionPressable>
           ) : null
         }
       />
       {error ? (
-        <AppText variant="caption" tone="danger" style={styles.fieldError}>
-          {error}
-        </AppText>
+        <MotionFadeIn>
+          <AppText variant="caption" tone="danger" style={styles.fieldError}>
+            {error}
+          </AppText>
+        </MotionFadeIn>
       ) : null}
-    </View>
+    </MotionShake>
   );
 }
 
@@ -253,24 +306,22 @@ const styles = StyleSheet.create({
     paddingBottom: 72,
   },
   hero: { alignItems: "center" },
+  heroCopy: { alignItems: "center" },
   logo: {
-    width: 76,
-    height: 76,
-    borderRadius: 22,
+    width: 72,
+    height: 72,
+    borderRadius: theme.radius.lg,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: theme.colors.primary,
-    shadowColor: "rgba(91,122,176,0.55)",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.28,
-    shadowRadius: 18,
-    elevation: 6,
+    ...theme.shadow.primary,
   },
   title: {
-    marginTop: 16,
+    marginTop: theme.spacing[4],
   },
-  subtitle: { marginTop: theme.spacing[1] },
-  form: { gap: 14, marginTop: 36 },
+  subtitle: { marginTop: theme.spacing[2] },
+  form: { gap: theme.spacing[4], marginTop: theme.spacing[8] },
+  ctaBlock: { gap: theme.spacing[3], marginTop: theme.spacing[4] },
   fieldLabel: {
     marginBottom: 6,
   },
@@ -296,14 +347,17 @@ const styles = StyleSheet.create({
   },
   divider: { flex: 1, height: 1, backgroundColor: theme.colors.line },
   signupButton: {
-    color: theme.colors.primaryDeep,
-    textAlign: "center",
-    fontWeight: "800",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 15,
     borderRadius: 999,
     borderWidth: 1,
     borderColor: theme.colors.lineStrong,
     backgroundColor: theme.colors.surface,
+  },
+  signupButtonText: {
+    color: theme.colors.primaryDeep,
+    fontWeight: theme.fontWeight.semibold,
   },
   copy: {
     textAlign: "center",

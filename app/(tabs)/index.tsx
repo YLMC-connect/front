@@ -146,24 +146,23 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    paddingBottom: 100,
+    paddingBottom: 112,
   },
   top: {
     paddingHorizontal: theme.layout.screenX,
-    paddingBottom: 14,
+    paddingBottom: theme.spacing[4],
   },
   profileCard: {
-    minHeight: 68,
+    minHeight: 64,
     borderRadius: theme.radius.lg,
     borderWidth: 1,
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingHorizontal: theme.spacing[4],
+    paddingVertical: theme.spacing[3],
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    ...theme.shadow.card,
+    gap: theme.spacing[3],
   },
   profileText: {
     flex: 1,
@@ -173,7 +172,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     flexDirection: "row",
     alignItems: "center",
-    gap: 3,
+    gap: 2,
   },
   body: {
     gap: theme.layout.sectionGap,
@@ -185,7 +184,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.lg,
     backgroundColor: "#516B4A",
     padding: theme.spacing[5],
-    minHeight: 150,
+    minHeight: 140,
     ...theme.shadow.raised,
   },
   prayerOrb: {
@@ -206,14 +205,14 @@ const styles = StyleSheet.create({
     opacity: 0.84,
   },
   prayerTitle: {
-    marginTop: 8,
+    marginTop: theme.spacing[2],
   },
   prayerMeta: {
-    marginTop: 10,
+    marginTop: theme.spacing[3],
     opacity: 0.88,
   },
   section: {
-    marginBottom: theme.spacing[6],
+    marginBottom: theme.spacing[4],
   },
   sectionTitle: {
     paddingHorizontal: theme.layout.screenX,
@@ -224,31 +223,31 @@ const styles = StyleSheet.create({
     gap: theme.spacing[3],
   },
   activityCard: {
-    minHeight: 84,
+    minHeight: 76,
     borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
     paddingHorizontal: theme.spacing[4],
-    paddingVertical: theme.spacing[4],
+    paddingVertical: theme.spacing[3],
     flexDirection: "row",
     alignItems: "center",
     gap: theme.layout.listGap,
-    ...theme.shadow.card,
   },
   activityAccent: {
     alignSelf: "stretch",
-    width: 6,
+    width: 4,
     borderRadius: theme.radius.pill,
   },
   activityText: {
     flex: 1,
     minWidth: 0,
+    gap: 2,
   },
   activityValue: {
-    marginTop: theme.spacing[1],
+    marginTop: 0,
   },
   activityDesc: {
-    marginTop: 3,
+    marginTop: 0,
   },
 });

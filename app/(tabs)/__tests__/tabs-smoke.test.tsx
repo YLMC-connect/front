@@ -685,7 +685,7 @@ describe("v1 tab smoke screens", () => {
       "group-service-card-service-1",
     );
     expect(StyleSheet.flatten(serviceCard.props.style)).toEqual(groupCardStyle);
-    expect(groupCardStyle).toMatchObject({ minHeight: 133 });
+    expect(groupCardStyle).toMatchObject({ minHeight: 120 });
     expect(screen.getByText("주방 봉사팀")).toBeTruthy();
     expect(screen.getByText("주일 10:30")).toBeTruthy();
     const serviceCount = screen.getByTestId(

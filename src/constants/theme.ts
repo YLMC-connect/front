@@ -1,4 +1,5 @@
 import designTokens from "./designTokens.json";
+import { appFont } from "./fonts";
 
 const { colors, spacing, radius } = designTokens;
 
@@ -69,9 +70,12 @@ const typography = {
 const layout = {
   screenX: 20,
   sectionGap: 32,
-  cardPadding: 16,
+  /** Inner padding for list cards (density pass: slightly tighter than 16). */
+  cardPadding: 12,
   contentGap: 8,
   listGap: 12,
+  /** Square thumb on market/group list rows. */
+  listThumb: 88,
   touchTarget: 44,
 } as const;
 
@@ -170,6 +174,7 @@ export const theme = {
   fontSize,
   lineHeight,
   fontWeight,
+  font: appFont,
   typography,
   layout,
   motion,

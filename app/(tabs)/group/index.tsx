@@ -554,7 +554,7 @@ function CompanionCard(
       style={[styles.groupCard, closed ? styles.closedCard : null]}
     >
       <VisualThumb
-        size={96}
+        size={theme.layout.listThumb}
         seed={props.item.coverSeed}
         icon={isService ? "volunteer-activism" : undefined}
       />
@@ -626,13 +626,13 @@ const styles = StyleSheet.create({
     height: 40,
     marginHorizontal: theme.layout.screenX,
     marginTop: 4,
-    marginBottom: 16,
+    marginBottom: theme.spacing[3],
   },
   body: {
     paddingBottom: 164,
   },
   allSectionHeader: {
-    marginTop: theme.spacing[3],
+    marginTop: theme.spacing[2],
   },
   sectionHead: {
     paddingHorizontal: theme.layout.screenX,
@@ -640,7 +640,7 @@ const styles = StyleSheet.create({
   },
   allSectionTitle: {
     paddingHorizontal: theme.layout.screenX,
-    paddingTop: theme.spacing[4],
+    paddingTop: theme.spacing[3],
     paddingBottom: theme.spacing[3],
   },
   mineScroll: {
@@ -648,49 +648,48 @@ const styles = StyleSheet.create({
   },
   mineList: {
     paddingHorizontal: theme.layout.screenX,
-    paddingBottom: 6,
+    paddingBottom: 4,
     gap: theme.layout.listGap,
   },
   mineCard: {
-    width: 214,
+    width: 200,
     flexShrink: 0,
     borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
-    padding: 14,
-    ...theme.shadow.card,
+    padding: theme.layout.cardPadding,
   },
   mineTitle: {
-    marginTop: 10,
+    marginTop: theme.spacing[2],
   },
   mineMeta: {
-    marginTop: 5,
+    marginTop: theme.spacing[1],
   },
   categoryScroll: {
     flexGrow: 0,
     flexShrink: 0,
     height: 44,
-    marginBottom: theme.layout.listGap,
+    marginBottom: theme.spacing[2],
   },
   categoryAnchor: {
     height: GROUP_COMBINED_STICKY_HEIGHT - GROUP_SEGMENT_STICKY_HEIGHT,
   },
   groupList: {
     paddingHorizontal: theme.layout.screenX,
-    paddingBottom: 12,
+    paddingBottom: theme.spacing[3],
     gap: theme.spacing[3],
   },
   serviceList: {
     paddingHorizontal: theme.layout.screenX,
-    paddingTop: 6,
-    paddingBottom: 12,
+    paddingTop: theme.spacing[2],
+    paddingBottom: theme.spacing[3],
     gap: theme.spacing[3],
   },
   fullList: {
     paddingHorizontal: theme.layout.screenX,
-    paddingBottom: 28,
-    gap: 12,
+    paddingBottom: theme.spacing[6],
+    gap: theme.spacing[3],
   },
   loading: {
     paddingTop: theme.spacing[2],
@@ -698,13 +697,12 @@ const styles = StyleSheet.create({
   groupCard: {
     flexDirection: "row",
     gap: theme.layout.listGap,
-    minHeight: 133,
+    minHeight: 120,
     borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
-    padding: theme.spacing[4],
-    ...theme.shadow.card,
+    padding: theme.layout.cardPadding,
   },
   groupCardBody: {
     flex: 1,

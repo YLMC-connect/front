@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react-native";
 import { StyleSheet } from "react-native";
 import designTokens from "../../../constants/designTokens.json";
+import { appFont } from "../../../constants/fonts";
 import { theme } from "../../../constants/theme";
 import { AppText, Card, ListSkeleton, Skeleton } from "../index";
 
@@ -16,6 +17,7 @@ describe("design system foundations", () => {
       "body",
       "caption",
     ]);
+    expect(theme.font).toEqual(appFont);
   });
 
   it("renders role typography and semantic color through AppText", () => {
@@ -29,7 +31,9 @@ describe("design system foundations", () => {
       screen.getByText("내 활동 요약").props.style,
     );
     expect(style).toMatchObject({
-      ...theme.typography.sectionTitle,
+      fontSize: theme.typography.sectionTitle.fontSize,
+      lineHeight: theme.typography.sectionTitle.lineHeight,
+      fontFamily: appFont.semibold,
       color: theme.colors.primaryDeep,
     });
   });

@@ -8,7 +8,7 @@ export const MOCK_LOGIN_CREDENTIALS: Readonly<LoginInput> = {
 
 export const MOCK_USER: Member = {
   id: "member-001",
-  name: "김은혜",
+  name: "이민구",
   department: "청년 1부",
   role: "member",
 };

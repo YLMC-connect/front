@@ -41,22 +41,42 @@ import { renderWithClient } from "../../../src/test/renderWithClient";
 import * as authService from "../../../src/services/authService";
 
 describe("v1 tab smoke screens", () => {
-  it("renders the home screen", () => {
+  it("renders the home screen", async () => {
     renderWithClient(<HomeScreen />);
 
     expect(screen.getByText("열린문 커넥트")).toBeTruthy();
-    expect(screen.getByText("오늘의 기도제목")).toBeTruthy();
-    expect(screen.getByText("내 활동 요약")).toBeTruthy();
+    expect(screen.queryByText("홈")).toBeNull();
+    expect(screen.getByLabelText(/내 정보/)).toBeTruthy();
+    // Logged-out fallback label is given-name style ("성도" has no surname strip).
+    expect(screen.getByTestId("home-open-mypage")).toBeTruthy();
+    expect(await screen.findByTestId("home-greeting")).toBeTruthy();
+    expect(screen.getByText(/님,/)).toBeTruthy();
+    expect(await screen.findByTestId("home-daily-prayer")).toBeTruthy();
+    expect(screen.getByTestId("home-dawn-prayer")).toBeTruthy();
+    expect(screen.getByText("새벽기도 말씀요약")).toBeTruthy();
+    expect(screen.queryByText("내 활동 요약")).toBeNull();
   });
 
-  it("opens a home activity from the summary card", () => {
+  it("opens mypage from the home profile action", async () => {
     const push = jest.fn();
     jest.mocked(useRouter).mockReturnValue({ push } as never);
     renderWithClient(<HomeScreen />);
 
-    fireEvent.press(screen.getByText("청년 1부 큐티모임 외 2개"));
+    await screen.findByTestId("home-daily-prayer");
+    fireEvent.press(screen.getByTestId("home-open-mypage"));
+    expect(push).toHaveBeenCalledWith("/mypage");
+  });
 
-    expect(push).toHaveBeenCalledWith("/group");
+  it("opens prayer routes from home prayer cards", async () => {
+    const push = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({ push } as never);
+    renderWithClient(<HomeScreen />);
+
+    await screen.findByTestId("home-daily-prayer");
+    fireEvent.press(screen.getByTestId("home-daily-prayer"));
+    expect(push).toHaveBeenCalledWith("/prayer");
+    fireEvent.press(screen.getByTestId("home-dawn-prayer"));
+    expect(push).toHaveBeenCalledWith("/prayer/dawn");
   });
 
   it("renders the market screen", async () => {

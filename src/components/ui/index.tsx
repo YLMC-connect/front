@@ -31,6 +31,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { theme } from "../../constants/theme";
+import { getGivenName } from "../../lib/koreanName";
 import { AppText } from "./app-text";
 import { MotionPressable, useMotionPresence } from "./motion";
 
@@ -243,8 +244,11 @@ export function Avatar({
   size?: number;
   seed?: string | number;
 }) {
-  const initial = name.trim().slice(0, 1) || "?";
+  // Given name only (성 제외), full 이름 e.g. 이민구 → 민구
+  const givenName = getGivenName(name) || name.trim() || "?";
   const backgroundColor = avatarColorFor(seed ?? name);
+  const fontSize =
+    givenName.length >= 3 ? size * 0.28 : givenName.length === 2 ? size * 0.34 : size * 0.42;
   return (
     <View
       style={[
@@ -252,8 +256,11 @@ export function Avatar({
         { width: size, height: size, borderRadius: size / 2, backgroundColor },
       ]}
     >
-      <Text style={[styles.avatarText, { fontSize: size * 0.42 }]}>
-        {initial}
+      <Text
+        numberOfLines={1}
+        style={[styles.avatarText, { fontSize, maxWidth: size * 0.88 }]}
+      >
+        {givenName}
       </Text>
     </View>
   );
@@ -1279,7 +1286,11 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
-  avatarText: { color: theme.colors.white, fontWeight: theme.fontWeight.bold },
+  avatarText: {
+    color: theme.colors.white,
+    fontWeight: theme.fontWeight.bold,
+    textAlign: "center",
+  },
   field: { gap: 6 },
   fieldLabel: {
     color: theme.colors.inkSoft,

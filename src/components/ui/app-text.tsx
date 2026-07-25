@@ -6,6 +6,7 @@ import {
   type TextProps,
   type TextStyle,
 } from "react-native";
+import { fontFamilyForWeight } from "../../constants/fonts";
 import { theme } from "../../constants/theme";
 
 export type AppTextVariant = keyof typeof theme.typography;
@@ -42,14 +43,27 @@ export function AppText({
   tone?: AppTextTone;
   style?: StyleProp<TextStyle>;
 }) {
+  const role = theme.typography[variant];
+  const flatStyle = StyleSheet.flatten(style);
+  const weight = flatStyle?.fontWeight ?? role.fontWeight;
+
   return (
     <Text
       {...textProps}
       style={[
         styles.base,
-        theme.typography[variant],
-        { color: toneColors[tone] },
+        role,
+        {
+          color: toneColors[tone],
+          fontFamily: fontFamilyForWeight(weight),
+          // Weight-specific Pretendard files already encode boldness.
+          fontWeight: "normal",
+        },
         style,
+        // Re-apply family after style so callers' fontWeight still maps correctly.
+        flatStyle?.fontWeight
+          ? { fontFamily: fontFamilyForWeight(flatStyle.fontWeight) }
+          : null,
       ]}
     >
       {children}

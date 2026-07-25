@@ -1208,7 +1208,8 @@ const styles = StyleSheet.create({
   buttonDanger: { backgroundColor: theme.colors.danger },
   buttonText: {
     color: theme.colors.white,
-    fontWeight: theme.fontWeight.semibold,
+    fontFamily: theme.font.semibold,
+    fontWeight: "normal",
     fontSize: theme.fontSize.base,
   },
   buttonTextSoft: { color: theme.colors.primaryDeep },

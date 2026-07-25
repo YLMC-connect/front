@@ -1,6 +1,6 @@
 # common (공통 인프라)
 
-> 마지막 갱신: 2026-07-23 (조용한 톤 Phase 1) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-07-25 (목록 밀도·Pretendard) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -13,6 +13,8 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- Pretendard 본문 폰트 도입 — Regular/Medium/SemiBold/Bold OTF를 `assets/fonts`에 두고 `expo-font`로 로드, `AppText`·공통 버튼이 weight별 family를 사용 (Issue #107)
+- 홈·나눔·동행 목록 밀도 완화 — `cardPadding 12` · `listThumb 88` · 카드 minHeight/패딩 축소로 1차 밀도 패스 재적용 (Issue #107)
 - 조용한 톤 Phase 1 — 타이포 무게 하향(display/screenTitle bold, section/card semibold), radius 스케일 한 단계 완화, 공통 `Card`는 border-only(shadow 제거), primary/float shadow 완화, 버튼 라벨 semibold
 - 공통 모션 프리미티브 확장 — `theme.motion`에 `enter/md/enterFrom/popFrom/stagger`를 추가하고 `MotionEnter`·`MotionShake`·`MotionFadeIn`·`MotionPop`·`motionStaggerDelay`를 제공해 인증 화면 등에서 soft timing·reduce-motion 패턴을 재사용
 - 숨김 화면 탭·필터 geometry 보존 — 웹 Stack이 비활성 화면을 `display:none`으로 바꾸며 전달하는 `0×0` layout은 무시하고 공통 `SegmentedTabs`·`FilterChips`가 마지막 정상 너비와 위치를 유지해 상세 복귀 시 선택 배경이 사라졌다 다시 나타나는 깜빡임을 제거하면서 이후 양수 크기 변경은 계속 반영
@@ -151,6 +153,8 @@
 | `src/lib/secureStore.ts`                                      | access/refresh token 안전 저장                                                                                                                                                                                                             |
 | `src/types/api.ts`                                            | 서버 공통 `ApiResponse<T>` 타입                                                                                                                                                                                                            |
 | `src/constants/theme.ts`                                      | `열린문커넥트.zip` 기준 color, radius, font, lineHeight, weight, shadow 디자인 토큰                                                                                                                                                        |
+| `src/constants/fonts.ts`                                      | Pretendard weight family 이름·asset require·fontWeight→family 매핑                                                                                                                                                                        |
+| `assets/fonts/Pretendard-*.otf`                               | Regular/Medium/SemiBold/Bold 본문 글꼴 파일                                                                                                                                                                                               |
 | `src/constants/designTokens.json`                             | Tailwind와 React Native theme가 함께 읽는 color·spacing·radius 단일 소스                                                                                                                                                                   |
 | `src/components/ui/app-text.tsx`                              | 6단계 역할형 typography와 semantic text tone을 적용하는 공통 텍스트                                                                                                                                                                        |
 | `src/components/ui/skeleton.tsx`                              | 동작 줄이기 대응 Skeleton과 핵심 목록용 ListSkeleton                                                                                                                                                                                       |
@@ -176,6 +180,8 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-07-25) **앱 본문 글꼴은 Pretendard를 사용한다** — Regular/Medium/SemiBold/Bold를 `assets/fonts`에 두고 root `useFonts`로 로드합니다. `AppText`는 fontWeight를 weight별 family로 매핑하고 native에서는 `fontWeight: normal`로 둡니다. 화면이 Solar/Material 아이콘 외 별도 폰트를 직접 참조하지 않습니다. Issue #107.
+- (2026-07-25) **홈·나눔·동행 목록은 카드 밀도를 완화한다** — `cardPadding: 12`, `listThumb: 88`, 소모임 카드 minHeight 120, 홈 활동 카드 minHeight 76. 기능·필터·네비게이션은 변경하지 않습니다. Issue #107.
 - (2026-07-23) **UI 톤은 “조용한 깔끔함”을 기본으로 한다** — 제목 extrabold를 줄이고( display/screenTitle=`bold`, section/card=`semibold` ), 목록 `Card`는 hairline border만 쓰고 drop shadow를 쓰지 않으며, radius는 sm10/md14/lg16 등 한 단계 완화합니다. primary 그림자는 파란 계열로 약하게, ZIP 픽셀 맞춤보다 톤 일관성을 우선합니다. Issue #105.
 - (2026-07-23) **짧은 진입·피드백 모션 토큰을 공통 `theme.motion`에 둔다** — `duration.enter(280)`·`distance.md(12)`·`scale.enterFrom(0.92)`·`scale.popFrom(0.9)`·`stagger(60)`을 추가하고, 화면은 in-flow soft timing 전용 `MotionEnter`/`MotionShake`/`MotionFadeIn`/`MotionPop`을 재사용합니다(레이아웃 `entering` 미사용). pulse 루프·대형 인트로·shared element는 공통 범위에 넣지 않으며 `useReducedMotion`이면 즉시 최종 상태를 표시합니다.
 - (2026-07-17) **숨겨진 route의 0 크기 layout은 탐색 control의 유효 geometry로 사용하지 않는다** — 웹 native-stack의 비활성 화면은 `display:none` 동안 공통 `SegmentedTabs` track과 `FilterChips` 항목에 `0×0` layout을 전달할 수 있으므로 마지막 양수 너비·위치를 유지합니다. 최초 정상 측정 전에는 indicator를 숨기고, 화면 회전·viewport 변경처럼 이후 들어오는 양수 측정과 세그먼트 항목 수 변경은 정상 재계산합니다.

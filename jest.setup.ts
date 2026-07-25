@@ -1,6 +1,12 @@
 jest.mock("react-native-worklets", () =>
   require("react-native-worklets/src/mock"),
 );
+
+jest.mock("expo-font", () => ({
+  useFonts: () => [true, null],
+  isLoaded: () => true,
+  loadAsync: jest.fn().mockResolvedValue(undefined),
+}));
 jest.mock("react-native-reanimated", () => {
   const Reanimated = require("react-native-reanimated/mock");
   Reanimated.useReducedMotion = () => false;

@@ -191,7 +191,7 @@ function PostRow({
   return (
     <Pressable accessibilityRole="button" onPress={onPress} style={styles.row}>
       <View style={styles.thumbWrap}>
-        <VisualThumb size={96} seed={post.thumbSeed} />
+        <VisualThumb size={theme.layout.listThumb} seed={post.thumbSeed} />
         {done ? (
           <View style={styles.doneOverlay}>
             <AppText variant="caption" tone="inverse">
@@ -273,13 +273,13 @@ const styles = StyleSheet.create({
     height: 40,
     marginHorizontal: theme.layout.screenX,
     marginTop: 4,
-    marginBottom: 16,
+    marginBottom: theme.spacing[3],
   },
   categoryScroll: {
     flexGrow: 0,
     flexShrink: 0,
     height: 44,
-    marginBottom: theme.layout.listGap,
+    marginBottom: theme.spacing[2],
   },
   list: {
     gap: theme.spacing[3],
@@ -292,16 +292,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: theme.layout.listGap,
     marginHorizontal: theme.layout.screenX,
-    padding: theme.spacing[4],
+    padding: theme.layout.cardPadding,
     borderWidth: 1,
     borderColor: theme.colors.line,
     borderRadius: theme.radius.md,
     backgroundColor: theme.colors.surface,
-    ...theme.shadow.card,
   },
   thumbWrap: {
-    width: 96,
-    height: 96,
+    width: theme.layout.listThumb,
+    height: theme.layout.listThumb,
     borderRadius: theme.radius.md,
     overflow: "hidden",
     flexShrink: 0,
@@ -316,22 +315,23 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 6,
     top: 6,
-    borderRadius: 6,
+    borderRadius: theme.radius.xs,
     backgroundColor: "#E89A3C",
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    ...theme.shadow.card,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
   },
   rowText: {
     flex: 1,
     minWidth: 0,
-    justifyContent: "space-between",
+    justifyContent: "center",
+    gap: theme.spacing[1],
+    paddingVertical: 2,
   },
   rowTextDone: {
     opacity: 0.55,
   },
   postMeta: {
-    marginTop: 6,
+    marginTop: 0,
   },
   emptyWrap: {
     paddingHorizontal: 32,

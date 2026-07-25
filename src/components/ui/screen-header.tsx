@@ -71,7 +71,8 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   textWithAction: {
-    paddingRight: theme.layout.touchTarget + theme.spacing[2],
+    // Room for home "내 정보" chip (avatar + label), not icon-only 44px.
+    paddingRight: 120,
   },
   subtitle: {
     marginTop: 2,
@@ -80,7 +81,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: theme.layout.screenX,
     minWidth: theme.layout.touchTarget,
-    height: theme.layout.touchTarget,
+    minHeight: theme.layout.touchTarget,
     alignItems: "center",
     justifyContent: "center",
   },

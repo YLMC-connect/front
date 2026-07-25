@@ -63,7 +63,8 @@
 
 - (2026-07-15) **기도 작성 세그먼트와 루트 FAB는 공통의 낮은 비율을 사용한다** — 작성 화면 세그먼트는 full pill을 유지하면서 40px track·32px 선택 영역과 상하 6px hitSlop으로 44px 터치 범위를 보장하고, `기도제목 작성` FAB는 46px 높이·18px 아이콘·13px label을 사용합니다. 기존 작성 경로·모션·접근성은 유지합니다.
 - (2026-07-15) **기도 루트는 이동 가능한 카드에만 행동 문구와 화살표를 표시한다** — 내 기도제목 개별 요약에는 별도 상세가 없으므로 정적 카드로 두고 섹션 `전체보기`만 `/prayer/request`로 이동합니다. 상세가 있는 내 기도방 카드는 `기도방 보기 + chevron-right`를 표시하고 기존 `/prayer/[id]` 이동을 유지합니다.
-- (2026-07-15) **중보기도 신청 카드는 Solar `UserPlusRounded`를 사용한다** — 하단 기도 탭은 `Hearts`, 참여 신청 카드는 사람과 추가 표시가 함께 보이는 `UserPlusRounded`로 역할을 구분합니다. 공통 `volunteer-activism` 매핑은 바꾸지 않아 홈·봉사·기도 빈 상태 등 다른 화면의 `HandHeart`는 유지합니다.
+- (2026-07-15) **중보기도 신청 카드는 Solar `UserPlusRounded`를 사용한다** — 하단 기도 탭은 `Hearts`, 참여 신청 카드는 사람과 추가 표시가 함께 보이는 `UserPlusRounded`로 역할을 구분합니다.
+- (2026-07-25) **손+하트(`HandHeart` / `volunteer-activism`) 아이콘은 앱에서 제거한다** — 기도 empty·MY 메뉴·동행 봉사 표시는 `hands-pray` 또는 `groups`로 대체합니다.
 - (2026-07-15) **기도 FAB는 `기도제목 작성`으로 실행 행동을 표시한다** — `기도제목`만 표시해 목록·작성 의미가 모호했던 문구를 행동형으로 바꾸되 기존 `/modal/prayer-new` 이동과 geometry는 유지합니다.
 - (2026-07-14) **내 기도제목 전체보기는 섹션 제목 오른쪽에 둔다** — 큰 독립 버튼 대신 공통 `SectionHeader`를 사용해 동행과 같은 `전체보기 + chevron-right`로 표시하고, action은 기존 `/prayer/request` Stack 경로를 그대로 push합니다.
 - (2026-07-14) **기도 루트 콘텐츠는 기본 배경색 glass 타이틀 아래 하나의 스크롤을 사용한다** — 실제 safe-area와 20px 상단 여백을 포함한 공통 sticky blur를 사용하고 하단 border 없이 콘텐츠가 뒤를 통과하며 fixed FAB는 유지합니다.

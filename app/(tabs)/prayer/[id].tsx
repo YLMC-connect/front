@@ -153,7 +153,7 @@ function PrayerPanel({ empty }: { empty: boolean }) {
   if (empty) {
     return (
       <EmptyMessage
-        icon="volunteer-activism"
+        icon="hands-pray"
         title="기도할 제목이 없어요"
         desc="새 기도제목이 승인되면 이곳에 표시됩니다."
       />
@@ -238,7 +238,7 @@ function StatusPanel({ empty }: { empty: boolean }) {
         {empty ? (
           <EmptyMessage
             compact
-            icon="volunteer-activism"
+            icon="hands-pray"
             title="기도 완료 현황이 없어요"
             desc="기도방 참여자가 생기면 완료 여부가 이곳에 표시됩니다."
           />

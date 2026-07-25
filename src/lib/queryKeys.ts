@@ -1,6 +1,8 @@
 export const queryKeys = {
   home: {
     all: ["home"] as const,
+    overview: () => [...queryKeys.home.all, "overview"] as const,
+    dawn: () => [...queryKeys.home.all, "dawn"] as const,
   },
   market: {
     all: ["market"] as const,

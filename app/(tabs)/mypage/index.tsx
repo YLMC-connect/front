@@ -21,7 +21,7 @@ const activityItems: MenuItem[] = [
   { label: "내 활동", icon: "history", href: "/mypage/activity" },
   {
     label: "중보기도 활동 이력",
-    icon: "volunteer-activism",
+    icon: "hands-pray",
     href: "/mypage/activity?tab=prayer",
   },
   {

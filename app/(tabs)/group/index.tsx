@@ -556,7 +556,7 @@ function CompanionCard(
       <VisualThumb
         size={theme.layout.listThumb}
         seed={props.item.coverSeed}
-        icon={isService ? "volunteer-activism" : undefined}
+        icon={isService ? "groups" : undefined}
       />
       <View style={styles.groupCardBody}>
         <View style={styles.cardTop}>
@@ -586,7 +586,7 @@ function CompanionCard(
           </View>
           <View testID={`${testID}-member-count`} style={styles.memberRow}>
             <AppIcon
-              name={isService ? "volunteer-activism" : "groups"}
+              name="groups"
               size={14}
               color={theme.colors.inkMute}
             />

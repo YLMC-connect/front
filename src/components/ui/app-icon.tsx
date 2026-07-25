@@ -16,7 +16,6 @@ import {
   Flag2,
   ForbiddenCircle,
   GalleryAdd,
-  HandHeart,
   Heart,
   Hearts,
   History,
@@ -147,7 +146,6 @@ const linearIcons = {
   "verified-user": ShieldCheck,
   visibility: Eye,
   "visibility-off": EyeClosed,
-  "volunteer-activism": HandHeart,
   "warning-amber": DangerTriangle,
 } satisfies Record<string, SolarIconComponent>;
 

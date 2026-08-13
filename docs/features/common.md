@@ -1,6 +1,6 @@
 # common (공통 인프라)
 
-> 마지막 갱신: 2026-07-25 (목록 밀도·Pretendard) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-08-13 (apiClient json format) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -13,6 +13,7 @@
 > AI 의 Pass 0/1 에서는 본 섹션을 **스킵** 합니다. 결과물 재사용 트리거가 있을 때만 본문 정독.
 > 끝난 작업의 결과만 짧게. 상세 변경 이력은 머지된 PR description (`gh pr list --state merged --label common`).
 
+- apiClient `format: "json"` — login/refresh처럼 공통 `{ code, message, data }` envelope를 쓰지 않는 성공 응답을 그대로 반환하고, 비envelope 오류는 `INVALID_RESPONSE`로 정규화해 서버 message를 화면에 노출하지 않음
 - Pretendard 본문 폰트 도입 — Regular/Medium/SemiBold/Bold OTF를 `assets/fonts`에 두고 `expo-font`로 로드, `AppText`·공통 버튼이 weight별 family를 사용 (Issue #107)
 - 홈·나눔·동행 목록 밀도 완화 — `cardPadding 12` · `listThumb 88` · 카드 minHeight/패딩 축소로 1차 밀도 패스 재적용 (Issue #107)
 - 조용한 톤 Phase 1 — 타이포 무게 하향(display/screenTitle bold, section/card semibold), radius 스케일 한 단계 완화, 공통 `Card`는 border-only(shadow 제거), primary/float shadow 완화, 버튼 라벨 semibold
@@ -138,7 +139,7 @@
 | `src/components/ui/modal-form-layout.tsx`                     | 나눔 등록·소모임 개설의 section label과 단일/멀티라인/숫자 입력 surface·primary 2px focus border를 공유                                                                                                                                    |
 | `src/components/ui/search-toggle-button.tsx`                  | 헤더의 검색/닫기 아이콘과 명시적 한글 label, press motion을 공유하는 action                                                                                                                                                                |
 | `src/components/layout/TabBlurTargetContext.ts`               | 현재 루트 화면의 Android blur target ref를 하단 tab bar까지 전달                                                                                                                                                                           |
-| `src/components/ui/motion.tsx`                                | Reanimated 기반 press scale, overlay presence, enter stagger(`MotionEnter`), shake/fade/pop 피드백. 시스템 동작 줄이기 설정을 반영                                                                                                          |
+| `src/components/ui/motion.tsx`                                | Reanimated 기반 press scale, overlay presence, enter stagger(`MotionEnter`), shake/fade/pop 피드백. 시스템 동작 줄이기 설정을 반영                                                                                                         |
 | `src/components/ui/filter-chips.tsx`                          | 가변 너비 카테고리 필터의 측정 기반 200ms 이동 indicator, press feedback, 접근성 상태 관리                                                                                                                                                 |
 | `src/hooks/useMotionRouteParam.ts`                            | 필터·세그먼트 선택은 즉시 반영하고 route query는 모션 종료 후 반영해 URL 갱신 remount가 이동을 끊지 않도록 관리                                                                                                                            |
 | `src/components/ui/detail-actions.tsx`                        | 나눔·동행 상세의 action/mini action 공통 구현                                                                                                                                                                                              |
@@ -153,8 +154,8 @@
 | `src/lib/secureStore.ts`                                      | access/refresh token 안전 저장                                                                                                                                                                                                             |
 | `src/types/api.ts`                                            | 서버 공통 `ApiResponse<T>` 타입                                                                                                                                                                                                            |
 | `src/constants/theme.ts`                                      | `열린문커넥트.zip` 기준 color, radius, font, lineHeight, weight, shadow 디자인 토큰                                                                                                                                                        |
-| `src/constants/fonts.ts`                                      | Pretendard weight family 이름·asset require·fontWeight→family 매핑                                                                                                                                                                        |
-| `assets/fonts/Pretendard-*.otf`                               | Regular/Medium/SemiBold/Bold 본문 글꼴 파일                                                                                                                                                                                               |
+| `src/constants/fonts.ts`                                      | Pretendard weight family 이름·asset require·fontWeight→family 매핑                                                                                                                                                                         |
+| `assets/fonts/Pretendard-*.otf`                               | Regular/Medium/SemiBold/Bold 본문 글꼴 파일                                                                                                                                                                                                |
 | `src/constants/designTokens.json`                             | Tailwind와 React Native theme가 함께 읽는 color·spacing·radius 단일 소스                                                                                                                                                                   |
 | `src/components/ui/app-text.tsx`                              | 6단계 역할형 typography와 semantic text tone을 적용하는 공통 텍스트                                                                                                                                                                        |
 | `src/components/ui/skeleton.tsx`                              | 동작 줄이기 대응 Skeleton과 핵심 목록용 ListSkeleton                                                                                                                                                                                       |
@@ -179,6 +180,8 @@
 [../../PLAN.md](../../PLAN.md) “🗃 데이터 타입 설계 > 공통” 참조.
 
 ## 결정 사항 (최신 위)
+
+- (2026-08-13) **공통 API client는 envelope가 아닌 성공 응답을 `format: "json"`으로만 허용한다** — 기본값은 기존 envelope 검증을 유지한다. 인증 login/refresh처럼 서버가 토큰 객체를 최상위로 주는 경우에만 opt-in 하며, 도메인 mapper가 필수 필드를 다시 검사한다.
 
 - (2026-07-25) **앱 본문 글꼴은 Pretendard를 사용한다** — Regular/Medium/SemiBold/Bold를 `assets/fonts`에 두고 root `useFonts`로 로드합니다. `AppText`는 fontWeight를 weight별 family로 매핑하고 native에서는 `fontWeight: normal`로 둡니다. 화면이 Solar/Material 아이콘 외 별도 폰트를 직접 참조하지 않습니다. Issue #107.
 - (2026-07-25) **홈·나눔·동행 목록은 카드 밀도를 완화한다** — `cardPadding: 12`, `listThumb: 88`, 소모임 카드 minHeight 120, 홈 활동 카드 minHeight 76. 기능·필터·네비게이션은 변경하지 않습니다. Issue #107.

@@ -1,3 +1,5 @@
+process.env.EXPO_PUBLIC_AUTH_ADAPTER = "mock";
+
 jest.mock("react-native-worklets", () =>
   require("react-native-worklets/src/mock"),
 );

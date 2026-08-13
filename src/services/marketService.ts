@@ -1,6 +1,8 @@
+import Constants from "expo-constants";
 import { mockMarketDetails, mockMarketOverview } from "../mocks/market";
 import { MOCK_USER } from "../mocks/auth";
 import { MARKET_CATEGORIES } from "../constants/domainOptions";
+import { httpMarketDataSource } from "./marketHttpDataSource";
 import type {
   MarketCommentInput,
   MarketCommentTarget,
@@ -227,7 +229,19 @@ export function createMarketService(dataSource: MarketDataSource) {
   };
 }
 
-const marketService = createMarketService(mockMarketDataSource);
+function resolveMarketAdapterMode(): "http" | "mock" {
+  const fromEnv = process.env.EXPO_PUBLIC_MARKET_ADAPTER;
+  if (fromEnv === "http" || fromEnv === "mock") return fromEnv;
+  return Constants.expoConfig?.extra?.marketAdapter === "http"
+    ? "http"
+    : "mock";
+}
+
+const marketService = createMarketService(
+  resolveMarketAdapterMode() === "http"
+    ? httpMarketDataSource
+    : mockMarketDataSource,
+);
 
 export const fetchMarketOverview = marketService.fetchOverview;
 export const fetchMarketDetail = marketService.fetchDetail;

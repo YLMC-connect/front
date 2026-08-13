@@ -1,6 +1,6 @@
 # group (소모임)
 
-> 마지막 갱신: 2026-07-17 | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-08-13 (httpGroupDataSource 라이브 관측 연결) | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 동행 HTTP data source — 라이브 목록(`type=SMALL_GROUP|VOLUNTEER`), `/my`, 상세, 멤버, 개설, 공지 CUD를 `httpGroupDataSource`로 연결. 상태/카테고리/타입은 common-codes 관측값만 매핑. 목록 `content`·일정·장소가 없어 설명/일정은 빈 문자열, 생성 요청에서 일정·장소 제외. 서버에 없는 카테고리(목장·선교·카풀·봉사)는 개설을 거절. development 기본값은 HTTP
 - 동행 상세 복귀 세그먼트·필터 깜빡임 제거 — 숨은 목록에서 들어오는 세그먼트·필터의 `0×0` layout과 카테고리 anchor의 0 크기 측정을 버려 마지막 정상 위치를 유지하고, 430×932 웹에서 상세 뒤로가기 직후부터 250ms까지 세그먼트 189px·필터 49px geometry와 opacity 1이 한 프레임도 무너지지 않음을 확인
 - 동행 상세 복귀 미세 잔상 제거 — 목록·세그먼트·필터를 재생성하지 않고 유지한 채 웹은 카드 입력 이벤트 안에서 기존 ScrollView를 `y=0`으로 맞춘 직후 같은 Stack에 직접 push하고, 네이티브는 push 전환이 끝난 뒤 숨은 목록을 초기화해 복귀 첫 프레임부터 본문 필터만 원래 위치에 표시하면서 일반 200ms Cross Fade·Translate는 유지
 - 소모임 상세·개설 상단 패딩 통일 — 상세는 공통 `Screen`의 `safe area + 20px` 기준을 상속하고 별도 `KeyboardAvoidingView`를 쓰는 개설 modal도 같은 계산식을 적용해 루트 동행 헤더와 시작점을 맞춤
@@ -76,6 +77,9 @@
 | `app/modal/group-new.tsx`                      | 소모임 개설 모달                                |
 | `src/mocks/groups.ts`                          | 소모임 mock 데이터                              |
 | `src/services/groupService.ts`                 | 교체 가능한 동행 조회·공지 CUD data source 경계 |
+| `src/services/groupHttpDataSource.ts`          | 라이브 동행 HTTP data source                    |
+| `src/services/groupMapper.ts`                  | Communion DTO → 화면 모델                       |
+| `src/types/groupApi.ts`                        | 관측된 동행 서버 DTO                            |
 | `src/hooks/useGroups.ts`                       | 동행 조회와 공지 CUD TanStack Query hook        |
 | `src/components/layout/StickyHeaderScreen.tsx` | sticky scroll guard와 내부 상태 reset 경계      |
 | `src/components/ui/motion.tsx`                 | presence 모션과 즉시 종료 경계                  |
@@ -89,6 +93,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-08-13) **동행 HTTP는 라이브 관측값과 common-codes만 매핑한다** — 타입 SMALL_GROUP/VOLUNTEER, 상태 RECRUITING/CLOSED, 카테고리 WORSHIP_STUDY/PRAYER/HOBBY_CULTURE/SPORTS_HEALTH/OTHER. 목록에 본문·일정이 없어 카드 설명/일정은 비운다. `/my`는 `type`이 있어야 한다. 생성은 JSON이며 서버가 받지 않는 일정·장소는 보내지 않는다. 서버에 없는 화면 카테고리는 추측해 OTHER로 보내지 않는다. 소모임장 이관·참여/탈퇴/강퇴는 현재 data source 표면에 없어 이번에 연결하지 않는다. development 기본 adapter는 `http`.
 - (2026-07-17) **동행의 카테고리 도킹 기준은 0 크기 anchor 측정으로 덮어쓰지 않는다** — 상세 push로 목록 route가 숨을 때 발생하는 `width=0` 또는 `height=0` layout은 원래 필터 위치가 아니므로 마지막 정상 anchor를 유지합니다. 공통 세그먼트·필터도 마지막 양수 geometry를 유지해 복귀 첫 프레임에 선택 배경이 0폭에서 다시 측정되는 동시 깜빡임을 막습니다.
 - (2026-07-16, 최종 원인) **상세 복귀 첫 프레임은 목록 subtree를 재생성하지 않고 플랫폼 전환 시점에 맞춰 초기화한다** — 웹 native-stack은 비활성 route를 `display:none`으로 전환하며 숨은 ScrollView의 `scrollTop=0` 측정값은 실제 보존 위치를 뜻하지 않아, 숨긴 뒤의 scroll reset만으로는 복귀 위치를 보장하지 못합니다. 웹은 카드 입력 이벤트 안에서 기존 ScrollView를 `y=0`으로 맞추고 `StackActions.push("[id]")`를 바로 dispatch해 다음 paint 전에 목록을 숨깁니다. Android·iOS는 이전 목록이 push 애니메이션 중 보이므로 사전 이동하지 않고 `transitionEnd(closing=true)` 뒤 초기화합니다. ScrollView·세그먼트·필터 indicator·blur layer는 같은 인스턴스를 유지하고 reset key는 sticky 내부 방향 누적값만 정리합니다. 430x932 웹에서 화면의 뒤로가기와 browser history 뒤로가기 모두 진입 전 `scrollTop=396`, sticky `height=116` 상태에서 복귀 직후와 300ms 뒤 `scrollTop=0`, 본문 필터 `opacity=1`, sticky 복제본 없음, layer `height=60`을 확인했습니다.
 - (2026-07-16) **소모임 상세와 개설 화면은 루트 동행과 같은 상단 기준을 사용한다** — 상세·오류·멤버·공지 화면은 공통 `Screen`의 `top inset + 20px`을 상속하고, `Screen` 밖의 소모임 개설 modal도 같은 계산식을 적용합니다. 화면 내부 section 여백과 기존 `TopBar` geometry는 변경하지 않습니다.
@@ -151,7 +156,7 @@
 ## 미결 / 추적
 
 - 봉사 목록의 `linkedGroupId`는 현재 모두 `5`를 가리키지만 `mockGroupDetails["5"]`가 없어 카드 클릭 후 기존 상세 오류 화면이 표시됩니다. 실제 봉사 상세 정책 또는 연결 소모임 fixture를 별도 확정해야 합니다.
-- Swagger 목록 설명·일정·장소·필터, 상세 일정·장소, type/category/status enum, 입력 제한, 소모임장 이관, 핵심 흐름 오류 코드 46건 확정 필요. 일정·장소를 백엔드 계약에 추가할지 최신 기획에서 제거할지도 명시적으로 결정해야 합니다. 단일 출처는 Issue #21이며 `npm run test:api:contract:group`으로 확인합니다.
+- 프런트 HTTP 목록/상세/개설/멤버/공지는 라이브 관측으로 연결됨. 남은 공백은 목록 본문·일정·장소, 서버에 없는 카테고리 4개, 소모임장 이관, 참여/탈퇴/강퇴 data source, 삭제 500, 오류 코드. 단일 출처는 Issue #21이며 `test:api:contract:group`은 46건 실패를 유지한다.
 - 참여 신청이 즉시 참여인지 승인 대기인지 운영 정책 확인 필요.
 - 공지 작성 권한과 소모임장/관리자 권한 모델 확인 필요.
 - 강제 내보내기 이의 제기/복구 플로우는 실제 API와 운영 정책 확정 후 반영.
@@ -160,7 +165,7 @@
 ## 의존성
 
 - common 도메인의 UI, `queryKeys`, `queryClient`, 이미지 선택 컴포넌트에 의존합니다.
-- auth 도메인의 mock 현재 사용자에 의존합니다.
+- auth 도메인의 현재 사용자(`authStore`)에 의존합니다. HTTP `isLeader`/`isMine`/`isJoined`는 `leaderId`·멤버 `userId`와 비교합니다.
 
 ## 관련 ADR
 

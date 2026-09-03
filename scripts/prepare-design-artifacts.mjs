@@ -1,11 +1,15 @@
 import { execFileSync, spawn } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import http from "node:http";
-import net from "node:net";
+import os from "node:os";
 import path from "node:path";
 
-const defaultZipPath = "/Users/mingulee/Downloads/열린문커넥트.zip";
-const defaultOutputRoot = "/private/tmp/ylmc-golden-screens/2026-05-23";
+const defaultZipPath = path.join(os.homedir(), "Downloads", "열린문커넥트.zip");
+const defaultOutputRoot = path.join(
+  os.tmpdir(),
+  "ylmc-golden-screens",
+  "2026-05-23",
+);
 const zipPath = process.env.YLMC_DESIGN_ZIP_PATH ?? defaultZipPath;
 const outputRoot = process.env.YLMC_DESIGN_ARTIFACT_ROOT ?? defaultOutputRoot;
 const originalRoot = path.join(outputRoot, "original");

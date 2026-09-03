@@ -1,3 +1,4 @@
+import Constants from "expo-constants";
 import {
   mockGroupDetails,
   mockGroupMembers,
@@ -5,6 +6,7 @@ import {
 } from "../mocks/groups";
 import { MOCK_USER } from "../mocks/auth";
 import { GROUP_CATEGORIES } from "../constants/domainOptions";
+import { httpGroupDataSource } from "./groupHttpDataSource";
 import type {
   GroupDetail,
   GroupMemberDetail,
@@ -210,7 +212,17 @@ export function createGroupService(dataSource: GroupDataSource) {
   };
 }
 
-const groupService = createGroupService(mockGroupDataSource);
+function resolveGroupAdapterMode(): "http" | "mock" {
+  const fromEnv = process.env.EXPO_PUBLIC_GROUP_ADAPTER;
+  if (fromEnv === "http" || fromEnv === "mock") return fromEnv;
+  return Constants.expoConfig?.extra?.groupAdapter === "http" ? "http" : "mock";
+}
+
+const groupService = createGroupService(
+  resolveGroupAdapterMode() === "http"
+    ? httpGroupDataSource
+    : mockGroupDataSource,
+);
 
 export const fetchGroupOverview = groupService.fetchOverview;
 export const fetchGroupDetail = groupService.fetchDetail;

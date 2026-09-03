@@ -11,11 +11,30 @@ jest.mock("expo-font", () => ({
   isLoaded: () => true,
   loadAsync: jest.fn().mockResolvedValue(undefined),
 }));
+
+jest.mock("@react-native-async-storage/async-storage", () =>
+  require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
+);
 jest.mock("react-native-reanimated", () => {
   const Reanimated = require("react-native-reanimated/mock");
   Reanimated.useReducedMotion = () => false;
   return Reanimated;
 });
+
+jest.mock(
+  "lottie-react-native",
+  () => {
+    const React = require("react");
+    const { View } = require("react-native");
+    const LottieView = React.forwardRef(
+      (props: Record<string, unknown>, _ref: unknown) =>
+        React.createElement(View, { testID: "lottie-mock", ...props }),
+    );
+    LottieView.displayName = "LottieView";
+    return LottieView;
+  },
+  { virtual: true },
+);
 
 jest.mock("expo-router", () => {
   const React = require("react");

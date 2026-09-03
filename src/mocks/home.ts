@@ -2,6 +2,9 @@ import type {
   HomeDailyPrayer,
   HomeDawnPrayer,
   HomeNotice,
+  HomeOverview,
+  HomeProgressStep,
+  HomeTodoItem,
   HomeWeekday,
 } from "../types/home";
 
@@ -67,7 +70,7 @@ export const homeDawnPrayer: HomeDawnPrayer = {
   title: "새벽기도 말씀요약",
   summary: "시편 23:1 — 여호와는 나의 목자시니 내게 부족함이 없으리로다.",
   timeLabel: "오늘 새벽 말씀",
-  body: "본문\n시편 23:1-3\n\n여호와는 나의 목자시니 내게 부족함이 없으리로다.\n그가 나를 푸른 풀밭에 누이시며 쉴 만한 물 가로 인도하시는도다.\n내 영혼을 소생시키시고 자기 이름을 위하여 의의 길로 인도하시는도다.\n\n요약\n오늘 새벽 말씀은 주님을 목자로 모신 삶의 평안을 전합니다.\n부족함을 채우시는 분은 환경이 아니라 목자 되신 주님입니다.\n푸른 풀밭과 쉴 만한 물가는  hustle이 아니라 인도하심 안에서 누리는 안식입니다.\n\n적용\n1. 오늘 하루, ‘부족하다’는 마음 대신 목자 되신 주님을 먼저 인정합니다.\n2. 바쁜 일정 속에서도 영혼이 쉴 자리를 짧게라도 확보합니다.\n3. 내 길보다 의의 길을 선택하는 작은 순종을 실천합니다.\n\n기도\n목자 되신 주님, 오늘도 제 영혼을 푸른 자리로 이끌어 주시고\n부족함을 주님으로 채우게 하소서.",
+  body: "본문\n시편 23:1-3\n\n여호와는 나의 목자시니 내게 부족함이 없으리로다.\n그가 나를 푸른 풀밭에 누이시며 쉴 만한 물 가로 인도하시는도다.\n내 영혼을 소생시키시고 자기 이름을 위하여 의의 길로 인도하시는도다.\n\n요약\n오늘 새벽 말씀은 주님을 목자로 모신 삶의 평안을 전합니다.\n부족함을 채우시는 분은 환경이 아니라 목자 되신 주님입니다.\n푸른 풀밭과 쉴 만한 물가는 hustle이 아니라 인도하심 안에서 누리는 안식입니다.\n\n적용\n1. 오늘 하루, ‘부족하다’는 마음 대신 목자 되신 주님을 먼저 인정합니다.\n2. 바쁜 일정 속에서도 영혼이 쉴 자리를 짧게라도 확보합니다.\n3. 내 길보다 의의 길을 선택하는 작은 순종을 실천합니다.\n\n기도\n목자 되신 주님, 오늘도 제 영혼을 푸른 자리로 이끌어 주시고\n부족함을 주님으로 채우게 하소서.",
   href: "/prayer/dawn",
 };
 
@@ -107,5 +110,47 @@ export function buildHomeDailyPrayer(date: Date = new Date()) {
     weekday,
     weekdayLabel: weekdayLabels[weekday],
     ...copy,
+  };
+}
+
+export function buildHomeTodos(
+  daily: HomeDailyPrayer,
+  dawn: HomeDawnPrayer,
+): HomeTodoItem[] {
+  return [
+    {
+      id: "dawn-word",
+      title: dawn.title,
+      subtitle: dawn.summary,
+      actionLabel: "보기",
+      href: dawn.href,
+      icon: "book-open-page-variant",
+    },
+    {
+      id: "daily-prayer",
+      title: "오늘의 기도",
+      subtitle: daily.title,
+      actionLabel: "기도",
+      href: daily.href,
+      icon: "hands-pray",
+    },
+  ];
+}
+
+export function buildHomeProgressSteps(): HomeProgressStep[] {
+  return [
+    { id: "dawn-word", label: "말씀" },
+    { id: "daily-prayer", label: "기도" },
+  ];
+}
+
+export function buildHomeOverview(date: Date = new Date()): HomeOverview {
+  const dailyPrayer = buildHomeDailyPrayer(date);
+  const dawnPrayer = homeDawnPrayer;
+  return {
+    dailyPrayer,
+    dawnPrayer,
+    todos: buildHomeTodos(dailyPrayer, dawnPrayer),
+    progressSteps: buildHomeProgressSteps(),
   };
 }

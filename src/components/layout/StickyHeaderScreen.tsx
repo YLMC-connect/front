@@ -33,6 +33,14 @@ import { Screen } from "./Screen";
 const HIDE_SCROLL_DISTANCE = 12;
 const SHOW_SCROLL_DISTANCE = 4;
 
+/**
+ * sticky 컨트롤 스크롤 숨김 방식
+ * - direction: 짧은 아래로 스크롤 시 hide (레거시)
+ * - past-inset: sticky 영역(높이)을 지나 리스트로 들어갔을 때만 hide
+ * - never: 스크롤로 숨기지 않음 (검색 pin / 도킹형 탭)
+ */
+export type StickyControlsHideMode = "direction" | "past-inset" | "never";
+
 export function StickyHeaderScreen({
   title,
   subtitle,
@@ -45,6 +53,7 @@ export function StickyHeaderScreen({
   stickyControlsHeightProgress,
   stickyControlsInset = stickyControlsHeight,
   stickyControlsAlwaysVisible = false,
+  stickyControlsHideMode = "direction",
   stickyControlsRevealKey,
   scrollStateResetKey,
   onScrollOffsetChange,
@@ -64,6 +73,7 @@ export function StickyHeaderScreen({
   stickyControlsHeightProgress?: SharedValue<number>;
   stickyControlsInset?: number;
   stickyControlsAlwaysVisible?: boolean;
+  stickyControlsHideMode?: StickyControlsHideMode;
   stickyControlsRevealKey?: string | number;
   scrollStateResetKey?: string | number;
   onScrollOffsetChange?: (offsetY: number) => void;
@@ -82,6 +92,7 @@ export function StickyHeaderScreen({
   const downwardDistance = useRef(0);
   const upwardDistance = useRef(0);
   const hasStickyControls = Boolean(stickyControls && stickyControlsHeight > 0);
+  const hideThreshold = Math.max(stickyControlsInset, stickyControlsHeight, 1);
 
   useEffect(() => {
     if (stickyControlsRevealKey === undefined) return;
@@ -100,10 +111,37 @@ export function StickyHeaderScreen({
     setControlsHidden(false);
   }, [scrollStateResetKey]);
 
+  useEffect(() => {
+    if (stickyControlsHideMode === "never") {
+      setControlsHidden(false);
+    }
+  }, [stickyControlsHideMode]);
+
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = Math.max(event.nativeEvent.contentOffset.y, 0);
-    if (shouldHandleScroll && !shouldHandleScroll()) return;
+    if (shouldHandleScroll && !shouldHandleScroll()) {
+      lastScrollY.current = offsetY;
+      onScrollOffsetChange?.(offsetY);
+      return;
+    }
 
+    if (stickyControlsAlwaysVisible || stickyControlsHideMode === "never") {
+      setControlsHidden(false);
+      lastScrollY.current = offsetY;
+      onScrollOffsetChange?.(offsetY);
+      return;
+    }
+
+    if (stickyControlsHideMode === "past-inset") {
+      // 필터/세그먼트 예약 높이를 지나 리스트로 들어갔을 때만 숨김.
+      // 영역 안에서는 항상 표시 (살짝 스크롤해도 사라지지 않음).
+      setControlsHidden(offsetY >= hideThreshold);
+      lastScrollY.current = offsetY;
+      onScrollOffsetChange?.(offsetY);
+      return;
+    }
+
+    // direction mode (default)
     const delta = offsetY - lastScrollY.current;
 
     if (offsetY <= 1) {
@@ -209,6 +247,8 @@ function StickyControlsLayer({
     const heightChanged = previousHeight.current !== height;
     previousHeight.current = height;
     const nextValue = hidden ? -height : 0;
+    // Height-only changes while already hidden: snap to new offset.
+    // Visibility changes: animate (unless reduce motion).
     translateY.value =
       reduceMotion || (hidden && heightChanged)
         ? nextValue

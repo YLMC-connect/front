@@ -46,7 +46,8 @@ const sections = [
 
 const GROUP_SEGMENT_STICKY_HEIGHT = 60;
 const GROUP_COMBINED_STICKY_HEIGHT = 116;
-const GROUP_FILTER_TRANSLATE_DISTANCE = 4;
+/** 필터 도킹 해제 시 깜빡임 방지 (px) */
+const GROUP_FILTER_UNDOCK_HYSTERESIS = 28;
 
 type GroupStackParamList = {
   "[id]": { id: string };
@@ -83,33 +84,13 @@ export default function GroupScreen() {
   } = useMotionPresence(categorySticky, {
     duration: theme.motion.duration.base,
   });
-  const contentFilterAnimatedStyle = useAnimatedStyle(() => {
-    const dockProgress = categoryDockProgress.value;
-
-    return {
-      opacity: 1 - dockProgress,
-      transform: [
-        {
-          translateY:
-            dockProgress === 0
-              ? 0
-              : -GROUP_FILTER_TRANSLATE_DISTANCE * dockProgress,
-        },
-      ],
-    };
-  });
-  const stickyFilterAnimatedStyle = useAnimatedStyle(() => {
-    const dockProgress = categoryDockProgress.value;
-
-    return {
-      opacity: dockProgress,
-      transform: [
-        {
-          translateY: GROUP_FILTER_TRANSLATE_DISTANCE * (1 - dockProgress),
-        },
-      ],
-    };
-  });
+  // opacity only — 위·아래 이동 없이 자리 유지해 도킹이 덜 튀게.
+  const contentFilterAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: 1 - categoryDockProgress.value,
+  }));
+  const stickyFilterAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: categoryDockProgress.value,
+  }));
   const resetGroupListAfterDetailNavigation = useCallback(() => {
     if (detailNavigationResetDone.current) return;
 
@@ -166,11 +147,18 @@ export default function GroupScreen() {
       if (detailNavigationSuspended.current) return;
 
       const activeAnchorY = section === "groups" ? anchorY : null;
-      const nextSticky = activeAnchorY !== null && offsetY >= activeAnchorY;
+      if (activeAnchorY === null) {
+        setCategorySticky((current) => (current ? false : current));
+        return;
+      }
 
-      setCategorySticky((current) =>
-        current === nextSticky ? current : nextSticky,
-      );
+      // 앵커 통과 시 sticky 도킹, 여유를 두고 해제 (경계 깜빡임 방지).
+      setCategorySticky((current) => {
+        const nextSticky = current
+          ? offsetY >= activeAnchorY - GROUP_FILTER_UNDOCK_HYSTERESIS
+          : offsetY >= activeAnchorY;
+        return current === nextSticky ? current : nextSticky;
+      });
     },
     [categoryAnchorY, section],
   );
@@ -357,6 +345,8 @@ export default function GroupScreen() {
         GROUP_SEGMENT_STICKY_HEIGHT +
         (searchOpen ? SEARCH_FIELD_STICKY_HEIGHT : 0)
       }
+      // 내릴 때 숨김 · 위로 살짝 올리면 다시 표시. 필터는 앵커 통과 시 sticky에 붙음.
+      stickyControlsHideMode="direction"
       stickyControlsAlwaysVisible={searchOpen}
       stickyControlsRevealKey={
         showStickyFilter ? "segment-with-filter" : "segment-only"

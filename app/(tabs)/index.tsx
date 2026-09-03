@@ -73,16 +73,18 @@ export default function HomeScreen() {
             <AppText variant="sectionTitle">
               {givenName} 님, {greeting}
             </AppText>
-            <AppText variant="caption" tone="secondary" style={styles.greetingSub}>
+            <AppText
+              variant="caption"
+              tone="secondary"
+              style={styles.greetingSub}
+            >
               오늘도 은혜 가운데 하루를 열어 보세요.
             </AppText>
           </View>
 
           <Pressable
             accessibilityRole="button"
-            onPress={() =>
-              router.push(overview.data.dailyPrayer.href as Href)
-            }
+            onPress={() => router.push(overview.data.dailyPrayer.href as Href)}
             style={styles.dailyCard}
             testID="home-daily-prayer"
           >
@@ -129,11 +131,7 @@ export default function HomeScreen() {
             <AppText variant="sectionTitle" style={styles.dawnTitle}>
               {overview.data.dawnPrayer.title}
             </AppText>
-            <AppText
-              variant="body"
-              tone="secondary"
-              style={styles.dawnSummary}
-            >
+            <AppText variant="body" tone="secondary" style={styles.dawnSummary}>
               {overview.data.dawnPrayer.summary}
             </AppText>
             <View style={styles.dawnAction}>

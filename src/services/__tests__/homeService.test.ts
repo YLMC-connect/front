@@ -1,7 +1,4 @@
-import {
-  buildHomeDailyPrayer,
-  resolveHomeWeekday,
-} from "../../mocks/home";
+import { buildHomeDailyPrayer, resolveHomeWeekday } from "../../mocks/home";
 import { fetchDawnPrayerDetail, fetchHomeOverview } from "../homeService";
 
 describe("home service", () => {

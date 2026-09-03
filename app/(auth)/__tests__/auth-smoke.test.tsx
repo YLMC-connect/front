@@ -134,10 +134,7 @@ describe("auth smoke screens", () => {
     renderWithClient(<LoginScreenRoute />);
 
     fireEvent.changeText(screen.getByTestId("login-id-input"), "admin");
-    fireEvent.changeText(
-      screen.getByTestId("login-password-input"),
-      "admin",
-    );
+    fireEvent.changeText(screen.getByTestId("login-password-input"), "admin");
     fireEvent.press(screen.getByText("로그인"));
 
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/"), {

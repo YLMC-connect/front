@@ -1,9 +1,12 @@
-import { buildHomeDailyPrayer, resolveHomeWeekday } from "../../mocks/home";
+import {
+  buildHomeDailyPrayer,
+  buildHomeOverview,
+  resolveHomeWeekday,
+} from "../../mocks/home";
 import { fetchDawnPrayerDetail, fetchHomeOverview } from "../homeService";
 
 describe("home service", () => {
   it("resolves weekdays from Date", () => {
-    // 2026-07-25 is Saturday
     expect(resolveHomeWeekday(new Date("2026-07-25T12:00:00"))).toBe("sat");
     expect(resolveHomeWeekday(new Date("2026-07-27T12:00:00"))).toBe("mon");
   });
@@ -17,10 +20,19 @@ describe("home service", () => {
     expect(daily.href).toBe("/prayer");
   });
 
-  it("returns home overview and dawn detail from mock", async () => {
+  it("returns overview with todos and progress steps", async () => {
     const overview = await fetchHomeOverview(new Date("2026-07-25T09:00:00"));
     expect(overview.dailyPrayer.weekday).toBe("sat");
     expect(overview.dawnPrayer.href).toBe("/prayer/dawn");
+    expect(overview.todos).toHaveLength(2);
+    expect(overview.todos.map((todo) => todo.id)).toEqual([
+      "dawn-word",
+      "daily-prayer",
+    ]);
+    expect(overview.progressSteps).toHaveLength(2);
+
+    const built = buildHomeOverview(new Date("2026-07-25T09:00:00"));
+    expect(built.todos[0]?.actionLabel).toBe("보기");
 
     const dawn = await fetchDawnPrayerDetail();
     expect(dawn.id).toBe(overview.dawnPrayer.id);

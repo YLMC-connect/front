@@ -28,7 +28,25 @@ export interface HomeDawnPrayer {
   href: string;
 }
 
+export type HomeTodoId = "dawn-word" | "daily-prayer";
+
+export interface HomeTodoItem {
+  id: HomeTodoId;
+  title: string;
+  subtitle: string;
+  actionLabel: string;
+  href: string;
+  icon: "book-open-page-variant" | "hands-pray";
+}
+
+export interface HomeProgressStep {
+  id: HomeTodoId;
+  label: string;
+}
+
 export interface HomeOverview {
   dailyPrayer: HomeDailyPrayer;
   dawnPrayer: HomeDawnPrayer;
+  todos: readonly HomeTodoItem[];
+  progressSteps: readonly HomeProgressStep[];
 }

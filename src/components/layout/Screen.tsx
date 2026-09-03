@@ -17,12 +17,15 @@ export function Screen({
   scroll = true,
   padded = true,
   applyTopInset = true,
+  backgroundColor,
   testID,
 }: {
   children: ReactNode;
   scroll?: boolean;
   padded?: boolean;
   applyTopInset?: boolean;
+  /** Override default canvas bg (e.g. white home sheet to tab bar). */
+  backgroundColor?: string;
   testID?: string;
 }) {
   const pathname = usePathname();
@@ -36,6 +39,7 @@ export function Screen({
       testID={testID}
       style={[
         styles.safe,
+        backgroundColor ? { backgroundColor } : null,
         applyTopInset
           ? { paddingTop: insets.top + SCREEN_HEADER_VERTICAL_PADDING }
           : null,

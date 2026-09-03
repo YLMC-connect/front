@@ -41,18 +41,19 @@ import { renderWithClient } from "../../../src/test/renderWithClient";
 import * as authService from "../../../src/services/authService";
 
 describe("v1 tab smoke screens", () => {
-  it("renders the home screen", async () => {
+  it("renders the home summary hero and todos", async () => {
     renderWithClient(<HomeScreen />);
 
-    expect(screen.getByText("열린문 커넥트")).toBeTruthy();
+    // Headerless home — title bar removed; profile chip lives inside hero.
+    expect(screen.queryByText("열린문 커넥트")).toBeNull();
     expect(screen.queryByText("홈")).toBeNull();
+    expect(await screen.findByTestId("home-hero")).toBeTruthy();
     expect(screen.getByLabelText(/내 정보/)).toBeTruthy();
-    // Logged-out fallback label is given-name style ("성도" has no surname strip).
     expect(screen.getByTestId("home-open-mypage")).toBeTruthy();
-    expect(await screen.findByTestId("home-greeting")).toBeTruthy();
-    expect(screen.getByText(/님,/)).toBeTruthy();
-    expect(await screen.findByTestId("home-daily-prayer")).toBeTruthy();
-    expect(screen.getByTestId("home-dawn-prayer")).toBeTruthy();
+    expect(screen.getByTestId("home-progress")).toBeTruthy();
+    expect(screen.queryByText("해야 할 일")).toBeNull();
+    expect(screen.getByTestId("home-todo-dawn-word")).toBeTruthy();
+    expect(screen.getByTestId("home-todo-daily-prayer")).toBeTruthy();
     expect(screen.getByText("새벽기도 말씀요약")).toBeTruthy();
     expect(screen.queryByText("내 활동 요약")).toBeNull();
   });
@@ -62,21 +63,23 @@ describe("v1 tab smoke screens", () => {
     jest.mocked(useRouter).mockReturnValue({ push } as never);
     renderWithClient(<HomeScreen />);
 
-    await screen.findByTestId("home-daily-prayer");
+    await screen.findByTestId("home-hero");
     fireEvent.press(screen.getByTestId("home-open-mypage"));
     expect(push).toHaveBeenCalledWith("/mypage");
   });
 
-  it("opens prayer routes from home prayer cards", async () => {
+  it("opens prayer routes from home todo actions", async () => {
     const push = jest.fn();
     jest.mocked(useRouter).mockReturnValue({ push } as never);
     renderWithClient(<HomeScreen />);
 
-    await screen.findByTestId("home-daily-prayer");
-    fireEvent.press(screen.getByTestId("home-daily-prayer"));
-    expect(push).toHaveBeenCalledWith("/prayer");
-    fireEvent.press(screen.getByTestId("home-dawn-prayer"));
-    expect(push).toHaveBeenCalledWith("/prayer/dawn");
+    await screen.findByTestId("home-todo-action-dawn-word");
+    fireEvent.press(screen.getByTestId("home-todo-action-dawn-word"));
+    await waitFor(() =>
+      expect(push).toHaveBeenCalledWith("/prayer/dawn"),
+    );
+    fireEvent.press(screen.getByTestId("home-todo-action-daily-prayer"));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/prayer"));
   });
 
   it("renders the market screen", async () => {

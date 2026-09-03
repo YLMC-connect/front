@@ -69,10 +69,7 @@ export default function HomeScreen() {
             <View style={styles.hero} testID="home-hero">
               <HomeHeroVisual fadeHeight={FADE_HEIGHT}>
                 <View
-                  style={[
-                    styles.heroTopBar,
-                    { paddingTop: insets.top + 28 },
-                  ]}
+                  style={[styles.heroTopBar, { paddingTop: insets.top + 28 }]}
                 >
                   <MotionPressable
                     accessibilityHint="마이페이지로 이동합니다"

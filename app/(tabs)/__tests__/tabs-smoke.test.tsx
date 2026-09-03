@@ -75,9 +75,7 @@ describe("v1 tab smoke screens", () => {
 
     await screen.findByTestId("home-todo-action-dawn-word");
     fireEvent.press(screen.getByTestId("home-todo-action-dawn-word"));
-    await waitFor(() =>
-      expect(push).toHaveBeenCalledWith("/prayer/dawn"),
-    );
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/prayer/dawn"));
     fireEvent.press(screen.getByTestId("home-todo-action-daily-prayer"));
     await waitFor(() => expect(push).toHaveBeenCalledWith("/prayer"));
   });

@@ -11,6 +11,7 @@
     "android:dev-client": "expo run:android",
     "ios:dev-client": "expo run:ios",
     "web": "expo start --web",
+    "export:web:mock": "EXPO_PUBLIC_AUTH_ADAPTER=mock EXPO_PUBLIC_MARKET_ADAPTER=mock EXPO_PUBLIC_GROUP_ADAPTER=mock expo export --platform web",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
     "format:check": "prettier --check \"*.{js,ts}\" \"app/**/*.{ts,tsx}\" \"src/**/*.{ts,tsx}\" \"scripts/**/*.{js,mjs}\" \"package.json\" \".github/**/*.yml\" \".maestro/**/*.yml\"",

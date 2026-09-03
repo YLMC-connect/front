@@ -1,0 +1,5 @@
+{
+  "buildCommand": "EXPO_PUBLIC_AUTH_ADAPTER=mock EXPO_PUBLIC_MARKET_ADAPTER=mock EXPO_PUBLIC_GROUP_ADAPTER=mock npx expo export --platform web",
+  "outputDirectory": "dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

@@ -376,9 +376,7 @@ export default function SignupScreen() {
                   onChangeText={setField("phone")}
                   placeholder="010-XXXX-XXXX"
                   keyboardType="phone-pad"
-                  hasError={
-                    isPhoneError || isPhoneDup || Boolean(errors.phone)
-                  }
+                  hasError={isPhoneError || isPhoneDup || Boolean(errors.phone)}
                 />
               </MotionShake>
               <InlineError>{phoneErrorMessage}</InlineError>

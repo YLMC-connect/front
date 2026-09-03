@@ -8,6 +8,8 @@ type FetchImplementation = typeof fetch;
 
 export type ApiRequestOptions = RequestInit & {
   auth?: boolean;
+  /** login/refresh처럼 공통 envelope를 쓰지 않는 응답 */
+  format?: "envelope" | "json";
 };
 
 export type ApiClientOptions = {
@@ -123,7 +125,7 @@ export function createApiClient({
     options: ApiRequestOptions,
     canRefresh: boolean,
   ): Promise<T | null> => {
-    const { auth = true, ...requestInit } = options;
+    const { auth = true, format = "envelope", ...requestInit } = options;
     const headers = toHeaderRecord(requestInit.headers);
 
     if (!hasHeader(headers, "Accept")) headers.Accept = "application/json";
@@ -162,6 +164,26 @@ export function createApiClient({
     if (auth && canRefresh && response.status === 401) {
       const refreshed = await tryRefresh();
       if (refreshed) return request<T>(path, options, false);
+    }
+
+    if (format === "json") {
+      if (!response.ok) {
+        if (isApiResponse(body)) {
+          throw new ApiError({
+            code: body.code,
+            message: body.message,
+            status: response.status,
+            data: body.data,
+          });
+        }
+        throw new ApiError({
+          code: "INVALID_RESPONSE",
+          message: "서버 응답 형식을 확인할 수 없습니다.",
+          status: response.status,
+          data: body,
+        });
+      }
+      return body as T;
     }
 
     if (!isApiResponse(body)) {

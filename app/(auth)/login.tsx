@@ -115,7 +115,11 @@ export default function LoginScreen() {
                 <AppText variant="screenTitle" style={styles.title}>
                   열린문 커넥트
                 </AppText>
-                <AppText variant="body" tone="secondary" style={styles.subtitle}>
+                <AppText
+                  variant="body"
+                  tone="secondary"
+                  style={styles.subtitle}
+                >
                   교회 가족과 함께하는 일상
                 </AppText>
               </MotionEnter>

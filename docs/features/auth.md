@@ -1,6 +1,6 @@
 # auth (인증)
 
-> 마지막 갱신: 2026-07-23 (조용한 톤 Phase 1–2) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-08-13 (httpAuthAdapter 라이브 관측 DTO 연결) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 인증 HTTP adapter 활성화 — 라이브 `ylmc-api.duckdns.org`에서 관측한 login/refresh 토큰 payload, signup 후 login 합성, `/api/member/me`, `/api/member/duplicate`를 `httpAuthAdapter`로 연결. development 기본값은 HTTP, 테스트/Maestro는 `EXPO_PUBLIC_AUTH_ADAPTER=mock`. Swagger 성공 DTO는 여전히 미기재라 `test:api:contract`는 13건 실패를 유지
 - 조용한 톤 인증 여백·위계 — 로그인 로고 그림자 완화·여백 토큰화, 회원가입 필드 간격·라벨 weight 정리, CTA 라벨 semibold; glass 하단 바 실험은 단순 `bottomFlat`으로 유지
 - 로그인·회원가입 절제 모션 (C-set) — 진입 stagger fade-up, 로고 1회 settle, 필드 검증 shake·인라인 에러 fade, 가입 아바타 empty↔filled morph, 중복확인 성공 체크 pop, CTA `MotionPressable`, 가입 버튼 enable soft 활성, auth Stack slide/fade. `designVariant=default`·`useReducedMotion`에서 진입 애니는 static
 - 로그인·회원가입 입력 포커스 통일 — 인증 전용 공통 `AuthInput`으로 전체 입력 surface를 공유하고 웹 기본 내부 outline을 제거한 뒤 나눔·동행 검색·작성 입력과 같은 primary 2px focus border를 적용하며 오류 테두리는 danger 색상을 우선
@@ -53,37 +54,40 @@
 
 ## 주요 파일 (도메인 파일 지도)
 
-| 경로                                  | 역할                               |
-| ------------------------------------- | ---------------------------------- |
-| `app/(auth)/_layout.tsx`              | 인증 스택 layout (slide/fade 전환) |
-| `src/components/ui/motion.tsx`        | 진입·shake·fade·pop 공통 모션 프리미티브 (auth 사용) |
-| `src/components/auth/AuthRouteNavigator.tsx` | 인증 상태별 auth/app route 보호    |
-| `app/(auth)/splash.tsx`               | Splash 실제 화면                   |
-| `app/(auth)/terms.tsx`                | 약관 동의 실제 화면                |
-| `app/(auth)/terms-sheet.tsx`          | 약관 전문 bottom sheet 실제 화면   |
-| `app/(auth)/login.tsx`                | 로그인 입력·오류·세션 시작 화면    |
-| `app/(auth)/signup.tsx`               | 회원가입 화면                      |
-| `src/components/auth/auth-input.tsx`  | 로그인·회원가입 공통 focus input surface |
-| `src/store/authStore.ts`              | Zustand 인증 상태                  |
-| `src/services/authService.ts`         | 인증 mock service                  |
-| `src/services/authSessionService.ts`  | 토큰 저장·복원·재발급·로그아웃 상태 전이 |
-| `src/services/authAdapter.ts`         | mock/http auth adapter 스위치 지점 |
-| `src/hooks/useAuth.ts`                | 인증 액션 hook                     |
-| `src/types/auth.ts`                   | 인증 입력/응답 타입                |
-| `src/types/api.ts`                    | 공통 `ApiResponse<T>` envelope     |
-| `src/mocks/auth.ts`                   | mock 로그인 계정과 사용자/성도 데이터 |
-| `src/lib/apiClient.ts`                | 공통 응답·오류·Authorization 처리  |
-| `src/lib/apiErrorMessage.ts`          | API 오류 코드→사용자 문구 변환     |
-| `src/constants/apiErrorMessages.ts`   | 문서화된 인증 오류 코드 메시지 표  |
-| `src/lib/secureStore.ts`              | 네이티브 SecureStore·웹 sessionStorage 토큰 저장 |
-| `scripts/check-auth-api-contract.mjs` | Swagger 인증 계약 검사             |
+| 경로                                         | 역할                                                 |
+| -------------------------------------------- | ---------------------------------------------------- |
+| `app/(auth)/_layout.tsx`                     | 인증 스택 layout (slide/fade 전환)                   |
+| `src/components/ui/motion.tsx`               | 진입·shake·fade·pop 공통 모션 프리미티브 (auth 사용) |
+| `src/components/auth/AuthRouteNavigator.tsx` | 인증 상태별 auth/app route 보호                      |
+| `app/(auth)/splash.tsx`                      | Splash 실제 화면                                     |
+| `app/(auth)/terms.tsx`                       | 약관 동의 실제 화면                                  |
+| `app/(auth)/terms-sheet.tsx`                 | 약관 전문 bottom sheet 실제 화면                     |
+| `app/(auth)/login.tsx`                       | 로그인 입력·오류·세션 시작 화면                      |
+| `app/(auth)/signup.tsx`                      | 회원가입 화면                                        |
+| `src/components/auth/auth-input.tsx`         | 로그인·회원가입 공통 focus input surface             |
+| `src/store/authStore.ts`                     | Zustand 인증 상태                                    |
+| `src/services/authService.ts`                | 인증 mock service                                    |
+| `src/services/authSessionService.ts`         | 토큰 저장·복원·재발급·로그아웃 상태 전이             |
+| `src/services/authAdapter.ts`                | mock/http auth adapter 스위치 지점                   |
+| `src/services/authMapper.ts`                 | 관측된 서버 DTO → 도메인 세션/회원                   |
+| `src/hooks/useAuth.ts`                       | 인증 액션 hook                                       |
+| `src/types/auth.ts`                          | 인증 입력/응답 타입                                  |
+| `src/types/authApi.ts`                       | 라이브 관측 인증 서버 DTO                            |
+| `src/types/api.ts`                           | 공통 `ApiResponse<T>` envelope                       |
+| `src/mocks/auth.ts`                          | mock 로그인 계정과 사용자/성도 데이터                |
+| `src/lib/apiClient.ts`                       | 공통 응답·오류·Authorization 처리                    |
+| `src/lib/apiErrorMessage.ts`                 | API 오류 코드→사용자 문구 변환                       |
+| `src/constants/apiErrorMessages.ts`          | 문서화된 인증 오류 코드 메시지 표                    |
+| `src/lib/secureStore.ts`                     | 네이티브 SecureStore·웹 sessionStorage 토큰 저장     |
+| `scripts/check-auth-api-contract.mjs`        | Swagger 인증 계약 검사                               |
 
 ## 데이터 타입
 
-`LoginInput`, `SignupInput`, `MemberDuplicateInput`, `MemberAvailability`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리합니다. 중복확인 요청은 Swagger의 `searchType: id | phone`, `searchValue` 계약을 따르며 화면에는 `available` 도메인 결과만 노출합니다. 실제 HTTP 응답 mapper는 `data.available`이 성공 schema에 명시된 뒤 활성화합니다.
+`LoginInput`, `SignupInput`, `MemberDuplicateInput`, `MemberAvailability`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리합니다. 중복확인 요청은 Swagger의 `searchType: id | phone`, `searchValue` 계약을 따르며 화면에는 `available` 도메인 결과만 노출합니다. 실제 HTTP mapper는 라이브 응답에서 확인한 `data.available`, login/refresh 토큰 payload, `/api/member/me` 회원 필드만 사용합니다. Swagger 성공 schema는 아직 비어 있어 계약 검사는 계속 실패합니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-08-13) **인증 HTTP는 Swagger가 비어 있어도 라이브에서 관측한 필드만 연결한다** — login/refresh 성공은 envelope가 아니라 `{ accessToken, refreshToken, userId, userName, role }`. signup 성공은 `{ userStatus }`만 주고 토큰이 없어 같은 자격증명으로 login을 이어서 호출한다. `/me`와 duplicate는 공통 envelope를 쓴다. 관측되지 않은 필드·역할·오류 코드는 만들지 않는다. development 기본 adapter는 `http`, 테스트와 Maestro mock 계정은 `EXPO_PUBLIC_AUTH_ADAPTER=mock`.
 - (2026-07-23) **인증 화면도 공통 “조용한 깔끔함” 톤을 따른다** — 로고·CTA 그림자는 `theme.shadow.primary` 수준으로 약하게, 여백은 spacing 토큰, 라벨/버튼 weight는 medium·semibold. Issue #105.
 - (2026-07-23) **인증 화면 모션은 soft timing + 짧은 stagger 로 절제한다** — duration `enter 280ms`, distance `md 12px`, stagger `60ms`, easing은 완만한 bezier(앞당김 적은 soft out). 웹 겹침 방지를 위해 layout `entering` 대신 in-flow opacity/transform 을 쓰고, spring/pulse 루프·shared element·confetti는 쓰지 않습니다. 로고는 1회 settle(`scale enterFrom 0.92→1`)만 허용하고, 검증 오류는 shake 1회(`±distance.xs~5px`), 가입 아바타는 empty↔filled 단일 레이어 전환입니다. `useReducedMotion`과 `designVariant !== default` 캡처 화면에서는 진입 애니는 static이며 피드백 모션도 reduce 시 즉시 표시합니다. 공통 프리미티브는 `MotionEnter` / `MotionShake` / `MotionFadeIn` / `MotionPop` 입니다.
 - (2026-07-18) **인증 입력은 전체 surface에 공통 focus border를 표시한다** — 로그인·회원가입의 내부 `TextInput` 웹 outline은 제거하고 공통 `AuthInput` 외곽에 primary 2px를 표시하며, 오류가 함께 있으면 danger 색상을 우선합니다.
@@ -127,7 +131,7 @@
 
 ## 미결 / 추적
 
-- 실제 로그인·회원가입·내 정보 성공 DTO, refresh 요청/응답 및 token rotation 정책, 공개 endpoint의 JWT 예외, `/api/member/me` security scheme 이름, 중복확인 `data.available`, 로그인·재발급 오류 코드 확정 필요. 단일 출처는 Issue #9이며 현재 `test:api:contract`는 13건을 검출합니다.
+- Swagger 성공 DTO·공개 endpoint security·`bearerAuth` scheme·로그인/재발급 오류 코드는 여전히 미기재. 프런트 HTTP 연결은 라이브 관측값으로 진행했고, `test:api:contract` 13건은 백엔드 문서 작업이다. 단일 출처는 Issue #9.
 - 약관/개인정보 동의 화면의 필수 여부와 문구 확정 필요.
 - auth bottom CTA/toast 정렬 후 `login-toast mean=10.18`, `code-toast mean=10.10`, `code-error mean=8.80`, `code-loading mean=8.32`, `code default mean=8.66`까지 낮췄습니다. 로그인 입력 식별자 추가 후 기본 화면 부분 재캡처는 `login mean=13.18`로 렌더 구조 변동이 없음을 확인했습니다. `terms-sheet mean=12.21`는 Android status bar/time, backdrop blur 미적용, RN/web font metric 차이가 남아 후속 공통 overlay 정렬에서 추적합니다.
 - signup variant residual은 `ScreenSignup` 구조 정렬 후 `signup-pw-error 21.74→10.14`, `signup-id-dup 20.65→9.18`, `signup default 12.50→7.76`까지 낮췄습니다. 입력 식별자 추가 후 기본 화면 부분 재캡처는 `signup mean=12.99`로 확인했으며 구조 변경은 없습니다. 남은 차이는 RN status bar/time, secure input glyph/font metrics, CSS gradient/shadow 번역 차이 중심으로 후속 공통 정렬에서 추적합니다.

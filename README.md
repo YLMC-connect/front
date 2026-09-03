@@ -52,6 +52,12 @@ development 환경의 기본 API는 `https://ylmc-api.duckdns.org`입니다. 다
 EXPO_PUBLIC_API_URL=https://example.test npm run start:dev-client
 ```
 
+development 빌드의 인증 adapter 기본값은 실제 HTTP입니다. 단위 테스트와 Maestro mock 계정(`admin`/`admin`)을 쓰려면 덮어씁니다.
+
+```bash
+EXPO_PUBLIC_AUTH_ADAPTER=mock npm run start:dev-client
+```
+
 검증 명령:
 
 ```bash
@@ -136,8 +142,8 @@ npm run test:visual:compare
 
 - 처음 보는 분: [docs/INDEX.md](docs/INDEX.md) 부터 — 5분에 전체 흐름 파악
 - 설계 기준 문서: [PLAN.md](PLAN.md) — 기술 스택, 데이터 타입, Phase 정의
-- 진행 작업: GitHub Issues — `gh issue list --state open` (label = 도메인). 기존 항목 보존: [docs/_archive/TASKS.md](docs/_archive/TASKS.md)
-- 변경 이력: 머지된 PR description — `gh pr list --state merged --limit 30`. 기존 항목 보존: [docs/_archive/LOG.md](docs/_archive/LOG.md)
+- 진행 작업: GitHub Issues — `gh issue list --state open` (label = 도메인). 기존 항목 보존: [docs/\_archive/TASKS.md](docs/_archive/TASKS.md)
+- 변경 이력: 머지된 PR description — `gh pr list --state merged --limit 30`. 기존 항목 보존: [docs/\_archive/LOG.md](docs/_archive/LOG.md)
 - AI 작업 규칙: [AGENTS.md](AGENTS.md) — Codex 동작 규약 (`CLAUDE.md` 는 Claude Code 호환본)
 - 유지보수 / 드리프트 복구: [docs/MAINTENANCE.md](docs/MAINTENANCE.md)
 

@@ -280,7 +280,9 @@ export function MotionFadeIn({
   testID,
 }: MotionFadeInProps) {
   const reduceMotion = useReducedMotion();
-  const progress = useSharedValue(reduceMotion || !visible ? (visible ? 1 : 0) : 0);
+  const progress = useSharedValue(
+    reduceMotion || !visible ? (visible ? 1 : 0) : 0,
+  );
 
   useEffect(() => {
     if (!visible) {

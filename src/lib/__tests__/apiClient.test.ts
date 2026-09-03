@@ -109,6 +109,49 @@ describe("apiClient", () => {
     });
   });
 
+  it("returns raw JSON when format is json", async () => {
+    const fetchImpl = jest.fn().mockResolvedValue(
+      jsonResponse({
+        accessToken: "access",
+        refreshToken: "refresh",
+        userId: "ylmc",
+        userName: "열린문",
+      }),
+    );
+    const client = createApiClient({
+      baseUrl: "https://api.example.com",
+      fetchImpl,
+    });
+
+    await expect(
+      client.request("/api/auth/login", { auth: false, format: "json" }),
+    ).resolves.toEqual({
+      accessToken: "access",
+      refreshToken: "refresh",
+      userId: "ylmc",
+      userName: "열린문",
+    });
+  });
+
+  it("maps non-envelope json errors without exposing a guessed code", async () => {
+    const fetchImpl = jest
+      .fn()
+      .mockResolvedValue(
+        jsonResponse({ message: "비밀번호가 일치하지 않습니다." }, 401),
+      );
+    const client = createApiClient({
+      baseUrl: "https://api.example.com",
+      fetchImpl,
+    });
+
+    await expect(
+      client.request("/api/auth/login", { auth: false, format: "json" }),
+    ).rejects.toMatchObject({
+      code: "INVALID_RESPONSE",
+      status: 401,
+    });
+  });
+
   it("rejects a response that does not follow the common envelope", async () => {
     const fetchImpl = jest
       .fn()

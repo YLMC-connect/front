@@ -585,11 +585,7 @@ function CompanionCard(
             <Text style={styles.categoryPillText}>{metaLabel}</Text>
           </View>
           <View testID={`${testID}-member-count`} style={styles.memberRow}>
-            <AppIcon
-              name="groups"
-              size={14}
-              color={theme.colors.inkMute}
-            />
+            <AppIcon name="groups" size={14} color={theme.colors.inkMute} />
             <AppText variant="caption" tone="muted">
               {isService ? "참여 " : null}
               <Text style={styles.memberCount}>

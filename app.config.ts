@@ -50,6 +50,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     extra: {
       apiUrl,
       variant: resolvedVariant,
+      authAdapter:
+        process.env.EXPO_PUBLIC_AUTH_ADAPTER ??
+        (resolvedVariant === "development" ? "http" : "mock"),
     },
   };
 };

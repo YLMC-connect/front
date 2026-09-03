@@ -248,7 +248,11 @@ export function Avatar({
   const givenName = getGivenName(name) || name.trim() || "?";
   const backgroundColor = avatarColorFor(seed ?? name);
   const fontSize =
-    givenName.length >= 3 ? size * 0.28 : givenName.length === 2 ? size * 0.34 : size * 0.42;
+    givenName.length >= 3
+      ? size * 0.28
+      : givenName.length === 2
+        ? size * 0.34
+        : size * 0.42;
   return (
     <View
       style={[

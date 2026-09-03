@@ -1,7 +1,10 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useRef, type ComponentProps } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import Animated, { interpolate, useAnimatedStyle } from "react-native-reanimated";
+import Animated, {
+  interpolate,
+  useAnimatedStyle,
+} from "react-native-reanimated";
 import { theme } from "../../constants/theme";
 import { AppText } from "./app-text";
 import { useMotionPresence } from "./motion";

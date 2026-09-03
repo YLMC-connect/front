@@ -7,7 +7,6 @@ import {
 } from "react";
 import {
   Pressable,
-  View,
   type PressableProps,
   type PressableStateCallbackType,
   type StyleProp,

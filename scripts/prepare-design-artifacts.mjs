@@ -4,11 +4,7 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 
-const defaultZipPath = path.join(
-  os.homedir(),
-  "Downloads",
-  "열린문커넥트.zip",
-);
+const defaultZipPath = path.join(os.homedir(), "Downloads", "열린문커넥트.zip");
 const defaultOutputRoot = path.join(
   os.tmpdir(),
   "ylmc-golden-screens",

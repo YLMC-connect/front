@@ -324,6 +324,53 @@ describe("shared maintenance UI", () => {
     ).toBe("auto");
   });
 
+  it("hides sticky controls only after scrolling past the inset (past-inset mode)", () => {
+    render(
+      <SafeAreaProvider
+        initialMetrics={{
+          frame: { x: 0, y: 0, width: 430, height: 932 },
+          insets: { top: 0, left: 0, right: 0, bottom: 0 },
+        }}
+      >
+        <StickyHeaderScreen
+          stickyControls={<Text>필터</Text>}
+          stickyControlsHeight={116}
+          stickyControlsHideMode="past-inset"
+          testID="past-inset-screen"
+          title="나눔"
+        >
+          <Text>리스트</Text>
+        </StickyHeaderScreen>
+      </SafeAreaProvider>,
+    );
+
+    // Still within the sticky inset — keep visible (unlike direction mode).
+    fireEvent.scroll(screen.getByTestId("past-inset-screen-scroll"), {
+      nativeEvent: { contentOffset: { y: 40 } },
+    });
+    expect(
+      screen.getByTestId("past-inset-screen-sticky-controls").props
+        .pointerEvents,
+    ).toBe("auto");
+
+    fireEvent.scroll(screen.getByTestId("past-inset-screen-scroll"), {
+      nativeEvent: { contentOffset: { y: 116 } },
+    });
+    expect(
+      screen.getByTestId("past-inset-screen-sticky-controls", {
+        includeHiddenElements: true,
+      }).props.pointerEvents,
+    ).toBe("none");
+
+    fireEvent.scroll(screen.getByTestId("past-inset-screen-scroll"), {
+      nativeEvent: { contentOffset: { y: 20 } },
+    });
+    expect(
+      screen.getByTestId("past-inset-screen-sticky-controls").props
+        .pointerEvents,
+    ).toBe("auto");
+  });
+
   it("keeps sticky controls visible when an intentional action pins them", () => {
     render(
       <SafeAreaProvider

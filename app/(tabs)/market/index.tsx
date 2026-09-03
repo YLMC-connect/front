@@ -128,6 +128,8 @@ export default function MarketScreen() {
         MARKET_STICKY_CONTROLS_HEIGHT +
         (searchOpen ? SEARCH_FIELD_STICKY_HEIGHT : 0)
       }
+      // 동행과 동일: 내릴 때 숨김 · 위로 살짝 올리면 세그먼트·필터 다시 표시. 검색 중 고정.
+      stickyControlsHideMode="direction"
       stickyControlsAlwaysVisible={searchOpen}
       right={
         <SearchToggleButton

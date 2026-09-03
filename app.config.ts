@@ -53,6 +53,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       authAdapter:
         process.env.EXPO_PUBLIC_AUTH_ADAPTER ??
         (resolvedVariant === "development" ? "http" : "mock"),
+      marketAdapter:
+        process.env.EXPO_PUBLIC_MARKET_ADAPTER ??
+        (resolvedVariant === "development" ? "http" : "mock"),
     },
   };
 };

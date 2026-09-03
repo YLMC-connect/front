@@ -52,10 +52,10 @@ development 환경의 기본 API는 `https://ylmc-api.duckdns.org`입니다. 다
 EXPO_PUBLIC_API_URL=https://example.test npm run start:dev-client
 ```
 
-development 빌드의 인증 adapter 기본값은 실제 HTTP입니다. 단위 테스트와 Maestro mock 계정(`admin`/`admin`)을 쓰려면 덮어씁니다.
+development 빌드의 인증·나눔 adapter 기본값은 실제 HTTP입니다. 단위 테스트와 Maestro mock 계정(`admin`/`admin`)을 쓰려면 덮어씁니다.
 
 ```bash
-EXPO_PUBLIC_AUTH_ADAPTER=mock npm run start:dev-client
+EXPO_PUBLIC_AUTH_ADAPTER=mock EXPO_PUBLIC_MARKET_ADAPTER=mock npm run start:dev-client
 ```
 
 검증 명령:

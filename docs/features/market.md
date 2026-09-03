@@ -1,6 +1,6 @@
 # market (나눔)
 
-> 마지막 갱신: 2026-07-16 | 담당 Phase: P1/P2/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-08-13 (httpMarketDataSource 라이브 관측 연결) | 담당 Phase: P1/P2/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 나눔 HTTP data source — 라이브 `GET/POST /api/share`, 상세·댓글 CUD, 삭제를 `httpMarketDataSource`로 연결. 상태/카테고리/물품상태는 `GET /api/common-codes?groupCode=`에서 관측한 값만 매핑. 목록 `authorName`·장소·이미지 업로드 URL·신고 enum은 없어 목록 작성자는 `authorId`, 장소는 요청에서 제외, 신고는 HTTP로 보내지 않음. development 기본값은 HTTP
 - 나눔 작성 폼 구획·상단 여백·포커스 통일 — 사진부터 수령 장소까지 이어지는 8px 회색 section divider를 제거해 하나의 폼 흐름으로 정리하고, 홈·나눔·동행·삶공부와 같은 기기 safe area + 상단 20px 기준을 적용했으며 제목·설명·장소 입력을 소모임 개설과 같은 공통 `ModalFormTextInput`의 primary 2px 포커스로 통일하면서 입력·등록 동작은 유지
 - 나눔 탐색 control·FAB 비율 보정 — 상태 세그먼트와 카테고리 필터의 full pill을 유지한 채 시각 높이를 낮추고 44px 터치 범위를 보존했으며 `나눔하기` FAB를 46px로 축소해 하단 탭과 위계를 분리
 - 나눔 상세 뒤로가기 surface 통일 — 이미지 위 뒤로가기의 흰색 RGBA와 카드 그림자를 제거하고 다른 상세와 같은 `surface2`·1px 경계를 사용하며 68×44px 위치·아이콘·문구·press motion·목록 복귀는 유지
@@ -73,6 +74,9 @@
 | `app/modal/market-new.tsx`              | 나눔 작성 모달                                                   |
 | `src/mocks/market.ts`                   | 나눔 mock 데이터                                                 |
 | `src/services/marketService.ts`         | 교체 가능한 나눔 조회·게시글 삭제·댓글 CUD·신고 data source 경계 |
+| `src/services/marketHttpDataSource.ts`  | 라이브 나눔 HTTP data source                                     |
+| `src/services/marketMapper.ts`          | Share DTO → 화면 모델                                            |
+| `src/types/marketApi.ts`                | 관측된 나눔 서버 DTO                                             |
 | `src/hooks/useMarket.ts`                | 나눔 query와 게시글 삭제·댓글 CUD·신고 mutation hook             |
 | `src/constants/domainOptions.ts`        | 나눔 카테고리/상태/신고 사유 옵션                                |
 | `src/types/market.ts`                   | 나눔 타입                                                        |
@@ -84,6 +88,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-08-13) **나눔 HTTP는 라이브 관측값과 common-codes만 매핑한다** — `SHARE_STATUS` AVAILABLE/RESERVED/COMPLETED, `SHARE_CATEGORY` 7개, `SHARE_ITEM_STATUS` NEW/USED/DAMAGED. 목록 DTO에 `authorName`/`images`가 없어 목록 작성자는 `authorId`를 쓰고 썸네일은 기존 `thumbSeed`를 유지한다. 생성은 multipart이며 서버가 받지 않는 `location`은 보내지 않는다. 신고 `reportReasonCode` enum이 공통 코드에 없어 HTTP 신고는 활성화하지 않는다. development 기본 adapter는 `http`.
 - (2026-07-16) **나눔 작성 폼은 회색 section divider 없이 내부 여백으로 구획하고 공통 탭 헤더·작성 입력 기준을 사용한다** — 사진·카테고리·제목·물품 상태·상세 설명·수령 장소의 기존 입력 surface와 section 내부 padding은 유지하면서 8px divider만 제거합니다. 작성 화면 상단은 홈·나눔·동행·삶공부의 `ScreenHeader`와 같은 기기 safe area + 20px을 사용하고, 텍스트 입력은 소모임 개설과 같은 `ModalFormTextInput`의 primary 2px 포커스를 공유합니다.
 - (2026-07-15) **나눔 탐색 control은 full pill과 44px 터치 범위를 유지하면서 시각 높이만 낮춘다** — 상태 세그먼트는 40px track·32px 선택 영역, 카테고리 필터는 36px surface를 사용하고 상하 hitSlop으로 44px 터치 범위를 보장합니다. `나눔하기` FAB는 공통 46px geometry를 사용하며 기존 sticky 높이·간격·모션·라우팅은 유지합니다.
 - (2026-07-15) **나눔 상세의 이미지 위 뒤로가기도 공통 `surface2`를 사용한다** — 이미지 위라는 이유로 사용하던 흰색 RGBA와 카드 그림자 예외를 폐기하고 다른 상세와 같은 `surface2`·1px 경계로 통일합니다. 이미지 상단 scrim과 68×44px geometry·아이콘·문구·press motion은 유지합니다.
@@ -145,7 +150,7 @@
 
 ## 미결 / 추적
 
-- Swagger 목록 작성자명·대표 이미지·검색·현재 사용자 소유 여부(`isMine`), 상세/작성 장소, 입력·응답·신고 enum, 제목/본문/사진 제한, 이미지 필수, 상태 변경·이미지 업로드 endpoint, 핵심 흐름 오류 코드 확정 필요. 장소를 백엔드 계약에 추가할지 최신 기획에서 제거할지도 명시적으로 결정해야 합니다. 단일 출처는 Issue #19이며 `npm run test:api:contract:market`으로 확인합니다.
+- 프런트 HTTP 목록/상세/작성/삭제/댓글은 라이브 관측으로 연결됨. 남은 문서 공백은 목록 `authorName`/`images`/`keyword`, 장소, 신고 enum, 상태 변경, 오류 코드. `isMine`은 `authorId === 현재 사용자`로 계산. 단일 출처는 Issue #19이며 `test:api:contract:market`은 38건 실패를 유지한다.
 - 신고 처리 후 블라인드/관리자 큐 정책은 API/운영 정책 확정 후 반영.
 - 나눔 작성 residual은 topbar/chip/control typography 정렬 후 `market-create-limit mean=14.62`, `market-create-fill mean=13.69`, `market-edit mean=13.70`, `market-create mean=12.22`, `market-create-back mean=7.72`입니다. 빈 작성/뒤로가기 화면은 status bar/time, RN font metrics, confirm overlay geometry 차이로 소폭 상승했지만 화면군 합계는 감소했습니다.
 - 나눔 목록 residual은 FAB root overlay 정렬 후 `market-list-all mean=13.75`, `market-list mean=10.64`, `market-list-reserved mean=6.79`, `market-list-done mean=6.31`입니다. 남은 차이는 native status bar/time, RN font metrics, tab bar geometry와 목록 row text metric 차이로 추적합니다.
@@ -154,7 +159,7 @@
 ## 의존성
 
 - common 도메인의 UI, `queryKeys`, `queryClient`, 이미지 선택 컴포넌트에 의존합니다.
-- auth 도메인의 mock 현재 사용자에 의존합니다.
+- auth 도메인의 현재 사용자(`authStore`)에 의존합니다. HTTP 목록/상세의 `isMine`은 `authorId`와 비교합니다.
 
 ## 관련 ADR
 

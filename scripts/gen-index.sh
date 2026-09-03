@@ -2,29 +2,30 @@
 # scripts/gen-index.sh
 # docs/INDEX.md 의 "도메인 상태표" 섹션을 GitHub Issues 데이터로 자동 갱신.
 #
-# 마커 사이를 교체:
-#   <!-- AUTO-GENERATED-START: domain-status -->
-#   ...
-#   <!-- AUTO-GENERATED-END: domain-status -->
-#
-# 사용:
-#   bash scripts/gen-index.sh
-#
-# 요구사항: gh CLI 로그인됨 (`gh auth login`), jq 설치됨.
+# 도메인 목록은 repo 루트의 .task-flow.conf (DOMAINS) 에서 읽습니다.
 # 인증 안 됐어도 동작은 하되 카운트가 "?" 로 표시됨.
 
 set -euo pipefail
+
+ROOT=$(git rev-parse --show-toplevel)
+cd "$ROOT"
 
 INDEX="docs/INDEX.md"
 START_MARKER="<!-- AUTO-GENERATED-START: domain-status -->"
 END_MARKER="<!-- AUTO-GENERATED-END: domain-status -->"
 
-DOMAINS=(common auth market group mypage life-study prayer)
+if [ -f .task-flow.conf ]; then
+  # shellcheck disable=SC1091
+  . .task-flow.conf
+fi
+DOMAINS="${DOMAINS:-}"
+[ -n "$DOMAINS" ] || { echo "✗ .task-flow.conf 의 DOMAINS 가 비어있습니다." >&2; exit 1; }
 
 domain_label() {
   case "$1" in
     common)     echo "common (공통 인프라)" ;;
     auth)       echo "auth (인증)" ;;
+    home)       echo "home (홈)" ;;
     market)     echo "market (나눔장터)" ;;
     group)      echo "group (소모임)" ;;
     mypage)     echo "mypage (MY)" ;;
@@ -44,7 +45,7 @@ TMP=$(mktemp)
   echo ""
   echo "| 도메인 | 진행 중 | 완료 | 마지막 갱신 | 상세 |"
   echo "|---|---|---|---|---|"
-  for d in "${DOMAINS[@]}"; do
+  for d in $DOMAINS; do
     name=$(domain_label "$d")
 
     if [ "$GH_OK" = "1" ]; then

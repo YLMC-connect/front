@@ -76,6 +76,7 @@
 - [0003 — MVP 범위는 Notion 최신 정의 우선](adr/0003-mvp-scope-notion-first.md) — 인증·홈·나눔·소모임·MY·이미지 선택을 MVP로 확정하고 중보기도·삶공부는 v1로 분리. (수락, 2026-05-22)
 - [0004 — Notion v1 범위와 Expo Dev Client 기준](adr/0004-notion-v1-dev-client-scope.md) — 삶공부·중보기도를 v1 mock-first로 구현하고 Expo Go가 아닌 Dev Client를 검증 기준으로 확정. (수락, 2026-05-22)
 - [0005 — 모바일 E2E는 Maestro 우선](adr/0005-mobile-e2e-maestro-first.md) — Expo Dev Client development build 기준 v1 탭 진입 smoke를 Maestro로 관리. (수락, 2026-05-23; 탭 smoke 대상 갱신 2026-06-27)
+- [0006 — Gluestack UI 및 NativeWind 퇴역](adr/0006-retire-nativewind-gluestack.md) — 실제 미사용 도구 정리 및 순수 React Native StyleSheet + theme.ts 체제 확정. (수락, 2026-09-03)
 
 ---
 

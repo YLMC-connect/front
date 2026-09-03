@@ -25,8 +25,8 @@
 | 라우팅          | Expo Router                        | `^55.0.x` (v7) | 파일 기반 라우팅, SDK와 함께 설치됨                                                         |
 | 서버 상태       | TanStack Query                     | `^5.100.x`     | 비동기 페칭, 캐싱, 동기화 — React Native 공식 지원                                          |
 | 클라이언트 상태 | Zustand                            | `^5.0.x`       | auth·UI 상태만 담당 (React 18+ 필요)                                                        |
-| 스타일          | NativeWind v4 + StyleSheet (예외)  | `^4.1.x`       | className 기반 Tailwind. 디자인 토큰은 `theme.ts` 단일 출처, `tailwind.config.js` 가 import |
-| UI 패턴 보조    | gluestack-ui CLI                   | `^5.0.3`       | 빠른 구현과 컴포넌트 패턴 확보용. 디자인 기준은 아니며 사용 시 공통 컴포넌트 계층에 흡수    |
+| 스타일          | React Native StyleSheet            | 플랫폼 내장   | `src/constants/theme.ts` 단일 출처 토큰 기반 스타일링 (ADR 0006)                             |
+| UI 컴포넌트     | 자체 구축 공통 UI 계층             | `src/components/ui` | buttons, display, inputs, navigation, dialog, feedback 등 역할별 모듈화 (ADR 0006)            |
 | 언어            | TypeScript                         | `~5.8.x`       | strict 모드                                                                                 |
 | 아이콘          | @expo/vector-icons / MaterialIcons | Expo 내장      | Google Material Icons                                                                       |
 | 이미지          | expo-image                         | Expo 내장      | 성능 최적화 이미지                                                                          |
@@ -45,8 +45,7 @@
 | @sentry/react-native          | Expo plugin 등록 필수 (`app.json`의 `plugins` 배열)                                                                                                                                                                                                                         |
 | expo-notifications            | iOS는 development build 필요 (Expo Go에서 일부 기능 미지원)                                                                                                                                                                                                                 |
 | expo-secure-store             | iOS Keychain / Android Keystore 사용 — 디바이스 잠금 해제 필요                                                                                                                                                                                                              |
-| NativeWind v4                 | Babel preset (`nativewind/babel`) + Metro 래퍼 (`withNativeWind`) + entry 의 `import './global.css'` + `nativewind-env.d.ts` 4가지가 모두 있어야 className 이 작동. 하나라도 빠지면 **에러 없이 className 이 무시** 되어 디버깅 어려움                                      |
-| gluestack-ui                  | CLI를 devDependency로 둡니다. `init`으로 기본 테마를 앱에 섞지 않고, 필요한 컴포넌트만 `npm run ui:add -- <component>`로 가져온 뒤 색상·간격·radius·타이포그래피·상태값을 Downloads 원본 JSX/token 기준으로 재정의해 `src/components/ui` 등 공통 컴포넌트 계층에 흡수합니다 |
+| 스타일 및 UI (ADR 0006)       | NativeWind v4 및 gluestack-ui는 2026-09-03 부로 퇴역함. 순수 React Native StyleSheet와 `src/constants/theme.ts`를 사용하며, 외부 번들러 래퍼나 CSS 변환 플러그인을 두지 않음                                                                                                |
 
 ---
 
@@ -768,4 +767,5 @@ queryClient.setDefaultOptions({
 | 2026-05-23 | 자동 테스트 체계 반영 — `validate`에 typecheck/lint/format/test를 포함하고, Jest/RNTL smoke, Dev Client Metro smoke, Maestro v1 탭 E2E smoke, ADR 0005를 Phase 1 검증 기준에 포함                                                                                                                                                                                                                                                                                                     |
 | 2026-05-23 | Maestro E2E 안정화 — Android Emulator에서는 Metro 상태 확인 URL과 Dev Client 전달 URL을 분리하고, Dev Client welcome sheet를 넘긴 뒤 v1 탭 smoke를 `testID` 기준으로 검증                                                                                                                                                                                                                                                                                                               |
 | 2026-05-27 | ZIP 5탭 IA 정정 — 디자인 산출물 기준을 최우선으로 재확정해 하단 탭을 홈/나눔/동행/기도/삶공부로 정리하고, MY는 홈 내 정보 진입점으로 이동                                                                                                                                                                                                                                                                                                                            |
-| 2026-06-29 | 문서 정리 — GitHub Issues/PR로 이관된 archive 본문을 안내문으로 축소하고, PLAN.md의 폐기된 홈/나눔/소모임/동행/MY 탭 설명을 최신 Downloads preview IA로 갱신                                                                                                                                                                                                                                                                                        |
+| 2026-06-29 | 문서 정리 — GitHub Issues/PR로 이관된 archive 본문을 안내문으로 축소하고, PLAN.md의 폐기된 홈/나눔/소모임/동행/MY 탭 설명을 최신 Downloads preview IA로 갱신                                                                                                                                                            |
+| 2026-09-03 | 기술 스택 정돈 — Gluestack UI 및 NativeWind 퇴역. 순수 React Native StyleSheet + theme.ts 단일 표준 확정 및 1,775줄 공통 UI index.tsx를 6개 모듈로 분리 (ADR 0006) |

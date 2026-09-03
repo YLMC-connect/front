@@ -1,15 +1,34 @@
-export const defaultOpenApiUrl =
-  process.env.YLMC_OPENAPI_URL ?? "https://ylmc-api.duckdns.org/v3/api-docs";
+import { existsSync, readFileSync } from "node:fs";
 
-export async function loadOpenApi(url = defaultOpenApiUrl) {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(
-      `OpenAPI 문서를 불러오지 못했습니다: HTTP ${response.status}`,
-    );
+export const defaultOpenApiUrl =
+  process.env.YLMC_OPENAPI_URL ??
+  process.env.YLMC_OPENAPI_FILE ??
+  "https://ylmc-api.duckdns.org/v3/api-docs";
+
+export async function loadOpenApi(source = defaultOpenApiUrl) {
+  if (typeof source === "string" && existsSync(source)) {
+    return JSON.parse(readFileSync(source, "utf8"));
   }
 
-  return response.json();
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const response = await fetch(source, { signal: controller.signal });
+    if (!response.ok) {
+      throw new Error(
+        `OpenAPI 문서를 불러오지 못했습니다: HTTP ${response.status}`,
+      );
+    }
+    return await response.json();
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error(`OpenAPI 요청 시간이 초과되었습니다 (8초): ${source}`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 export function createOpenApiContract(spec) {

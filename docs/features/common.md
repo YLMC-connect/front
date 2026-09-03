@@ -1,6 +1,6 @@
 # common (공통 인프라)
 
-> 마지막 갱신: 2026-09-03 (워크플로 축소, home 도메인 편입) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-09-03 (Gluestack UI 및 NativeWind 퇴역, UI 모듈화) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -13,6 +13,7 @@
 > 지금 시스템이 어떻게 동작하는지. 날짜별 이력은 머지된 PR (`gh pr list --state merged --label common`).
 
 - Expo SDK 55 + Dev Client 기준. 서버 데이터는 TanStack Query, 인증·UI는 Zustand. mock-first 후 `services/` 만 교체
+- Gluestack UI 및 NativeWind 퇴역 및 UI 모듈화 — 실제 미사용 중이던 Gluestack UI 및 NativeWind/Tailwind 관련 패키지 160개 및 설정 파일을 완전 제거하고, 1,775줄의 공통 UI index.tsx를 6개 서브모듈(buttons, display, inputs, navigation, dialog, feedback)로 분리 (Issue #119, ADR 0006)
 - 본문 글꼴 Pretendard. 아이콘은 공통 `AppIcon`(Solar Linear, 선택 Bold)
 - 루트 5탭 홈/나눔/동행/기도/삶공부. MY는 홈에서 숨김 route. 상세는 탭 중첩 Stack
 - 화면 상단은 `safe area + 20px`. 이미지 hero overlay만 예외
@@ -38,7 +39,13 @@
 | `src/constants/theme.ts` / `designTokens.json` | 디자인 토큰 |
 | `src/components/layout/Screen.tsx` | 공통 화면 + 상단 inset |
 | `src/components/layout/StickyHeaderScreen.tsx` | 루트 탭 sticky 헤더·필터 |
-| `src/components/ui/` | AppText, AppIcon, Card, 검색·작성·모션 |
+| `src/components/ui/buttons.tsx` | Button, FloatingActionButton 공통 컴포넌트 |
+| `src/components/ui/display.tsx` | Card, Badge, Avatar, VisualThumb, VisualCover, Chip |
+| `src/components/ui/inputs.tsx` | TextField, Textarea, ImagePickerField, FormSection |
+| `src/components/ui/navigation.tsx` | TopBar, SegmentedTabs, HorizontalChips |
+| `src/components/ui/dialog.tsx` | ConfirmDialog, BottomSheet, RadioSheet |
+| `src/components/ui/feedback.tsx` | EmptyState, ErrorState, SuccessState, Toast |
+| `src/components/ui/index.tsx` | 6개 서브모듈 barrel export |
 | `.github/workflows/ci.yml` | PR `npm run validate` |
 | `scripts/check-*-api-contract.mjs` | Swagger 계약 검사 |
 | `scripts/prepare-design-artifacts.mjs` 등 | ZIP 시각 비교. **요청 시에만** |
@@ -63,7 +70,8 @@
 - **sticky 기본 숨김은 direction(12px/4px)** — hide mode를 화면이 바꿀 수 있음 (`past-inset` / `never`).
 - **숨긴 route의 0 크기 layout은 무시** — 마지막 양수 geometry 유지.
 - **탭 IA는 홈/나눔/동행/기도/삶공부** — MY는 홈 진입.
-- **Expo Dev Client 기준** — Expo Go 아님. NativeWind Babel preset 위치 유지.
+- **Expo Dev Client 기준** — Expo Go 아님.
+- **Gluestack UI 및 NativeWind 퇴역 (ADR 0006)** — 순수 React Native StyleSheet + `src/constants/theme.ts` 단일 표준 확정. 1,775줄 ui/index.tsx를 6개 서브모듈로 모듈화하되 하위 호환성을 위해 barrel export 유지.
 - **Mock-first** — API 없는 도메인은 service/mock 후 adapter 교체.
 
 ## 미결 / 추적
@@ -76,7 +84,7 @@
 ## 의존성
 
 - GitHub Issues / PR description 작업 추적
-- Expo SDK 55, Dev Client, Reanimated 4, TanStack Query, Zustand, NativeWind, Solar icons
+- Expo SDK 55, Dev Client, Reanimated 4, TanStack Query, Zustand, Solar icons
 
 ## 관련 ADR
 
@@ -85,3 +93,4 @@
 - [ADR 0003 — MVP 범위는 Notion 최신 정의 우선](../adr/0003-mvp-scope-notion-first.md)
 - [ADR 0004 — Notion v1 범위와 Expo Dev Client 기준](../adr/0004-notion-v1-dev-client-scope.md)
 - [ADR 0005 — 모바일 E2E는 Maestro 우선](../adr/0005-mobile-e2e-maestro-first.md)
+- [ADR 0006 — Gluestack/NativeWind 퇴역 및 공통 UI 모듈화](../adr/0006-retire-nativewind-gluestack.md)

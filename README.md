@@ -114,13 +114,13 @@ brew install mobile-dev-inc/tap/maestro
 maestro --version
 ```
 
-전체 로컬 검증:
+기본 로컬·PR 검증:
 
 ```bash
-npm run validate:full
+npm run validate
 ```
 
-`validate:full`은 `validate`, Dev Client Metro smoke, Maestro smoke를 순서대로 실행합니다. 로컬에 Maestro CLI나 development build가 없으면 E2E 단계는 실패하므로, 먼저 `npm run ios:dev-client` 또는 `npm run android:dev-client`로 dev build를 설치합니다.
+`validate:full`(Dev Client Metro + Maestro)과 `test:visual:*` 는 사용자가 요청하거나 디자인 번역·릴리스를 할 때만 실행합니다. 로컬에 Maestro CLI나 development build가 없으면 E2E 단계는 실패합니다.
 
 무거운 모바일 E2E는 일반 PR CI와 분리되어 있으며, `.github/workflows/e2e-smoke.yml`에서 수동 실행을 기본값으로 둡니다. release/nightly 실행은 `E2E_SMOKE_ENABLED=true` repo variable과 Dev Client 설치가 가능한 전용 러너가 준비된 뒤 활성화합니다.
 

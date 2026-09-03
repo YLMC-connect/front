@@ -1,6 +1,6 @@
 # YLMC Connect — 인덱스
 
-> 마지막 갱신: 2026-06-29 (archive 문서 안내문 축소, PLAN.md 폐기 탭 설명 최신 IA로 정리) | 현재 Phase: 6 — API 연결 준비 (진행중)
+> 마지막 갱신: 2026-09-03 (문서 의무 축소, home 도메인 편입) | 현재 Phase: 6 — API 연결 준비 (진행중)
 
 본 문서는 **작업자 5분용 진입점** 입니다. 외부인은 [README.md](../README.md) 부터, AI 작업 규칙은 [AGENTS.md](../AGENTS.md) 를 참고하세요. 문서 시스템이 어긋났을 때의 복구 절차는 [MAINTENANCE.md](MAINTENANCE.md).
 
@@ -27,6 +27,7 @@
 |---|---|---|---|---|
 | common (공통 인프라) | 6 | 41 | 2026-09-03 | [features/common.md](features/common.md) |
 | auth (인증) | 1 | 10 | 2026-09-03 | [features/auth.md](features/auth.md) |
+| home (홈) | 1 | 0 | 2026-09-03 | [features/home.md](features/home.md) |
 | market (나눔장터) | 1 | 23 | 2026-09-03 | [features/market.md](features/market.md) |
 | group (소모임) | 1 | 27 | 2026-09-03 | [features/group.md](features/group.md) |
 | mypage (MY) | 0 | 6 | 2026-09-03 | [features/mypage.md](features/mypage.md) |
@@ -42,28 +43,29 @@
 
 ## 작업 라우팅 (AI 의 3단계 읽기)
 
-**Pass 0 — 목차 스캔 (항상)**
+**Pass 0 — 목차 스캔 (짧게)**
 
-- 작업 issue 본문: `gh issue view <N>` _(진행 작업의 단일 출처)_
-- 본 INDEX 의 도메인 상태표 (자동 생성) + 현재 Phase
-- 작업 도메인 features 페이지의 섹션 제목들 + 상단 메타
-- 최근 PR 제목: `gh pr list --state merged --label <도메인> --limit 5` (변경 이력 LOG 대체)
+- 작업 issue: `gh issue view <N>` _(제목·라벨·마일스톤)_
+- 작업 도메인 features 상단 메타 + 섹션 제목
+- 본 INDEX 의 현재 Phase (한눈)
 
-**Pass 1 — 정독 (항상)**
+머지된 PR 목록은 관련 결정이 의심될 때만 Pass 2.
+
+**Pass 1 — 정독**
 
 - 작업 issue 본문 + 코멘트
-- 작업 도메인 features 의 **결정 사항 / 미결 / 데이터 타입 / 의존성 / 주요 파일** 섹션 본문 _(도메인 컨텍스트)_
+- 작업 도메인 features 의 **결정 사항 / 미결 / 데이터 타입 / 의존성 / 주요 파일**
 
-**Pass 2 — 트리거 시 심층 (조건부)**
+**Pass 2 — 트리거 시 심층**
 | 트리거 | 정독할 곳 |
 |---|---|
-| 신규 도메인 첫 진입 | [PLAN.md](../PLAN.md) 의 해당 도메인 섹션 (1회) + GitHub 라벨 생성 |
+| 신규 도메인 첫 진입 | [PLAN.md](../PLAN.md) 해당 섹션 + 라벨 + `.task-flow.conf` |
 | 데이터 타입·Phase·보안·기술스택 영향 작업 | PLAN.md 관련 섹션 |
-| Pass 0 의 PR 제목 스캔에서 관련 결정 의심 | `gh pr view <N>` 으로 description 본문 |
-| 다른 도메인과 의존성 | 해당 도메인 features 페이지 |
-| 완료된 결과물을 재사용 | 작업 도메인 features 의 `✅ 완료` 본문 |
+| 관련 결정 의심 | `gh pr view <N>` description |
+| 다른 도메인과 의존성 | 해당 도메인 features |
+| 완료된 결과물 재사용 | features `✅ 완료` |
 
-상세 규칙은 [../AGENTS.md](../AGENTS.md).
+상세 규칙은 [../AGENTS.md](../AGENTS.md). 기본 검증은 `npm run validate`.
 
 ---
 

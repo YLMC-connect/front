@@ -41,6 +41,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     web: {
       bundler: "metro",
     },
+    experiments: {
+      ...(process.env.EXPO_BASE_URL
+        ? { baseUrl: process.env.EXPO_BASE_URL }
+        : {}),
+    },
     plugins: [
       "expo-router",
       "expo-secure-store",

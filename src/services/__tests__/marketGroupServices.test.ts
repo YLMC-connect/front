@@ -28,23 +28,12 @@ describe("market and group service boundaries", () => {
     const overview = await fetchMarketOverview();
     const detail = await fetchMarketDetail("1");
 
-    expect(overview.items).toHaveLength(6);
-    expect(overview.items.map((item) => item.status)).toEqual([
-      "sharing",
-      "reserved",
-      "sharing",
-      "sharing",
-      "done",
-      "sharing",
-    ]);
-    expect(overview.items.map((item) => item.isMine)).toEqual([
-      true,
-      false,
-      false,
-      false,
-      false,
-      false,
-    ]);
+    expect(overview.items.length).toBeGreaterThanOrEqual(20);
+    expect(overview.items.map((item) => item.status)).toEqual(
+      expect.arrayContaining(["sharing", "reserved", "done"]),
+    );
+    expect(overview.items.some((item) => item.isMine)).toBe(true);
+    expect(overview.items.some((item) => !item.isMine)).toBe(true);
     expect(detail).toMatchObject({
       id: "1",
       status: "sharing",

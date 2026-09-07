@@ -1,6 +1,6 @@
 # common (공통 인프라)
 
-> 마지막 갱신: 2026-09-03 (Gluestack UI 및 NativeWind 퇴역, UI 모듈화) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-09-07 (라이브 API 실행 가이드) | 담당 Phase: P1/P6/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -12,6 +12,7 @@
 
 > 지금 시스템이 어떻게 동작하는지. 날짜별 이력은 머지된 PR (`gh pr list --state merged --label common`).
 
+- 처음 실행 안내 — `docs/GETTING_STARTED.md`와 `.env.example`. development 기본은 라이브 `https://ylmc-api.duckdns.org`, 인증·나눔·동행 HTTP. 홈·기도·삶공부는 사용자 API가 없어 mock
 - Expo SDK 55 + Dev Client 기준. 서버 데이터는 TanStack Query, 인증·UI는 Zustand. mock-first 후 `services/` 만 교체
 - Gluestack UI 및 NativeWind 퇴역 및 UI 모듈화 — 실제 미사용 중이던 Gluestack UI 및 NativeWind/Tailwind 관련 패키지 160개 및 설정 파일을 완전 제거하고, 1,775줄의 공통 UI index.tsx를 6개 서브모듈(buttons, display, inputs, navigation, dialog, feedback)로 분리 (Issue #119, ADR 0006)
 - 본문 글꼴 Pretendard. 아이콘은 공통 `AppIcon`(Solar Linear, 선택 Bold)
@@ -32,6 +33,8 @@
 |---|---|
 | `AGENTS.md` / `CLAUDE.md` | AI 작업 규칙 |
 | `.task-flow.conf` | 도메인 목록 단일 출처 |
+| `docs/GETTING_STARTED.md` | 클론·Dev Client·라이브 API / mock 실행 안내 |
+| `.env.example` | `EXPO_PUBLIC_API_URL`과 adapter 스위치 |
 | `docs/INDEX.md` | 진입점. 도메인 상태표는 Issues 기반 자동생성 |
 | `scripts/gen-index.sh` | INDEX 상태표 재생성 |
 | `docs/MAINTENANCE.md` | 문서 드리프트 복구 |
@@ -58,6 +61,7 @@
 
 ## 결정 사항 (지금 유효한 것만)
 
+- **development 기본 adapter는 HTTP** — 인증·나눔·동행. 홈·기도·삶공부는 사용자 API가 생길 때까지 mock. 테스트와 Maestro mock 계정은 `EXPO_PUBLIC_*_ADAPTER=mock`.
 - **기본 검증은 `npm run validate`** — visual capture/compare 와 Maestro/`validate:full` 은 사용자가 요청하거나 디자인 번역·릴리스일 때만.
 - **features `✅ 완료` 는 현재 동작** — 작업 일시는 머지된 PR description.
 - **도메인 목록은 `.task-flow.conf`** — `home` 포함. INDEX 표는 이 목록 + Issues 라벨.

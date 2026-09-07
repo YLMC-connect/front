@@ -5,7 +5,7 @@
 ## 무엇을 만드나
 
 Notion “열린문커넥트” 최신 기획을 기준으로 **MVP + v1 모바일 화면** 을 Expo Dev Client 기반으로 제공합니다.
-현재 범위는 회원가입/로그인 · 홈 · 나눔 · 소모임 · MY · 이미지 선택 · 삶공부 · 중보기도입니다. 실제 API가 없는 기능은 Mock-first 구조로 동작합니다.
+현재 범위는 회원가입/로그인 · 홈 · 나눔 · 소모임 · MY · 이미지 선택 · 삶공부 · 중보기도입니다. development에서 인증·나눔·동행은 라이브 API를 쓰고, 사용자 API가 없는 홈·기도·삶공부는 mock입니다.
 
 ## 진행 상태
 
@@ -16,6 +16,8 @@ Notion “열린문커넥트” 최신 기획을 기준으로 **MVP + v1 모바�
 자세한 진행 상태와 도메인별 상태표: [docs/INDEX.md](docs/INDEX.md)
 
 ## 실행
+
+저장소를 처음 받은 분은 [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) 를 먼저 보세요. 준비물, Dev Client, 라이브 API / mock 전환, 아직 mock인 화면을 한곳에 모아 두었습니다.
 
 ```bash
 npm install
@@ -140,7 +142,8 @@ npm run test:visual:compare
 
 ## 문서 지도
 
-- 처음 보는 분: [docs/INDEX.md](docs/INDEX.md) 부터 — 5분에 전체 흐름 파악
+- 처음 보는 분: [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) — 클론부터 라이브 API 실행
+- 작업자 5분 진입점: [docs/INDEX.md](docs/INDEX.md) — 도메인 상태표와 Phase
 - 설계 기준 문서: [PLAN.md](PLAN.md) — 기술 스택, 데이터 타입, Phase 정의
 - 진행 작업: GitHub Issues — `gh issue list --state open` (label = 도메인). 기존 항목 보존: [docs/\_archive/TASKS.md](docs/_archive/TASKS.md)
 - 변경 이력: 머지된 PR description — `gh pr list --state merged --limit 30`. 기존 항목 보존: [docs/\_archive/LOG.md](docs/_archive/LOG.md)

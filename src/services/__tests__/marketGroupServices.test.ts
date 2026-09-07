@@ -6,6 +6,8 @@ import {
   fetchGroupDetail,
   fetchGroupMembers,
   fetchGroupOverview,
+  joinGroup,
+  leaveGroup,
   updateGroupNotice,
   type GroupDataSource,
 } from "../groupService";
@@ -289,6 +291,8 @@ describe("market and group service boundaries", () => {
       getDetail: jest.fn().mockRejectedValue(new Error("not used")),
       getMembers: jest.fn().mockRejectedValue(new Error("not used")),
       createGroup: jest.fn().mockRejectedValue(new Error("not used")),
+      joinGroup: jest.fn().mockRejectedValue(new Error("not used")),
+      leaveGroup: jest.fn().mockRejectedValue(new Error("not used")),
       createNotice: jest.fn().mockRejectedValue(new Error("not used")),
       updateNotice: jest.fn().mockRejectedValue(new Error("not used")),
       deleteNotice: jest.fn().mockRejectedValue(new Error("not used")),
@@ -307,6 +311,8 @@ describe("market and group service boundaries", () => {
       getDetail: jest.fn().mockRejectedValue(new Error("not used")),
       getMembers: jest.fn().mockRejectedValue(new Error("not used")),
       createGroup: jest.fn().mockRejectedValue(new Error("not used")),
+      joinGroup: jest.fn().mockRejectedValue(new Error("not used")),
+      leaveGroup: jest.fn().mockRejectedValue(new Error("not used")),
       createNotice: jest.fn().mockRejectedValue(new Error("not used")),
       updateNotice: jest.fn().mockRejectedValue(new Error("not used")),
       deleteNotice: jest.fn().mockRejectedValue(new Error("not used")),
@@ -337,5 +343,60 @@ describe("market and group service boundaries", () => {
       isLeader: true,
     });
     expect(overview.groups[0]).toMatchObject({ id: created.id });
+  });
+
+  it("joins an open group and can leave afterwards", async () => {
+    const joined = await joinGroup("4");
+    expect(joined).toMatchObject({
+      id: "4",
+      isJoined: true,
+      isLeader: false,
+    });
+    expect(
+      (await fetchGroupOverview()).groups.find((group) => group.id === "4"),
+    ).toMatchObject({ isJoined: true });
+
+    const left = await leaveGroup("4");
+    expect(left.isJoined).toBe(false);
+    expect(
+      (await fetchGroupOverview()).groups.find((group) => group.id === "4"),
+    ).toMatchObject({ isJoined: false });
+  });
+
+  it("rejects leaving as the group leader before calling the data source", async () => {
+    const dataSource: GroupDataSource = {
+      getOverview: jest.fn().mockRejectedValue(new Error("not used")),
+      getDetail: jest.fn().mockResolvedValue({
+        id: "1",
+        name: "리더 모임",
+        description: "설명",
+        categoryLabel: "취미·문화",
+        currentMembers: 2,
+        maxMembers: 10,
+        status: "open",
+        leaderName: "이민구",
+        isLeader: true,
+        isJoined: true,
+        members: ["이민구"],
+        notices: [],
+      }),
+      getMembers: jest.fn().mockRejectedValue(new Error("not used")),
+      createGroup: jest.fn().mockRejectedValue(new Error("not used")),
+      joinGroup: jest.fn().mockRejectedValue(new Error("not used")),
+      leaveGroup: jest.fn().mockRejectedValue(new Error("not used")),
+      createNotice: jest.fn().mockRejectedValue(new Error("not used")),
+      updateNotice: jest.fn().mockRejectedValue(new Error("not used")),
+      deleteNotice: jest.fn().mockRejectedValue(new Error("not used")),
+    };
+    const service = createGroupService(dataSource);
+
+    await expect(service.leaveGroup("1")).rejects.toThrow(
+      "소모임장은 탈퇴할 수 없어요. 먼저 이관해주세요",
+    );
+    expect(dataSource.leaveGroup).not.toHaveBeenCalled();
+  });
+
+  it("rejects joining a closed group before calling the data source", async () => {
+    await expect(joinGroup("6")).rejects.toThrow("모집이 마감됐어요");
   });
 });

@@ -19,7 +19,10 @@
 git clone https://github.com/YLMC-connect/front.git
 cd front
 npm install
+cp .env.example .env
 ```
+
+`.env`에 팀에서 받은 API origin을 `EXPO_PUBLIC_API_URL`로 넣으세요. `.env`는 gitignore라 커밋되지 않습니다. 실제 주소는 저장소·문서에 두지 않습니다.
 
 ## 2. 앱 실행
 
@@ -45,18 +48,23 @@ npm run start:dev-client -- --port 8081 --localhost
 
 웹으로 UI만 볼 수는 있지만, 검증 기준은 Dev Client입니다.
 
-## 3. 실제 API 연결 (기본값)
+## 3. 실제 API 연결
 
 `APP_VARIANT=development`(기본)이면 인증·나눔·동행 adapter는 **HTTP**입니다.
-기본 서버는 `https://ylmc-api.duckdns.org`입니다.
+HTTP를 쓰는 동안 `EXPO_PUBLIC_API_URL`이 없으면 Expo config가 바로 실패합니다.
 
-다른 서버:
+```bash
+cp .env.example .env
+# .env 의 EXPO_PUBLIC_API_URL= 뒤에 팀에서 받은 origin을 넣습니다
+```
+
+명령 앞에 붙여도 됩니다.
 
 ```bash
 EXPO_PUBLIC_API_URL=https://example.test npm run start:dev-client
 ```
 
-환경 변수 이름은 [`.env.example`](../.env.example)에 모아 두었습니다. 값을 바꿀 때는 프로젝트 루트 `.env`를 만들거나 명령 앞에 붙이면 됩니다.
+환경 변수 이름은 [`.env.example`](../.env.example)에 있습니다. EAS 빌드도 같은 변수를 시크릿/프로필 env로 넣습니다.
 
 라이브 계정으로 로그인하세요. Maestro용 `admin` / `admin`은 **mock adapter 전용**이라 라이브 서버에서는 통하지 않습니다.
 
@@ -97,6 +105,7 @@ typecheck, lint, prettier, 스크립트 테스트, Jest를 순서대로 돌립�
 
 ## 6. 막힐 때
 
+- **`EXPO_PUBLIC_API_URL이 필요합니다`** — `.env`에 팀에서 받은 origin이 없습니다. mock만 띄울 때는 `EXPO_PUBLIC_*_ADAPTER=mock`.
 - **Expo Go로 열림** — `start:dev-client`와 development build를 쓰세요. bundle id는 `com.ylmc.connect.dev`.
 - **로그인 실패 (`admin`/`admin`)** — 라이브 모드입니다. 실제 가입 계정을 쓰거나 mock adapter로 전환하세요.
 - **나눔/동행 목록이 비어 있음** — 라이브 서버에 데이터가 없는 정상 상태일 수 있습니다. mock로 바꾸면 픽스처가 보입니다.

@@ -21,6 +21,8 @@ Notion “열린문커넥트” 최신 기획을 기준으로 **MVP + v1 모바�
 
 ```bash
 npm install
+cp .env.example .env
+# .env 에 팀에서 받은 EXPO_PUBLIC_API_URL 을 넣은 뒤
 npm run start:dev-client
 ```
 
@@ -48,7 +50,7 @@ npm run start:dev-client -- --port 8081 --localhost
 
 Codex 기본 샌드박스에서는 위 명령이 `Starting project...` 이후 8081 포트에 바인딩되지 않을 수 있습니다. 샌드박스 밖 로컬 권한으로는 `npm run test:dev-client:smoke`가 `http://localhost:8081/status` 응답까지 확인했습니다. development build가 설치된 iOS/Android 기기에서는 같은 Metro에 연결해 실제 앱 실행을 확인합니다.
 
-development 환경의 기본 API는 `https://ylmc-api.duckdns.org`입니다. 다른 서버를 사용할 때는 실행 또는 빌드 환경에서 덮어씁니다.
+API origin은 로컬 `.env`의 `EXPO_PUBLIC_API_URL`만 사용합니다. 저장소에 실제 주소를 두지 않습니다. HTTP adapter(development 기본)를 켤 때 필수입니다.
 
 ```bash
 EXPO_PUBLIC_API_URL=https://example.test npm run start:dev-client
@@ -82,7 +84,7 @@ npm run test:api:contract:group
 
 Jest + React Native Testing Library로 공통 UI, 도메인 옵션, 홈/나눔/동행/기도/삶공부 핵심 화면 렌더링을 mock-first 기준으로 확인합니다.
 
-`test:api:contract`는 공개 OpenAPI 문서의 로그인·토큰 재발급·회원가입·내 정보 성공 DTO, 회원 중복확인 `data.available`, 공개 endpoint/JWT 정의를 확인합니다. 백엔드 계약이 불완전하면 누락 항목을 출력하고 실패하며, 계약 확정 전에는 일반 `validate`와 분리해 실행합니다. 다른 OpenAPI 문서를 확인할 때는 `YLMC_OPENAPI_URL`로 덮어씁니다.
+`test:api:contract`는 OpenAPI 문서의 로그인·토큰 재발급·회원가입·내 정보 성공 DTO, 회원 중복확인 `data.available`, 공개 endpoint/JWT 정의를 확인합니다. 출처는 `YLMC_OPENAPI_URL`, `YLMC_OPENAPI_FILE`, 또는 `EXPO_PUBLIC_API_URL`의 `/v3/api-docs`입니다. 백엔드 계약이 불완전하면 누락 항목을 출력하고 실패하며, 계약 확정 전에는 일반 `validate`와 분리해 실행합니다.
 
 `test:api:contract:market`은 나눔 CRUD·댓글·신고·이미지 업로드 endpoint와 목록/상세/작성 화면에 필요한 작성자명·이미지·검색·장소·enum·상태 변경·제목/본문 길이·사진 5장 계약을 확인합니다. 업로드 경로 이름을 가정하지 않고 operation summary/id로 찾은 뒤 request/200 DTO를 검증합니다. 누락 필드를 임의 fallback으로 감추지 않고 DTO mapper를 활성화하기 전에 실패로 노출합니다.
 

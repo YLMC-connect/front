@@ -1,6 +1,6 @@
 # auth (인증)
 
-> 마지막 갱신: 2026-08-13 (httpAuthAdapter 라이브 관측 DTO 연결) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-09-08 (중복확인 실패를 아이디 필드에 표시) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,7 +10,7 @@
 
 ## ✅ 완료
 
-- 인증 HTTP adapter 활성화 — 라이브 `ylmc-api.duckdns.org`에서 관측한 login/refresh 토큰 payload, signup 후 login 합성, `/api/member/me`, `/api/member/duplicate`를 `httpAuthAdapter`로 연결. development 기본값은 HTTP, 테스트/Maestro는 `EXPO_PUBLIC_AUTH_ADAPTER=mock`. Swagger 성공 DTO는 여전히 미기재라 `test:api:contract`는 13건 실패를 유지
+- 인증 HTTP adapter 활성화 — 라이브 API에서 관측한 login/refresh 토큰 payload, signup 후 login 합성, `/api/member/me`, `/api/member/duplicate`를 `httpAuthAdapter`로 연결. development 기본값은 HTTP, 테스트/Maestro는 `EXPO_PUBLIC_AUTH_ADAPTER=mock`. API origin은 `EXPO_PUBLIC_API_URL`. 회원가입 중복확인 실패는 아이디 필드에 표시. Swagger 성공 DTO는 여전히 미기재라 `test:api:contract`는 13건 실패를 유지
 - 조용한 톤 인증 여백·위계 — 로그인 로고 그림자 완화·여백 토큰화, 회원가입 필드 간격·라벨 weight 정리, CTA 라벨 semibold; glass 하단 바 실험은 단순 `bottomFlat`으로 유지
 - 로그인·회원가입 절제 모션 (C-set) — 진입 stagger fade-up, 로고 1회 settle, 필드 검증 shake·인라인 에러 fade, 가입 아바타 empty↔filled morph, 중복확인 성공 체크 pop, CTA `MotionPressable`, 가입 버튼 enable soft 활성, auth Stack slide/fade. `designVariant=default`·`useReducedMotion`에서 진입 애니는 static
 - 로그인·회원가입 입력 포커스 통일 — 인증 전용 공통 `AuthInput`으로 전체 입력 surface를 공유하고 웹 기본 내부 outline을 제거한 뒤 나눔·동행 검색·작성 입력과 같은 primary 2px focus border를 적용하며 오류 테두리는 danger 색상을 우선
@@ -87,6 +87,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-09-08) **회원가입 중복확인 실패는 아이디 필드에 표시한다** — 성공(`available`)만 그리면 CORS/네트워크 오류가 무반응처럼 보인다. mutation error를 인라인 오류로 보여주고, 아이디가 바뀌면 이전 오류를 버린다.
 - (2026-08-13) **인증 HTTP는 Swagger가 비어 있어도 라이브에서 관측한 필드만 연결한다** — login/refresh 성공은 envelope가 아니라 `{ accessToken, refreshToken, userId, userName, role }`. signup 성공은 `{ userStatus }`만 주고 토큰이 없어 같은 자격증명으로 login을 이어서 호출한다. `/me`와 duplicate는 공통 envelope를 쓴다. 관측되지 않은 필드·역할·오류 코드는 만들지 않는다. development 기본 adapter는 `http`, 테스트와 Maestro mock 계정은 `EXPO_PUBLIC_AUTH_ADAPTER=mock`.
 - (2026-07-23) **인증 화면도 공통 “조용한 깔끔함” 톤을 따른다** — 로고·CTA 그림자는 `theme.shadow.primary` 수준으로 약하게, 여백은 spacing 토큰, 라벨/버튼 weight는 medium·semibold. Issue #105.
 - (2026-07-23) **인증 화면 모션은 soft timing + 짧은 stagger 로 절제한다** — duration `enter 280ms`, distance `md 12px`, stagger `60ms`, easing은 완만한 bezier(앞당김 적은 soft out). 웹 겹침 방지를 위해 layout `entering` 대신 in-flow opacity/transform 을 쓰고, spring/pulse 루프·shared element·confetti는 쓰지 않습니다. 로고는 1회 settle(`scale enterFrom 0.92→1`)만 허용하고, 검증 오류는 shake 1회(`±distance.xs~5px`), 가입 아바타는 empty↔filled 단일 레이어 전환입니다. `useReducedMotion`과 `designVariant !== default` 캡처 화면에서는 진입 애니는 static이며 피드백 모션도 reduce 시 즉시 표시합니다. 공통 프리미티브는 `MotionEnter` / `MotionShake` / `MotionFadeIn` / `MotionPop` 입니다.

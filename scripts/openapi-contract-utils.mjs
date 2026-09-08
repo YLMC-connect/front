@@ -1,11 +1,23 @@
 import { existsSync, readFileSync } from "node:fs";
 
-export const defaultOpenApiUrl =
-  process.env.YLMC_OPENAPI_URL ??
-  process.env.YLMC_OPENAPI_FILE ??
-  "https://ylmc-api.duckdns.org/v3/api-docs";
+function resolveOpenApiSource() {
+  if (process.env.YLMC_OPENAPI_URL) return process.env.YLMC_OPENAPI_URL;
+  if (process.env.YLMC_OPENAPI_FILE) return process.env.YLMC_OPENAPI_FILE;
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL?.trim();
+  if (apiUrl) {
+    return `${apiUrl.replace(/\/+$/, "")}/v3/api-docs`;
+  }
+  return undefined;
+}
+
+export const defaultOpenApiUrl = resolveOpenApiSource();
 
 export async function loadOpenApi(source = defaultOpenApiUrl) {
+  if (!source) {
+    throw new Error(
+      "OpenAPI 출처가 없습니다. YLMC_OPENAPI_URL, YLMC_OPENAPI_FILE, 또는 EXPO_PUBLIC_API_URL을 설정하세요.",
+    );
+  }
   if (typeof source === "string" && existsSync(source)) {
     return JSON.parse(readFileSync(source, "utf8"));
   }

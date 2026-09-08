@@ -200,6 +200,18 @@ export function createHttpGroupDataSource({
         },
       );
     },
+
+    async joinGroup(id) {
+      await client.request(`/api/communion/${id}/join`, { method: "POST" });
+      return getDetail(id);
+    },
+
+    async leaveGroup(id) {
+      await client.request(`/api/communion/${id}/leave`, {
+        method: "DELETE",
+      });
+      return getDetail(id);
+    },
   };
 }
 

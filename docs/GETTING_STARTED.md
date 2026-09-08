@@ -106,6 +106,7 @@ typecheck, lint, prettier, 스크립트 테스트, Jest를 순서대로 돌립�
 ## 6. 막힐 때
 
 - **`EXPO_PUBLIC_API_URL이 필요합니다`** — `.env`에 팀에서 받은 origin이 없습니다. mock만 띄울 때는 `EXPO_PUBLIC_*_ADAPTER=mock`.
+- **웹에서 중복확인/로그인이 안 됨** — 라이브 API가 브라우저 CORS를 막습니다. `npm run web`은 Metro가 `/api`를 프록시합니다. 설정 변경 후 Metro를 재시작하세요. 공식 검증은 Dev Client입니다.
 - **Expo Go로 열림** — `start:dev-client`와 development build를 쓰세요. bundle id는 `com.ylmc.connect.dev`.
 - **로그인 실패 (`admin`/`admin`)** — 라이브 모드입니다. 실제 가입 계정을 쓰거나 mock adapter로 전환하세요.
 - **나눔/동행 목록이 비어 있음** — 라이브 서버에 데이터가 없는 정상 상태일 수 있습니다. mock로 바꾸면 픽스처가 보입니다.

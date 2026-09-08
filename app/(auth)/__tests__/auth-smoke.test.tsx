@@ -12,6 +12,16 @@ import { renderWithClient } from "../../../src/test/renderWithClient";
 import { theme } from "../../../src/constants/theme";
 import { MOCK_USER } from "../../../src/mocks/auth";
 import { useAuthStore } from "../../../src/store/authStore";
+import { ApiError } from "../../../src/lib/apiClient";
+import * as authService from "../../../src/services/authService";
+
+jest.mock("../../../src/services/authService", () => {
+  const actual = jest.requireActual("../../../src/services/authService");
+  return {
+    ...actual,
+    checkMemberAvailability: jest.fn(actual.checkMemberAvailability),
+  };
+});
 
 jest.mock("expo-secure-store", () => ({
   getItemAsync: jest.fn().mockResolvedValue(null),
@@ -171,6 +181,24 @@ describe("auth smoke screens", () => {
     ).toBeTruthy();
     expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
     expect(router.replace).not.toHaveBeenCalledWith("/");
+  });
+
+  it("shows a duplicate-check failure on the id field", async () => {
+    jest.mocked(authService.checkMemberAvailability).mockRejectedValueOnce(
+      new ApiError({
+        code: "NETWORK_ERROR",
+        message: "네트워크 연결을 확인해주세요.",
+        status: 0,
+      }),
+    );
+    renderWithClient(<SignupScreenRoute />);
+
+    fireEvent.changeText(screen.getByPlaceholderText("아이디"), "new-member");
+    fireEvent.press(screen.getByText("중복 확인"));
+
+    expect(
+      await screen.findByText("네트워크 연결을 확인해주세요."),
+    ).toBeTruthy();
   });
 
   it("shows that a new member id is available", async () => {

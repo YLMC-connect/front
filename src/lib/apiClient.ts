@@ -1,4 +1,5 @@
 import Constants from "expo-constants";
+import { Platform } from "react-native";
 import { recoverAuth } from "./authRecovery";
 import { secureTokenStore } from "./secureStore";
 import type { ApiResponse } from "../types/api";
@@ -45,6 +46,12 @@ export class ApiError extends Error {
 }
 
 function getApiBaseUrl() {
+  // Web browsers hit CORS on the live API. In dev, call same-origin `/api`
+  // and let Metro proxy to EXPO_PUBLIC_API_URL.
+  if (Platform.OS === "web" && __DEV__) {
+    return "";
+  }
+
   const apiUrl = Constants.expoConfig?.extra?.apiUrl;
   if (typeof apiUrl !== "string" || !/^https?:\/\//.test(apiUrl)) {
     throw new Error(

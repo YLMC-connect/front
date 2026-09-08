@@ -1,6 +1,6 @@
 # common (공통 인프라)
 
-> 마지막 갱신: 2026-09-08 (API origin은 로컬 .env만) | 담당 Phase: P1/P6/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-09-08 (웹 dev API 프록시) | 담당 Phase: P1/P6/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -12,7 +12,7 @@
 
 > 지금 시스템이 어떻게 동작하는지. 날짜별 이력은 머지된 PR (`gh pr list --state merged --label common`).
 
-- 처음 실행 안내 — `docs/GETTING_STARTED.md`와 `.env.example`. API origin은 `EXPO_PUBLIC_API_URL`(로컬 `.env`, gitignore). HTTP adapter일 때 없으면 Expo config가 실패. development 기본 adapter는 인증·나눔·동행 HTTP. 홈·기도·삶공부는 사용자 API가 없어 mock
+- 처음 실행 안내 — `docs/GETTING_STARTED.md`와 `.env.example`. API origin은 `EXPO_PUBLIC_API_URL`(로컬 `.env`, gitignore). HTTP adapter일 때 없으면 Expo config가 실패. 웹 development는 CORS를 피하려고 same-origin `/api`를 Metro가 프록시. development 기본 adapter는 인증·나눔·동행 HTTP. 홈·기도·삶공부는 사용자 API가 없어 mock
 - Expo SDK 55 + Dev Client 기준. 서버 데이터는 TanStack Query, 인증·UI는 Zustand. mock-first 후 `services/` 만 교체
 - Gluestack UI 및 NativeWind 퇴역 및 UI 모듈화 — 실제 미사용 중이던 Gluestack UI 및 NativeWind/Tailwind 관련 패키지 160개 및 설정 파일을 완전 제거하고, 1,775줄의 공통 UI index.tsx를 6개 서브모듈(buttons, display, inputs, navigation, dialog, feedback)로 분리 (Issue #119, ADR 0006)
 - 본문 글꼴 Pretendard. 아이콘은 공통 `AppIcon`(Solar Linear, 선택 Bold)
@@ -38,7 +38,8 @@
 | `docs/INDEX.md` | 진입점. 도메인 상태표는 Issues 기반 자동생성 |
 | `scripts/gen-index.sh` | INDEX 상태표 재생성 |
 | `docs/MAINTENANCE.md` | 문서 드리프트 복구 |
-| `src/lib/apiClient.ts` | envelope·오류·Authorization |
+| `src/lib/apiClient.ts` | envelope·오류·Authorization. 웹 `__DEV__`는 same-origin |
+| `metro.config.js` | 웹 development `/api` → `EXPO_PUBLIC_API_URL` 프록시 |
 | `src/constants/theme.ts` / `designTokens.json` | 디자인 토큰 |
 | `src/components/layout/Screen.tsx` | 공통 화면 + 상단 inset |
 | `src/components/layout/StickyHeaderScreen.tsx` | 루트 탭 sticky 헤더·필터 |
@@ -62,6 +63,7 @@
 ## 결정 사항 (지금 유효한 것만)
 
 - **API origin은 로컬 env만** — `EXPO_PUBLIC_API_URL`. 실제 호스트를 코드·문서·`.env.example`에 두지 않음. HTTP adapter를 쓰는 동안 없으면 `app.config.ts`가 실패. mock만이면 URL 없이 실행 가능.
+- **웹 development API는 Metro 프록시** — 브라우저 CORS를 피하려고 `__DEV__` 웹은 same-origin `/api`를 치고 `metro.config.js`가 `EXPO_PUBLIC_API_URL`로 넘김. 네이티브는 origin 직접 호출. 서버 CORS 허용은 백엔드 이슈.
 - **development 기본 adapter는 HTTP** — 인증·나눔·동행. 홈·기도·삶공부는 사용자 API가 생길 때까지 mock. 테스트와 Maestro mock 계정은 `EXPO_PUBLIC_*_ADAPTER=mock`.
 - **기본 검증은 `npm run validate`** — visual capture/compare 와 Maestro/`validate:full` 은 사용자가 요청하거나 디자인 번역·릴리스일 때만.
 - **features `✅ 완료` 는 현재 동작** — 작업 일시는 머지된 PR description.

@@ -18,6 +18,8 @@ import { theme } from "../../../src/constants/theme";
 import {
   useDeleteGroupNotice,
   useGroupDetail,
+  useJoinGroup,
+  useLeaveGroup,
 } from "../../../src/hooks/useGroups";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 
@@ -31,11 +33,21 @@ export default function GroupDetailScreen() {
   const variant = readDesignVariant(params.designVariant);
   const detail = useGroupDetail(id);
   const deleteNotice = useDeleteGroupNotice(id);
+  const joinGroupMutation = useJoinGroup(id);
+  const leaveGroupMutation = useLeaveGroup(id);
   const [deletingNotice, setDeletingNotice] = useState<{
     id: string;
     title: string;
   } | null>(null);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const isDeleted = variant === "deleted-exception";
+  const membershipBusy =
+    joinGroupMutation.isPending || leaveGroupMutation.isPending;
+  const membershipError = joinGroupMutation.isError
+    ? joinGroupMutation.error
+    : leaveGroupMutation.isError
+      ? leaveGroupMutation.error
+      : null;
 
   if (isDeleted) {
     return (
@@ -169,19 +181,34 @@ export default function GroupDetailScreen() {
               </Card>
             ) : isMember ? (
               <Pressable
+                testID="group-leave-button"
                 accessibilityRole="button"
+                accessibilityLabel="탈퇴하기"
+                disabled={membershipBusy}
                 style={styles.outlineButton}
+                onPress={() => {
+                  if (variant) return;
+                  setShowLeaveConfirm(true);
+                }}
               >
                 <Text style={styles.outlineButtonText}>탈퇴하기</Text>
               </Pressable>
             ) : isNonMember ? (
               <Pressable
+                testID="group-join-button"
                 accessibilityRole="button"
-                disabled={isClosed}
+                accessibilityLabel={
+                  isClosed ? "모집이 마감됐어요" : "참여 신청하기"
+                }
+                disabled={isClosed || membershipBusy}
                 style={[
                   styles.primaryButton,
                   isClosed ? styles.primaryButtonOff : null,
                 ]}
+                onPress={() => {
+                  if (variant || isClosed) return;
+                  joinGroupMutation.mutate();
+                }}
               >
                 <Text style={styles.primaryButtonText}>
                   {isClosed ? "모집이 마감됐어요" : "참여 신청하기"}
@@ -264,6 +291,27 @@ export default function GroupDetailScreen() {
         {deleteNotice.isError ? (
           <Text style={styles.noticeError}>공지 삭제에 실패했습니다.</Text>
         ) : null}
+        {membershipError ? (
+          <Text style={styles.noticeError}>
+            {membershipError instanceof Error
+              ? membershipError.message
+              : "소모임 참여 상태를 바꾸지 못했습니다."}
+          </Text>
+        ) : null}
+        <ConfirmDialog
+          visible={showLeaveConfirm}
+          title="소모임을 탈퇴할까요?"
+          message="탈퇴하면 공지와 일정을 더 이상 받아볼 수 없어요."
+          confirmText="탈퇴"
+          danger
+          onCancel={() => setShowLeaveConfirm(false)}
+          onConfirm={() => {
+            if (leaveGroupMutation.isPending) return;
+            leaveGroupMutation.mutate(undefined, {
+              onSettled: () => setShowLeaveConfirm(false),
+            });
+          }}
+        />
         <ConfirmDialog
           visible={Boolean(deletingNotice)}
           title="공지를 삭제하시겠습니까?"

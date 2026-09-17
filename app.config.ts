@@ -6,19 +6,36 @@ const bundleIds = {
   production: "com.ylmc.connect",
 } as const;
 
-const apiUrls = {
-  development: "https://ylmc-api.duckdns.org",
-  preview: "https://staging-api.example.invalid",
-  production: "https://api.example.invalid",
-} as const;
-
 type Variant = keyof typeof bundleIds;
+type AdapterKind = "http" | "mock";
+
+function readAdapter(envName: string, variant: Variant): AdapterKind {
+  const value = process.env[envName];
+  if (value === "http" || value === "mock") return value;
+  return variant === "development" ? "http" : "mock";
+}
 
 export default ({ config }: ConfigContext): ExpoConfig => {
   const variant =
     (process.env.APP_VARIANT as Variant | undefined) ?? "development";
   const resolvedVariant = variant in bundleIds ? variant : "development";
-  const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? apiUrls[resolvedVariant];
+  const authAdapter = readAdapter("EXPO_PUBLIC_AUTH_ADAPTER", resolvedVariant);
+  const marketAdapter = readAdapter(
+    "EXPO_PUBLIC_MARKET_ADAPTER",
+    resolvedVariant,
+  );
+  const groupAdapter = readAdapter(
+    "EXPO_PUBLIC_GROUP_ADAPTER",
+    resolvedVariant,
+  );
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL?.trim() || undefined;
+  const usesHttp = [authAdapter, marketAdapter, groupAdapter].includes("http");
+
+  if (usesHttp && !apiUrl) {
+    throw new Error(
+      "EXPO_PUBLIC_API_URL이 필요합니다. `.env.example`을 복사해 `.env`를 만들고 팀에서 받은 API origin을 넣으세요.",
+    );
+  }
 
   return {
     ...config,
@@ -55,15 +72,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     extra: {
       apiUrl,
       variant: resolvedVariant,
-      authAdapter:
-        process.env.EXPO_PUBLIC_AUTH_ADAPTER ??
-        (resolvedVariant === "development" ? "http" : "mock"),
-      marketAdapter:
-        process.env.EXPO_PUBLIC_MARKET_ADAPTER ??
-        (resolvedVariant === "development" ? "http" : "mock"),
-      groupAdapter:
-        process.env.EXPO_PUBLIC_GROUP_ADAPTER ??
-        (resolvedVariant === "development" ? "http" : "mock"),
+      authAdapter,
+      marketAdapter,
+      groupAdapter,
     },
   };
 };

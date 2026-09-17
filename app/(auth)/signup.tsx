@@ -136,7 +136,10 @@ export default function SignupScreen() {
     (value: string): void => {
       const nextValue = field === "phone" ? formatPhoneNumber(value) : value;
       setValues((current) => ({ ...current, [field]: nextValue }));
-      if (field === "id") setIdAvailability(null);
+      if (field === "id") {
+        setIdAvailability(null);
+        checkAvailability.reset();
+      }
     };
 
   const onCheckIdAvailability = () => {
@@ -181,8 +184,16 @@ export default function SignupScreen() {
     values.phone,
   );
   const isSubmitDisabled = !allFilled && isDefault;
+  const availabilityErrorMessage = checkAvailability.error
+    ? getApiErrorMessage(
+        checkAvailability.error,
+        authApiErrorMessages,
+        "중복 확인에 실패했습니다. 잠시 후 다시 시도해주세요.",
+      )
+    : undefined;
   const idErrorMessage =
     errors.id ??
+    availabilityErrorMessage ??
     (currentIdAvailability === false || variant === "id-dup"
       ? "이미 사용 중인 아이디입니다"
       : undefined);
@@ -260,11 +271,7 @@ export default function SignupScreen() {
                       value={values.id}
                       onChangeText={setField("id")}
                       placeholder="아이디"
-                      hasError={
-                        currentIdAvailability === false ||
-                        variant === "id-dup" ||
-                        Boolean(errors.id)
-                      }
+                      hasError={Boolean(idErrorMessage)}
                     />
                   </View>
                   <MotionPressable

@@ -7,6 +7,8 @@ import {
   fetchGroupDetail,
   fetchGroupMembers,
   fetchGroupOverview,
+  joinGroup,
+  leaveGroup,
   updateGroupNotice,
 } from "../services/groupService";
 import type {
@@ -85,6 +87,36 @@ export function useUpdateGroupNotice(groupId: string) {
             : detail,
       );
     },
+  });
+}
+
+function syncGroupMembership(
+  queryClient: ReturnType<typeof useQueryClient>,
+  detail: GroupDetail,
+) {
+  queryClient.setQueryData<GroupDetail>(
+    queryKeys.group.detail(detail.id),
+    detail,
+  );
+  queryClient.invalidateQueries({ queryKey: queryKeys.group.overview() });
+  queryClient.invalidateQueries({
+    queryKey: queryKeys.group.members(detail.id),
+  });
+}
+
+export function useJoinGroup(groupId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => joinGroup(groupId),
+    onSuccess: (detail) => syncGroupMembership(queryClient, detail),
+  });
+}
+
+export function useLeaveGroup(groupId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => leaveGroup(groupId),
+    onSuccess: (detail) => syncGroupMembership(queryClient, detail),
   });
 }
 

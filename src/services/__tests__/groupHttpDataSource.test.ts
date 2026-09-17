@@ -148,6 +148,83 @@ describe("httpGroupDataSource", () => {
     );
   });
 
+  it("joins then reloads detail", async () => {
+    const { request, dataSource } = setup();
+    request.mockImplementation(async (path: string, options) => {
+      if (path === "/api/communion/4/join" && options?.method === "POST") {
+        return null;
+      }
+      if (path === "/api/communion/4") {
+        return {
+          id: 4,
+          type: "SMALL_GROUP",
+          title: "화요 새벽기도회",
+          content: "함께 기도합니다.",
+          categoryCode: "PRAYER",
+          maxParticipants: 50,
+          currentParticipants: 33,
+          status: "RECRUITING",
+          leaderId: "leader-1",
+          leaderName: "소모임장",
+          createdAt: "2026-08-13T11:26:07",
+        };
+      }
+      if (path === "/api/communion/4/members") {
+        return [
+          {
+            userId: "frontprobe",
+            userName: "프론트점검",
+            joinedAt: "2026-08-13T11:26:07",
+          },
+        ];
+      }
+      return [];
+    });
+
+    await expect(dataSource.joinGroup("4")).resolves.toMatchObject({
+      id: "4",
+      isJoined: true,
+    });
+    expect(request).toHaveBeenCalledWith(
+      "/api/communion/4/join",
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("leaves then reloads detail", async () => {
+    const { request, dataSource } = setup();
+    request.mockImplementation(async (path: string, options) => {
+      if (path === "/api/communion/4/leave" && options?.method === "DELETE") {
+        return null;
+      }
+      if (path === "/api/communion/4") {
+        return {
+          id: 4,
+          type: "SMALL_GROUP",
+          title: "화요 새벽기도회",
+          content: "함께 기도합니다.",
+          categoryCode: "PRAYER",
+          maxParticipants: 50,
+          currentParticipants: 32,
+          status: "RECRUITING",
+          leaderId: "leader-1",
+          leaderName: "소모임장",
+          createdAt: "2026-08-13T11:26:07",
+        };
+      }
+      return [];
+    });
+
+    await expect(dataSource.leaveGroup("4")).resolves.toMatchObject({
+      id: "4",
+      isJoined: false,
+    });
+    expect(request).toHaveBeenCalledWith(
+      "/api/communion/4/leave",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+  });
+
   it("rejects unmapped create categories instead of guessing", async () => {
     const { dataSource } = setup();
     await expect(

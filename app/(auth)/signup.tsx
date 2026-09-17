@@ -46,7 +46,7 @@ type FormValues = {
 };
 
 type FormErrors = Partial<Record<keyof FormValues, string>>;
-type IdAvailability = {
+type Availability = {
   value: string;
   available: boolean;
 };
@@ -87,8 +87,8 @@ function validateSignup(values: FormValues) {
   if (phoneDigits(values.phone).length < 10) {
     errors.phone = "연락처를 입력해주세요.";
   }
-  if (values.email && !emailPattern.test(values.email)) {
-    errors.email = "이메일 형식이 올바르지 않습니다.";
+  if (!emailPattern.test(values.email)) {
+    errors.email = "이메일을 입력해주세요.";
   }
   return errors;
 }
@@ -123,12 +123,21 @@ export default function SignupScreen() {
         },
   );
   const [errors, setErrors] = useState<FormErrors>({});
-  const [idAvailability, setIdAvailability] = useState<IdAvailability | null>(
+  const [idAvailability, setIdAvailability] = useState<Availability | null>(
     null,
   );
+  const [emailAvailability, setEmailAvailability] =
+    useState<Availability | null>(null);
+  const [lastAvailabilityTarget, setLastAvailabilityTarget] = useState<
+    "id" | "email" | null
+  >(null);
   const currentIdAvailability =
     idAvailability?.value === values.id.trim()
       ? idAvailability.available
+      : null;
+  const currentEmailAvailability =
+    emailAvailability?.value === values.email.trim()
+      ? emailAvailability.available
       : null;
 
   const setField =
@@ -136,28 +145,41 @@ export default function SignupScreen() {
     (value: string): void => {
       const nextValue = field === "phone" ? formatPhoneNumber(value) : value;
       setValues((current) => ({ ...current, [field]: nextValue }));
-      if (field === "id") {
-        setIdAvailability(null);
+      if (field === "id" || field === "email") {
+        if (field === "id") setIdAvailability(null);
+        if (field === "email") setEmailAvailability(null);
+        setLastAvailabilityTarget(null);
         checkAvailability.reset();
       }
     };
 
-  const onCheckIdAvailability = () => {
-    const id = values.id.trim();
-    if (id.length < 3) {
+  const onCheckAvailability = (target: "id" | "email") => {
+    const value = values[target].trim();
+    if (target === "id" && value.length < 3) {
       setErrors((current) => ({
         ...current,
         id: "아이디는 3자 이상 입력해주세요.",
       }));
       return;
     }
+    if (target === "email" && !emailPattern.test(value)) {
+      setErrors((current) => ({
+        ...current,
+        email: "이메일 형식이 올바르지 않습니다.",
+      }));
+      return;
+    }
 
-    setErrors((current) => ({ ...current, id: undefined }));
+    setErrors((current) => ({ ...current, [target]: undefined }));
+    setLastAvailabilityTarget(target);
     checkAvailability.mutate(
-      { searchType: "id", searchValue: id },
+      { searchType: target, searchValue: value },
       {
-        onSuccess: ({ available }) =>
-          setIdAvailability({ value: id, available }),
+        onSuccess: ({ available }) => {
+          const result = { value, available };
+          if (target === "id") setIdAvailability(result);
+          else setEmailAvailability(result);
+        },
       },
     );
   };
@@ -166,6 +188,9 @@ export default function SignupScreen() {
     const nextErrors = validateSignup(values);
     if (isDefault && currentIdAvailability !== true) {
       nextErrors.id = "아이디 중복 확인이 필요합니다.";
+    }
+    if (isDefault && currentEmailAvailability !== true) {
+      nextErrors.email = "이메일 중복 확인이 필요합니다.";
     }
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
@@ -181,7 +206,8 @@ export default function SignupScreen() {
     values.password &&
     values.passwordConfirm &&
     values.userName &&
-    values.phone,
+    values.phone &&
+    values.email,
   );
   const isSubmitDisabled = !allFilled && isDefault;
   const availabilityErrorMessage = checkAvailability.error
@@ -193,9 +219,17 @@ export default function SignupScreen() {
     : undefined;
   const idErrorMessage =
     errors.id ??
-    availabilityErrorMessage ??
+    (lastAvailabilityTarget === "id" ? availabilityErrorMessage : undefined) ??
     (currentIdAvailability === false || variant === "id-dup"
       ? "이미 사용 중인 아이디입니다"
+      : undefined);
+  const emailErrorMessage =
+    errors.email ??
+    (lastAvailabilityTarget === "email"
+      ? availabilityErrorMessage
+      : undefined) ??
+    (currentEmailAvailability === false
+      ? "이미 사용 중인 이메일입니다"
       : undefined);
   const passwordErrorMessage = isPwError
     ? "비밀번호는 8자 이상, 영문·숫자를 모두 포함해야 합니다"
@@ -277,7 +311,7 @@ export default function SignupScreen() {
                   <MotionPressable
                     testID="signup-check-id"
                     accessibilityRole="button"
-                    onPress={onCheckIdAvailability}
+                    onPress={() => onCheckAvailability("id")}
                     disabled={checkAvailability.isPending}
                     style={styles.checkButton}
                   >
@@ -388,6 +422,59 @@ export default function SignupScreen() {
               </MotionShake>
               <InlineError>{phoneErrorMessage}</InlineError>
             </Field>
+
+            <Field label="이메일">
+              <MotionShake trigger={emailErrorMessage}>
+                <View style={styles.idRow}>
+                  <View style={styles.idInputWrap}>
+                    <SignupInput
+                      testID="signup-email-input"
+                      value={values.email}
+                      onChangeText={setField("email")}
+                      placeholder="이메일"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      hasError={Boolean(emailErrorMessage)}
+                    />
+                  </View>
+                  <MotionPressable
+                    testID="signup-check-email"
+                    accessibilityRole="button"
+                    onPress={() => onCheckAvailability("email")}
+                    disabled={checkAvailability.isPending}
+                    style={styles.checkButton}
+                  >
+                    {checkAvailability.isPending ? (
+                      <ActivityIndicator
+                        size="small"
+                        color={theme.colors.primaryDeep}
+                      />
+                    ) : (
+                      <Text style={styles.checkButtonText}>중복 확인</Text>
+                    )}
+                  </MotionPressable>
+                </View>
+              </MotionShake>
+              <InlineError>{emailErrorMessage}</InlineError>
+              {currentEmailAvailability === true ? (
+                <MotionPop>
+                  <View style={styles.successRow}>
+                    <AppIcon
+                      name="check-circle"
+                      size={14}
+                      color={theme.colors.success}
+                    />
+                    <AppText
+                      variant="caption"
+                      tone="success"
+                      style={styles.successHint}
+                    >
+                      사용 가능한 이메일입니다
+                    </AppText>
+                  </View>
+                </MotionPop>
+              ) : null}
+            </Field>
           </MotionEnter>
 
           {signup.error ? (
@@ -475,7 +562,7 @@ function SubmitButton({
         {loading ? (
           <ActivityIndicator size="small" color={theme.colors.white} />
         ) : (
-          <Text style={styles.submitText}>가입 완료</Text>
+          <Text style={styles.submitText}>회원 가입</Text>
         )}
       </MotionPressable>
     </Animated.View>
@@ -524,6 +611,7 @@ function SignupInput({
   hasError,
   secureTextEntry,
   keyboardType = "default",
+  autoCapitalize,
 }: {
   testID?: string;
   value?: string;
@@ -531,7 +619,8 @@ function SignupInput({
   placeholder: string;
   hasError?: boolean;
   secureTextEntry?: boolean;
-  keyboardType?: "default" | "phone-pad";
+  keyboardType?: "default" | "phone-pad" | "email-address";
+  autoCapitalize?: "none" | "sentences" | "words" | "characters";
 }) {
   const [passwordVisible, setPasswordVisible] = useState(false);
   return (
@@ -542,6 +631,7 @@ function SignupInput({
       placeholder={placeholder}
       secureTextEntry={secureTextEntry && !passwordVisible}
       keyboardType={keyboardType}
+      autoCapitalize={autoCapitalize}
       hasError={hasError}
       trailing={
         secureTextEntry ? (

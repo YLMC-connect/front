@@ -1,9 +1,11 @@
+import type { UserRole } from "./common";
+
 export interface AuthTokenResponse {
   accessToken: string;
   refreshToken: string;
   userId: string;
   userName: string;
-  role?: string;
+  role?: UserRole;
 }
 
 export interface MemberMeResponse {
@@ -12,7 +14,7 @@ export interface MemberMeResponse {
   email?: string | null;
   phone?: string | null;
   mokjangName?: string | null;
-  role?: string;
+  role?: UserRole;
   userStatus?: string;
   point?: number;
   snsId?: string | null;

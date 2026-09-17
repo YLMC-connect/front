@@ -39,6 +39,8 @@
 | `scripts/gen-index.sh` | INDEX 상태표 재생성 |
 | `docs/MAINTENANCE.md` | 문서 드리프트 복구 |
 | `src/lib/apiClient.ts` | envelope·오류·Authorization |
+| `src/types/common.ts` | 공통 회원·서버 역할 타입 |
+| `src/lib/rolePermissions.ts` | 관리자 도메인별 역할 접근 판별 |
 | `src/constants/theme.ts` / `designTokens.json` | 디자인 토큰 |
 | `src/components/layout/Screen.tsx` | 공통 화면 + 상단 inset |
 | `src/components/layout/StickyHeaderScreen.tsx` | 루트 탭 sticky 헤더·필터 |
@@ -61,6 +63,7 @@
 
 ## 결정 사항 (지금 유효한 것만)
 
+- **서버 역할은 공통 타입으로 보존** — `UserRole`은 `ADMIN`, `USER`, 도메인별 `MANAGER_*` 역할을 원본 값으로 유지한다. 프런트 판별은 메뉴/route 노출용이며 실제 API 인가는 서버가 담당한다.
 - **API origin은 로컬 env만** — `EXPO_PUBLIC_API_URL`. 실제 호스트를 코드·문서·`.env.example`에 두지 않음. HTTP adapter를 쓰는 동안 없으면 `app.config.ts`가 실패. mock만이면 URL 없이 실행 가능.
 - **웹 라이브 API는 검증 대상이 아님** — 브라우저 CORS. 서버 CORS를 열지 않는 한 `npm run web`으로 라이브 인증을 맞추지 않음. 검증 기준은 Expo Dev Client.
 - **development 기본 adapter는 HTTP** — 인증·나눔·동행. 홈·기도·삶공부는 사용자 API가 생길 때까지 mock. 테스트와 Maestro mock 계정은 `EXPO_PUBLIC_*_ADAPTER=mock`.

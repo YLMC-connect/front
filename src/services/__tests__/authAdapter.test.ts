@@ -6,6 +6,7 @@ describe("mockAuthAdapter", () => {
   it.each([
     ["id", "admin"],
     ["phone", "010-2345-6789"],
+    ["email", "admin@ylmc.local"],
   ] as const)(
     "reports a known %s as unavailable",
     async (searchType, searchValue) => {
@@ -90,7 +91,7 @@ describe("httpAuthAdapter", () => {
       adapter.login({ id: "ylmc", password: "secret" }),
     ).resolves.toMatchObject({
       accessToken: "access",
-      member: { id: "ylmc", name: "열린문", role: "member" },
+      member: { id: "ylmc", name: "열린문", role: "USER" },
     });
     expect(request).toHaveBeenCalledWith(
       "/api/auth/login",
@@ -173,7 +174,7 @@ describe("httpAuthAdapter", () => {
     await expect(adapter.getCurrentMember()).resolves.toEqual({
       id: "ylmc",
       name: "열린문",
-      role: "member",
+      role: "USER",
     });
     expect(request).toHaveBeenCalledWith("/api/member/me");
   });

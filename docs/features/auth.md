@@ -10,7 +10,7 @@
 
 ## ✅ 완료
 
-- 인증 HTTP adapter 활성화 — 라이브 API에서 관측한 login/refresh 토큰 payload, signup 후 login 합성, `/api/member/me`, `/api/member/duplicate`를 `httpAuthAdapter`로 연결. development 기본값은 HTTP, 테스트/Maestro는 `EXPO_PUBLIC_AUTH_ADAPTER=mock`. API origin은 `EXPO_PUBLIC_API_URL`. 회원가입 중복확인 실패는 아이디 필드에 표시. Swagger 성공 DTO는 여전히 미기재라 `test:api:contract`는 13건 실패를 유지
+- 인증 HTTP adapter 활성화 — 라이브 API에서 관측한 login/refresh 토큰 payload, signup 후 login 합성, `/api/member/me`, `/api/member/duplicate`를 `httpAuthAdapter`로 연결. 회원가입은 아이디와 이메일을 필수 입력으로 받고 각각 중복확인을 통과해야 한다. 값이 바뀌면 기존 확인 결과를 폐기한다. development 기본값은 HTTP, 테스트/Maestro는 `EXPO_PUBLIC_AUTH_ADAPTER=mock`. API origin은 `EXPO_PUBLIC_API_URL`. 회원가입 중복확인 실패는 해당 필드에 표시. Swagger 성공 DTO는 여전히 미기재라 `test:api:contract`는 13건 실패를 유지
 - 조용한 톤 인증 여백·위계 — 로그인 로고 그림자 완화·여백 토큰화, 회원가입 필드 간격·라벨 weight 정리, CTA 라벨 semibold; glass 하단 바 실험은 단순 `bottomFlat`으로 유지
 - 로그인·회원가입 절제 모션 (C-set) — 진입 stagger fade-up, 로고 1회 settle, 필드 검증 shake·인라인 에러 fade, 가입 아바타 empty↔filled morph, 중복확인 성공 체크 pop, CTA `MotionPressable`, 가입 버튼 enable soft 활성, auth Stack slide/fade. `designVariant=default`·`useReducedMotion`에서 진입 애니는 static
 - 로그인·회원가입 입력 포커스 통일 — 인증 전용 공통 `AuthInput`으로 전체 입력 surface를 공유하고 웹 기본 내부 outline을 제거한 뒤 나눔·동행 검색·작성 입력과 같은 primary 2px focus border를 적용하며 오류 테두리는 danger 색상을 우선
@@ -73,6 +73,7 @@
 | `src/hooks/useAuth.ts`                       | 인증 액션 hook                                       |
 | `src/types/auth.ts`                          | 인증 입력/응답 타입                                  |
 | `src/types/authApi.ts`                       | 라이브 관측 인증 서버 DTO                            |
+| `src/lib/rolePermissions.ts`                 | 관리자 도메인별 역할 접근 판별                       |
 | `src/types/api.ts`                           | 공통 `ApiResponse<T>` envelope                       |
 | `src/mocks/auth.ts`                          | mock 로그인 계정과 사용자/성도 데이터                |
 | `src/lib/apiClient.ts`                       | 공통 응답·오류·Authorization 처리                    |
@@ -83,10 +84,11 @@
 
 ## 데이터 타입
 
-`LoginInput`, `SignupInput`, `MemberDuplicateInput`, `MemberAvailability`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`를 사용합니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리합니다. 중복확인 요청은 Swagger의 `searchType: id | phone`, `searchValue` 계약을 따르며 화면에는 `available` 도메인 결과만 노출합니다. 실제 HTTP mapper는 라이브 응답에서 확인한 `data.available`, login/refresh 토큰 payload, `/api/member/me` 회원 필드만 사용합니다. Swagger 성공 schema는 아직 비어 있어 계약 검사는 계속 실패합니다.
+`LoginInput`, `SignupInput`, `MemberDuplicateInput`, `MemberAvailability`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`와 `UserRole`을 사용하며, 역할은 `ADMIN`, `USER`, `MANAGER_COMMUNION`, `MANAGER_SHARE`, `MANAGER_LIFESTUDY`, `MANAGER_PRAYER` 중 하나입니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리합니다. 중복확인 요청은 Swagger의 `searchType: id | phone | email`, `searchValue` 계약을 따르며 화면에는 `available` 도메인 결과만 노출합니다. 실제 HTTP mapper는 라이브 응답에서 확인한 `data.available`, login/refresh 토큰 payload, `/api/member/me` 회원 필드만 사용합니다. Swagger 성공 schema는 아직 비어 있어 계약 검사는 계속 실패합니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-09-16) **서버 역할 문자열은 인증 모델에서 보존한다** — login/refresh와 `/api/member/me`의 유효한 역할은 `USER`로 축소하지 않는다. 역할 기반 UI 접근은 공통 판별 함수를 쓰되, 실제 관리자 API 차단은 서버의 403 정책이 단일 출처다. Issue #128.
 - (2026-09-08) **회원가입 중복확인 실패는 아이디 필드에 표시한다** — 성공(`available`)만 그리면 CORS/네트워크 오류가 무반응처럼 보인다. mutation error를 인라인 오류로 보여주고, 아이디가 바뀌면 이전 오류를 버린다.
 - (2026-08-13) **인증 HTTP는 Swagger가 비어 있어도 라이브에서 관측한 필드만 연결한다** — login/refresh 성공은 envelope가 아니라 `{ accessToken, refreshToken, userId, userName, role }`. signup 성공은 `{ userStatus }`만 주고 토큰이 없어 같은 자격증명으로 login을 이어서 호출한다. `/me`와 duplicate는 공통 envelope를 쓴다. 관측되지 않은 필드·역할·오류 코드는 만들지 않는다. development 기본 adapter는 `http`, 테스트와 Maestro mock 계정은 `EXPO_PUBLIC_AUTH_ADAPTER=mock`.
 - (2026-07-23) **인증 화면도 공통 “조용한 깔끔함” 톤을 따른다** — 로고·CTA 그림자는 `theme.shadow.primary` 수준으로 약하게, 여백은 spacing 토큰, 라벨/버튼 weight는 medium·semibold. Issue #105.

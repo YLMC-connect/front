@@ -194,7 +194,7 @@ describe("auth smoke screens", () => {
     renderWithClient(<SignupScreenRoute />);
 
     fireEvent.changeText(screen.getByPlaceholderText("아이디"), "new-member");
-    fireEvent.press(screen.getByText("중복 확인"));
+    fireEvent.press(screen.getByTestId("signup-check-id"));
 
     expect(
       await screen.findByText("네트워크 연결을 확인해주세요."),
@@ -205,7 +205,7 @@ describe("auth smoke screens", () => {
     renderWithClient(<SignupScreenRoute />);
 
     fireEvent.changeText(screen.getByPlaceholderText("아이디"), "new-member");
-    fireEvent.press(screen.getByText("중복 확인"));
+    fireEvent.press(screen.getByTestId("signup-check-id"));
 
     await waitFor(() =>
       expect(screen.getByText("사용 가능한 아이디입니다")).toBeTruthy(),
@@ -266,7 +266,7 @@ describe("auth smoke screens", () => {
     renderWithClient(<SignupScreenRoute />);
 
     fireEvent.changeText(screen.getByPlaceholderText("아이디"), "admin");
-    fireEvent.press(screen.getByText("중복 확인"));
+    fireEvent.press(screen.getByTestId("signup-check-id"));
 
     await waitFor(() =>
       expect(screen.getByText("이미 사용 중인 아이디입니다")).toBeTruthy(),
@@ -300,10 +300,59 @@ describe("auth smoke screens", () => {
     expect(screen.getByTestId("signup-phone-input").props.value).toBe(
       "010-1234-5678",
     );
+    fireEvent.changeText(
+      screen.getByTestId("signup-email-input"),
+      "new-member@example.com",
+    );
+    fireEvent.press(screen.getByTestId("signup-check-email"));
+    await screen.findByText("사용 가능한 이메일입니다");
     fireEvent.press(screen.getByTestId("signup-submit"));
 
     expect(screen.getByText("아이디 중복 확인이 필요합니다.")).toBeTruthy();
     expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
+  });
+
+  it("requires an available email before signup", async () => {
+    renderWithClient(<SignupScreenRoute />);
+
+    fireEvent.changeText(screen.getByTestId("signup-id-input"), "new-member");
+    fireEvent.press(screen.getByTestId("signup-check-id"));
+    await screen.findByText("사용 가능한 아이디입니다");
+    fireEvent.changeText(
+      screen.getByTestId("signup-password-input"),
+      "password1",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("signup-password-confirm-input"),
+      "password1",
+    );
+    fireEvent.changeText(screen.getByTestId("signup-name-input"), "새성도");
+    fireEvent.changeText(
+      screen.getByTestId("signup-phone-input"),
+      "01012345678",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("signup-email-input"),
+      "new-member@example.com",
+    );
+    fireEvent.press(screen.getByTestId("signup-submit"));
+
+    expect(screen.getByText("이메일 중복 확인이 필요합니다.")).toBeTruthy();
+    expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
+  });
+
+  it("shows that a known email is unavailable", async () => {
+    renderWithClient(<SignupScreenRoute />);
+
+    fireEvent.changeText(
+      screen.getByTestId("signup-email-input"),
+      "admin@ylmc.local",
+    );
+    fireEvent.press(screen.getByTestId("signup-check-email"));
+
+    await waitFor(() =>
+      expect(screen.getByText("이미 사용 중인 이메일입니다")).toBeTruthy(),
+    );
   });
 
   it("stores a signup session after checking id availability", async () => {
@@ -325,6 +374,12 @@ describe("auth smoke screens", () => {
       screen.getByTestId("signup-phone-input"),
       "01012345678",
     );
+    fireEvent.changeText(
+      screen.getByTestId("signup-email-input"),
+      "new-member@example.com",
+    );
+    fireEvent.press(screen.getByTestId("signup-check-email"));
+    await screen.findByText("사용 가능한 이메일입니다");
     fireEvent.press(screen.getByTestId("signup-submit"));
 
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/"), {

@@ -13,7 +13,7 @@ export interface SignupInput {
   email?: string;
 }
 
-export type MemberDuplicateType = "id" | "phone";
+export type MemberDuplicateType = "id" | "phone" | "email";
 
 export interface MemberDuplicateInput {
   searchType: MemberDuplicateType;

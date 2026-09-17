@@ -27,6 +27,7 @@ type AuthApiClient = {
 const MOCK_DUPLICATE_VALUES = {
   id: new Set([MOCK_LOGIN_CREDENTIALS.id]),
   phone: new Set(["010-2345-6789"]),
+  email: new Set(["admin@ylmc.local"]),
 };
 
 export interface AuthAdapter {

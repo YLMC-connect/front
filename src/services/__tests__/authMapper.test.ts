@@ -17,7 +17,7 @@ describe("authMapper", () => {
     ).toEqual({
       accessToken: "access",
       refreshToken: "refresh",
-      member: { id: "ylmc", name: "열린문", role: "member" },
+      member: { id: "ylmc", name: "열린문", role: "USER" },
     });
   });
 
@@ -33,7 +33,7 @@ describe("authMapper", () => {
       id: "ylmc",
       name: "열린문",
       department: "1목장",
-      role: "member",
+      role: "USER",
     });
   });
 
@@ -41,6 +41,25 @@ describe("authMapper", () => {
     expect(mapMemberAvailability({ available: false })).toEqual({
       available: false,
     });
+  });
+
+  it.each([
+    "ADMIN",
+    "USER",
+    "MANAGER_COMMUNION",
+    "MANAGER_SHARE",
+    "MANAGER_LIFESTUDY",
+    "MANAGER_PRAYER",
+  ] as const)("preserves the %s server role", (role) => {
+    expect(
+      mapAuthSession({
+        accessToken: "access",
+        refreshToken: "refresh",
+        userId: "ylmc",
+        userName: "열린문",
+        role,
+      }).member.role,
+    ).toBe(role);
   });
 
   it("rejects an incomplete token payload", () => {

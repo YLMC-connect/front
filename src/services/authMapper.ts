@@ -5,7 +5,7 @@ import type {
   MemberDuplicateResponse,
   MemberMeResponse,
 } from "../types/authApi";
-import type { Member } from "../types/common";
+import { USER_ROLES, type Member, type UserRole } from "../types/common";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -15,9 +15,11 @@ function readString(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
-function mapMemberRole(role: string | undefined): Member["role"] {
-  if (role === "ADMIN" || role === "admin") return "admin";
-  return "member";
+function mapMemberRole(role: string | undefined): UserRole {
+  const normalizedRole = role?.trim().toUpperCase();
+  return USER_ROLES.includes(normalizedRole as UserRole)
+    ? (normalizedRole as UserRole)
+    : "USER";
 }
 
 export function mapMemberFromMe(data: unknown): Member {

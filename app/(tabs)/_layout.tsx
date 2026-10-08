@@ -1,7 +1,12 @@
 import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
-import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { LinearGradient } from "expo-linear-gradient";
-import { Tabs, usePathname, useRouter, type Router } from "expo-router";
+import {
+  Tabs,
+  usePathname,
+  useRouter,
+  type ImperativeRouter,
+} from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, {
@@ -93,7 +98,7 @@ export default function TabsLayout() {
               <AppIcon
                 name={tab?.icon.off ?? "circle-outline"}
                 size={size}
-                color={color}
+                color={typeof color === "string" ? color : undefined}
               />
             );
           },
@@ -154,7 +159,7 @@ function VisibleTabBar({
   router,
   routes,
 }: Pick<BottomTabBarProps, "state" | "descriptors" | "navigation"> & {
-  router: Router;
+  router: ImperativeRouter;
   routes: TabRoute[];
 }) {
   const blurTarget = useTabBlurTarget();

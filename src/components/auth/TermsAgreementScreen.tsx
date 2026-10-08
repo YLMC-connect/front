@@ -327,12 +327,12 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.bold,
   },
   sheetLayer: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     zIndex: 50,
     justifyContent: "flex-end",
   },
   sheetDim: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: theme.colors.sheetOverlay,
   },
   sheet: {

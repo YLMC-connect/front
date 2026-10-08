@@ -154,4 +154,4 @@ npm run test:visual:compare
 
 ## 기술 스택 (요약)
 
-Expo SDK 55 · Expo Dev Client · React Native 0.83 · TypeScript · Expo Router SDK 55 계열 · TanStack Query · Zustand · local form validation · MaterialIcons · NativeWind v4. 상세는 [PLAN.md](PLAN.md) 의 “🛠 기술 스택”.
+Expo SDK 57 · Expo Dev Client · React Native 0.86 · TypeScript · Expo Router · TanStack Query · Zustand · local form validation · React Native StyleSheet. 상세는 [PLAN.md](PLAN.md) 의 “🛠 기술 스택”.

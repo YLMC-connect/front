@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   doneOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: "rgba(20,30,18,0.55)",
     alignItems: "center",
     justifyContent: "center",

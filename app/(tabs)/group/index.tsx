@@ -1,7 +1,10 @@
 import { AppIcon } from "@/components/ui/app-icon";
-import { StackActions } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import {
+  useLocalSearchParams,
+  useNavigation,
+  useRouter,
+  type NativeStackNavigationProp,
+} from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Platform,
@@ -206,11 +209,12 @@ export default function GroupScreen() {
     };
   }, [navigation, resetGroupListAfterDetailNavigation]);
 
+  if (reduceMotion && stickyFilterInteractive !== categorySticky) {
+    setStickyFilterInteractive(categorySticky);
+  }
+
   useEffect(() => {
-    if (reduceMotion) {
-      setStickyFilterInteractive(categorySticky);
-      return;
-    }
+    if (reduceMotion) return;
 
     const interactiveTimer = setTimeout(
       () => setStickyFilterInteractive(categorySticky),
@@ -239,7 +243,10 @@ export default function GroupScreen() {
         listScrollRef.current?.scrollTo({ y: 0, animated: false });
         currentScrollY.current = 0;
       }
-      navigation.dispatch(StackActions.push("[id]", { id }));
+      navigation.dispatch({
+        type: "PUSH",
+        payload: { name: "[id]", params: { id } },
+      });
     },
     [navigation],
   );

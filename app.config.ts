@@ -67,7 +67,17 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       "expo-router",
       "expo-secure-store",
       "expo-font",
+      "expo-image",
+      "expo-status-bar",
       ["expo-dev-client", { toolsButton: false }],
+      [
+        "expo-build-properties",
+        {
+          ios: {
+            enableSceneSupport: true,
+          },
+        },
+      ],
     ],
     extra: {
       apiUrl,

@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 삶공부 수강 신청 FAB 추가 — 기도 탭과의 일관성 및 접근성을 높이기 위해 삶공부 루트 화면 우측 하단에 수강 신청 화면(/life-study/apply)으로 이동하는 플로팅 액션 버튼(FAB)을 추가
 - 삶공부 수업·출석·수료 HTTP adapter — development 기본값은 나눔과 같이 http다. 수료 목록은 mock 과정 위에 덮지 않고 `GET /api/life-study/completions` 행으로 만든다. 테스트와 `EXPO_PUBLIC_LIFE_STUDY_ADAPTER=mock`은 기존 mock service를 쓴다
 - 삶공부 검색 위치·포커스 보정 — 검색을 제목 바로 아래 sticky surface로 표시하고 전체 검색 영역에 단일 focus border를 적용했으며, 목록을 내린 상태에서도 헤더 검색 action으로 즉시 노출
 - 삶공부 glass sticky 헤더 — 검색·학습경로·신청 가능·전체 과정 영역을 하나의 스크롤로 묶고 기본 배경색 기반 blur 타이틀 뒤로 지나가게 적용
@@ -61,6 +62,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-10-09) **삶공부 화면 우측 하단에 '삶공부 신청' 플로팅 버튼(FAB)을 추가한다** — 기도 탭과의 일관성 및 접근성을 높이기 위해 삶공부 루트 화면 우측 하단에 수강 신청 화면(`/life-study/apply`)으로 바로 이동하는 플로팅 액션 버튼(FAB)을 제공합니다.
 - (2026-10-09) **development http에서는 삶공부 목록 캐시와 상세·수강 내역이 목업 화면과 갈라진다** — 목록·overview query key 끝에 adapter mode를 붙여 저장된 목업 응답을 다시 쓰지 않는다. `__DEV__`에서 내 학습경로 아래에 `서버 데이터` 또는 `목업 데이터`를 표시한다. route id가 있고 `designVariant`가 없으며 adapter가 http이면 상세는 overview에 있는 과정 이름·상태와, 값이 있는 강사·소개·주 수만 그린다. 팀장·교재·커리큘럼·공지·숙제는 그리지 않는다. 수강 내역은 본인 수료 행의 이름과 `completedAt`만 그린다. id가 없거나 mock이거나 `designVariant`가 있으면 기존 디자인 문구를 유지한다.
 - (2026-10-09) **삶공부 HTTP는 2026-09-22 이후 사용자 수업·출석·수료만 호출하고 development 기본값은 http다** — 나눔과 같이 `EXPO_PUBLIC_LIFE_STUDY_ADAPTER`가 없으면 development는 http, preview·production은 mock이다. `mock`이면 기존 mock overview·과정 목록을 반환한다. `http`일 때 `GET /api/life-study/completions`로 수료 행을 만들고, 과정 카탈로그에만 있는 학습경로·강사·소개·신청 과정은 비운다. 필수/선택 구분이 응답에 없어 과정 종류는 선택으로 둔다. `totalClassCount`는 주 수가 아니므로 `weekCount`에 쓰지 않고, 과정 `sessions`에만 쓴다. `attendCount`는 `currentSession`이나 수강 회차가 아니다. 추가로 `GET /api/life-study/cohorts/{cohortId}/classes`, `GET`·`PUT /api/life-study/classes/{classId}/attendance`, `PUT .../attendance/user`, `GET`·`PUT /api/life-study/cohorts/{cohortId}/completions`, `PUT .../completions/user`를 호출한다. `/api/admin`, 2026-09-16 이전 `GET /api/life-study`, `GET /api/life-study/cohorts`, `GET /api/life-study/cohorts/{id}`, `POST /api/life-study/cohorts/{id}/attend`, `GET /api/mypage/activities/life-studies`는 호출하지 않는다. 출석·수료 권한(`team_leader`, `MANAGER_LIFESTUDY`, `ADMIN`)과 `LST012`·`LST013`·`LST017`은 서버 오류를 그대로 전달하고 클라이언트 역할로 거르지 않는다. 계약 검사는 `npm run test:api:contract:life-study`이며 `npm run validate`에는 넣지 않는다.
 - (2026-10-09) **수업일·수료 명단을 이미 있는 과정 객체에 붙일 때는 Notion에 있는 값만 덮어쓴다** — HTTP 목록 자체는 수료 행으로 새로 만든다. 과정 ID 문자열이 같을 때만 `lifeStudyName`을 `title`로 쓰고, 본인 수료가 그 ID로 하나뿐이면 `LifeStudyCourse.isCompleted`를 true로 둔다. `completedAt`이 문자열이면 `LifeStudyHistory.completedAt`에 쓰고 null이면 비운다. 수업일 목록의 `weekCount`는 기수를 넘겨 호출한 overview 과정의 `weekCount`에만 쓴다. 수료 명단은 `lifeStudyId`가 과정 `id`와 같고 현재 사용자 `userId`가 한 명일 때만 `completed`를 `isCompleted`에 쓴다. 아래는 Notion 필드가 없거나 대응을 단정할 수 없어 mock을 유지한다.

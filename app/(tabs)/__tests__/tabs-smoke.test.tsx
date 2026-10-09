@@ -869,6 +869,7 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("함께 기도하고 응답을 나눠요")).toBeTruthy();
     expect(await screen.findByText("내 기도방")).toBeTruthy();
     expect(screen.getByText("오늘의 기도 진행")).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("기도 신청 메뉴"));
     fireEvent.press(screen.getByLabelText("기도제목 작성"));
     expect(router.push).toHaveBeenCalledWith("/modal/prayer-new");
     expect(
@@ -891,7 +892,8 @@ describe("v1 tab smoke screens", () => {
     expect(router.push).toHaveBeenCalledWith(
       "/prayer/prayer-overview-room-mon-am",
     );
-    fireEvent.press(screen.getAllByText("중보기도 신청").at(-1)!);
+    fireEvent.press(screen.getByLabelText("기도 신청 메뉴"));
+    fireEvent.press(screen.getByLabelText("중보기도 신청"));
     expect(router.push).toHaveBeenCalledWith("/prayer/apply");
     fireEvent.press(screen.getByLabelText("내 기도제목 전체보기"));
     expect(router.push).toHaveBeenCalledWith("/prayer/request");
@@ -928,11 +930,14 @@ describe("v1 tab smoke screens", () => {
   });
 
   it("renders the direct life study screen", async () => {
+    jest.mocked(router.push).mockClear();
     renderWithClient(<LifeStudyScreen />);
 
     expect(screen.getByText("말씀으로 배우고 삶으로 자라가요")).toBeTruthy();
     expect(await screen.findByText("내 학습경로")).toBeTruthy();
     expect(screen.queryByText("중보기도")).toBeNull();
+    fireEvent.press(screen.getByLabelText("삶공부 신청"));
+    expect(router.push).toHaveBeenCalledWith("/life-study/apply");
   });
 
   it("searches life study courses and opens a course", async () => {

@@ -24,6 +24,7 @@ import {
   ErrorState,
   FloatingActionButton,
   ListSkeleton,
+  MotionPressable,
   SearchField,
   SEARCH_FIELD_STICKY_HEIGHT,
   SearchToggleButton,
@@ -37,10 +38,7 @@ export function FaithSectionsScreen({ section }: { section: FaithSection }) {
   const [search, setSearch] = useState("");
   return (
     <StickyHeaderScreen
-      contentContainerStyle={[
-        styles.body,
-        section === "pray" ? styles.bodyWithFab : styles.bodyWithTab,
-      ]}
+      contentContainerStyle={[styles.body, styles.bodyWithFab]}
       testID="screen-faith"
       title={section === "study" ? "삶공부" : "기도"}
       subtitle={
@@ -79,13 +77,17 @@ export function FaithSectionsScreen({ section }: { section: FaithSection }) {
       }
       overlay={
         section === "pray" ? (
+          <PrayerFloatingMenu />
+        ) : (
           <FloatingActionButton
-            label="기도제목 작성"
+            accessibilityLabel="삶공부 신청"
+            label="삶공부 신청"
             icon="add"
             style={styles.fab}
-            onPress={() => router.push("/modal/prayer-new")}
+            testID="life-study-apply-fab"
+            onPress={() => router.push("/life-study/apply")}
           />
-        ) : undefined
+        )
       }
     >
       {section === "study" ? (
@@ -255,31 +257,6 @@ function PrayerContent() {
             </View>
           ))}
         </View>
-      </View>
-
-      <View style={styles.section}>
-        <AppText variant="sectionTitle" style={styles.sectionTitle}>
-          중보기도 신청
-        </AppText>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.push("/prayer/apply")}
-          style={styles.applyCard}
-        >
-          <View style={styles.applyIcon}>
-            <AppIcon
-              name="prayer-apply"
-              size={24}
-              color={theme.colors.primaryDeep}
-            />
-          </View>
-          <View style={styles.cardText}>
-            <AppText variant="cardTitle">중보기도 신청</AppText>
-            <AppText variant="body" tone="secondary" style={styles.applyDesc}>
-              월-토 오전/오후 기도방은 신청 화면에서 선택해요.
-            </AppText>
-          </View>
-        </Pressable>
       </View>
     </>
   );
@@ -510,6 +487,74 @@ const lifeStudyStatusLabels: Record<LifeStudyOverviewStatus, string> = {
   pending: "대기",
 };
 
+function PrayerFloatingMenu() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      {open ? (
+        <Pressable
+          accessibilityLabel="메뉴 닫기"
+          accessibilityRole="button"
+          onPress={() => setOpen(false)}
+          style={styles.fabBackdrop}
+          testID="prayer-fab-backdrop"
+        />
+      ) : null}
+      <View pointerEvents="box-none" style={styles.fabContainer}>
+        {open ? (
+          <View style={styles.fabMenu}>
+            <MotionPressable
+              accessibilityLabel="중보기도 신청"
+              accessibilityRole="button"
+              onPress={() => {
+                setOpen(false);
+                router.push("/prayer/apply");
+              }}
+              style={styles.fabMenuItem}
+              testID="prayer-fab-apply-item"
+            >
+              <AppIcon
+                name="prayer-apply"
+                size={18}
+                color={theme.colors.primaryDeep}
+              />
+              <AppText variant="caption" style={styles.fabMenuItemText}>
+                중보기도 신청
+              </AppText>
+            </MotionPressable>
+
+            <MotionPressable
+              accessibilityLabel="기도제목 작성"
+              accessibilityRole="button"
+              onPress={() => {
+                setOpen(false);
+                router.push("/modal/prayer-new");
+              }}
+              style={styles.fabMenuItem}
+              testID="prayer-fab-write-item"
+            >
+              <AppIcon name="edit" size={18} color={theme.colors.primaryDeep} />
+              <AppText variant="caption" style={styles.fabMenuItemText}>
+                기도제목 작성
+              </AppText>
+            </MotionPressable>
+          </View>
+        ) : null}
+
+        <FloatingActionButton
+          accessibilityLabel={open ? "기도 신청 메뉴 닫기" : "기도 신청 메뉴"}
+          icon={open ? "close" : "add"}
+          label={open ? "닫기" : "신청 및 작성"}
+          onPress={() => setOpen((prev) => !prev)}
+          style={styles.fabButton}
+          testID="prayer-fab-toggle"
+        />
+      </View>
+    </>
+  );
+}
+
 const styles = StyleSheet.create({
   segmented: {
     marginHorizontal: theme.layout.screenX,
@@ -695,28 +740,43 @@ const styles = StyleSheet.create({
   requestTitle: {
     marginTop: 8,
   },
-  applyCard: {
-    marginHorizontal: theme.layout.screenX,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: "rgba(91,122,176,0.22)",
-    backgroundColor: theme.colors.surface,
-    padding: 16,
+  fabBackdrop: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    zIndex: 19,
+  },
+  fabContainer: {
+    position: "absolute",
+    right: theme.layout.screenX,
+    bottom: 86,
+    zIndex: 20,
+    alignItems: "flex-end",
+  },
+  fabButton: {
+    position: "relative",
+    right: 0,
+    bottom: 0,
+  },
+  fabMenu: {
+    marginBottom: 10,
+    gap: 8,
+    alignItems: "flex-end",
+  },
+  fabMenuItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    ...theme.shadow.card,
   },
-  applyIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    backgroundColor: theme.colors.primarySoft,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  applyDesc: {
-    marginTop: 5,
+  fabMenuItemText: {
+    color: theme.colors.primaryDeep,
+    fontWeight: theme.fontWeight.bold,
   },
   pathCard: {
     marginHorizontal: theme.layout.screenX,

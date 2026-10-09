@@ -387,30 +387,27 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("소모임과 봉사로 함께 걸어가요")).toBeTruthy();
     expect(screen.getAllByText("소모임").length).toBeGreaterThan(0);
     expect(screen.getAllByText("봉사").length).toBeGreaterThan(0);
-    expect(await screen.findByText("내 소모임")).toBeTruthy();
+    expect(screen.getAllByText("내 소모임").length).toBeGreaterThan(0);
     fireEvent.press(screen.getByLabelText("소모임 개설"));
     expect(push).toHaveBeenCalledWith("/modal/group-new");
-    expect(
-      screen.getByTestId("group-my-section-header-view-all-icon"),
-    ).toBeTruthy();
-    expect(screen.getByText("전체 모임")).toBeTruthy();
   });
 
-  it("does not stack extra spacing below the group segment", async () => {
+  it("renders the joined groups when mine segment is selected", async () => {
     renderWithClient(<GroupScreen />);
     await screen.findByText("내 소모임");
 
-    expect(screen.getByTestId("group-my-section").props.style).toBeUndefined();
-    expect(
-      StyleSheet.flatten(
-        screen.getByTestId("group-my-section-header").props.style,
-      ),
-    ).not.toHaveProperty("paddingTop");
+    fireEvent.press(screen.getByTestId("group-section-mine"));
+
+    const myList = await screen.findByTestId("group-my-list");
+    expect(myList).toBeTruthy();
+    expect(within(myList).getByText("토요 산악회")).toBeTruthy();
+    expect(within(myList).getByText("독서 나눔")).toBeTruthy();
+    expect(within(myList).getByText("엄마들의 수다방")).toBeTruthy();
   });
 
   it("joins the group category filter to sticky controls at its content anchor", async () => {
     renderWithClient(<GroupScreen />);
-    await screen.findByText("내 소모임");
+    await screen.findByTestId("group-category-anchor");
 
     fireEvent(screen.getByTestId("group-category-anchor"), "layout", {
       nativeEvent: { layout: { x: 0, y: 300, width: 430, height: 56 } },
@@ -527,7 +524,7 @@ describe("v1 tab smoke screens", () => {
       .mockReturnValue({ push: jest.fn(), setParams: jest.fn() } as never);
     try {
       renderWithClient(<GroupScreen />);
-      await screen.findByText("내 소모임");
+      await screen.findByTestId("group-category-anchor");
 
       fireEvent(screen.getByTestId("group-category-anchor"), "layout", {
         nativeEvent: { layout: { x: 0, y: 300, width: 430, height: 56 } },
@@ -669,24 +666,16 @@ describe("v1 tab smoke screens", () => {
     }
   });
 
-  it("applies the group category filter only to the all-groups list", async () => {
+  it("applies the group category filter to the groups list", async () => {
     const setParams = jest.fn();
     jest
       .mocked(useRouter)
       .mockReturnValue({ push: jest.fn(), setParams } as never);
     renderWithClient(<GroupScreen />);
-    await screen.findByText("내 소모임");
-
-    const mySection = screen.getByTestId("group-my-section");
-    expect(within(mySection).getByText("토요 산악회")).toBeTruthy();
-    expect(within(mySection).getByText("독서 나눔")).toBeTruthy();
-    expect(within(mySection).getByText("엄마들의 수다방")).toBeTruthy();
+    await screen.findByTestId("group-card-1");
 
     fireEvent.press(screen.getByTestId("group-category-pray"));
 
-    expect(within(mySection).getByText("토요 산악회")).toBeTruthy();
-    expect(within(mySection).getByText("독서 나눔")).toBeTruthy();
-    expect(within(mySection).getByText("엄마들의 수다방")).toBeTruthy();
     expect(screen.getByText("화요 새벽기도회")).toBeTruthy();
     expect(screen.queryByText("찬양 동아리")).toBeNull();
     await waitFor(() =>
@@ -704,7 +693,7 @@ describe("v1 tab smoke screens", () => {
     } as never);
     jest.mocked(useRouter).mockReturnValue({ setParams } as never);
     renderWithClient(<GroupScreen />);
-    await screen.findByText("내 소모임");
+    await screen.findByTestId("group-card-1");
     const groupCardStyle = StyleSheet.flatten(
       screen.getByTestId("group-card-1").props.style,
     );
@@ -735,7 +724,7 @@ describe("v1 tab smoke screens", () => {
 
   it("opens group search and filters the visible list", async () => {
     renderWithClient(<GroupScreen />);
-    await screen.findByText("내 소모임");
+    await screen.findByTestId("group-card-1");
 
     // 내릴 때 숨김
     fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {

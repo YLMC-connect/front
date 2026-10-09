@@ -28,8 +28,6 @@ import {
   SEARCH_FIELD_STICKY_HEIGHT,
   SearchToggleButton,
   SegmentedTabs,
-  SectionHeader,
-  VisualCover,
   VisualThumb,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
@@ -42,10 +40,13 @@ import type {
   GroupServiceOverviewItem,
 } from "../../../src/types/group";
 
-const sections = [
+type GroupSection = "groups" | "service" | "mine";
+
+const sections: readonly { key: GroupSection; label: string }[] = [
   { key: "groups", label: "소모임" },
   { key: "service", label: "봉사" },
-] as const;
+  { key: "mine", label: "내 소모임" },
+];
 
 const GROUP_SEGMENT_STICKY_HEIGHT = 60;
 const GROUP_COMBINED_STICKY_HEIGHT = 116;
@@ -69,7 +70,6 @@ export default function GroupScreen() {
   const overview = useGroupOverview();
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [showMyFull, setShowMyFull] = useState(false);
   const [categoryAnchorY, setCategoryAnchorY] = useState<number | null>(null);
   const [categorySticky, setCategorySticky] = useState(false);
   const [stickyFilterInteractive, setStickyFilterInteractive] = useState(false);
@@ -105,10 +105,15 @@ export default function GroupScreen() {
     hideStickyFilterImmediately();
     setScrollStateResetKey((key) => key + 1);
   }, [hideStickyFilterImmediately]);
-  const routeSection = params.section === "service" ? "service" : "groups";
+  const routeSection: GroupSection =
+    params.section === "service"
+      ? "service"
+      : params.section === "mine" || variant === "my-full"
+        ? "mine"
+        : "groups";
   const routeCategory =
     GROUP_CATEGORIES.find((item) => item.key === params.category)?.key ?? "all";
-  const [section, setSection] = useMotionRouteParam(
+  const [section, setSection] = useMotionRouteParam<GroupSection>(
     routeSection,
     (nextSection) => {
       router.setParams({
@@ -252,7 +257,7 @@ export default function GroupScreen() {
   );
   const showStickyFilter = section === "groups" && stickyFilterMounted;
 
-  if (isMyFull || showMyFull) {
+  if (isMyFull) {
     return (
       <StickyHeaderScreen
         contentContainerStyle={styles.fullList}
@@ -263,7 +268,7 @@ export default function GroupScreen() {
         right={
           <SearchToggleButton
             accessibilityLabel="내 소모임 닫기"
-            onPress={() => (isMyFull ? router.back() : setShowMyFull(false))}
+            onPress={() => router.back()}
             open
             testID="group-my-list-close"
           />
@@ -406,57 +411,26 @@ export default function GroupScreen() {
               ))
             )}
           </View>
-        ) : (
-          <>
-            <View testID="group-my-section">
-              <SectionHeader
-                title="내 소모임"
-                onViewAll={() => setShowMyFull(true)}
-                style={styles.sectionHead}
-                testID="group-my-section-header"
+        ) : section === "mine" ? (
+          <View style={styles.serviceList} testID="group-my-list">
+            {myGroups.length === 0 ? (
+              <EmptyState
+                title="참여 중인 소모임이 없어요"
+                description="소모임 탭에서 관심 있는 모임에 참여해보세요."
               />
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.mineList}
-                style={styles.mineScroll}
-                snapToInterval={226}
-                decelerationRate="fast"
-              >
-                {myGroups.map((group) => (
-                  <Pressable
-                    key={group.id}
-                    accessibilityRole="button"
-                    style={styles.mineCard}
-                    onPress={() => openGroupDetail(group.id)}
-                  >
-                    <VisualCover height={78} seed={group.coverSeed} />
-                    <AppText
-                      numberOfLines={1}
-                      variant="cardTitle"
-                      style={styles.mineTitle}
-                    >
-                      {group.name}
-                    </AppText>
-                    <AppText
-                      numberOfLines={1}
-                      variant="caption"
-                      tone="muted"
-                      style={styles.mineMeta}
-                    >
-                      멤버 {group.currentMembers}명 ·{" "}
-                      {categoryOf(group.category)}
-                    </AppText>
-                  </Pressable>
-                ))}
-              </ScrollView>
-            </View>
-
-            <View style={styles.allSectionHeader}>
-              <AppText variant="sectionTitle" style={styles.allSectionTitle}>
-                전체 모임
-              </AppText>
-            </View>
+            ) : (
+              myGroups.map((group) => (
+                <CompanionCard
+                  key={group.id}
+                  kind="group"
+                  item={group}
+                  onPress={() => openGroupDetail(group.id)}
+                />
+              ))
+            )}
+          </View>
+        ) : (
+          <View style={styles.groupList}>
             <View
               onLayout={(event) => {
                 if (detailNavigationSuspended.current) return;
@@ -492,24 +466,22 @@ export default function GroupScreen() {
                 />
               </Animated.View>
             </View>
-            <View style={styles.groupList}>
-              {groups.length === 0 ? (
-                <EmptyState
-                  title="검색 결과가 없어요"
-                  description="카테고리나 검색어를 바꿔보세요."
+            {groups.length === 0 ? (
+              <EmptyState
+                title="검색 결과가 없어요"
+                description="카테고리나 검색어를 바꿔보세요."
+              />
+            ) : (
+              groups.map((group) => (
+                <CompanionCard
+                  key={group.id}
+                  kind="group"
+                  item={group}
+                  onPress={() => openGroupDetail(group.id)}
                 />
-              ) : (
-                groups.map((group) => (
-                  <CompanionCard
-                    key={group.id}
-                    kind="group"
-                    item={group}
-                    onPress={() => openGroupDetail(group.id)}
-                  />
-                ))
-              )}
-            </View>
-          </>
+              ))
+            )}
+          </View>
         )}
       </View>
     </StickyHeaderScreen>
@@ -623,41 +595,6 @@ const styles = StyleSheet.create({
   },
   body: {
     paddingBottom: 164,
-  },
-  allSectionHeader: {
-    marginTop: theme.spacing[2],
-  },
-  sectionHead: {
-    paddingHorizontal: theme.layout.screenX,
-    paddingBottom: theme.spacing[3],
-  },
-  allSectionTitle: {
-    paddingHorizontal: theme.layout.screenX,
-    paddingTop: theme.spacing[3],
-    paddingBottom: theme.spacing[3],
-  },
-  mineScroll: {
-    flexGrow: 0,
-  },
-  mineList: {
-    paddingHorizontal: theme.layout.screenX,
-    paddingBottom: 4,
-    gap: theme.layout.listGap,
-  },
-  mineCard: {
-    width: 200,
-    flexShrink: 0,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface,
-    padding: theme.layout.cardPadding,
-  },
-  mineTitle: {
-    marginTop: theme.spacing[2],
-  },
-  mineMeta: {
-    marginTop: theme.spacing[1],
   },
   categoryScroll: {
     flexGrow: 0,

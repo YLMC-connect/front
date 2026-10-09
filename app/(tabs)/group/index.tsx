@@ -14,9 +14,7 @@ import {
   Text,
   View,
 } from "react-native";
-import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
-import { useMotionPresence } from "../../../src/components/ui/motion";
 import {
   AppText,
   EmptyState,
@@ -50,8 +48,6 @@ const sections: readonly { key: GroupSection; label: string }[] = [
 
 const GROUP_SEGMENT_STICKY_HEIGHT = 60;
 const GROUP_COMBINED_STICKY_HEIGHT = 116;
-/** 필터 도킹 해제 시 깜빡임 방지 (px) */
-const GROUP_FILTER_UNDOCK_HYSTERESIS = 28;
 
 type GroupStackParamList = {
   "[id]": { id: string };
@@ -70,41 +66,22 @@ export default function GroupScreen() {
   const overview = useGroupOverview();
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [categoryAnchorY, setCategoryAnchorY] = useState<number | null>(null);
-  const [categorySticky, setCategorySticky] = useState(false);
-  const [stickyFilterInteractive, setStickyFilterInteractive] = useState(false);
   const listScrollRef = useRef<ScrollView | null>(null);
   const detailNavigationSuspended = useRef(false);
   const detailNavigationWasBlurred = useRef(false);
   const detailNavigationResetDone = useRef(false);
   const [scrollStateResetKey, setScrollStateResetKey] = useState(0);
   const currentScrollY = useRef(0);
-  const {
-    hideImmediately: hideStickyFilterImmediately,
-    mounted: stickyFilterMounted,
-    progress: categoryDockProgress,
-    reduceMotion,
-  } = useMotionPresence(categorySticky, {
-    duration: theme.motion.duration.base,
-  });
-  // opacity only — 위·아래 이동 없이 자리 유지해 도킹이 덜 튀게.
-  const contentFilterAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: 1 - categoryDockProgress.value,
-  }));
-  const stickyFilterAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: categoryDockProgress.value,
-  }));
+
   const resetGroupListAfterDetailNavigation = useCallback(() => {
     if (detailNavigationResetDone.current) return;
 
     detailNavigationResetDone.current = true;
     listScrollRef.current?.scrollTo({ y: 0, animated: false });
     currentScrollY.current = 0;
-    setCategorySticky(false);
-    setStickyFilterInteractive(false);
-    hideStickyFilterImmediately();
     setScrollStateResetKey((key) => key + 1);
-  }, [hideStickyFilterImmediately]);
+  }, []);
+
   const routeSection: GroupSection =
     params.section === "service"
       ? "service"
@@ -150,31 +127,6 @@ export default function GroupScreen() {
     : searchedGroups.filter((group) => group.isJoined);
   const isLoading = overview.isPending && !isError;
 
-  const updateCategoryDockState = useCallback(
-    (offsetY: number, anchorY = categoryAnchorY) => {
-      if (detailNavigationSuspended.current) return;
-
-      const activeAnchorY = section === "groups" ? anchorY : null;
-      if (activeAnchorY === null) {
-        setCategorySticky((current) => (current ? false : current));
-        return;
-      }
-
-      // 앵커 통과 시 sticky 도킹, 여유를 두고 해제 (경계 깜빡임 방지).
-      setCategorySticky((current) => {
-        const nextSticky = current
-          ? offsetY >= activeAnchorY - GROUP_FILTER_UNDOCK_HYSTERESIS
-          : offsetY >= activeAnchorY;
-        return current === nextSticky ? current : nextSticky;
-      });
-    },
-    [categoryAnchorY, section],
-  );
-
-  useEffect(() => {
-    updateCategoryDockState(currentScrollY.current);
-  }, [updateCategoryDockState]);
-
   useEffect(() => {
     const unsubscribeBlur = navigation.addListener("blur", () => {
       if (detailNavigationSuspended.current) {
@@ -214,29 +166,6 @@ export default function GroupScreen() {
     };
   }, [navigation, resetGroupListAfterDetailNavigation]);
 
-  if (reduceMotion && stickyFilterInteractive !== categorySticky) {
-    setStickyFilterInteractive(categorySticky);
-  }
-
-  useEffect(() => {
-    if (reduceMotion) return;
-
-    const interactiveTimer = setTimeout(
-      () => setStickyFilterInteractive(categorySticky),
-      theme.motion.duration.base / 2,
-    );
-
-    return () => clearTimeout(interactiveTimer);
-  }, [categorySticky, reduceMotion]);
-
-  const handleScrollOffsetChange = (offsetY: number) => {
-    currentScrollY.current = offsetY;
-    updateCategoryDockState(offsetY);
-  };
-  const shouldHandleGroupScroll = useCallback(
-    () => !detailNavigationSuspended.current,
-    [],
-  );
   const openGroupDetail = useCallback(
     (id: string) => {
       if (detailNavigationSuspended.current) return;
@@ -255,7 +184,8 @@ export default function GroupScreen() {
     },
     [navigation],
   );
-  const showStickyFilter = section === "groups" && stickyFilterMounted;
+
+  const hasCategoryFilter = section === "groups";
 
   if (isMyFull) {
     return (
@@ -298,10 +228,8 @@ export default function GroupScreen() {
       testID="screen-group"
       title="동행"
       subtitle="소모임과 봉사로 함께 걸어가요"
-      onScrollOffsetChange={handleScrollOffsetChange}
       scrollRef={listScrollRef}
       scrollStateResetKey={scrollStateResetKey}
-      shouldHandleScroll={shouldHandleGroupScroll}
       stickyControls={
         <View testID="group-sticky-controls-content">
           {searchOpen ? (
@@ -321,48 +249,25 @@ export default function GroupScreen() {
             style={styles.segmented}
             testIDPrefix="group-section"
           />
-          {showStickyFilter ? (
-            <Animated.View
-              accessibilityElementsHidden={!stickyFilterInteractive}
-              importantForAccessibility={
-                stickyFilterInteractive ? "auto" : "no-hide-descendants"
-              }
-              pointerEvents={stickyFilterInteractive ? "auto" : "none"}
-              style={stickyFilterAnimatedStyle}
-              testID="group-sticky-controls-filter"
-            >
-              <FilterChips
-                items={GROUP_CATEGORIES}
-                active={category}
-                onChange={setCategory}
-                style={styles.categoryScroll}
-                testIDPrefix="group-sticky-category"
-              />
-            </Animated.View>
+          {hasCategoryFilter ? (
+            <FilterChips
+              items={GROUP_CATEGORIES}
+              active={category}
+              onChange={setCategory}
+              style={styles.categoryScroll}
+              testIDPrefix="group-category"
+            />
           ) : null}
         </View>
       }
       stickyControlsHeight={
-        (showStickyFilter
+        (hasCategoryFilter
           ? GROUP_COMBINED_STICKY_HEIGHT
           : GROUP_SEGMENT_STICKY_HEIGHT) +
         (searchOpen ? SEARCH_FIELD_STICKY_HEIGHT : 0)
       }
-      stickyControlsCollapsedHeight={
-        GROUP_SEGMENT_STICKY_HEIGHT +
-        (searchOpen ? SEARCH_FIELD_STICKY_HEIGHT : 0)
-      }
-      stickyControlsHeightProgress={categoryDockProgress}
-      stickyControlsInset={
-        GROUP_SEGMENT_STICKY_HEIGHT +
-        (searchOpen ? SEARCH_FIELD_STICKY_HEIGHT : 0)
-      }
-      // 내릴 때 숨김 · 위로 살짝 올리면 다시 표시. 필터는 앵커 통과 시 sticky에 붙음.
       stickyControlsHideMode="direction"
       stickyControlsAlwaysVisible={searchOpen}
-      stickyControlsRevealKey={
-        showStickyFilter ? "segment-with-filter" : "segment-only"
-      }
       right={
         <SearchToggleButton
           accessibilityLabel={searchOpen ? "동행 검색 닫기" : "동행 검색"}
@@ -431,41 +336,6 @@ export default function GroupScreen() {
           </View>
         ) : (
           <View style={styles.groupList}>
-            <View
-              onLayout={(event) => {
-                if (detailNavigationSuspended.current) return;
-
-                const {
-                  height,
-                  width,
-                  y: nextAnchorY,
-                } = event.nativeEvent.layout;
-                if (width <= 0 || height <= 0) return;
-
-                setCategoryAnchorY(nextAnchorY);
-                updateCategoryDockState(currentScrollY.current, nextAnchorY);
-              }}
-              style={styles.categoryAnchor}
-              testID="group-category-anchor"
-            >
-              <Animated.View
-                accessibilityElementsHidden={stickyFilterInteractive}
-                importantForAccessibility={
-                  stickyFilterInteractive ? "no-hide-descendants" : "auto"
-                }
-                pointerEvents={stickyFilterInteractive ? "none" : "auto"}
-                style={contentFilterAnimatedStyle}
-                testID="group-content-filter"
-              >
-                <FilterChips
-                  items={GROUP_CATEGORIES}
-                  active={category}
-                  onChange={setCategory}
-                  style={styles.categoryScroll}
-                  testIDPrefix="group-category"
-                />
-              </Animated.View>
-            </View>
             {groups.length === 0 ? (
               <EmptyState
                 title="검색 결과가 없어요"
@@ -601,9 +471,6 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     height: 44,
     marginBottom: theme.spacing[2],
-  },
-  categoryAnchor: {
-    height: GROUP_COMBINED_STICKY_HEIGHT - GROUP_SEGMENT_STICKY_HEIGHT,
   },
   groupList: {
     paddingHorizontal: theme.layout.screenX,

@@ -47,7 +47,7 @@ const sections: readonly { key: GroupSection; label: string }[] = [
 ];
 
 const GROUP_SEGMENT_STICKY_HEIGHT = 60;
-const GROUP_COMBINED_STICKY_HEIGHT = 116;
+const GROUP_STICKY_CONTROLS_HEIGHT = 116;
 
 type GroupStackParamList = {
   "[id]": { id: string };
@@ -224,7 +224,6 @@ export default function GroupScreen() {
 
   return (
     <StickyHeaderScreen
-      contentContainerStyle={styles.body}
       testID="screen-group"
       title="동행"
       subtitle="소모임과 봉사로 함께 걸어가요"
@@ -262,7 +261,7 @@ export default function GroupScreen() {
       }
       stickyControlsHeight={
         (hasCategoryFilter
-          ? GROUP_COMBINED_STICKY_HEIGHT
+          ? GROUP_STICKY_CONTROLS_HEIGHT
           : GROUP_SEGMENT_STICKY_HEIGHT) +
         (searchOpen ? SEARCH_FIELD_STICKY_HEIGHT : 0)
       }
@@ -288,7 +287,7 @@ export default function GroupScreen() {
         />
       }
     >
-      <View testID="group-scroll-content">
+      <View style={styles.list} testID="group-scroll-content">
         {isLoading ? (
           <View style={styles.loading}>
             <ListSkeleton rows={4} thumbnail={false} />
@@ -299,25 +298,23 @@ export default function GroupScreen() {
             onRetry={() => overview.refetch()}
           />
         ) : section === "service" ? (
-          <View style={styles.serviceList}>
-            {serviceItems.length === 0 ? (
-              <EmptyState
-                title="검색 결과가 없어요"
-                description="다른 검색어로 다시 찾아보세요."
+          serviceItems.length === 0 ? (
+            <EmptyState
+              title="검색 결과가 없어요"
+              description="다른 검색어로 다시 찾아보세요."
+            />
+          ) : (
+            serviceItems.map((item) => (
+              <CompanionCard
+                key={item.id}
+                kind="service"
+                item={item}
+                onPress={() => openGroupDetail(item.linkedGroupId)}
               />
-            ) : (
-              serviceItems.map((item) => (
-                <CompanionCard
-                  key={item.id}
-                  kind="service"
-                  item={item}
-                  onPress={() => openGroupDetail(item.linkedGroupId)}
-                />
-              ))
-            )}
-          </View>
+            ))
+          )
         ) : section === "mine" ? (
-          <View style={styles.serviceList} testID="group-my-list">
+          <View style={styles.myListWrap} testID="group-my-list">
             {myGroups.length === 0 ? (
               <EmptyState
                 title="참여 중인 소모임이 없어요"
@@ -334,24 +331,20 @@ export default function GroupScreen() {
               ))
             )}
           </View>
+        ) : groups.length === 0 ? (
+          <EmptyState
+            title="검색 결과가 없어요"
+            description="카테고리나 검색어를 바꿔보세요."
+          />
         ) : (
-          <View style={styles.groupList}>
-            {groups.length === 0 ? (
-              <EmptyState
-                title="검색 결과가 없어요"
-                description="카테고리나 검색어를 바꿔보세요."
-              />
-            ) : (
-              groups.map((group) => (
-                <CompanionCard
-                  key={group.id}
-                  kind="group"
-                  item={group}
-                  onPress={() => openGroupDetail(group.id)}
-                />
-              ))
-            )}
-          </View>
+          groups.map((group) => (
+            <CompanionCard
+              key={group.id}
+              kind="group"
+              item={group}
+              onPress={() => openGroupDetail(group.id)}
+            />
+          ))
         )}
       </View>
     </StickyHeaderScreen>
@@ -463,28 +456,20 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: theme.spacing[3],
   },
-  body: {
-    paddingBottom: 164,
-  },
   categoryScroll: {
     flexGrow: 0,
     flexShrink: 0,
     height: 44,
     marginBottom: theme.spacing[2],
   },
-  groupList: {
-    paddingHorizontal: theme.layout.screenX,
-    paddingBottom: theme.spacing[3],
+  list: {
     gap: theme.spacing[3],
+    paddingBottom: 164,
   },
-  serviceList: {
-    paddingHorizontal: theme.layout.screenX,
-    paddingTop: theme.spacing[2],
-    paddingBottom: theme.spacing[3],
+  myListWrap: {
     gap: theme.spacing[3],
   },
   fullList: {
-    paddingHorizontal: theme.layout.screenX,
     paddingBottom: theme.spacing[6],
     gap: theme.spacing[3],
   },
@@ -494,6 +479,7 @@ const styles = StyleSheet.create({
   groupCard: {
     flexDirection: "row",
     gap: theme.layout.listGap,
+    marginHorizontal: theme.layout.screenX,
     minHeight: 120,
     borderRadius: theme.radius.md,
     borderWidth: 1,

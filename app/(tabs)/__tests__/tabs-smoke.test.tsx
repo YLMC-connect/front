@@ -915,12 +915,22 @@ describe("v1 tab smoke screens", () => {
     expect(requestCard.props.onPress).toBeUndefined();
   });
 
-  it("renders the prayer apply screen", () => {
+  it("renders the prayer apply screen", async () => {
     renderWithClient(<PrayerApplyScreenRoute />);
 
     expect(screen.getByText("기도방 참여 신청")).toBeTruthy();
     expect(screen.getByText("1. 요일 선택")).toBeTruthy();
+    expect(screen.getByText("토요일")).toBeTruthy();
+    expect(screen.getByLabelText("특이사항")).toBeTruthy();
+    expect(
+      screen.queryByText("기도방 참여를 희망하는 이유를 적어주세요"),
+    ).toBeNull();
+    expect(screen.queryByText("김은혜")).toBeNull();
     expect(screen.getByText("월요일 오전 기도방 신청하기")).toBeTruthy();
+    fireEvent.press(screen.getByText("월요일 오전 기도방 신청하기"));
+    expect(
+      await screen.findByText("목 데이터에는 기도방 신청이 없습니다."),
+    ).toBeTruthy();
   });
 
   it("renders the prayer request screen", () => {

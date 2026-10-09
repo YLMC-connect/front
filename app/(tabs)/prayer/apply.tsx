@@ -10,8 +10,9 @@ import {
   View,
 } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
-import { Badge, TopBar } from "../../../src/components/ui";
+import { TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { useCreatePrayerApplication } from "../../../src/hooks/usePrayers";
 
 const days = ["월", "화", "수", "목", "금", "토"] as const;
 const dayNames: Record<(typeof days)[number], string> = {
@@ -22,6 +23,7 @@ const dayNames: Record<(typeof days)[number], string> = {
   금: "금요일",
   토: "토요일",
 };
+const dayYoil = { 월: 1, 화: 2, 수: 3, 목: 4, 금: 5, 토: 6 } as const;
 const times = ["오전", "오후"] as const;
 
 export default function PrayerApplyScreenRoute() {
@@ -29,7 +31,20 @@ export default function PrayerApplyScreenRoute() {
   const [selectedDay, setSelectedDay] = useState<(typeof days)[number]>("월");
   const [selectedTime, setSelectedTime] =
     useState<(typeof times)[number]>("오전");
+  const [memo, setMemo] = useState("");
+  const apply = useCreatePrayerApplication();
   const selectedLabel = `${dayNames[selectedDay]} ${selectedTime} 기도방`;
+  const sent = apply.isSuccess;
+
+  function onSubmit() {
+    if (apply.isPending || sent) return;
+    const applyMemo = memo.trim();
+    apply.mutate({
+      yoil: dayYoil[selectedDay],
+      timeSlot: selectedTime === "오전" ? "AM" : "PM",
+      ...(applyMemo ? { applyMemo } : {}),
+    });
+  }
 
   return (
     <Screen scroll={false} padded={false}>
@@ -83,39 +98,51 @@ export default function PrayerApplyScreenRoute() {
               </View>
             </View>
 
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>신청자 정보</Text>
-              <Field label="이름" value="김은혜" />
-              <Field label="연락처" value="010-1234-5678" />
-              <View>
-                <Text style={styles.fieldLabel}>신청 메모</Text>
-                <TextInput
-                  editable={false}
-                  multiline
-                  placeholder="기도방 참여를 희망하는 이유를 적어주세요"
-                  placeholderTextColor={theme.colors.inkHint}
-                  style={[styles.input, styles.textarea]}
-                />
-              </View>
+            <View>
+              <Text style={styles.sectionLabel}>3. 특이사항</Text>
+              <TextInput
+                accessibilityLabel="특이사항"
+                editable={!apply.isPending && !sent}
+                multiline
+                onChangeText={setMemo}
+                placeholder="비고가 있으면 적어주세요"
+                placeholderTextColor={theme.colors.inkHint}
+                style={styles.memoInput}
+                value={memo}
+              />
             </View>
 
-            <View style={styles.waitingCard}>
-              <View style={styles.waitingHead}>
-                <Badge tone="warn">승인 대기</Badge>
-                <Text style={styles.waitingTitle}>
-                  신청 후 중복 신청은 제한됩니다
-                </Text>
-              </View>
-              <Text style={styles.waitingText}>
-                중보기도 관리자가 승인하면 내 기도방에 표시됩니다.
+            {sent ? (
+              <Text style={styles.result}>신청을 보냈습니다.</Text>
+            ) : null}
+            {apply.isError ? (
+              <Text style={styles.errorText}>
+                {apply.error instanceof Error
+                  ? apply.error.message
+                  : "신청을 보내지 못했습니다."}
               </Text>
-            </View>
+            ) : null}
           </View>
         </ScrollView>
 
         <View style={styles.bottom}>
-          <Pressable accessibilityRole="button" style={styles.submitButton}>
-            <Text style={styles.submitText}>{selectedLabel} 신청하기</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ disabled: apply.isPending || sent }}
+            disabled={apply.isPending || sent}
+            onPress={onSubmit}
+            style={[
+              styles.submitButton,
+              apply.isPending || sent ? styles.submitButtonDisabled : null,
+            ]}
+          >
+            <Text style={styles.submitText}>
+              {sent
+                ? "신청을 보냈습니다"
+                : apply.isPending
+                  ? "신청을 보내는 중입니다"
+                  : `${selectedLabel} 신청하기`}
+            </Text>
           </Pressable>
         </View>
       </View>
@@ -152,15 +179,6 @@ function SelectRow({
         </Text>
       </View>
     </Pressable>
-  );
-}
-
-function Field({ label, value }: { label: string; value: string }) {
-  return (
-    <View>
-      <Text style={styles.fieldLabel}>{label}</Text>
-      <TextInput editable={false} style={styles.input} value={value} />
-    </View>
   );
 }
 
@@ -245,61 +263,25 @@ const styles = StyleSheet.create({
   selectedTextOn: {
     color: theme.colors.primaryDeep,
   },
-  card: {
-    borderRadius: theme.radius.lg,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface,
-    padding: 15,
-    gap: 12,
-  },
-  cardTitle: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.extrabold,
-  },
-  fieldLabel: {
-    marginBottom: 6,
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  input: {
-    height: 46,
+  memoInput: {
+    minHeight: 86,
     borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface2,
+    backgroundColor: theme.colors.surface,
     paddingHorizontal: 14,
+    paddingTop: 12,
     color: theme.colors.ink,
     fontSize: theme.fontSize.md,
-  },
-  textarea: {
-    minHeight: 86,
-    paddingTop: 12,
     textAlignVertical: "top",
   },
-  waitingCard: {
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface,
-    padding: 14,
+  result: {
+    color: theme.colors.primaryDeep,
+    fontSize: theme.fontSize.sm,
+    lineHeight: 20,
   },
-  waitingHead: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  waitingTitle: {
-    flex: 1,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-    fontWeight: theme.fontWeight.extrabold,
-  },
-  waitingText: {
-    marginTop: 8,
-    color: theme.colors.inkSoft,
+  errorText: {
+    color: theme.colors.danger,
     fontSize: theme.fontSize.sm,
     lineHeight: 20,
   },
@@ -316,6 +298,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     ...theme.shadow.primary,
+  },
+  submitButtonDisabled: {
+    opacity: 0.6,
   },
   submitText: {
     color: theme.colors.white,

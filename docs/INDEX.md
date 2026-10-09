@@ -27,7 +27,7 @@
 |---|---|---|---|---|
 | common (공통 인프라) | 5 | 46 | 2026-10-09 | [features/common.md](features/common.md) |
 | auth (인증) | 1 | 15 | 2026-10-09 | [features/auth.md](features/auth.md) |
-| home (홈) | 1 | 1 | 2026-10-09 | [features/home.md](features/home.md) |
+| home (홈) | 0 | 2 | 2026-10-09 | [features/home.md](features/home.md) |
 | market (나눔장터) | 1 | 24 | 2026-09-06 | [features/market.md](features/market.md) |
 | group (소모임) | 1 | 29 | 2026-09-17 | [features/group.md](features/group.md) |
 | mypage (MY) | 0 | 7 | 2026-10-09 | [features/mypage.md](features/mypage.md) |

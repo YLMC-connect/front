@@ -123,7 +123,7 @@ export function createLifeStudyService(dataSource: LifeStudyDataSource) {
   };
 }
 
-function resolveLifeStudyAdapterMode(): "http" | "mock" {
+export function resolveLifeStudyAdapterMode(): "http" | "mock" {
   const fromEnv = process.env.EXPO_PUBLIC_LIFE_STUDY_ADAPTER;
   if (fromEnv === "http" || fromEnv === "mock") return fromEnv;
   return Constants.expoConfig?.extra?.lifeStudyAdapter === "http"

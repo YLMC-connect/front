@@ -87,6 +87,11 @@ export default function ActivityScreen() {
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
         <TopBar title="활동 내역" back onBack={() => router.back()} />
+        {__DEV__ ? (
+          <Text style={styles.sourceCaption}>
+            {httpAdapter ? "서버 데이터" : "목업 데이터"}
+          </Text>
+        ) : null}
         <UnderlineTabs
           items={tabs}
           active={active}
@@ -197,6 +202,12 @@ function GroupRow({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+  },
+  sourceCaption: {
+    paddingHorizontal: 18,
+    paddingBottom: 4,
+    color: theme.colors.inkMute,
+    fontSize: theme.fontSize.xs,
   },
   body: {
     paddingHorizontal: 18,

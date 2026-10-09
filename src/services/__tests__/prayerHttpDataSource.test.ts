@@ -99,6 +99,7 @@ describe("httpPrayerDataSource", () => {
       rooms: [
         {
           id: "15",
+          title: "월요일 오전 기도방",
           weekday: "mon",
           period: "morning",
           memberCount: 41,

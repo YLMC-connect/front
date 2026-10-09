@@ -1,9 +1,18 @@
 import { AppIcon } from "@/components/ui/app-icon";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import { Badge, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import {
+  fetchMyPrayerTopics,
+  resolvePrayerAdapterMode,
+} from "../../../src/services/prayerService";
+import type {
+  PrayerTopicDto,
+  PrayerTopicStatus,
+} from "../../../src/types/prayerApi";
 
 type RequestStatusTone = "primary" | "mute" | "warn" | "danger";
 
@@ -53,14 +62,47 @@ const requests: readonly {
   },
 ] as const;
 
+const topicStatusLabel: Record<
+  PrayerTopicStatus,
+  { label: string; tone: RequestStatusTone }
+> = {
+  REVIEW: { label: "검토중", tone: "warn" },
+  OPEN: { label: "공개중", tone: "primary" },
+  REJECTED: { label: "반려", tone: "danger" },
+  ANSWER_REQUESTED: { label: "응답 요청", tone: "mute" },
+  ANSWERED: { label: "응답됨", tone: "primary" },
+  HIDDEN: { label: "숨김", tone: "mute" },
+};
+
 export default function PrayerRequestScreenRoute() {
   const router = useRouter();
+  const http = resolvePrayerAdapterMode() === "http";
+  const topics = useQuery({
+    queryKey: ["prayer", "my-topics", "request-screen"],
+    queryFn: fetchMyPrayerTopics,
+    enabled: http,
+  });
+  const rows = http
+    ? (topics.data ?? []).map((topic: PrayerTopicDto) => ({
+        title: topic.title,
+        category: topic.categoryName,
+        status: topicStatusLabel[topic.status].label,
+        desc: topic.content,
+        tone: topicStatusLabel[topic.status].tone,
+        active: false,
+      }))
+    : requests;
 
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
         <TopBar title="내 기도제목" back onBack={() => router.back()} />
         <ScrollView contentContainerStyle={styles.body}>
+          {__DEV__ ? (
+            <Text style={styles.desc}>
+              {http ? "서버 데이터" : "목업 데이터"}
+            </Text>
+          ) : null}
           <View style={styles.noticeCard}>
             <Text style={styles.noticeTitle}>
               기도제목은 승인 후 공개됩니다
@@ -72,7 +114,18 @@ export default function PrayerRequestScreenRoute() {
           </View>
 
           <View style={styles.stack}>
-            {requests.map((request) => (
+            {http && topics.isPending ? (
+              <Text style={styles.desc}>
+                서버에서 기도제목을 불러오는 중입니다.
+              </Text>
+            ) : null}
+            {http && topics.isError ? (
+              <Text style={styles.desc}>기도제목을 다시 불러와주세요.</Text>
+            ) : null}
+            {http && topics.isSuccess && rows.length === 0 ? (
+              <Text style={styles.desc}>등록된 기도제목이 없습니다.</Text>
+            ) : null}
+            {rows.map((request) => (
               <Pressable
                 accessibilityRole="button"
                 key={request.title}

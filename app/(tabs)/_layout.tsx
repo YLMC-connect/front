@@ -1,12 +1,7 @@
 import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { LinearGradient } from "expo-linear-gradient";
-import {
-  Tabs,
-  usePathname,
-  useRouter,
-  type ImperativeRouter,
-} from "expo-router";
+import { Tabs, usePathname } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, {
@@ -126,9 +121,12 @@ export default function TabsLayout() {
   );
 }
 
-function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+export function AppTabBar({
+  state,
+  descriptors,
+  navigation,
+}: BottomTabBarProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const currentRoute = state.routes[state.index];
   const currentOptions = descriptors[currentRoute.key]?.options;
 
@@ -146,7 +144,7 @@ function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
       state={state}
       descriptors={descriptors}
       navigation={navigation}
-      router={router}
+      pathname={pathname}
       routes={routes}
     />
   );
@@ -156,10 +154,10 @@ function VisibleTabBar({
   state,
   descriptors,
   navigation,
-  router,
+  pathname,
   routes,
 }: Pick<BottomTabBarProps, "state" | "descriptors" | "navigation"> & {
-  router: ImperativeRouter;
+  pathname: string;
   routes: TabRoute[];
 }) {
   const blurTarget = useTabBlurTarget();
@@ -255,11 +253,7 @@ function VisibleTabBar({
                 testID={options.tabBarButtonTestID}
                 onPress={() => {
                   const tab = findRootTab(route.name);
-                  if (tab) {
-                    router.replace(tab.href);
-                    return;
-                  }
-
+                  if (tab && (focused || pathname === tab.href)) return;
                   navigation.navigate(route.name);
                 }}
               />

@@ -5,7 +5,10 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import { Button, Card, DetailBadge, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { useLifeStudyOverview } from "../../../src/hooks/useLifeStudyCourses";
 import { readDesignVariant } from "../../../src/lib/designVariant";
+import { resolveLifeStudyAdapterMode } from "../../../src/services/lifeStudyService";
+import type { LifeStudyOverviewStatus } from "../../../src/types/lifeStudy";
 
 const course = {
   name: "생명의 삶",
@@ -66,10 +69,89 @@ const assignments = [
   { week: "3주차", title: "성경 읽기 적용 기록", state: "제출 확인" },
 ] as const;
 
+const lifeStudyStatusLabel: Record<LifeStudyOverviewStatus, string> = {
+  completed: "수료",
+  recommended: "추천",
+  pending: "대기",
+};
+
+function routeId(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function LiveLifeStudyDetail({ id }: { id: string }) {
+  const router = useRouter();
+  const overview = useLifeStudyOverview();
+  const course = [
+    ...(overview.data?.courses ?? []),
+    ...(overview.data?.openCourses ?? []),
+  ].find((item) => item.id === id);
+
+  return (
+    <Screen scroll={false} padded={false}>
+      <View style={styles.root}>
+        <TopBar
+          title={course?.title || "삶공부"}
+          back
+          onBack={() => router.back()}
+        />
+        <ScrollView contentContainerStyle={styles.body}>
+          <View style={styles.hero}>
+            {__DEV__ ? <Text style={styles.caption}>서버 데이터</Text> : null}
+            {overview.isPending ? (
+              <Text style={styles.desc}>서버에서 불러오는 중입니다.</Text>
+            ) : null}
+            {overview.isError ? (
+              <Text style={styles.desc}>과정을 다시 불러와주세요.</Text>
+            ) : null}
+            {overview.isSuccess && !course ? (
+              <Text style={styles.desc}>
+                서버 수료 목록에 이 과정이 없습니다.
+              </Text>
+            ) : null}
+            {course ? (
+              <>
+                <Text style={styles.title}>{course.title || "이름 없음"}</Text>
+                <Text style={styles.caption}>
+                  {lifeStudyStatusLabel[course.status ?? "pending"]}
+                </Text>
+                {course.summary ? (
+                  <Text style={styles.desc}>{course.summary}</Text>
+                ) : null}
+                {course.instructorName || course.weekCount > 0 ? (
+                  <Card style={styles.infoCard}>
+                    <Text style={styles.infoTitle}>과정 정보</Text>
+                    {course.instructorName ? (
+                      <InfoRow label="강사" value={course.instructorName} />
+                    ) : null}
+                    {course.weekCount > 0 ? (
+                      <InfoRow label="주 수" value={`${course.weekCount}주`} />
+                    ) : null}
+                  </Card>
+                ) : null}
+                <Text style={styles.desc}>
+                  팀장, 교재, 커리큘럼, 수업 일정은 수료 응답에 없습니다.
+                </Text>
+              </>
+            ) : null}
+          </View>
+        </ScrollView>
+      </View>
+    </Screen>
+  );
+}
+
 export default function LifeStudyDetailScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const params = useLocalSearchParams<{
+    id?: string;
+    designVariant?: string;
+  }>();
+  const id = routeId(params.id);
   const variant = readDesignVariant(params.designVariant);
+  if (id && !params.designVariant && resolveLifeStudyAdapterMode() === "http") {
+    return <LiveLifeStudyDetail id={id} />;
+  }
   const enrolled = variant === "enrolled";
 
   return (

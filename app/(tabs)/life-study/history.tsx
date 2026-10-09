@@ -1,8 +1,13 @@
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen, Section } from "../../../src/components/layout/Screen";
 import { Badge, Button, TopBar, VisualThumb } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import {
+  fetchMyLifeStudyCompletions,
+  resolveLifeStudyAdapterMode,
+} from "../../../src/services/lifeStudyService";
 
 const applications = [
   {
@@ -59,6 +64,53 @@ const completed = [
 
 export default function LifeStudyHistoryScreen() {
   const router = useRouter();
+  const http = resolveLifeStudyAdapterMode() === "http";
+  const completions = useQuery({
+    queryKey: ["lifeStudy", "my-completions", "history-screen"],
+    queryFn: fetchMyLifeStudyCompletions,
+    enabled: http,
+  });
+
+  if (http) {
+    const rows = completions.data ?? [];
+    return (
+      <Screen scroll={false} padded={false}>
+        <View style={styles.root}>
+          <TopBar title="수강 내역" back onBack={() => router.back()} />
+          <ScrollView contentContainerStyle={styles.body}>
+            {__DEV__ ? <Text style={styles.meta}>서버 데이터</Text> : null}
+            <Section title="내 수료 기록">
+              {completions.isPending ? (
+                <Text style={styles.meta}>서버에서 불러오는 중입니다.</Text>
+              ) : null}
+              {completions.isError ? (
+                <Text style={styles.meta}>수강 내역을 다시 불러와주세요.</Text>
+              ) : null}
+              {!completions.isPending &&
+              !completions.isError &&
+              rows.length === 0 ? (
+                <Text style={styles.meta}>수료 기록이 없습니다.</Text>
+              ) : null}
+              <View style={styles.stack}>
+                {rows.map((course) => (
+                  <View key={course.id} style={styles.card}>
+                    <Text style={styles.title}>
+                      {course.title || "이름 없음"}
+                    </Text>
+                    <Text style={styles.meta}>
+                      {course.completedAt
+                        ? `수료 ${course.completedAt}`
+                        : "수료일 없음"}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </Section>
+          </ScrollView>
+        </View>
+      </Screen>
+    );
+  }
 
   return (
     <Screen scroll={false} padded={false}>

@@ -213,7 +213,7 @@ export function createPrayerService(dataSource: PrayerDataSource) {
   };
 }
 
-function resolvePrayerAdapterMode(): "http" | "mock" {
+export function resolvePrayerAdapterMode(): "http" | "mock" {
   const fromEnv = process.env.EXPO_PUBLIC_PRAYER_ADAPTER;
   if (fromEnv === "http" || fromEnv === "mock") return fromEnv;
   return Constants.expoConfig?.extra?.prayerAdapter === "http"

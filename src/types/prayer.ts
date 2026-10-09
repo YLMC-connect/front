@@ -49,6 +49,8 @@ export type PrayerPeriod = "morning" | "afternoon";
 
 export interface PrayerOverviewRoom {
   id: string;
+  /** 서버 기도방 이름. mock 행에는 없다. */
+  title?: string;
   weekday: PrayerWeekday;
   period: PrayerPeriod;
   memberCount: number;

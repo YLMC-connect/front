@@ -457,6 +457,7 @@ function cohortToOverviewRoom(
   if (!weekday || !period || !joined) return null;
   return {
     id: String(cohort.id),
+    title: cohort.cohortName,
     weekday,
     period,
     memberCount: cohort.memberCount,

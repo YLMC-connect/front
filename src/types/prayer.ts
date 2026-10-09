@@ -38,7 +38,13 @@ export interface PrayerTopicInput {
 }
 
 export type PrayerOverviewRoomStatus = "joined" | "pending";
-export type PrayerRequestStatus = "reviewing" | "published" | "rejected";
+export type PrayerRequestStatus =
+  | "reviewing"
+  | "published"
+  | "rejected"
+  | "answerRequested"
+  | "answered"
+  | "hidden";
 export type PrayerPeriod = "morning" | "afternoon";
 
 export interface PrayerOverviewRoom {

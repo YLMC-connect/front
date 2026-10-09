@@ -295,9 +295,9 @@ function StudyContent({ search }: { search: string }) {
     );
   }
 
-  const progressPercent = Math.round(
-    (data.path.completedRequired / data.path.totalRequired) * 100,
-  );
+  const progressPercent = data.path.totalRequired
+    ? Math.round((data.path.completedRequired / data.path.totalRequired) * 100)
+    : 0;
   const normalizedSearch = search.trim().toLocaleLowerCase();
   const matchesSearch = (course: LifeStudyOverviewCourse) =>
     !normalizedSearch ||
@@ -486,6 +486,9 @@ const requestStatusLabels: Record<PrayerRequestStatus, string> = {
   reviewing: "검토중",
   published: "공개중",
   rejected: "반려",
+  answerRequested: "응답 요청",
+  answered: "응답됨",
+  hidden: "숨김",
 };
 
 const lifeStudyStatusLabels: Record<LifeStudyOverviewStatus, string> = {

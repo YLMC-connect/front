@@ -80,6 +80,7 @@ npm run test:coverage
 npm run test:api:contract
 npm run test:api:contract:market
 npm run test:api:contract:group
+npm run test:api:contract:mypage
 ```
 
 Jest + React Native Testing Library로 공통 UI, 도메인 옵션, 홈/나눔/동행/기도/삶공부 핵심 화면 렌더링을 mock-first 기준으로 확인합니다.
@@ -89,6 +90,8 @@ Jest + React Native Testing Library로 공통 UI, 도메인 옵션, 홈/나눔/�
 `test:api:contract:market`은 나눔 CRUD·댓글·신고·이미지 업로드 endpoint와 목록/상세/작성 화면에 필요한 작성자명·이미지·검색·장소·enum·상태 변경·제목/본문 길이·사진 5장 계약을 확인합니다. 업로드 경로 이름을 가정하지 않고 operation summary/id로 찾은 뒤 request/200 DTO를 검증합니다. 누락 필드를 임의 fallback으로 감추지 않고 DTO mapper를 활성화하기 전에 실패로 노출합니다.
 
 `test:api:contract:group`은 동행 목록·상세·내 목록·멤버/공지·참여/탈퇴·생성/수정/상태/관리 endpoint와 카드 표시 필드, 일정·장소, 필터, enum, 제목/본문·정원 입력 제한, 소모임장 이관 계약을 확인합니다.
+
+`test:api:contract:mypage`는 2026-10-06 마이페이지 활동 `GET /api/mypage/activities` 5종을 확인합니다. posts·comments·groups는 0-based `page` 요청과 `PageResponse`의 `content`, `totalElements`, `totalPages`, 1-based `currentPage`, `size`, `hasNext`를 확인하고, life-studies·prayers는 페이징 없는 단일 객체를 확인합니다. `npm run validate`에는 넣지 않습니다.
 
 API 오류는 `getApiErrorMessage`가 `ApiError.code`를 도메인 메시지 표로 변환합니다. 문서화되지 않은 API 코드는 서버 `message`를 그대로 노출하지 않고 화면별 안전한 fallback을 사용하며, 현재 Swagger에 정의된 인증 `MEM001~MEM006`은 `authApiErrorMessages`로 관리합니다.
 

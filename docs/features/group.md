@@ -1,6 +1,6 @@
 # group (소모임)
 
-> 마지막 갱신: 2026-10-09 (내 소모임 세그먼트화) | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-10-09 (카테고리 필터 stickyControls 통합) | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 동행 카테고리 필터 stickyControls 통합 및 도킹 구조 제거 — 내 소모임이 독립 세그먼트 탭으로 분리됨에 따라, 소모임 탭 상단의 복잡한 인라인 필터 앵커와 도킹 애니메이션을 제거하고 나눔과 동일하게 상단 stickyControls에 FilterChips를 직접 배치. 필터와 첫 번째 카드 사이 간격을 나눔 기준(16px)으로 일치시킴
 - 동행 HTTP data source — 라이브 목록(`type=SMALL_GROUP|VOLUNTEER`), `/my`, 상세, 멤버, 개설, 공지 CUD, `POST /api/communion/{id}/join`·`DELETE /api/communion/{id}/leave`를 `httpGroupDataSource`로 연결. 상세의 참여/탈퇴 버튼이 같은 경계를 사용. 상태/카테고리/타입은 common-codes 관측값만 매핑. 목록 `content`·일정·장소가 없어 설명/일정은 빈 문자열, 생성 요청에서 일정·장소 제외. 서버에 없는 카테고리(목장·선교·카풀·봉사)는 개설을 거절. development 기본값은 HTTP
 - 동행 상세 복귀 세그먼트·필터 깜빡임 제거 — 숨은 목록에서 들어오는 세그먼트·필터의 `0×0` layout과 카테고리 anchor의 0 크기 측정을 버려 마지막 정상 위치를 유지하고, 430×932 웹에서 상세 뒤로가기 직후부터 250ms까지 세그먼트 189px·필터 49px geometry와 opacity 1이 한 프레임도 무너지지 않음을 확인
 - 동행 상세 복귀 미세 잔상 제거 — 목록·세그먼트·필터를 재생성하지 않고 유지한 채 웹은 카드 입력 이벤트 안에서 기존 ScrollView를 `y=0`으로 맞춘 직후 같은 Stack에 직접 push하고, 네이티브는 push 전환이 끝난 뒤 숨은 목록을 초기화해 복귀 첫 프레임부터 본문 필터만 원래 위치에 표시하면서 일반 200ms Cross Fade·Translate는 유지
@@ -67,25 +68,25 @@
 
 ## 주요 파일 (도메인 파일 지도)
 
-| 경로                                           | 역할                                            |
-| ---------------------------------------------- | ----------------------------------------------- |
-| `app/(tabs)/group/_layout.tsx`                 | 동행 목록·상세·공지·멤버 중첩 Stack             |
-| `app/(tabs)/group/index.tsx`                   | 동행 탭 루트, 소모임/봉사 segment               |
-| `app/(tabs)/group/[id].tsx`                    | 소모임 상세, 공지 작성·인라인 삭제, 멤버        |
-| `app/(tabs)/group/notices.tsx`                 | 소모임 공지 작성/수정/삭제                      |
-| `app/(tabs)/group/members.tsx`                 | 소모임 멤버 관리와 소모임장 이관                |
-| `app/modal/group-new.tsx`                      | 소모임 개설 모달                                |
-| `src/mocks/groups.ts`                          | 소모임 mock 데이터                              |
+| 경로                                           | 역할                                          |
+| ---------------------------------------------- | --------------------------------------------- |
+| `app/(tabs)/group/_layout.tsx`                 | 동행 목록·상세·공지·멤버 중첩 Stack           |
+| `app/(tabs)/group/index.tsx`                   | 동행 탭 루트, 소모임/봉사 segment             |
+| `app/(tabs)/group/[id].tsx`                    | 소모임 상세, 공지 작성·인라인 삭제, 멤버      |
+| `app/(tabs)/group/notices.tsx`                 | 소모임 공지 작성/수정/삭제                    |
+| `app/(tabs)/group/members.tsx`                 | 소모임 멤버 관리와 소모임장 이관              |
+| `app/modal/group-new.tsx`                      | 소모임 개설 모달                              |
+| `src/mocks/groups.ts`                          | 소모임 mock 데이터                            |
 | `src/services/groupService.ts`                 | 교체 가능한 동행 조회·참여/탈퇴·공지 CUD 경계 |
-| `src/services/groupHttpDataSource.ts`          | 라이브 동행 HTTP data source                    |
-| `src/services/groupMapper.ts`                  | Communion DTO → 화면 모델                       |
-| `src/types/groupApi.ts`                        | 관측된 동행 서버 DTO                            |
-| `src/hooks/useGroups.ts`                       | 동행 조회, 참여/탈퇴, 공지 CUD hook             |
-| `src/components/layout/StickyHeaderScreen.tsx` | sticky scroll guard와 내부 상태 reset 경계      |
-| `src/components/ui/motion.tsx`                 | presence 모션과 즉시 종료 경계                  |
-| `src/constants/domainOptions.ts`               | 소모임 카테고리/상태 필터 옵션                  |
-| `src/types/group.ts`                           | 소모임 타입                                     |
-| `scripts/check-group-api-contract.mjs`         | 동행 Swagger endpoint·화면/관리 계약 검사       |
+| `src/services/groupHttpDataSource.ts`          | 라이브 동행 HTTP data source                  |
+| `src/services/groupMapper.ts`                  | Communion DTO → 화면 모델                     |
+| `src/types/groupApi.ts`                        | 관측된 동행 서버 DTO                          |
+| `src/hooks/useGroups.ts`                       | 동행 조회, 참여/탈퇴, 공지 CUD hook           |
+| `src/components/layout/StickyHeaderScreen.tsx` | sticky scroll guard와 내부 상태 reset 경계    |
+| `src/components/ui/motion.tsx`                 | presence 모션과 즉시 종료 경계                |
+| `src/constants/domainOptions.ts`               | 소모임 카테고리/상태 필터 옵션                |
+| `src/types/group.ts`                           | 소모임 타입                                   |
+| `scripts/check-group-api-contract.mjs`         | 동행 Swagger endpoint·화면/관리 계약 검사     |
 
 ## 데이터 타입
 
@@ -93,6 +94,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-10-09) **동행의 카테고리 필터는 나눔과 동일하게 상단 stickyControls에 통합한다** — 내 소모임이 세그먼트 탭으로 분리되어 본문 상단 가로 레일이 제거됨에 따라, 스크롤 위치에 따라 필터가 헤더에 도킹되던 복잡한 앵커 구조를 폐기하고 나눔과 동일하게 상단 `stickyControls` 내부에 카테고리 필터를 직접 배치합니다. 이를 통해 필터와 첫 번째 카드 사이 간격(16px) 및 스크롤 감추기/노출 동작을 나눔과 일치시키고 유지보수 복잡성을 대폭 낮춥니다. Issue #145.
 - (2026-10-09) **동행의 내 소모임은 나눔처럼 세그먼트 탭으로 분리한다** — 상단 세그먼트를 `소모임` | `봉사` | `내 소모임` 3개로 구성하고, `내 소모임` 선택 시 참여 중인 소모임 목록을 세로 카드로 표시한다. 기존 소모임 탭 상단의 가로 스크롤 '내 소모임' 레일은 제거해 화면 탐색을 단순화한다. Issue #141.
 - (2026-09-07) **동행 참여는 즉시 가입으로 연결한다** — 라이브 `POST /api/communion/{id}/join`, 탈퇴는 `DELETE /api/communion/{id}/leave`. 화면 문구는 기존 `참여 신청하기`를 유지한다. 승인 대기 플로우는 서버가 별도 상태를 주기 전까지 만들지 않는다. 소모임장 탈퇴는 서비스에서 막고, 강퇴·이관은 아직 HTTP로 보내지 않는다.
 - (2026-08-13) **동행 HTTP는 라이브 관측값과 common-codes만 매핑한다** — 타입 SMALL_GROUP/VOLUNTEER, 상태 RECRUITING/CLOSED, 카테고리 WORSHIP_STUDY/PRAYER/HOBBY_CULTURE/SPORTS_HEALTH/OTHER. 목록에 본문·일정이 없어 카드 설명/일정은 비운다. `/my`는 `type`이 있어야 한다. 생성은 JSON이며 서버가 받지 않는 일정·장소는 보내지 않는다. 서버에 없는 화면 카테고리는 추측해 OTHER로 보내지 않는다. development 기본 adapter는 `http`.

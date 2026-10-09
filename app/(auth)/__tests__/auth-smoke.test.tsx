@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { router, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import MyPageScreen from "../../(tabs)/mypage";
 import LoginScreenRoute from "../login";
 import SignupScreenRoute from "../signup";
@@ -87,10 +87,12 @@ describe("auth smoke screens", () => {
     expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
   });
 
-  it("places the login flow slightly above center with a scroll fallback", () => {
+  it("keeps the login flow slightly above center when the keyboard changes height", () => {
     renderWithClient(<LoginScreenRoute />);
 
-    expect(screen.getByTestId("login-scroll").props).toMatchObject({
+    const scroll = screen.getByTestId("login-scroll");
+    expect(scroll.props).toMatchObject({
+      automaticallyAdjustKeyboardInsets: Platform.OS === "ios",
       keyboardShouldPersistTaps: "handled",
     });
     expect(
@@ -100,6 +102,24 @@ describe("auth smoke screens", () => {
       justifyContent: "center",
       paddingBottom: 72,
     });
+
+    fireEvent(scroll, "layout", {
+      nativeEvent: { layout: { x: 0, y: 0, width: 390, height: 800 } },
+    });
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("login-scroll").props.contentContainerStyle,
+      ),
+    ).toMatchObject({ minHeight: 800 });
+
+    fireEvent(screen.getByTestId("login-scroll"), "layout", {
+      nativeEvent: { layout: { x: 0, y: 0, width: 390, height: 420 } },
+    });
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("login-scroll").props.contentContainerStyle,
+      ),
+    ).toMatchObject({ minHeight: 800 });
   });
 
   it("draws login focus on the full input surface", () => {
@@ -126,7 +146,7 @@ describe("auth smoke screens", () => {
     });
   });
 
-  it("toggles password visibility and explains the unavailable recovery flow", () => {
+  it("toggles password visibility without a recovery link", () => {
     renderWithClient(<LoginScreenRoute />);
     const password = screen.getByTestId("login-password-input");
 
@@ -135,9 +155,8 @@ describe("auth smoke screens", () => {
     expect(
       screen.getByTestId("login-password-input").props.secureTextEntry,
     ).toBe(false);
-
-    fireEvent.press(screen.getByText("비밀번호 찾기"));
-    expect(screen.getByText("비밀번호 찾기는 준비 중입니다")).toBeTruthy();
+    expect(screen.queryByText("비밀번호 찾기")).toBeNull();
+    expect(screen.queryByText("비밀번호 찾기는 준비 중입니다")).toBeNull();
   });
 
   it("stores the login session before entering the home screen", async () => {

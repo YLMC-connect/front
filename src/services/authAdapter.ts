@@ -99,7 +99,6 @@ export function createHttpAuthAdapter(
     const data = await client.request<AuthTokenResponse>("/api/auth/login", {
       method: "POST",
       auth: false,
-      format: "json",
       body: JSON.stringify({
         id: input.id.trim(),
         password: input.password,
@@ -144,7 +143,6 @@ export function createHttpAuthAdapter(
         {
           method: "POST",
           auth: false,
-          format: "json",
           body: JSON.stringify({ refreshToken }),
         },
       );

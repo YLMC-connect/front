@@ -5,6 +5,8 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { theme } from "../../constants/theme";
 import { useLifeStudyOverview } from "../../hooks/useLifeStudyCourses";
 import { usePrayerOverview } from "../../hooks/usePrayers";
+import { resolveLifeStudyAdapterMode } from "../../services/lifeStudyService";
+import { resolvePrayerAdapterMode } from "../../services/prayerService";
 import type {
   LifeStudyOverviewCourse,
   LifeStudyOverviewStatus,
@@ -154,6 +156,7 @@ function PrayerContent() {
         <AppText variant="sectionTitle" style={styles.sectionTitle}>
           내 기도방
         </AppText>
+        <DataSourceCaption mode={resolvePrayerAdapterMode()} />
         <View style={styles.stack}>
           {data.rooms.map((room) => (
             <Pressable
@@ -166,8 +169,8 @@ function PrayerContent() {
               <View style={styles.cardText}>
                 <View style={styles.badgeRow}>
                   <AppText variant="cardTitle">
-                    {weekdayLabels[room.weekday].long}{" "}
-                    {periodLabels[room.period]}
+                    {room.title ??
+                      `${weekdayLabels[room.weekday].long} ${periodLabels[room.period]}`}
                   </AppText>
                   <View
                     style={[
@@ -295,9 +298,9 @@ function StudyContent({ search }: { search: string }) {
     );
   }
 
-  const progressPercent = Math.round(
-    (data.path.completedRequired / data.path.totalRequired) * 100,
-  );
+  const progressPercent = data.path.totalRequired
+    ? Math.round((data.path.completedRequired / data.path.totalRequired) * 100)
+    : 0;
   const normalizedSearch = search.trim().toLocaleLowerCase();
   const matchesSearch = (course: LifeStudyOverviewCourse) =>
     !normalizedSearch ||
@@ -322,6 +325,7 @@ function StudyContent({ search }: { search: string }) {
         <AppText variant="sectionTitle" style={styles.sectionTitle}>
           내 학습경로
         </AppText>
+        <DataSourceCaption mode={resolveLifeStudyAdapterMode()} />
         <View style={styles.pathCard}>
           <View style={styles.pathTop}>
             <View>
@@ -381,6 +385,15 @@ function StudyContent({ search }: { search: string }) {
         </View>
       </View>
     </>
+  );
+}
+
+function DataSourceCaption({ mode }: { mode: "http" | "mock" }) {
+  if (!__DEV__) return null;
+  return (
+    <AppText variant="caption" tone="muted" style={styles.sourceCaption}>
+      {mode === "http" ? "서버 데이터" : "목업 데이터"}
+    </AppText>
   );
 }
 
@@ -486,6 +499,9 @@ const requestStatusLabels: Record<PrayerRequestStatus, string> = {
   reviewing: "검토중",
   published: "공개중",
   rejected: "반려",
+  answerRequested: "응답 요청",
+  answered: "응답됨",
+  hidden: "숨김",
 };
 
 const lifeStudyStatusLabels: Record<LifeStudyOverviewStatus, string> = {
@@ -566,6 +582,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.layout.screenX,
     paddingTop: theme.spacing[5],
     paddingBottom: theme.spacing[3],
+  },
+  sourceCaption: {
+    paddingHorizontal: theme.layout.screenX,
+    marginTop: -theme.spacing[2],
+    marginBottom: theme.spacing[2],
   },
   sectionHeader: {
     paddingHorizontal: theme.layout.screenX,

@@ -1,6 +1,6 @@
 # auth (인증)
 
-> 마지막 갱신: 2026-09-08 (중복확인 실패를 아이디 필드에 표시) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-10-09 (로그인 키보드 위치 고정, 비밀번호 찾기 문구 제거, 로그인 성공 envelope) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,16 +10,16 @@
 
 ## ✅ 완료
 
-- 인증 HTTP adapter 활성화 — 라이브 API에서 관측한 login/refresh 토큰 payload, signup 후 login 합성, `/api/member/me`, `/api/member/duplicate`를 `httpAuthAdapter`로 연결. 회원가입은 아이디와 이메일을 필수 입력으로 받고 각각 중복확인을 통과해야 한다. 값이 바뀌면 기존 확인 결과를 폐기한다. development 기본값은 HTTP, 테스트/Maestro는 `EXPO_PUBLIC_AUTH_ADAPTER=mock`. API origin은 `EXPO_PUBLIC_API_URL`. 회원가입 중복확인 실패는 해당 필드에 표시. Swagger 성공 DTO는 여전히 미기재라 `test:api:contract`는 13건 실패를 유지
+- 인증 HTTP adapter 활성화 — login/refresh 성공 envelope의 `data`에서 토큰 payload를 읽고, signup 후 login 합성, `/api/member/me`, `/api/member/duplicate`를 `httpAuthAdapter`로 연결. 회원가입은 아이디와 이메일을 필수 입력으로 받고 각각 중복확인을 통과해야 한다. 값이 바뀌면 기존 확인 결과를 폐기한다. development 기본값은 HTTP, 테스트/Maestro는 `EXPO_PUBLIC_AUTH_ADAPTER=mock`. API origin은 `EXPO_PUBLIC_API_URL`. 회원가입 중복확인 실패는 해당 필드에 표시. 로그인 성공 schema는 `ApiResponseLoginResponse`이고, 그 밖 Swagger 성공 schema가 비어 있는 항목 때문에 `test:api:contract` 실패는 남아 있다
 - 조용한 톤 인증 여백·위계 — 로그인 로고 그림자 완화·여백 토큰화, 회원가입 필드 간격·라벨 weight 정리, CTA 라벨 semibold; glass 하단 바 실험은 단순 `bottomFlat`으로 유지
 - 로그인·회원가입 절제 모션 (C-set) — 진입 stagger fade-up, 로고 1회 settle, 필드 검증 shake·인라인 에러 fade, 가입 아바타 empty↔filled morph, 중복확인 성공 체크 pop, CTA `MotionPressable`, 가입 버튼 enable soft 활성, auth Stack slide/fade. `designVariant=default`·`useReducedMotion`에서 진입 애니는 static
 - 로그인·회원가입 입력 포커스 통일 — 인증 전용 공통 `AuthInput`으로 전체 입력 surface를 공유하고 웹 기본 내부 outline을 제거한 뒤 나눔·동행 검색·작성 입력과 같은 primary 2px focus border를 적용하며 오류 테두리는 danger 색상을 우선
 - 로그인 비밀번호 보기 아이콘 Material 복원 — 로그인 secure field의 `visibility / visibility-off`만 기존 Material Icons로 렌더링하고 나머지 앱 아이콘과 회원가입 아이콘은 Solar 체계를 유지
-- 로그인·회원가입 세로 배치 정리 — 로그인은 hero·입력·CTA를 하나의 스크롤 가능한 묶음으로 중앙보다 약간 위에 배치하고 저작권 문구를 하단 흐름에 유지했으며, 회원가입은 헤더 아래 24px에서 시작해 기존 스크롤·하단 가입 버튼을 유지하면서 iOS·Android 키보드 높이에 대응
+- 로그인·회원가입 세로 배치 정리 — 로그인은 hero·입력·CTA를 하나의 스크롤 가능한 묶음으로 중앙보다 약간 위에 두고, 그 높이는 첫 레이아웃에 고정한다. 키보드가 열려도 다시 가운데로 올리지 않으며, iOS는 가려진 입력만 `automaticallyAdjustKeyboardInsets`로 올린다. 회원가입은 헤더 아래 24px에서 시작하고 하단 가입 버튼은 키보드 위에 둔다
 - 약관 뒤로·닫기 의미 구분 — 약관 동의 page에는 공통 `chevron-left + 뒤로`와 `router.back()`을 연결하고 같은 화면의 약관 전문 sheet에는 `close + 닫기`를 표시해 sheet state만 해제
 - 기본 mock 로그인 계정 변경 — 개발·테스트 계정을 `admin / admin`으로 통일하고 mock adapter가 해당 자격증명만 허용하도록 고정
 - 인증 typography·접근성 정리 — 로그인/회원가입의 display·제목·본문·보조·오류 문구를 역할형 `AppText`와 semantic tone으로 정리하고 양쪽 비밀번호 입력에 44px 표시/숨김 버튼을 적용
-- 로그인 보조 동작 연결 — 비밀번호 표시/숨기기를 접근 가능한 버튼으로 연결하고 MVP 제외 상태인 비밀번호 찾기는 무반응 링크 대신 준비 중 피드백을 표시
+- 로그인 보조 동작 연결 — 비밀번호 표시/숨기기를 접근 가능한 버튼으로 연결한다. 비밀번호 찾기 문구와 준비 중 안내는 로그인 화면에 두지 않는다
 - 인증 route guard와 웹 세션 저장 경계 추가 — 복원 중 route를 숨기고 anonymous/unavailable은 auth만, authenticated는 app/modal만 허용하며, 네이티브 SecureStore를 유지한 채 웹은 탭 단위 sessionStorage를 사용하도록 테스트로 고정
 - Mock 회원가입/로그인 화면 구현 — `app/(auth)/signup.tsx`, `app/(auth)/login.tsx`
 - ZIP 원본 auth 화면 라우트 보강 — splash, 가입 코드, 약관 동의/전문, 로그인/회원가입 상태 variant
@@ -84,13 +84,15 @@
 
 ## 데이터 타입
 
-`LoginInput`, `SignupInput`, `MemberDuplicateInput`, `MemberAvailability`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`와 `UserRole`을 사용하며, 역할은 `ADMIN`, `USER`, `MANAGER_COMMUNION`, `MANAGER_SHARE`, `MANAGER_LIFESTUDY`, `MANAGER_PRAYER` 중 하나입니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리합니다. 중복확인 요청은 Swagger의 `searchType: id | phone | email`, `searchValue` 계약을 따르며 화면에는 `available` 도메인 결과만 노출합니다. 실제 HTTP mapper는 라이브 응답에서 확인한 `data.available`, login/refresh 토큰 payload, `/api/member/me` 회원 필드만 사용합니다. Swagger 성공 schema는 아직 비어 있어 계약 검사는 계속 실패합니다.
+`LoginInput`, `SignupInput`, `MemberDuplicateInput`, `MemberAvailability`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`와 `UserRole`을 사용하며, 역할은 `ADMIN`, `USER`, `MANAGER_COMMUNION`, `MANAGER_SHARE`, `MANAGER_LIFESTUDY`, `MANAGER_PRAYER` 중 하나입니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리합니다. 중복확인 요청은 Swagger의 `searchType: id | phone | email`, `searchValue` 계약을 따르며 화면에는 `available` 도메인 결과만 노출합니다. 실제 HTTP mapper는 공통 envelope의 `data`만 사용합니다. 중복확인은 `available`, login/refresh는 `accessToken`, `refreshToken`, `userId`, `userName`, `role`, `/api/member/me`는 회원 필드입니다. 로그인 성공 schema는 `ApiResponseLoginResponse`입니다. 그 밖 Swagger 성공 schema가 비어 있는 항목은 `test:api:contract`가 계속 실패합니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-10-09) **로그인·재발급 성공 토큰은 envelope의 `data`에 있다** — `{ code, message, data: { accessToken, refreshToken, userId, userName, role } }`를 읽고 `data`만 세션으로 만든다. Issue #134.
+- (2026-10-09) **로그인 화면에 비밀번호 찾기 문구를 두지 않는다** — 복구 계약이 생기기 전에는 링크도, `준비 중` 안내도 보여 주지 않는다. Issue #132.
 - (2026-09-16) **서버 역할 문자열은 인증 모델에서 보존한다** — login/refresh와 `/api/member/me`의 유효한 역할은 `USER`로 축소하지 않는다. 역할 기반 UI 접근은 공통 판별 함수를 쓰되, 실제 관리자 API 차단은 서버의 403 정책이 단일 출처다. Issue #128.
 - (2026-09-08) **회원가입 중복확인 실패는 아이디 필드에 표시한다** — 성공(`available`)만 그리면 CORS/네트워크 오류가 무반응처럼 보인다. mutation error를 인라인 오류로 보여주고, 아이디가 바뀌면 이전 오류를 버린다.
-- (2026-08-13) **인증 HTTP는 Swagger가 비어 있어도 라이브에서 관측한 필드만 연결한다** — login/refresh 성공은 envelope가 아니라 `{ accessToken, refreshToken, userId, userName, role }`. signup 성공은 `{ userStatus }`만 주고 토큰이 없어 같은 자격증명으로 login을 이어서 호출한다. `/me`와 duplicate는 공통 envelope를 쓴다. 관측되지 않은 필드·역할·오류 코드는 만들지 않는다. development 기본 adapter는 `http`, 테스트와 Maestro mock 계정은 `EXPO_PUBLIC_AUTH_ADAPTER=mock`.
+- (2026-08-13) **인증 HTTP는 관측한 필드만 연결한다** — signup 성공은 `{ userStatus }`만 주고 토큰이 없어 같은 자격증명으로 login을 이어서 호출한다. `/me`와 duplicate는 공통 envelope를 쓴다. 관측되지 않은 필드·역할·오류 코드는 만들지 않는다. development 기본 adapter는 `http`, 테스트와 Maestro mock 계정은 `EXPO_PUBLIC_AUTH_ADAPTER=mock`. (2026-10-09에 login/refresh 성공도 envelope `data`를 읽도록 변경)
 - (2026-07-23) **인증 화면도 공통 “조용한 깔끔함” 톤을 따른다** — 로고·CTA 그림자는 `theme.shadow.primary` 수준으로 약하게, 여백은 spacing 토큰, 라벨/버튼 weight는 medium·semibold. Issue #105.
 - (2026-07-23) **인증 화면 모션은 soft timing + 짧은 stagger 로 절제한다** — duration `enter 280ms`, distance `md 12px`, stagger `60ms`, easing은 완만한 bezier(앞당김 적은 soft out). 웹 겹침 방지를 위해 layout `entering` 대신 in-flow opacity/transform 을 쓰고, spring/pulse 루프·shared element·confetti는 쓰지 않습니다. 로고는 1회 settle(`scale enterFrom 0.92→1`)만 허용하고, 검증 오류는 shake 1회(`±distance.xs~5px`), 가입 아바타는 empty↔filled 단일 레이어 전환입니다. `useReducedMotion`과 `designVariant !== default` 캡처 화면에서는 진입 애니는 static이며 피드백 모션도 reduce 시 즉시 표시합니다. 공통 프리미티브는 `MotionEnter` / `MotionShake` / `MotionFadeIn` / `MotionPop` 입니다.
 - (2026-07-18) **인증 입력은 전체 surface에 공통 focus border를 표시한다** — 로그인·회원가입의 내부 `TextInput` 웹 outline은 제거하고 공통 `AuthInput` 외곽에 primary 2px를 표시하며, 오류가 함께 있으면 danger 색상을 우선합니다.
@@ -98,14 +100,14 @@
 - (2026-07-23) **회원가입 연락처는 숫자만 받아 010-XXXX-XXXX 하이픈을 자동 삽입한다** — 입력은 최대 11자리 숫자로 제한하고 표시·제출 값은 `010-1234-5678` 형식을 쓰며, 검증은 하이픈을 제외한 숫자 길이(10자 이상)로 판단합니다.
 - (2026-07-23) **로그인·회원가입 비밀번호 보기 아이콘은 Material Icons를 사용한다** — secure field의 `visibility / visibility-off`만 Material Icons로 렌더링하고, 나머지 앱 아이콘과 회원가입의 기타 아이콘(아바타·에러·info 등)은 Solar/`AppIcon` 체계를 유지합니다.
 - (2026-07-18) **로그인 비밀번호 보기 아이콘은 Material Icons를 사용한다** — (2026-07-23에 회원가입 secure field까지 동일 정책으로 확장)
-- (2026-07-18) **로그인은 중앙보다 약간 위, 회원가입은 상단 시작을 기본 세로 배치로 사용한다** — 로그인은 `flexGrow` 기반 가운데 정렬에 더 큰 하단 여백을 둬 핵심 묶음을 위로 보정하고 가용 높이가 부족하면 같은 `ScrollView`가 스크롤합니다. 회원가입은 `TopBar` 아래 24px에서 display와 필드를 시작하며 긴 입력 목록·고정 가입 버튼·safe area·기존 mutation은 유지합니다. 두 화면은 iOS `padding`, Android `height` 방식으로 키보드 높이에 대응합니다.
+- (2026-10-09) **로그인 묶음의 세로 위치는 키보드가 나와도 다시 계산하지 않는다** — 키보드가 없을 때는 중앙보다 약간 위(`paddingBottom: 72`)를 유지한다. 그 높이는 첫 `ScrollView` 레이아웃에 `minHeight`로 고정한다. iOS 키보드 대응은 `automaticallyAdjustKeyboardInsets` 하나다. Android는 `adjustResize`가 창 높이를 줄인다. `KeyboardAvoidingView`로 영역을 줄인 뒤 가운데 정렬을 다시 하지 않는다. 회원가입은 `TopBar` 아래 24px에서 긴 입력과 하단 고정 가입 버튼을 유지한다. 나눔 등록·소모임 개설도 상단에서 시작하고, 하단 버튼을 키보드 위로 올리려고 `KeyboardAvoidingView`를 유지한다.
 - (2026-07-15) **약관 page 이동과 전문 sheet 해제를 다른 action으로 표시한다** — `/terms`와 `/terms-sheet`의 기본 page header는 공통 `뒤로`로 이전 경로를 pop하고, 약관 전문 overlay는 명시적인 `닫기`로 local sheet state만 해제합니다.
 - (2026-07-23) **개발용 기본 계정은 `admin / admin`으로 고정한다** — mock adapter는 빈 값만 검사하지 않고 정확한 자격증명을 확인하며, 해당 아이디는 회원가입 중복확인에서도 사용 중으로 처리합니다. 실제 HTTP adapter 활성화 시 서버 인증 계약이 이 값을 대체합니다.
 - (2026-07-23) **회원가입 하단 CTA glass/블러 실험은 철회하고 단순 bottomFlat으로 되돌린다** — 탭 glass와 동일 비주얼을 맞추기 어려워 `BlurTargetView`/`GlassBackdrop`/soft edge 오버레이를 제거하고, 기존처럼 하단 고정 패딩 바에 primary 가입 버튼만 둔다.
 - (2026-07-14) **개발용 기본 계정은 `admin / admin123`으로 고정한다** — (2026-07-23에 `admin / admin`으로 변경)
 - (2026-07-12) **인증 화면은 display와 입력 흐름만 강하게 강조한다** — 브랜드 제목·가입 display 외 설명/label/hint는 body·caption 역할로 제한하고, 작은 문구는 `textMuted` 이상 대비를 사용합니다. 로그인/회원가입 secure field는 동일한 44px visibility 조작을 제공합니다.
 
-- (2026-07-12) **MVP 제외 기능도 가짜 affordance로 남기지 않는다** — 비밀번호 찾기는 실제 복구 계약이 생기기 전까지 이동을 추측하지 않고 `준비 중` 피드백을 표시하며, 비밀번호 visibility는 로컬 UI 상태로 즉시 전환합니다.
+- (2026-07-12) **비밀번호 표시는 로컬 UI 상태로 즉시 전환한다** — (2026-10-09에 비밀번호 찾기 `준비 중` 문구는 화면에서 제거)
 
 - (2026-07-11) **로그아웃은 모든 토큰 삭제를 시도한 뒤 메모리 세션을 반드시 종료한다** — SecureStore의 한 키 삭제가 실패해도 다른 키 삭제를 건너뛰지 않으며, native cleanup 오류는 호출자에게 전달하되 session manager의 `finally`가 `anonymous` 상태를 보장합니다. 마이페이지는 오류 여부와 관계없이 로그인 화면으로 이동합니다.
 - (2026-07-11) **핵심 E2E는 회원가입과 로그인을 같은 세션 경계로 검증한다** — 메인 Maestro는 회원가입 성공으로 홈에 도달한 뒤 로그인 route를 다시 열어 재인증하고 도메인 흐름을 실행합니다. 두 화면은 토큰을 직접 다루지 않고 동일한 session manager를 사용해야 합니다.

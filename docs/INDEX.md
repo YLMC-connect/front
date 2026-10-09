@@ -71,7 +71,7 @@
 
 ## ADR
 
-- [0001 — 기술 스택](adr/0001-tech-stack.md) — Expo SDK 55 / TanStack Query / Zustand / local form validation / NativeWind v4 등 채택 근거. (수락, 2026-05-08; form/date 의존성 축소 2026-06-27)
+- [0001 — 기술 스택](adr/0001-tech-stack.md) — Expo SDK 57 / TanStack Query / Zustand / local form validation 등 채택 근거. (수락, 2026-05-08; form/date 의존성 축소 2026-06-27; SDK 57 2026-10-09)
 - [0002 — 백엔드 선택 보류 (Mock-first)](adr/0002-backend-tbd.md) — Phase 5 종료까지 백엔드 플랫폼 결정 보류, services/ 격리로 무관 진행. (수락, 2026-05-08)
 - [0003 — MVP 범위는 Notion 최신 정의 우선](adr/0003-mvp-scope-notion-first.md) — 인증·홈·나눔·소모임·MY·이미지 선택을 MVP로 확정하고 중보기도·삶공부는 v1로 분리. (수락, 2026-05-22)
 - [0004 — Notion v1 범위와 Expo Dev Client 기준](adr/0004-notion-v1-dev-client-scope.md) — 삶공부·중보기도를 v1 mock-first로 구현하고 Expo Go가 아닌 Dev Client를 검증 기준으로 확정. (수락, 2026-05-22)

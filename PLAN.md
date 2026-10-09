@@ -1,7 +1,7 @@
 # YLMC Connect — 프로젝트 기획 문서
 
 > 우리 교회(YLMC) 성도를 서로 이어주는 커뮤니티 앱  
-> 최종 수정: 2026-05-23
+> 최종 수정: 2026-10-09
 
 ---
 
@@ -20,15 +20,15 @@
 
 | 항목            | 선택                               | 버전           | 비고                                                                                        |
 | --------------- | ---------------------------------- | -------------- | ------------------------------------------------------------------------------------------- |
-| Expo SDK        | React Native + Expo                | `^55.0.0`      | React Native 0.83 · React 19.2 · New Architecture 기본                                      |
-| Dev Client      | expo-dev-client                    | `~55.0.35`     | Expo Go 대신 development build + `expo start --dev-client` 기준                             |
-| 라우팅          | Expo Router                        | `^55.0.x` (v7) | 파일 기반 라우팅, SDK와 함께 설치됨                                                         |
+| Expo SDK        | React Native + Expo                | `^57.0.0`      | React Native 0.86 · React 19.2 · New Architecture 기본                                      |
+| Dev Client      | expo-dev-client                    | `~57.0.19`     | Expo Go 대신 development build + `expo start --dev-client` 기준                             |
+| 라우팅          | Expo Router                        | `~57.0.x`      | 파일 기반 라우팅, SDK와 함께 설치됨                                                         |
 | 서버 상태       | TanStack Query                     | `^5.100.x`     | 비동기 페칭, 캐싱, 동기화 — React Native 공식 지원                                          |
 | 클라이언트 상태 | Zustand                            | `^5.0.x`       | auth·UI 상태만 담당 (React 18+ 필요)                                                        |
 | 스타일          | React Native StyleSheet            | 플랫폼 내장   | `src/constants/theme.ts` 단일 출처 토큰 기반 스타일링 (ADR 0006)                             |
 | UI 컴포넌트     | 자체 구축 공통 UI 계층             | `src/components/ui` | buttons, display, inputs, navigation, dialog, feedback 등 역할별 모듈화 (ADR 0006)            |
-| 언어            | TypeScript                         | `~5.8.x`       | strict 모드                                                                                 |
-| 아이콘          | @expo/vector-icons / MaterialIcons | Expo 내장      | Google Material Icons                                                                       |
+| 언어            | TypeScript                         | `~6.0.x`       | strict 모드                                                                                 |
+| 아이콘          | @expo/vector-icons / MaterialIcons | `^15.0.2`      | 직접 의존성. Google Material Icons                                                          |
 | 이미지          | expo-image                         | Expo 내장      | 성능 최적화 이미지                                                                          |
 
 > **백엔드 없이 시작** — Mock 데이터 + TanStack Query로 개발 후, API 연결 시 `services/` 레이어만 교체  
@@ -39,9 +39,9 @@
 
 | 패키지                        | 주의사항                                                                                                                                                                                                                                                                    |
 | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Expo Router v7                | SDK 55와 함께 배포됨, `expo-router` 별도 버전 고정 불필요                                                                                                                                                                                                                   |
+| Expo Router                   | SDK 57과 함께 배포됨, `expo-router` 별도 버전 고정 불필요                                                                                                                                                                                                                   |
 | TanStack Query (React Native) | `onlineManager`, `focusManager` 설정을 사용합니다. 영속 캐시는 실제 API 데이터 재사용 요구가 생길 때 `query-async-storage-persister`로 추가합니다.                                                                                                                           |
-| Zustand v5                    | React 18 미만 미지원 (Expo SDK 55 = React 19.2 이므로 문제없음)                                                                                                                                                                                                             |
+| Zustand v5                    | React 18 미만 미지원 (Expo SDK 57 = React 19.2 이므로 문제없음)                                                                                                                                                                                                             |
 | @sentry/react-native          | Expo plugin 등록 필수 (`app.json`의 `plugins` 배열)                                                                                                                                                                                                                         |
 | expo-notifications            | iOS는 development build 필요 (Expo Go에서 일부 기능 미지원)                                                                                                                                                                                                                 |
 | expo-secure-store             | iOS Keychain / Android Keystore 사용 — 디바이스 잠금 해제 필요                                                                                                                                                                                                              |
@@ -359,7 +359,7 @@ interface PrayerRequest {
 | 로컬 실행   | Expo Dev Client                        | `npm run start:dev-client`, development build는 `npm run ios:dev-client` 또는 `npm run android:dev-client` |
 | 자동 검증   | npm scripts + GitHub Actions + Maestro | `validate`(typecheck/lint/format/test), Dev Client Metro smoke, v1 탭 E2E smoke                            |
 | 환경변수    | `app.config.ts` + `expo-constants`     | 환경별 API URL, 키 분리                                                                                    |
-| Node.js     | `>=20.19.4` (LTS)                      | React Native 0.83 / Metro 요구 버전에 맞춰 package.json `engines`와 CI Node 버전 명시                      |
+| Node.js     | `^22.13.0 \|\| ^24.3.0 \|\| >=25.0.0` | Expo SDK 57 최소 22.13. Node 20·23은 제외. CI는 22.22.0                                                     |
 | 커밋 컨벤션 | Conventional Commits + commitlint      | `feat / fix / docs / chore / refactor / test`                                                              |
 | 커밋 훅     | husky + lint-staged                    | 커밋 전 typecheck + lint + format 자동 실행                                                                |
 | CI          | GitHub Actions                         | PR마다 `npm ci` + `npm run validate` 실행                                                                  |
@@ -769,3 +769,4 @@ queryClient.setDefaultOptions({
 | 2026-05-27 | ZIP 5탭 IA 정정 — 디자인 산출물 기준을 최우선으로 재확정해 하단 탭을 홈/나눔/동행/기도/삶공부로 정리하고, MY는 홈 내 정보 진입점으로 이동                                                                                                                                                                                                                                                                                                                            |
 | 2026-06-29 | 문서 정리 — GitHub Issues/PR로 이관된 archive 본문을 안내문으로 축소하고, PLAN.md의 폐기된 홈/나눔/소모임/동행/MY 탭 설명을 최신 Downloads preview IA로 갱신                                                                                                                                                            |
 | 2026-09-03 | 기술 스택 정돈 — Gluestack UI 및 NativeWind 퇴역. 순수 React Native StyleSheet + theme.ts 단일 표준 확정 및 1,775줄 공통 UI index.tsx를 6개 모듈로 분리 (ADR 0006) |
+| 2026-10-09 | 기술 스택 갱신 — Expo SDK 57 (React Native 0.86 / React 19.2). Xcode 27 대응으로 iOS scene lifecycle(`ios.enableSceneSupport`)을 켜고, Node 기준은 `^22.13.0 \|\| ^24.3.0 \|\| >=25.0.0`(CI 22.22.0). `@expo/vector-icons`와 테스트용 `@react-native/jest-preset`은 직접 의존성 |

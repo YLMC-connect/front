@@ -52,9 +52,11 @@ export function MotionPressable({
   }));
 
   const updateScale = (nextScale: number) => {
-    scale.value = reduceMotion
-      ? 1
-      : withTiming(nextScale, { duration: theme.motion.duration.fast });
+    scale.set(
+      reduceMotion
+        ? 1
+        : withTiming(nextScale, { duration: theme.motion.duration.fast }),
+    );
   };
 
   const motionStyle =
@@ -101,7 +103,7 @@ export function useMotionPresence(
   }, []);
   const hideImmediately = useCallback(() => {
     cancelAnimation(progress);
-    progress.value = 0;
+    progress.set(0);
     mountedRef.current = false;
     setMounted(false);
   }, [progress]);
@@ -114,7 +116,7 @@ export function useMotionPresence(
       }
 
       if (enterReady) {
-        progress.value = reduceMotion ? 1 : withTiming(1, { duration });
+        progress.set(reduceMotion ? 1 : withTiming(1, { duration }));
       }
       return;
     }
@@ -122,17 +124,18 @@ export function useMotionPresence(
     if (!mountedRef.current) return;
 
     if (reduceMotion) {
-      progress.value = 0;
-      mountedRef.current = false;
-      setMounted(false);
+      progress.set(0);
+      queueMicrotask(finishUnmount);
       return;
     }
 
-    progress.value = withTiming(0, { duration }, (finished) => {
-      if (finished) {
-        runOnJS(finishUnmount)();
-      }
-    });
+    progress.set(
+      withTiming(0, { duration }, (finished) => {
+        if (finished) {
+          runOnJS(finishUnmount)();
+        }
+      }),
+    );
   }, [duration, enterReady, finishUnmount, progress, reduceMotion, visible]);
 
   return { hideImmediately, mounted, progress, reduceMotion };

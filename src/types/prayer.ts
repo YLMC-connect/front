@@ -38,11 +38,19 @@ export interface PrayerTopicInput {
 }
 
 export type PrayerOverviewRoomStatus = "joined" | "pending";
-export type PrayerRequestStatus = "reviewing" | "published" | "rejected";
+export type PrayerRequestStatus =
+  | "reviewing"
+  | "published"
+  | "rejected"
+  | "answerRequested"
+  | "answered"
+  | "hidden";
 export type PrayerPeriod = "morning" | "afternoon";
 
 export interface PrayerOverviewRoom {
   id: string;
+  /** 서버 기도방 이름. mock 행에는 없다. */
+  title?: string;
   weekday: PrayerWeekday;
   period: PrayerPeriod;
   memberCount: number;

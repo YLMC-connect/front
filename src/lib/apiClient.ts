@@ -8,7 +8,7 @@ type FetchImplementation = typeof fetch;
 
 export type ApiRequestOptions = RequestInit & {
   auth?: boolean;
-  /** login/refresh처럼 공통 envelope를 쓰지 않는 응답 */
+  /** 공통 envelope가 아닌 성공 본문만 그대로 받는다 */
   format?: "envelope" | "json";
 };
 

@@ -41,6 +41,6 @@ export function GlassBackdrop({
 
 const styles = StyleSheet.create({
   tint: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
 });

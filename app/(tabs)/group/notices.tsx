@@ -1,6 +1,6 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -52,22 +52,24 @@ export default function GroupNoticesScreenRoute() {
   const [title, setTitle] = useState(isDesignFilled ? filledTitle : "");
   const [body, setBody] = useState(isDesignFilled ? filledBody : "");
   const [showDelete, setShowDelete] = useState(variant === "delete-confirm");
-
-  useEffect(() => {
-    if (!variant) return;
+  const [seenVariant, setSeenVariant] = useState(variant);
+  const [syncedDetail, setSyncedDetail] = useState<typeof detail.data>();
+  if (variant && variant !== seenVariant) {
+    setSeenVariant(variant);
     const filled = isDesignEdit || variant === "create-filled";
     setTitle(filled ? filledTitle : "");
     setBody(filled ? filledBody : "");
     setShowDelete(variant === "delete-confirm");
-  }, [isDesignEdit, variant]);
+  }
 
-  useEffect(() => {
-    if (variant || !noticeId) return;
-    const notice = detail.data?.notices.find(({ id }) => id === noticeId);
-    if (!notice) return;
-    setTitle(notice.title);
-    setBody(notice.content);
-  }, [detail.data, noticeId, variant]);
+  if (!variant && noticeId && detail.data && detail.data !== syncedDetail) {
+    setSyncedDetail(detail.data);
+    const notice = detail.data.notices.find(({ id }) => id === noticeId);
+    if (notice) {
+      setTitle(notice.title);
+      setBody(notice.content);
+    }
+  }
 
   const isFilled = Boolean(title.trim() && body.trim());
   const isPending = createNotice.isPending || updateNotice.isPending;

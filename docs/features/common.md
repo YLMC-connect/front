@@ -1,6 +1,6 @@
 # common (공통 인프라)
 
-> 마지막 갱신: 2026-09-08 (웹 라이브 API는 검증 대상 아님) | 담당 Phase: P1/P6/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-10-09 (Expo SDK 57. 웹 라이브 API는 검증 대상 아님. login/refresh도 공통 envelope. 선택 중인 루트 탭은 다시 열지 않음) | 담당 Phase: P1/P6/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -13,15 +13,15 @@
 > 지금 시스템이 어떻게 동작하는지. 날짜별 이력은 머지된 PR (`gh pr list --state merged --label common`).
 
 - 처음 실행 안내 — `docs/GETTING_STARTED.md`와 `.env.example`. API origin은 `EXPO_PUBLIC_API_URL`(로컬 `.env`, gitignore). HTTP adapter일 때 없으면 Expo config가 실패. 웹은 브라우저 CORS 때문에 라이브 API 검증 대상이 아님(Dev Client). development 기본 adapter는 인증·나눔·동행 HTTP. 홈·기도·삶공부는 사용자 API가 없어 mock
-- Expo SDK 55 + Dev Client 기준. 서버 데이터는 TanStack Query, 인증·UI는 Zustand. mock-first 후 `services/` 만 교체
+- Expo SDK 57 + Dev Client 기준. 서버 데이터는 TanStack Query, 인증·UI는 Zustand. mock-first 후 `services/` 만 교체. iOS는 `ios.enableSceneSupport`로 scene lifecycle을 켠다
 - Gluestack UI 및 NativeWind 퇴역 및 UI 모듈화 — 실제 미사용 중이던 Gluestack UI 및 NativeWind/Tailwind 관련 패키지 160개 및 설정 파일을 완전 제거하고, 1,775줄의 공통 UI index.tsx를 6개 서브모듈(buttons, display, inputs, navigation, dialog, feedback)로 분리 (Issue #119, ADR 0006)
 - 본문 글꼴 Pretendard. 아이콘은 공통 `AppIcon`(Solar Linear, 선택 Bold)
-- 루트 5탭 홈/나눔/동행/기도/삶공부. MY는 홈에서 숨김 route. 상세는 탭 중첩 Stack
+- 루트 5탭 홈/나눔/동행/기도/삶공부. MY는 홈에서 숨김 route. 상세는 탭 중첩 Stack. 이미 보고 있는 루트 탭을 다시 누르면 같은 주소로 다시 열지 않는다
 - 화면 상단은 `safe area + 20px`. 이미지 hero overlay만 예외
 - 루트 탭은 glass sticky 헤더 + `StickyHeaderScreen`. 기본 숨김은 아래 12px / 위 4px(`direction`)
 - 작성 입력은 공통 `ModalFormTextInput`(primary 2px 포커스). 검색은 `SearchField`
 - 숨긴 웹 route의 `0×0` layout은 탭·필터 geometry로 쓰지 않음
-- API client는 기본 `{ code, message, data }` envelope. login/refresh처럼 비envelope 성공만 `format: "json"`
+- API client는 기본 `{ code, message, data }` envelope. 비envelope 성공만 `format: "json"`
 - 인증·나눔·동행 Swagger 계약 검사 스크립트 (`test:api:contract*`)
 - PR CI 게이트는 `npm run validate`. visual 비교와 Maestro는 요청 시
 
@@ -71,15 +71,16 @@
 - **features `✅ 완료` 는 현재 동작** — 작업 일시는 머지된 PR description.
 - **도메인 목록은 `.task-flow.conf`** — `home` 포함. INDEX 표는 이 목록 + Issues 라벨.
 - **공유용 mock 웹은 공식 제품이 아님** — `export:web:mock` 정적 export. 검증 기준은 Expo Dev Client. (코드는 별도 PR)
-- **API client `format: "json"` 은 opt-in** — 기본 envelope 유지. 토큰 객체를 최상위로 주는 login/refresh만 허용.
+- **API client `format: "json"` 은 opt-in** — 기본은 `{ code, message, data }`에서 `data`만 반환. login/refresh도 이 envelope를 쓴다.
 - **본문 글꼴 Pretendard / 아이콘 Solar** — 화면이 글꼴·아이콘 세트를 직접 고르지 않음.
 - **UI 톤은 조용한 깔끔함** — 제목 bold, 카드 hairline, ZIP 픽셀 맞춤보다 톤 일관성.
 - **화면 상단 `safe area + 20px`** — 나눔 상세 이미지 overlay만 예외.
 - **작성 입력은 `ModalFormTextInput` 소유** — 화면은 값·제약만.
 - **sticky 기본 숨김은 direction(12px/4px)** — hide mode를 화면이 바꿀 수 있음 (`past-inset` / `never`).
 - **숨긴 route의 0 크기 layout은 무시** — 마지막 양수 geometry 유지.
-- **탭 IA는 홈/나눔/동행/기도/삶공부** — MY는 홈 진입.
+- **탭 IA는 홈/나눔/동행/기도/삶공부** — MY는 홈 진입. 보고 있는 루트 탭을 다시 누르면 이동하지 않고, 다른 탭은 탭 네비게이터로 전환해 이미 떠 있는 화면을 유지한다. Issue #136.
 - **Expo Dev Client 기준** — Expo Go 아님.
+- **런타임은 Expo SDK 57** — React Native 0.86. Node는 `package.json` `engines`(`^22.13.0 || ^24.3.0 || >=25.0.0`)이고 CI는 22.22.0. iOS는 `expo-build-properties`의 `ios.enableSceneSupport`로 UIKit scene lifecycle을 켠다. `userInterfaceStyle: light`는 `expo-system-ui`가 적용한다. `ios/`·`android/`는 gitignore이며 prebuild로 다시 만든다.
 - **Gluestack UI 및 NativeWind 퇴역 (ADR 0006)** — 순수 React Native StyleSheet + `src/constants/theme.ts` 단일 표준 확정. 1,775줄 ui/index.tsx를 6개 서브모듈로 모듈화하되 하위 호환성을 위해 barrel export 유지.
 - **Mock-first** — API 없는 도메인은 service/mock 후 adapter 교체.
 
@@ -93,7 +94,7 @@
 ## 의존성
 
 - GitHub Issues / PR description 작업 추적
-- Expo SDK 55, Dev Client, Reanimated 4, TanStack Query, Zustand, Solar icons
+- Expo SDK 57, Dev Client, Reanimated 4, TanStack Query, Zustand, Solar icons
 
 ## 관련 ADR
 

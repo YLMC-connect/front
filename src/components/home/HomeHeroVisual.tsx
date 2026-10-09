@@ -84,11 +84,11 @@ export function HomeHeroVisual({ fadeHeight, children }: HomeHeroVisualProps) {
 
 const styles = StyleSheet.create({
   root: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     overflow: "hidden",
   },
   bannerWrap: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     top: -8,
     bottom: -8,
   },

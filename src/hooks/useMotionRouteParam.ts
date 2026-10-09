@@ -8,14 +8,18 @@ export function useMotionRouteParam<T extends string>(
 ) {
   const reduceMotion = useReducedMotion();
   const [value, setValue] = useState(routeValue);
+  const [seenRouteValue, setSeenRouteValue] = useState(routeValue);
   const commitRef = useRef(onCommit);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  commitRef.current = onCommit;
+  if (routeValue !== seenRouteValue) {
+    setSeenRouteValue(routeValue);
+    setValue(routeValue);
+  }
 
   useEffect(() => {
-    setValue(routeValue);
-  }, [routeValue]);
+    commitRef.current = onCommit;
+  }, [onCommit]);
 
   useEffect(
     () => () => {

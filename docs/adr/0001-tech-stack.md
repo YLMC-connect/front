@@ -17,10 +17,11 @@ YLMC Connect 는 iOS / Android 모두를 지원하는 교회 커뮤니티 앱이
 
 ### 런타임 · 라우팅
 
-- **Expo SDK 55 (React Native 0.83 / React 19.2 / New Architecture 전용)**
+- **Expo SDK 57 (React Native 0.86 / React 19.2 / New Architecture 전용)**
   - Expo 의 OTA 업데이트 · EAS Build · 네이티브 API 추상화로 단일 개발자 운영 비용 최소화.
   - SDK 55 부터 Legacy Architecture 가 완전 제거되어, 채택 시 모든 서드파티 라이브러리의 New Arch 호환성을 첫날부터 확인해야 함 — **이 검증을 미루면 Phase 후반에 라이브러리 한 개 때문에 SDK 다운그레이드를 강요받는 사고**가 발생.
-- **Expo Router v7** — 파일 기반 라우팅. 디렉토리 = 라우트 트리이므로 화면 추가 시 보일러플레이트 0. SDK 55 와 함께 배포되어 별도 버전 고정 불필요.
+  - Xcode 27 / iOS 27 SDK 로 빌드하면 UIKit scene lifecycle 이 필수다. SDK 57 에서는 `expo-build-properties` 의 `ios.enableSceneSupport` 로 켠다.
+- **Expo Router** — 파일 기반 라우팅. 디렉토리 = 라우트 트리이므로 화면 추가 시 보일러플레이트 0. SDK 57 과 함께 배포되어 별도 버전 고정 불필요. 앱 코드는 `@react-navigation/*` 를 직접 import 하지 않는다.
 
 ### 상태 관리 — 서버 / 클라이언트 명확히 분리
 
@@ -58,14 +59,14 @@ YLMC Connect 는 iOS / Android 모두를 지원하는 교회 커뮤니티 앱이
 
 ### 기타 핵심 의존성
 
-- **TypeScript 5.8 strict** — 협업·리팩터링 안전망.
+- **TypeScript 6 strict** — 협업·리팩터링 안전망.
 - **expo-image** — 캐싱 · placeholder · 메모리 최적화 내장. 표준 `Image` 대비 목록 스크롤에서 큰 차이.
-- **MaterialIcons (`@expo/vector-icons`)** — Expo 내장으로 별도 폰트 등록 무비용.
+- **MaterialIcons (`@expo/vector-icons`)** — SDK 57부터 `expo`가 이 패키지를 포함하지 않으므로 직접 의존성으로 둔다. 화면 아이콘의 기본은 Solar `AppIcon`이고, MaterialIcons는 인증 화면에 남아 있다.
 
 ### 개발 도구
 
 - **ESLint (expo preset) + Prettier** — Expo 권장 설정 그대로 사용해 분쟁 회피.
-- **Jest + @testing-library/react-native + jest-expo** — RN 표준 조합.
+- **Jest + @testing-library/react-native + jest-expo** — RN 표준 조합. SDK 57의 `jest-expo`는 React Native가 분리한 `@react-native/jest-preset`(0.86)를 peer로 요구한다.
 - **husky + lint-staged + commitlint** — 커밋 전 typecheck / lint / format 자동화. **Phase 1 P1 끝물에 우선 활성화** (CI 워크플로우 활성화 전이라도 로컬 게이트는 첫 커밋부터 작동).
 
 ## 고려했지만 채택하지 않은 대안
@@ -96,3 +97,4 @@ YLMC Connect 는 iOS / Android 모두를 지원하는 교회 커뮤니티 앱이
 - 2026-05-08 — 최초 수락. PLAN.md 의 기술 스택 표를 ADR 화하여 “왜” 를 영속화.
 - 2026-05-08 — 스타일 도구 결정 갱신: 보류했던 NativeWind v4 를 채택으로 전환. `theme.ts` 단일 출처 + `tailwind.config.js` import 패턴. 기각 대안에서 “NativeWind 미사용” 과 “tailwind.config 단일 출처(theme.ts 폐기)” 두 안을 모두 기록.
 - 2026-06-27 — 실제 사용처 기준으로 `react-hook-form`, `zod`, `@hookform/resolvers`, `date-fns`를 제거하고 화면별 local validation으로 축소.
+- 2026-10-09 — Expo SDK 57 (React Native 0.86 / React 19.2)로 올린다. iOS scene lifecycle을 켜고, Node 20을 제외한다. `@expo/vector-icons`와 테스트용 `@react-native/jest-preset`은 직접 의존성. 버전 숫자의 단일 출처는 PLAN.md 기술 스택 표.

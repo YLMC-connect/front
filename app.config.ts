@@ -28,8 +28,27 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     "EXPO_PUBLIC_GROUP_ADAPTER",
     resolvedVariant,
   );
+  const lifeStudyAdapter = readAdapter(
+    "EXPO_PUBLIC_LIFE_STUDY_ADAPTER",
+    resolvedVariant,
+  );
+  const prayerAdapter = readAdapter(
+    "EXPO_PUBLIC_PRAYER_ADAPTER",
+    resolvedVariant,
+  );
+  const mypageAdapter = readAdapter(
+    "EXPO_PUBLIC_MYPAGE_ADAPTER",
+    resolvedVariant,
+  );
   const apiUrl = process.env.EXPO_PUBLIC_API_URL?.trim() || undefined;
-  const usesHttp = [authAdapter, marketAdapter, groupAdapter].includes("http");
+  const usesHttp = [
+    authAdapter,
+    marketAdapter,
+    groupAdapter,
+    lifeStudyAdapter,
+    prayerAdapter,
+    mypageAdapter,
+  ].includes("http");
 
   if (usesHttp && !apiUrl) {
     throw new Error(
@@ -67,7 +86,17 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       "expo-router",
       "expo-secure-store",
       "expo-font",
+      "expo-image",
+      "expo-status-bar",
       ["expo-dev-client", { toolsButton: false }],
+      [
+        "expo-build-properties",
+        {
+          ios: {
+            enableSceneSupport: true,
+          },
+        },
+      ],
     ],
     extra: {
       apiUrl,
@@ -75,6 +104,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       authAdapter,
       marketAdapter,
       groupAdapter,
+      lifeStudyAdapter,
+      prayerAdapter,
+      mypageAdapter,
     },
   };
 };

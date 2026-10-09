@@ -3,6 +3,7 @@ import { queryKeys } from "../lib/queryKeys";
 import {
   createPrayerTopic,
   fetchPrayerOverview,
+  resolvePrayerAdapterMode,
 } from "../services/prayerService";
 import type { PrayerTopicInput } from "../types/prayer";
 
@@ -23,7 +24,7 @@ export function useCreatePrayerTopic(roomId: string) {
 
 export function usePrayerOverview() {
   return useQuery({
-    queryKey: queryKeys.prayer.overview(),
+    queryKey: [...queryKeys.prayer.overview(), resolvePrayerAdapterMode()],
     queryFn: fetchPrayerOverview,
   });
 }

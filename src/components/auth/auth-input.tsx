@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   focusRing: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     borderRadius: theme.radius.md,
     borderColor: theme.colors.primary,
     borderWidth: 2,

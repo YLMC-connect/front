@@ -2,13 +2,7 @@ import { AppIcon } from "@/components/ui/app-icon";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { Platform, ScrollView, StyleSheet, View } from "react-native";
 import { AuthInput } from "../../src/components/auth/auth-input";
 import { Screen } from "../../src/components/layout/Screen";
 import {
@@ -56,7 +50,7 @@ export default function LoginScreen() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [feedback, setFeedback] = useState("");
+  const [lockedHeight, setLockedHeight] = useState<number | null>(null);
   const isFilled = values.id.length > 0 && values.password.length > 0;
   const formErrorMessage = login.error
     ? getApiErrorMessage(
@@ -80,148 +74,133 @@ export default function LoginScreen() {
 
   return (
     <Screen scroll={false} padded={false}>
-      <KeyboardAvoidingView
-        behavior={
-          Platform.OS === "ios"
-            ? "padding"
-            : Platform.OS === "android"
-              ? "height"
-              : undefined
-        }
-        style={styles.keyboard}
+      <ScrollView
+        testID="login-scroll"
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.root,
+          lockedHeight != null ? { minHeight: lockedHeight } : null,
+        ]}
+        automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        onLayout={(event) => {
+          const nextHeight = event.nativeEvent.layout.height;
+          if (nextHeight <= 0) return;
+          // 키보드가 높이를 줄여도 가운데 정렬을 다시 계산하지 않는다.
+          setLockedHeight((current) => current ?? nextHeight);
+        }}
       >
-        <ScrollView
-          testID="login-scroll"
-          contentContainerStyle={styles.root}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <View testID="login-content" style={styles.content}>
-            <View style={styles.hero}>
-              <MotionEnter
-                enabled={enterMotion}
-                mode="settle"
-                delay={motionStaggerDelay(0)}
-              >
-                <View style={styles.logo}>
-                  <AppIcon name="door-front" size={38} color="#fff" />
-                </View>
-              </MotionEnter>
-              <MotionEnter
-                enabled={enterMotion}
-                delay={motionStaggerDelay(1)}
-                style={styles.heroCopy}
-              >
-                <AppText variant="screenTitle" style={styles.title}>
-                  열린문 커넥트
-                </AppText>
-                <AppText
-                  variant="body"
-                  tone="secondary"
-                  style={styles.subtitle}
-                >
-                  교회 가족과 함께하는 일상
-                </AppText>
-              </MotionEnter>
-            </View>
-
+        <View testID="login-content" style={styles.content}>
+          <View style={styles.hero}>
             <MotionEnter
               enabled={enterMotion}
-              delay={motionStaggerDelay(2)}
-              style={styles.form}
+              mode="settle"
+              delay={motionStaggerDelay(0)}
             >
-              <AuthField
-                testID="login-id-input"
-                label="아이디"
-                value={values.id}
-                onChangeText={(id) =>
-                  setValues((current) => ({ ...current, id }))
-                }
-                placeholder="아이디를 입력해주세요"
-                error={errors.id}
-                hasError={isError}
-              />
-              <AuthField
-                testID="login-password-input"
-                label="비밀번호"
-                value={values.password}
-                onChangeText={(password) =>
-                  setValues((current) => ({ ...current, password }))
-                }
-                placeholder="비밀번호를 입력해주세요"
-                secureTextEntry={!passwordVisible}
-                error={errors.password}
-                hasError={isError}
-                trailingIcon={passwordVisible ? "visibility" : "visibility-off"}
-                trailingLabel={
-                  passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"
-                }
-                onTrailingPress={() =>
-                  setPasswordVisible((visible) => !visible)
-                }
-              />
-              {formErrorMessage ? (
-                <MotionShake trigger={formErrorMessage}>
-                  <MotionFadeIn>
-                    <AppText variant="caption" tone="danger">
-                      {formErrorMessage}
-                    </AppText>
-                  </MotionFadeIn>
-                </MotionShake>
-              ) : null}
-            </MotionEnter>
-
-            <MotionEnter
-              enabled={enterMotion}
-              delay={motionStaggerDelay(3)}
-              style={styles.ctaBlock}
-            >
-              <Button
-                onPress={onSubmit}
-                loading={login.isPending || isLoading}
-                disabled={!isFilled && isDefault}
-              >
-                로그인
-              </Button>
-              <MotionPressable
-                accessibilityRole="button"
-                onPress={() => setFeedback("비밀번호 찾기는 준비 중입니다")}
-                style={styles.findPassword}
-              >
-                <AppText variant="caption" tone="muted">
-                  비밀번호 찾기
-                </AppText>
-              </MotionPressable>
-              <View style={styles.dividerRow}>
-                <View style={styles.divider} />
-                <AppText variant="caption" tone="disabled">
-                  처음이신가요?
-                </AppText>
-                <View style={styles.divider} />
+              <View style={styles.logo}>
+                <AppIcon name="door-front" size={38} color="#fff" />
               </View>
-              <MotionPressable
-                accessibilityRole="link"
-                onPress={() => router.push("/signup")}
-                style={styles.signupButton}
-              >
-                <AppText
-                  variant="body"
-                  tone="brand"
-                  style={styles.signupButtonText}
-                >
-                  회원가입
-                </AppText>
-              </MotionPressable>
+            </MotionEnter>
+            <MotionEnter
+              enabled={enterMotion}
+              delay={motionStaggerDelay(1)}
+              style={styles.heroCopy}
+            >
+              <AppText variant="screenTitle" style={styles.title}>
+                열린문 커넥트
+              </AppText>
+              <AppText variant="body" tone="secondary" style={styles.subtitle}>
+                교회 가족과 함께하는 일상
+              </AppText>
             </MotionEnter>
           </View>
-          <AppText variant="caption" tone="disabled" style={styles.copy}>
-            © 열린문교회
-          </AppText>
-        </ScrollView>
-      </KeyboardAvoidingView>
+
+          <MotionEnter
+            enabled={enterMotion}
+            delay={motionStaggerDelay(2)}
+            style={styles.form}
+          >
+            <AuthField
+              testID="login-id-input"
+              label="아이디"
+              value={values.id}
+              onChangeText={(id) =>
+                setValues((current) => ({ ...current, id }))
+              }
+              placeholder="아이디를 입력해주세요"
+              error={errors.id}
+              hasError={isError}
+            />
+            <AuthField
+              testID="login-password-input"
+              label="비밀번호"
+              value={values.password}
+              onChangeText={(password) =>
+                setValues((current) => ({ ...current, password }))
+              }
+              placeholder="비밀번호를 입력해주세요"
+              secureTextEntry={!passwordVisible}
+              error={errors.password}
+              hasError={isError}
+              trailingIcon={passwordVisible ? "visibility" : "visibility-off"}
+              trailingLabel={
+                passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"
+              }
+              onTrailingPress={() => setPasswordVisible((visible) => !visible)}
+            />
+            {formErrorMessage ? (
+              <MotionShake trigger={formErrorMessage}>
+                <MotionFadeIn>
+                  <AppText variant="caption" tone="danger">
+                    {formErrorMessage}
+                  </AppText>
+                </MotionFadeIn>
+              </MotionShake>
+            ) : null}
+          </MotionEnter>
+
+          <MotionEnter
+            enabled={enterMotion}
+            delay={motionStaggerDelay(3)}
+            style={styles.ctaBlock}
+          >
+            <Button
+              onPress={onSubmit}
+              loading={login.isPending || isLoading}
+              disabled={!isFilled && isDefault}
+            >
+              로그인
+            </Button>
+            <View style={styles.dividerRow}>
+              <View style={styles.divider} />
+              <AppText variant="caption" tone="disabled">
+                처음이신가요?
+              </AppText>
+              <View style={styles.divider} />
+            </View>
+            <MotionPressable
+              accessibilityRole="link"
+              onPress={() => router.push("/signup")}
+              style={styles.signupButton}
+            >
+              <AppText
+                variant="body"
+                tone="brand"
+                style={styles.signupButtonText}
+              >
+                회원가입
+              </AppText>
+            </MotionPressable>
+          </MotionEnter>
+        </View>
+        <AppText variant="caption" tone="disabled" style={styles.copy}>
+          © 열린문교회
+        </AppText>
+      </ScrollView>
       <Toast
-        message={feedback || (isToast ? "네트워크 연결을 확인해주세요" : "")}
-        icon={feedback ? "info" : "sync"}
+        message={isToast ? "네트워크 연결을 확인해주세요" : ""}
+        icon="sync"
       />
     </Screen>
   );
@@ -296,7 +275,7 @@ function AuthField({
 }
 
 const styles = StyleSheet.create({
-  keyboard: { flex: 1 },
+  scroll: { flex: 1 },
   root: {
     flexGrow: 1,
     paddingHorizontal: theme.layout.screenX,
@@ -337,11 +316,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   fieldError: { marginTop: 6 },
-  findPassword: {
-    alignSelf: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
   dividerRow: {
     flexDirection: "row",
     alignItems: "center",

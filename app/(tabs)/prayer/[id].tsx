@@ -1,4 +1,5 @@
 import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
+import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -11,6 +12,11 @@ import {
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import { readDesignVariant } from "../../../src/lib/designVariant";
+import {
+  fetchPrayerCohortStatus,
+  fetchPrayerTopicBoard,
+  resolvePrayerAdapterMode,
+} from "../../../src/services/prayerService";
 
 type TabKey = "pray" | "answers" | "status";
 
@@ -67,13 +73,117 @@ const answers = [
   },
 ] as const;
 
+function LivePrayerDetail({ id }: { id: string }) {
+  const router = useRouter();
+  const status = useQuery({
+    queryKey: ["prayer", "cohort-status", id],
+    queryFn: () => fetchPrayerCohortStatus(id),
+  });
+  const board = useQuery({
+    queryKey: ["prayer", "topic-board"],
+    queryFn: fetchPrayerTopicBoard,
+  });
+  const room = status.data;
+  const topics = [
+    ...(board.data?.emergency ?? []),
+    ...(board.data?.ongoing ?? []),
+    ...(board.data?.recentAnswers ?? []),
+  ];
+  const pending = status.isPending || board.isPending;
+
+  return (
+    <Screen scroll={false} padded={false}>
+      <View style={styles.root}>
+        <TopBar
+          title={room?.cohortName || "기도방"}
+          back
+          onBack={() => router.back()}
+        />
+        <ScrollView contentContainerStyle={styles.body}>
+          <View style={styles.stack}>
+            {__DEV__ ? (
+              <Text style={styles.prayerText}>서버 데이터</Text>
+            ) : null}
+            {pending ? (
+              <Text style={styles.emptyDesc}>서버에서 불러오는 중입니다.</Text>
+            ) : null}
+            {status.isError || board.isError ? (
+              <Text style={styles.emptyDesc}>기도방을 다시 불러와주세요.</Text>
+            ) : null}
+            {room ? (
+              <Card style={styles.prayerCard}>
+                <Text style={styles.prayerTitle}>
+                  멤버 {room.totalMembers}명 · 오늘 완료 {room.completedCount}명
+                </Text>
+                <Text style={styles.prayerText}>
+                  {room.scheduledDate} · 참여율 {room.completionRate}%
+                </Text>
+              </Card>
+            ) : null}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>기도제목 게시판</Text>
+              {!pending && topics.length === 0 ? (
+                <Text style={styles.prayerText}>
+                  게시된 기도제목이 없습니다.
+                </Text>
+              ) : null}
+              {topics.map((topic) => (
+                <Card key={topic.id} style={styles.prayerCard}>
+                  <Text style={styles.prayerTitle}>{topic.title}</Text>
+                  <Text style={styles.prayerText}>
+                    {topic.categoryName} · {topic.writerName}
+                  </Text>
+                  <Text style={styles.prayerText}>{topic.content}</Text>
+                </Card>
+              ))}
+            </View>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>오늘 완료</Text>
+              {(room?.completed ?? []).map((member) => (
+                <Text key={member.userId} style={styles.prayerText}>
+                  {member.userName}
+                </Text>
+              ))}
+              {room && room.completed.length === 0 ? (
+                <Text style={styles.prayerText}>완료한 멤버가 없습니다.</Text>
+              ) : null}
+            </View>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>아직 미완료</Text>
+              {(room?.notCompleted ?? []).map((member) => (
+                <Text key={member.userId} style={styles.prayerText}>
+                  {member.userName}
+                </Text>
+              ))}
+              {room && room.notCompleted.length === 0 ? (
+                <Text style={styles.prayerText}>미완료 멤버가 없습니다.</Text>
+              ) : null}
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+    </Screen>
+  );
+}
+
 const completedPeople = ["김은혜", "박정아", "이수진", "김지영"];
 const pendingPeople = ["한수연", "오지연"];
 
+function routeId(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 export default function PrayerDetailScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const params = useLocalSearchParams<{
+    id?: string;
+    designVariant?: string;
+  }>();
+  const id = routeId(params.id);
   const variant = readDesignVariant(params.designVariant) ?? "pray";
+  if (id && !params.designVariant && resolvePrayerAdapterMode() === "http") {
+    return <LivePrayerDetail id={id} />;
+  }
   const activeTab: TabKey =
     variant === "status" ||
     variant === "status-empty" ||

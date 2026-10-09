@@ -1,6 +1,6 @@
 # mypage (MY / 성도 프로필)
 
-> 마지막 갱신: 2026-07-12 | 담당 Phase: P4/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-10-09 | 담당 Phase: P4/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 마이페이지 활동 HTTP adapter — development 기본값은 나눔과 같이 http다. 활동 화면은 `GET /api/mypage/activities`의 나눔 글·댓글·소모임을 보여 준다. 테스트와 `EXPO_PUBLIC_MYPAGE_ADAPTER=mock`은 기존 로컬 목록을 쓴다
 - 홈 진입 MY 뒤로가기 보완 — 하단 탭이 아닌 홈 `내 정보 보기`에서 push되는 `/mypage` 루트에도 공통 `chevron-left + 뒤로`를 표시하고 `router.back()`으로 홈에 복귀
 - 공통 TopBar 디자인 시스템 반영 — MY 상세 화면이 역할형 section title·caption subtitle과 44px back target, semantic text 대비를 공통으로 상속
 
@@ -41,25 +42,34 @@
 
 ## 주요 파일 (도메인 파일 지도)
 
-| 경로                              | 역할                              |
-| --------------------------------- | --------------------------------- |
-| `app/(tabs)/mypage/index.tsx`     | 홈에서 진입하는 MY·로그아웃 화면  |
-| `app/(tabs)/mypage/edit.tsx`      | 프로필 수정 연락처/비밀번호 화면  |
-| `app/(tabs)/mypage/activity.tsx`  | 나눔 게시글/댓글/소모임 활동 내역 |
-| `app/(tabs)/mypage/blocked.tsx`   | 차단 사용자 목록과 해제 상태      |
-| `app/(tabs)/mypage/faq.tsx`       | FAQ 목록과 empty state            |
-| `app/(tabs)/mypage/terms.tsx`     | 이용약관 전문 문서                |
-| `app/(tabs)/mypage/privacy.tsx`   | 개인정보처리방침 전문 문서        |
-| `app/(tabs)/mypage/withdraw.tsx`  | 회원 탈퇴 안내와 확인             |
-| `app/(tabs)/mypage/user/[id].tsx` | 타 성도 프로필과 차단 상태        |
-| `src/types/mypage.ts`             | MY 데이터 타입                    |
+| 경로                                    | 역할                              |
+| --------------------------------------- | --------------------------------- |
+| `app/(tabs)/mypage/index.tsx`           | 홈에서 진입하는 MY·로그아웃 화면  |
+| `app/(tabs)/mypage/edit.tsx`            | 프로필 수정 연락처/비밀번호 화면  |
+| `app/(tabs)/mypage/activity.tsx`        | 나눔 게시글/댓글/소모임 활동 내역 |
+| `src/services/mypageService.ts`         | 활동 mock 기본, http adapter 전환 |
+| `src/services/mypageHttpDataSource.ts`  | 활동 5종 HTTP data source         |
+| `src/services/mypageMapper.ts`          | Notion DTO → 활동 화면 행         |
+| `src/mocks/mypageActivity.ts`           | 활동 화면 로컬 목록               |
+| `app/(tabs)/mypage/blocked.tsx`         | 차단 사용자 목록과 해제 상태      |
+| `app/(tabs)/mypage/faq.tsx`             | FAQ 목록과 empty state            |
+| `app/(tabs)/mypage/terms.tsx`           | 이용약관 전문 문서                |
+| `app/(tabs)/mypage/privacy.tsx`         | 개인정보처리방침 전문 문서        |
+| `app/(tabs)/mypage/withdraw.tsx`        | 회원 탈퇴 안내와 확인             |
+| `app/(tabs)/mypage/user/[id].tsx`       | 타 성도 프로필과 차단 상태        |
+| `src/types/mypage.ts`                   | MY 화면 모델                      |
+| `src/types/mypageApi.ts`                | Notion 필드만 담은 활동 DTO       |
+| `scripts/check-mypage-api-contract.mjs` | 활동 OpenAPI 계약 검사            |
 
 ## 데이터 타입
 
-`MyPageData`는 나눔, 소모임, 삶공부, 기도방, 관심 제목, FAQ 목록을 묶어 반환합니다.
+`MyPageData`는 나눔, 소모임, 삶공부, 기도방, 관심 제목, FAQ 목록을 묶어 반환합니다. 활동 화면 행은 `MyPageActivityPost`, `MyPageActivityComment`, `MyPageActivityGroup`입니다. `MyPagePostDto`, `MyPageCommentDto`, `MyPageGroupDto`와 `MyPageActivityPage`는 Notion에 적힌 필드만 가집니다. 요청 `page`는 0부터이고 응답 `currentPage`는 1부터입니다. `MyPageLifeStudyHistoryDto`의 신청·수강·수료 원소는 이름만 있고 값 타입이 없어 `unknown`입니다. `MyPagePrayerHistoryDto`와 `MyPagePrayerActivityItem`은 Notion에 적힌 필드만 가집니다. `a / b`로 한 칸에 적힌 이름은 두 필드입니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-10-09) **활동 화면은 development에서 출처를 한 줄로 표시한다** — `__DEV__`일 때 제목 아래에 adapter가 http면 `서버 데이터`, mock이면 `목업 데이터`를 보여 준다. 탭·행·empty 문구는 그대로다.
+- (2026-10-09) **마이페이지 활동 HTTP는 2026-10-06 `GET /api/mypage/activities` 5종만 호출하고 development 기본값은 http다** — 나눔과 같이 `EXPO_PUBLIC_MYPAGE_ADAPTER`가 없으면 development는 http, preview·production은 mock이다. `mock`이면 활동 화면은 기존 로컬 나눔 게시글·댓글·소모임 목록을 보여 준다. `http`이면 그 로컬 목록을 그리지 않는다. `http`일 때 호출하는 경로는 `GET /api/mypage/activities/posts`, `GET /api/mypage/activities/comments`, `GET /api/mypage/activities/groups`, `GET /api/mypage/activities/life-studies`, `GET /api/mypage/activities/prayers`다. posts·comments·groups 요청 `page`는 0부터이고 기본 `size`는 10, 기본 정렬은 글·댓글 `id,desc`, 소모임 `joinedAt,desc`다. 응답 `currentPage`는 1부터라 다음 요청 page는 `currentPage`다. life-studies와 prayers는 쿼리 없는 단일 객체다. `/api/admin`, `/api/life-study`, `/api/prayer`는 호출하지 않는다. 활동 화면의 탭·행·empty 상태는 바꾸지 않고, 삶공부·중보기도 이력은 이 화면에 그리지 않는다. 이 도메인 전용 에러코드는 없다. 계약 검사는 `npm run test:api:contract:mypage`이며 `npm run validate`에는 넣지 않는다. Issue #137.
+- (2026-10-09) **활동 화면 행에는 지금 그리는 값만 올린다** — 나눔은 `statusName`을 배지 문구로, `status` `AVAILABLE`/`RESERVED`/`COMPLETED`를 tone `primary`/`warn`/`mute`로 쓴다. 날짜는 `createdAt`·`joinedAt`의 `yyyy-MM-dd`를 `yyyy.MM.dd`로 바꾼다. 댓글 출처는 `shareTitle`, 소모임 이름은 `title`, 인원은 `currentParticipants`다. `thumbnailUrl`·본문·카테고리·조회수·모임장·봉사 구분은 화면 행에 없다. 삶공부 하위 항목은 이름만 있고 값 타입이 없어 그대로 둔다. 기도 이력은 Notion에 적힌 필드만 읽는다. `currentPage`가 0이면 잘못된 응답이다.
 - (2026-07-15) **MY 루트도 홈에서 push되는 별도 page이므로 뒤로가기를 표시한다** — 하단 탭에서 제거된 `/mypage`는 홈 프로필 카드가 진입점이므로 공통 `TopBar back`으로 직전 홈 화면에 복귀합니다.
 - (2026-07-12) **MY 상세 제목은 공통 TopBar 역할형 typography를 상속한다** — 화면별 로컬 title 크기를 추가하지 않고 공통 sectionTitle/caption과 44px back affordance를 사용합니다.
 

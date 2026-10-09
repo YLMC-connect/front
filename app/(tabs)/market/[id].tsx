@@ -1,7 +1,7 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -76,10 +76,15 @@ export default function MarketDetailScreen() {
   const [reportDetails, setReportDetails] = useState("");
   const [reportMessage, setReportMessage] = useState<string>();
   const [showDelete, setShowDelete] = useState(variant === "delete-confirm");
-  const router = useRouter();
-  const { width } = useWindowDimensions();
-
-  useEffect(() => {
+  const [seenDeleteVariant, setSeenDeleteVariant] = useState(variant);
+  const [syncedReportKey, setSyncedReportKey] = useState<string | null>(null);
+  if (variant !== seenDeleteVariant) {
+    setSeenDeleteVariant(variant);
+    setShowDelete(variant === "delete-confirm");
+  }
+  const reportSyncKey = `${id}\0${variant ?? ""}`;
+  if (syncedReportKey !== reportSyncKey) {
+    setSyncedReportKey(reportSyncKey);
     if (isReportSheetVariant) {
       setReportTarget({ targetType: "market", targetId: id });
       setReportReason(
@@ -91,18 +96,15 @@ export default function MarketDetailScreen() {
           : "",
       );
       setReportMessage(undefined);
-      return;
+    } else {
+      setReportTarget(null);
+      setReportMessage(
+        variant === "report-dup-toast" ? "이미 신고한 게시글입니다" : undefined,
+      );
     }
-
-    setReportTarget(null);
-    setReportMessage(
-      variant === "report-dup-toast" ? "이미 신고한 게시글입니다" : undefined,
-    );
-  }, [id, isReportSheetVariant, variant]);
-
-  useEffect(() => {
-    setShowDelete(variant === "delete-confirm");
-  }, [variant]);
+  }
+  const router = useRouter();
+  const { width } = useWindowDimensions();
 
   if (variant === "deleted" || variant === "blocked") {
     return (
@@ -643,7 +645,7 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.semibold,
   },
   doneOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: "rgba(20,30,18,0.45)",
   },
   doneHeroText: {

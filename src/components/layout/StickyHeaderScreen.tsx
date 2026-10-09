@@ -88,6 +88,9 @@ export function StickyHeaderScreen({
   const insets = useSafeAreaInsets();
   const topInset = insets.top;
   const [controlsHidden, setControlsHidden] = useState(false);
+  const [seenRevealKey, setSeenRevealKey] = useState(stickyControlsRevealKey);
+  const [seenScrollResetKey, setSeenScrollResetKey] =
+    useState(scrollStateResetKey);
   const lastScrollY = useRef(0);
   const downwardDistance = useRef(0);
   const upwardDistance = useRef(0);
@@ -96,26 +99,36 @@ export function StickyHeaderScreen({
 
   useEffect(() => {
     if (stickyControlsRevealKey === undefined) return;
-
     downwardDistance.current = 0;
     upwardDistance.current = 0;
-    setControlsHidden(false);
   }, [stickyControlsRevealKey]);
 
   useEffect(() => {
     if (scrollStateResetKey === undefined) return;
-
     lastScrollY.current = 0;
     downwardDistance.current = 0;
     upwardDistance.current = 0;
-    setControlsHidden(false);
   }, [scrollStateResetKey]);
 
-  useEffect(() => {
-    if (stickyControlsHideMode === "never") {
-      setControlsHidden(false);
-    }
-  }, [stickyControlsHideMode]);
+  if (
+    stickyControlsRevealKey !== undefined &&
+    stickyControlsRevealKey !== seenRevealKey
+  ) {
+    setSeenRevealKey(stickyControlsRevealKey);
+    setControlsHidden(false);
+  }
+
+  if (
+    scrollStateResetKey !== undefined &&
+    scrollStateResetKey !== seenScrollResetKey
+  ) {
+    setSeenScrollResetKey(scrollStateResetKey);
+    setControlsHidden(false);
+  }
+
+  if (stickyControlsHideMode === "never" && controlsHidden) {
+    setControlsHidden(false);
+  }
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = Math.max(event.nativeEvent.contentOffset.y, 0);
@@ -259,7 +272,7 @@ function StickyControlsLayer({
     if (resetKey === undefined) return;
 
     cancelAnimation(translateY);
-    translateY.value = 0;
+    translateY.set(0);
   }, [resetKey, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({

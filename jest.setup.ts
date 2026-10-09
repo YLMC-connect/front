@@ -1,6 +1,9 @@
 process.env.EXPO_PUBLIC_AUTH_ADAPTER = "mock";
 process.env.EXPO_PUBLIC_MARKET_ADAPTER = "mock";
 process.env.EXPO_PUBLIC_GROUP_ADAPTER = "mock";
+process.env.EXPO_PUBLIC_LIFE_STUDY_ADAPTER = "mock";
+process.env.EXPO_PUBLIC_PRAYER_ADAPTER = "mock";
+process.env.EXPO_PUBLIC_MYPAGE_ADAPTER = "mock";
 
 jest.mock("react-native-worklets", () =>
   require("react-native-worklets/src/mock"),

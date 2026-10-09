@@ -1,5 +1,5 @@
 import { AppIcon } from "@/components/ui/app-icon";
-import { useRef, type ComponentProps } from "react";
+import { useState, type ComponentProps } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
   interpolate,
@@ -129,8 +129,10 @@ export function Toast({
   offset?: number;
   icon?: IconName;
 }) {
-  const contentRef = useRef(message);
-  if (message) contentRef.current = message;
+  const [content, setContent] = useState(message);
+  if (message && message !== content) {
+    setContent(message);
+  }
   const { mounted, progress } = useMotionPresence(Boolean(message), {
     duration: theme.motion.duration.base,
   });
@@ -154,7 +156,7 @@ export function Toast({
       style={[styles.toast, { bottom: offset }, animatedStyle]}
     >
       <AppIcon name={icon} size={18} color="#fff" />
-      <Text style={styles.toastText}>{contentRef.current}</Text>
+      <Text style={styles.toastText}>{content}</Text>
     </Animated.View>
   );
 }

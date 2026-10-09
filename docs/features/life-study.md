@@ -1,6 +1,6 @@
 # life-study (삶공부)
 
-> 마지막 갱신: 2026-07-14 | 담당 Phase: P5/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-10-09 | 담당 Phase: P5/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 삶공부 수업·출석·수료 HTTP adapter — development 기본값은 나눔과 같이 http다. 수료 목록은 mock 과정 위에 덮지 않고 `GET /api/life-study/completions` 행으로 만든다. 테스트와 `EXPO_PUBLIC_LIFE_STUDY_ADAPTER=mock`은 기존 mock service를 쓴다
 - 삶공부 검색 위치·포커스 보정 — 검색을 제목 바로 아래 sticky surface로 표시하고 전체 검색 영역에 단일 focus border를 적용했으며, 목록을 내린 상태에서도 헤더 검색 action으로 즉시 노출
 - 삶공부 glass sticky 헤더 — 검색·학습경로·신청 가능·전체 과정 영역을 하나의 스크롤로 묶고 기본 배경색 기반 blur 타이틀 뒤로 지나가게 적용
 - 삶공부 탭 상세 Stack 적용 — 과정 상세·수강 신청·수강 내역을 삶공부 목록 위에 push하고 뒤로가기 시 `/life-study`로 복귀하도록 탭별 중첩 Stack 추가
@@ -44,18 +45,32 @@
 | `app/(tabs)/life-study/[id].tsx`               | 삶공부 상세, 신청/취소, 진도/커리큘럼 |
 | `app/(tabs)/life-study/apply.tsx`              | 삶공부 수강 신청 입력 화면            |
 | `app/(tabs)/life-study/history.tsx`            | 삶공부 신청/수강/지난 과정 내역 화면  |
-| `src/services/lifeStudyService.ts`             | 삶공부 목록·overview mock service     |
+| `src/services/lifeStudyService.ts`             | overview mock 기본, http adapter 전환 |
+| `src/services/lifeStudyHttpDataSource.ts`      | 수업·출석·수료 HTTP data source       |
+| `src/services/lifeStudyMapper.ts`              | Notion DTO → 기존 view model          |
 | `src/hooks/useLifeStudyCourses.ts`             | 삶공부 목록·overview query hook       |
 | `src/mocks/lifeStudy.ts`                       | 삶공부 mock 데이터                    |
 | `src/constants/domainOptions.ts`               | 삶공부 상태 필터 옵션                 |
-| `src/types/lifeStudy.ts`                       | 삶공부 타입                           |
+| `src/types/lifeStudy.ts`                       | 삶공부 화면 모델                      |
+| `src/types/lifeStudyApi.ts`                    | Notion 필드만 담은 수업·출석·수료 DTO |
+| `scripts/check-life-study-api-contract.mjs`    | 수업·출석·수료 OpenAPI 계약 검사      |
 
 ## 데이터 타입
 
-`LifeStudyCourse`는 `status`, `sessions`, `currentSession`, `capacity`, `enrolledCount`, `isEnrolled`, `isCompleted`, `curriculum`을 포함합니다. `LifeStudyHistory`는 수강 회차와 수료증 발급 여부를 포함합니다. 루트 화면 전용 `LifeStudyOverview`는 필수 과정 진행 경로, 신청 가능한 과정, 전체 과정 요약을 가지며 추후 API DTO mapper의 출력 모델로 사용합니다.
+`LifeStudyCourse`는 `status`, `sessions`, `currentSession`, `capacity`, `enrolledCount`, `isEnrolled`, `isCompleted`, `curriculum`을 포함합니다. `LifeStudyHistory`는 수강 회차와 수료증 발급 여부를 포함합니다. 루트 화면 전용 `LifeStudyOverview`는 필수 과정 진행 경로, 신청 가능한 과정, 전체 과정 요약을 가지며 API DTO mapper의 출력 모델로 사용합니다. `LifeStudyClassList`, `LifeStudyAttendanceRoster`, `LifeStudyCompletionRoster`, `LifeStudyMyCompletion`은 Notion에 적힌 필드만 가집니다. `classes[]` 원소와 출석부 하위 필드는 페이지에 없어 타입에 두지 않습니다. `a / b`로 한 칸에 적힌 이름은 두 필드입니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-10-09) **development http에서는 삶공부 목록 캐시와 상세·수강 내역이 목업 화면과 갈라진다** — 목록·overview query key 끝에 adapter mode를 붙여 저장된 목업 응답을 다시 쓰지 않는다. `__DEV__`에서 내 학습경로 아래에 `서버 데이터` 또는 `목업 데이터`를 표시한다. route id가 있고 `designVariant`가 없으며 adapter가 http이면 상세는 overview에 있는 과정 이름·상태와, 값이 있는 강사·소개·주 수만 그린다. 팀장·교재·커리큘럼·공지·숙제는 그리지 않는다. 수강 내역은 본인 수료 행의 이름과 `completedAt`만 그린다. id가 없거나 mock이거나 `designVariant`가 있으면 기존 디자인 문구를 유지한다.
+- (2026-10-09) **삶공부 HTTP는 2026-09-22 이후 사용자 수업·출석·수료만 호출하고 development 기본값은 http다** — 나눔과 같이 `EXPO_PUBLIC_LIFE_STUDY_ADAPTER`가 없으면 development는 http, preview·production은 mock이다. `mock`이면 기존 mock overview·과정 목록을 반환한다. `http`일 때 `GET /api/life-study/completions`로 수료 행을 만들고, 과정 카탈로그에만 있는 학습경로·강사·소개·신청 과정은 비운다. 필수/선택 구분이 응답에 없어 과정 종류는 선택으로 둔다. `totalClassCount`는 주 수가 아니므로 `weekCount`에 쓰지 않고, 과정 `sessions`에만 쓴다. `attendCount`는 `currentSession`이나 수강 회차가 아니다. 추가로 `GET /api/life-study/cohorts/{cohortId}/classes`, `GET`·`PUT /api/life-study/classes/{classId}/attendance`, `PUT .../attendance/user`, `GET`·`PUT /api/life-study/cohorts/{cohortId}/completions`, `PUT .../completions/user`를 호출한다. `/api/admin`, 2026-09-16 이전 `GET /api/life-study`, `GET /api/life-study/cohorts`, `GET /api/life-study/cohorts/{id}`, `POST /api/life-study/cohorts/{id}/attend`, `GET /api/mypage/activities/life-studies`는 호출하지 않는다. 출석·수료 권한(`team_leader`, `MANAGER_LIFESTUDY`, `ADMIN`)과 `LST012`·`LST013`·`LST017`은 서버 오류를 그대로 전달하고 클라이언트 역할로 거르지 않는다. 계약 검사는 `npm run test:api:contract:life-study`이며 `npm run validate`에는 넣지 않는다.
+- (2026-10-09) **수업일·수료 명단을 이미 있는 과정 객체에 붙일 때는 Notion에 있는 값만 덮어쓴다** — HTTP 목록 자체는 수료 행으로 새로 만든다. 과정 ID 문자열이 같을 때만 `lifeStudyName`을 `title`로 쓰고, 본인 수료가 그 ID로 하나뿐이면 `LifeStudyCourse.isCompleted`를 true로 둔다. `completedAt`이 문자열이면 `LifeStudyHistory.completedAt`에 쓰고 null이면 비운다. 수업일 목록의 `weekCount`는 기수를 넘겨 호출한 overview 과정의 `weekCount`에만 쓴다. 수료 명단은 `lifeStudyId`가 과정 `id`와 같고 현재 사용자 `userId`가 한 명일 때만 `completed`를 `isCompleted`에 쓴다. 아래는 Notion 필드가 없거나 대응을 단정할 수 없어 mock을 유지한다.
+  - 학습경로 `completedRequired`, `totalRequired`, `nextRecommendation`, `eligibility`. 수료 건수를 필수 과정 수로 세지 않는다.
+  - overview `kind`, `instructorName`, `summary`, `applicationPeriod`, `capacity`, `enrolledCount`, `status`, `target`. 목록 화면 과정에는 `cohortId`가 없어 `weekCount`를 수업일 목록과 연결하지 않는다. `totalClassCount`는 휴강 제외 정규 수업 횟수라 주 수로 보지 않는다.
+  - `LifeStudyCourse`의 `description`, `instructor`, `schedule`, `location`, `status`, `sessions`, `currentSession`, `capacity`, `enrolledCount`, `isEnrolled`, `curriculum`. `attendCount`는 출석 횟수라 `currentSession`이 아니다.
+  - `LifeStudyHistory`의 `id`, `enrolledAt`, `completedSessions`, `certificateIssued`. 수료증 필드가 없고 `attendCount`를 수강 회차로 보지 않는다. 과정 ID가 맞지 않는 수료 행은 새 이력으로 만들지 않는다. ID가 둘이면 어느 기수인지 단정하지 않고 mock을 유지한다.
+  - mock이거나 route id·`designVariant`가 있을 때의 상세 디자인 문구(팀장·교재·커리큘럼·공지·숙제). http이고 id만 있으면 overview 과정의 이름·상태와, 값이 있는 강사·소개·주 수만 그린다. `classes[]` 원소와 출석부 하위 필드는 그리지 않는다.
+  - mock일 때의 수강 내역 디자인 문구(신청중·수강 중·대기·수료 뱃지). http이면 본인 수료 행의 이름과 `completedAt`만 그린다.
+  - 수료 명단의 `userName`, `userPhone`, `attendCount`, `absentCount`, `cohortNumber`. 학생 이름은 강사가 아니고 명단용 view model이 없다.
 - (2026-09-16) **삶공부 관리자 UI의 역할 경계는 `MANAGER_LIFESTUDY` 또는 `ADMIN`이다** — 공통 권한 판별은 두 역할만 삶공부 관리 도메인에 허용한다. 현재 모바일 삶공부는 사용자용 화면만 제공하며, 실제 관리자 API의 403 강제와 관리자 화면은 후속 서버 계약 작업으로 분리한다. Issue #128.
 - (2026-07-14) **삶공부 검색은 제목 바로 아래에서 의도적으로 고정 노출한다** — 검색 action을 누르면 현재 목록 스크롤 위치와 관계없이 헤더 아래 검색 surface를 표시하고, 닫으면 검색어와 추가 sticky 높이를 제거합니다. 포커스와 검색/닫기 label은 나눔·동행과 같은 공통 UI를 사용합니다.
 - (2026-07-14) **삶공부 루트 콘텐츠는 기본 배경색 glass 타이틀 아래 하나의 스크롤을 사용한다** — 실제 safe-area와 20px 상단 여백을 포함한 공통 sticky blur를 사용하고 하단 border 없이 검색과 과정 목록이 뒤를 통과합니다.
@@ -84,7 +99,7 @@
 
 ## 미결 / 추적
 
-- 실제 삶공부 API 스키마, 신청 승인 방식, 수료증 표시 방식 확인 필요.
+- 수업일 `classes[]` 원소, 출석부 하위 필드, 신청 승인, 수료증 표시는 Notion 사용자 계약에 없다.
 - 관리자 과정 개설/수정은 모바일 v1 범위가 아니며 후속 Phase입니다.
 - `study-list` residual은 ZIP 목록 구조 정렬 후 `mean=11.76`입니다. 남은 차이는 Android status bar/time, RN font metrics, SegmentedTabs/Badge antialiasing, native shadow 번역 차이 중심으로 추적합니다.
 - `study-detail` residual은 ZIP 구조 정렬 후 `20.90→9.39`까지 낮췄습니다. 남은 차이는 RN status bar/time, font metrics, blur/shadow, native bottom home indicator 번역 차이 중심으로 추적합니다.

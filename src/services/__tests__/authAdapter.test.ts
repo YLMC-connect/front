@@ -1,6 +1,14 @@
-import { createHttpAuthAdapter, mockAuthAdapter } from "../authAdapter";
+import { createApiClient, type ApiRequestOptions } from "../../lib/apiClient";
 import { MOCK_USER } from "../../mocks/auth";
-import type { ApiRequestOptions } from "../../lib/apiClient";
+import { createHttpAuthAdapter, mockAuthAdapter } from "../authAdapter";
+
+function jsonResponse(body: unknown, status = 200): Response {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    text: jest.fn().mockResolvedValue(JSON.stringify(body)),
+  } as unknown as Response;
+}
 
 describe("mockAuthAdapter", () => {
   it.each([
@@ -97,9 +105,40 @@ describe("httpAuthAdapter", () => {
       "/api/auth/login",
       expect.objectContaining({
         auth: false,
-        format: "json",
+        method: "POST",
       }),
     );
+    expect(request.mock.calls[0]?.[1]).not.toHaveProperty("format");
+  });
+
+  it("reads login tokens from the success envelope", async () => {
+    const fetchImpl = jest.fn().mockResolvedValue(
+      jsonResponse({
+        code: "SUCCESS",
+        message: "정상 처리되었습니다.",
+        data: {
+          accessToken: "access",
+          refreshToken: "refresh",
+          userId: "ylmc",
+          userName: "열린문",
+          role: "USER",
+        },
+      }),
+    );
+    const adapter = createHttpAuthAdapter(
+      createApiClient({
+        baseUrl: "https://api.example.com",
+        fetchImpl,
+      }),
+    );
+
+    await expect(
+      adapter.login({ id: "ylmc", password: "secret" }),
+    ).resolves.toMatchObject({
+      accessToken: "access",
+      refreshToken: "refresh",
+      member: { id: "ylmc", name: "열린문", role: "USER" },
+    });
   });
 
   it("signs up then logs in because signup does not return tokens", async () => {
@@ -135,7 +174,7 @@ describe("httpAuthAdapter", () => {
     expect(request).toHaveBeenNthCalledWith(
       2,
       "/api/auth/login",
-      expect.objectContaining({ format: "json" }),
+      expect.not.objectContaining({ format: "json" }),
     );
   });
 
@@ -157,10 +196,39 @@ describe("httpAuthAdapter", () => {
       "/api/auth/refresh",
       expect.objectContaining<ApiRequestOptions>({
         auth: false,
-        format: "json",
+        method: "POST",
         body: JSON.stringify({ refreshToken: "stored-refresh" }),
       }),
     );
+    expect(request.mock.calls[0]?.[1]).not.toHaveProperty("format");
+  });
+
+  it("reads refresh tokens from the success envelope", async () => {
+    const fetchImpl = jest.fn().mockResolvedValue(
+      jsonResponse({
+        code: "SUCCESS",
+        message: "정상 처리되었습니다.",
+        data: {
+          accessToken: "next-access",
+          refreshToken: "next-refresh",
+          userId: "ylmc",
+          userName: "열린문",
+          role: "USER",
+        },
+      }),
+    );
+    const adapter = createHttpAuthAdapter(
+      createApiClient({
+        baseUrl: "https://api.example.com",
+        fetchImpl,
+      }),
+    );
+
+    await expect(adapter.refresh("stored-refresh")).resolves.toMatchObject({
+      accessToken: "next-access",
+      refreshToken: "next-refresh",
+      member: { id: "ylmc", name: "열린문", role: "USER" },
+    });
   });
 
   it("loads the current member from /api/member/me", async () => {

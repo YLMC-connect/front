@@ -1,6 +1,6 @@
 # prayer (중보기도)
 
-> 마지막 갱신: 2026-07-15 | 담당 Phase: P5/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-10-09 | 담당 Phase: P5/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 중보기도 사용자 HTTP adapter — development 기본값은 나눔과 같이 http다. 내 기도방·내 기도제목은 mock 행 위에 덮지 않고 `GET /api/prayer/cohorts/my`와 `GET /api/prayer/topics/my`로 만든다. 테스트와 `EXPO_PUBLIC_PRAYER_ADAPTER=mock`은 기존 mock service를 쓴다. 작성 화면의 `createPrayerTopic`은 `categoryId`가 없어 등록 API를 호출하지 않는다
 - 기도 작성 control·FAB 비율 보정 — 작성 화면 세그먼트의 full pill을 유지한 채 40/32px로 낮추고 44px 터치 범위를 보존했으며 루트 `기도제목 작성` FAB를 46px로 축소해 하단 탭과 위계를 분리
 - 기도 루트 카드 이동 의미 구분 — 상세 이동이 없는 내 기도제목 개별 카드는 버튼 역할·이동·화살표를 제거하고, 상세로 이동하는 내 기도방 카드에는 `기도방 보기 + chevron-right`를 명시하며 섹션 전체보기와 기존 경로는 유지
 - 중보기도 신청 아이콘 구분 — 하단 기도 탭의 `Hearts`와 신청 카드의 기존 `HandHeart`가 겹쳐 보이지 않도록 신청 카드만 Solar `UserPlusRounded`로 변경하고 기존 카드 geometry·색상·`/prayer/apply` 이동을 유지
@@ -49,18 +50,42 @@
 | `app/(tabs)/prayer/apply.tsx`                  | 기도방 참여 신청 요일/시간 선택 화면            |
 | `app/(tabs)/prayer/request.tsx`                | 내 기도제목 요청 상태 목록                      |
 | `app/modal/prayer-new.tsx`                     | 기도제목 등록 모달                              |
-| `src/services/prayerService.ts`                | 기도 overview 조회·기도제목 생성 mock service   |
+| `src/services/prayerService.ts`                | overview mock 기본, http adapter 전환           |
+| `src/services/prayerHttpDataSource.ts`         | 사용자 `/api/prayer` HTTP data source           |
+| `src/services/prayerMapper.ts`                 | Notion DTO → 기존 view model                    |
 | `src/hooks/usePrayers.ts`                      | 기도 overview query·기도제목 생성 mutation hook |
 | `src/mocks/prayers.ts`                         | 기도방/기도제목 mock 데이터                     |
 | `src/constants/domainOptions.ts`               | 중보기도 요일 필터 옵션                         |
-| `src/types/prayer.ts`                          | 중보기도 타입                                   |
+| `src/types/prayer.ts`                          | 중보기도 화면 모델                              |
+| `src/types/prayerApi.ts`                       | Notion 필드만 담은 사용자 기도 DTO              |
+| `scripts/check-prayer-api-contract.mjs`        | 사용자 중보기도 OpenAPI 계약 검사               |
 
 ## 데이터 타입
 
-`PrayerRoom`은 `weekday`, `leader`, `memberCount`, `isJoined`를 포함합니다. `PrayerTopic`은 `isAnonymous`, `prayerCount`, `hasPrayed`, `isAnswered`, `answer`를 포함합니다. 루트 화면 전용 `PrayerOverview`는 요일방 요약과 내 기도제목 상태 요약을 가지며, 추후 API DTO mapper의 출력 모델로 사용합니다.
+`PrayerRoom`은 `weekday`, `leader`, `memberCount`, `isJoined`를 포함합니다. `PrayerTopic`은 `isAnonymous`, `prayerCount`, `hasPrayed`, `isAnswered`, `answer`를 포함합니다. 루트 화면 전용 `PrayerOverview`는 요일방 요약과 내 기도제목 상태 요약을 가지며 API DTO mapper의 출력 모델로 사용합니다. `PrayerCohortDto`, `PrayerCohortStatusDto`, `PrayerCompletionMemberDto`, `PrayerTopicDto`, `PrayerHistoryItem`은 Notion에 적힌 필드만 가집니다. `PrayerApplicationDto`와 `PrayerCategoryDto`는 이름만 있고 값 타입은 페이지에 없어 `unknown`입니다. 기도방 상세 성공 필드는 없어 빈 객체로만 읽습니다. `a / b`로 한 칸에 적힌 이름은 두 필드입니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-10-09) **development http에서는 기도 목록 캐시와 상세가 목업 화면과 갈라진다** — overview query key 끝에 adapter mode를 붙여 저장된 목업 응답을 다시 쓰지 않는다. 기도방 카드 제목은 `cohortName`이 있으면 그 이름이고, 없으면 요일·시간이다. `__DEV__`에서 내 기도방 아래에 `서버 데이터` 또는 `목업 데이터`를 표시한다. route id가 있고 `designVariant`가 없으며 adapter가 http이면 상세는 `GET /api/prayer/cohorts/{id}/status`와 `GET /api/prayer/topics/board`만 그린다. 게시판은 기수별이 아니다. 내 기도제목 화면은 `GET /api/prayer/topics/my`의 title·categoryName·content·status를 그린다. id가 없거나 mock이거나 `designVariant`가 있으면 기존 디자인 문구를 유지한다. 신청 화면과 작성 모달 `createPrayerTopic`은 그대로다.
+- (2026-10-09) **중보기도 HTTP는 2026-10-02 사용자 `/api/prayer`만 호출하고 development 기본값은 http다** — 나눔과 같이 `EXPO_PUBLIC_PRAYER_ADAPTER`가 없으면 development는 http, preview·production은 mock이다. `mock`이면 기존 mock overview를 반환한다. `http`의 내 기도방·내 기도제목은 mock 행을 남기지 않는다. 참여 역할이 `LEADER` 또는 `MEMBER`이고 `yoil`이 1~5이며 `timeSlot`이 `AM`/`PM`인 기수만 기도방이 된다. 역할이 없거나 일·토는 목록에서 뺀다. 기도제목 status는 `REVIEW`/`OPEN`/`REJECTED`/`ANSWER_REQUESTED`/`ANSWERED`/`HIDDEN`을 화면 status로 두고, 본문은 `content`다. 호출 경로는 `GET /api/prayer/cohorts/my`, `GET /api/prayer/cohorts/open`, `GET /api/prayer/cohorts/{cohortId}`, `GET /api/prayer/cohorts/{cohortId}/status`, `POST`·`DELETE /api/prayer/cohorts/{cohortId}/completion`, `POST`·`DELETE /api/prayer/completions/{completionId}/like`, `GET /api/prayer/applications/my`, `POST /api/prayer/applications`, `DELETE /api/prayer/applications/{applicationId}`, `GET /api/prayer/me/history`, `GET /api/prayer/categories`, `GET /api/prayer/topics/board`, `GET /api/prayer/topics/my`, `POST /api/prayer/topics`, `PUT`·`DELETE /api/prayer/topics/{topicId}`, `POST /api/prayer/topics/{topicId}/answer-request`다. overview는 my cohorts와 my topics만 읽는다. `/api/admin/prayer`와 `GET /api/mypage/activities/prayers`는 호출하지 않는다. 작성 화면 `createPrayerTopic`은 `categoryId`가 없어 `POST /api/prayer/topics`를 호출하지 않는다. 팀장 좋아요(`PRY015`)와 멤버 완료(`PRY010`)는 서버 오류를 그대로 전달하고 클라이언트 역할로 거르지 않는다. 기도방 상세 성공 본문 필드는 Notion에 없어 `PrayerCohortDto`로 읽지 않는다. 계약 검사는 `npm run test:api:contract:prayer`이며 `npm run validate`에는 넣지 않는다. Issue #135.
+- (2026-10-09) **기존 행에 붙이는 helper는 ID가 같을 때만 Notion 값을 덮어쓴다** — overview 목록은 API 행으로 새로 만든다. helper에서는 새 행을 만들지 않는다. 같은 ID가 `open`과 `my`에 있으면 `my`가 이긴다.
+  - `PrayerOverviewRoom.memberCount` ← `memberCount`, `completedCount` ← `weekCompletedCount`, `participationRate` ← `completionRate`.
+  - `timeSlot` `AM`/`PM`만 `period` `morning`/`afternoon`.
+  - `yoil` 1~5만 `weekday` `mon`~`fri`. 0(일)·6(토)는 `PrayerWeekday`에 없어 mock 요일을 유지한다.
+  - `myRole`이 `LEADER` 또는 `MEMBER`면 overview `status`는 `joined`. null은 승인 대기가 아니므로 `pending`으로 바꾸지 않는다. cohort `status` `ACTIVE`/`CLOSED`는 참여 상태가 아니라 덮어쓰지 않는다.
+  - `PrayerRequestSummary`는 `GET /api/prayer/topics/my`에서 `title`, `categoryName`→`category`를 쓴다. `REVIEW`/`OPEN`/`REJECTED`만 `reviewing`/`published`/`rejected`다. `ANSWER_REQUESTED`/`ANSWERED`/`HIDDEN`은 기존 status에 없어 mock status를 유지한다. `description`은 상태 안내 문구라 `content`·`rejectReason`으로 바꾸지 않는다.
+  - `PrayerRoom`은 `cohortName`→`title`, `description`, `memberCount`를 쓴다. `myRole`이 역할이면 `isJoined` true, null이면 false. `leader`는 회원 객체가 아니라 mock을 유지한다.
+  - `PrayerTopic`은 `title`, `content`, `createdAt`을 쓴다. `status === ANSWERED`일 때만 `isAnswered`와 `answer`←`answerContent`다. 그 외에는 `isAnswered` false이고 `answer`는 비운다. `roomId`, `author`, `isAnonymous`, `prayerCount`, `hasPrayed`는 대응 필드가 없어 mock을 유지한다.
+  - 아래는 대응을 단정할 수 없거나 화면이 view model을 읽지 않아 mock·화면 fixture를 유지한다.
+    - 오늘 진행 카드의 합산 퍼센트. 방 `completionRate`로 바꾸지 않고 참여 중 방의 `completedCount/memberCount` 합으로 계산한다.
+    - overview에 없는 `cohortYear`, `cohortName`, `startDate`, `endDate`, `myCompleted`, `emergencyCount`.
+    - 참여 신청 `status` 코드 목록이 없어 신청을 `pending`으로 연결하지 않는다.
+    - mock이거나 route id·`designVariant`가 있을 때의 기도방 상세 디자인 문구. http이고 id만 있으면 현황 DTO와 전체 게시판을 직접 그린다. 상대 시각·좋아요 버튼은 그 화면에 없다.
+    - 신청 화면의 요일·시간 선택과 안내 문구. `POST /api/prayer/applications`의 `yoil`·`timeSlot`은 data source에만 있고 화면은 호출하지 않는다. 이름·연락처·메모는 화면 입력이 아니다.
+    - mock일 때의 내 기도제목 디자인 문구와, http에서도 유지하는 승인 안내·응답완료 요청 버튼. 버튼은 API를 호출하지 않는다.
+    - 작성 모달의 `roomId`·`isAnonymous`. 등록 API 필수값은 `categoryId`·`title`·`content`이고 응답은 기도제목 ID다. 기존 `createPrayerTopic`은 API를 호출하지 않고 mock `PrayerTopic`을 만든다. `POST /api/prayer/topics`는 `createPrayerTopicRequest`만 호출한다.
+    - `GET /api/prayer/me/history`의 활동 기간·종료 사유와 카테고리 목록. 화면 모델이 없다. 신청·카테고리 하위 타입은 Notion에 없어 값 타입을 단정하지 않는다.
+    - 좋아요·완료 취소·제목 수정·삭제·응답완료 요청의 성공 본문 필드가 없다.
 - (2026-07-15) **기도 작성 세그먼트와 루트 FAB는 공통의 낮은 비율을 사용한다** — 작성 화면 세그먼트는 full pill을 유지하면서 40px track·32px 선택 영역과 상하 6px hitSlop으로 44px 터치 범위를 보장하고, `기도제목 작성` FAB는 46px 높이·18px 아이콘·13px label을 사용합니다. 기존 작성 경로·모션·접근성은 유지합니다.
 - (2026-07-15) **기도 루트는 이동 가능한 카드에만 행동 문구와 화살표를 표시한다** — 내 기도제목 개별 요약에는 별도 상세가 없으므로 정적 카드로 두고 섹션 `전체보기`만 `/prayer/request`로 이동합니다. 상세가 있는 내 기도방 카드는 `기도방 보기 + chevron-right`를 표시하고 기존 `/prayer/[id]` 이동을 유지합니다.
 - (2026-07-15) **중보기도 신청 카드는 Solar `UserPlusRounded`를 사용한다** — 하단 기도 탭은 `Hearts`, 참여 신청 카드는 사람과 추가 표시가 함께 보이는 `UserPlusRounded`로 역할을 구분합니다.
@@ -94,6 +119,7 @@
 
 ## 미결 / 추적
 
+- 기도방 상세 성공 필드, 참여 신청 status 코드, 신청·카테고리 값 타입, 일·토 `PrayerWeekday`, 작성 화면 `categoryId`는 사용자 계약만으로는 화면과 연결하지 못했다. Issue #135.
 - 비성도 기도 요청, 기도방 참여 승인, 익명 작성자의 서버 응답 필드 정책 확인 필요.
 - 푸시 알림과 기도 통계는 후속 Phase입니다.
 - 2026-05-27 ZIP FAB root overlay 정렬 후 중보기도 residual은 `pray-list mean=12.28`, `pray-detail mean=11.84`, `pray-request mean=9.34`입니다. 남은 차이는 Android native status bar/time, RN 한글 font metrics, tab/FAB shadow 번역 차이로 분리 추적합니다.

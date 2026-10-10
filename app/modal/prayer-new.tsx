@@ -73,6 +73,7 @@ export default function PrayerNewModal() {
   return (
     <Screen
       applyTopInset={false}
+      padded={false}
       style={styles.root}
       testID="prayer-form-screen"
     >
@@ -84,40 +85,42 @@ export default function PrayerNewModal() {
             back
             onBack={() => router.back()}
           />
-          <FormSection title="기도제목">
-            <TextField
-              label="제목"
-              value={values.title}
-              onChangeText={(title) =>
-                setValues((current) => ({ ...current, title }))
-              }
-              error={errors.title}
-            />
-            <Textarea
-              label="내용"
-              value={values.content}
-              onChangeText={(content) =>
-                setValues((current) => ({ ...current, content }))
-              }
-              error={errors.content}
-            />
-          </FormSection>
-          <FormSection title="작성자 표시">
-            <SegmentedTabs
-              items={visibilityTabs}
-              active={values.visibility}
-              onChange={(visibility) =>
-                setValues((current) => ({ ...current, visibility }))
-              }
-            />
-          </FormSection>
-          <View style={styles.actions}>
-            <Button variant="soft" onPress={() => router.back()}>
-              취소
-            </Button>
-            <Button onPress={onSubmit} loading={createPrayerTopic.isPending}>
-              등록
-            </Button>
+          <View style={styles.formBody}>
+            <FormSection title="기도제목">
+              <TextField
+                label="제목"
+                value={values.title}
+                onChangeText={(title) =>
+                  setValues((current) => ({ ...current, title }))
+                }
+                error={errors.title}
+              />
+              <Textarea
+                label="내용"
+                value={values.content}
+                onChangeText={(content) =>
+                  setValues((current) => ({ ...current, content }))
+                }
+                error={errors.content}
+              />
+            </FormSection>
+            <FormSection title="작성자 표시">
+              <SegmentedTabs
+                items={visibilityTabs}
+                active={values.visibility}
+                onChange={(visibility) =>
+                  setValues((current) => ({ ...current, visibility }))
+                }
+              />
+            </FormSection>
+            <View style={styles.actions}>
+              <Button variant="soft" onPress={() => router.back()}>
+                취소
+              </Button>
+              <Button onPress={onSubmit} loading={createPrayerTopic.isPending}>
+                등록
+              </Button>
+            </View>
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -127,6 +130,11 @@ export default function PrayerNewModal() {
 
 const styles = StyleSheet.create({
   root: { paddingTop: theme.layout.screenX },
-  formContainer: { gap: 16 },
+  formContainer: { flex: 1 },
+  formBody: {
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: 8,
+    gap: 16,
+  },
   actions: { flexDirection: "row", gap: 8 },
 });

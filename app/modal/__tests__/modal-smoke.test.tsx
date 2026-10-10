@@ -144,6 +144,9 @@ describe("modal smoke screens", () => {
     expect(screen.getByText("기도제목 등록")).toBeTruthy();
     expect(screen.getByLabelText("뒤로")).toBeTruthy();
     expect(
+      StyleSheet.flatten(screen.getByLabelText("뒤로").props.style).marginLeft,
+    ).toBeUndefined();
+    expect(
       StyleSheet.flatten(screen.getByTestId("prayer-form-screen").props.style),
     ).toMatchObject({ paddingTop: theme.layout.screenX });
   });

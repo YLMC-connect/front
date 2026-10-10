@@ -1,7 +1,7 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useRouter, type Href } from "expo-router";
 import type { ComponentProps } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen, Section } from "../../../src/components/layout/Screen";
 import { Avatar, Card, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
@@ -22,12 +22,12 @@ const activityItems: MenuItem[] = [
   {
     label: "중보기도 활동 이력",
     icon: "hands-pray",
-    href: "/mypage/activity?tab=prayer",
+    href: "/prayer/request?returnUrl=/mypage",
   },
   {
     label: "삶공부 수료",
     icon: "menu-book",
-    href: "/life-study/history",
+    href: "/life-study/history?returnUrl=/mypage",
   },
   { label: "차단 관리", icon: "block", href: "/mypage/blocked" },
 ];
@@ -77,46 +77,49 @@ export default function MyPageScreen() {
   };
 
   return (
-    <Screen>
-      <TopBar title="마이페이지" back onBack={() => router.back()} />
+    <Screen scroll={false} padded={false}>
+      <View style={styles.root}>
+        <TopBar title="마이페이지" back onBack={() => router.back()} />
+        <ScrollView contentContainerStyle={styles.body}>
+          <Card style={styles.profileCard}>
+            <Avatar name="김은혜" size={60} seed="김은혜" />
+            <View style={styles.profileText}>
+              <Text style={styles.name}>김은혜</Text>
+              <Text style={styles.church}>열린문교회</Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push("/mypage/edit")}
+              style={styles.editButton}
+            >
+              <Text style={styles.editText}>프로필 수정</Text>
+            </Pressable>
+          </Card>
 
-      <Card style={styles.profileCard}>
-        <Avatar name="김은혜" size={60} seed="김은혜" />
-        <View style={styles.profileText}>
-          <Text style={styles.name}>김은혜</Text>
-          <Text style={styles.church}>열린문교회</Text>
-        </View>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.push("/mypage/edit")}
-          style={styles.editButton}
-        >
-          <Text style={styles.editText}>프로필 수정</Text>
-        </Pressable>
-      </Card>
+          <MenuSection
+            title="활동 관리"
+            items={activityItems}
+            onPress={handleMenuPress}
+          />
+          <MenuSection
+            title="고객센터"
+            items={supportItems}
+            onPress={handleMenuPress}
+          />
+          <MenuSection
+            title="계정"
+            items={accountItems}
+            onPress={handleMenuPress}
+          />
+          <MenuSection
+            title="계정 관리"
+            items={manageItems}
+            onPress={handleMenuPress}
+          />
 
-      <MenuSection
-        title="활동 관리"
-        items={activityItems}
-        onPress={handleMenuPress}
-      />
-      <MenuSection
-        title="고객센터"
-        items={supportItems}
-        onPress={handleMenuPress}
-      />
-      <MenuSection
-        title="계정"
-        items={accountItems}
-        onPress={handleMenuPress}
-      />
-      <MenuSection
-        title="계정 관리"
-        items={manageItems}
-        onPress={handleMenuPress}
-      />
-
-      <Text style={styles.version}>v 1.0.2 · 열린문 커넥트</Text>
+          <Text style={styles.version}>v 1.0.2 · 열린문 커넥트</Text>
+        </ScrollView>
+      </View>
     </Screen>
   );
 }
@@ -174,6 +177,13 @@ function MenuRow({
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1 },
+  body: {
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: 8,
+    paddingBottom: 28,
+    gap: 16,
+  },
   profileCard: {
     flexDirection: "row",
     alignItems: "center",

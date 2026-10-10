@@ -18,7 +18,7 @@
 - 본문 글꼴 Pretendard. 아이콘은 공통 `AppIcon`(Solar Linear, 선택 Bold)
 - 루트 5탭 홈/나눔/동행/기도/삶공부. MY는 홈에서 숨김 route. 상세는 탭 중첩 Stack. 이미 보고 있는 루트 탭을 다시 누르면 같은 주소로 다시 열지 않는다
 - 화면 상단은 `safe area + 20px`. 이미지 hero overlay는 예외이며, 등록 바텀 모달(presentation: "modal")은 safe area 대신 좌우 여백(screenX=20px)과 동일한 상단 여백 적용
-- 루트 탭은 glass sticky 헤더 + `StickyHeaderScreen`. 기본 숨김은 아래 12px / 위 4px(`direction`)
+- 루트 탭은 glass sticky 헤더 + `StickyHeaderScreen`. 기본 숨김은 아래 12px / 위 4px(`direction`). 화면 오버레이(`overlay`)는 `ScreenHeader` 상위 레이어로 배치되어 플로팅 메뉴 backdrop이 헤더까지 온전히 덮는다
 - 작성 입력은 공통 `ModalFormTextInput`(primary 2px 포커스). 검색은 `SearchField`
 - 숨긴 웹 route의 `0×0` layout은 탭·필터 geometry로 쓰지 않음
 - API client는 기본 `{ code, message, data }` envelope. 비envelope 성공만 `format: "json"`

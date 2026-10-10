@@ -30,7 +30,7 @@
 | home (홈) | 1 | 2 | 2026-10-10 | [features/home.md](features/home.md) |
 | market (나눔장터) | 2 | 24 | 2026-10-10 | [features/market.md](features/market.md) |
 | group (소모임) | 2 | 33 | 2026-10-10 | [features/group.md](features/group.md) |
-| mypage (MY) | 1 | 7 | 2026-10-10 | [features/mypage.md](features/mypage.md) |
+| mypage (MY) | 2 | 7 | 2026-10-10 | [features/mypage.md](features/mypage.md) |
 | life-study (삶공부) | 1 | 12 | 2026-10-09 | [features/life-study.md](features/life-study.md) |
 | prayer (중보기도) | 3 | 17 | 2026-10-10 | [features/prayer.md](features/prayer.md) |
 

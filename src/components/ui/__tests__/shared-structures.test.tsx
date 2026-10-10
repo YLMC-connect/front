@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { createRef } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Keyboard, StyleSheet, Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { theme } from "../../../constants/theme";
 import { Screen } from "../../layout/Screen";
@@ -480,5 +480,69 @@ describe("shared maintenance UI", () => {
       zIndex: 25,
     });
     expect(screen.getByTestId("custom-overlay")).toBeTruthy();
+  });
+
+  it("resets scroll position to 0 and resets controls on navigation focus in StickyHeaderScreen", () => {
+    const listeners: Record<string, () => void> = {};
+    const mockAddListener = jest.fn((event: string, cb: () => void) => {
+      listeners[event] = cb;
+      return () => {
+        delete listeners[event];
+      };
+    });
+    jest.mocked(useNavigation).mockReturnValue({
+      addListener: mockAddListener,
+      isFocused: () => true,
+    } as any);
+
+    const scrollRef = {
+      current: {
+        scrollTo: jest.fn(),
+      },
+    };
+
+    render(
+      <SafeAreaProvider
+        initialMetrics={{
+          frame: { x: 0, y: 0, width: 430, height: 932 },
+          insets: { top: 0, left: 0, right: 0, bottom: 0 },
+        }}
+      >
+        <StickyHeaderScreen
+          scrollRef={scrollRef as any}
+          testID="focus-reset-screen"
+          title="홈"
+        >
+          <Text>본문</Text>
+        </StickyHeaderScreen>
+      </SafeAreaProvider>,
+    );
+
+    expect(mockAddListener).toHaveBeenCalledWith("focus", expect.any(Function));
+    listeners.focus?.();
+    expect(scrollRef.current.scrollTo).toHaveBeenCalledWith({
+      y: 0,
+      animated: false,
+    });
+  });
+
+  it("dismisses keyboard on touch in StickyHeaderScreen and Screen", () => {
+    const dismissSpy = jest.spyOn(Keyboard, "dismiss");
+
+    render(
+      <SafeAreaProvider
+        initialMetrics={{
+          frame: { x: 0, y: 0, width: 430, height: 932 },
+          insets: { top: 0, left: 0, right: 0, bottom: 0 },
+        }}
+      >
+        <StickyHeaderScreen testID="touch-dismiss-screen" title="홈">
+          <Text testID="touch-target">터치 영역</Text>
+        </StickyHeaderScreen>
+      </SafeAreaProvider>,
+    );
+
+    fireEvent.press(screen.getByTestId("touch-target"));
+    expect(dismissSpy).toHaveBeenCalled();
   });
 });

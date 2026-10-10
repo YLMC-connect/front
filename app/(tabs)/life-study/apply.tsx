@@ -1,6 +1,7 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useRouter } from "expo-router";
 import {
+  Keyboard,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -21,83 +22,95 @@ export default function LifeStudyApplyScreenRoute() {
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
         <TopBar title="수강 신청" back onBack={() => router.back()} />
-        <ScrollView contentContainerStyle={styles.body}>
-          <View style={styles.summaryCard}>
-            <VisualThumb size={72} seed={1} icon="menu-book" />
-            <View style={styles.summaryText}>
-              <Text style={styles.courseTitle}>생명의 삶</Text>
-              <Text style={styles.courseMeta}>
-                매주 수 19:30 · 본당 3층 소예배실{"\n"}2026.07.08 ~ 2026.10.07
-                (총 13주)
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.infoBox}>
-            <InfoRow label="신청 기간" value="6.24 ~ 7.05" />
-            <InfoRow label="정원" value="18 / 24명" />
-            <Text style={styles.infoHint}>
-              생명의 삶은 이후 필수·선택 과정을 위한 첫 과정입니다.
-            </Text>
-          </View>
-
-          <View style={styles.form}>
-            <Field label="이름" value="김은혜" />
-            <View style={styles.twoCols}>
-              <Field label="연락처" value="010-1234-5678" />
-              <Field label="생년" value="1988" />
-            </View>
-            <Field label="소속 부서" placeholder="예) 4부 청장년부" />
-
-            <View>
-              <Text style={styles.label}>신앙 연차</Text>
-              <View style={styles.chips}>
-                {faithYears.map((item, index) => {
-                  const selected = index === 3;
-                  return (
-                    <View
-                      key={item}
-                      style={[styles.chip, selected ? styles.chipOn : null]}
-                    >
-                      <Text
-                        style={[
-                          styles.chipText,
-                          selected ? styles.chipTextOn : null,
-                        ]}
-                      >
-                        {item}
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
-            </View>
-
-            <View>
-              <Text style={styles.label}>신청 동기</Text>
-              <TextInput
-                editable={false}
-                multiline
-                placeholder="신청하시는 이유를 자유롭게 적어주세요"
-                placeholderTextColor={theme.colors.inkHint}
-                style={[styles.input, styles.textarea]}
-              />
-            </View>
-
-            <View style={styles.promiseBox}>
-              <View style={styles.checkBox}>
-                <AppIcon name="check" size={14} color={theme.colors.white} />
-              </View>
-              <Text style={styles.promiseText}>
-                <Text style={styles.promiseStrong}>수강 약속에 동의합니다</Text>
-                {"\n"}
-                <Text style={styles.promiseMuted}>
-                  13주 과정 중 80% 이상 출석하며, 매주 묵상 과제를 성실히
-                  수행하겠습니다.
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          contentContainerStyle={[styles.body, { flexGrow: 1 }]}
+        >
+          <Pressable
+            accessible={false}
+            onPress={Keyboard.dismiss}
+            style={{ flexGrow: 1 }}
+          >
+            <View style={styles.summaryCard}>
+              <VisualThumb size={72} seed={1} icon="menu-book" />
+              <View style={styles.summaryText}>
+                <Text style={styles.courseTitle}>생명의 삶</Text>
+                <Text style={styles.courseMeta}>
+                  매주 수 19:30 · 본당 3층 소예배실{"\n"}2026.07.08 ~ 2026.10.07
+                  (총 13주)
                 </Text>
+              </View>
+            </View>
+
+            <View style={styles.infoBox}>
+              <InfoRow label="신청 기간" value="6.24 ~ 7.05" />
+              <InfoRow label="정원" value="18 / 24명" />
+              <Text style={styles.infoHint}>
+                생명의 삶은 이후 필수·선택 과정을 위한 첫 과정입니다.
               </Text>
             </View>
-          </View>
+
+            <View style={styles.form}>
+              <Field label="이름" value="김은혜" />
+              <View style={styles.twoCols}>
+                <Field label="연락처" value="010-1234-5678" />
+                <Field label="생년" value="1988" />
+              </View>
+              <Field label="소속 부서" placeholder="예) 4부 청장년부" />
+
+              <View>
+                <Text style={styles.label}>신앙 연차</Text>
+                <View style={styles.chips}>
+                  {faithYears.map((item, index) => {
+                    const selected = index === 3;
+                    return (
+                      <View
+                        key={item}
+                        style={[styles.chip, selected ? styles.chipOn : null]}
+                      >
+                        <Text
+                          style={[
+                            styles.chipText,
+                            selected ? styles.chipTextOn : null,
+                          ]}
+                        >
+                          {item}
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+
+              <View>
+                <Text style={styles.label}>신청 동기</Text>
+                <TextInput
+                  editable={false}
+                  multiline
+                  placeholder="신청하시는 이유를 자유롭게 적어주세요"
+                  placeholderTextColor={theme.colors.inkHint}
+                  style={[styles.input, styles.textarea]}
+                />
+              </View>
+
+              <View style={styles.promiseBox}>
+                <View style={styles.checkBox}>
+                  <AppIcon name="check" size={14} color={theme.colors.white} />
+                </View>
+                <Text style={styles.promiseText}>
+                  <Text style={styles.promiseStrong}>
+                    수강 약속에 동의합니다
+                  </Text>
+                  {"\n"}
+                  <Text style={styles.promiseMuted}>
+                    13주 과정 중 80% 이상 출석하며, 매주 묵상 과제를 성실히
+                    수행하겠습니다.
+                  </Text>
+                </Text>
+              </View>
+            </View>
+          </Pressable>
         </ScrollView>
 
         <View style={styles.bottom}>

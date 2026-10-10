@@ -2,6 +2,7 @@ import { AppIcon } from "@/components/ui/app-icon";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  Keyboard,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -35,82 +36,92 @@ export default function PrayerApplyScreenRoute() {
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
         <TopBar title="기도방 참여 신청" back onBack={() => router.back()} />
-        <ScrollView contentContainerStyle={styles.body}>
-          <Text style={styles.notice}>
-            먼저 요일을 고르고, 그 다음 오전/오후 중 하나를 선택합니다. 승인
-            전에는 기도제목을 볼 수 없습니다.
-          </Text>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          contentContainerStyle={[styles.body, { flexGrow: 1 }]}
+        >
+          <Pressable
+            accessible={false}
+            onPress={Keyboard.dismiss}
+            style={{ flexGrow: 1 }}
+          >
+            <Text style={styles.notice}>
+              먼저 요일을 고르고, 그 다음 오전/오후 중 하나를 선택합니다. 승인
+              전에는 기도제목을 볼 수 없습니다.
+            </Text>
 
-          <View style={styles.stack}>
-            <View>
-              <Text style={styles.sectionLabel}>1. 요일 선택</Text>
-              <View style={styles.optionStack}>
-                {days.map((day) => (
-                  <SelectRow
-                    key={day}
-                    label={dayNames[day]}
-                    selected={day === selectedDay}
-                    onPress={() => setSelectedDay(day)}
-                  />
-                ))}
+            <View style={styles.stack}>
+              <View>
+                <Text style={styles.sectionLabel}>1. 요일 선택</Text>
+                <View style={styles.optionStack}>
+                  {days.map((day) => (
+                    <SelectRow
+                      key={day}
+                      label={dayNames[day]}
+                      selected={day === selectedDay}
+                      onPress={() => setSelectedDay(day)}
+                    />
+                  ))}
+                </View>
               </View>
-            </View>
 
-            <View>
-              <Text style={styles.sectionLabel}>2. 시간 선택</Text>
-              <View style={styles.timeGrid}>
-                {times.map((time) => (
-                  <Pressable
-                    accessibilityRole="button"
-                    key={time}
-                    onPress={() => setSelectedTime(time)}
-                    style={[
-                      styles.timeOption,
-                      time === selectedTime ? styles.optionOn : null,
-                    ]}
-                  >
-                    <Text
+              <View>
+                <Text style={styles.sectionLabel}>2. 시간 선택</Text>
+                <View style={styles.timeGrid}>
+                  {times.map((time) => (
+                    <Pressable
+                      accessibilityRole="button"
+                      key={time}
+                      onPress={() => setSelectedTime(time)}
                       style={[
-                        styles.optionText,
-                        time === selectedTime ? styles.optionTextOn : null,
+                        styles.timeOption,
+                        time === selectedTime ? styles.optionOn : null,
                       ]}
                     >
-                      {time === selectedTime ? "✓ " : ""}
-                      {time} 기도방
-                    </Text>
-                  </Pressable>
-                ))}
+                      <Text
+                        style={[
+                          styles.optionText,
+                          time === selectedTime ? styles.optionTextOn : null,
+                        ]}
+                      >
+                        {time === selectedTime ? "✓ " : ""}
+                        {time} 기도방
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
               </View>
-            </View>
 
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>신청자 정보</Text>
-              <Field label="이름" value="김은혜" />
-              <Field label="연락처" value="010-1234-5678" />
-              <View>
-                <Text style={styles.fieldLabel}>신청 메모</Text>
-                <TextInput
-                  editable={false}
-                  multiline
-                  placeholder="기도방 참여를 희망하는 이유를 적어주세요"
-                  placeholderTextColor={theme.colors.inkHint}
-                  style={[styles.input, styles.textarea]}
-                />
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>신청자 정보</Text>
+                <Field label="이름" value="김은혜" />
+                <Field label="연락처" value="010-1234-5678" />
+                <View>
+                  <Text style={styles.fieldLabel}>신청 메모</Text>
+                  <TextInput
+                    editable={false}
+                    multiline
+                    placeholder="기도방 참여를 희망하는 이유를 적어주세요"
+                    placeholderTextColor={theme.colors.inkHint}
+                    style={[styles.input, styles.textarea]}
+                  />
+                </View>
               </View>
-            </View>
 
-            <View style={styles.waitingCard}>
-              <View style={styles.waitingHead}>
-                <Badge tone="warn">승인 대기</Badge>
-                <Text style={styles.waitingTitle}>
-                  신청 후 중복 신청은 제한됩니다
+              <View style={styles.waitingCard}>
+                <View style={styles.waitingHead}>
+                  <Badge tone="warn">승인 대기</Badge>
+                  <Text style={styles.waitingTitle}>
+                    신청 후 중복 신청은 제한됩니다
+                  </Text>
+                </View>
+                <Text style={styles.waitingText}>
+                  중보기도 관리자가 승인하면 내 기도방에 표시됩니다.
                 </Text>
               </View>
-              <Text style={styles.waitingText}>
-                중보기도 관리자가 승인하면 내 기도방에 표시됩니다.
-              </Text>
             </View>
-          </View>
+          </Pressable>
         </ScrollView>
 
         <View style={styles.bottom}>

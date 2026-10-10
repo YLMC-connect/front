@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   Badge,
-  EmptyState,
+  Empty,
   TopBar,
   UnderlineTabs,
   VisualThumb,
@@ -47,10 +47,13 @@ export default function ActivityScreen() {
     tab?: string;
     designVariant?: string;
   }>();
-  const variant = variantOf(
+  const initialVariant = variantOf(
     readDesignVariant(params.designVariant) ?? params.tab,
   );
-  const active = variant === "empty" ? "posts" : variant;
+  const isDesignEmpty = initialVariant === "empty";
+  const [activeTab, setActiveTab] = useState<ActivityTab>(
+    isDesignEmpty ? "posts" : initialVariant,
+  );
   const localActivity = readLocalMyPageActivity();
   const httpAdapter = resolveMyPageAdapterMode() === "http";
   const [posts, setPosts] = useState<readonly MyPageActivityPost[]>(
@@ -92,36 +95,55 @@ export default function ActivityScreen() {
         ) : null}
         <UnderlineTabs
           items={tabs}
-          active={active}
+          active={activeTab}
           variant="border"
-          onChange={(tab) => router.push(`/mypage/activity?tab=${tab}`)}
+          onChange={(tab) => setActiveTab(tab as ActivityTab)}
         />
 
         <ScrollView contentContainerStyle={styles.body}>
-          {variant === "empty" ? (
-            <EmptyState
+          {isDesignEmpty ? (
+            <Empty
               icon="schedule"
-              title="활동 내역이 없습니다"
+              title="활동 내역이 없어요"
               description={
                 "나눔 게시글, 댓글, 소모임 참여가\n이곳에 모여서 쉽게 살펴볼 수 있어요."
               }
             />
-          ) : active === "posts" ? (
-            posts.map((post, index) => (
-              <PostRow
-                key={post.id}
-                post={post}
-                last={index === posts.length - 1}
+          ) : activeTab === "posts" ? (
+            posts.length === 0 ? (
+              <Empty
+                title="작성한 나눔 게시글이 없어요"
+                description="나눔 탭에서 첫 글을 올려보세요."
               />
-            ))
-          ) : active === "comments" ? (
-            comments.map((comment, index) => (
-              <CommentRow
-                key={comment.id}
-                comment={comment}
-                last={index === comments.length - 1}
+            ) : (
+              posts.map((post, index) => (
+                <PostRow
+                  key={post.id}
+                  post={post}
+                  last={index === posts.length - 1}
+                />
+              ))
+            )
+          ) : activeTab === "comments" ? (
+            comments.length === 0 ? (
+              <Empty
+                title="작성한 댓글이 없어요"
+                description="게시글에 따뜻한 댓글을 남겨보세요."
               />
-            ))
+            ) : (
+              comments.map((comment, index) => (
+                <CommentRow
+                  key={comment.id}
+                  comment={comment}
+                  last={index === comments.length - 1}
+                />
+              ))
+            )
+          ) : groups.length === 0 ? (
+            <Empty
+              title="참여 중인 소모임이 없어요"
+              description="소모임 탭에서 관심 있는 모임에 참여해보세요."
+            />
           ) : (
             groups.map((group, index) => (
               <GroupRow

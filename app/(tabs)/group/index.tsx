@@ -43,7 +43,7 @@ type GroupSection = "groups" | "service" | "mine";
 const sections: readonly { key: GroupSection; label: string }[] = [
   { key: "groups", label: "소모임" },
   { key: "service", label: "봉사" },
-  { key: "mine", label: "내 소모임" },
+  { key: "mine", label: "내 모임" },
 ];
 
 const GROUP_SEGMENT_STICKY_HEIGHT = 60;
@@ -194,10 +194,10 @@ export default function GroupScreen() {
         scrollRef={listScrollRef}
         scrollStateResetKey={scrollStateResetKey}
         testID="screen-group"
-        title="내 소모임"
+        title="내 모임"
         right={
           <SearchToggleButton
-            accessibilityLabel="내 소모임 닫기"
+            accessibilityLabel="내 모임 닫기"
             onPress={() => router.back()}
             open
             testID="group-my-list-close"

@@ -20,6 +20,7 @@ import type {
 import { StickyHeaderScreen } from "../layout/StickyHeaderScreen";
 import {
   AppText,
+  Empty,
   EmptyState,
   ErrorState,
   FloatingActionButton,
@@ -160,61 +161,69 @@ function PrayerContent() {
         </AppText>
         <DataSourceCaption mode={resolvePrayerAdapterMode()} />
         <View style={styles.stack}>
-          {data.rooms.map((room) => (
-            <Pressable
-              key={room.id}
-              accessibilityRole="button"
-              onPress={() => router.push(`/prayer/${room.id}`)}
-              style={styles.roomCard}
-            >
-              <PrayerDayBadge weekday={room.weekday} period={room.period} />
-              <View style={styles.cardText}>
-                <View style={styles.badgeRow}>
-                  <AppText variant="cardTitle">
-                    {room.title ??
-                      `${weekdayLabels[room.weekday].long} ${periodLabels[room.period]}`}
-                  </AppText>
-                  <View
-                    style={[
-                      styles.statusBadge,
-                      room.status !== "joined" ? styles.warnBadge : null,
-                    ]}
-                  >
-                    <Text style={styles.statusBadgeText}>
-                      {roomStatusLabels[room.status]}
-                    </Text>
-                  </View>
-                </View>
-                <AppText
-                  variant="caption"
-                  tone="muted"
-                  style={styles.mutedText}
-                >
-                  멤버 {room.memberCount}명 · 오늘 완료{" "}
-                  {room.completedCount == null
-                    ? "승인 대기"
-                    : `${room.completedCount}명`}{" "}
-                  · 참여율{" "}
-                  {room.participationRate == null
-                    ? "-"
-                    : `${room.participationRate}%`}
-                </AppText>
-              </View>
-              <View
-                testID={`prayer-room-${room.id}-action`}
-                style={styles.roomAction}
+          {data.rooms.length === 0 ? (
+            <Empty
+              title="참여 중인 기도방이 없어요"
+              description="중보기도 신청을 통해 기도방에 참여해보세요."
+              testID="prayer-rooms-empty"
+            />
+          ) : (
+            data.rooms.map((room) => (
+              <Pressable
+                key={room.id}
+                accessibilityRole="button"
+                onPress={() => router.push(`/prayer/${room.id}`)}
+                style={styles.roomCard}
               >
-                <AppText variant="caption" tone="brand">
-                  기도방 보기
-                </AppText>
-                <AppIcon
-                  name="chevron-right"
-                  size={18}
-                  color={theme.colors.primaryDeep}
-                />
-              </View>
-            </Pressable>
-          ))}
+                <PrayerDayBadge weekday={room.weekday} period={room.period} />
+                <View style={styles.cardText}>
+                  <View style={styles.badgeRow}>
+                    <AppText variant="cardTitle">
+                      {room.title ??
+                        `${weekdayLabels[room.weekday].long} ${periodLabels[room.period]}`}
+                    </AppText>
+                    <View
+                      style={[
+                        styles.statusBadge,
+                        room.status !== "joined" ? styles.warnBadge : null,
+                      ]}
+                    >
+                      <Text style={styles.statusBadgeText}>
+                        {roomStatusLabels[room.status]}
+                      </Text>
+                    </View>
+                  </View>
+                  <AppText
+                    variant="caption"
+                    tone="muted"
+                    style={styles.mutedText}
+                  >
+                    멤버 {room.memberCount}명 · 오늘 완료{" "}
+                    {room.completedCount == null
+                      ? "승인 대기"
+                      : `${room.completedCount}명`}{" "}
+                    · 참여율{" "}
+                    {room.participationRate == null
+                      ? "-"
+                      : `${room.participationRate}%`}
+                  </AppText>
+                </View>
+                <View
+                  testID={`prayer-room-${room.id}-action`}
+                  style={styles.roomAction}
+                >
+                  <AppText variant="caption" tone="brand">
+                    기도방 보기
+                  </AppText>
+                  <AppIcon
+                    name="chevron-right"
+                    size={18}
+                    color={theme.colors.primaryDeep}
+                  />
+                </View>
+              </Pressable>
+            ))
+          )}
         </View>
       </View>
 
@@ -226,36 +235,44 @@ function PrayerContent() {
           testID="prayer-request-section-header"
         />
         <View style={styles.stack}>
-          {data.requests.map((item) => (
-            <View
-              key={item.id}
-              testID={`prayer-request-card-${item.id}`}
-              style={styles.requestCard}
-            >
-              <View style={styles.cardText}>
-                <View style={styles.badgeRow}>
-                  <View style={styles.muteBadge}>
-                    <Text style={styles.muteBadgeText}>{item.category}</Text>
+          {data.requests.length === 0 ? (
+            <Empty
+              title="등록된 기도제목이 없어요"
+              description="기도제목 작성을 통해 기도제목을 나눠보세요."
+              testID="prayer-requests-empty"
+            />
+          ) : (
+            data.requests.map((item) => (
+              <View
+                key={item.id}
+                testID={`prayer-request-card-${item.id}`}
+                style={styles.requestCard}
+              >
+                <View style={styles.cardText}>
+                  <View style={styles.badgeRow}>
+                    <View style={styles.muteBadge}>
+                      <Text style={styles.muteBadgeText}>{item.category}</Text>
+                    </View>
+                    <View style={styles.statusBadge}>
+                      <Text style={styles.statusBadgeText}>
+                        {requestStatusLabels[item.status]}
+                      </Text>
+                    </View>
                   </View>
-                  <View style={styles.statusBadge}>
-                    <Text style={styles.statusBadgeText}>
-                      {requestStatusLabels[item.status]}
-                    </Text>
-                  </View>
+                  <AppText variant="cardTitle" style={styles.requestTitle}>
+                    {item.title}
+                  </AppText>
+                  <AppText
+                    variant="caption"
+                    tone="muted"
+                    style={styles.mutedText}
+                  >
+                    {item.description}
+                  </AppText>
                 </View>
-                <AppText variant="cardTitle" style={styles.requestTitle}>
-                  {item.title}
-                </AppText>
-                <AppText
-                  variant="caption"
-                  tone="muted"
-                  style={styles.mutedText}
-                >
-                  {item.description}
-                </AppText>
               </View>
-            </View>
-          ))}
+            ))
+          )}
         </View>
       </View>
     </>

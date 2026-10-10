@@ -49,7 +49,7 @@
 | `src/components/ui/inputs.tsx` | TextField, Textarea, ImagePickerField, FormSection |
 | `src/components/ui/navigation.tsx` | TopBar, SegmentedTabs, HorizontalChips |
 | `src/components/ui/dialog.tsx` | ConfirmDialog, BottomSheet, RadioSheet |
-| `src/components/ui/feedback.tsx` | EmptyState, ErrorState, SuccessState, Toast |
+| `src/components/ui/feedback.tsx` | Empty, EmptyState, ErrorState, SuccessState, Toast |
 | `src/components/ui/index.tsx` | 6개 서브모듈 barrel export |
 | `.github/workflows/ci.yml` | PR `npm run validate` |
 | `scripts/check-*-api-contract.mjs` | Swagger 계약 검사 |
@@ -63,6 +63,7 @@
 
 ## 결정 사항 (지금 유효한 것만)
 
+- **공통 Empty 컴포넌트 표준화 (`src/components/ui`)** — 빈 목록/데이터 부재 상태를 위한 `Empty` 공통 컴포넌트(아이콘 + 타이틀 + 부제목 + 선택적 액션) 및 `EmptyProps`를 표준화하여 export하고, 기존 `EmptyState`를 alias로 하위 호환 유지. Issue #164.
 - **서버 역할은 공통 타입으로 보존** — `UserRole`은 `ADMIN`, `USER`, 도메인별 `MANAGER_*` 역할을 원본 값으로 유지한다. 프런트 판별은 메뉴/route 노출용이며 실제 API 인가는 서버가 담당한다.
 - **API origin은 로컬 env만** — `EXPO_PUBLIC_API_URL`. 실제 호스트를 코드·문서·`.env.example`에 두지 않음. HTTP adapter를 쓰는 동안 없으면 `app.config.ts`가 실패. mock만이면 URL 없이 실행 가능.
 - **웹 라이브 API는 검증 대상이 아님** — 브라우저 CORS. 서버 CORS를 열지 않는 한 `npm run web`으로 라이브 인증을 맞추지 않음. 검증 기준은 Expo Dev Client.

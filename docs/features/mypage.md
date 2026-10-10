@@ -11,7 +11,7 @@
 ## ✅ 완료
 
 - 마이페이지 활동 HTTP adapter — development 기본값은 나눔과 같이 http다. 활동 화면은 `GET /api/mypage/activities`의 나눔 글·댓글·소모임을 보여 준다. 테스트와 `EXPO_PUBLIC_MYPAGE_ADAPTER=mock`은 기존 로컬 목록을 쓴다
-- 홈 진입 MY 뒤로가기 보완 — 하단 탭이 아닌 홈 `내 정보 보기`에서 push되는 `/mypage` 루트에도 공통 `chevron-left + 뒤로`를 표시하고 `router.back()`으로 홈에 복귀
+- 홈 진입 MY 뒤로가기 보완 — 하단 탭이 아닌 홈 '내 정보'에서 push되는 `/mypage` 루트에도 공통 `chevron-left + 뒤로`를 표시하고 `router.back()`으로 홈에 복귀하며, Screen의 이중 여백을 제거하고 `theme.layout.screenX`(20px) 기준으로 뒤로 버튼과 본문 컨텐츠 좌우 여백을 일치
 - 공통 TopBar 디자인 시스템 반영 — MY 상세 화면이 역할형 section title·caption subtitle과 44px back target, semantic text 대비를 공통으로 상속
 
 - MY 활동 내역 underline tab 공통화와 메뉴 href 타입 보강 — 기존 탭 geometry·query 이동을 유지하고 `as never` 우회를 제거

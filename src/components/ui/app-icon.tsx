@@ -1,180 +1,142 @@
-import type { IconProps } from "@solar-icons/react-native";
 import {
-  AltArrowLeft,
-  AltArrowRight,
-  Bag,
+  ArrowLeftRight,
+  Ban,
   Bell,
-  Book2,
-  Box,
-  CheckCircle,
-  ClockCircle,
-  DangerCircle,
-  DangerTriangle,
-  DocumentText,
+  BookOpen,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Circle,
+  CircleAlert,
+  CircleCheck,
+  CircleQuestionMark,
+  Clock,
+  DoorOpen,
   Eye,
-  EyeClosed,
-  Flag2,
-  ForbiddenCircle,
-  GalleryAdd,
+  EyeOff,
+  FileText,
+  Flag,
   Heart,
-  Hearts,
-  History,
-  Home2,
+  HeartHandshake,
   House,
+  ImagePlus,
   Inbox,
-  InfoCircle,
-  Logout2,
-  Magnifer,
-  Pen2,
-  Plain,
-  QuestionCircle,
-  RecordCircle,
-  Restart,
+  Info,
+  LogOut,
+  Megaphone,
+  Package,
+  PenLine,
+  Plus,
+  RefreshCw,
+  RotateCcwClock,
+  Search,
+  SearchX,
+  Send,
   Share,
   ShieldCheck,
-  Shop,
-  Speaker,
+  ShoppingBag,
   Star,
-  TransferHorizontal,
-  TrashBin2,
-  UserMinusRounded,
-  UserPlusRounded,
-  UserRounded,
-  UsersGroupRounded,
-} from "@solar-icons/react-native/Linear";
-import {
-  Book2 as Book2Bold,
-  Hearts as HeartsBold,
-  Home2 as Home2Bold,
-  Shop as ShopBold,
-  UsersGroupRounded as UsersGroupRoundedBold,
-} from "@solar-icons/react-native/Bold";
-import type { ComponentType } from "react";
-import { G, Path, Svg } from "react-native-svg";
+  Trash,
+  TriangleAlert,
+  User,
+  UserMinus,
+  UserPlus,
+  Users,
+  X,
+  type LucideIcon,
+  type LucideProps,
+} from "lucide-react-native";
 
-type SolarIconComponent = ComponentType<IconProps>;
-
-function PlusIcon({
-  size = 24,
-  color = "currentColor",
-  mirrored = false,
-  ...props
-}: IconProps) {
-  return (
-    <Svg {...props} width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <G transform={mirrored ? "translate(24 0) scale(-1 1)" : undefined}>
-        <Path
-          d="M12 5V19M5 12H19"
-          stroke={color}
-          strokeWidth={2}
-          strokeLinecap="round"
-        />
-      </G>
-    </Svg>
-  );
-}
-
-function CloseIcon({
-  size = 24,
-  color = "currentColor",
-  mirrored = false,
-  ...props
-}: IconProps) {
-  return (
-    <Svg {...props} width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <G transform={mirrored ? "translate(24 0) scale(-1 1)" : undefined}>
-        <Path
-          d="M6 6L18 18M18 6L6 18"
-          stroke={color}
-          strokeWidth={2}
-          strokeLinecap="round"
-        />
-      </G>
-    </Svg>
-  );
-}
-
-const linearIcons = {
-  add: PlusIcon,
-  "add-photo-alternate": GalleryAdd,
-  "account-multiple": UsersGroupRounded,
-  "account-multiple-outline": UsersGroupRounded,
-  block: ForbiddenCircle,
-  "book-open-page-variant": Book2,
-  "book-open-page-variant-outline": Book2,
-  campaign: Speaker,
-  check: CheckCircle,
-  "check-circle": CheckCircle,
-  "chevron-left": AltArrowLeft,
-  "chevron-right": AltArrowRight,
-  circle: RecordCircle,
-  "circle-outline": RecordCircle,
-  close: CloseIcon,
-  "delete-outline": TrashBin2,
-  description: DocumentText,
-  "door-front": House,
-  edit: Pen2,
-  "error-outline": DangerCircle,
+const iconMap = {
+  add: Plus,
+  "add-photo-alternate": ImagePlus,
+  "account-multiple": Users,
+  "account-multiple-outline": Users,
+  block: Ban,
+  "book-open-page-variant": BookOpen,
+  "book-open-page-variant-outline": BookOpen,
+  campaign: Megaphone,
+  check: Check,
+  "check-circle": CircleCheck,
+  "chevron-left": ChevronLeft,
+  "chevron-right": ChevronRight,
+  circle: Circle,
+  "circle-outline": Circle,
+  close: X,
+  "delete-outline": Trash,
+  description: FileText,
+  "door-front": DoorOpen,
+  edit: PenLine,
+  "error-outline": CircleAlert,
   favorite: Heart,
-  groups: UsersGroupRounded,
-  "hands-pray": Hearts,
-  "help-outline": QuestionCircle,
-  history: History,
-  home: Home2,
-  "home-outline": Home2,
+  groups: Users,
+  "hands-pray": HeartHandshake,
+  "help-outline": CircleQuestionMark,
+  history: RotateCcwClock,
+  home: House,
+  "home-outline": House,
   inbox: Inbox,
-  info: InfoCircle,
-  "inventory-2": Box,
+  info: Info,
+  "inventory-2": Package,
   "ios-share": Share,
-  logout: Logout2,
-  "menu-book": Book2,
+  logout: LogOut,
+  "menu-book": BookOpen,
   notifications: Bell,
-  "outlined-flag": Flag2,
-  "person-outline": UserRounded,
-  "person-remove": UserMinusRounded,
-  "prayer-apply": UserPlusRounded,
-  schedule: ClockCircle,
-  search: Magnifer,
-  "search-off": Magnifer,
-  send: Plain,
-  shopping: Shop,
-  "shopping-bag": Bag,
-  "shopping-outline": Shop,
+  "outlined-flag": Flag,
+  "person-outline": User,
+  "person-remove": UserMinus,
+  "prayer-apply": UserPlus,
+  schedule: Clock,
+  search: Search,
+  "search-off": SearchX,
+  send: Send,
+  shopping: ShoppingBag,
+  "shopping-bag": ShoppingBag,
+  "shopping-outline": ShoppingBag,
   star: Star,
-  sync: Restart,
-  "sync-alt": TransferHorizontal,
+  sync: RefreshCw,
+  "sync-alt": ArrowLeftRight,
   "verified-user": ShieldCheck,
   visibility: Eye,
-  "visibility-off": EyeClosed,
-  "warning-amber": DangerTriangle,
-} satisfies Record<string, SolarIconComponent>;
+  "visibility-off": EyeOff,
+  "warning-amber": TriangleAlert,
+} as const satisfies Record<string, LucideIcon>;
 
-export type AppIconName = keyof typeof linearIcons;
+export type AppIconName = keyof typeof iconMap;
 
-const boldIcons: Partial<Record<AppIconName, SolarIconComponent>> = {
-  "book-open-page-variant": Book2Bold,
-  "book-open-page-variant-outline": Book2Bold,
-  "hands-pray": HeartsBold,
-  home: Home2Bold,
-  "home-outline": Home2Bold,
-  shopping: ShopBold,
-  "shopping-outline": ShopBold,
-  "account-multiple": UsersGroupRoundedBold,
-  "account-multiple-outline": UsersGroupRoundedBold,
-};
+export interface AppIconProps extends Omit<LucideProps, "size"> {
+  name: AppIconName;
+  size?: number | string;
+  weight?: "linear" | "bold";
+  mirrored?: boolean;
+}
 
 export function AppIcon({
   name,
   weight = "linear",
+  size = 24,
+  color = "currentColor",
+  strokeWidth,
+  mirrored = false,
+  style,
   ...props
-}: IconProps & {
-  name: AppIconName;
-  weight?: "linear" | "bold";
-}) {
-  const Icon =
-    weight === "bold"
-      ? (boldIcons[name] ?? linearIcons[name])
-      : linearIcons[name];
+}: AppIconProps) {
+  const IconComponent = iconMap[name];
+  if (!IconComponent) return null;
 
-  return <Icon {...props} />;
+  const resolvedStrokeWidth = strokeWidth ?? (weight === "bold" ? 2.75 : 2);
+
+  const resolvedStyle = mirrored
+    ? [style, { transform: [{ scaleX: -1 }] }]
+    : style;
+
+  return (
+    <IconComponent
+      size={size}
+      color={color}
+      strokeWidth={resolvedStrokeWidth}
+      style={resolvedStyle}
+      {...props}
+    />
+  );
 }

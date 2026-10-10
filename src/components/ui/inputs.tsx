@@ -21,6 +21,8 @@ export function TextField({
   secureTextEntry,
   error,
   keyboardType,
+  size = "md",
+  height,
 }: {
   label?: string;
   value?: string;
@@ -29,7 +31,12 @@ export function TextField({
   secureTextEntry?: boolean;
   error?: string;
   keyboardType?: "default" | "email-address" | "phone-pad" | "number-pad";
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
+  height?: number;
 }) {
+  const sizeHeights = { xs: 40, sm: 44, md: 48, lg: 52, xl: 56 } as const;
+  const resolvedHeight = height ?? sizeHeights[size];
+
   return (
     <View style={styles.field}>
       {label ? <Text style={styles.fieldLabel}>{label}</Text> : null}
@@ -40,7 +47,11 @@ export function TextField({
         placeholderTextColor={theme.colors.inkMute}
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
-        style={[styles.input, error ? styles.inputError : null]}
+        style={[
+          styles.input,
+          { height: resolvedHeight },
+          error ? styles.inputError : null,
+        ]}
       />
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>

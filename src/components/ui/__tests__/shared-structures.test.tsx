@@ -400,4 +400,36 @@ describe("shared maintenance UI", () => {
         .pointerEvents,
     ).toBe("auto");
   });
+
+  it("renders overlay above screen header with zIndex 25 and pointerEvents box-none", () => {
+    render(
+      <SafeAreaProvider
+        initialMetrics={{
+          frame: { x: 0, y: 0, width: 430, height: 932 },
+          insets: { top: 0, left: 0, right: 0, bottom: 0 },
+        }}
+      >
+        <StickyHeaderScreen
+          overlay={<Text testID="custom-overlay">오버레이</Text>}
+          testID="overlay-screen"
+          title="기도"
+        >
+          <Text>스크롤 콘텐츠</Text>
+        </StickyHeaderScreen>
+      </SafeAreaProvider>,
+    );
+
+    const overlayLayer = screen.getByTestId("overlay-screen-overlay");
+    expect(overlayLayer.props.pointerEvents).toBe("box-none");
+    const overlayStyle = StyleSheet.flatten(overlayLayer.props.style);
+    expect(overlayStyle).toMatchObject({
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 25,
+    });
+    expect(screen.getByTestId("custom-overlay")).toBeTruthy();
+  });
 });

@@ -2,7 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen, Section } from "../../../src/components/layout/Screen";
-import { Badge, Button, TopBar, VisualThumb } from "../../../src/components/ui";
+import {
+  Badge,
+  Button,
+  Empty,
+  TopBar,
+  VisualThumb,
+} from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import {
   fetchMyLifeStudyCompletions,
@@ -88,7 +94,10 @@ export default function LifeStudyHistoryScreen() {
               {!completions.isPending &&
               !completions.isError &&
               rows.length === 0 ? (
-                <Text style={styles.meta}>수료 기록이 없습니다.</Text>
+                <Empty
+                  title="수료 기록이 없어요"
+                  description="삶공부 과정을 수료하면 수료 기록이 여기에 표시돼요."
+                />
               ) : null}
               <View style={styles.stack}>
                 {rows.map((course) => (

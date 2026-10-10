@@ -212,7 +212,6 @@ const styles = StyleSheet.create({
   backButton: {
     minWidth: 68,
     height: theme.layout.touchTarget,
-    marginLeft: -12,
     marginRight: 4,
     paddingHorizontal: 8,
     borderRadius: theme.radius.pill,

@@ -12,9 +12,12 @@ import {
   TextInput,
   useWindowDimensions,
   View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
 } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
+  AppText,
   Avatar,
   ConfirmDialog,
   DetailAction,
@@ -105,6 +108,15 @@ export default function MarketDetailScreen() {
   }
   const router = useRouter();
   const { width } = useWindowDimensions();
+  const [isPastHero, setIsPastHero] = useState(false);
+  const heroThreshold = Math.max(width - 56, 1);
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    const past = offsetY >= heroThreshold;
+    if (past !== isPastHero) {
+      setIsPastHero(past);
+    }
+  };
 
   if (variant === "deleted" || variant === "blocked") {
     return (
@@ -262,7 +274,39 @@ export default function MarketDetailScreen() {
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
-        <ScrollView contentContainerStyle={styles.content}>
+        <View
+          testID="market-detail-sticky-header"
+          style={[
+            styles.stickyHeader,
+            isPastHero
+              ? styles.stickyHeaderScrolled
+              : styles.stickyHeaderTransparent,
+          ]}
+        >
+          <MotionPressable
+            accessibilityLabel="뒤로"
+            accessibilityRole="button"
+            onPress={() => router.back()}
+            style={styles.backButton}
+          >
+            <AppIcon name="chevron-left" size={22} color={theme.colors.ink} />
+            <Text style={styles.backText}>뒤로</Text>
+          </MotionPressable>
+          {isPastHero ? (
+            <View pointerEvents="none" style={styles.headerTitleWrap}>
+              <AppText numberOfLines={1} variant="sectionTitle">
+                나눔 상세
+              </AppText>
+            </View>
+          ) : null}
+        </View>
+
+        <ScrollView
+          contentContainerStyle={styles.content}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          testID="market-detail-scroll"
+        >
           <View style={[styles.hero, { height: width }]}>
             <VisualThumb
               size={width}
@@ -282,15 +326,6 @@ export default function MarketDetailScreen() {
               style={styles.heroScrim}
               testID="market-hero-scrim"
             />
-            <MotionPressable
-              accessibilityLabel="뒤로"
-              accessibilityRole="button"
-              onPress={() => router.back()}
-              style={styles.backButton}
-            >
-              <AppIcon name="chevron-left" size={22} color={theme.colors.ink} />
-              <Text style={styles.backText}>뒤로</Text>
-            </MotionPressable>
             {isReserved ? <CenterBadge label="예약중" /> : null}
             {isDone ? (
               <>
@@ -623,12 +658,36 @@ const styles = StyleSheet.create({
     right: 0,
     height: 88,
   },
-  backButton: {
+  stickyHeader: {
     position: "absolute",
-    top: 6,
-    left: 8,
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 56,
+    zIndex: 10,
+    paddingHorizontal: theme.layout.screenX,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  stickyHeaderTransparent: {
+    backgroundColor: "transparent",
+  },
+  stickyHeaderScrolled: {
+    backgroundColor: theme.colors.bg,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
+  },
+  headerTitleWrap: {
+    position: "absolute",
+    left: theme.layout.screenX + 68,
+    right: theme.layout.screenX + 68,
+    alignItems: "center",
+  },
+  backButton: {
     minWidth: 68,
     height: theme.layout.touchTarget,
+    marginLeft: -12,
+    marginRight: 4,
     borderRadius: theme.radius.pill,
     paddingHorizontal: 8,
     flexDirection: "row",

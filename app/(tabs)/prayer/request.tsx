@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
-import { Badge, TopBar } from "../../../src/components/ui";
+import { Badge, Empty, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import {
   fetchMyPrayerTopics,
@@ -121,7 +121,10 @@ export default function PrayerRequestScreenRoute() {
               <Text style={styles.desc}>기도제목을 다시 불러와주세요.</Text>
             ) : null}
             {http && topics.isSuccess && rows.length === 0 ? (
-              <Text style={styles.desc}>등록된 기도제목이 없습니다.</Text>
+              <Empty
+                title="등록된 기도제목이 없어요"
+                description="기도제목을 작성하여 중보기도를 요청해보세요."
+              />
             ) : null}
             {rows.map((request) => (
               <Pressable

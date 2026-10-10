@@ -39,6 +39,7 @@ import PrayerRequestScreenRoute from "../prayer/request";
 import { theme } from "../../../src/constants/theme";
 import { renderWithClient } from "../../../src/test/renderWithClient";
 import * as authService from "../../../src/services/authService";
+import * as prayerService from "../../../src/services/prayerService";
 
 describe("v1 tab smoke screens", () => {
   it("renders the home screen", async () => {
@@ -280,6 +281,38 @@ describe("v1 tab smoke screens", () => {
     });
     expect(backStyle.shadowOpacity).toBeUndefined();
     expect(backStyle.elevation).toBeUndefined();
+  });
+
+  it("switches sticky header background when scrolling past the market hero image", async () => {
+    renderWithClient(<MarketDetailScreen />);
+    await screen.findByText(
+      "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
+    );
+
+    const header = screen.getByTestId("market-detail-sticky-header");
+    expect(StyleSheet.flatten(header.props.style)).toMatchObject({
+      backgroundColor: "transparent",
+    });
+    expect(screen.queryByText("나눔 상세")).toBeNull();
+
+    fireEvent.scroll(screen.getByTestId("market-detail-scroll"), {
+      nativeEvent: { contentOffset: { y: 800 } },
+    });
+
+    expect(StyleSheet.flatten(header.props.style)).toMatchObject({
+      backgroundColor: theme.colors.bg,
+      borderBottomColor: theme.colors.line,
+    });
+    expect(screen.getByText("나눔 상세")).toBeTruthy();
+
+    fireEvent.scroll(screen.getByTestId("market-detail-scroll"), {
+      nativeEvent: { contentOffset: { y: 0 } },
+    });
+
+    expect(StyleSheet.flatten(header.props.style)).toMatchObject({
+      backgroundColor: "transparent",
+    });
+    expect(screen.queryByText("나눔 상세")).toBeNull();
   });
 
   it("creates a comment from the market detail screen", async () => {
@@ -723,7 +756,11 @@ describe("v1 tab smoke screens", () => {
 
     expect(screen.getByText("함께 기도하고 응답을 나눠요")).toBeTruthy();
     expect(await screen.findByText("내 기도방")).toBeTruthy();
-    expect(screen.getByText("오늘의 기도 진행")).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("기도 신청 메뉴"));
+    expect(screen.getByTestId("prayer-fab-backdrop")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("prayer-fab-backdrop"));
+    expect(screen.queryByTestId("prayer-fab-backdrop")).toBeNull();
+
     fireEvent.press(screen.getByLabelText("기도 신청 메뉴"));
     fireEvent.press(screen.getByLabelText("기도제목 작성"));
     expect(router.push).toHaveBeenCalledWith("/modal/prayer-new");
@@ -758,6 +795,20 @@ describe("v1 tab smoke screens", () => {
     );
     expect(requestCard.props.accessibilityRole).toBeUndefined();
     expect(requestCard.props.onPress).toBeUndefined();
+  });
+
+  it("renders empty states when prayer rooms and requests are empty", async () => {
+    jest.spyOn(prayerService, "fetchPrayerOverview").mockResolvedValueOnce({
+      rooms: [],
+      requests: [],
+    });
+
+    renderWithClient(<PrayerScreen />);
+
+    expect(await screen.findByTestId("prayer-rooms-empty")).toBeTruthy();
+    expect(screen.getByText("참여 중인 기도방이 없어요")).toBeTruthy();
+    expect(screen.getByTestId("prayer-requests-empty")).toBeTruthy();
+    expect(screen.getByText("등록된 기도제목이 없어요")).toBeTruthy();
   });
 
   it("renders the prayer apply screen", () => {

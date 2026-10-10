@@ -17,8 +17,8 @@
 - Gluestack UI 및 NativeWind 퇴역 및 UI 모듈화 — 실제 미사용 중이던 Gluestack UI 및 NativeWind/Tailwind 관련 패키지 160개 및 설정 파일을 완전 제거하고, 1,775줄의 공통 UI index.tsx를 6개 서브모듈(buttons, display, inputs, navigation, dialog, feedback)로 분리 (Issue #119, ADR 0006)
 - 본문 글꼴 Pretendard. 아이콘은 공통 `AppIcon`(Solar Linear, 선택 Bold)
 - 루트 5탭 홈/나눔/동행/기도/삶공부. MY는 홈에서 숨김 route. 상세는 탭 중첩 Stack. 이미 보고 있는 루트 탭을 다시 누르면 같은 주소로 다시 열지 않는다
-- 화면 상단은 `safe area + 20px`. 이미지 hero overlay만 예외
-- 루트 탭은 glass sticky 헤더 + `StickyHeaderScreen`. 기본 숨김은 아래 12px / 위 4px(`direction`)
+- 화면 상단은 `safe area + 20px`. 이미지 hero overlay는 예외이며, 등록 바텀 모달(presentation: "modal")은 safe area 대신 좌우 여백(screenX=20px)과 동일한 상단 여백 적용
+- 루트 탭은 glass sticky 헤더 + `StickyHeaderScreen`. 기본 숨김은 아래 12px / 위 4px(`direction`). 화면 오버레이(`overlay`)는 `ScreenHeader` 상위 레이어로 배치되어 플로팅 메뉴 backdrop이 헤더까지 온전히 덮는다
 - 작성 입력은 공통 `ModalFormTextInput`(primary 2px 포커스). 검색은 `SearchField`
 - 숨긴 웹 route의 `0×0` layout은 탭·필터 geometry로 쓰지 않음
 - API client는 기본 `{ code, message, data }` envelope. 비envelope 성공만 `format: "json"`
@@ -49,7 +49,7 @@
 | `src/components/ui/inputs.tsx` | TextField, Textarea, ImagePickerField, FormSection |
 | `src/components/ui/navigation.tsx` | TopBar, SegmentedTabs, HorizontalChips |
 | `src/components/ui/dialog.tsx` | ConfirmDialog, BottomSheet, RadioSheet |
-| `src/components/ui/feedback.tsx` | EmptyState, ErrorState, SuccessState, Toast |
+| `src/components/ui/feedback.tsx` | Empty, EmptyState, ErrorState, SuccessState, Toast |
 | `src/components/ui/index.tsx` | 6개 서브모듈 barrel export |
 | `.github/workflows/ci.yml` | PR `npm run validate` |
 | `scripts/check-*-api-contract.mjs` | Swagger 계약 검사 |
@@ -63,6 +63,7 @@
 
 ## 결정 사항 (지금 유효한 것만)
 
+- **공통 Empty 컴포넌트 표준화 (`src/components/ui`)** — 빈 목록/데이터 부재 상태를 위한 `Empty` 공통 컴포넌트(아이콘 + 타이틀 + 부제목 + 선택적 액션) 및 `EmptyProps`를 표준화하여 export하고, 기존 `EmptyState`를 alias로 하위 호환 유지. Issue #164.
 - **서버 역할은 공통 타입으로 보존** — `UserRole`은 `ADMIN`, `USER`, 도메인별 `MANAGER_*` 역할을 원본 값으로 유지한다. 프런트 판별은 메뉴/route 노출용이며 실제 API 인가는 서버가 담당한다.
 - **API origin은 로컬 env만** — `EXPO_PUBLIC_API_URL`. 실제 호스트를 코드·문서·`.env.example`에 두지 않음. HTTP adapter를 쓰는 동안 없으면 `app.config.ts`가 실패. mock만이면 URL 없이 실행 가능.
 - **웹 라이브 API는 검증 대상이 아님** — 브라우저 CORS. 서버 CORS를 열지 않는 한 `npm run web`으로 라이브 인증을 맞추지 않음. 검증 기준은 Expo Dev Client.
@@ -74,7 +75,7 @@
 - **API client `format: "json"` 은 opt-in** — 기본은 `{ code, message, data }`에서 `data`만 반환. login/refresh도 이 envelope를 쓴다.
 - **본문 글꼴 Pretendard / 아이콘 Solar** — 화면이 글꼴·아이콘 세트를 직접 고르지 않음.
 - **UI 톤은 조용한 깔끔함** — 제목 bold, 카드 hairline, ZIP 픽셀 맞춤보다 톤 일관성.
-- **화면 상단 `safe area + 20px`** — 나눔 상세 이미지 overlay만 예외.
+- **화면 상단 `safe area + 20px`** — 나눔 상세 이미지 overlay는 예외이며, 등록 바텀 모달(presentation: "modal")은 safe area 대신 좌우 여백(screenX=20px)과 동일한 상단 여백을 모달 자체에 적용.
 - **작성 입력은 `ModalFormTextInput` 소유** — 화면은 값·제약만.
 - **sticky 기본 숨김은 direction(12px/4px)** — hide mode를 화면이 바꿀 수 있음 (`past-inset` / `never`).
 - **숨긴 route의 0 크기 layout은 무시** — 마지막 양수 geometry 유지.

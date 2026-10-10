@@ -2,7 +2,7 @@ import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
-import { TopBar } from "../../../src/components/ui";
+import { Empty, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 
@@ -34,19 +34,13 @@ export default function FaqScreen() {
       <View style={styles.root}>
         <TopBar title="자주 묻는 질문" back onBack={() => router.back()} />
         {empty ? (
-          <View style={styles.empty}>
-            <View style={styles.emptyIcon}>
-              <AppIcon
-                name="help-outline"
-                size={38}
-                color={theme.colors.inkHint}
-              />
-            </View>
-            <Text style={styles.emptyTitle}>등록된 FAQ가 없습니다</Text>
-            <Text style={styles.emptyText}>
-              지금은 등록된 질문이 없어요.{"\n"}궁금한 건 1:1 문의로 연락주세요.
-            </Text>
-          </View>
+          <Empty
+            icon="help-outline"
+            title="등록된 FAQ가 없어요"
+            description={
+              "지금은 등록된 질문이 없어요.\n궁금한 점은 1:1 문의로 연락주세요."
+            }
+          />
         ) : (
           <ScrollView contentContainerStyle={styles.body}>
             <ScrollView
@@ -178,33 +172,5 @@ const styles = StyleSheet.create({
     color: theme.colors.inkSoft,
     fontSize: 13.5,
     lineHeight: 22,
-  },
-  empty: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 32,
-    paddingBottom: 60,
-  },
-  emptyIcon: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-    backgroundColor: theme.colors.surface2,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 18,
-  },
-  emptyTitle: {
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.bold,
-  },
-  emptyText: {
-    marginTop: 8,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 20,
-    textAlign: "center",
   },
 });

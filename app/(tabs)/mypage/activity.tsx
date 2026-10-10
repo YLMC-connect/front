@@ -47,10 +47,13 @@ export default function ActivityScreen() {
     tab?: string;
     designVariant?: string;
   }>();
-  const variant = variantOf(
+  const initialVariant = variantOf(
     readDesignVariant(params.designVariant) ?? params.tab,
   );
-  const active = variant === "empty" ? "posts" : variant;
+  const isDesignEmpty = initialVariant === "empty";
+  const [activeTab, setActiveTab] = useState<ActivityTab>(
+    isDesignEmpty ? "posts" : initialVariant,
+  );
   const localActivity = readLocalMyPageActivity();
   const httpAdapter = resolveMyPageAdapterMode() === "http";
   const [posts, setPosts] = useState<readonly MyPageActivityPost[]>(
@@ -92,13 +95,13 @@ export default function ActivityScreen() {
         ) : null}
         <UnderlineTabs
           items={tabs}
-          active={active}
+          active={activeTab}
           variant="border"
-          onChange={(tab) => router.push(`/mypage/activity?tab=${tab}`)}
+          onChange={(tab) => setActiveTab(tab as ActivityTab)}
         />
 
         <ScrollView contentContainerStyle={styles.body}>
-          {variant === "empty" ? (
+          {isDesignEmpty ? (
             <Empty
               icon="schedule"
               title="활동 내역이 없어요"
@@ -106,7 +109,7 @@ export default function ActivityScreen() {
                 "나눔 게시글, 댓글, 소모임 참여가\n이곳에 모여서 쉽게 살펴볼 수 있어요."
               }
             />
-          ) : active === "posts" ? (
+          ) : activeTab === "posts" ? (
             posts.length === 0 ? (
               <Empty
                 title="작성한 나눔 게시글이 없어요"
@@ -121,7 +124,7 @@ export default function ActivityScreen() {
                 />
               ))
             )
-          ) : active === "comments" ? (
+          ) : activeTab === "comments" ? (
             comments.length === 0 ? (
               <Empty
                 title="작성한 댓글이 없어요"

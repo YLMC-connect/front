@@ -81,7 +81,7 @@ jest.mock("expo-router", () => {
 });
 
 jest.mock(
-  "@solar-icons/react-native/Linear",
+  "lucide-react-native",
   () => {
     const React = require("react");
     const { View } = require("react-native");
@@ -93,27 +93,10 @@ jest.mock(
           property in target
             ? target[property as keyof typeof target]
             : (props: Record<string, unknown>) =>
-                React.createElement(View, props),
-      },
-    );
-  },
-  { virtual: true },
-);
-
-jest.mock(
-  "@solar-icons/react-native/Bold",
-  () => {
-    const React = require("react");
-    const { View } = require("react-native");
-
-    return new Proxy(
-      { __esModule: true },
-      {
-        get: (target, property) =>
-          property in target
-            ? target[property as keyof typeof target]
-            : (props: Record<string, unknown>) =>
-                React.createElement(View, props),
+                React.createElement(View, {
+                  testID: `lucide-icon-${String(property)}`,
+                  ...props,
+                }),
       },
     );
   },

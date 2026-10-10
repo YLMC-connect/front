@@ -1,4 +1,41 @@
-/** Notion 사용자 수업·출석·수료 DTO. 페이지에 없는 필드는 두지 않는다. */
+/** 삶공부 API DTO */
+
+export interface LifeStudyDto {
+  id: number;
+  name: string;
+  studyContent?: string | null;
+  weekCount: number;
+  teamLeader?: string | null;
+  bookName?: string | null;
+  studyTarget?: string | null;
+  eligibility?: string | null;
+  required?: boolean;
+  officialMokja?: boolean;
+}
+
+export interface LifeStudyCohortDto {
+  id: number;
+  lifeStudyId: number;
+  lifeStudyName: string;
+  studyContent?: string | null;
+  cohortNumber?: number | null;
+  weekCount: number;
+  yoil?: number | null;
+  userNum?: number | null;
+  appliedCount?: number | null;
+  instructor?: string | null;
+  teamLeaderName?: string | null;
+  bookName?: string | null;
+  studyTarget?: string | null;
+  eligibility?: string | null;
+  studyPlace?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  lifeStudyDate?: string | null;
+  status?: string | null;
+  required?: boolean;
+  officialMokja?: boolean;
+}
 
 export interface LifeStudyClassList {
   cohortId: number;

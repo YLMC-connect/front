@@ -62,6 +62,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-10-10) **삶공부 전체 과정(GET /api/life-study) 및 신청 가능 기수(GET /api/life-study/cohorts) API 연동** — 어드민 및 백엔드에 개설된 삶공부 목록을 앱에서 온전히 확인할 수 있도록 http 어댑터의 개요 조회 시 전체 과정(`/api/life-study`), 신청 가능 기수(`/api/life-study/cohorts`), 내 수료 내역(`/api/life-study/completions`)을 병합 조회하여 학습 경로·신청 가능 과정·전체 과정 목록을 완전하게 구성. Issue #179.
 - (2026-10-10) **수강 내역 화면(/life-study/history) 좌우 여백을 theme.layout.screenX(20px)로 통일** — 루트 ScrollView 및 섹션 헤더, 안내 문구, 카드 스택, 플랫 리스트, 수료 뱃지 카드의 좌우 여백을 공통 20px로 일치시켜 타이틀과 카드의 시각적 정렬 기준선을 통일. Issue #175.
 - (2026-10-09) **삶공부 화면 우측 하단에 '삶공부 신청' 플로팅 버튼(FAB)을 추가한다** — 기도 탭과의 일관성 및 접근성을 높이기 위해 삶공부 루트 화면 우측 하단에 수강 신청 화면(`/life-study/apply`)으로 바로 이동하는 플로팅 액션 버튼(FAB)을 제공합니다.
 - (2026-10-09) **development http에서는 삶공부 목록 캐시와 상세·수강 내역이 목업 화면과 갈라진다** — 목록·overview query key 끝에 adapter mode를 붙여 저장된 목업 응답을 다시 쓰지 않는다. `__DEV__`에서 mock일 때만 `목업 데이터`를 표시하고 http일 때는 표시하지 않는다. route id가 있고 `designVariant`가 없으며 adapter가 http이면 상세는 overview에 있는 과정 이름·상태와, 값이 있는 강사·소개·주 수만 그린다. 팀장·교재·커리큘럼·공지·숙제는 그리지 않는다. 수강 내역은 본인 수료 행의 이름과 `completedAt`만 그린다. id가 없거나 mock이거나 `designVariant`가 있으면 기존 디자인 문구를 유지한다.

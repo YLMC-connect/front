@@ -5,12 +5,15 @@ import type {
   LifeStudyHistory,
   LifeStudyOverview,
   LifeStudyOverviewCourse,
+  LifeStudyPathOverview,
 } from "../types/lifeStudy";
 import type {
   LifeStudyAttendanceRoster,
   LifeStudyClassList,
+  LifeStudyCohortDto,
   LifeStudyCompletionRoster,
   LifeStudyCompletionStudent,
+  LifeStudyDto,
   LifeStudyMyCompletion,
 } from "../types/lifeStudyApi";
 
@@ -271,16 +274,212 @@ const emptyPath = {
   eligibility: "",
 };
 
-/** 수료 목록만으로 화면 목록을 만든다. 과정 카탈로그 필드는 비운다. */
-export function buildLifeStudyOverview(data: unknown): LifeStudyOverview {
+export function tryReadLifeStudyList(data: unknown): LifeStudyDto[] {
+  if (data == null || !Array.isArray(data)) return [];
+  const result: LifeStudyDto[] = [];
+  for (const item of data) {
+    if (!isRecord(item)) return [];
+    if (typeof item.id !== "number" || typeof item.name !== "string") return [];
+    result.push({
+      id: item.id,
+      name: item.name,
+      studyContent:
+        typeof item.studyContent === "string" ? item.studyContent : null,
+      weekCount: typeof item.weekCount === "number" ? item.weekCount : 0,
+      teamLeader: typeof item.teamLeader === "string" ? item.teamLeader : null,
+      bookName: typeof item.bookName === "string" ? item.bookName : null,
+      studyTarget:
+        typeof item.studyTarget === "string" ? item.studyTarget : null,
+      eligibility:
+        typeof item.eligibility === "string" ? item.eligibility : null,
+      required: typeof item.required === "boolean" ? item.required : false,
+      officialMokja:
+        typeof item.officialMokja === "boolean" ? item.officialMokja : false,
+    });
+  }
+  return result;
+}
+
+export function tryReadLifeStudyCohortList(
+  data: unknown,
+): LifeStudyCohortDto[] {
+  if (data == null || !Array.isArray(data)) return [];
+  const result: LifeStudyCohortDto[] = [];
+  for (const item of data) {
+    if (!isRecord(item)) return [];
+    if (
+      typeof item.id !== "number" ||
+      typeof item.lifeStudyId !== "number" ||
+      typeof item.lifeStudyName !== "string"
+    ) {
+      return [];
+    }
+    result.push({
+      id: item.id,
+      lifeStudyId: item.lifeStudyId,
+      lifeStudyName: item.lifeStudyName,
+      studyContent:
+        typeof item.studyContent === "string" ? item.studyContent : null,
+      cohortNumber:
+        typeof item.cohortNumber === "number" ? item.cohortNumber : null,
+      weekCount: typeof item.weekCount === "number" ? item.weekCount : 0,
+      yoil: typeof item.yoil === "number" ? item.yoil : null,
+      userNum: typeof item.userNum === "number" ? item.userNum : null,
+      appliedCount:
+        typeof item.appliedCount === "number" ? item.appliedCount : null,
+      instructor: typeof item.instructor === "string" ? item.instructor : null,
+      teamLeaderName:
+        typeof item.teamLeaderName === "string" ? item.teamLeaderName : null,
+      bookName: typeof item.bookName === "string" ? item.bookName : null,
+      studyTarget:
+        typeof item.studyTarget === "string" ? item.studyTarget : null,
+      eligibility:
+        typeof item.eligibility === "string" ? item.eligibility : null,
+      studyPlace: typeof item.studyPlace === "string" ? item.studyPlace : null,
+      startDate: typeof item.startDate === "string" ? item.startDate : null,
+      endDate: typeof item.endDate === "string" ? item.endDate : null,
+      lifeStudyDate:
+        typeof item.lifeStudyDate === "string" ? item.lifeStudyDate : null,
+      status: typeof item.status === "string" ? item.status : null,
+      required: typeof item.required === "boolean" ? item.required : false,
+      officialMokja:
+        typeof item.officialMokja === "boolean" ? item.officialMokja : false,
+    });
+  }
+  return result;
+}
+
+export type LifeStudyOverviewSource =
+  | unknown
+  | {
+      lifeStudies?: unknown;
+      cohorts?: unknown;
+      completions?: unknown;
+    };
+
+/** 수료 목록 및 전체 과정, 기수 목록을 병합하여 화면 개요를 만든다. */
+export function buildLifeStudyOverview(
+  data: LifeStudyOverviewSource,
+): LifeStudyOverview {
+  let lifeStudiesRaw: unknown = null;
+  let cohortsRaw: unknown = null;
+  let completionsRaw: unknown = null;
+
+  if (Array.isArray(data)) {
+    completionsRaw = data;
+  } else if (isRecord(data)) {
+    lifeStudiesRaw = data.lifeStudies;
+    cohortsRaw = data.cohorts;
+    completionsRaw = data.completions;
+  }
+
+  const myCompletions = readMyCompletions(completionsRaw);
+  const completedIds = new Set(
+    myCompletions
+      .filter((c) => typeof c.completedAt === "string")
+      .map((c) => String(c.lifeStudyId)),
+  );
+
+  const lifeStudies = tryReadLifeStudyList(lifeStudiesRaw);
+  const cohorts = tryReadLifeStudyCohortList(cohortsRaw);
+
+  const openCourses: LifeStudyOverviewCourse[] = cohorts.map((cohort) => {
+    const appPeriod =
+      cohort.startDate && cohort.endDate
+        ? `${cohort.startDate} ~ ${cohort.endDate}`
+        : undefined;
+    return {
+      id: String(cohort.lifeStudyId),
+      title: cohort.lifeStudyName,
+      kind: cohort.required ? "required" : "optional",
+      weekCount: cohort.weekCount ?? 0,
+      instructorName: cohort.instructor ?? cohort.teamLeaderName ?? "",
+      summary: cohort.studyContent ?? "",
+      applicationPeriod: appPeriod,
+      capacity: cohort.userNum ?? undefined,
+      enrolledCount:
+        cohort.appliedCount != null ? Number(cohort.appliedCount) : undefined,
+      status: "recommended",
+      target: cohort.studyTarget ?? undefined,
+    };
+  });
+
+  let courses: LifeStudyOverviewCourse[];
+  if (lifeStudies.length > 0) {
+    courses = lifeStudies.map((study) => {
+      const isCompleted = completedIds.has(String(study.id));
+      return {
+        id: String(study.id),
+        title: study.name,
+        kind: study.required ? "required" : "optional",
+        weekCount: study.weekCount ?? 0,
+        instructorName: study.teamLeader ?? "",
+        summary: study.studyContent ?? "",
+        status: isCompleted ? "completed" : "pending",
+        target: study.studyTarget ?? undefined,
+      };
+    });
+  } else {
+    courses = myCompletions.map(overviewCourseFromCompletion);
+  }
+
+  let path: LifeStudyPathOverview;
+  if (lifeStudies.length > 0) {
+    const requiredStudies = lifeStudies.filter((s) => s.required);
+    const totalRequired = requiredStudies.length;
+    const completedRequired = requiredStudies.filter((s) =>
+      completedIds.has(String(s.id)),
+    ).length;
+    const nextRequired = requiredStudies.find(
+      (s) => !completedIds.has(String(s.id)),
+    );
+    path = {
+      completedRequired,
+      totalRequired,
+      nextRecommendation: nextRequired
+        ? nextRequired.name
+        : totalRequired > 0
+          ? "모든 필수 과정 수료 완료"
+          : "",
+      eligibility:
+        nextRequired?.eligibility ||
+        (totalRequired > 0 ? "등록교인 누구나" : ""),
+    };
+  } else {
+    path = { ...emptyPath };
+  }
+
   return {
-    path: { ...emptyPath },
-    openCourses: [],
-    courses: readMyCompletions(data).map(overviewCourseFromCompletion),
+    path,
+    openCourses,
+    courses,
   };
 }
 
 export function buildLifeStudyCourses(data: unknown): LifeStudyCourse[] {
+  const studies = tryReadLifeStudyList(data);
+  if (studies.length > 0) {
+    return studies.map((study) => ({
+      id: String(study.id),
+      title: study.name,
+      description: study.studyContent ?? "",
+      instructor: {
+        id: "",
+        name: study.teamLeader ?? "",
+        role: "USER",
+      },
+      schedule: "",
+      location: "",
+      status: "ongoing",
+      sessions: study.weekCount ?? 0,
+      currentSession: 0,
+      capacity: 0,
+      enrolledCount: 0,
+      isEnrolled: false,
+      isCompleted: false,
+      curriculum: [],
+    }));
+  }
   return readMyCompletions(data).map(courseFromCompletion);
 }
 

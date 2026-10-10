@@ -107,15 +107,7 @@ export default function TabsLayout() {
           />
         ))}
         <Tabs.Screen name="notifications" options={{ href: null }} />
-        <Tabs.Screen name="mypage/index" options={{ href: null }} />
-        <Tabs.Screen name="mypage/edit" options={{ href: null }} />
-        <Tabs.Screen name="mypage/activity" options={{ href: null }} />
-        <Tabs.Screen name="mypage/blocked" options={{ href: null }} />
-        <Tabs.Screen name="mypage/faq" options={{ href: null }} />
-        <Tabs.Screen name="mypage/terms" options={{ href: null }} />
-        <Tabs.Screen name="mypage/privacy" options={{ href: null }} />
-        <Tabs.Screen name="mypage/withdraw" options={{ href: null }} />
-        <Tabs.Screen name="mypage/user/[id]" options={{ href: null }} />
+        <Tabs.Screen name="mypage" options={{ href: null }} />
       </Tabs>
     </TabBlurTargetContext.Provider>
   );

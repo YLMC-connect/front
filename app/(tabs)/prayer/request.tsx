@@ -98,10 +98,8 @@ export default function PrayerRequestScreenRoute() {
       <View style={styles.root}>
         <TopBar title="내 기도제목" back onBack={() => router.back()} />
         <ScrollView contentContainerStyle={styles.body}>
-          {__DEV__ ? (
-            <Text style={styles.desc}>
-              {http ? "서버 데이터" : "목업 데이터"}
-            </Text>
+          {__DEV__ && !http ? (
+            <Text style={styles.desc}>목업 데이터</Text>
           ) : null}
           <View style={styles.noticeCard}>
             <Text style={styles.noticeTitle}>

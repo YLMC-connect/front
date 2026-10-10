@@ -101,9 +101,6 @@ function LivePrayerDetail({ id }: { id: string }) {
         />
         <ScrollView contentContainerStyle={styles.body}>
           <View style={styles.stack}>
-            {__DEV__ ? (
-              <Text style={styles.prayerText}>서버 데이터</Text>
-            ) : null}
             {pending ? (
               <Text style={styles.emptyDesc}>서버에서 불러오는 중입니다.</Text>
             ) : null}

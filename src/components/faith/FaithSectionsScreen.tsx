@@ -366,10 +366,10 @@ function StudyContent({ search }: { search: string }) {
 }
 
 function DataSourceCaption({ mode }: { mode: "http" | "mock" }) {
-  if (!__DEV__) return null;
+  if (!__DEV__ || mode === "http") return null;
   return (
     <AppText variant="caption" tone="muted" style={styles.sourceCaption}>
-      {mode === "http" ? "서버 데이터" : "목업 데이터"}
+      목업 데이터
     </AppText>
   );
 }

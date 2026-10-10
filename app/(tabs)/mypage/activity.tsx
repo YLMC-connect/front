@@ -87,10 +87,8 @@ export default function ActivityScreen() {
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
         <TopBar title="활동 내역" back onBack={() => router.back()} />
-        {__DEV__ ? (
-          <Text style={styles.sourceCaption}>
-            {httpAdapter ? "서버 데이터" : "목업 데이터"}
-          </Text>
+        {__DEV__ && !httpAdapter ? (
+          <Text style={styles.sourceCaption}>목업 데이터</Text>
         ) : null}
         <UnderlineTabs
           items={tabs}

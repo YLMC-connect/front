@@ -67,7 +67,7 @@
 
 ## 결정 사항 (최신 위)
 
-- (2026-10-09) **활동 화면은 development에서 출처를 한 줄로 표시한다** — `__DEV__`일 때 제목 아래에 adapter가 http면 `서버 데이터`, mock이면 `목업 데이터`를 보여 준다. 탭·행·empty 문구는 그대로다.
+- (2026-10-10) **활동 화면은 development mock일 때만 출처를 표시한다** — `__DEV__`일 때 adapter가 mock이면 `목업 데이터`를 보여 주고, http일 때는 표시하지 않는다. 탭·행·empty 문구는 그대로다.
 - (2026-10-09) **마이페이지 활동 HTTP는 2026-10-06 `GET /api/mypage/activities` 5종만 호출하고 development 기본값은 http다** — 나눔과 같이 `EXPO_PUBLIC_MYPAGE_ADAPTER`가 없으면 development는 http, preview·production은 mock이다. `mock`이면 활동 화면은 기존 로컬 나눔 게시글·댓글·소모임 목록을 보여 준다. `http`이면 그 로컬 목록을 그리지 않는다. `http`일 때 호출하는 경로는 `GET /api/mypage/activities/posts`, `GET /api/mypage/activities/comments`, `GET /api/mypage/activities/groups`, `GET /api/mypage/activities/life-studies`, `GET /api/mypage/activities/prayers`다. posts·comments·groups 요청 `page`는 0부터이고 기본 `size`는 10, 기본 정렬은 글·댓글 `id,desc`, 소모임 `joinedAt,desc`다. 응답 `currentPage`는 1부터라 다음 요청 page는 `currentPage`다. life-studies와 prayers는 쿼리 없는 단일 객체다. `/api/admin`, `/api/life-study`, `/api/prayer`는 호출하지 않는다. 활동 화면의 탭·행·empty 상태는 바꾸지 않고, 삶공부·중보기도 이력은 이 화면에 그리지 않는다. 이 도메인 전용 에러코드는 없다. 계약 검사는 `npm run test:api:contract:mypage`이며 `npm run validate`에는 넣지 않는다. Issue #137.
 - (2026-10-09) **활동 화면 행에는 지금 그리는 값만 올린다** — 나눔은 `statusName`을 배지 문구로, `status` `AVAILABLE`/`RESERVED`/`COMPLETED`를 tone `primary`/`warn`/`mute`로 쓴다. 날짜는 `createdAt`·`joinedAt`의 `yyyy-MM-dd`를 `yyyy.MM.dd`로 바꾼다. 댓글 출처는 `shareTitle`, 소모임 이름은 `title`, 인원은 `currentParticipants`다. `thumbnailUrl`·본문·카테고리·조회수·모임장·봉사 구분은 화면 행에 없다. 삶공부 하위 항목은 이름만 있고 값 타입이 없어 그대로 둔다. 기도 이력은 Notion에 적힌 필드만 읽는다. `currentPage`가 0이면 잘못된 응답이다.
 - (2026-07-15) **MY 루트도 홈에서 push되는 별도 page이므로 뒤로가기를 표시한다** — 하단 탭에서 제거된 `/mypage`는 홈 프로필 카드가 진입점이므로 공통 `TopBar back`으로 직전 홈 화면에 복귀합니다.

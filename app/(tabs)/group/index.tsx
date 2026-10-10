@@ -17,6 +17,7 @@ import {
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   AppText,
+  Empty,
   EmptyState,
   ErrorState,
   FilterChips,
@@ -316,7 +317,7 @@ export default function GroupScreen() {
         ) : section === "mine" ? (
           <View style={styles.myListWrap} testID="group-my-list">
             {myGroups.length === 0 ? (
-              <EmptyState
+              <Empty
                 title="참여 중인 소모임이 없어요"
                 description="소모임 탭에서 관심 있는 모임에 참여해보세요."
               />

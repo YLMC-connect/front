@@ -39,6 +39,7 @@ import PrayerRequestScreenRoute from "../prayer/request";
 import { theme } from "../../../src/constants/theme";
 import { renderWithClient } from "../../../src/test/renderWithClient";
 import * as authService from "../../../src/services/authService";
+import * as prayerService from "../../../src/services/prayerService";
 
 describe("v1 tab smoke screens", () => {
   it("renders the home screen", async () => {
@@ -758,6 +759,20 @@ describe("v1 tab smoke screens", () => {
     );
     expect(requestCard.props.accessibilityRole).toBeUndefined();
     expect(requestCard.props.onPress).toBeUndefined();
+  });
+
+  it("renders empty states when prayer rooms and requests are empty", async () => {
+    jest.spyOn(prayerService, "fetchPrayerOverview").mockResolvedValueOnce({
+      rooms: [],
+      requests: [],
+    });
+
+    renderWithClient(<PrayerScreen />);
+
+    expect(await screen.findByTestId("prayer-rooms-empty")).toBeTruthy();
+    expect(screen.getByText("참여 중인 기도방이 없어요")).toBeTruthy();
+    expect(screen.getByTestId("prayer-requests-empty")).toBeTruthy();
+    expect(screen.getByText("등록된 기도제목이 없어요")).toBeTruthy();
   });
 
   it("renders the prayer apply screen", () => {

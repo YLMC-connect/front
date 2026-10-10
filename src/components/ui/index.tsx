@@ -4,6 +4,9 @@ export { FilterChips } from "./filter-chips";
 export {
   ModalFormSection,
   ModalFormTextInput,
+  MODAL_FORM_INPUT_HEIGHTS,
+  type ModalFormTextInputProps,
+  type ModalFormTextInputSize,
   SectionDivider,
 } from "./modal-form-layout";
 export { ScreenHeader } from "./screen-header";

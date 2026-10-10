@@ -723,7 +723,11 @@ describe("v1 tab smoke screens", () => {
 
     expect(screen.getByText("함께 기도하고 응답을 나눠요")).toBeTruthy();
     expect(await screen.findByText("내 기도방")).toBeTruthy();
-    expect(screen.getByText("오늘의 기도 진행")).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("기도 신청 메뉴"));
+    expect(screen.getByTestId("prayer-fab-backdrop")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("prayer-fab-backdrop"));
+    expect(screen.queryByTestId("prayer-fab-backdrop")).toBeNull();
+
     fireEvent.press(screen.getByLabelText("기도 신청 메뉴"));
     fireEvent.press(screen.getByLabelText("기도제목 작성"));
     expect(router.push).toHaveBeenCalledWith("/modal/prayer-new");

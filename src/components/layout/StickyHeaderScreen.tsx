@@ -203,7 +203,6 @@ export function StickyHeaderScreen({
           >
             {children}
           </ScrollView>
-          {overlay}
         </BlurTargetView>
         {hasStickyControls ? (
           <StickyControlsLayer
@@ -226,6 +225,15 @@ export function StickyHeaderScreen({
           title={title}
           topInset={topInset}
         />
+        {overlay ? (
+          <View
+            pointerEvents="box-none"
+            style={styles.overlay}
+            testID={`${testID}-overlay`}
+          >
+            {overlay}
+          </View>
+        ) : null}
       </View>
     </Screen>
   );
@@ -312,5 +320,9 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 19,
     overflow: "hidden",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFill,
+    zIndex: 25,
   },
 });

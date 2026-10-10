@@ -251,7 +251,11 @@ export default function GroupNewModal() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: theme.colors.bg },
+  root: {
+    flex: 1,
+    backgroundColor: theme.colors.bg,
+    paddingTop: theme.layout.screenX,
+  },
   body: { paddingBottom: 24 },
   chips: {
     flexDirection: "row",

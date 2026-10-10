@@ -1,6 +1,13 @@
 import type { ReactNode } from "react";
 import { usePathname } from "expo-router";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { theme } from "../../constants/theme";
 import { SCREEN_HEADER_VERTICAL_PADDING } from "../ui/screen-header";
@@ -18,6 +25,7 @@ export function Screen({
   padded = true,
   applyTopInset = true,
   backgroundColor,
+  style,
   testID,
 }: {
   children: ReactNode;
@@ -26,6 +34,7 @@ export function Screen({
   applyTopInset?: boolean;
   /** Override default canvas bg (e.g. white home sheet to tab bar). */
   backgroundColor?: string;
+  style?: StyleProp<ViewStyle>;
   testID?: string;
 }) {
   const pathname = usePathname();
@@ -43,6 +52,7 @@ export function Screen({
         applyTopInset
           ? { paddingTop: insets.top + SCREEN_HEADER_VERTICAL_PADDING }
           : null,
+        style,
       ]}
     >
       {scroll ? (

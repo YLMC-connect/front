@@ -10,6 +10,7 @@ import {
   Textarea,
   TopBar,
 } from "../../src/components/ui";
+import { theme } from "../../src/constants/theme";
 import { useCreatePrayerTopic } from "../../src/hooks/usePrayers";
 
 const visibilityTabs = [
@@ -65,7 +66,11 @@ export default function PrayerNewModal() {
   };
 
   return (
-    <Screen applyTopInset={false} testID="prayer-form-screen">
+    <Screen
+      applyTopInset={false}
+      style={styles.root}
+      testID="prayer-form-screen"
+    >
       <TopBar
         title="기도제목 등록"
         subtitle="중보가 필요한 내용을 나눕니다"
@@ -112,5 +117,6 @@ export default function PrayerNewModal() {
 }
 
 const styles = StyleSheet.create({
+  root: { paddingTop: theme.layout.screenX },
   actions: { flexDirection: "row", gap: 8 },
 });

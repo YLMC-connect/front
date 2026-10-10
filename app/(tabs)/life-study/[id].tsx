@@ -97,7 +97,6 @@ function LiveLifeStudyDetail({ id }: { id: string }) {
         />
         <ScrollView contentContainerStyle={styles.body}>
           <View style={styles.hero}>
-            {__DEV__ ? <Text style={styles.caption}>서버 데이터</Text> : null}
             {overview.isPending ? (
               <Text style={styles.desc}>서버에서 불러오는 중입니다.</Text>
             ) : null}

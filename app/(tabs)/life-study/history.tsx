@@ -78,7 +78,6 @@ export default function LifeStudyHistoryScreen() {
         <View style={styles.root}>
           <TopBar title="수강 내역" back onBack={() => router.back()} />
           <ScrollView contentContainerStyle={styles.body}>
-            {__DEV__ ? <Text style={styles.meta}>서버 데이터</Text> : null}
             <Section title="내 수료 기록">
               {completions.isPending ? (
                 <Text style={styles.meta}>서버에서 불러오는 중입니다.</Text>

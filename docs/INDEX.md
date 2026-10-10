@@ -25,14 +25,14 @@
 
 | 도메인 | 진행 중 | 완료 | 마지막 갱신 | 상세 |
 |---|---|---|---|---|
-| common (공통 인프라) | 6 | 49 | 2026-10-10 | [features/common.md](features/common.md) |
+| common (공통 인프라) | 7 | 49 | 2026-10-10 | [features/common.md](features/common.md) |
 | auth (인증) | 1 | 15 | 2026-10-09 | [features/auth.md](features/auth.md) |
 | home (홈) | 0 | 2 | 2026-10-09 | [features/home.md](features/home.md) |
 | market (나눔장터) | 1 | 24 | 2026-09-06 | [features/market.md](features/market.md) |
 | group (소모임) | 1 | 33 | 2026-10-10 | [features/group.md](features/group.md) |
-| mypage (MY) | 0 | 7 | 2026-10-09 | [features/mypage.md](features/mypage.md) |
+| mypage (MY) | 1 | 7 | 2026-10-10 | [features/mypage.md](features/mypage.md) |
 | life-study (삶공부) | 1 | 12 | 2026-10-09 | [features/life-study.md](features/life-study.md) |
-| prayer (중보기도) | 1 | 17 | 2026-10-09 | [features/prayer.md](features/prayer.md) |
+| prayer (중보기도) | 2 | 17 | 2026-10-10 | [features/prayer.md](features/prayer.md) |
 
 <!-- AUTO-GENERATED-END: domain-status -->
 

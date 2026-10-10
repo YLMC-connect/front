@@ -387,14 +387,14 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("소모임과 봉사로 함께 걸어가요")).toBeTruthy();
     expect(screen.getAllByText("소모임").length).toBeGreaterThan(0);
     expect(screen.getAllByText("봉사").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("내 소모임").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("내 모임").length).toBeGreaterThan(0);
     fireEvent.press(screen.getByLabelText("소모임 개설"));
     expect(push).toHaveBeenCalledWith("/modal/group-new");
   });
 
   it("renders the joined groups when mine segment is selected", async () => {
     renderWithClient(<GroupScreen />);
-    await screen.findByText("내 소모임");
+    await screen.findByText("내 모임");
 
     fireEvent.press(screen.getByTestId("group-section-mine"));
 

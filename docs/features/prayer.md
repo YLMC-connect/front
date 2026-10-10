@@ -10,7 +10,7 @@
 
 ## ✅ 완료
 
-- 기도 신청·작성 플로팅 메뉴 통합 — 우측 하단에 '중보기도 신청'과 '기도제목 작성'을 토글하는 Speed Dial 플로팅 메뉴를 추가하고, 본문 내 불필요한 중보기도 신청 카드를 제거해 신청/작성 진입점을 플로팅 메뉴로 일원화
+- 기도 신청·작성 플로팅 메뉴 통합 — 우측 하단에 '중보기도 신청'과 '기도제목 작성'을 토글하는 Speed Dial 플로팅 메뉴를 추가하고, 메뉴 오픈 시 딤처리(backdrop)가 상단 glass 헤더까지 온전히 덮도록 overlay 레이어 zIndex 보정. 본문 내 불필요한 중보기도 신청 카드를 제거해 신청/작성 진입점을 플로팅 메뉴로 일원화
 - 중보기도 사용자 HTTP adapter — development 기본값은 나눔과 같이 http다. 내 기도방·내 기도제목은 mock 행 위에 덮지 않고 `GET /api/prayer/cohorts/my`와 `GET /api/prayer/topics/my`로 만든다. 테스트와 `EXPO_PUBLIC_PRAYER_ADAPTER=mock`은 기존 mock service를 쓴다. 작성 화면의 `createPrayerTopic`은 `categoryId`가 없어 등록 API를 호출하지 않는다
 - 기도 작성 control·FAB 비율 보정 — 작성 화면 세그먼트의 full pill을 유지한 채 40/32px로 낮추고 44px 터치 범위를 보존했으며 루트 `기도제목 작성` FAB를 46px로 축소해 하단 탭과 위계를 분리
 - 기도 루트 카드 이동 의미 구분 — 상세 이동이 없는 내 기도제목 개별 카드는 버튼 역할·이동·화살표를 제거하고, 상세로 이동하는 내 기도방 카드에는 `기도방 보기 + chevron-right`를 명시하며 섹션 전체보기와 기존 경로는 유지

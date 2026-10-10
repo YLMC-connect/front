@@ -3,9 +3,10 @@ import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
+  AppText,
+  Empty,
   EmptyState,
   ErrorState,
-  AppText,
   FilterChips,
   FloatingActionButton,
   ListSkeleton,
@@ -258,7 +259,7 @@ function MarketEmptyState({
 
   return (
     <View style={styles.emptyWrap}>
-      <EmptyState
+      <Empty
         title={message.title}
         description={message.description}
         icon="shopping-bag"

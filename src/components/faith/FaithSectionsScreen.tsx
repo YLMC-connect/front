@@ -362,9 +362,17 @@ function StudyContent({ search }: { search: string }) {
           지금 신청 가능한 과정
         </AppText>
         <View style={styles.stack}>
-          {openCourses.map((course) => (
-            <CourseCard key={course.id} course={course} open />
-          ))}
+          {openCourses.length === 0 ? (
+            <Empty
+              title="지금 신청 가능한 과정이 없어요"
+              description="새로운 과정이 개설되면 안내해 드릴게요."
+              testID="life-study-open-courses-empty"
+            />
+          ) : (
+            openCourses.map((course) => (
+              <CourseCard key={course.id} course={course} open />
+            ))
+          )}
         </View>
       </View>
 
@@ -373,9 +381,17 @@ function StudyContent({ search }: { search: string }) {
           전체 과정
         </AppText>
         <View style={styles.stack}>
-          {courses.map((course) => (
-            <CourseCard key={course.id} course={course} />
-          ))}
+          {courses.length === 0 ? (
+            <Empty
+              title="개설된 과정이 없어요"
+              description="개설 예정인 삶공부 과정을 준비 중이에요."
+              testID="life-study-courses-empty"
+            />
+          ) : (
+            courses.map((course) => (
+              <CourseCard key={course.id} course={course} />
+            ))
+          )}
         </View>
       </View>
     </>

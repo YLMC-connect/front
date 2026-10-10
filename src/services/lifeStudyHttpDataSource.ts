@@ -22,13 +22,40 @@ export function createHttpLifeStudyDataSource({
 } = {}): LifeStudyDataSource {
   return {
     async getOverview() {
-      const data = await client.request<unknown>("/api/life-study/completions");
-      return buildLifeStudyOverview(data);
+      const [studiesRes, cohortsRes, completionsRes] = await Promise.allSettled(
+        [
+          client.request<unknown>("/api/life-study"),
+          client.request<unknown>("/api/life-study/cohorts"),
+          client.request<unknown>("/api/life-study/completions"),
+        ],
+      );
+
+      const lifeStudies =
+        studiesRes.status === "fulfilled" ? studiesRes.value : null;
+      const cohorts =
+        cohortsRes.status === "fulfilled" ? cohortsRes.value : null;
+      const completions =
+        completionsRes.status === "fulfilled" ? completionsRes.value : null;
+
+      return buildLifeStudyOverview({ lifeStudies, cohorts, completions });
     },
 
     async getCourses(filter: LifeStudyStatus = "all") {
-      const data = await client.request<unknown>("/api/life-study/completions");
-      const mapped = buildLifeStudyCourses(data);
+      const [studiesRes, completionsRes] = await Promise.allSettled([
+        client.request<unknown>("/api/life-study"),
+        client.request<unknown>("/api/life-study/completions"),
+      ]);
+
+      const lifeStudies =
+        studiesRes.status === "fulfilled" ? studiesRes.value : null;
+      const completions =
+        completionsRes.status === "fulfilled" ? completionsRes.value : null;
+
+      const mapped =
+        lifeStudies != null
+          ? buildLifeStudyCourses(lifeStudies)
+          : buildLifeStudyCourses(completions);
+
       if (filter === "all") return mapped;
       return mapped.filter((course) => course.status === filter);
     },

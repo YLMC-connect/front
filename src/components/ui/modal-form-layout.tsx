@@ -37,15 +37,33 @@ export function SectionDivider() {
   return <View style={styles.divider} />;
 }
 
+export const MODAL_FORM_INPUT_HEIGHTS = {
+  xs: 40,
+  sm: 44,
+  md: 48,
+  lg: 52,
+  xl: 56,
+} as const;
+
+export type ModalFormTextInputSize = keyof typeof MODAL_FORM_INPUT_HEIGHTS;
+
+export type ModalFormTextInputProps = TextInputProps & {
+  size?: ModalFormTextInputSize;
+  height?: number;
+};
+
 export function ModalFormTextInput({
   multiline,
   onBlur,
   onFocus,
   placeholderTextColor = theme.colors.inkMute,
   style,
+  size = "md",
+  height,
   ...props
-}: TextInputProps) {
+}: ModalFormTextInputProps) {
   const [focused, setFocused] = useState(false);
+  const resolvedHeight = height ?? MODAL_FORM_INPUT_HEIGHTS[size];
 
   return (
     <TextInput
@@ -62,7 +80,7 @@ export function ModalFormTextInput({
       placeholderTextColor={placeholderTextColor}
       style={[
         styles.input,
-        multiline ? styles.textarea : null,
+        multiline ? styles.textarea : { height: resolvedHeight },
         style,
         focused ? styles.inputFocused : null,
       ]}

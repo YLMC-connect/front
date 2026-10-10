@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { createRef } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Keyboard, StyleSheet, Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { theme } from "../../../constants/theme";
 import { Screen } from "../../layout/Screen";
@@ -182,6 +183,54 @@ describe("shared maintenance UI", () => {
 
     fireEvent.press(screen.getByLabelText("뒤로"));
     expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it("navigates back to returnUrl when returnUrl parameter is provided", () => {
+    const mockReplace = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({
+      back: jest.fn(),
+      push: jest.fn(),
+      replace: mockReplace,
+      setParams: jest.fn(),
+    } as unknown as ReturnType<typeof useRouter>);
+    jest.mocked(useLocalSearchParams).mockReturnValue({ returnUrl: "/mypage" });
+
+    render(<TopBar title="내 기도제목" back />);
+    fireEvent.press(screen.getByLabelText("뒤로"));
+
+    expect(mockReplace).toHaveBeenCalledWith("/mypage");
+  });
+
+  it("navigates back to returnUrl prop when provided directly", () => {
+    const mockReplace = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({
+      back: jest.fn(),
+      push: jest.fn(),
+      replace: mockReplace,
+      setParams: jest.fn(),
+    } as unknown as ReturnType<typeof useRouter>);
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
+
+    render(<TopBar title="내 기도제목" back returnUrl="/custom-return" />);
+    fireEvent.press(screen.getByLabelText("뒤로"));
+
+    expect(mockReplace).toHaveBeenCalledWith("/custom-return");
+  });
+
+  it("calls router.back when back is pressed without onBack or returnUrl", () => {
+    const mockBack = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({
+      back: mockBack,
+      push: jest.fn(),
+      replace: jest.fn(),
+      setParams: jest.fn(),
+    } as unknown as ReturnType<typeof useRouter>);
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
+
+    render(<TopBar title="내 기도제목" back />);
+    fireEvent.press(screen.getByLabelText("뒤로"));
+
+    expect(mockBack).toHaveBeenCalledTimes(1);
   });
 
   it("renders section view-all actions with a chevron and shared touch size", () => {
@@ -399,5 +448,101 @@ describe("shared maintenance UI", () => {
       screen.getByTestId("pinned-controls-screen-sticky-controls").props
         .pointerEvents,
     ).toBe("auto");
+  });
+
+  it("renders overlay above screen header with zIndex 25 and pointerEvents box-none", () => {
+    render(
+      <SafeAreaProvider
+        initialMetrics={{
+          frame: { x: 0, y: 0, width: 430, height: 932 },
+          insets: { top: 0, left: 0, right: 0, bottom: 0 },
+        }}
+      >
+        <StickyHeaderScreen
+          overlay={<Text testID="custom-overlay">오버레이</Text>}
+          testID="overlay-screen"
+          title="기도"
+        >
+          <Text>스크롤 콘텐츠</Text>
+        </StickyHeaderScreen>
+      </SafeAreaProvider>,
+    );
+
+    const overlayLayer = screen.getByTestId("overlay-screen-overlay");
+    expect(overlayLayer.props.pointerEvents).toBe("box-none");
+    const overlayStyle = StyleSheet.flatten(overlayLayer.props.style);
+    expect(overlayStyle).toMatchObject({
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 25,
+    });
+    expect(screen.getByTestId("custom-overlay")).toBeTruthy();
+  });
+
+  it("resets scroll position to 0 and resets controls on navigation focus in StickyHeaderScreen", () => {
+    const listeners: Record<string, () => void> = {};
+    const mockAddListener = jest.fn((event: string, cb: () => void) => {
+      listeners[event] = cb;
+      return () => {
+        delete listeners[event];
+      };
+    });
+    jest.mocked(useNavigation).mockReturnValue({
+      addListener: mockAddListener,
+      isFocused: () => true,
+    } as any);
+
+    const scrollRef = {
+      current: {
+        scrollTo: jest.fn(),
+      },
+    };
+
+    render(
+      <SafeAreaProvider
+        initialMetrics={{
+          frame: { x: 0, y: 0, width: 430, height: 932 },
+          insets: { top: 0, left: 0, right: 0, bottom: 0 },
+        }}
+      >
+        <StickyHeaderScreen
+          scrollRef={scrollRef as any}
+          testID="focus-reset-screen"
+          title="홈"
+        >
+          <Text>본문</Text>
+        </StickyHeaderScreen>
+      </SafeAreaProvider>,
+    );
+
+    expect(mockAddListener).toHaveBeenCalledWith("focus", expect.any(Function));
+    listeners.focus?.();
+    expect(scrollRef.current.scrollTo).toHaveBeenCalledWith({
+      y: 0,
+      animated: false,
+    });
+  });
+
+  it("dismisses keyboard on touch in StickyHeaderScreen and Screen", () => {
+    const dismissSpy = jest.spyOn(Keyboard, "dismiss");
+
+    render(
+      <SafeAreaProvider
+        initialMetrics={{
+          frame: { x: 0, y: 0, width: 430, height: 932 },
+          insets: { top: 0, left: 0, right: 0, bottom: 0 },
+        }}
+      >
+        <StickyHeaderScreen testID="touch-dismiss-screen" title="홈">
+          <Text testID="touch-target">터치 영역</Text>
+        </StickyHeaderScreen>
+      </SafeAreaProvider>,
+    );
+
+    fireEvent.press(screen.getByTestId("touch-target"));
+    expect(dismissSpy).toHaveBeenCalled();
   });
 });

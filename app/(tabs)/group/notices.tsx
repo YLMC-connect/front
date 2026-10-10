@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { type ReactNode, useState } from "react";
 import {
   ActivityIndicator,
+  Keyboard,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -127,39 +128,51 @@ export default function GroupNoticesScreenRoute() {
           }
         />
 
-        <ScrollView contentContainerStyle={styles.body}>
-          <View style={styles.noticeBox}>
-            <AppIcon name="info" size={16} color={theme.colors.primaryDeep} />
-            <Text style={styles.noticeText}>소모임 멤버에게만 공개됩니다.</Text>
-          </View>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          contentContainerStyle={[styles.body, { flexGrow: 1 }]}
+        >
+          <Pressable
+            accessible={false}
+            onPress={Keyboard.dismiss}
+            style={{ flexGrow: 1 }}
+          >
+            <View style={styles.noticeBox}>
+              <AppIcon name="info" size={16} color={theme.colors.primaryDeep} />
+              <Text style={styles.noticeText}>
+                소모임 멤버에게만 공개됩니다.
+              </Text>
+            </View>
 
-          <Field label="제목" required hint={`${title.length}/30`}>
-            <TextInput
-              testID="group-notice-title-input"
-              value={title}
-              onChangeText={setTitle}
-              placeholder="공지 제목 (최대 30자)"
-              placeholderTextColor={theme.colors.inkMute}
-              maxLength={30}
-              style={styles.input}
-            />
-          </Field>
+            <Field label="제목" required hint={`${title.length}/30`}>
+              <TextInput
+                testID="group-notice-title-input"
+                value={title}
+                onChangeText={setTitle}
+                placeholder="공지 제목 (최대 30자)"
+                placeholderTextColor={theme.colors.inkMute}
+                maxLength={30}
+                style={styles.input}
+              />
+            </Field>
 
-          <View style={styles.divider} />
+            <View style={styles.divider} />
 
-          <Field label="내용" required hint={`${body.length}/500`}>
-            <TextInput
-              testID="group-notice-content-input"
-              value={body}
-              onChangeText={setBody}
-              multiline
-              placeholder="공지 내용을 입력해주세요"
-              placeholderTextColor={theme.colors.inkMute}
-              maxLength={500}
-              textAlignVertical="top"
-              style={[styles.input, styles.textarea]}
-            />
-          </Field>
+            <Field label="내용" required hint={`${body.length}/500`}>
+              <TextInput
+                testID="group-notice-content-input"
+                value={body}
+                onChangeText={setBody}
+                multiline
+                placeholder="공지 내용을 입력해주세요"
+                placeholderTextColor={theme.colors.inkMute}
+                maxLength={500}
+                textAlignVertical="top"
+                style={[styles.input, styles.textarea]}
+              />
+            </Field>
+          </Pressable>
         </ScrollView>
 
         {createNotice.isError ||

@@ -1,7 +1,7 @@
 import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { LinearGradient } from "expo-linear-gradient";
-import { Tabs, usePathname } from "expo-router";
+import { router, Tabs, usePathname } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, {
@@ -107,15 +107,7 @@ export default function TabsLayout() {
           />
         ))}
         <Tabs.Screen name="notifications" options={{ href: null }} />
-        <Tabs.Screen name="mypage/index" options={{ href: null }} />
-        <Tabs.Screen name="mypage/edit" options={{ href: null }} />
-        <Tabs.Screen name="mypage/activity" options={{ href: null }} />
-        <Tabs.Screen name="mypage/blocked" options={{ href: null }} />
-        <Tabs.Screen name="mypage/faq" options={{ href: null }} />
-        <Tabs.Screen name="mypage/terms" options={{ href: null }} />
-        <Tabs.Screen name="mypage/privacy" options={{ href: null }} />
-        <Tabs.Screen name="mypage/withdraw" options={{ href: null }} />
-        <Tabs.Screen name="mypage/user/[id]" options={{ href: null }} />
+        <Tabs.Screen name="mypage" options={{ href: null }} />
       </Tabs>
     </TabBlurTargetContext.Provider>
   );
@@ -253,8 +245,13 @@ function VisibleTabBar({
                 testID={options.tabBarButtonTestID}
                 onPress={() => {
                   const tab = findRootTab(route.name);
-                  if (tab && (focused || pathname === tab.href)) return;
-                  navigation.navigate(route.name);
+                  if (tab && pathname === tab.href) return;
+                  if (tab) {
+                    router.replace(tab.href);
+                  }
+                  if (!focused) {
+                    navigation.navigate(route.name);
+                  }
                 }}
               />
             );

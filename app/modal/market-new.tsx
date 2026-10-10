@@ -1,7 +1,6 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -20,7 +19,6 @@ import {
   Toast,
   TopBar,
 } from "../../src/components/ui";
-import { SCREEN_HEADER_VERTICAL_PADDING } from "../../src/components/ui/screen-header";
 import { MARKET_CATEGORIES } from "../../src/constants/domainOptions";
 import { theme } from "../../src/constants/theme";
 import { useCreateMarketPost } from "../../src/hooks/useMarket";
@@ -54,7 +52,6 @@ const emptyValues: MarketInput = {
 
 export default function MarketNewModal() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ designVariant?: string }>();
   const variant = readDesignVariant(params.designVariant) ?? "create";
   const isEdit = variant === "edit";
@@ -106,10 +103,7 @@ export default function MarketNewModal() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={[
-        styles.root,
-        { paddingTop: insets.top + SCREEN_HEADER_VERTICAL_PADDING },
-      ]}
+      style={styles.root}
       testID="market-form-screen"
     >
       <TopBar

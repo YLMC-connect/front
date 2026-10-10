@@ -4,7 +4,7 @@ import * as ImagePicker from "expo-image-picker";
 import { StyleSheet } from "react-native";
 import GroupNewModal from "../group-new";
 import MarketNewModal from "../market-new";
-import { SCREEN_HEADER_VERTICAL_PADDING } from "../../../src/components/ui/screen-header";
+import PrayerNewModal from "../prayer-new";
 import { theme } from "../../../src/constants/theme";
 import { renderWithClient } from "../../../src/test/renderWithClient";
 
@@ -23,8 +23,9 @@ describe("modal smoke screens", () => {
     expect(screen.getByLabelText("뒤로")).toBeTruthy();
     expect(screen.queryByText("닫기")).toBeNull();
     expect(
-      StyleSheet.flatten(screen.getByTestId("market-form-screen").props.style),
-    ).toMatchObject({ paddingTop: 24 + SCREEN_HEADER_VERTICAL_PADDING });
+      StyleSheet.flatten(screen.getByTestId("market-form-screen").props.style)
+        .paddingTop,
+    ).toBeUndefined();
     expect(screen.getByText("사진 0/5")).toBeTruthy();
     expect(screen.getByText("사용감 있음")).toBeTruthy();
     expect(
@@ -48,8 +49,9 @@ describe("modal smoke screens", () => {
     expect(screen.getByLabelText("뒤로")).toBeTruthy();
     expect(screen.queryByText("닫기")).toBeNull();
     expect(
-      StyleSheet.flatten(screen.getByTestId("group-form-screen").props.style),
-    ).toMatchObject({ paddingTop: 24 + SCREEN_HEADER_VERTICAL_PADDING });
+      StyleSheet.flatten(screen.getByTestId("group-form-screen").props.style)
+        .paddingTop,
+    ).toBeUndefined();
     expect(screen.getByText("운동·건강")).toBeTruthy();
     expect(
       screen.getByPlaceholderText("소모임 이름을 입력해주세요 (최대 20자)"),
@@ -109,5 +111,16 @@ describe("modal smoke screens", () => {
         expect.stringMatching(/^\/group\/mock-group-/),
       ),
     );
+  });
+
+  it("renders the prayer create modal without safe-area top padding", () => {
+    renderWithClient(<PrayerNewModal />);
+
+    expect(screen.getByText("기도제목 등록")).toBeTruthy();
+    expect(screen.getByLabelText("뒤로")).toBeTruthy();
+    expect(
+      StyleSheet.flatten(screen.getByTestId("prayer-form-screen").props.style)
+        .paddingTop,
+    ).toBeUndefined();
   });
 });

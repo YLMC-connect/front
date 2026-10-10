@@ -88,6 +88,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-10-10) **나눔 상세 뒤로가기 버튼 영역 sticky 고정 및 사진 영역 이탈 시 배경색/타이틀 전환** — 기존 hero 이미지 내부 absolute 버튼 대신 화면 상단 고정 헤더(`stickyHeader`, 높이 56px)로 분리하여 스크롤 시에도 뒤로가기 버튼이 상단에 유지되도록 하고, 스크롤이 사진 영역(`width - 56px`)을 벗어나면 새벽기도 말씀요약 상단과 동일한 배경색(`theme.colors.bg`), 하단 보더(`theme.colors.line`), "나눔 상세" 타이틀을 갖도록 전환 처리. Issue #167.
 - (2026-08-13) **나눔 HTTP는 라이브 관측값과 common-codes만 매핑한다** — `SHARE_STATUS` AVAILABLE/RESERVED/COMPLETED, `SHARE_CATEGORY` 7개, `SHARE_ITEM_STATUS` NEW/USED/DAMAGED. 목록 DTO에 `authorName`/`images`가 없어 목록 작성자는 `authorId`를 쓰고 썸네일은 기존 `thumbSeed`를 유지한다. 생성은 multipart이며 서버가 받지 않는 `location`은 보내지 않는다. 신고 `reportReasonCode` enum이 공통 코드에 없어 HTTP 신고는 활성화하지 않는다. development 기본 adapter는 `http`.
 - (2026-07-16) **나눔 작성 폼은 회색 section divider 없이 내부 여백으로 구획하고 공통 탭 헤더·작성 입력 기준을 사용한다** — 사진·카테고리·제목·물품 상태·상세 설명·수령 장소의 기존 입력 surface와 section 내부 padding은 유지하면서 8px divider만 제거합니다. 작성 화면 상단은 홈·나눔·동행·삶공부의 `ScreenHeader`와 같은 기기 safe area + 20px을 사용하고, 텍스트 입력은 소모임 개설과 같은 `ModalFormTextInput`의 primary 2px 포커스를 공유합니다.
 - (2026-07-15) **나눔 탐색 control은 full pill과 44px 터치 범위를 유지하면서 시각 높이만 낮춘다** — 상태 세그먼트는 40px track·32px 선택 영역, 카테고리 필터는 36px surface를 사용하고 상하 hitSlop으로 44px 터치 범위를 보장합니다. `나눔하기` FAB는 공통 46px geometry를 사용하며 기존 sticky 높이·간격·모션·라우팅은 유지합니다.

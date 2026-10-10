@@ -283,6 +283,38 @@ describe("v1 tab smoke screens", () => {
     expect(backStyle.elevation).toBeUndefined();
   });
 
+  it("switches sticky header background when scrolling past the market hero image", async () => {
+    renderWithClient(<MarketDetailScreen />);
+    await screen.findByText(
+      "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
+    );
+
+    const header = screen.getByTestId("market-detail-sticky-header");
+    expect(StyleSheet.flatten(header.props.style)).toMatchObject({
+      backgroundColor: "transparent",
+    });
+    expect(screen.queryByText("나눔 상세")).toBeNull();
+
+    fireEvent.scroll(screen.getByTestId("market-detail-scroll"), {
+      nativeEvent: { contentOffset: { y: 800 } },
+    });
+
+    expect(StyleSheet.flatten(header.props.style)).toMatchObject({
+      backgroundColor: theme.colors.bg,
+      borderBottomColor: theme.colors.line,
+    });
+    expect(screen.getByText("나눔 상세")).toBeTruthy();
+
+    fireEvent.scroll(screen.getByTestId("market-detail-scroll"), {
+      nativeEvent: { contentOffset: { y: 0 } },
+    });
+
+    expect(StyleSheet.flatten(header.props.style)).toMatchObject({
+      backgroundColor: "transparent",
+    });
+    expect(screen.queryByText("나눔 상세")).toBeNull();
+  });
+
   it("creates a comment from the market detail screen", async () => {
     renderWithClient(<MarketDetailScreen />);
 

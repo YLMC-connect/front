@@ -22,12 +22,12 @@ const activityItems: MenuItem[] = [
   {
     label: "중보기도 활동 이력",
     icon: "hands-pray",
-    href: "/prayer/request",
+    href: "/prayer/request?returnUrl=/mypage",
   },
   {
     label: "삶공부 수료",
     icon: "menu-book",
-    href: "/life-study/history",
+    href: "/life-study/history?returnUrl=/mypage",
   },
   { label: "차단 관리", icon: "block", href: "/mypage/blocked" },
 ];

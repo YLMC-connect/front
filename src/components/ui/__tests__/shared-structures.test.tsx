@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { createRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -182,6 +183,54 @@ describe("shared maintenance UI", () => {
 
     fireEvent.press(screen.getByLabelText("뒤로"));
     expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it("navigates back to returnUrl when returnUrl parameter is provided", () => {
+    const mockReplace = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({
+      back: jest.fn(),
+      push: jest.fn(),
+      replace: mockReplace,
+      setParams: jest.fn(),
+    } as unknown as ReturnType<typeof useRouter>);
+    jest.mocked(useLocalSearchParams).mockReturnValue({ returnUrl: "/mypage" });
+
+    render(<TopBar title="내 기도제목" back />);
+    fireEvent.press(screen.getByLabelText("뒤로"));
+
+    expect(mockReplace).toHaveBeenCalledWith("/mypage");
+  });
+
+  it("navigates back to returnUrl prop when provided directly", () => {
+    const mockReplace = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({
+      back: jest.fn(),
+      push: jest.fn(),
+      replace: mockReplace,
+      setParams: jest.fn(),
+    } as unknown as ReturnType<typeof useRouter>);
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
+
+    render(<TopBar title="내 기도제목" back returnUrl="/custom-return" />);
+    fireEvent.press(screen.getByLabelText("뒤로"));
+
+    expect(mockReplace).toHaveBeenCalledWith("/custom-return");
+  });
+
+  it("calls router.back when back is pressed without onBack or returnUrl", () => {
+    const mockBack = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({
+      back: mockBack,
+      push: jest.fn(),
+      replace: jest.fn(),
+      setParams: jest.fn(),
+    } as unknown as ReturnType<typeof useRouter>);
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
+
+    render(<TopBar title="내 기도제목" back />);
+    fireEvent.press(screen.getByLabelText("뒤로"));
+
+    expect(mockBack).toHaveBeenCalledTimes(1);
   });
 
   it("renders section view-all actions with a chevron and shared touch size", () => {

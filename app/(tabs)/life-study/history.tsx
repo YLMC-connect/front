@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
@@ -69,7 +68,6 @@ const completed = [
 ] as const;
 
 export default function LifeStudyHistoryScreen() {
-  const router = useRouter();
   const http = resolveLifeStudyAdapterMode() === "http";
   const completions = useQuery({
     queryKey: ["lifeStudy", "my-completions", "history-screen"],
@@ -82,7 +80,7 @@ export default function LifeStudyHistoryScreen() {
     return (
       <Screen scroll={false} padded={false}>
         <View style={styles.root}>
-          <TopBar title="수강 내역" back onBack={() => router.back()} />
+          <TopBar title="수강 내역" back />
           <ScrollView contentContainerStyle={styles.body}>
             <HistorySection title="내 수료 기록">
               {completions.isPending ? (
@@ -129,7 +127,7 @@ export default function LifeStudyHistoryScreen() {
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
-        <TopBar title="수강 내역" back onBack={() => router.back()} />
+        <TopBar title="수강 내역" back />
         <ScrollView contentContainerStyle={styles.body}>
           <HistorySection title="신청중">
             <View style={styles.stack}>

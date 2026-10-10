@@ -1,4 +1,5 @@
 import { AppIcon } from "@/components/ui/app-icon";
+import { useLocalSearchParams, useRouter, type Href } from "expo-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ScrollView,
@@ -28,6 +29,7 @@ export function TopBar({
   back,
   right,
   onBack,
+  returnUrl: returnUrlProp,
   testID,
 }: {
   title: string;
@@ -35,15 +37,35 @@ export function TopBar({
   back?: boolean;
   right?: ReactNode;
   onBack?: () => void;
+  returnUrl?: string;
   testID?: string;
 }) {
+  const router = useRouter();
+  const params = useLocalSearchParams<{ returnUrl?: string | string[] }>();
+  const rawReturnUrl = returnUrlProp ?? params.returnUrl;
+  const returnUrl = Array.isArray(rawReturnUrl)
+    ? rawReturnUrl[0]
+    : rawReturnUrl;
+
+  const handleBack = () => {
+    if (returnUrl) {
+      router.replace(returnUrl as Href);
+      return;
+    }
+    if (onBack) {
+      onBack();
+      return;
+    }
+    router.back();
+  };
+
   return (
     <View testID={testID} style={styles.topBar}>
       {back ? (
         <MotionPressable
           accessibilityLabel="뒤로"
           accessibilityRole="button"
-          onPress={onBack}
+          onPress={handleBack}
           style={styles.backButton}
         >
           <AppIcon name="chevron-left" size={22} color={theme.colors.inkSoft} />

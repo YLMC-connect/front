@@ -1,6 +1,5 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import { Badge, Empty, TopBar } from "../../../src/components/ui";
@@ -75,7 +74,6 @@ const topicStatusLabel: Record<
 };
 
 export default function PrayerRequestScreenRoute() {
-  const router = useRouter();
   const http = resolvePrayerAdapterMode() === "http";
   const topics = useQuery({
     queryKey: ["prayer", "my-topics", "request-screen"],
@@ -96,7 +94,7 @@ export default function PrayerRequestScreenRoute() {
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
-        <TopBar title="내 기도제목" back onBack={() => router.back()} />
+        <TopBar title="내 기도제목" back />
         <ScrollView contentContainerStyle={styles.body}>
           {__DEV__ && !http ? (
             <Text style={styles.desc}>목업 데이터</Text>

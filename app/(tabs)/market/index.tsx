@@ -5,7 +5,6 @@ import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderS
 import {
   AppText,
   Empty,
-  EmptyState,
   ErrorState,
   FilterChips,
   FloatingActionButton,
@@ -165,6 +164,7 @@ export default function MarketScreen() {
         ) : visiblePosts.length === 0 ? (
           <MarketEmptyState
             status={isEmpty ? null : activeStatus}
+            isSearching={Boolean(search.trim())}
             onCreate={() => router.push("/modal/market-new")}
           />
         ) : (
@@ -233,13 +233,19 @@ function StatusBadge() {
 
 function MarketEmptyState({
   status,
+  isSearching,
   onCreate,
 }: {
   status: MarketSegment | null;
+  isSearching?: boolean;
   onCreate: () => void;
 }) {
-  const message =
-    status === "mine"
+  const message = isSearching
+    ? {
+        title: "검색 결과가 없어요",
+        description: "다른 검색어나 카테고리로 다시 찾아보세요.",
+      }
+    : status === "mine"
       ? {
           title: "아직 등록한 나눔이 없어요",
           description:
@@ -252,7 +258,7 @@ function MarketEmptyState({
               "첫 나눔을 시작해보세요.\n받는 분께 사랑을 전할 수 있어요.",
           }
         : {
-            title: "아직 나눔 게시글이 없습니다",
+            title: "아직 나눔 게시글이 없어요",
             description:
               "첫 나눔을 시작해보세요.\n받는 분께 사랑을 전할 수 있어요.",
           };
@@ -262,9 +268,9 @@ function MarketEmptyState({
       <Empty
         title={message.title}
         description={message.description}
-        icon="shopping-bag"
-        actionLabel="나눔 등록하기"
-        onAction={onCreate}
+        icon={isSearching ? "search" : "shopping-bag"}
+        actionLabel={isSearching ? undefined : "나눔 등록하기"}
+        onAction={isSearching ? undefined : onCreate}
       />
     </View>
   );

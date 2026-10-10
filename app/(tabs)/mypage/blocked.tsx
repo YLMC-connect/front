@@ -5,6 +5,7 @@ import { Screen } from "../../../src/components/layout/Screen";
 import {
   Avatar,
   ConfirmDialog,
+  Empty,
   Toast,
   TopBar,
 } from "../../../src/components/ui";
@@ -42,19 +43,13 @@ export default function BlockedScreen() {
 
           <View style={styles.list}>
             {users.length === 0 ? (
-              <View style={styles.empty}>
-                <View style={styles.emptyIcon}>
-                  <AppIcon
-                    name="block"
-                    size={38}
-                    color={theme.colors.inkHint}
-                  />
-                </View>
-                <Text style={styles.emptyTitle}>차단한 사용자가 없습니다</Text>
-                <Text style={styles.emptyText}>
-                  프로필 화면에서 언제든지{"\n"}상대를 차단할 수 있어요.
-                </Text>
-              </View>
+              <Empty
+                title="차단한 사용자가 없어요"
+                description={
+                  "프로필 화면에서 언제든지\n상대를 차단할 수 있어요."
+                }
+                icon="block"
+              />
             ) : (
               users.map((user, index) => (
                 <View
@@ -157,32 +152,5 @@ const styles = StyleSheet.create({
     color: theme.colors.primaryDeep,
     fontSize: theme.fontSize.xs,
     fontWeight: theme.fontWeight.bold,
-  },
-  empty: {
-    alignItems: "center",
-    paddingHorizontal: 24,
-    paddingTop: 80,
-    paddingBottom: 60,
-  },
-  emptyIcon: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-    backgroundColor: theme.colors.surface2,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 18,
-  },
-  emptyTitle: {
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.bold,
-  },
-  emptyText: {
-    marginTop: 8,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 20,
-    textAlign: "center",
   },
 });

@@ -18,7 +18,6 @@ import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderS
 import {
   AppText,
   Empty,
-  EmptyState,
   ErrorState,
   FilterChips,
   FloatingActionButton,
@@ -351,9 +350,7 @@ export default function GroupScreen() {
         ) : groups.length === 0 ? (
           <Empty
             title={
-              normalizedSearch
-                ? "검색 결과가 없어요"
-                : "등록된 소모임이 없어요"
+              normalizedSearch ? "검색 결과가 없어요" : "등록된 소모임이 없어요"
             }
             description={
               normalizedSearch

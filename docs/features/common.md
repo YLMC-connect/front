@@ -15,7 +15,7 @@
 - 처음 실행 안내 — `docs/GETTING_STARTED.md`와 `.env.example`. API origin은 `EXPO_PUBLIC_API_URL`(로컬 `.env`, gitignore). HTTP adapter일 때 없으면 Expo config가 실패. 웹은 브라우저 CORS 때문에 라이브 API 검증 대상이 아님(Dev Client). development 기본 adapter는 인증·나눔·동행 HTTP. 홈·기도·삶공부는 사용자 API가 없어 mock
 - Expo SDK 57 + Dev Client 기준. 서버 데이터는 TanStack Query, 인증·UI는 Zustand. mock-first 후 `services/` 만 교체. iOS는 `ios.enableSceneSupport`로 scene lifecycle을 켠다
 - Gluestack UI 및 NativeWind 퇴역 및 UI 모듈화 — 실제 미사용 중이던 Gluestack UI 및 NativeWind/Tailwind 관련 패키지 160개 및 설정 파일을 완전 제거하고, 1,775줄의 공통 UI index.tsx를 6개 서브모듈(buttons, display, inputs, navigation, dialog, feedback)로 분리 (Issue #119, ADR 0006)
-- 본문 글꼴 Pretendard. 아이콘은 공통 `AppIcon`(Solar Linear, 선택 Bold)
+- 본문 글꼴 Pretendard. 아이콘은 공통 `AppIcon`(Lucide Icons `lucide-react-native`, `weight="bold"` 시 strokeWidth 2.75 강조)
 - 루트 5탭 홈/나눔/동행/기도/삶공부. MY는 홈에서 숨김 route. 상세는 탭 중첩 Stack. 이미 보고 있는 루트 탭을 다시 누르면 같은 주소로 다시 열지 않는다
 - 화면 상단은 `safe area + 20px`. 이미지 hero overlay는 예외이며, 등록 바텀 모달(presentation: "modal")은 safe area 대신 좌우 여백(screenX=20px)과 동일한 상단 여백 적용
 - 루트 탭은 glass sticky 헤더 + `StickyHeaderScreen`. 기본 숨김은 아래 12px / 위 4px(`direction`). 화면 오버레이(`overlay`)는 `ScreenHeader` 상위 레이어로 배치되어 플로팅 메뉴 backdrop이 헤더까지 온전히 덮는다
@@ -29,31 +29,31 @@
 
 ## 주요 파일
 
-| 경로 | 역할 |
-|---|---|
-| `AGENTS.md` / `CLAUDE.md` | AI 작업 규칙 |
-| `.task-flow.conf` | 도메인 목록 단일 출처 |
-| `docs/GETTING_STARTED.md` | 클론·Dev Client·라이브 API / mock 실행 안내 |
-| `.env.example` | `EXPO_PUBLIC_API_URL`과 adapter 스위치 |
-| `docs/INDEX.md` | 진입점. 도메인 상태표는 Issues 기반 자동생성 |
-| `scripts/gen-index.sh` | INDEX 상태표 재생성 |
-| `docs/MAINTENANCE.md` | 문서 드리프트 복구 |
-| `src/lib/apiClient.ts` | envelope·오류·Authorization |
-| `src/types/common.ts` | 공통 회원·서버 역할 타입 |
-| `src/lib/rolePermissions.ts` | 관리자 도메인별 역할 접근 판별 |
-| `src/constants/theme.ts` / `designTokens.json` | 디자인 토큰 |
-| `src/components/layout/Screen.tsx` | 공통 화면 + 상단 inset |
-| `src/components/layout/StickyHeaderScreen.tsx` | 루트 탭 sticky 헤더·필터 |
-| `src/components/ui/buttons.tsx` | Button, FloatingActionButton 공통 컴포넌트 |
-| `src/components/ui/display.tsx` | Card, Badge, Avatar, VisualThumb, VisualCover, Chip |
-| `src/components/ui/inputs.tsx` | TextField, Textarea, ImagePickerField, FormSection |
-| `src/components/ui/navigation.tsx` | TopBar, SegmentedTabs, HorizontalChips |
-| `src/components/ui/dialog.tsx` | ConfirmDialog, BottomSheet, RadioSheet |
-| `src/components/ui/feedback.tsx` | Empty, EmptyState, ErrorState, SuccessState, Toast |
-| `src/components/ui/index.tsx` | 6개 서브모듈 barrel export |
-| `.github/workflows/ci.yml` | PR `npm run validate` |
-| `scripts/check-*-api-contract.mjs` | Swagger 계약 검사 |
-| `scripts/prepare-design-artifacts.mjs` 등 | ZIP 시각 비교. **요청 시에만** |
+| 경로                                           | 역할                                                |
+| ---------------------------------------------- | --------------------------------------------------- |
+| `AGENTS.md` / `CLAUDE.md`                      | AI 작업 규칙                                        |
+| `.task-flow.conf`                              | 도메인 목록 단일 출처                               |
+| `docs/GETTING_STARTED.md`                      | 클론·Dev Client·라이브 API / mock 실행 안내         |
+| `.env.example`                                 | `EXPO_PUBLIC_API_URL`과 adapter 스위치              |
+| `docs/INDEX.md`                                | 진입점. 도메인 상태표는 Issues 기반 자동생성        |
+| `scripts/gen-index.sh`                         | INDEX 상태표 재생성                                 |
+| `docs/MAINTENANCE.md`                          | 문서 드리프트 복구                                  |
+| `src/lib/apiClient.ts`                         | envelope·오류·Authorization                         |
+| `src/types/common.ts`                          | 공통 회원·서버 역할 타입                            |
+| `src/lib/rolePermissions.ts`                   | 관리자 도메인별 역할 접근 판별                      |
+| `src/constants/theme.ts` / `designTokens.json` | 디자인 토큰                                         |
+| `src/components/layout/Screen.tsx`             | 공통 화면 + 상단 inset                              |
+| `src/components/layout/StickyHeaderScreen.tsx` | 루트 탭 sticky 헤더·필터                            |
+| `src/components/ui/buttons.tsx`                | Button, FloatingActionButton 공통 컴포넌트          |
+| `src/components/ui/display.tsx`                | Card, Badge, Avatar, VisualThumb, VisualCover, Chip |
+| `src/components/ui/inputs.tsx`                 | TextField, Textarea, ImagePickerField, FormSection  |
+| `src/components/ui/navigation.tsx`             | TopBar, SegmentedTabs, HorizontalChips              |
+| `src/components/ui/dialog.tsx`                 | ConfirmDialog, BottomSheet, RadioSheet              |
+| `src/components/ui/feedback.tsx`               | Empty, EmptyState, ErrorState, SuccessState, Toast  |
+| `src/components/ui/index.tsx`                  | 6개 서브모듈 barrel export                          |
+| `.github/workflows/ci.yml`                     | PR `npm run validate`                               |
+| `scripts/check-*-api-contract.mjs`             | Swagger 계약 검사                                   |
+| `scripts/prepare-design-artifacts.mjs` 등      | ZIP 시각 비교. **요청 시에만**                      |
 
 홈 루트 화면 지도는 [home.md](home.md).
 

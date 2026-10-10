@@ -2,12 +2,14 @@ import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import {
@@ -115,119 +117,130 @@ export default function MarketNewModal() {
 
       <ScrollView
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         contentContainerStyle={styles.body}
       >
-        <Section label="사진" required hint={`사진 ${values.images.length}/5`}>
-          <View style={styles.fieldInset}>
-            <ImagePickerField
-              value={values.images}
-              onChange={(images) => update("images", images)}
-              maxImages={5}
-            />
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <View>
+            <Section
+              label="사진"
+              required
+              hint={`사진 ${values.images.length}/5`}
+            >
+              <View style={styles.fieldInset}>
+                <ImagePickerField
+                  value={values.images}
+                  onChange={(images) => update("images", images)}
+                  maxImages={5}
+                />
+              </View>
+            </Section>
+
+            <Section label="카테고리" required>
+              <View style={styles.chips}>
+                {categories.map((category) => {
+                  const selected = values.category === category.key;
+                  return (
+                    <Pressable
+                      key={category.key}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected }}
+                      onPress={() => update("category", category.key)}
+                      style={[styles.chip, selected ? styles.chipOn : null]}
+                    >
+                      <Text
+                        style={[
+                          styles.chipText,
+                          selected ? styles.chipTextOn : null,
+                        ]}
+                      >
+                        {category.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </Section>
+
+            <Section label="제목" required hint={`${values.title.length}/30`}>
+              <FormInput
+                accessibilityLabel="나눔 제목"
+                value={values.title}
+                onChangeText={(title) => update("title", title)}
+                maxLength={30}
+                placeholder="제목을 입력해주세요 (최대 30자)"
+              />
+            </Section>
+
+            <Section label="물품 상태" required>
+              <View style={styles.conditionRow}>
+                {conditions.map((condition) => {
+                  const selected = values.condition === condition;
+                  return (
+                    <Pressable
+                      key={condition}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected }}
+                      onPress={() => update("condition", condition)}
+                      style={[
+                        styles.condition,
+                        selected ? styles.conditionOn : null,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.conditionText,
+                          selected ? styles.conditionTextOn : null,
+                        ]}
+                      >
+                        {condition}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </Section>
+
+            <Section
+              label="상세 설명"
+              required
+              hint={`${values.description.length}/500`}
+            >
+              <FormInput
+                accessibilityLabel="나눔 상세 설명"
+                multiline
+                value={values.description}
+                onChangeText={(description) =>
+                  update("description", description)
+                }
+                maxLength={500}
+                placeholder="물품 상태, 수령 방법, 일정 등을 자세히 적어주세요"
+                textAlignVertical="top"
+              />
+            </Section>
+
+            <Section label="수령 장소" required>
+              <FormInput
+                accessibilityLabel="나눔 수령 장소"
+                value={values.location}
+                onChangeText={(location) => update("location", location)}
+                placeholder="예: 교회 1층 로비"
+              />
+            </Section>
+
+            <View style={styles.infoBox}>
+              <AppIcon name="info" size={16} color={theme.colors.primaryDeep} />
+              <Text style={styles.infoText}>
+                직거래 시 안전한 장소(교회 로비 등)에서 만나주세요.
+              </Text>
+            </View>
+            {error ? (
+              <Text accessibilityRole="alert" style={styles.errorText}>
+                {error}
+              </Text>
+            ) : null}
           </View>
-        </Section>
-
-        <Section label="카테고리" required>
-          <View style={styles.chips}>
-            {categories.map((category) => {
-              const selected = values.category === category.key;
-              return (
-                <Pressable
-                  key={category.key}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected }}
-                  onPress={() => update("category", category.key)}
-                  style={[styles.chip, selected ? styles.chipOn : null]}
-                >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      selected ? styles.chipTextOn : null,
-                    ]}
-                  >
-                    {category.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </Section>
-
-        <Section label="제목" required hint={`${values.title.length}/30`}>
-          <FormInput
-            accessibilityLabel="나눔 제목"
-            value={values.title}
-            onChangeText={(title) => update("title", title)}
-            maxLength={30}
-            placeholder="제목을 입력해주세요 (최대 30자)"
-          />
-        </Section>
-
-        <Section label="물품 상태" required>
-          <View style={styles.conditionRow}>
-            {conditions.map((condition) => {
-              const selected = values.condition === condition;
-              return (
-                <Pressable
-                  key={condition}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected }}
-                  onPress={() => update("condition", condition)}
-                  style={[
-                    styles.condition,
-                    selected ? styles.conditionOn : null,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.conditionText,
-                      selected ? styles.conditionTextOn : null,
-                    ]}
-                  >
-                    {condition}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </Section>
-
-        <Section
-          label="상세 설명"
-          required
-          hint={`${values.description.length}/500`}
-        >
-          <FormInput
-            accessibilityLabel="나눔 상세 설명"
-            multiline
-            value={values.description}
-            onChangeText={(description) => update("description", description)}
-            maxLength={500}
-            placeholder="물품 상태, 수령 방법, 일정 등을 자세히 적어주세요"
-            textAlignVertical="top"
-          />
-        </Section>
-
-        <Section label="수령 장소" required>
-          <FormInput
-            accessibilityLabel="나눔 수령 장소"
-            value={values.location}
-            onChangeText={(location) => update("location", location)}
-            placeholder="예: 교회 1층 로비"
-          />
-        </Section>
-
-        <View style={styles.infoBox}>
-          <AppIcon name="info" size={16} color={theme.colors.primaryDeep} />
-          <Text style={styles.infoText}>
-            직거래 시 안전한 장소(교회 로비 등)에서 만나주세요.
-          </Text>
-        </View>
-        {error ? (
-          <Text accessibilityRole="alert" style={styles.errorText}>
-            {error}
-          </Text>
-        ) : null}
+        </TouchableWithoutFeedback>
       </ScrollView>
 
       <View style={styles.footer}>

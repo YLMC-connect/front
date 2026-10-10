@@ -1,10 +1,11 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
-import { StyleSheet } from "react-native";
+import { Keyboard, StyleSheet } from "react-native";
 import GroupNewModal from "../group-new";
 import MarketNewModal from "../market-new";
 import PrayerNewModal from "../prayer-new";
+import { ConfirmDialog, ModalFormTextInput } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import { renderWithClient } from "../../../src/test/renderWithClient";
 
@@ -14,6 +15,7 @@ describe("modal smoke screens", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useRouter).mockReturnValue(router as never);
+    jest.spyOn(Keyboard, "dismiss");
   });
 
   it("renders the market create modal", () => {
@@ -35,6 +37,9 @@ describe("modal smoke screens", () => {
     ).toBeTruthy();
 
     const titleInput = screen.getByLabelText("나눔 제목");
+    expect(StyleSheet.flatten(titleInput.props.style)).toMatchObject({
+      height: 48,
+    });
     fireEvent(titleInput, "focus");
     expect(StyleSheet.flatten(titleInput.props.style)).toMatchObject({
       borderColor: theme.colors.primary,
@@ -59,6 +64,25 @@ describe("modal smoke screens", () => {
     ).toBeTruthy();
 
     const nameInput = screen.getByLabelText("소모임 이름");
+    expect(StyleSheet.flatten(nameInput.props.style)).toMatchObject({
+      height: 48,
+    });
+    const capacityInput = screen.getByLabelText("소모임 최대인원");
+    const scheduleInput = screen.getByLabelText("소모임 일정");
+    const locationInput = screen.getByLabelText("소모임 장소");
+    expect(StyleSheet.flatten(capacityInput.props.style)).toMatchObject({
+      height: 48,
+    });
+    expect(StyleSheet.flatten(scheduleInput.props.style)).toMatchObject({
+      height: 48,
+    });
+    expect(StyleSheet.flatten(locationInput.props.style)).toMatchObject({
+      height: 48,
+    });
+    expect(StyleSheet.flatten(capacityInput.props.style).height).toBe(
+      StyleSheet.flatten(scheduleInput.props.style).height,
+    );
+
     fireEvent(nameInput, "focus");
     expect(StyleSheet.flatten(nameInput.props.style)).toMatchObject({
       borderColor: theme.colors.primary,
@@ -122,5 +146,56 @@ describe("modal smoke screens", () => {
     expect(
       StyleSheet.flatten(screen.getByTestId("prayer-form-screen").props.style),
     ).toMatchObject({ paddingTop: theme.layout.screenX });
+  });
+
+  it("supports size options in 4px increments and custom height prop on ModalFormTextInput", () => {
+    renderWithClient(
+      <>
+        <ModalFormTextInput accessibilityLabel="sm-input" size="sm" />
+        <ModalFormTextInput accessibilityLabel="md-input" size="md" />
+        <ModalFormTextInput accessibilityLabel="lg-input" size="lg" />
+        <ModalFormTextInput accessibilityLabel="custom-input" height={60} />
+      </>,
+    );
+
+    expect(
+      StyleSheet.flatten(screen.getByLabelText("sm-input").props.style),
+    ).toMatchObject({ height: 44 });
+    expect(
+      StyleSheet.flatten(screen.getByLabelText("md-input").props.style),
+    ).toMatchObject({ height: 48 });
+    expect(
+      StyleSheet.flatten(screen.getByLabelText("lg-input").props.style),
+    ).toMatchObject({ height: 52 });
+    expect(
+      StyleSheet.flatten(screen.getByLabelText("custom-input").props.style),
+    ).toMatchObject({ height: 60 });
+  });
+
+  it("renders confirm dialog with horizontal padding matching bottom padding (16px)", () => {
+    renderWithClient(
+      <ConfirmDialog
+        visible
+        title="작성을 그만둘까요?"
+        message="입력한 내용은 저장되지 않습니다."
+        confirmText="나가기"
+        cancelText="취소"
+        danger
+        onCancel={jest.fn()}
+        onConfirm={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByText("작성을 그만둘까요?")).toBeTruthy();
+    expect(screen.getByText("나가기")).toBeTruthy();
+    expect(screen.getByText("취소")).toBeTruthy();
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("confirm-dialog-panel").props.style,
+      ),
+    ).toMatchObject({
+      paddingHorizontal: 16,
+      paddingBottom: 16,
+    });
   });
 });

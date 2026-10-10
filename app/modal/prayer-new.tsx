@@ -1,6 +1,11 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import {
+  Keyboard,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import { Screen } from "../../src/components/layout/Screen";
 import {
   Button,
@@ -71,52 +76,57 @@ export default function PrayerNewModal() {
       style={styles.root}
       testID="prayer-form-screen"
     >
-      <TopBar
-        title="기도제목 등록"
-        subtitle="중보가 필요한 내용을 나눕니다"
-        back
-        onBack={() => router.back()}
-      />
-      <FormSection title="기도제목">
-        <TextField
-          label="제목"
-          value={values.title}
-          onChangeText={(title) =>
-            setValues((current) => ({ ...current, title }))
-          }
-          error={errors.title}
-        />
-        <Textarea
-          label="내용"
-          value={values.content}
-          onChangeText={(content) =>
-            setValues((current) => ({ ...current, content }))
-          }
-          error={errors.content}
-        />
-      </FormSection>
-      <FormSection title="작성자 표시">
-        <SegmentedTabs
-          items={visibilityTabs}
-          active={values.visibility}
-          onChange={(visibility) =>
-            setValues((current) => ({ ...current, visibility }))
-          }
-        />
-      </FormSection>
-      <View style={styles.actions}>
-        <Button variant="soft" onPress={() => router.back()}>
-          취소
-        </Button>
-        <Button onPress={onSubmit} loading={createPrayerTopic.isPending}>
-          등록
-        </Button>
-      </View>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.formContainer}>
+          <TopBar
+            title="기도제목 등록"
+            subtitle="중보가 필요한 내용을 나눕니다"
+            back
+            onBack={() => router.back()}
+          />
+          <FormSection title="기도제목">
+            <TextField
+              label="제목"
+              value={values.title}
+              onChangeText={(title) =>
+                setValues((current) => ({ ...current, title }))
+              }
+              error={errors.title}
+            />
+            <Textarea
+              label="내용"
+              value={values.content}
+              onChangeText={(content) =>
+                setValues((current) => ({ ...current, content }))
+              }
+              error={errors.content}
+            />
+          </FormSection>
+          <FormSection title="작성자 표시">
+            <SegmentedTabs
+              items={visibilityTabs}
+              active={values.visibility}
+              onChange={(visibility) =>
+                setValues((current) => ({ ...current, visibility }))
+              }
+            />
+          </FormSection>
+          <View style={styles.actions}>
+            <Button variant="soft" onPress={() => router.back()}>
+              취소
+            </Button>
+            <Button onPress={onSubmit} loading={createPrayerTopic.isPending}>
+              등록
+            </Button>
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   root: { paddingTop: theme.layout.screenX },
+  formContainer: { gap: 16 },
   actions: { flexDirection: "row", gap: 8 },
 });

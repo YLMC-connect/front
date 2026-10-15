@@ -10,7 +10,9 @@
 
 ## ✅ 완료
 
+- 삶공부 수강신청 HTTP adapter — `POST /api/life-study/cohorts/{id}/attend` 연동. userYear, userFaithYears, userPart 필드를 전달하며 폼 유효성 검증 및 useApplyLifeStudyCohort mutation을 연결
 - 삶공부 수강 신청 FAB 추가 — 기도 탭과의 일관성 및 접근성을 높이기 위해 삶공부 루트 화면 우측 하단에 수강 신청 화면(/life-study/apply)으로 이동하는 플로팅 액션 버튼(FAB)을 추가
+
 - 삶공부 수업·출석·수료 HTTP adapter — development 기본값은 나눔과 같이 http다. 수료 목록은 mock 과정 위에 덮지 않고 `GET /api/life-study/completions` 행으로 만든다. 테스트와 `EXPO_PUBLIC_LIFE_STUDY_ADAPTER=mock`은 기존 mock service를 쓴다
 - 삶공부 검색 위치·포커스 보정 — 검색을 제목 바로 아래 sticky surface로 표시하고 전체 검색 영역에 단일 focus border를 적용했으며, 목록을 내린 상태에서도 헤더 검색 action으로 즉시 노출
 - 삶공부 glass sticky 헤더 — 검색·학습경로·신청 가능·전체 과정 영역을 하나의 스크롤로 묶고 기본 배경색 기반 blur 타이틀 뒤로 지나가게 적용

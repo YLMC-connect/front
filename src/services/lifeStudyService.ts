@@ -14,6 +14,7 @@ import type {
 import type {
   LifeStudyAttendanceRoster,
   LifeStudyAttendanceUserRequest,
+  LifeStudyAttendRequest,
   LifeStudyCompletionRoster,
   LifeStudyCompletionUserRequest,
 } from "../types/lifeStudyApi";
@@ -27,6 +28,11 @@ export interface LifeStudyDataSource {
     cohortId: string,
     course: LifeStudyOverviewCourse,
   ): Promise<LifeStudyOverviewCourse>;
+  applyCohort(
+    cohortId: string | number,
+    input: LifeStudyAttendRequest,
+  ): Promise<number>;
+
   getAttendance(classId: string): Promise<LifeStudyAttendanceRoster | null>;
   replaceAttendance(
     classId: string,
@@ -95,6 +101,11 @@ const mockLifeStudyDataSource: LifeStudyDataSource = {
     await delay();
     throw new Error("목 데이터에는 수료 명단이 없습니다.");
   },
+
+  async applyCohort() {
+    await delay();
+    return 1;
+  },
 };
 
 export function createLifeStudyService(dataSource: LifeStudyDataSource) {
@@ -104,6 +115,8 @@ export function createLifeStudyService(dataSource: LifeStudyDataSource) {
     fetchMyCompletions: () => dataSource.getMyCompletions(),
     applyClassesToCourse: (cohortId: string, course: LifeStudyOverviewCourse) =>
       dataSource.applyClassesToCourse(cohortId, course),
+    applyCohort: (cohortId: string | number, input: LifeStudyAttendRequest) =>
+      dataSource.applyCohort(cohortId, input),
     fetchAttendance: (classId: string) => dataSource.getAttendance(classId),
     replaceAttendance: (classId: string, attendedUserIds: readonly string[]) =>
       dataSource.replaceAttendance(classId, attendedUserIds),
@@ -142,6 +155,7 @@ export const fetchLifeStudyCourses = lifeStudyService.fetchCourses;
 export const fetchMyLifeStudyCompletions = lifeStudyService.fetchMyCompletions;
 export const applyLifeStudyClassesToCourse =
   lifeStudyService.applyClassesToCourse;
+export const applyLifeStudyCohort = lifeStudyService.applyCohort;
 export const fetchLifeStudyAttendance = lifeStudyService.fetchAttendance;
 export const replaceLifeStudyAttendance = lifeStudyService.replaceAttendance;
 export const updateLifeStudyAttendanceUser =

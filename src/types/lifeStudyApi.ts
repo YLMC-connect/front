@@ -90,3 +90,9 @@ export interface LifeStudyMyCompletion {
   totalClassCount: number | null;
   completedAt: string | null;
 }
+
+export interface LifeStudyAttendRequest {
+  userYear: string;
+  userFaithYears: string;
+  userPart: string;
+}

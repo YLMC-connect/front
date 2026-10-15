@@ -134,6 +134,33 @@ describe("httpPrayerDataSource", () => {
     });
   });
 
+  it("recovers gracefully when one of the endpoints fails in getOverview", async () => {
+    const { request, dataSource } = setup();
+    request.mockImplementation(async (path: string) => {
+      if (path === "/api/prayer/cohorts/my") {
+        throw new ApiError({
+          code: "FORBIDDEN",
+          message: "Forbidden",
+          status: 403,
+        });
+      }
+      return [topic];
+    });
+
+    await expect(dataSource.getOverview()).resolves.toEqual({
+      rooms: [],
+      requests: [
+        {
+          id: "7",
+          title: "어머니 회복",
+          category: "치유",
+          status: "reviewing",
+          description: "수술이 잘 끝나기를",
+        },
+      ],
+    });
+  });
+
   it("does not read undocumented cohort detail fields", async () => {
     const { request, dataSource } = setup();
     request.mockResolvedValue({ id: 15, cohortName: "제외", leader: "김성도" });

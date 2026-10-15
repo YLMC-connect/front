@@ -169,7 +169,7 @@ function readCohort(value: unknown, source: unknown): PrayerCohortDto {
     yoil: requireInteger(value, "yoil", source),
     timeSlot: requireOneOf(value, "timeSlot", source, TIME_SLOTS),
     cohortName: requireString(value, "cohortName", source),
-    description: requireString(value, "description", source),
+    description: requireNullableString(value, "description", source) ?? "",
     startDate: requireString(value, "startDate", source),
     endDate: requireString(value, "endDate", source),
     status: requireOneOf(value, "status", source, COHORT_STATUSES),
@@ -193,7 +193,7 @@ function readMember(
     userPhone: requireString(value, "userPhone", source),
     memberRole: requireRole(value, "memberRole", source),
     completionId: requireNullableInteger(value, "completionId", source),
-    completedAt: requireString(value, "completedAt", source),
+    completedAt: requireNullableString(value, "completedAt", source),
     likeCount: requireInteger(value, "likeCount", source),
     liked: requireBoolean(value, "liked", source),
   };
@@ -208,13 +208,13 @@ function readTopic(value: unknown, source: unknown): PrayerTopicDto {
     title: requireString(value, "title", source),
     content: requireString(value, "content", source),
     status: requireOneOf(value, "status", source, TOPIC_STATUSES),
-    rejectReason: requireString(value, "rejectReason", source),
+    rejectReason: requireNullableString(value, "rejectReason", source),
     writerName: requireString(value, "writerName", source),
     mine: requireBoolean(value, "mine", source),
     emergency: requireBoolean(value, "emergency", source),
-    emergencyEndAt: requireString(value, "emergencyEndAt", source),
-    answerContent: requireString(value, "answerContent", source),
-    answeredAt: requireString(value, "answeredAt", source),
+    emergencyEndAt: requireNullableString(value, "emergencyEndAt", source),
+    answerContent: requireNullableString(value, "answerContent", source),
+    answeredAt: requireNullableString(value, "answeredAt", source),
     createdAt: requireString(value, "createdAt", source),
   };
 }
@@ -530,7 +530,7 @@ export function applyTopicsToTopics(
       isAnswered: answered,
       createdAt: row.createdAt,
     };
-    if (answered) next.answer = row.answerContent;
+    if (answered) next.answer = row.answerContent ?? undefined;
     return next;
   });
 }

@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 기도 탭 API 로딩 정상화 및 Nullable 매퍼 안정화 — 서버의 nullable 필드(rejectReason, emergencyEndAt, answerContent, answeredAt, completedAt, description)를 안전하게 파싱하도록 requireNullableString을 적용하고, getOverview에서 Promise.allSettled를 통해 일부 엔드포인트 실패 또는 데이터 부재 시에도 화면 오류 없이 복구
 - 기도 신청·작성 플로팅 메뉴 통합 — 우측 하단에 '중보기도 신청'과 '기도제목 작성'을 토글하는 Speed Dial 플로팅 메뉴를 추가하고, 메뉴 오픈 시 딤처리(backdrop)가 상단 glass 헤더까지 온전히 덮도록 overlay 레이어 zIndex 보정. 본문 내 불필요한 중보기도 신청 카드를 제거해 신청/작성 진입점을 플로팅 메뉴로 일원화
 - 중보기도 사용자 HTTP adapter — development 기본값은 나눔과 같이 http다. 내 기도방·내 기도제목은 mock 행 위에 덮지 않고 `GET /api/prayer/cohorts/my`와 `GET /api/prayer/topics/my`로 만든다. 테스트와 `EXPO_PUBLIC_PRAYER_ADAPTER=mock`은 기존 mock service를 쓴다. 작성 화면의 `createPrayerTopic`은 `categoryId`가 없어 등록 API를 호출하지 않는다
 - 기도 작성 control·FAB 비율 보정 — 작성 화면 세그먼트의 full pill을 유지한 채 40/32px로 낮추고 44px 터치 범위를 보존했으며 루트 `기도제목 작성` FAB를 46px로 축소해 하단 탭과 위계를 분리
@@ -67,6 +68,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-10-15) **기도 DTO의 Nullable 필드 안전 파싱 및 getOverview 병렬 복구 적용** — 실제 서버 응답에서 `rejectReason`, `emergencyEndAt`, `answerContent`, `answeredAt`, `completedAt`이 null로 반환될 때 매퍼 검증 실패(`INVALID_RESPONSE`)가 발생하던 문제를 해결하기 위해 `requireNullableString`을 적용합니다. `getOverview()`는 `Promise.allSettled`를 통해 `cohorts/my`와 `topics/my`를 병렬로 안전하게 수집하여 일부 실패 시에도 화면이 정상 렌더링되도록 합니다. Issue #185.
 - (2026-10-10) **내 기도방 및 내 기도제목 빈 상태에 공통 Empty 컴포넌트 적용** — `data.rooms.length === 0`일 때 "참여 중인 기도방이 없어요 / 중보기도 신청을 통해 기도방에 참여해보세요.", `data.requests.length === 0`일 때 "등록된 기도제목이 없어요 / 기도제목 작성을 통해 기도제목을 나눠보세요." 공통 Empty 컴포넌트를 렌더링하도록 적용. Issue #164.
 - (2026-10-09) **기도 신청 및 작성 액션을 우측 하단 플로팅 메뉴(Speed Dial)로 통합하고 본문 중복 카드를 제거한다** — 기존 본문 하단의 정적 '중보기도 신청' 카드와 '기도제목 작성' 단일 FAB를 우측 하단 토글형 플로팅 메뉴로 통합합니다. 메뉴 토글 시 '중보기도 신청'(`/prayer/apply`) 및 '기도제목 작성'(`/modal/prayer-new`) 항목이 펼쳐지며, 본문 내 불필요한 신청 카드는 제거하여 신청/작성 행위를 하단 우측 플로팅 메뉴에서 일원화합니다.
 - (2026-10-09) **development http에서는 기도 목록 캐시와 상세가 목업 화면과 갈라진다** — overview query key 끝에 adapter mode를 붙여 저장된 목업 응답을 다시 쓰지 않는다. 기도방 카드 제목은 `cohortName`이 있으면 그 이름이고, 없으면 요일·시간이다. `__DEV__`에서 mock일 때만 `목업 데이터`를 표시하고 http일 때는 표시하지 않는다. route id가 있고 `designVariant`가 없으며 adapter가 http이면 상세는 `GET /api/prayer/cohorts/{id}/status`와 `GET /api/prayer/topics/board`만 그린다. 게시판은 기수별이 아니다. 내 기도제목 화면은 `GET /api/prayer/topics/my`의 title·categoryName·content·status를 그린다. id가 없거나 mock이거나 `designVariant`가 있으면 기존 디자인 문구를 유지한다. 신청 화면과 작성 모달 `createPrayerTopic`은 그대로다.

@@ -33,12 +33,20 @@ export function createHttpPrayerDataSource({
 } = {}): PrayerDataSource {
   return {
     async getOverview() {
-      const myCohorts = readPrayerCohorts(
-        await client.request("/api/prayer/cohorts/my"),
-      );
-      const topics = readPrayerTopics(
-        await client.request("/api/prayer/topics/my"),
-      );
+      const [cohortsRes, topicsRes] = await Promise.allSettled([
+        client.request("/api/prayer/cohorts/my"),
+        client.request("/api/prayer/topics/my"),
+      ]);
+
+      const myCohorts =
+        cohortsRes.status === "fulfilled" && cohortsRes.value != null
+          ? readPrayerCohorts(cohortsRes.value)
+          : [];
+      const topics =
+        topicsRes.status === "fulfilled" && topicsRes.value != null
+          ? readPrayerTopics(topicsRes.value)
+          : [];
+
       return buildPrayerOverview(myCohorts, topics);
     },
 

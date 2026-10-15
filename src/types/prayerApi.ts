@@ -37,7 +37,8 @@ export interface PrayerCompletionMemberDto {
   memberRole: PrayerMemberRole;
   /** 미완료면 null. */
   completionId: number | null;
-  completedAt: string;
+  /** 미완료면 null. */
+  completedAt: string | null;
   likeCount: number;
   liked: boolean;
 }
@@ -67,13 +68,13 @@ export interface PrayerTopicDto {
   title: string;
   content: string;
   status: PrayerTopicStatus;
-  rejectReason: string;
+  rejectReason: string | null;
   writerName: string;
   mine: boolean;
   emergency: boolean;
-  emergencyEndAt: string;
-  answerContent: string;
-  answeredAt: string;
+  emergencyEndAt: string | null;
+  answerContent: string | null;
+  answeredAt: string | null;
   createdAt: string;
 }
 

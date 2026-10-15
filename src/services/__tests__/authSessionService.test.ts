@@ -25,6 +25,9 @@ function setup() {
     }),
     getCurrentMember: jest.fn().mockResolvedValue(MOCK_USER),
     updateCurrentMember: jest.fn().mockResolvedValue(MOCK_USER),
+    verifyPassword: jest.fn().mockResolvedValue(true),
+    changePassword: jest.fn().mockResolvedValue(undefined),
+    withdraw: jest.fn().mockResolvedValue(undefined),
   };
   const tokenStore: jest.Mocked<AuthTokenStore> = {
     getTokens: jest.fn().mockResolvedValue({

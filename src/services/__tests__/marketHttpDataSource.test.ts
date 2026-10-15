@@ -116,6 +116,50 @@ describe("httpMarketDataSource", () => {
     });
   });
 
+  it("updates a share post and reloads detail", async () => {
+    const { request, dataSource } = setup();
+    request.mockImplementation(async (path: string, options) => {
+      if (path === "/api/share/1" && options?.method === "PUT") {
+        expect(JSON.parse(options.body)).toEqual({
+          title: "수정된 나눔 제목",
+          content: "수정된 나눔 설명글입니다.",
+          categoryCode: "BABY_KIDS",
+          itemStatus: "USED",
+        });
+        return null;
+      }
+      if (path === "/api/share/1") {
+        return {
+          id: 1,
+          title: "수정된 나눔 제목",
+          content: "수정된 나눔 설명글입니다.",
+          status: "AVAILABLE",
+          categoryCode: "BABY_KIDS",
+          itemStatus: "USED",
+          authorId: "frontprobe",
+          authorName: "프론트점검",
+          createdAt: "2026-08-13T10:37:37",
+        };
+      }
+      return [];
+    });
+
+    await expect(
+      dataSource.updatePost({
+        marketId: "1",
+        title: "수정된 나눔 제목",
+        description: "수정된 나눔 설명글입니다.",
+        category: "baby",
+        condition: "사용감 있음",
+      }),
+    ).resolves.toMatchObject({
+      id: "1",
+      title: "수정된 나눔 제목",
+      content: "수정된 나눔 설명글입니다.",
+      isMine: true,
+    });
+  });
+
   it("creates a comment from the returned id", async () => {
     const { request, dataSource } = setup();
     request.mockResolvedValue(2);

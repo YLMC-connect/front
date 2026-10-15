@@ -21,7 +21,11 @@ import {
 } from "../../src/components/ui";
 import { GROUP_CATEGORIES } from "../../src/constants/domainOptions";
 import { theme } from "../../src/constants/theme";
-import { useCreateGroup } from "../../src/hooks/useGroups";
+import {
+  useCreateGroup,
+  useGroupDetail,
+  useUpdateGroup,
+} from "../../src/hooks/useGroups";
 import { readDesignVariant } from "../../src/lib/designVariant";
 import type { GroupInput } from "../../src/types/group";
 
@@ -51,12 +55,38 @@ const emptyValues: GroupInput = {
 
 export default function GroupNewModal() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const params = useLocalSearchParams<{
+    id?: string;
+    designVariant?: string;
+  }>();
   const variant = readDesignVariant(params.designVariant) ?? "create";
-  const isEdit = ["edit", "range-error", "member-error"].includes(variant);
+  const isEdit =
+    Boolean(params.id) ||
+    ["edit", "range-error", "member-error"].includes(variant);
   const useFilledValues = isEdit || variant === "create-filled";
-  const initialValues = useMemo<GroupInput>(
-    () => ({
+  const createGroup = useCreateGroup();
+  const updateGroupMutation = useUpdateGroup(params.id ?? "");
+  const existingDetail = useGroupDetail(params.id ?? "");
+  const detailData = existingDetail.data;
+
+  const initialValues = useMemo<GroupInput>(() => {
+    if (params.id && detailData) {
+      const matchedCategory = GROUP_CATEGORIES.find(
+        (c) => c.label === detailData.categoryLabel,
+      )?.key;
+      const category = (
+        matchedCategory && matchedCategory !== "all" ? matchedCategory : "etc"
+      ) as GroupInput["category"];
+      return {
+        category,
+        name: detailData.name,
+        description: detailData.description,
+        maxMembers: detailData.maxMembers,
+        schedule: "",
+        location: "",
+      };
+    }
+    return {
       ...(useFilledValues ? filledValues : emptyValues),
       maxMembers:
         variant === "range-error"
@@ -66,14 +96,14 @@ export default function GroupNewModal() {
             : useFilledValues
               ? filledValues.maxMembers
               : emptyValues.maxMembers,
-    }),
-    [useFilledValues, variant],
-  );
+    };
+  }, [detailData, params.id, useFilledValues, variant]);
+
   const [values, setValues] = useState(initialValues);
   const [capacity, setCapacity] = useState(String(initialValues.maxMembers));
   const [error, setError] = useState<string>();
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
-  const createGroup = useCreateGroup();
+
   const isDirty = JSON.stringify(values) !== JSON.stringify(initialValues);
 
   const update = <Key extends keyof GroupInput>(
@@ -95,13 +125,25 @@ export default function GroupNewModal() {
   const submit = async () => {
     setError(undefined);
     try {
-      const created = await createGroup.mutateAsync(values);
-      router.replace(`/group/${created.id}`);
+      if (params.id) {
+        await updateGroupMutation.mutateAsync({
+          name: values.name,
+          description: values.description,
+          category: values.category,
+          maxMembers: values.maxMembers,
+        });
+        router.replace(`/group/${params.id}`);
+      } else {
+        const created = await createGroup.mutateAsync(values);
+        router.replace(`/group/${created.id}`);
+      }
     } catch (submitError) {
       setError(
         submitError instanceof Error
           ? submitError.message
-          : "소모임을 개설하지 못했습니다.",
+          : isEdit
+            ? "소모임을 수정하지 못했습니다."
+            : "소모임을 개설하지 못했습니다.",
       );
     }
   };
@@ -247,7 +289,10 @@ export default function GroupNewModal() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <Button onPress={submit} loading={createGroup.isPending}>
+        <Button
+          onPress={submit}
+          loading={createGroup.isPending || updateGroupMutation.isPending}
+        >
           {isEdit ? "변경사항 저장" : "소모임 개설"}
         </Button>
       </View>

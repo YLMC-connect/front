@@ -16,10 +16,12 @@ import {
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import {
+  useDeleteGroup,
   useDeleteGroupNotice,
   useGroupDetail,
   useJoinGroup,
   useLeaveGroup,
+  useUpdateGroupStatus,
 } from "../../../src/hooks/useGroups";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 
@@ -33,6 +35,8 @@ export default function GroupDetailScreen() {
   const variant = readDesignVariant(params.designVariant);
   const detail = useGroupDetail(id);
   const deleteNotice = useDeleteGroupNotice(id);
+  const deleteGroupMutation = useDeleteGroup(id);
+  const updateStatusMutation = useUpdateGroupStatus(id);
   const joinGroupMutation = useJoinGroup(id);
   const leaveGroupMutation = useLeaveGroup(id);
   const [deletingNotice, setDeletingNotice] = useState<{
@@ -40,6 +44,7 @@ export default function GroupDetailScreen() {
     title: string;
   } | null>(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const isDeleted = variant === "deleted-exception";
   const membershipBusy =
     joinGroupMutation.isPending || leaveGroupMutation.isPending;
@@ -119,21 +124,45 @@ export default function GroupDetailScreen() {
               <View style={styles.categoryChip}>
                 <Text style={styles.categoryText}>{group.categoryLabel}</Text>
               </View>
-              <View
-                style={[
-                  styles.recruitChip,
-                  isClosed ? styles.recruitChipClosed : null,
-                ]}
-              >
-                <Text
+              {isLeader ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`모집 상태 변경: 현재 ${isClosed ? "모집완료" : "모집중"}`}
+                  disabled={updateStatusMutation.isPending}
+                  onPress={() => {
+                    updateStatusMutation.mutate(isClosed ? "open" : "closed");
+                  }}
                   style={[
-                    styles.recruitText,
-                    isClosed ? styles.recruitTextClosed : null,
+                    styles.recruitChip,
+                    isClosed ? styles.recruitChipClosed : null,
                   ]}
                 >
-                  {isClosed ? "모집완료" : "모집중"}
-                </Text>
-              </View>
+                  <Text
+                    style={[
+                      styles.recruitText,
+                      isClosed ? styles.recruitTextClosed : null,
+                    ]}
+                  >
+                    {isClosed ? "모집완료" : "모집중"}
+                  </Text>
+                </Pressable>
+              ) : (
+                <View
+                  style={[
+                    styles.recruitChip,
+                    isClosed ? styles.recruitChipClosed : null,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.recruitText,
+                      isClosed ? styles.recruitTextClosed : null,
+                    ]}
+                  >
+                    {isClosed ? "모집완료" : "모집중"}
+                  </Text>
+                </View>
+              )}
             </View>
 
             <AppText variant="screenTitle">{group.name}</AppText>
@@ -165,7 +194,13 @@ export default function GroupDetailScreen() {
           <View style={styles.actionWrap}>
             {isLeader ? (
               <Card style={styles.actionCard}>
-                <DetailAction icon="edit" label="수정" />
+                <DetailAction
+                  icon="edit"
+                  label="수정"
+                  onPress={() =>
+                    router.push(`/modal/group-new?id=${id}&designVariant=edit`)
+                  }
+                />
                 <DetailAction
                   testID="group-notice-open-create"
                   icon="campaign"
@@ -177,7 +212,12 @@ export default function GroupDetailScreen() {
                   label="멤버"
                   onPress={() => router.push(`/group/members?id=${id}`)}
                 />
-                <DetailAction icon="delete-outline" label="삭제" danger />
+                <DetailAction
+                  icon="delete-outline"
+                  label="삭제"
+                  danger
+                  onPress={() => setShowDeleteConfirm(true)}
+                />
               </Card>
             ) : isMember ? (
               <Pressable
@@ -331,6 +371,32 @@ export default function GroupDetailScreen() {
             });
           }}
         />
+        <ConfirmDialog
+          visible={showDeleteConfirm}
+          title="소모임을 삭제하시겠습니까?"
+          message="삭제된 소모임은 복구할 수 없습니다."
+          confirmText="삭제"
+          danger
+          onCancel={() => setShowDeleteConfirm(false)}
+          onConfirm={async () => {
+            if (deleteGroupMutation.isPending) return;
+            try {
+              await deleteGroupMutation.mutateAsync();
+              setShowDeleteConfirm(false);
+              router.replace("/(tabs)/group");
+            } catch {
+              setShowDeleteConfirm(false);
+            }
+          }}
+        />
+        {deleteGroupMutation.isError ? (
+          <Text style={styles.noticeError}>소모임 삭제에 실패했습니다.</Text>
+        ) : null}
+        {updateStatusMutation.isError ? (
+          <Text style={styles.noticeError}>
+            소모임 모집 상태를 변경하지 못했습니다.
+          </Text>
+        ) : null}
       </View>
     </Screen>
   );

@@ -48,6 +48,24 @@ export interface GroupInput {
   coverImage?: string;
 }
 
+export interface GroupUpdateInput {
+  groupId: string;
+  name: string;
+  description: string;
+  category: Exclude<GroupCategory, "all">;
+  maxMembers: number;
+}
+
+export interface GroupStatusUpdateInput {
+  groupId: string;
+  status: GroupStatus;
+}
+
+export interface GroupKickMemberInput {
+  groupId: string;
+  targetUserId: string;
+}
+
 export interface GroupOverviewItem {
   id: string;
   name: string;

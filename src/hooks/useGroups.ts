@@ -3,19 +3,25 @@ import { queryKeys } from "../lib/queryKeys";
 import {
   createGroup,
   createGroupNotice,
+  deleteGroup,
   deleteGroupNotice,
   fetchGroupDetail,
   fetchGroupMembers,
   fetchGroupOverview,
   joinGroup,
+  kickGroupMember,
   leaveGroup,
+  updateGroup,
   updateGroupNotice,
+  updateGroupStatus,
 } from "../services/groupService";
 import type {
   GroupDetail,
   GroupInput,
   GroupNoticeInput,
   GroupNoticeUpdateInput,
+  GroupStatus,
+  GroupUpdateInput,
 } from "../types/group";
 
 export function useGroupOverview() {
@@ -135,6 +141,63 @@ export function useDeleteGroupNotice(groupId: string) {
               }
             : detail,
       );
+    },
+  });
+}
+
+export function useUpdateGroup(groupId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: Omit<GroupUpdateInput, "groupId">) =>
+      updateGroup({ ...input, groupId }),
+    onSuccess: (detail) => {
+      queryClient.setQueryData<GroupDetail>(
+        queryKeys.group.detail(groupId),
+        detail,
+      );
+      queryClient.invalidateQueries({ queryKey: queryKeys.group.overview() });
+    },
+  });
+}
+
+export function useDeleteGroup(groupId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => deleteGroup(groupId),
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: queryKeys.group.detail(groupId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.group.overview() });
+    },
+  });
+}
+
+export function useKickGroupMember(groupId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (targetUserId: string) =>
+      kickGroupMember({ groupId, targetUserId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.group.detail(groupId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.group.members(groupId),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.group.overview() });
+    },
+  });
+}
+
+export function useUpdateGroupStatus(groupId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (status: GroupStatus) => updateGroupStatus({ groupId, status }),
+    onSuccess: (detail) => {
+      queryClient.setQueryData<GroupDetail>(
+        queryKeys.group.detail(groupId),
+        detail,
+      );
+      queryClient.invalidateQueries({ queryKey: queryKeys.group.overview() });
     },
   });
 }

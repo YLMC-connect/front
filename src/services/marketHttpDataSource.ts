@@ -105,6 +105,24 @@ export function createHttpMarketDataSource({
       return getDetail(String(createdId));
     },
 
+    async updatePost(input) {
+      const itemStatus = toShareItemStatus(input.condition);
+      if (!itemStatus) {
+        throw new Error("물품 상태를 확인할 수 없습니다.");
+      }
+
+      await client.request(`/api/share/${input.marketId}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          title: input.title,
+          content: input.description,
+          categoryCode: toShareCategoryCode(input.category),
+          itemStatus,
+        }),
+      });
+      return getDetail(input.marketId);
+    },
+
     async deletePost(input) {
       await client.request(`/api/share/${input.marketId}`, {
         method: "DELETE",

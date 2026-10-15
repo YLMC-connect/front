@@ -119,6 +119,20 @@ export function createHttpLifeStudyDataSource({
       );
       return requireCompletionRoster(data);
     },
+
+    async applyCohort(cohortId, input) {
+      const data = await client.request<number>(
+        `/api/life-study/cohorts/${cohortId}/attend`,
+        {
+          method: "POST",
+          body: JSON.stringify(input),
+        },
+      );
+      if (data == null) {
+        throw new Error("수강신청 처리 결과를 확인할 수 없습니다.");
+      }
+      return data;
+    },
   };
 }
 

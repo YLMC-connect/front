@@ -1,6 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getCurrentMember, updateCurrentMember } from "../services/authService";
+import {
+  changePassword,
+  getCurrentMember,
+  updateCurrentMember,
+  verifyPassword,
+  withdrawMember,
+} from "../services/authService";
 import { useAuthStore } from "../store/authStore";
+import type {
+  MemberChangePasswordRequest,
+  MemberVerifyPasswordRequest,
+} from "../types/authApi";
 
 export const MEMBER_ME_QUERY_KEY = ["member", "me"] as const;
 
@@ -24,6 +34,29 @@ export function useUpdateMemberMe() {
     mutationFn: (input: { phone: string }) => updateCurrentMember(input),
     onSuccess: (updated) => {
       queryClient.setQueryData(MEMBER_ME_QUERY_KEY, updated);
+    },
+  });
+}
+
+export function useVerifyPassword() {
+  return useMutation({
+    mutationFn: (input: MemberVerifyPasswordRequest) => verifyPassword(input),
+  });
+}
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: (input: MemberChangePasswordRequest) => changePassword(input),
+  });
+}
+
+export function useWithdrawMember() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => withdrawMember(),
+    onSuccess: () => {
+      queryClient.clear();
     },
   });
 }

@@ -238,4 +238,114 @@ describe("httpGroupDataSource", () => {
       }),
     ).rejects.toThrow("이 카테고리는 아직 서버에 없습니다.");
   });
+
+  it("updates communion with PUT /api/communion/{id}", async () => {
+    const { request, dataSource } = setup();
+    request.mockImplementation(async (path: string, options) => {
+      if (path === "/api/communion/1" && options?.method === "PUT") {
+        expect(JSON.parse(String(options.body))).toEqual({
+          title: "수정된 소모임",
+          content: "수정된 설명입니다.",
+          categoryCode: "HOBBY_CULTURE",
+          maxParticipants: 10,
+        });
+        return null;
+      }
+      if (path === "/api/communion/1") {
+        return {
+          id: 1,
+          type: "SMALL_GROUP",
+          title: "수정된 소모임",
+          content: "수정된 설명입니다.",
+          categoryCode: "HOBBY_CULTURE",
+          maxParticipants: 10,
+          currentParticipants: 1,
+          status: "RECRUITING",
+          leaderId: "frontprobe",
+          leaderName: "프론트점검",
+          createdAt: "2026-08-13T11:26:07",
+        };
+      }
+      if (path === "/api/communion/1/members") {
+        return [];
+      }
+      return null;
+    });
+
+    const updated = await dataSource.updateGroup({
+      groupId: "1",
+      name: "수정된 소모임",
+      description: "수정된 설명입니다.",
+      category: "hobby",
+      maxMembers: 10,
+    });
+    expect(updated).toMatchObject({
+      id: "1",
+      name: "수정된 소모임",
+      maxMembers: 10,
+    });
+  });
+
+  it("deletes communion with DELETE /api/communion/{id}", async () => {
+    const { request, dataSource } = setup();
+    request.mockResolvedValue(null);
+
+    await dataSource.deleteGroup("1");
+    expect(request).toHaveBeenCalledWith("/api/communion/1", {
+      method: "DELETE",
+    });
+  });
+
+  it("kicks communion member with DELETE /api/communion/{id}/kick/{targetUserId}", async () => {
+    const { request, dataSource } = setup();
+    request.mockResolvedValue(null);
+
+    await dataSource.kickMember({
+      groupId: "1",
+      targetUserId: "user-2",
+    });
+    expect(request).toHaveBeenCalledWith("/api/communion/1/kick/user-2", {
+      method: "DELETE",
+    });
+  });
+
+  it("updates communion status with PUT /api/communion/{id}/status", async () => {
+    const { request, dataSource } = setup();
+    request.mockImplementation(async (path: string, options) => {
+      if (path === "/api/communion/1/status" && options?.method === "PUT") {
+        expect(JSON.parse(String(options.body))).toEqual({
+          status: "COMPLETED",
+        });
+        return null;
+      }
+      if (path === "/api/communion/1") {
+        return {
+          id: 1,
+          type: "SMALL_GROUP",
+          title: "소모임",
+          content: "설명",
+          categoryCode: "HOBBY_CULTURE",
+          maxParticipants: 10,
+          currentParticipants: 10,
+          status: "COMPLETED",
+          leaderId: "frontprobe",
+          leaderName: "프론트점검",
+          createdAt: "2026-08-13T11:26:07",
+        };
+      }
+      if (path === "/api/communion/1/members") {
+        return [];
+      }
+      return null;
+    });
+
+    const updated = await dataSource.updateGroupStatus({
+      groupId: "1",
+      status: "closed",
+    });
+    expect(updated).toMatchObject({
+      id: "1",
+      status: "closed",
+    });
+  });
 });

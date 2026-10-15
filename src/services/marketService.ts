@@ -13,6 +13,7 @@ import type {
   MarketInput,
   MarketPostTarget,
   MarketReportInput,
+  MarketUpdateInput,
 } from "../types/market";
 
 export class DuplicateMarketReportError extends Error {
@@ -26,6 +27,7 @@ export interface MarketDataSource {
   getOverview(): Promise<MarketOverview>;
   getDetail(id: string): Promise<MarketDetail>;
   createPost(input: MarketInput): Promise<MarketDetail>;
+  updatePost(input: MarketUpdateInput): Promise<MarketDetail>;
   deletePost(input: MarketPostTarget): Promise<void>;
   createComment(input: MarketCommentInput): Promise<MarketDetailComment>;
   updateComment(input: MarketCommentUpdateInput): Promise<MarketDetailComment>;
@@ -117,6 +119,27 @@ export const mockMarketDataSource: MarketDataSource = {
     mockComments.set(id, []);
     return detail;
   },
+  async updatePost(input) {
+    await delay();
+    const detail =
+      mockCreatedDetails.get(input.marketId) ??
+      mockMarketDetails[input.marketId];
+    if (!detail || mockDeletedPosts.has(input.marketId)) {
+      throw new Error("존재하지 않는 나눔입니다.");
+    }
+    const categoryLabel =
+      MARKET_CATEGORIES.find((item) => item.key === input.category)?.label ||
+      "기타";
+    const updated: MarketDetail = {
+      ...detail,
+      title: input.title,
+      content: input.description,
+      categoryLabel,
+      conditionLabel: input.condition,
+    };
+    mockCreatedDetails.set(input.marketId, updated);
+    return updated;
+  },
   async deletePost(input) {
     await delay();
     const detail =
@@ -203,6 +226,23 @@ export function createMarketService(dataSource: MarketDataSource) {
       }
       return dataSource.createPost(normalized);
     },
+    updatePost: (input: MarketUpdateInput) => {
+      const normalized = {
+        ...input,
+        title: input.title.trim(),
+        description: input.description.trim(),
+      };
+      if (!normalized.title || normalized.title.length > 50) {
+        throw new Error("제목은 1~50자로 입력해주세요.");
+      }
+      if (
+        normalized.description.length < 5 ||
+        normalized.description.length > 500
+      ) {
+        throw new Error("상세 설명은 5~500자로 입력해주세요.");
+      }
+      return dataSource.updatePost(normalized);
+    },
     deletePost: (input: MarketPostTarget) => dataSource.deletePost(input),
     createComment: (input: MarketCommentInput) => {
       const content = input.content.trim();
@@ -246,6 +286,7 @@ const marketService = createMarketService(
 export const fetchMarketOverview = marketService.fetchOverview;
 export const fetchMarketDetail = marketService.fetchDetail;
 export const createMarketPost = marketService.createPost;
+export const updateMarketPost = marketService.updatePost;
 export const deleteMarketPost = marketService.deletePost;
 export const createMarketComment = marketService.createComment;
 export const updateMarketComment = marketService.updateComment;

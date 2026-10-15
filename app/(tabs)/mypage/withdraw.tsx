@@ -1,9 +1,11 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import { Button, ConfirmDialog, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { useWithdrawMember } from "../../../src/hooks/useMember";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 
 const cautions = [
@@ -17,6 +19,20 @@ export default function WithdrawScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ designVariant?: string }>();
   const showConfirm = readDesignVariant(params.designVariant) === "confirm";
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const withdrawMutation = useWithdrawMember();
+
+  const handleWithdraw = async () => {
+    try {
+      await withdrawMutation.mutateAsync();
+      router.replace("/login");
+    } catch {
+      Alert.alert(
+        "오류",
+        "탈퇴 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      );
+    }
+  };
 
   return (
     <Screen scroll={false} padded={false}>
@@ -58,17 +74,34 @@ export default function WithdrawScreen() {
         </ScrollView>
 
         <View style={styles.bottomBar}>
-          <Button variant="danger">탈퇴하기</Button>
+          <Button
+            variant="danger"
+            loading={withdrawMutation.isPending}
+            disabled={withdrawMutation.isPending}
+            onPress={() => setConfirmVisible(true)}
+          >
+            탈퇴하기
+          </Button>
         </View>
 
         <ConfirmDialog
-          visible={showConfirm}
+          visible={showConfirm || confirmVisible}
           title="정말 탈퇴하시겠습니까?"
           message="이 작업은 되돌릴 수 없으며, 모든 데이터가 즉시 삭제됩니다."
           confirmText="탈퇴"
           danger
-          onCancel={() => router.back()}
-          onConfirm={() => router.back()}
+          onCancel={() => {
+            setConfirmVisible(false);
+            if (showConfirm) router.back();
+          }}
+          onConfirm={() => {
+            setConfirmVisible(false);
+            if (showConfirm) {
+              router.back();
+            } else {
+              void handleWithdraw();
+            }
+          }}
         />
       </View>
     </Screen>

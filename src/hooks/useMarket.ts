@@ -9,12 +9,14 @@ import {
   fetchMarketOverview,
   reportMarketContent,
   updateMarketComment,
+  updateMarketPost,
 } from "../services/marketService";
 import type {
   MarketDetail,
   MarketInput,
   MarketOverview,
   MarketReportInput,
+  MarketUpdateInput,
 } from "../types/market";
 
 export function useMarketOverview() {
@@ -32,6 +34,22 @@ export function useCreateMarketPost() {
     onSuccess: (detail) => {
       queryClient.setQueryData<MarketDetail>(
         queryKeys.market.detail(detail.id),
+        detail,
+      );
+      queryClient.invalidateQueries({ queryKey: queryKeys.market.overview() });
+    },
+  });
+}
+
+export function useUpdateMarketPost(marketId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: Omit<MarketUpdateInput, "marketId">) =>
+      updateMarketPost({ ...input, marketId }),
+    onSuccess: (detail) => {
+      queryClient.setQueryData<MarketDetail>(
+        queryKeys.market.detail(marketId),
         detail,
       );
       queryClient.invalidateQueries({ queryKey: queryKeys.market.overview() });

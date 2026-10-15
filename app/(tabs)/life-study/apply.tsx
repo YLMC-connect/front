@@ -1,6 +1,9 @@
 import { AppIcon } from "@/components/ui/app-icon";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Keyboard,
   Pressable,
   ScrollView,
@@ -12,15 +15,81 @@ import {
 import { Screen } from "../../../src/components/layout/Screen";
 import { TopBar, VisualThumb } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import {
+  useApplyLifeStudyCohort,
+  useLifeStudyOverview,
+} from "../../../src/hooks/useLifeStudyCourses";
 import { useMemberMe } from "../../../src/hooks/useMember";
 
 const faithYears = ["1년 미만", "1-3년", "3-5년", "5-10년", "10년 이상"];
 
 export default function LifeStudyApplyScreenRoute() {
   const router = useRouter();
+  const params = useLocalSearchParams<{
+    cohortId?: string;
+    courseTitle?: string;
+  }>();
   const { data: member } = useMemberMe();
+  const { data: overview } = useLifeStudyOverview();
+
+  const openCohort =
+    overview?.openCourses.find((c) => String(c.id) === params.cohortId) ??
+    overview?.openCourses[0];
+  const cohortId =
+    params.cohortId || (openCohort ? String(openCohort.id) : "1");
+  const courseTitle = params.courseTitle || openCohort?.title || "생명의 삶";
+  const courseMeta = openCohort
+    ? `${openCohort.summary ? `${openCohort.summary} · ` : ""}총 ${openCohort.weekCount || 13}주`
+    : "매주 수 19:30 · 본당 3층 소예배실\n2026.07.08 ~ 2026.10.07 (총 13주)";
+
   const memberName = member?.name || "사용자";
   const memberPhone = member?.phone || "010-1234-5678";
+
+  const [userYear, setUserYear] = useState("1988");
+  const [userPart, setUserPart] = useState("");
+  const [faithYearIndex, setFaithYearIndex] = useState(3);
+  const [memo, setMemo] = useState("");
+  const [promiseAgreed, setPromiseAgreed] = useState(true);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const applyMutation = useApplyLifeStudyCohort();
+
+  const handleSubmit = async () => {
+    setFormError(null);
+    const trimmedYear = userYear.trim();
+    if (!/^\d{4}$/.test(trimmedYear)) {
+      setFormError("생년은 4자리 숫자로 입력해주세요 (예: 1994).");
+      return;
+    }
+    const trimmedPart = userPart.trim();
+    if (!trimmedPart) {
+      setFormError("소속 부서를 입력해주세요 (예: 4부 청장년부).");
+      return;
+    }
+    if (!promiseAgreed) {
+      setFormError("수강 약속에 동의해주세요.");
+      return;
+    }
+
+    try {
+      await applyMutation.mutateAsync({
+        cohortId,
+        input: {
+          userYear: trimmedYear,
+          userFaithYears: faithYears[faithYearIndex],
+          userPart: trimmedPart,
+        },
+      });
+      Alert.alert("수강 신청 완료", "삶공부 수강 신청이 완료되었습니다.", [
+        { text: "확인", onPress: () => router.back() },
+      ]);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "수강신청 중 오류가 발생했습니다.";
+      setFormError(message);
+      Alert.alert("수강 신청 실패", message);
+    }
+  };
 
   return (
     <Screen scroll={false} padded={false}>
@@ -39,11 +108,8 @@ export default function LifeStudyApplyScreenRoute() {
             <View style={styles.summaryCard}>
               <VisualThumb size={72} seed={1} icon="menu-book" />
               <View style={styles.summaryText}>
-                <Text style={styles.courseTitle}>생명의 삶</Text>
-                <Text style={styles.courseMeta}>
-                  매주 수 19:30 · 본당 3층 소예배실{"\n"}2026.07.08 ~ 2026.10.07
-                  (총 13주)
-                </Text>
+                <Text style={styles.courseTitle}>{courseTitle}</Text>
+                <Text style={styles.courseMeta}>{courseMeta}</Text>
               </View>
             </View>
 
@@ -56,21 +122,35 @@ export default function LifeStudyApplyScreenRoute() {
             </View>
 
             <View style={styles.form}>
-              <Field label="이름" value={memberName} />
+              <Field label="이름" value={memberName} editable={false} />
               <View style={styles.twoCols}>
-                <Field label="연락처" value={memberPhone} />
-                <Field label="생년" value="1988" />
+                <Field label="연락처" value={memberPhone} editable={false} />
+                <Field
+                  label="생년"
+                  value={userYear}
+                  onChangeText={setUserYear}
+                  keyboardType="number-pad"
+                  maxLength={4}
+                  placeholder="예: 1988"
+                />
               </View>
-              <Field label="소속 부서" placeholder="예) 4부 청장년부" />
+              <Field
+                label="소속 부서"
+                value={userPart}
+                onChangeText={setUserPart}
+                placeholder="예) 4부 청장년부"
+              />
 
               <View>
                 <Text style={styles.label}>신앙 연차</Text>
                 <View style={styles.chips}>
                   {faithYears.map((item, index) => {
-                    const selected = index === 3;
+                    const selected = index === faithYearIndex;
                     return (
-                      <View
+                      <Pressable
                         key={item}
+                        accessibilityRole="button"
+                        onPress={() => setFaithYearIndex(index)}
                         style={[styles.chip, selected ? styles.chipOn : null]}
                       >
                         <Text
@@ -81,7 +161,7 @@ export default function LifeStudyApplyScreenRoute() {
                         >
                           {item}
                         </Text>
-                      </View>
+                      </Pressable>
                     );
                   })}
                 </View>
@@ -90,17 +170,34 @@ export default function LifeStudyApplyScreenRoute() {
               <View>
                 <Text style={styles.label}>신청 동기</Text>
                 <TextInput
-                  editable={false}
                   multiline
                   placeholder="신청하시는 이유를 자유롭게 적어주세요"
                   placeholderTextColor={theme.colors.inkHint}
                   style={[styles.input, styles.textarea]}
+                  value={memo}
+                  onChangeText={setMemo}
                 />
               </View>
 
-              <View style={styles.promiseBox}>
-                <View style={styles.checkBox}>
-                  <AppIcon name="check" size={14} color={theme.colors.white} />
+              <Pressable
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: promiseAgreed }}
+                onPress={() => setPromiseAgreed(!promiseAgreed)}
+                style={styles.promiseBox}
+              >
+                <View
+                  style={[
+                    styles.checkBox,
+                    !promiseAgreed ? styles.checkBoxOff : null,
+                  ]}
+                >
+                  {promiseAgreed ? (
+                    <AppIcon
+                      name="check"
+                      size={14}
+                      color={theme.colors.white}
+                    />
+                  ) : null}
                 </View>
                 <Text style={styles.promiseText}>
                   <Text style={styles.promiseStrong}>
@@ -112,14 +209,30 @@ export default function LifeStudyApplyScreenRoute() {
                     수행하겠습니다.
                   </Text>
                 </Text>
-              </View>
+              </Pressable>
+
+              {formError ? (
+                <Text style={styles.errorText}>{formError}</Text>
+              ) : null}
             </View>
           </Pressable>
         </ScrollView>
 
         <View style={styles.bottom}>
-          <Pressable accessibilityRole="button" style={styles.submitButton}>
-            <Text style={styles.submitText}>수강 신청하기</Text>
+          <Pressable
+            accessibilityRole="button"
+            disabled={applyMutation.isPending}
+            onPress={handleSubmit}
+            style={[
+              styles.submitButton,
+              applyMutation.isPending ? styles.submitButtonDisabled : null,
+            ]}
+          >
+            {applyMutation.isPending ? (
+              <ActivityIndicator color={theme.colors.white} size="small" />
+            ) : (
+              <Text style={styles.submitText}>수강 신청하기</Text>
+            )}
           </Pressable>
         </View>
       </View>
@@ -140,20 +253,31 @@ function Field({
   label,
   value,
   placeholder,
+  editable = true,
+  onChangeText,
+  keyboardType = "default",
+  maxLength,
 }: {
   label: string;
   value?: string;
   placeholder?: string;
+  editable?: boolean;
+  onChangeText?: (text: string) => void;
+  keyboardType?: "default" | "number-pad";
+  maxLength?: number;
 }) {
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
-        editable={false}
+        editable={editable}
         placeholder={placeholder}
         placeholderTextColor={theme.colors.inkHint}
-        style={styles.input}
+        style={[styles.input, !editable ? styles.inputDisabled : null]}
         value={value}
+        onChangeText={onChangeText}
+        keyboardType={keyboardType}
+        maxLength={maxLength}
       />
     </View>
   );
@@ -296,6 +420,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexShrink: 0,
   },
+  checkBoxOff: {
+    backgroundColor: "transparent",
+    borderWidth: 1.5,
+    borderColor: theme.colors.line,
+  },
+  inputDisabled: {
+    backgroundColor: theme.colors.surfaceMuted,
+    color: theme.colors.inkSoft,
+  },
+
+  errorText: {
+    marginTop: 4,
+    color: theme.colors.danger,
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.semibold,
+  },
   promiseText: {
     flex: 1,
     fontSize: theme.fontSize.sm,
@@ -327,6 +467,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     ...theme.shadow.primary,
+  },
+  submitButtonDisabled: {
+    opacity: 0.6,
   },
   submitText: {
     color: theme.colors.white,

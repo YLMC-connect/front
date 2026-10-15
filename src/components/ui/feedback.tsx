@@ -11,21 +11,25 @@ import { useMotionPresence } from "./motion";
 
 type IconName = ComponentProps<typeof AppIcon>["name"];
 
-export function EmptyState({
-  title,
-  description,
-  icon = "inbox",
-  actionLabel,
-  onAction,
-}: {
+export type EmptyProps = {
   title: string;
   description?: string;
   icon?: IconName;
   actionLabel?: string;
   onAction?: () => void;
-}) {
+  testID?: string;
+};
+
+export function Empty({
+  title,
+  description,
+  icon = "inbox",
+  actionLabel,
+  onAction,
+  testID,
+}: EmptyProps) {
   return (
-    <View style={styles.state}>
+    <View style={styles.state} testID={testID}>
       <View style={styles.stateIcon}>
         <AppIcon name={icon} size={42} color={theme.colors.inkHint} />
       </View>
@@ -51,6 +55,8 @@ export function EmptyState({
     </View>
   );
 }
+
+export const EmptyState = Empty;
 
 export function ErrorState({
   message = "잠시 후 다시 시도해주세요.",

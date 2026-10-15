@@ -10,6 +10,7 @@ import type {
   MemberDuplicateInput,
   SignupInput,
 } from "../types/auth";
+import type { Member } from "../types/common";
 
 const delay = (ms = 250) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -48,6 +49,20 @@ export async function refreshSession(): Promise<AuthSession> {
 
 export const restoreAuthSession = () => sessionManager.restore();
 export const logout = () => sessionManager.logout();
+
+export async function getCurrentMember(): Promise<Member> {
+  const member = await authAdapter.getCurrentMember();
+  useAuthStore.getState().setAuthenticated(member);
+  return member;
+}
+
+export async function updateCurrentMember(input: {
+  phone: string;
+}): Promise<Member> {
+  const member = await authAdapter.updateCurrentMember(input);
+  useAuthStore.getState().updateProfile(member);
+  return member;
+}
 
 configureAuthRecovery(async () => {
   await refreshSession();

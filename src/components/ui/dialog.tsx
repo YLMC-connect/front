@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     maxWidth: 280,
     borderRadius: 18,
     paddingTop: 24,
-    paddingHorizontal: 22,
+    paddingHorizontal: 16,
     paddingBottom: 16,
     backgroundColor: theme.colors.surface,
     ...theme.shadow.dialog,

@@ -31,45 +31,12 @@ export default function HomeScreen() {
   return (
     <StickyHeaderScreen
       contentContainerStyle={styles.content}
-      right={
-        <MotionPressable
-          accessibilityHint="마이페이지로 이동합니다"
-          accessibilityLabel="내 정보"
-          accessibilityRole="button"
-          hitSlop={6}
-          onPress={() => router.push("/mypage")}
-          style={styles.profileButton}
-          testID="home-open-mypage"
-        >
-          {/* Circle: given name (성 제외). Label: 내 정보. */}
-          <Avatar name={fullName} size={32} seed={fullName} />
-          <AppText variant="caption" tone="brand" style={styles.profileLabel}>
-            내 정보
-          </AppText>
-          <AppIcon
-            name="chevron-right"
-            size={16}
-            color={theme.colors.primaryDeep}
-          />
-        </MotionPressable>
-      }
       testID="screen-home"
       title="열린문 커넥트"
     >
-      {overview.isPending ? (
-        <View style={styles.loading}>
-          <ListSkeleton rows={2} />
-        </View>
-      ) : overview.isError || !overview.data ? (
-        <View style={styles.errorWrap}>
-          <ErrorState
-            message="홈 정보를 불러오지 못했습니다. 다시 시도해주세요."
-            onRetry={() => overview.refetch()}
-          />
-        </View>
-      ) : (
-        <View style={styles.body}>
-          <View style={styles.greeting} testID="home-greeting">
+      <View style={styles.body}>
+        <View style={styles.greetingCard} testID="home-greeting">
+          <View style={styles.greetingContent}>
             <AppText variant="sectionTitle">
               {givenName} 님, {greeting}
             </AppText>
@@ -81,72 +48,117 @@ export default function HomeScreen() {
               오늘도 은혜 가운데 하루를 열어 보세요.
             </AppText>
           </View>
-
-          <Pressable
+          <MotionPressable
+            accessibilityHint="마이페이지로 이동합니다"
+            accessibilityLabel="내 정보"
             accessibilityRole="button"
-            onPress={() => router.push(overview.data.dailyPrayer.href as Href)}
-            style={styles.dailyCard}
-            testID="home-daily-prayer"
+            hitSlop={6}
+            onPress={() => router.push("/mypage")}
+            style={styles.profileButton}
+            testID="home-open-mypage"
           >
-            <View style={styles.dailyOrb} />
-            <AppText
-              variant="caption"
-              tone="inverse"
-              style={styles.dailyEyebrow}
-            >
-              오늘의 기도 · {overview.data.dailyPrayer.dateLabel}{" "}
-              {overview.data.dailyPrayer.weekdayLabel}
+            {/* Circle: given name (성 제외). Label: 내 정보. */}
+            <Avatar name={fullName} size={32} seed={fullName} />
+            <AppText variant="caption" tone="brand" style={styles.profileLabel}>
+              내 정보
             </AppText>
-            <AppText
-              variant="sectionTitle"
-              tone="inverse"
-              style={styles.dailyTitle}
-            >
-              {overview.data.dailyPrayer.title}
-            </AppText>
-            <AppText
-              variant="caption"
-              tone="inverse"
-              style={styles.dailySummary}
-            >
-              {overview.data.dailyPrayer.summary}
-            </AppText>
-            <View style={styles.cardAction}>
-              <AppText variant="caption" tone="inverse">
-                기도 보러가기
-              </AppText>
-              <AppIcon name="chevron-right" size={18} color="#fff" />
-            </View>
-          </Pressable>
-
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.push(overview.data.dawnPrayer.href as Href)}
-            style={styles.dawnCard}
-            testID="home-dawn-prayer"
-          >
-            <AppText variant="caption" tone="muted" style={styles.dawnEyebrow}>
-              {overview.data.dawnPrayer.timeLabel}
-            </AppText>
-            <AppText variant="sectionTitle" style={styles.dawnTitle}>
-              {overview.data.dawnPrayer.title}
-            </AppText>
-            <AppText variant="body" tone="secondary" style={styles.dawnSummary}>
-              {overview.data.dawnPrayer.summary}
-            </AppText>
-            <View style={styles.dawnAction}>
-              <AppText variant="caption" tone="brand">
-                말씀요약 더 보기
-              </AppText>
-              <AppIcon
-                name="chevron-right"
-                size={18}
-                color={theme.colors.primaryDeep}
-              />
-            </View>
-          </Pressable>
+            <AppIcon
+              name="chevron-right"
+              size={16}
+              color={theme.colors.primaryDeep}
+            />
+          </MotionPressable>
         </View>
-      )}
+
+        {overview.isPending ? (
+          <View style={styles.loading}>
+            <ListSkeleton rows={2} />
+          </View>
+        ) : overview.isError || !overview.data ? (
+          <View style={styles.errorWrap}>
+            <ErrorState
+              message="홈 정보를 불러오지 못했습니다. 다시 시도해주세요."
+              onRetry={() => overview.refetch()}
+            />
+          </View>
+        ) : (
+          <>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() =>
+                router.push(overview.data.dailyPrayer.href as Href)
+              }
+              style={styles.dailyCard}
+              testID="home-daily-prayer"
+            >
+              <View style={styles.dailyOrb} />
+              <AppText
+                variant="caption"
+                tone="inverse"
+                style={styles.dailyEyebrow}
+              >
+                오늘의 기도 · {overview.data.dailyPrayer.dateLabel}{" "}
+                {overview.data.dailyPrayer.weekdayLabel}
+              </AppText>
+              <AppText
+                variant="sectionTitle"
+                tone="inverse"
+                style={styles.dailyTitle}
+              >
+                {overview.data.dailyPrayer.title}
+              </AppText>
+              <AppText
+                variant="caption"
+                tone="inverse"
+                style={styles.dailySummary}
+              >
+                {overview.data.dailyPrayer.summary}
+              </AppText>
+              <View style={styles.cardAction}>
+                <AppText variant="caption" tone="inverse">
+                  기도 보러가기
+                </AppText>
+                <AppIcon name="chevron-right" size={18} color="#fff" />
+              </View>
+            </Pressable>
+
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push(overview.data.dawnPrayer.href as Href)}
+              style={styles.dawnCard}
+              testID="home-dawn-prayer"
+            >
+              <AppText
+                variant="caption"
+                tone="muted"
+                style={styles.dawnEyebrow}
+              >
+                {overview.data.dawnPrayer.timeLabel}
+              </AppText>
+              <AppText variant="sectionTitle" style={styles.dawnTitle}>
+                {overview.data.dawnPrayer.title}
+              </AppText>
+              <AppText
+                variant="body"
+                tone="secondary"
+                style={styles.dawnSummary}
+              >
+                {overview.data.dawnPrayer.summary}
+              </AppText>
+              <View style={styles.dawnAction}>
+                <AppText variant="caption" tone="brand">
+                  말씀요약 더 보기
+                </AppText>
+                <AppIcon
+                  name="chevron-right"
+                  size={18}
+                  color={theme.colors.primaryDeep}
+                />
+              </View>
+            </Pressable>
+          </>
+        )}
+      </View>
     </StickyHeaderScreen>
   );
 }
@@ -180,11 +192,25 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing[6],
   },
   body: {
-    gap: theme.layout.sectionGap,
+    gap: theme.layout.screenX,
     paddingTop: theme.spacing[1],
   },
-  greeting: {
-    paddingHorizontal: theme.layout.screenX,
+  greetingCard: {
+    marginHorizontal: theme.layout.screenX,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface,
+    padding: theme.spacing[4],
+    ...theme.shadow.card,
+  },
+  greetingContent: {
+    flex: 1,
+    minWidth: 0,
   },
   greetingSub: {
     marginTop: theme.spacing[1],

@@ -1,4 +1,5 @@
 import { BlurTargetView } from "expo-blur";
+import { useNavigation } from "expo-router";
 import {
   useEffect,
   useRef,
@@ -7,8 +8,10 @@ import {
   type RefObject,
 } from "react";
 import {
+  Keyboard,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
+  Pressable,
   ScrollView,
   StyleSheet,
   type StyleProp,
@@ -58,6 +61,7 @@ export function StickyHeaderScreen({
   scrollStateResetKey,
   onScrollOffsetChange,
   scrollRef,
+  resetScrollOnFocus = true,
   shouldHandleScroll,
   contentContainerStyle,
   testID,
@@ -78,10 +82,14 @@ export function StickyHeaderScreen({
   scrollStateResetKey?: string | number;
   onScrollOffsetChange?: (offsetY: number) => void;
   scrollRef?: RefObject<ScrollView | null>;
+  resetScrollOnFocus?: boolean;
   shouldHandleScroll?: () => boolean;
   contentContainerStyle?: StyleProp<ViewStyle>;
   testID: string;
 }) {
+  const navigation = useNavigation();
+  const localScrollRef = useRef<ScrollView | null>(null);
+  const effectiveScrollRef = scrollRef ?? localScrollRef;
   const localBlurTarget = useRef<View | null>(null);
   const sharedBlurTarget = useTabBlurTarget();
   const blurTarget = sharedBlurTarget ?? localBlurTarget;
@@ -96,6 +104,24 @@ export function StickyHeaderScreen({
   const upwardDistance = useRef(0);
   const hasStickyControls = Boolean(stickyControls && stickyControlsHeight > 0);
   const hideThreshold = Math.max(stickyControlsInset, stickyControlsHeight, 1);
+
+  useEffect(() => {
+    if (!resetScrollOnFocus) return;
+    const unsubscribe = navigation?.addListener?.("focus", () => {
+      effectiveScrollRef.current?.scrollTo({ y: 0, animated: false });
+      lastScrollY.current = 0;
+      downwardDistance.current = 0;
+      upwardDistance.current = 0;
+      setControlsHidden(false);
+      onScrollOffsetChange?.(0);
+    });
+    return unsubscribe;
+  }, [
+    navigation,
+    resetScrollOnFocus,
+    effectiveScrollRef,
+    onScrollOffsetChange,
+  ]);
 
   useEffect(() => {
     if (stickyControlsRevealKey === undefined) return;
@@ -186,7 +212,9 @@ export function StickyHeaderScreen({
       <View style={styles.root}>
         <BlurTargetView ref={blurTarget} style={styles.target}>
           <ScrollView
-            ref={scrollRef}
+            ref={effectiveScrollRef}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
             contentContainerStyle={[
               styles.content,
               contentContainerStyle,
@@ -201,9 +229,14 @@ export function StickyHeaderScreen({
             scrollEventThrottle={16}
             testID={`${testID}-scroll`}
           >
-            {children}
+            <Pressable
+              accessible={false}
+              onPress={Keyboard.dismiss}
+              style={styles.scrollInner}
+            >
+              {children}
+            </Pressable>
           </ScrollView>
-          {overlay}
         </BlurTargetView>
         {hasStickyControls ? (
           <StickyControlsLayer
@@ -226,6 +259,15 @@ export function StickyHeaderScreen({
           title={title}
           topInset={topInset}
         />
+        {overlay ? (
+          <View
+            pointerEvents="box-none"
+            style={styles.overlay}
+            testID={`${testID}-overlay`}
+          >
+            {overlay}
+          </View>
+        ) : null}
       </View>
     </Screen>
   );
@@ -306,11 +348,18 @@ const styles = StyleSheet.create({
   content: {
     paddingTop: SCREEN_HEADER_HEIGHT,
   },
+  scrollInner: {
+    flexGrow: 1,
+  },
   stickyControls: {
     position: "absolute",
     left: 0,
     right: 0,
     zIndex: 19,
     overflow: "hidden",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFill,
+    zIndex: 25,
   },
 });

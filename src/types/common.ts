@@ -15,6 +15,9 @@ export interface Member {
   profileImage?: string;
   department?: string;
   role: UserRole;
+  phone?: string;
+  email?: string;
+  point?: number;
 }
 
 export interface PaginatedResponse<T> {

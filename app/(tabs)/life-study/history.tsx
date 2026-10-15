@@ -1,8 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { Screen, Section } from "../../../src/components/layout/Screen";
-import { Badge, Button, TopBar, VisualThumb } from "../../../src/components/ui";
+import { Screen } from "../../../src/components/layout/Screen";
+import {
+  Badge,
+  Button,
+  Empty,
+  TopBar,
+  VisualThumb,
+} from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import {
   fetchMyLifeStudyCompletions,
@@ -63,7 +68,6 @@ const completed = [
 ] as const;
 
 export default function LifeStudyHistoryScreen() {
-  const router = useRouter();
   const http = resolveLifeStudyAdapterMode() === "http";
   const completions = useQuery({
     queryKey: ["lifeStudy", "my-completions", "history-screen"],
@@ -76,35 +80,44 @@ export default function LifeStudyHistoryScreen() {
     return (
       <Screen scroll={false} padded={false}>
         <View style={styles.root}>
-          <TopBar title="수강 내역" back onBack={() => router.back()} />
+          <TopBar title="수강 내역" back />
           <ScrollView contentContainerStyle={styles.body}>
-            <Section title="내 수료 기록">
+            <HistorySection title="내 수료 기록">
               {completions.isPending ? (
-                <Text style={styles.meta}>서버에서 불러오는 중입니다.</Text>
+                <Text style={styles.sectionMeta}>
+                  서버에서 불러오는 중입니다.
+                </Text>
               ) : null}
               {completions.isError ? (
-                <Text style={styles.meta}>수강 내역을 다시 불러와주세요.</Text>
+                <Text style={styles.sectionMeta}>
+                  수강 내역을 다시 불러와주세요.
+                </Text>
               ) : null}
               {!completions.isPending &&
               !completions.isError &&
               rows.length === 0 ? (
-                <Text style={styles.meta}>수료 기록이 없습니다.</Text>
+                <Empty
+                  title="수료 기록이 없어요"
+                  description="삶공부 과정을 수료하면 수료 기록이 여기에 표시돼요."
+                />
               ) : null}
-              <View style={styles.stack}>
-                {rows.map((course) => (
-                  <View key={course.id} style={styles.card}>
-                    <Text style={styles.title}>
-                      {course.title || "이름 없음"}
-                    </Text>
-                    <Text style={styles.meta}>
-                      {course.completedAt
-                        ? `수료 ${course.completedAt}`
-                        : "수료일 없음"}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            </Section>
+              {rows.length > 0 ? (
+                <View style={styles.stack}>
+                  {rows.map((course) => (
+                    <View key={course.id} style={styles.card}>
+                      <Text style={styles.title}>
+                        {course.title || "이름 없음"}
+                      </Text>
+                      <Text style={styles.meta}>
+                        {course.completedAt
+                          ? `수료 ${course.completedAt}`
+                          : "수료일 없음"}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+            </HistorySection>
           </ScrollView>
         </View>
       </Screen>
@@ -114,33 +127,33 @@ export default function LifeStudyHistoryScreen() {
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
-        <TopBar title="수강 내역" back onBack={() => router.back()} />
+        <TopBar title="수강 내역" back />
         <ScrollView contentContainerStyle={styles.body}>
-          <Section title="신청중">
+          <HistorySection title="신청중">
             <View style={styles.stack}>
               {applications.map((course) => (
                 <CourseCard key={course.name} course={course} action />
               ))}
             </View>
-          </Section>
+          </HistorySection>
 
-          <Section title="수강 중">
+          <HistorySection title="수강 중">
             <View style={styles.stack}>
               {ongoing.map((course) => (
                 <ProgressCard key={course.name} course={course} />
               ))}
             </View>
-          </Section>
+          </HistorySection>
 
-          <Section title="추천 과정">
+          <HistorySection title="추천 과정">
             <View style={styles.stack}>
               {waiting.map((course) => (
                 <CourseCard key={course.name} course={course} />
               ))}
             </View>
-          </Section>
+          </HistorySection>
 
-          <Section title="지난 과정">
+          <HistorySection title="지난 과정">
             <View style={styles.flatList}>
               {completed.map((course, index) => (
                 <HistoryRow
@@ -150,9 +163,9 @@ export default function LifeStudyHistoryScreen() {
                 />
               ))}
             </View>
-          </Section>
+          </HistorySection>
 
-          <Section title="수료 뱃지">
+          <HistorySection title="수료 뱃지">
             <View style={styles.badgeCard}>
               <View style={styles.badgeIcon}>
                 <Text style={styles.badgeIconText}>✓</Text>
@@ -165,10 +178,30 @@ export default function LifeStudyHistoryScreen() {
               </View>
               <Button variant="soft">수료 뱃지 보기</Button>
             </View>
-          </Section>
+          </HistorySection>
         </ScrollView>
       </View>
     </Screen>
+  );
+}
+
+function HistorySection({
+  title,
+  children,
+  trailing,
+}: {
+  title: string;
+  children: React.ReactNode;
+  trailing?: React.ReactNode;
+}) {
+  return (
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        {trailing}
+      </View>
+      {children}
+    </View>
   );
 }
 
@@ -248,9 +281,29 @@ const styles = StyleSheet.create({
   },
   body: {
     paddingBottom: 24,
+    gap: 24,
+  },
+  section: {
+    gap: 12,
+  },
+  sectionHeader: {
+    paddingHorizontal: theme.layout.screenX,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  sectionTitle: {
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.base,
+    fontWeight: theme.fontWeight.bold,
+  },
+  sectionMeta: {
+    paddingHorizontal: theme.layout.screenX,
+    color: theme.colors.inkMute,
+    fontSize: theme.fontSize.sm,
   },
   stack: {
-    paddingHorizontal: 18,
+    paddingHorizontal: theme.layout.screenX,
     gap: 12,
   },
   card: {
@@ -344,7 +397,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
   },
   flatList: {
-    paddingHorizontal: 18,
+    paddingHorizontal: theme.layout.screenX,
   },
   historyRow: {
     flexDirection: "row",
@@ -375,7 +428,7 @@ const styles = StyleSheet.create({
     color: theme.colors.white,
   },
   badgeCard: {
-    marginHorizontal: 18,
+    marginHorizontal: theme.layout.screenX,
     borderRadius: theme.radius.lg,
     borderWidth: 1,
     borderColor: theme.colors.line,

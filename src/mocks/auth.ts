@@ -11,6 +11,8 @@ export const MOCK_USER: Member = {
   name: "이민구",
   department: "청년 1부",
   role: "ADMIN",
+  phone: "010-1234-5678",
+  email: "admin@ylmc.local",
 };
 
 export const MOCK_MEMBERS: Member[] = [

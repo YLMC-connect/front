@@ -45,11 +45,16 @@ export function mapMemberFromMe(data: unknown): Member {
 
   const dto = data as unknown as MemberMeResponse;
   const department = readString(dto.mokjangName);
+  const phone = readString(dto.phone);
+  const email = readString(dto.email);
 
   return {
     id,
     name,
     ...(department ? { department } : {}),
+    ...(phone ? { phone } : {}),
+    ...(email ? { email } : {}),
+    ...(typeof dto.point === "number" ? { point: dto.point } : {}),
     role: mapMemberRole(readString(dto.role) ?? undefined),
   };
 }

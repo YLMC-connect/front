@@ -4,8 +4,10 @@ import { router, useLocalSearchParams } from "expo-router";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -270,224 +272,233 @@ export default function SignupScreen() {
         <ScrollView
           testID="signup-scroll"
           style={styles.scroll}
-          contentContainerStyle={styles.body}
+          contentContainerStyle={[styles.body, { flexGrow: 1 }]}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}
         >
-          <MotionEnter enabled={enterMotion} delay={motionStaggerDelay(0)}>
-            <AppText variant="display">정보를 입력해주세요</AppText>
-          </MotionEnter>
-
-          <MotionEnter
-            enabled={enterMotion}
-            delay={motionStaggerDelay(1)}
-            style={styles.avatarPreview}
+          <Pressable
+            accessible={false}
+            onPress={Keyboard.dismiss}
+            style={{ flexGrow: 1 }}
           >
-            <AutoAvatar name={values.userName} />
-            <AppText variant="caption" tone="muted">
-              {values.userName
-                ? "이름 두 글자로 자동 생성된 프로필"
-                : "이름을 입력하면 미리보기가 표시됩니다"}
-            </AppText>
-          </MotionEnter>
+            <MotionEnter enabled={enterMotion} delay={motionStaggerDelay(0)}>
+              <AppText variant="display">정보를 입력해주세요</AppText>
+            </MotionEnter>
 
-          <MotionEnter
-            enabled={enterMotion}
-            delay={motionStaggerDelay(2)}
-            style={styles.form}
-          >
-            <Field label="아이디">
-              <MotionShake trigger={idErrorMessage}>
-                <View style={styles.idRow}>
-                  <View style={styles.idInputWrap}>
-                    <SignupInput
-                      testID="signup-id-input"
-                      value={values.id}
-                      onChangeText={setField("id")}
-                      placeholder="아이디"
-                      hasError={Boolean(idErrorMessage)}
-                    />
-                  </View>
-                  <MotionPressable
-                    testID="signup-check-id"
-                    accessibilityRole="button"
-                    onPress={() => onCheckAvailability("id")}
-                    disabled={checkAvailability.isPending}
-                    style={styles.checkButton}
-                  >
-                    {checkAvailability.isPending ? (
-                      <ActivityIndicator
-                        size="small"
-                        color={theme.colors.primaryDeep}
+            <MotionEnter
+              enabled={enterMotion}
+              delay={motionStaggerDelay(1)}
+              style={styles.avatarPreview}
+            >
+              <AutoAvatar name={values.userName} />
+              <AppText variant="caption" tone="muted">
+                {values.userName
+                  ? "이름 두 글자로 자동 생성된 프로필"
+                  : "이름을 입력하면 미리보기가 표시됩니다"}
+              </AppText>
+            </MotionEnter>
+
+            <MotionEnter
+              enabled={enterMotion}
+              delay={motionStaggerDelay(2)}
+              style={styles.form}
+            >
+              <Field label="아이디">
+                <MotionShake trigger={idErrorMessage}>
+                  <View style={styles.idRow}>
+                    <View style={styles.idInputWrap}>
+                      <SignupInput
+                        testID="signup-id-input"
+                        value={values.id}
+                        onChangeText={setField("id")}
+                        placeholder="아이디"
+                        hasError={Boolean(idErrorMessage)}
                       />
-                    ) : (
-                      <Text style={styles.checkButtonText}>중복 확인</Text>
-                    )}
-                  </MotionPressable>
-                </View>
-              </MotionShake>
-              <InlineError>{idErrorMessage}</InlineError>
-              {currentIdAvailability === true ? (
-                <MotionPop>
-                  <View style={styles.successRow}>
-                    <AppIcon
-                      name="check-circle"
-                      size={14}
-                      color={theme.colors.success}
-                    />
-                    <AppText
-                      variant="caption"
-                      tone="success"
-                      style={styles.successHint}
+                    </View>
+                    <MotionPressable
+                      testID="signup-check-id"
+                      accessibilityRole="button"
+                      onPress={() => onCheckAvailability("id")}
+                      disabled={checkAvailability.isPending}
+                      style={styles.checkButton}
                     >
-                      사용 가능한 아이디입니다
-                    </AppText>
+                      {checkAvailability.isPending ? (
+                        <ActivityIndicator
+                          size="small"
+                          color={theme.colors.primaryDeep}
+                        />
+                      ) : (
+                        <Text style={styles.checkButtonText}>중복 확인</Text>
+                      )}
+                    </MotionPressable>
                   </View>
-                </MotionPop>
-              ) : null}
-            </Field>
-
-            <Field label="비밀번호">
-              <MotionShake
-                trigger={
-                  passwordErrorMessage ?? (isPwError ? "pw-error" : undefined)
-                }
-              >
-                <SignupInput
-                  testID="signup-password-input"
-                  value={values.password}
-                  onChangeText={setField("password")}
-                  placeholder="비밀번호"
-                  secureTextEntry
-                  hasError={isPwError || Boolean(errors.password)}
-                />
-              </MotionShake>
-              {isPwError || errors.password ? (
-                <InlineError>{passwordErrorMessage}</InlineError>
-              ) : (
-                <FieldHint>8자 이상, 영문·숫자 조합</FieldHint>
-              )}
-            </Field>
-
-            <Field label="비밀번호 확인">
-              <MotionShake
-                trigger={
-                  passwordConfirmErrorMessage ??
-                  (isPwError ? "pw-confirm-error" : undefined)
-                }
-              >
-                <SignupInput
-                  testID="signup-password-confirm-input"
-                  value={values.passwordConfirm}
-                  onChangeText={setField("passwordConfirm")}
-                  placeholder="비밀번호 확인"
-                  secureTextEntry
-                  hasError={isPwError || Boolean(errors.passwordConfirm)}
-                />
-              </MotionShake>
-              <InlineError>{passwordConfirmErrorMessage}</InlineError>
-            </Field>
-
-            <Field label="이름">
-              <MotionShake trigger={errors.userName}>
-                <SignupInput
-                  testID="signup-name-input"
-                  value={values.userName}
-                  onChangeText={setField("userName")}
-                  placeholder="실명을 입력해주세요"
-                  hasError={Boolean(errors.userName)}
-                />
-              </MotionShake>
-              <InlineError>{errors.userName}</InlineError>
-              {!errors.userName ? (
-                <FieldHint>2~10자, 특수문자는 사용할 수 없어요</FieldHint>
-              ) : null}
-            </Field>
-
-            <Field label="연락처">
-              <MotionShake
-                trigger={
-                  phoneErrorMessage ??
-                  (isPhoneError || isPhoneDup ? "phone-error" : undefined)
-                }
-              >
-                <SignupInput
-                  testID="signup-phone-input"
-                  value={values.phone}
-                  onChangeText={setField("phone")}
-                  placeholder="010-XXXX-XXXX"
-                  keyboardType="phone-pad"
-                  hasError={isPhoneError || isPhoneDup || Boolean(errors.phone)}
-                />
-              </MotionShake>
-              <InlineError>{phoneErrorMessage}</InlineError>
-            </Field>
-
-            <Field label="이메일">
-              <MotionShake trigger={emailErrorMessage}>
-                <View style={styles.idRow}>
-                  <View style={styles.idInputWrap}>
-                    <SignupInput
-                      testID="signup-email-input"
-                      value={values.email}
-                      onChangeText={setField("email")}
-                      placeholder="이메일"
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      hasError={Boolean(emailErrorMessage)}
-                    />
-                  </View>
-                  <MotionPressable
-                    testID="signup-check-email"
-                    accessibilityRole="button"
-                    onPress={() => onCheckAvailability("email")}
-                    disabled={checkAvailability.isPending}
-                    style={styles.checkButton}
-                  >
-                    {checkAvailability.isPending ? (
-                      <ActivityIndicator
-                        size="small"
-                        color={theme.colors.primaryDeep}
+                </MotionShake>
+                <InlineError>{idErrorMessage}</InlineError>
+                {currentIdAvailability === true ? (
+                  <MotionPop>
+                    <View style={styles.successRow}>
+                      <AppIcon
+                        name="check-circle"
+                        size={14}
+                        color={theme.colors.success}
                       />
-                    ) : (
-                      <Text style={styles.checkButtonText}>중복 확인</Text>
-                    )}
-                  </MotionPressable>
-                </View>
-              </MotionShake>
-              <InlineError>{emailErrorMessage}</InlineError>
-              {currentEmailAvailability === true ? (
-                <MotionPop>
-                  <View style={styles.successRow}>
-                    <AppIcon
-                      name="check-circle"
-                      size={14}
-                      color={theme.colors.success}
-                    />
-                    <AppText
-                      variant="caption"
-                      tone="success"
-                      style={styles.successHint}
-                    >
-                      사용 가능한 이메일입니다
-                    </AppText>
-                  </View>
-                </MotionPop>
-              ) : null}
-            </Field>
-          </MotionEnter>
+                      <AppText
+                        variant="caption"
+                        tone="success"
+                        style={styles.successHint}
+                      >
+                        사용 가능한 아이디입니다
+                      </AppText>
+                    </View>
+                  </MotionPop>
+                ) : null}
+              </Field>
 
-          {signup.error ? (
-            <MotionFadeIn>
-              <Text style={styles.error}>
-                {getApiErrorMessage(
-                  signup.error,
-                  authApiErrorMessages,
-                  "회원가입에 실패했습니다. 입력 정보를 확인해주세요.",
+              <Field label="비밀번호">
+                <MotionShake
+                  trigger={
+                    passwordErrorMessage ?? (isPwError ? "pw-error" : undefined)
+                  }
+                >
+                  <SignupInput
+                    testID="signup-password-input"
+                    value={values.password}
+                    onChangeText={setField("password")}
+                    placeholder="비밀번호"
+                    secureTextEntry
+                    hasError={isPwError || Boolean(errors.password)}
+                  />
+                </MotionShake>
+                {isPwError || errors.password ? (
+                  <InlineError>{passwordErrorMessage}</InlineError>
+                ) : (
+                  <FieldHint>8자 이상, 영문·숫자 조합</FieldHint>
                 )}
-              </Text>
-            </MotionFadeIn>
-          ) : null}
+              </Field>
+
+              <Field label="비밀번호 확인">
+                <MotionShake
+                  trigger={
+                    passwordConfirmErrorMessage ??
+                    (isPwError ? "pw-confirm-error" : undefined)
+                  }
+                >
+                  <SignupInput
+                    testID="signup-password-confirm-input"
+                    value={values.passwordConfirm}
+                    onChangeText={setField("passwordConfirm")}
+                    placeholder="비밀번호 확인"
+                    secureTextEntry
+                    hasError={isPwError || Boolean(errors.passwordConfirm)}
+                  />
+                </MotionShake>
+                <InlineError>{passwordConfirmErrorMessage}</InlineError>
+              </Field>
+
+              <Field label="이름">
+                <MotionShake trigger={errors.userName}>
+                  <SignupInput
+                    testID="signup-name-input"
+                    value={values.userName}
+                    onChangeText={setField("userName")}
+                    placeholder="실명을 입력해주세요"
+                    hasError={Boolean(errors.userName)}
+                  />
+                </MotionShake>
+                <InlineError>{errors.userName}</InlineError>
+                {!errors.userName ? (
+                  <FieldHint>2~10자, 특수문자는 사용할 수 없어요</FieldHint>
+                ) : null}
+              </Field>
+
+              <Field label="연락처">
+                <MotionShake
+                  trigger={
+                    phoneErrorMessage ??
+                    (isPhoneError || isPhoneDup ? "phone-error" : undefined)
+                  }
+                >
+                  <SignupInput
+                    testID="signup-phone-input"
+                    value={values.phone}
+                    onChangeText={setField("phone")}
+                    placeholder="010-XXXX-XXXX"
+                    keyboardType="phone-pad"
+                    hasError={
+                      isPhoneError || isPhoneDup || Boolean(errors.phone)
+                    }
+                  />
+                </MotionShake>
+                <InlineError>{phoneErrorMessage}</InlineError>
+              </Field>
+
+              <Field label="이메일">
+                <MotionShake trigger={emailErrorMessage}>
+                  <View style={styles.idRow}>
+                    <View style={styles.idInputWrap}>
+                      <SignupInput
+                        testID="signup-email-input"
+                        value={values.email}
+                        onChangeText={setField("email")}
+                        placeholder="이메일"
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        hasError={Boolean(emailErrorMessage)}
+                      />
+                    </View>
+                    <MotionPressable
+                      testID="signup-check-email"
+                      accessibilityRole="button"
+                      onPress={() => onCheckAvailability("email")}
+                      disabled={checkAvailability.isPending}
+                      style={styles.checkButton}
+                    >
+                      {checkAvailability.isPending ? (
+                        <ActivityIndicator
+                          size="small"
+                          color={theme.colors.primaryDeep}
+                        />
+                      ) : (
+                        <Text style={styles.checkButtonText}>중복 확인</Text>
+                      )}
+                    </MotionPressable>
+                  </View>
+                </MotionShake>
+                <InlineError>{emailErrorMessage}</InlineError>
+                {currentEmailAvailability === true ? (
+                  <MotionPop>
+                    <View style={styles.successRow}>
+                      <AppIcon
+                        name="check-circle"
+                        size={14}
+                        color={theme.colors.success}
+                      />
+                      <AppText
+                        variant="caption"
+                        tone="success"
+                        style={styles.successHint}
+                      >
+                        사용 가능한 이메일입니다
+                      </AppText>
+                    </View>
+                  </MotionPop>
+                ) : null}
+              </Field>
+            </MotionEnter>
+
+            {signup.error ? (
+              <MotionFadeIn>
+                <Text style={styles.error}>
+                  {getApiErrorMessage(
+                    signup.error,
+                    authApiErrorMessages,
+                    "회원가입에 실패했습니다. 입력 정보를 확인해주세요.",
+                  )}
+                </Text>
+              </MotionFadeIn>
+            ) : null}
+          </Pressable>
         </ScrollView>
 
         <MotionEnter enabled={enterMotion} delay={motionStaggerDelay(3)}>

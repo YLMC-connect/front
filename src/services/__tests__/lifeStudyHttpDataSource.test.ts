@@ -75,8 +75,64 @@ describe("httpLifeStudyDataSource", () => {
         },
       ],
     });
-    expect(pathsOf(request)).toEqual(["/api/life-study/completions"]);
+    expect(pathsOf(request)).toEqual([
+      "/api/life-study",
+      "/api/life-study/cohorts",
+      "/api/life-study/completions",
+    ]);
     expect(mockLifeStudyOverview.path.completedRequired).toBe(1);
+  });
+
+  it("builds overview with open courses and all courses from life-study API", async () => {
+    const { request, dataSource } = setup();
+    request.mockImplementation((path: string) => {
+      if (path === "/api/life-study") {
+        return Promise.resolve([
+          {
+            id: 1,
+            name: "생명의 삶",
+            studyContent: "기본 삶공부",
+            weekCount: 13,
+            teamLeader: "박귀원",
+            bookName: "생명의 삶",
+            studyTarget: "등록교인 누구나",
+            eligibility: "누구나",
+            required: true,
+          },
+        ]);
+      }
+      if (path === "/api/life-study/cohorts") {
+        return Promise.resolve([
+          {
+            id: 10,
+            lifeStudyId: 1,
+            lifeStudyName: "생명의 삶",
+            studyContent: "기본 삶공부",
+            cohortNumber: 1,
+            weekCount: 13,
+            instructor: "박귀원",
+            userNum: 20,
+            appliedCount: 5,
+            startDate: "2026-06-01",
+            endDate: "2026-06-14",
+            required: true,
+          },
+        ]);
+      }
+      if (path === "/api/life-study/completions") {
+        return Promise.resolve([]);
+      }
+      return Promise.resolve(null);
+    });
+
+    const overview = await dataSource.getOverview();
+    expect(overview.openCourses).toHaveLength(1);
+    expect(overview.openCourses[0].title).toBe("생명의 삶");
+    expect(overview.courses).toHaveLength(1);
+    expect(overview.courses[0].title).toBe("생명의 삶");
+    expect(overview.path.totalRequired).toBe(1);
+    expect(overview.path.completedRequired).toBe(0);
+    expect(overview.path.nextRecommendation).toBe("생명의 삶");
   });
 
   it("builds courses from completions and filters by that status", async () => {
@@ -103,8 +159,12 @@ describe("httpLifeStudyDataSource", () => {
     ]);
     await expect(dataSource.getCourses("ongoing")).resolves.toEqual([]);
     expect(
-      pathsOf(request).every((path) => path === "/api/life-study/completions"),
+      pathsOf(request).every(
+        (path) =>
+          path === "/api/life-study" || path === "/api/life-study/completions",
+      ),
     ).toBe(true);
+    expect(pathsOf(request)).toHaveLength(4);
   });
 
   it("builds history rows from my completions", async () => {

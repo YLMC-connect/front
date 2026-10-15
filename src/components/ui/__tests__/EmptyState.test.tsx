@@ -1,7 +1,22 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
-import { EmptyState, SuccessState } from "../index";
+import { Empty, EmptyState, SuccessState } from "../index";
 
-describe("EmptyState", () => {
+describe("Empty / EmptyState", () => {
+  it("renders the empty component with title, description, and testID", () => {
+    render(
+      <Empty
+        title="참여 중인 기도방이 없어요"
+        description="중보기도 신청을 통해 기도방에 참여해보세요."
+        testID="custom-empty"
+      />,
+    );
+
+    expect(screen.getByTestId("custom-empty")).toBeTruthy();
+    expect(screen.getByText("참여 중인 기도방이 없어요")).toBeTruthy();
+    expect(
+      screen.getByText("중보기도 신청을 통해 기도방에 참여해보세요."),
+    ).toBeTruthy();
+  });
   it("renders the empty title and description", () => {
     render(
       <EmptyState

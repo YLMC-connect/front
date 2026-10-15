@@ -344,4 +344,45 @@ describe("prayerMapper", () => {
     expect(readPrayerCohorts(null)).toEqual([]);
     expect(readPrayerHistory(null)).toEqual([]);
   });
+
+  it("safely reads topic with null nullable fields", () => {
+    const raw = {
+      id: 1,
+      categoryId: 10,
+      categoryName: "치유",
+      title: "기도제목",
+      content: "기도제목 내용",
+      status: "OPEN",
+      rejectReason: null,
+      writerName: "작성자",
+      mine: true,
+      emergency: false,
+      emergencyEndAt: null,
+      answerContent: null,
+      answeredAt: null,
+      createdAt: "2026-10-15T12:00:00",
+    };
+    expect(readPrayerTopics([raw])).toEqual([
+      {
+        ...raw,
+        rejectReason: null,
+        emergencyEndAt: null,
+        answerContent: null,
+        answeredAt: null,
+      },
+    ]);
+  });
+
+  it("safely reads cohort with null description", () => {
+    const raw = {
+      ...cohort,
+      description: null,
+    };
+    expect(readPrayerCohorts([raw])).toEqual([
+      {
+        ...cohort,
+        description: "",
+      },
+    ]);
+  });
 });

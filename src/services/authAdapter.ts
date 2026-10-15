@@ -36,6 +36,7 @@ export interface AuthAdapter {
   signup(input: SignupInput): Promise<AuthSession>;
   refresh(refreshToken: string): Promise<AuthSession>;
   getCurrentMember(): Promise<Member>;
+  updateCurrentMember(input: { phone: string }): Promise<Member>;
 }
 
 export const mockAuthAdapter: AuthAdapter = {
@@ -89,6 +90,13 @@ export const mockAuthAdapter: AuthAdapter = {
 
   async getCurrentMember() {
     return MOCK_USER;
+  },
+
+  async updateCurrentMember(input) {
+    return {
+      ...MOCK_USER,
+      phone: input.phone,
+    };
   },
 };
 
@@ -151,6 +159,14 @@ export function createHttpAuthAdapter(
 
     async getCurrentMember() {
       const data = await client.request<MemberMeResponse>("/api/member/me");
+      return mapMemberFromMe(data);
+    },
+
+    async updateCurrentMember(input) {
+      const data = await client.request<MemberMeResponse>("/api/member/me", {
+        method: "PUT",
+        body: JSON.stringify(input),
+      });
       return mapMemberFromMe(data);
     },
   };

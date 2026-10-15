@@ -1,5 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
+  Keyboard,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -10,7 +11,9 @@ import {
 import { Screen } from "../../../src/components/layout/Screen";
 import { TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { useMemberMe } from "../../../src/hooks/useMember";
 import { readDesignVariant } from "../../../src/lib/designVariant";
+import { getGivenName } from "../../../src/lib/koreanName";
 
 type Variant =
   | "default"
@@ -73,12 +76,15 @@ function ProfileTextInput({
 export default function EditProfileScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ designVariant?: string }>();
+  const { data: member } = useMemberMe();
   const variant = variantOf(readDesignVariant(params.designVariant));
   const hasChange = variant !== "default";
   const isPhoneDup = variant === "phone-dup";
   const isCurrentPwError = variant === "current-pw-error";
   const isPwMismatch = variant === "pw-mismatch";
-  const phone = isPhoneDup ? "010-9999-9999" : "010-2345-6789";
+  const memberName = member?.name || "사용자";
+  const avatarText = getGivenName(memberName) || memberName;
+  const phone = isPhoneDup ? "010-9999-9999" : member?.phone || "010-2345-6789";
 
   return (
     <Screen scroll={false} padded={false}>
@@ -99,78 +105,94 @@ export default function EditProfileScreen() {
             </Pressable>
           }
         />
-        <ScrollView contentContainerStyle={styles.body}>
-          <View style={styles.profileCard}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>은혜</Text>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          contentContainerStyle={[styles.body, { flexGrow: 1 }]}
+        >
+          <Pressable
+            accessible={false}
+            onPress={Keyboard.dismiss}
+            style={{ flexGrow: 1 }}
+          >
+            <View style={styles.profileCard}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{avatarText}</Text>
+              </View>
+              <View style={styles.profileText}>
+                <Text style={styles.readonlyLabel}>이름</Text>
+                <Text style={styles.name}>{memberName}</Text>
+                <Text style={styles.readonlyHint}>
+                  이름과 프로필은 변경할 수 없어요
+                </Text>
+              </View>
             </View>
-            <View style={styles.profileText}>
-              <Text style={styles.readonlyLabel}>이름</Text>
-              <Text style={styles.name}>김은혜</Text>
-              <Text style={styles.readonlyHint}>
-                이름과 프로필은 변경할 수 없어요
-              </Text>
-            </View>
-          </View>
 
-          <View style={styles.section}>
-            <FieldLabel>연락처</FieldLabel>
-            <ProfileTextInput
-              value={phone}
-              placeholder="010-XXXX-XXXX"
-              keyboardType="phone-pad"
-              error={isPhoneDup}
-            />
-            {isPhoneDup ? (
-              <InlineError>이미 사용 중인 연락처입니다</InlineError>
-            ) : (
-              <FieldHint>숫자만 입력하면 자동으로 하이픈이 추가돼요</FieldHint>
-            )}
-          </View>
-
-          <View style={styles.divider} />
-
-          <Text style={styles.sectionTitle}>비밀번호 변경</Text>
-
-          <View style={styles.passwordFields}>
-            <View>
-              <FieldLabel>현재 비밀번호</FieldLabel>
+            <View style={styles.section}>
+              <FieldLabel>연락처</FieldLabel>
               <ProfileTextInput
-                value={hasChange ? "••••••••" : ""}
-                placeholder="현재 비밀번호"
-                secureTextEntry
-                error={isCurrentPwError}
+                value={phone}
+                placeholder="010-XXXX-XXXX"
+                keyboardType="phone-pad"
+                error={isPhoneDup}
               />
-              {isCurrentPwError ? (
-                <InlineError>현재 비밀번호가 올바르지 않습니다</InlineError>
-              ) : null}
+              {isPhoneDup ? (
+                <InlineError>이미 사용 중인 연락처입니다</InlineError>
+              ) : (
+                <FieldHint>
+                  숫자만 입력하면 자동으로 하이픈이 추가돼요
+                </FieldHint>
+              )}
             </View>
 
-            <View>
-              <FieldLabel>새 비밀번호</FieldLabel>
-              <ProfileTextInput
-                value={hasChange ? "spring2026!" : ""}
-                placeholder="새 비밀번호"
-                secureTextEntry
-              />
-              <FieldHint>8자 이상, 영문·숫자 조합</FieldHint>
-            </View>
+            <View style={styles.divider} />
 
-            <View>
-              <FieldLabel>새 비밀번호 확인</FieldLabel>
-              <ProfileTextInput
-                value={
-                  hasChange ? (isPwMismatch ? "spring2025" : "spring2026!") : ""
-                }
-                placeholder="새 비밀번호 확인"
-                secureTextEntry
-                error={isPwMismatch}
-              />
-              {isPwMismatch ? (
-                <InlineError>비밀번호가 일치하지 않습니다</InlineError>
-              ) : null}
+            <Text style={styles.sectionTitle}>비밀번호 변경</Text>
+
+            <View style={styles.passwordFields}>
+              <View>
+                <FieldLabel>현재 비밀번호</FieldLabel>
+                <ProfileTextInput
+                  value={hasChange ? "••••••••" : ""}
+                  placeholder="현재 비밀번호"
+                  secureTextEntry
+                  error={isCurrentPwError}
+                />
+                {isCurrentPwError ? (
+                  <InlineError>현재 비밀번호가 올바르지 않습니다</InlineError>
+                ) : null}
+              </View>
+
+              <View>
+                <FieldLabel>새 비밀번호</FieldLabel>
+                <ProfileTextInput
+                  value={hasChange ? "spring2026!" : ""}
+                  placeholder="새 비밀번호"
+                  secureTextEntry
+                />
+                <FieldHint>8자 이상, 영문·숫자 조합</FieldHint>
+              </View>
+
+              <View>
+                <FieldLabel>새 비밀번호 확인</FieldLabel>
+                <ProfileTextInput
+                  value={
+                    hasChange
+                      ? isPwMismatch
+                        ? "spring2025"
+                        : "spring2026!"
+                      : ""
+                  }
+                  placeholder="새 비밀번호 확인"
+                  secureTextEntry
+                  error={isPwMismatch}
+                />
+                {isPwMismatch ? (
+                  <InlineError>비밀번호가 일치하지 않습니다</InlineError>
+                ) : null}
+              </View>
             </View>
-          </View>
+          </Pressable>
         </ScrollView>
       </View>
     </Screen>

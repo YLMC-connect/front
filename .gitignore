@@ -47,6 +47,7 @@ ehthumbs.db
 .idea/
 .vscode/
 .claude/
+.grok/
 *.swp
 *.swo
 

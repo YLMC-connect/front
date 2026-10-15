@@ -17,7 +17,7 @@ import {
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   AppText,
-  EmptyState,
+  Empty,
   ErrorState,
   FilterChips,
   FloatingActionButton,
@@ -299,9 +299,17 @@ export default function GroupScreen() {
           />
         ) : section === "service" ? (
           serviceItems.length === 0 ? (
-            <EmptyState
-              title="검색 결과가 없어요"
-              description="다른 검색어로 다시 찾아보세요."
+            <Empty
+              title={
+                normalizedSearch
+                  ? "검색 결과가 없어요"
+                  : "등록된 봉사활동이 없어요"
+              }
+              description={
+                normalizedSearch
+                  ? "다른 검색어로 다시 찾아보세요."
+                  : "새로운 봉사활동이 등록되면 안내해 드릴게요."
+              }
             />
           ) : (
             serviceItems.map((item) => (
@@ -316,9 +324,17 @@ export default function GroupScreen() {
         ) : section === "mine" ? (
           <View style={styles.myListWrap} testID="group-my-list">
             {myGroups.length === 0 ? (
-              <EmptyState
-                title="참여 중인 소모임이 없어요"
-                description="소모임 탭에서 관심 있는 모임에 참여해보세요."
+              <Empty
+                title={
+                  normalizedSearch
+                    ? "검색 결과가 없어요"
+                    : "참여 중인 소모임이 없어요"
+                }
+                description={
+                  normalizedSearch
+                    ? "다른 검색어로 다시 찾아보세요."
+                    : "소모임 탭에서 관심 있는 모임에 참여해보세요."
+                }
               />
             ) : (
               myGroups.map((group) => (
@@ -332,9 +348,15 @@ export default function GroupScreen() {
             )}
           </View>
         ) : groups.length === 0 ? (
-          <EmptyState
-            title="검색 결과가 없어요"
-            description="카테고리나 검색어를 바꿔보세요."
+          <Empty
+            title={
+              normalizedSearch ? "검색 결과가 없어요" : "등록된 소모임이 없어요"
+            }
+            description={
+              normalizedSearch
+                ? "카테고리나 검색어를 바꿔보세요."
+                : "소모임을 개설하거나 관심 있는 모임에 참여해보세요."
+            }
           />
         ) : (
           groups.map((group) => (

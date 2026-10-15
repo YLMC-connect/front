@@ -2,7 +2,14 @@ import { AppIcon } from "@/components/ui/app-icon";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Platform, ScrollView, StyleSheet, View } from "react-native";
+import {
+  Keyboard,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { AuthInput } from "../../src/components/auth/auth-input";
 import { Screen } from "../../src/components/layout/Screen";
 import {
@@ -83,6 +90,7 @@ export default function LoginScreen() {
         ]}
         automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         showsVerticalScrollIndicator={false}
         onLayout={(event) => {
           const nextHeight = event.nativeEvent.layout.height;
@@ -91,7 +99,12 @@ export default function LoginScreen() {
           setLockedHeight((current) => current ?? nextHeight);
         }}
       >
-        <View testID="login-content" style={styles.content}>
+        <Pressable
+          accessible={false}
+          onPress={Keyboard.dismiss}
+          testID="login-content"
+          style={styles.content}
+        >
           <View style={styles.hero}>
             <MotionEnter
               enabled={enterMotion}
@@ -193,7 +206,7 @@ export default function LoginScreen() {
               </AppText>
             </MotionPressable>
           </MotionEnter>
-        </View>
+        </Pressable>
         <AppText variant="caption" tone="disabled" style={styles.copy}>
           © 열린문교회
         </AppText>

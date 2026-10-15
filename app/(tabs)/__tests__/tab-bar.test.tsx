@@ -1,6 +1,6 @@
 import { fireEvent, screen } from "@testing-library/react-native";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
-import { usePathname } from "expo-router";
+import { router, usePathname } from "expo-router";
 import { AppTabBar } from "../_layout";
 import { renderWithClient } from "../../../src/test/renderWithClient";
 
@@ -63,11 +63,12 @@ describe("root tab bar", () => {
     }
   });
 
-  it("opens a different root tab", () => {
+  it("opens a different root tab and navigates to its root page", () => {
     const { navigate } = renderTabBar(1, "/market");
 
     fireEvent.press(screen.getByTestId("tab-prayer"));
 
     expect(navigate).toHaveBeenCalledWith("prayer");
+    expect(router.replace).toHaveBeenCalledWith("/prayer");
   });
 });

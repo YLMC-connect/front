@@ -12,11 +12,15 @@ import {
 import { Screen } from "../../../src/components/layout/Screen";
 import { TopBar, VisualThumb } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { useMemberMe } from "../../../src/hooks/useMember";
 
 const faithYears = ["1년 미만", "1-3년", "3-5년", "5-10년", "10년 이상"];
 
 export default function LifeStudyApplyScreenRoute() {
   const router = useRouter();
+  const { data: member } = useMemberMe();
+  const memberName = member?.name || "사용자";
+  const memberPhone = member?.phone || "010-1234-5678";
 
   return (
     <Screen scroll={false} padded={false}>
@@ -52,9 +56,9 @@ export default function LifeStudyApplyScreenRoute() {
             </View>
 
             <View style={styles.form}>
-              <Field label="이름" value="김은혜" />
+              <Field label="이름" value={memberName} />
               <View style={styles.twoCols}>
-                <Field label="연락처" value="010-1234-5678" />
+                <Field label="연락처" value={memberPhone} />
                 <Field label="생년" value="1988" />
               </View>
               <Field label="소속 부서" placeholder="예) 4부 청장년부" />

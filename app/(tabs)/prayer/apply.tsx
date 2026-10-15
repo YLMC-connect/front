@@ -13,6 +13,7 @@ import {
 import { Screen } from "../../../src/components/layout/Screen";
 import { Badge, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { useMemberMe } from "../../../src/hooks/useMember";
 
 const days = ["월", "화", "수", "목", "금", "토"] as const;
 const dayNames: Record<(typeof days)[number], string> = {
@@ -27,10 +28,13 @@ const times = ["오전", "오후"] as const;
 
 export default function PrayerApplyScreenRoute() {
   const router = useRouter();
+  const { data: member } = useMemberMe();
   const [selectedDay, setSelectedDay] = useState<(typeof days)[number]>("월");
   const [selectedTime, setSelectedTime] =
     useState<(typeof times)[number]>("오전");
   const selectedLabel = `${dayNames[selectedDay]} ${selectedTime} 기도방`;
+  const memberName = member?.name || "사용자";
+  const memberPhone = member?.phone || "010-1234-5678";
 
   return (
     <Screen scroll={false} padded={false}>
@@ -95,8 +99,8 @@ export default function PrayerApplyScreenRoute() {
 
               <View style={styles.card}>
                 <Text style={styles.cardTitle}>신청자 정보</Text>
-                <Field label="이름" value="김은혜" />
-                <Field label="연락처" value="010-1234-5678" />
+                <Field label="이름" value={memberName} />
+                <Field label="연락처" value={memberPhone} />
                 <View>
                   <Text style={styles.fieldLabel}>신청 메모</Text>
                   <TextInput

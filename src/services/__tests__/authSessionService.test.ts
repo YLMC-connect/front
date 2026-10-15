@@ -24,6 +24,7 @@ function setup() {
       refreshToken: "rotated-refresh-token",
     }),
     getCurrentMember: jest.fn().mockResolvedValue(MOCK_USER),
+    updateCurrentMember: jest.fn().mockResolvedValue(MOCK_USER),
   };
   const tokenStore: jest.Mocked<AuthTokenStore> = {
     getTokens: jest.fn().mockResolvedValue({

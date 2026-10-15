@@ -11,7 +11,9 @@ import {
 import { Screen } from "../../../src/components/layout/Screen";
 import { TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { useMemberMe } from "../../../src/hooks/useMember";
 import { readDesignVariant } from "../../../src/lib/designVariant";
+import { getGivenName } from "../../../src/lib/koreanName";
 
 type Variant =
   | "default"
@@ -74,12 +76,15 @@ function ProfileTextInput({
 export default function EditProfileScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ designVariant?: string }>();
+  const { data: member } = useMemberMe();
   const variant = variantOf(readDesignVariant(params.designVariant));
   const hasChange = variant !== "default";
   const isPhoneDup = variant === "phone-dup";
   const isCurrentPwError = variant === "current-pw-error";
   const isPwMismatch = variant === "pw-mismatch";
-  const phone = isPhoneDup ? "010-9999-9999" : "010-2345-6789";
+  const memberName = member?.name || "사용자";
+  const avatarText = getGivenName(memberName) || memberName;
+  const phone = isPhoneDup ? "010-9999-9999" : member?.phone || "010-2345-6789";
 
   return (
     <Screen scroll={false} padded={false}>
@@ -112,11 +117,11 @@ export default function EditProfileScreen() {
           >
             <View style={styles.profileCard}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>은혜</Text>
+                <Text style={styles.avatarText}>{avatarText}</Text>
               </View>
               <View style={styles.profileText}>
                 <Text style={styles.readonlyLabel}>이름</Text>
-                <Text style={styles.name}>김은혜</Text>
+                <Text style={styles.name}>{memberName}</Text>
                 <Text style={styles.readonlyHint}>
                   이름과 프로필은 변경할 수 없어요
                 </Text>

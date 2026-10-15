@@ -53,6 +53,21 @@ describe("mockAuthAdapter", () => {
       mockAuthAdapter.login({ id: "gracekim", password: "password" }),
     ).rejects.toThrow("아이디 또는 비밀번호가 올바르지 않습니다");
   });
+
+  it("returns mock user on getCurrentMember", async () => {
+    await expect(mockAuthAdapter.getCurrentMember()).resolves.toEqual(
+      MOCK_USER,
+    );
+  });
+
+  it("updates phone on mockAuthAdapter.updateCurrentMember", async () => {
+    await expect(
+      mockAuthAdapter.updateCurrentMember({ phone: "010-9999-9999" }),
+    ).resolves.toMatchObject({
+      ...MOCK_USER,
+      phone: "010-9999-9999",
+    });
+  });
 });
 
 describe("httpAuthAdapter", () => {
@@ -245,5 +260,52 @@ describe("httpAuthAdapter", () => {
       role: "USER",
     });
     expect(request).toHaveBeenCalledWith("/api/member/me");
+  });
+
+  it("loads the current member from /api/member/me with phone, email, point, department", async () => {
+    const { request, adapter } = setup();
+    request.mockResolvedValue({
+      id: "ylmc",
+      userName: "열린문",
+      phone: "010-1234-5678",
+      email: "ylmc@example.com",
+      point: 100,
+      mokjangName: "믿음목장",
+      role: "USER",
+    });
+
+    await expect(adapter.getCurrentMember()).resolves.toEqual({
+      id: "ylmc",
+      name: "열린문",
+      phone: "010-1234-5678",
+      email: "ylmc@example.com",
+      point: 100,
+      department: "믿음목장",
+      role: "USER",
+    });
+    expect(request).toHaveBeenCalledWith("/api/member/me");
+  });
+
+  it("updates the current member through PUT /api/member/me", async () => {
+    const { request, adapter } = setup();
+    request.mockResolvedValue({
+      id: "ylmc",
+      userName: "열린문",
+      phone: "010-9999-8888",
+      role: "USER",
+    });
+
+    await expect(
+      adapter.updateCurrentMember({ phone: "010-9999-8888" }),
+    ).resolves.toEqual({
+      id: "ylmc",
+      name: "열린문",
+      phone: "010-9999-8888",
+      role: "USER",
+    });
+    expect(request).toHaveBeenCalledWith("/api/member/me", {
+      method: "PUT",
+      body: JSON.stringify({ phone: "010-9999-8888" }),
+    });
   });
 });

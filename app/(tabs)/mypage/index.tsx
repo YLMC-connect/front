@@ -6,6 +6,7 @@ import { Screen, Section } from "../../../src/components/layout/Screen";
 import { Avatar, Card, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import { useAuth } from "../../../src/hooks/useAuth";
+import { useMemberMe } from "../../../src/hooks/useMember";
 
 type IconName = ComponentProps<typeof AppIcon>["name"];
 
@@ -58,6 +59,12 @@ const manageItems: MenuItem[] = [
 export default function MyPageScreen() {
   const router = useRouter();
   const { logout } = useAuth();
+  const { data: member } = useMemberMe();
+
+  const memberName = member?.name || "사용자";
+  const churchLabel = member?.department
+    ? `열린문교회 · ${member.department}`
+    : "열린문교회";
 
   const handleMenuPress = async (item: MenuItem) => {
     if (item.action === "logout") {
@@ -82,10 +89,14 @@ export default function MyPageScreen() {
         <TopBar title="마이페이지" back onBack={() => router.back()} />
         <ScrollView contentContainerStyle={styles.body}>
           <Card style={styles.profileCard}>
-            <Avatar name="김은혜" size={60} seed="김은혜" />
+            <Avatar
+              name={memberName}
+              size={60}
+              seed={member?.id || memberName}
+            />
             <View style={styles.profileText}>
-              <Text style={styles.name}>김은혜</Text>
-              <Text style={styles.church}>열린문교회</Text>
+              <Text style={styles.name}>{memberName}</Text>
+              <Text style={styles.church}>{churchLabel}</Text>
             </View>
             <Pressable
               accessibilityRole="button"

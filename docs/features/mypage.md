@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 내 정보 조회 HTTP 연동 — `/api/member/me` 내 정보 조회 API 연동 및 프로필 카드/수정 화면, 삶공부/중보기도 신청 화면의 하드코딩된 이름/연락처를 현재 로그인 사용자 정보로 바인딩
 - 마이페이지 활동 HTTP adapter — development 기본값은 나눔과 같이 http다. 활동 화면은 `GET /api/mypage/activities`의 나눔 글·댓글·소모임을 보여 준다. 테스트와 `EXPO_PUBLIC_MYPAGE_ADAPTER=mock`은 기존 로컬 목록을 쓴다
 - 홈 진입 MY 뒤로가기 보완 — 하단 탭이 아닌 홈 '내 정보'에서 push되는 `/mypage` 루트에도 공통 `chevron-left + 뒤로`를 표시하고 `router.back()`으로 홈에 복귀하며, Screen의 이중 여백을 제거하고 `theme.layout.screenX`(20px) 기준으로 뒤로 버튼과 본문 컨텐츠 좌우 여백을 일치
 - 공통 TopBar 디자인 시스템 반영 — MY 상세 화면이 역할형 section title·caption subtitle과 44px back target, semantic text 대비를 공통으로 상속
@@ -51,6 +52,7 @@
 | `src/services/mypageService.ts`         | 활동 mock 기본, http adapter 전환 |
 | `src/services/mypageHttpDataSource.ts`  | 활동 5종 HTTP data source         |
 | `src/services/mypageMapper.ts`          | Notion DTO → 활동 화면 행         |
+| `src/hooks/useMember.ts`                | 내 정보 조회 및 수정 훅           |
 | `src/mocks/mypageActivity.ts`           | 활동 화면 로컬 목록               |
 | `app/(tabs)/mypage/blocked.tsx`         | 차단 사용자 목록과 해제 상태      |
 | `app/(tabs)/mypage/faq.tsx`             | FAQ 목록과 empty state            |

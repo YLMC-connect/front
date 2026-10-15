@@ -27,3 +27,12 @@ export interface MemberDuplicateResponse {
 export interface MemberSignupResponse {
   userStatus?: string;
 }
+
+export interface MemberVerifyPasswordRequest {
+  password: string;
+}
+
+export interface MemberChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}

@@ -64,6 +64,24 @@ export async function updateCurrentMember(input: {
   return member;
 }
 
+export async function verifyPassword(input: {
+  password: string;
+}): Promise<boolean> {
+  return authAdapter.verifyPassword(input);
+}
+
+export async function changePassword(input: {
+  currentPassword: string;
+  newPassword: string;
+}): Promise<void> {
+  return authAdapter.changePassword(input);
+}
+
+export async function withdrawMember(): Promise<void> {
+  await authAdapter.withdraw();
+  await logout();
+}
+
 configureAuthRecovery(async () => {
   await refreshSession();
 });

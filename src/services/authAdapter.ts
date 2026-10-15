@@ -15,8 +15,10 @@ import type {
 } from "../types/auth";
 import type {
   AuthTokenResponse,
+  MemberChangePasswordRequest,
   MemberDuplicateResponse,
   MemberMeResponse,
+  MemberVerifyPasswordRequest,
 } from "../types/authApi";
 import type { Member } from "../types/common";
 
@@ -37,6 +39,9 @@ export interface AuthAdapter {
   refresh(refreshToken: string): Promise<AuthSession>;
   getCurrentMember(): Promise<Member>;
   updateCurrentMember(input: { phone: string }): Promise<Member>;
+  verifyPassword(input: MemberVerifyPasswordRequest): Promise<boolean>;
+  changePassword(input: MemberChangePasswordRequest): Promise<void>;
+  withdraw(): Promise<void>;
 }
 
 export const mockAuthAdapter: AuthAdapter = {
@@ -98,6 +103,21 @@ export const mockAuthAdapter: AuthAdapter = {
       phone: input.phone,
     };
   },
+
+  async verifyPassword(input) {
+    if (input.password.trim() === MOCK_LOGIN_CREDENTIALS.password) {
+      return true;
+    }
+    throw new Error("비밀번호가 일치하지 않습니다");
+  },
+
+  async changePassword(input) {
+    if (input.currentPassword.trim() !== MOCK_LOGIN_CREDENTIALS.password) {
+      throw new Error("현재 비밀번호가 일치하지 않습니다");
+    }
+  },
+
+  async withdraw() {},
 };
 
 export function createHttpAuthAdapter(
@@ -168,6 +188,27 @@ export function createHttpAuthAdapter(
         body: JSON.stringify(input),
       });
       return mapMemberFromMe(data);
+    },
+
+    async verifyPassword(input) {
+      await client.request("/api/member/verify-password", {
+        method: "POST",
+        body: JSON.stringify(input),
+      });
+      return true;
+    },
+
+    async changePassword(input) {
+      await client.request("/api/member/password", {
+        method: "PUT",
+        body: JSON.stringify(input),
+      });
+    },
+
+    async withdraw() {
+      await client.request("/api/member/me", {
+        method: "DELETE",
+      });
     },
   };
 }

@@ -385,7 +385,17 @@ export default function MarketDetailScreen() {
             <View style={styles.actions}>
               {isOwn && !isDone ? (
                 <>
-                  <DetailAction icon="edit" label="수정" />
+                  <DetailAction
+                    testID="market-edit-post"
+                    icon="edit"
+                    label="수정"
+                    onPress={() =>
+                      router.push({
+                        pathname: "/modal/market-new",
+                        params: { id: market.id, designVariant: "edit" },
+                      })
+                    }
+                  />
                   <DetailAction
                     testID="market-delete-post"
                     icon="delete-outline"

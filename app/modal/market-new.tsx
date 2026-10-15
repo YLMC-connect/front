@@ -23,7 +23,10 @@ import {
 } from "../../src/components/ui";
 import { MARKET_CATEGORIES } from "../../src/constants/domainOptions";
 import { theme } from "../../src/constants/theme";
-import { useCreateMarketPost } from "../../src/hooks/useMarket";
+import {
+  useCreateMarketPost,
+  useUpdateMarketPost,
+} from "../../src/hooks/useMarket";
 import { readDesignVariant } from "../../src/lib/designVariant";
 import type { MarketInput } from "../../src/types/market";
 
@@ -54,7 +57,10 @@ const emptyValues: MarketInput = {
 
 export default function MarketNewModal() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ designVariant?: string }>();
+  const params = useLocalSearchParams<{
+    designVariant?: string;
+    id?: string;
+  }>();
   const variant = readDesignVariant(params.designVariant) ?? "create";
   const isEdit = variant === "edit";
   const useFilledValues =
@@ -70,6 +76,7 @@ export default function MarketNewModal() {
   const [error, setError] = useState<string>();
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
   const createPost = useCreateMarketPost();
+  const updatePost = useUpdateMarketPost(params.id ?? "");
   const isDirty = JSON.stringify(values) !== JSON.stringify(initialValues);
 
   const update = <Key extends keyof MarketInput>(
@@ -91,13 +98,25 @@ export default function MarketNewModal() {
   const submit = async () => {
     setError(undefined);
     try {
-      const created = await createPost.mutateAsync(values);
-      router.replace(`/market/${created.id}`);
+      if (params.id) {
+        await updatePost.mutateAsync({
+          title: values.title,
+          description: values.description,
+          category: values.category,
+          condition: values.condition,
+        });
+        router.replace(`/market/${params.id}`);
+      } else {
+        const created = await createPost.mutateAsync(values);
+        router.replace(`/market/${created.id}`);
+      }
     } catch (submitError) {
       setError(
         submitError instanceof Error
           ? submitError.message
-          : "나눔을 등록하지 못했습니다.",
+          : isEdit
+            ? "나눔을 수정하지 못했습니다."
+            : "나눔을 등록하지 못했습니다.",
       );
     }
   };

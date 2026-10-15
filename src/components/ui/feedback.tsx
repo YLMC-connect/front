@@ -1,6 +1,13 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useState, type ComponentProps } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -17,6 +24,7 @@ export type EmptyProps = {
   icon?: IconName;
   actionLabel?: string;
   onAction?: () => void;
+  style?: StyleProp<ViewStyle>;
   testID?: string;
 };
 
@@ -26,10 +34,11 @@ export function Empty({
   icon = "inbox",
   actionLabel,
   onAction,
+  style,
   testID,
 }: EmptyProps) {
   return (
-    <View style={styles.state} testID={testID}>
+    <View style={[styles.state, style]} testID={testID}>
       <View style={styles.stateIcon}>
         <AppIcon name={icon} size={42} color={theme.colors.inkHint} />
       </View>

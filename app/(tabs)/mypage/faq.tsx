@@ -34,13 +34,15 @@ export default function FaqScreen() {
       <View style={styles.root}>
         <TopBar title="자주 묻는 질문" back onBack={() => router.back()} />
         {empty ? (
-          <Empty
-            icon="help-outline"
-            title="등록된 FAQ가 없어요"
-            description={
-              "지금은 등록된 질문이 없어요.\n궁금한 점은 1:1 문의로 연락주세요."
-            }
-          />
+          <View style={styles.emptyWrap}>
+            <Empty
+              icon="help-outline"
+              title="등록된 FAQ가 없어요"
+              description={
+                "지금은 등록된 질문이 없어요.\n궁금한 점은 1:1 문의로 연락주세요."
+              }
+            />
+          </View>
         ) : (
           <ScrollView contentContainerStyle={styles.body}>
             <ScrollView
@@ -172,5 +174,11 @@ const styles = StyleSheet.create({
     color: theme.colors.inkSoft,
     fontSize: 13.5,
     lineHeight: 22,
+  },
+  emptyWrap: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingBottom: 60,
   },
 });

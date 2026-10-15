@@ -119,10 +119,12 @@ export default function PrayerRequestScreenRoute() {
               <Text style={styles.desc}>기도제목을 다시 불러와주세요.</Text>
             ) : null}
             {http && topics.isSuccess && rows.length === 0 ? (
-              <Empty
-                title="등록된 기도제목이 없어요"
-                description="기도제목을 작성하여 중보기도를 요청해보세요."
-              />
+              <View style={styles.emptyWrap}>
+                <Empty
+                  title="등록된 기도제목이 없어요"
+                  description="기도제목을 작성하여 중보기도를 요청해보세요."
+                />
+              </View>
             ) : null}
             {rows.map((request) => (
               <Pressable
@@ -248,5 +250,10 @@ const styles = StyleSheet.create({
     color: theme.colors.white,
     fontSize: theme.fontSize.md,
     fontWeight: theme.fontWeight.bold,
+  },
+  emptyWrap: {
+    paddingHorizontal: 16,
+    paddingTop: 64,
+    paddingBottom: 80,
   },
 });

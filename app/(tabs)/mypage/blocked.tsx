@@ -43,13 +43,15 @@ export default function BlockedScreen() {
 
           <View style={styles.list}>
             {users.length === 0 ? (
-              <Empty
-                title="차단한 사용자가 없어요"
-                description={
-                  "프로필 화면에서 언제든지\n상대를 차단할 수 있어요."
-                }
-                icon="block"
-              />
+              <View style={styles.emptyWrap}>
+                <Empty
+                  title="차단한 사용자가 없어요"
+                  description={
+                    "프로필 화면에서 언제든지\n상대를 차단할 수 있어요."
+                  }
+                  icon="block"
+                />
+              </View>
             ) : (
               users.map((user, index) => (
                 <View
@@ -152,5 +154,10 @@ const styles = StyleSheet.create({
     color: theme.colors.primaryDeep,
     fontSize: theme.fontSize.xs,
     fontWeight: theme.fontWeight.bold,
+  },
+  emptyWrap: {
+    paddingHorizontal: 14,
+    paddingTop: 80,
+    paddingBottom: 80,
   },
 });

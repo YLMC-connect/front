@@ -346,6 +346,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
+    flexGrow: 1,
     paddingTop: SCREEN_HEADER_HEIGHT,
   },
   scrollInner: {

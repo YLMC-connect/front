@@ -500,10 +500,12 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[2],
   },
   list: {
+    flex: 1,
     gap: theme.spacing[3],
     paddingBottom: 164,
   },
   myListWrap: {
+    flex: 1,
     gap: theme.spacing[3],
   },
   fullList: {
@@ -597,13 +599,19 @@ const styles = StyleSheet.create({
     bottom: 86,
   },
   emptyWrap: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 32,
-    paddingTop: 56,
-    paddingBottom: 60,
+    paddingTop: 32,
+    paddingBottom: 100,
   },
   emptyWrapExpanded: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 32,
-    paddingTop: 100,
+    paddingTop: 32,
     paddingBottom: 100,
   },
 });

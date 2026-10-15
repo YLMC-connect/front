@@ -96,10 +96,12 @@ export default function LifeStudyHistoryScreen() {
               {!completions.isPending &&
               !completions.isError &&
               rows.length === 0 ? (
-                <Empty
-                  title="수료 기록이 없어요"
-                  description="삶공부 과정을 수료하면 수료 기록이 여기에 표시돼요."
-                />
+                <View style={styles.emptyWrap}>
+                  <Empty
+                    title="수료 기록이 없어요"
+                    description="삶공부 과정을 수료하면 수료 기록이 여기에 표시돼요."
+                  />
+                </View>
               ) : null}
               {rows.length > 0 ? (
                 <View style={styles.stack}>
@@ -452,5 +454,10 @@ const styles = StyleSheet.create({
     color: theme.colors.primaryDeep,
     fontSize: 22,
     fontWeight: theme.fontWeight.extrabold,
+  },
+  emptyWrap: {
+    paddingHorizontal: 16,
+    paddingTop: 48,
+    paddingBottom: 60,
   },
 });

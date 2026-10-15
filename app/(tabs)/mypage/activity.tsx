@@ -102,19 +102,23 @@ export default function ActivityScreen() {
 
         <ScrollView contentContainerStyle={styles.body}>
           {isDesignEmpty ? (
-            <Empty
-              icon="schedule"
-              title="활동 내역이 없어요"
-              description={
-                "나눔 게시글, 댓글, 소모임 참여가\n이곳에 모여서 쉽게 살펴볼 수 있어요."
-              }
-            />
+            <View style={styles.emptyWrap}>
+              <Empty
+                icon="schedule"
+                title="활동 내역이 없어요"
+                description={
+                  "나눔 게시글, 댓글, 소모임 참여가\n이곳에 모여서 쉽게 살펴볼 수 있어요."
+                }
+              />
+            </View>
           ) : activeTab === "posts" ? (
             posts.length === 0 ? (
-              <Empty
-                title="작성한 나눔 게시글이 없어요"
-                description="나눔 탭에서 첫 글을 올려보세요."
-              />
+              <View style={styles.emptyWrap}>
+                <Empty
+                  title="작성한 나눔 게시글이 없어요"
+                  description="나눔 탭에서 첫 글을 올려보세요."
+                />
+              </View>
             ) : (
               posts.map((post, index) => (
                 <PostRow
@@ -126,10 +130,12 @@ export default function ActivityScreen() {
             )
           ) : activeTab === "comments" ? (
             comments.length === 0 ? (
-              <Empty
-                title="작성한 댓글이 없어요"
-                description="게시글에 따뜻한 댓글을 남겨보세요."
-              />
+              <View style={styles.emptyWrap}>
+                <Empty
+                  title="작성한 댓글이 없어요"
+                  description="게시글에 따뜻한 댓글을 남겨보세요."
+                />
+              </View>
             ) : (
               comments.map((comment, index) => (
                 <CommentRow
@@ -140,10 +146,12 @@ export default function ActivityScreen() {
               ))
             )
           ) : groups.length === 0 ? (
-            <Empty
-              title="참여 중인 소모임이 없어요"
-              description="소모임 탭에서 관심 있는 모임에 참여해보세요."
-            />
+            <View style={styles.emptyWrap}>
+              <Empty
+                title="참여 중인 소모임이 없어요"
+                description="소모임 탭에서 관심 있는 모임에 참여해보세요."
+              />
+            </View>
           ) : (
             groups.map((group, index) => (
               <GroupRow
@@ -305,5 +313,10 @@ const styles = StyleSheet.create({
     marginTop: 4,
     color: theme.colors.inkMute,
     fontSize: theme.fontSize.sm,
+  },
+  emptyWrap: {
+    paddingHorizontal: 14,
+    paddingTop: 72,
+    paddingBottom: 80,
   },
 });

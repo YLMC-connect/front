@@ -15,6 +15,9 @@ import type {
   GroupNoticeUpdateInput,
   GroupOverview,
   GroupInput,
+  GroupUpdateInput,
+  GroupStatusUpdateInput,
+  GroupKickMemberInput,
 } from "../types/group";
 
 export interface GroupDataSource {
@@ -22,6 +25,10 @@ export interface GroupDataSource {
   getDetail(id: string): Promise<GroupDetail>;
   getMembers(id: string): Promise<GroupMemberDetail[]>;
   createGroup(input: GroupInput): Promise<GroupDetail>;
+  updateGroup(input: GroupUpdateInput): Promise<GroupDetail>;
+  deleteGroup(id: string): Promise<void>;
+  kickMember(input: GroupKickMemberInput): Promise<void>;
+  updateGroupStatus(input: GroupStatusUpdateInput): Promise<GroupDetail>;
   joinGroup(id: string): Promise<GroupDetail>;
   leaveGroup(id: string): Promise<GroupDetail>;
   createNotice(
@@ -195,6 +202,85 @@ export const mockGroupDataSource: GroupDataSource = {
     mockGroupNotices.set(id, []);
     return detail;
   },
+  async updateGroup(input) {
+    await delay();
+    const detail = readMockDetail(input.groupId);
+    const categoryLabel =
+      GROUP_CATEGORIES.find(({ key }) => key === input.category)?.label ??
+      input.category;
+    const updated: GroupDetail = {
+      ...detail,
+      name: input.name,
+      description: input.description,
+      categoryLabel,
+      maxMembers: input.maxMembers,
+    };
+    persistMockDetail(updated);
+    const overviewIdx = mockCreatedGroups.findIndex(
+      (g) => g.id === input.groupId,
+    );
+    if (overviewIdx >= 0) {
+      mockCreatedGroups[overviewIdx] = {
+        ...mockCreatedGroups[overviewIdx],
+        name: input.name,
+        description: input.description,
+        category: input.category,
+        maxMembers: input.maxMembers,
+      };
+    }
+    return updated;
+  },
+  async deleteGroup(id) {
+    await delay();
+    mockCreatedDetails.delete(id);
+    mockCreatedMembers.delete(id);
+    mockGroupNotices.delete(id);
+    const idx = mockCreatedGroups.findIndex((g) => g.id === id);
+    if (idx >= 0) {
+      mockCreatedGroups.splice(idx, 1);
+    }
+  },
+  async kickMember(input) {
+    await delay();
+    const members = (
+      mockCreatedMembers.get(input.groupId) ??
+      mockGroupMembers[input.groupId] ??
+      []
+    ).filter((member) => member.userId !== input.targetUserId);
+    mockCreatedMembers.set(input.groupId, members);
+    const detail = readMockDetail(input.groupId);
+    const kickedMember = (
+      mockCreatedMembers.get(input.groupId) ??
+      mockGroupMembers[input.groupId] ??
+      []
+    ).find((m) => m.userId === input.targetUserId);
+    persistMockDetail({
+      ...detail,
+      currentMembers: Math.max(0, detail.currentMembers - 1),
+      members: detail.members.filter((name) =>
+        kickedMember ? name !== kickedMember.userName : true,
+      ),
+    });
+  },
+  async updateGroupStatus(input) {
+    await delay();
+    const detail = readMockDetail(input.groupId);
+    const updated: GroupDetail = {
+      ...detail,
+      status: input.status,
+    };
+    persistMockDetail(updated);
+    const overviewIdx = mockCreatedGroups.findIndex(
+      (g) => g.id === input.groupId,
+    );
+    if (overviewIdx >= 0) {
+      mockCreatedGroups[overviewIdx] = {
+        ...mockCreatedGroups[overviewIdx],
+        status: input.status,
+      };
+    }
+    return updated;
+  },
   async joinGroup(id) {
     await delay();
     const detail = readMockDetail(id);
@@ -337,6 +423,30 @@ export function createGroupService(dataSource: GroupDataSource) {
       if (!normalized.location) throw new Error("모임 장소를 입력해주세요.");
       return dataSource.createGroup(normalized);
     },
+    updateGroup: (input: GroupUpdateInput) => {
+      const normalized = {
+        ...input,
+        name: input.name.trim(),
+        description: input.description.trim(),
+      };
+      if (normalized.name.length < 2 || normalized.name.length > 20) {
+        throw new Error("소모임명은 2~20자로 입력해주세요.");
+      }
+      if (
+        normalized.description.length < 5 ||
+        normalized.description.length > 200
+      ) {
+        throw new Error("설명은 5~200자로 입력해주세요.");
+      }
+      if (normalized.maxMembers < 2 || normalized.maxMembers > 100) {
+        throw new Error("최대 인원은 2~100명으로 입력해주세요.");
+      }
+      return dataSource.updateGroup(normalized);
+    },
+    deleteGroup: (id: string) => dataSource.deleteGroup(id),
+    kickMember: (input: GroupKickMemberInput) => dataSource.kickMember(input),
+    updateGroupStatus: (input: GroupStatusUpdateInput) =>
+      dataSource.updateGroupStatus(input),
     joinGroup: async (id: string) => {
       const detail = await dataSource.getDetail(id);
       if (detail.isJoined) return detail;
@@ -380,6 +490,10 @@ export const fetchGroupOverview = groupService.fetchOverview;
 export const fetchGroupDetail = groupService.fetchDetail;
 export const fetchGroupMembers = groupService.fetchMembers;
 export const createGroup = groupService.createGroup;
+export const updateGroup = groupService.updateGroup;
+export const deleteGroup = groupService.deleteGroup;
+export const kickGroupMember = groupService.kickMember;
+export const updateGroupStatus = groupService.updateGroupStatus;
 export const joinGroup = groupService.joinGroup;
 export const leaveGroup = groupService.leaveGroup;
 export const createGroupNotice = groupService.createNotice;

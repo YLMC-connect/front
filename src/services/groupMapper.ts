@@ -98,6 +98,10 @@ export function toCommunionCategoryCode(
   ];
 }
 
+export function toCommunionStatus(status: GroupStatus): string {
+  return status === "open" ? "RECRUITING" : "COMPLETED";
+}
+
 export function toNoticePreview(content: string) {
   return content.replace(/\s+/g, " ").trim().slice(0, 100);
 }

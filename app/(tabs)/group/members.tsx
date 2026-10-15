@@ -1,5 +1,6 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -18,19 +19,28 @@ import {
   TopBar,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
-import { useGroupMembers } from "../../../src/hooks/useGroups";
+import {
+  useGroupMembers,
+  useKickGroupMember,
+} from "../../../src/hooks/useGroups";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 import type { GroupMemberDetail } from "../../../src/types/group";
 
 export default function GroupMembersScreenRoute() {
   const router = useRouter();
   const params = useLocalSearchParams<{
+    id?: string;
     groupId?: string;
     designVariant?: string;
   }>();
-  const groupId = params.groupId ?? "1";
+  const groupId = params.groupId ?? params.id ?? "1";
   const variant = readDesignVariant(params.designVariant) ?? "default";
   const membersQuery = useGroupMembers(groupId);
+  const kickMemberMutation = useKickGroupMember(groupId);
+  const [kickingMember, setKickingMember] = useState<GroupMemberDetail | null>(
+    null,
+  );
+  const [toastMessage, setToastMessage] = useState<string>();
   const members = membersQuery.data ?? [];
   const isTransfer = variant === "transfer" || variant === "transfer-confirm";
   const transferTarget = isTransfer ? "박정아" : null;
@@ -73,6 +83,7 @@ export default function GroupMembersScreenRoute() {
               transfer={isTransfer}
               selected={member.userName === transferTarget}
               last={index === members.length - 1}
+              onKick={() => setKickingMember(member)}
             />
           ))}
         </ScrollView>
@@ -84,13 +95,33 @@ export default function GroupMembersScreenRoute() {
         ) : null}
 
         <ConfirmDialog
-          visible={variant === "kick-confirm"}
-          title="이수진님을 강퇴하시겠습니까?"
+          visible={variant === "kick-confirm" || Boolean(kickingMember)}
+          title={`${variant === "kick-confirm" ? "이수진" : (kickingMember?.userName ?? "")}님을 강퇴하시겠습니까?`}
           message="강퇴된 멤버는 다시 신청할 수 없어요."
           confirmText="강퇴"
           danger
-          onCancel={() => router.back()}
-          onConfirm={() => router.back()}
+          onCancel={() => {
+            if (variant === "kick-confirm") {
+              router.back();
+            } else {
+              setKickingMember(null);
+            }
+          }}
+          onConfirm={async () => {
+            if (variant === "kick-confirm") {
+              router.back();
+              return;
+            }
+            if (!kickingMember || kickMemberMutation.isPending) return;
+            try {
+              const name = kickingMember.userName;
+              await kickMemberMutation.mutateAsync(kickingMember.userId);
+              setKickingMember(null);
+              setToastMessage(`${name}님이 강퇴되었습니다`);
+            } catch {
+              setKickingMember(null);
+            }
+          }}
         />
         <ConfirmDialog
           visible={variant === "transfer-confirm"}
@@ -102,7 +133,9 @@ export default function GroupMembersScreenRoute() {
         />
         <Toast
           message={
-            variant === "kick-toast" ? "이수진님이 강퇴되었습니다" : undefined
+            variant === "kick-toast"
+              ? "이수진님이 강퇴되었습니다"
+              : toastMessage
           }
           offset={28}
         />
@@ -116,11 +149,13 @@ function MemberRow({
   transfer,
   selected,
   last,
+  onKick,
 }: {
   member: GroupMemberDetail;
   transfer: boolean;
   selected: boolean;
   last: boolean;
+  onKick?: () => void;
 }) {
   const candidate = transfer && !member.isLeader;
 
@@ -148,7 +183,11 @@ function MemberRow({
         <Text style={styles.joined}>{member.joinedLabel} 가입</Text>
       </View>
       {!transfer && !member.isLeader ? (
-        <Pressable accessibilityRole="button" style={styles.kickButton}>
+        <Pressable
+          accessibilityRole="button"
+          style={styles.kickButton}
+          onPress={onKick}
+        >
           <AppIcon name="close" size={12} color={theme.colors.danger} />
           <Text style={styles.kickText}>강퇴</Text>
         </Pressable>

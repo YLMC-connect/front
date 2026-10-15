@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 나눔 게시글 수정 API 연동 — `PUT /api/share/{id}` 엔드포인트를 `httpMarketDataSource`, `marketService`, `useUpdateMarketPost` mutation 훅과 `app/modal/market-new.tsx` 수정 화면에 연결하여 제목·내용·카테고리·물품 상태를 서버와 동기화.
 - 나눔 HTTP data source — 라이브 `GET/POST /api/share`, 상세·댓글 CUD, 삭제를 `httpMarketDataSource`로 연결. 상태/카테고리/물품상태는 `GET /api/common-codes?groupCode=`에서 관측한 값만 매핑. 목록 `authorName`·장소·이미지 업로드 URL·신고 enum은 없어 목록 작성자는 `authorId`, 장소는 요청에서 제외, 신고는 HTTP로 보내지 않음. development 기본값은 HTTP
 - 나눔 작성 폼 구획·상단 여백·포커스 통일 — 사진부터 수령 장소까지 이어지는 8px 회색 section divider를 제거해 하나의 폼 흐름으로 정리하고, 홈·나눔·동행·삶공부와 같은 기기 safe area + 상단 20px 기준을 적용했으며 제목·설명·장소 입력을 소모임 개설과 같은 공통 `ModalFormTextInput`의 primary 2px 포커스로 통일하면서 입력·등록 동작은 유지
 - 나눔 탐색 control·FAB 비율 보정 — 상태 세그먼트와 카테고리 필터의 full pill을 유지한 채 시각 높이를 낮추고 44px 터치 범위를 보존했으며 `나눔하기` FAB를 46px로 축소해 하단 탭과 위계를 분리
@@ -88,6 +89,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-10-15) **나눔 게시글 수정(`PUT /api/share/{id}`) API를 HTTP 및 mock 경계에 연동한다** — 나눔 게시글 수정 기능을 `MarketDataSource`, `httpMarketDataSource`, `useUpdateMarketPost` 훅에 연결하고 모달(`app/modal/market-new.tsx`)에서 제목, 설명, 카테고리, 물품 상태를 서버에 전송하도록 구현합니다.
 - (2026-10-10) **나눔 상세 뒤로가기 버튼 영역 sticky 고정 및 사진 영역 이탈 시 배경색/타이틀 전환** — 기존 hero 이미지 내부 absolute 버튼 대신 화면 상단 고정 헤더(`stickyHeader`, 높이 56px)로 분리하여 스크롤 시에도 뒤로가기 버튼이 상단에 유지되도록 하고, 스크롤이 사진 영역(`width - 56px`)을 벗어나면 새벽기도 말씀요약 상단과 동일한 배경색(`theme.colors.bg`), 하단 보더(`theme.colors.line`), "나눔 상세" 타이틀을 갖도록 전환 처리. Issue #167.
 - (2026-08-13) **나눔 HTTP는 라이브 관측값과 common-codes만 매핑한다** — `SHARE_STATUS` AVAILABLE/RESERVED/COMPLETED, `SHARE_CATEGORY` 7개, `SHARE_ITEM_STATUS` NEW/USED/DAMAGED. 목록 DTO에 `authorName`/`images`가 없어 목록 작성자는 `authorId`를 쓰고 썸네일은 기존 `thumbSeed`를 유지한다. 생성은 multipart이며 서버가 받지 않는 `location`은 보내지 않는다. 신고 `reportReasonCode` enum이 공통 코드에 없어 HTTP 신고는 활성화하지 않는다. development 기본 adapter는 `http`.
 - (2026-07-16) **나눔 작성 폼은 회색 section divider 없이 내부 여백으로 구획하고 공통 탭 헤더·작성 입력 기준을 사용한다** — 사진·카테고리·제목·물품 상태·상세 설명·수령 장소의 기존 입력 surface와 section 내부 padding은 유지하면서 8px divider만 제거합니다. 작성 화면 상단은 홈·나눔·동행·삶공부의 `ScreenHeader`와 같은 기기 safe area + 20px을 사용하고, 텍스트 입력은 소모임 개설과 같은 `ModalFormTextInput`의 primary 2px 포커스를 공유합니다.

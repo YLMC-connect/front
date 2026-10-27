@@ -1,9 +1,9 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useRouter, type Href } from "expo-router";
-import type { ComponentProps } from "react";
+import { useState, type ComponentProps } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen, Section } from "../../../src/components/layout/Screen";
-import { Avatar, Card, TopBar } from "../../../src/components/ui";
+import { Avatar, Card, ConfirmDialog, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import { useAuth } from "../../../src/hooks/useAuth";
 import { useMemberMe } from "../../../src/hooks/useMember";
@@ -57,26 +57,32 @@ export default function MyPageScreen() {
   const router = useRouter();
   const { logout } = useAuth();
   const { data: member } = useMemberMe();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const memberName = member?.name || "사용자";
   const churchLabel = member?.department
     ? `열린문교회 · ${member.department}`
     : "열린문교회";
 
-  const handleMenuPress = async (item: MenuItem) => {
+  const handleMenuPress = (item: MenuItem) => {
     if (item.action === "logout") {
-      try {
-        await logout();
-      } catch {
-        // The in-memory session is cleared even if native token deletion fails.
-      } finally {
-        router.replace("/login");
-      }
+      setShowLogoutConfirm(true);
       return;
     }
 
     if (item.href) {
       router.push(item.href);
+    }
+  };
+
+  const handleConfirmLogout = async () => {
+    setShowLogoutConfirm(false);
+    try {
+      await logout();
+    } catch {
+      // The in-memory session is cleared even if native token deletion fails.
+    } finally {
+      router.replace("/login");
     }
   };
 
@@ -122,6 +128,15 @@ export default function MyPageScreen() {
 
           <Text style={styles.version}>v 1.0.2 · 열린문 커넥트</Text>
         </ScrollView>
+
+        <ConfirmDialog
+          visible={showLogoutConfirm}
+          title="로그아웃 하시겠어요?"
+          cancelText="취소"
+          confirmText="로그아웃"
+          onCancel={() => setShowLogoutConfirm(false)}
+          onConfirm={handleConfirmLogout}
+        />
       </View>
     </Screen>
   );

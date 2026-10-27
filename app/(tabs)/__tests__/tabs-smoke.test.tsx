@@ -901,7 +901,7 @@ describe("v1 tab smoke screens", () => {
     expect(back).toHaveBeenCalledTimes(1);
   });
 
-  it("clears the session before leaving my page on logout", async () => {
+  it("shows confirmation dialog and clears the session on confirmed logout", async () => {
     const logout = jest
       .spyOn(authService, "logout")
       .mockRejectedValueOnce(new Error("keystore delete failed"));
@@ -909,12 +909,26 @@ describe("v1 tab smoke screens", () => {
     jest.mocked(useRouter).mockReturnValue({ replace } as never);
     renderWithClient(<MyPageScreen />);
 
-    fireEvent.press(screen.getByText("로그아웃"));
+    fireEvent.press(screen.getByTestId("mypage-logout"));
+    expect(screen.getByText("로그아웃 하시겠어요?")).toBeTruthy();
+
+    const logoutButtons = screen.getAllByText("로그아웃");
+    fireEvent.press(logoutButtons[logoutButtons.length - 1]);
 
     await waitFor(() => {
       expect(logout).toHaveBeenCalledTimes(1);
       expect(replace).toHaveBeenCalledWith("/login");
     });
+  });
+
+  it("closes the logout dialog when cancelled", () => {
+    renderWithClient(<MyPageScreen />);
+
+    fireEvent.press(screen.getByTestId("mypage-logout"));
+    expect(screen.getByText("로그아웃 하시겠어요?")).toBeTruthy();
+
+    fireEvent.press(screen.getByText("취소"));
+    expect(screen.queryByText("로그아웃 하시겠어요?")).toBeNull();
   });
 
   it("renders the profile edit screen", () => {

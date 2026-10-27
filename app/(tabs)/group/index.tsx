@@ -6,7 +6,15 @@ import {
   type NativeStackNavigationProp,
 } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   AppText,
@@ -173,6 +181,8 @@ export default function GroupScreen() {
         contentContainerStyle={styles.fullList}
         scrollRef={listScrollRef}
         scrollStateResetKey={scrollStateResetKey}
+        refreshing={overview.isRefetching}
+        onRefresh={() => void overview.refetch()}
         testID="screen-group"
         title="내 모임"
         right={
@@ -219,6 +229,17 @@ export default function GroupScreen() {
       subtitle="소모임과 봉사로 함께 걸어가요"
       scrollRef={listScrollRef}
       scrollStateResetKey={scrollStateResetKey}
+      refreshing={overview.isRefetching}
+      onRefresh={() => void overview.refetch()}
+      onEndReached={() => {
+        if (
+          section === "groups" &&
+          overview.hasNextPage &&
+          !overview.isFetchingNextPage
+        ) {
+          void overview.fetchNextPage();
+        }
+      }}
       stickyControls={
         <View testID="group-sticky-controls-content">
           <SegmentedTabs
@@ -323,6 +344,11 @@ export default function GroupScreen() {
             ))}
           </MotionEnter>
         )}
+        {section === "groups" && overview.isFetchingNextPage ? (
+          <View style={styles.footerLoader}>
+            <ActivityIndicator color={theme.colors.primary} />
+          </View>
+        ) : null}
       </View>
     </StickyHeaderScreen>
   );
@@ -555,5 +581,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     paddingTop: 32,
     paddingBottom: 100,
+  },
+  footerLoader: {
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

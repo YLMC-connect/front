@@ -23,8 +23,18 @@ export class DuplicateMarketReportError extends Error {
   }
 }
 
+export interface MarketOverviewPage {
+  items: MarketOverview["items"];
+  hasNext: boolean;
+  nextCursor?: number | null;
+}
+
 export interface MarketDataSource {
   getOverview(): Promise<MarketOverview>;
+  getOverviewPage?(params?: {
+    lastId?: number | null;
+    size?: number;
+  }): Promise<MarketOverviewPage>;
   getDetail(id: string): Promise<MarketDetail>;
   createPost(input: MarketInput): Promise<MarketDetail>;
   updatePost(input: MarketUpdateInput): Promise<MarketDetail>;
@@ -72,6 +82,37 @@ export const mockMarketDataSource: MarketDataSource = {
       items: [...mockCreatedOverviewItems, ...mockMarketOverview.items].filter(
         ({ id }) => !mockDeletedPosts.has(id),
       ),
+    };
+  },
+  async getOverviewPage({
+    lastId,
+    size = 10,
+  }: {
+    lastId?: number | null;
+    size?: number;
+  } = {}) {
+    await delay();
+    const all = [
+      ...mockCreatedOverviewItems,
+      ...mockMarketOverview.items,
+    ].filter(({ id }) => !mockDeletedPosts.has(id));
+    let startIndex = 0;
+    if (lastId != null) {
+      const idx = all.findIndex((item) => Number(item.id) === lastId);
+      if (idx !== -1) {
+        startIndex = idx + 1;
+      }
+    }
+    const pageItems = all.slice(startIndex, startIndex + size);
+    const hasNext = startIndex + size < all.length;
+    const nextCursor =
+      hasNext && pageItems.length > 0
+        ? Number(pageItems[pageItems.length - 1].id) || null
+        : null;
+    return {
+      items: pageItems,
+      hasNext,
+      nextCursor,
     };
   },
   async getDetail(id) {
@@ -205,6 +246,16 @@ export const mockMarketDataSource: MarketDataSource = {
 export function createMarketService(dataSource: MarketDataSource) {
   return {
     fetchOverview: () => dataSource.getOverview(),
+    fetchOverviewPage: (params?: { lastId?: number | null; size?: number }) => {
+      if (dataSource.getOverviewPage) {
+        return dataSource.getOverviewPage(params);
+      }
+      return dataSource.getOverview().then((res) => ({
+        items: res.items,
+        hasNext: false,
+        nextCursor: null,
+      }));
+    },
     fetchDetail: (id: string) => dataSource.getDetail(id),
     createPost: (input: MarketInput) => {
       const normalized = {
@@ -286,6 +337,7 @@ const marketService = createMarketService(
 );
 
 export const fetchMarketOverview = marketService.fetchOverview;
+export const fetchMarketOverviewPage = marketService.fetchOverviewPage;
 export const fetchMarketDetail = marketService.fetchDetail;
 export const createMarketPost = marketService.createPost;
 export const updateMarketPost = marketService.updatePost;

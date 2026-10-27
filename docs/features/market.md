@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 나눔 목록 무한스크롤 및 당겨서 새로고침(Pull-to-Refresh) — `useMarketOverview`를 TanStack `useInfiniteQuery` 기반으로 전환하여 `getOverviewPage` 커서 페이징과 하단 로딩 스피너를 연동하고, `StickyHeaderScreen` 및 상세 화면 스크롤에 `RefreshControl`을 연결하여 상단 당김 새로고침 지원.
 - 나눔 게시글 수정 API 연동 — `PUT /api/share/{id}` 엔드포인트를 `httpMarketDataSource`, `marketService`, `useUpdateMarketPost` mutation 훅과 `app/modal/market-new.tsx` 수정 화면에 연결하여 제목·내용·카테고리·물품 상태를 서버와 동기화.
 - 나눔 HTTP data source — 라이브 `GET/POST /api/share`, 상세·댓글 CUD, 삭제를 `httpMarketDataSource`로 연결. 상태/카테고리/물품상태는 `GET /api/common-codes?groupCode=`에서 관측한 값만 매핑. 목록 `authorName`·장소·이미지 업로드 URL·신고 enum은 없어 목록 작성자는 `authorId`, 장소는 요청에서 제외, 신고는 HTTP로 보내지 않음. development 기본값은 HTTP
 - 나눔 작성 폼 구획·상단 여백·포커스 통일 — 사진부터 수령 장소까지 이어지는 8px 회색 section divider를 제거해 하나의 폼 흐름으로 정리하고, 홈·나눔·동행·삶공부와 같은 기기 safe area + 상단 20px 기준을 적용했으며 제목·설명·장소 입력을 소모임 개설과 같은 공통 `ModalFormTextInput`의 primary 2px 포커스로 통일하면서 입력·등록 동작은 유지

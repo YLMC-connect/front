@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 소모임장 이관 플로우 및 동행 목록 무한스크롤 / 당겨서 새로고침 — 소모임 상세 관리 메뉴에 `이관` 액션을 추가하고 멤버 관리 화면에서 후보 멤버 라디오 선택 및 이관 확인 모달 플로우를 구현. 동행 목록은 `useInfiniteQuery` 기반 `getOverviewPage` 커서 페이징과 하단 로딩 스피너를 연동하고 `StickyHeaderScreen` 및 소모임 상세 스크롤에 `RefreshControl`을 연결하여 상단 당김 새로고침 지원.
 - 동행/소모임 관리(수정/삭제/강퇴/상태변경) API 연동 — `PUT /api/communion/{id}`(소모임 수정), `DELETE /api/communion/{id}`(소모임 삭제), `DELETE /api/communion/{id}/kick/{targetUserId}`(멤버 강퇴), `PUT /api/communion/{id}/status`(모집 상태 변경)를 `httpGroupDataSource`, `groupService`, `useGroups` 훅과 UI 화면(`group/[id]`, `group-new`, `group/members`)에 완전 연동.
 - 동행과 나눔 탭 간 필터-카드 간격 및 리스트 레이아웃 구조 완전 일치 — 동행 화면의 contentContainerStyle과 불필요한 래퍼 뷰(group-scroll-content)를 제거하고, 나눔과 동일하게 ScrollView 직하위 styles.list(gap: 12, paddingBottom: 164) 컨테이너 및 CompanionCard marginHorizontal: 20 구조로 통일. 탭 상호 전환 시 필터-카드 간격(16px) 및 첫 번째 카드 상단 Y 위치를 완벽히 일치시켜 시각적 흔들림 제거
 - 동행 카테고리 필터 stickyControls 통합 및 도킹 구조 제거 — 내 소모임이 독립 세그먼트 탭으로 분리됨에 따라, 소모임 탭 상단의 복잡한 인라인 필터 앵커와 도킹 애니메이션을 제거하고 나눔과 동일하게 상단 stickyControls에 FilterChips를 직접 배치. 필터와 첫 번째 카드 사이 간격을 나눔 기준(16px)으로 일치시킴

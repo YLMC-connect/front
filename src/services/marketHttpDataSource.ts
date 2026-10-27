@@ -80,6 +80,31 @@ export function createHttpMarketDataSource({
       return { items };
     },
 
+    async getOverviewPage({
+      lastId,
+      size = 20,
+    }: {
+      lastId?: number | null;
+      size?: number;
+    } = {}) {
+      const query = new URLSearchParams({ size: String(size) });
+      if (lastId != null) query.set("lastId", String(lastId));
+      const data = await client.request<ShareListResponseDto>(
+        `/api/share?${query.toString()}`,
+      );
+      const content = data?.content ?? [];
+      const items = [];
+      for (const item of content) {
+        const mapped = mapShareOverviewItem(item, currentUserId());
+        if (mapped) items.push(mapped);
+      }
+      return {
+        items,
+        hasNext: Boolean(data?.hasNext),
+        nextCursor: data?.nextCursor ?? null,
+      };
+    },
+
     getDetail,
 
     async createPost(input) {

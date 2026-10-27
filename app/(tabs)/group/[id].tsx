@@ -1,7 +1,14 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   Avatar,
@@ -118,7 +125,17 @@ export default function GroupDetailScreen() {
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
         <TopBar title="소모임" back onBack={() => router.back()} />
-        <ScrollView contentContainerStyle={styles.body}>
+        <ScrollView
+          contentContainerStyle={styles.body}
+          refreshControl={
+            <RefreshControl
+              refreshing={detail.isRefetching}
+              onRefresh={() => void detail.refetch()}
+              tintColor={theme.colors.primary}
+              colors={[theme.colors.primary]}
+            />
+          }
+        >
           <View style={styles.header}>
             <View style={styles.chips}>
               <View style={styles.categoryChip}>

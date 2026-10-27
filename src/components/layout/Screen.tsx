@@ -3,6 +3,7 @@ import { useNavigation, usePathname } from "expo-router";
 import {
   Keyboard,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -30,6 +31,8 @@ export function Screen({
   backgroundColor,
   style,
   testID,
+  refreshing,
+  onRefresh,
 }: {
   children: ReactNode;
   scroll?: boolean;
@@ -40,6 +43,8 @@ export function Screen({
   backgroundColor?: string;
   style?: StyleProp<ViewStyle>;
   testID?: string;
+  refreshing?: boolean;
+  onRefresh?: () => void | Promise<void>;
 }) {
   const pathname = usePathname();
   const navigation = useNavigation();
@@ -74,6 +79,16 @@ export function Screen({
           ref={scrollRef}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
+          refreshControl={
+            onRefresh ? (
+              <RefreshControl
+                refreshing={Boolean(refreshing)}
+                onRefresh={onRefresh}
+                tintColor={theme.colors.primary}
+                colors={[theme.colors.primary]}
+              />
+            ) : undefined
+          }
           contentContainerStyle={[
             styles.scrollContent,
             contentStyle,

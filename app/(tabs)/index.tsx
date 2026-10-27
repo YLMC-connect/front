@@ -28,6 +28,8 @@ export default function HomeScreen() {
       contentContainerStyle={styles.content}
       testID="screen-home"
       title="열린문 커넥트"
+      refreshing={overview.isRefetching}
+      onRefresh={() => void overview.refetch()}
     >
       <View style={styles.body}>
         <View style={styles.greetingCard} testID="home-greeting">

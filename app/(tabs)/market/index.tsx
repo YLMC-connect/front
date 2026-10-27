@@ -1,6 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Image, StyleSheet, View } from "react-native";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   AppText,
@@ -87,6 +86,13 @@ export default function MarketScreen() {
       testID="screen-market"
       title="나눔"
       subtitle="이웃과 물건을 나누며 따뜻함을 전해요"
+      refreshing={overview.isRefetching}
+      onRefresh={() => void overview.refetch()}
+      onEndReached={() => {
+        if (overview.hasNextPage && !overview.isFetchingNextPage) {
+          void overview.fetchNextPage();
+        }
+      }}
       stickyControls={
         <View testID="market-sticky-controls-content">
           <SegmentedTabs
@@ -144,6 +150,11 @@ export default function MarketScreen() {
             ))}
           </MotionEnter>
         )}
+        {overview.isFetchingNextPage ? (
+          <View style={styles.footerLoader}>
+            <ActivityIndicator color={theme.colors.primary} />
+          </View>
+        ) : null}
       </View>
     </StickyHeaderScreen>
   );
@@ -330,6 +341,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     paddingTop: 56,
     paddingBottom: 60,
+  },
+  footerLoader: {
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
   },
   fab: {
     position: "absolute",

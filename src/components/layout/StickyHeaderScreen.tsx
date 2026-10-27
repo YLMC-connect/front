@@ -12,6 +12,7 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   type StyleProp,
@@ -65,6 +66,10 @@ export function StickyHeaderScreen({
   shouldHandleScroll,
   contentContainerStyle,
   testID,
+  refreshing,
+  onRefresh,
+  onEndReached,
+  onEndReachedThreshold,
 }: {
   title: string;
   subtitle?: string;
@@ -86,6 +91,10 @@ export function StickyHeaderScreen({
   shouldHandleScroll?: () => boolean;
   contentContainerStyle?: StyleProp<ViewStyle>;
   testID: string;
+  refreshing?: boolean;
+  onRefresh?: () => void | Promise<void>;
+  onEndReached?: () => void;
+  onEndReachedThreshold?: number;
 }) {
   const navigation = useNavigation();
   const localScrollRef = useRef<ScrollView | null>(null);
@@ -205,6 +214,18 @@ export function StickyHeaderScreen({
 
     lastScrollY.current = offsetY;
     onScrollOffsetChange?.(offsetY);
+
+    const { layoutMeasurement, contentSize } = event.nativeEvent;
+    const threshold = onEndReachedThreshold ?? 160;
+    if (
+      onEndReached &&
+      contentSize?.height != null &&
+      layoutMeasurement?.height != null &&
+      contentSize.height > layoutMeasurement.height &&
+      layoutMeasurement.height + offsetY >= contentSize.height - threshold
+    ) {
+      onEndReached();
+    }
   };
 
   return (
@@ -215,6 +236,17 @@ export function StickyHeaderScreen({
             ref={effectiveScrollRef}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
+            refreshControl={
+              onRefresh ? (
+                <RefreshControl
+                  refreshing={Boolean(refreshing)}
+                  onRefresh={onRefresh}
+                  tintColor={theme.colors.primary}
+                  colors={[theme.colors.primary]}
+                  progressViewOffset={SCREEN_HEADER_HEIGHT + topInset}
+                />
+              ) : undefined
+            }
             contentContainerStyle={[
               styles.content,
               contentContainerStyle,

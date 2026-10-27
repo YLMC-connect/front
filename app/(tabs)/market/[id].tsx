@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -252,6 +253,15 @@ export default function MarketDetailScreen() {
           contentContainerStyle={styles.content}
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
+          refreshControl={
+            <RefreshControl
+              refreshing={detail.isRefetching}
+              onRefresh={() => void detail.refetch()}
+              tintColor={theme.colors.primary}
+              colors={[theme.colors.primary]}
+              progressViewOffset={insets.top + 56}
+            />
+          }
           onScroll={handleScroll}
           scrollEventThrottle={16}
           testID="market-detail-scroll"

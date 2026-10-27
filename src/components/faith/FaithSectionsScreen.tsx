@@ -22,7 +22,6 @@ import {
   AnimatedProgressFill,
   AppText,
   Empty,
-  EmptyState,
   ErrorState,
   FloatingActionButton,
   ListSkeleton,
@@ -34,6 +33,10 @@ import {
 type FaithSection = "pray" | "study";
 
 export function FaithSectionsScreen({ section }: { section: FaithSection }) {
+  const prayerQuery = usePrayerOverview();
+  const studyQuery = useLifeStudyOverview();
+  const currentQuery = section === "study" ? studyQuery : prayerQuery;
+
   return (
     <StickyHeaderScreen
       contentContainerStyle={[styles.body, styles.bodyWithFab]}
@@ -44,6 +47,8 @@ export function FaithSectionsScreen({ section }: { section: FaithSection }) {
           ? "말씀으로 배우고 삶으로 자라가요"
           : "함께 기도하고 응답을 나눠요"
       }
+      refreshing={currentQuery.isRefetching}
+      onRefresh={() => void currentQuery.refetch()}
       overlay={
         section === "pray" ? (
           <PrayerFloatingMenu />

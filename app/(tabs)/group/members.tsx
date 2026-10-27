@@ -1,6 +1,6 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -45,6 +45,14 @@ export default function GroupMembersScreenRoute() {
     useState<GroupMemberDetail | null>(null);
   const [showTransferConfirm, setShowTransferConfirm] = useState(false);
   const [toastMessage, setToastMessage] = useState<string>();
+  const transferTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (transferTimerRef.current) clearTimeout(transferTimerRef.current);
+    };
+  }, []);
+
   const members = membersQuery.data ?? [];
   const isTransfer =
     params.mode === "transfer" ||
@@ -168,7 +176,13 @@ export default function GroupMembersScreenRoute() {
             setToastMessage(
               `${transferTargetName}님께 소모임장이 이관되었습니다`,
             );
-            setTimeout(() => router.back(), 700);
+            transferTimerRef.current = setTimeout(() => {
+              try {
+                router.back?.();
+              } catch {
+                // ignore
+              }
+            }, 700);
           }}
         />
         <Toast

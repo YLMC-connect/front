@@ -68,6 +68,34 @@ describe("mockAuthAdapter", () => {
       phone: "010-9999-9999",
     });
   });
+
+  it("verifies matching password and rejects incorrect password in mockAuthAdapter", async () => {
+    await expect(
+      mockAuthAdapter.verifyPassword({ password: "admin" }),
+    ).resolves.toBe(true);
+    await expect(
+      mockAuthAdapter.verifyPassword({ password: "wrong" }),
+    ).rejects.toThrow("비밀번호가 일치하지 않습니다");
+  });
+
+  it("changes password with correct current password in mockAuthAdapter", async () => {
+    await expect(
+      mockAuthAdapter.changePassword({
+        currentPassword: "admin",
+        newPassword: "newPassword123!",
+      }),
+    ).resolves.toBeUndefined();
+    await expect(
+      mockAuthAdapter.changePassword({
+        currentPassword: "wrong",
+        newPassword: "newPassword123!",
+      }),
+    ).rejects.toThrow("현재 비밀번호가 일치하지 않습니다");
+  });
+
+  it("withdraws in mockAuthAdapter", async () => {
+    await expect(mockAuthAdapter.withdraw()).resolves.toBeUndefined();
+  });
 });
 
 describe("httpAuthAdapter", () => {
@@ -306,6 +334,48 @@ describe("httpAuthAdapter", () => {
     expect(request).toHaveBeenCalledWith("/api/member/me", {
       method: "PUT",
       body: JSON.stringify({ phone: "010-9999-8888" }),
+    });
+  });
+
+  it("verifies password through POST /api/member/verify-password", async () => {
+    const { request, adapter } = setup();
+    request.mockResolvedValue(null);
+
+    await expect(
+      adapter.verifyPassword({ password: "secretPassword" }),
+    ).resolves.toBe(true);
+    expect(request).toHaveBeenCalledWith("/api/member/verify-password", {
+      method: "POST",
+      body: JSON.stringify({ password: "secretPassword" }),
+    });
+  });
+
+  it("changes password through PUT /api/member/password", async () => {
+    const { request, adapter } = setup();
+    request.mockResolvedValue(null);
+
+    await expect(
+      adapter.changePassword({
+        currentPassword: "oldPassword",
+        newPassword: "newPassword123!",
+      }),
+    ).resolves.toBeUndefined();
+    expect(request).toHaveBeenCalledWith("/api/member/password", {
+      method: "PUT",
+      body: JSON.stringify({
+        currentPassword: "oldPassword",
+        newPassword: "newPassword123!",
+      }),
+    });
+  });
+
+  it("withdraws through DELETE /api/member/me", async () => {
+    const { request, adapter } = setup();
+    request.mockResolvedValue(null);
+
+    await expect(adapter.withdraw()).resolves.toBeUndefined();
+    expect(request).toHaveBeenCalledWith("/api/member/me", {
+      method: "DELETE",
     });
   });
 });

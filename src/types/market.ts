@@ -37,6 +37,14 @@ export interface MarketInput {
   images: string[];
 }
 
+export interface MarketUpdateInput {
+  marketId: string;
+  title: string;
+  description: string;
+  category: Exclude<MarketCategory, "all">;
+  condition: string;
+}
+
 export interface MarketOverviewItem {
   id: string;
   thumbSeed: number;

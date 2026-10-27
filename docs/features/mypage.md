@@ -10,6 +10,8 @@
 
 ## ✅ 완료
 
+- 회원 비밀번호 확인·변경 및 탈퇴 API 연동 — `POST /api/member/verify-password`(비밀번호 확인), `PUT /api/member/password`(비밀번호 변경), `DELETE /api/member/me`(회원 탈퇴)를 `authAdapter`와 `useMember` 훅에 연결하고 `mypage/edit` 및 `mypage/withdraw` 화면에 실시간 반영.
+- 사이트 이용약관/개인정보처리방침 및 FAQ 조회 API 연동 — `GET /api/site-policies/{policyType}`(이용약관: 1, 개인정보처리방침: 2), `GET /api/faqs`(categoryId 필터링)를 `siteContentHttpDataSource` 및 `useSiteContent` 훅에 연결하여 `mypage/terms`, `mypage/privacy`, `mypage/faq`에 동적 데이터 바인딩.
 - 내 정보 조회 HTTP 연동 — `/api/member/me` 내 정보 조회 API 연동 및 프로필 카드/수정 화면, 삶공부/중보기도 신청 화면의 하드코딩된 이름/연락처를 현재 로그인 사용자 정보로 바인딩
 - 마이페이지 활동 HTTP adapter — development 기본값은 나눔과 같이 http다. 활동 화면은 `GET /api/mypage/activities`의 나눔 글·댓글·소모임을 보여 준다. 테스트와 `EXPO_PUBLIC_MYPAGE_ADAPTER=mock`은 기존 로컬 목록을 쓴다
 - 홈 진입 MY 뒤로가기 보완 — 하단 탭이 아닌 홈 '내 정보'에서 push되는 `/mypage` 루트에도 공통 `chevron-left + 뒤로`를 표시하고 `router.back()`으로 홈에 복귀하며, Screen의 이중 여백을 제거하고 `theme.layout.screenX`(20px) 기준으로 뒤로 버튼과 본문 컨텐츠 좌우 여백을 일치
@@ -70,6 +72,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-10-15) **회원 비밀번호 확인/변경, 탈퇴 및 법적 문서/FAQ 조회를 실제 API로 연동한다** — 비밀번호 확인(`POST /api/member/verify-password`), 비밀번호 변경(`PUT /api/member/password`), 회원 탈퇴(`DELETE /api/member/me`)를 `authAdapter`에 추가하고, 사이트 정책(`GET /api/site-policies/{policyType}`)과 FAQ 목록(`GET /api/faqs`)을 `siteContentService`로 연결하여 하드코딩 fixture 대신 서버 데이터를 우선 렌더링하도록 전환합니다.
 - (2026-10-10) **활동 내역 화면 탭 전환 SPA 처리 및 중보기도 활동 이력 링크 보정** — `app/(tabs)/mypage/activity.tsx`의 탭(나눔 게시글/댓글/소모임) 전환 시 `router.push` 대신 `setActiveTab` 로컬 상태로 전환하여 뒤로가기 히스토리 스택 누적을 방지하고, 마이페이지 '중보기도 활동 이력' 메뉴는 fallback으로 열리던 `activity?tab=prayer` 대신 실제 기도제목/상태 관리 화면인 `/prayer/request`로 연결. Issue #175.
 - (2026-10-10) **마이페이지 중첩 Stack 레이아웃 적용으로 하위 페이지 뒤로가기 흐름 정상화** — `app/(tabs)/mypage/_layout.tsx`(`<Stack screenOptions={{ headerShown: false }} />`)을 추가하고, `app/(tabs)/_layout.tsx`의 개별 탭 등록을 `<Tabs.Screen name="mypage" options={{ href: null }} />`로 일원화하여 프로필 수정/활동 내역 등 하위 댑스에서 `router.back()` 실행 시 마이페이지 메인으로 정상 복귀하도록 수정. Issue #169.
 - (2026-10-10) **활동 화면은 development mock일 때만 출처를 표시한다** — `__DEV__`일 때 adapter가 mock이면 `목업 데이터`를 보여 주고, http일 때는 표시하지 않는다. 탭·행·empty 문구는 그대로다.

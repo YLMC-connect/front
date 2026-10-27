@@ -9,6 +9,7 @@ import {
   mapCommunionOverviewItem,
   mapCommunionServiceItem,
   toCommunionCategoryCode,
+  toCommunionStatus,
   toNoticePreview,
 } from "./groupMapper";
 import type {
@@ -136,6 +137,48 @@ export function createHttpGroupDataSource({
         throw new Error("소모임 개설 결과를 확인할 수 없습니다.");
       }
       return getDetail(String(createdId));
+    },
+
+    async updateGroup(input) {
+      const categoryCode = toCommunionCategoryCode(input.category);
+      if (!categoryCode) {
+        throw new Error("이 카테고리는 아직 서버에 없습니다.");
+      }
+      await client.request(`/api/communion/${input.groupId}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          title: input.name,
+          content: input.description,
+          categoryCode,
+          maxParticipants: input.maxMembers,
+        }),
+      });
+      return getDetail(input.groupId);
+    },
+
+    async deleteGroup(id) {
+      await client.request(`/api/communion/${id}`, {
+        method: "DELETE",
+      });
+    },
+
+    async kickMember(input) {
+      await client.request(
+        `/api/communion/${input.groupId}/kick/${input.targetUserId}`,
+        {
+          method: "DELETE",
+        },
+      );
+    },
+
+    async updateGroupStatus(input) {
+      await client.request(`/api/communion/${input.groupId}/status`, {
+        method: "PUT",
+        body: JSON.stringify({
+          status: toCommunionStatus(input.status),
+        }),
+      });
+      return getDetail(input.groupId);
     },
 
     async createNotice(input) {

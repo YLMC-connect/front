@@ -3,20 +3,28 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../layout/Screen";
 import { TopBar } from "../ui";
 import { theme } from "../../constants/theme";
+import { useActiveSitePolicy } from "../../hooks/useSiteContent";
+import type { SitePolicyType } from "../../types/siteContentApi";
 
-const body =
+const defaultBody =
   '본 약관은 열린문커넥트(이하 "서비스")가 제공하는 모바일 애플리케이션 및 관련 제반 서비스의 이용과 관련하여 회사와 회원의 권리·의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.';
 
 export function LegalDocumentScreen({
   title = "이용약관",
   primary = "제1조 (목적)",
+  policyType,
 }: {
   title?: string;
   primary?: string;
+  policyType?: SitePolicyType;
 }) {
   const router = useRouter();
-  const sections = [
-    { heading: primary, text: body },
+  const resolvedType: SitePolicyType =
+    policyType ?? (title.includes("개인정보") ? 2 : 1);
+  const { data: policy } = useActiveSitePolicy(resolvedType);
+
+  const defaultSections = [
+    { heading: primary, text: defaultBody },
     {
       heading: "제2조 (정의)",
       text: '1. "회원"이란 본 약관에 동의하고 회사가 제공하는 서비스를 이용하는 자를 말합니다.\n2. "콘텐츠"란 회원이 서비스에 게시한 글, 사진, 댓글 등을 의미합니다.\n3. "교회 커뮤니티"란 동일 교회 소속 회원으로 구성된 폐쇄형 그룹을 말합니다.',
@@ -35,18 +43,41 @@ export function LegalDocumentScreen({
     },
   ];
 
+  const formatEnforcedAt = (dateStr?: string) => {
+    if (!dateStr) return "시행일자: 2026년 1월 1일";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return "시행일자: 2026년 1월 1일";
+      return `시행일자: ${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+    } catch {
+      return "시행일자: 2026년 1월 1일";
+    }
+  };
+
+  const effectiveDateText = formatEnforcedAt(policy?.enforcedAt);
+
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
-        <TopBar title={title} back onBack={() => router.back()} />
+        <TopBar
+          title={policy?.title || title}
+          back
+          onBack={() => router.back()}
+        />
         <ScrollView contentContainerStyle={styles.body}>
-          <Text style={styles.effective}>시행일자: 2026년 1월 1일</Text>
-          {sections.map((section) => (
-            <View key={section.heading} style={styles.section}>
-              <Text style={styles.heading}>{section.heading}</Text>
-              <Text style={styles.text}>{section.text}</Text>
+          <Text style={styles.effective}>{effectiveDateText}</Text>
+          {policy?.content ? (
+            <View style={styles.section}>
+              <Text style={styles.text}>{policy.content}</Text>
             </View>
-          ))}
+          ) : (
+            defaultSections.map((section) => (
+              <View key={section.heading} style={styles.section}>
+                <Text style={styles.heading}>{section.heading}</Text>
+                <Text style={styles.text}>{section.text}</Text>
+              </View>
+            ))
+          )}
         </ScrollView>
       </View>
     </Screen>

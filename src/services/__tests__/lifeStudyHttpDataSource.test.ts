@@ -291,4 +291,38 @@ describe("httpLifeStudyDataSource", () => {
       ),
     ).rejects.toBeInstanceOf(ApiError);
   });
+
+  it("submits cohort application to /api/life-study/cohorts/{id}/attend", async () => {
+    const { request, dataSource } = setup();
+    request.mockResolvedValue(101);
+
+    const result = await dataSource.applyCohort("15", {
+      userYear: "1994",
+      userFaithYears: "3-5년",
+      userPart: "청년1부",
+    });
+
+    expect(result).toBe(101);
+    expect(request).toHaveBeenCalledWith("/api/life-study/cohorts/15/attend", {
+      method: "POST",
+      body: JSON.stringify({
+        userYear: "1994",
+        userFaithYears: "3-5년",
+        userPart: "청년1부",
+      }),
+    });
+  });
+
+  it("throws error when applyCohort returns null", async () => {
+    const { request, dataSource } = setup();
+    request.mockResolvedValue(null);
+
+    await expect(
+      dataSource.applyCohort("15", {
+        userYear: "1994",
+        userFaithYears: "3-5년",
+        userPart: "청년1부",
+      }),
+    ).rejects.toThrow("수강신청 처리 결과를 확인할 수 없습니다.");
+  });
 });

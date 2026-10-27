@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 동행/소모임 관리(수정/삭제/강퇴/상태변경) API 연동 — `PUT /api/communion/{id}`(소모임 수정), `DELETE /api/communion/{id}`(소모임 삭제), `DELETE /api/communion/{id}/kick/{targetUserId}`(멤버 강퇴), `PUT /api/communion/{id}/status`(모집 상태 변경)를 `httpGroupDataSource`, `groupService`, `useGroups` 훅과 UI 화면(`group/[id]`, `group-new`, `group/members`)에 완전 연동.
 - 동행과 나눔 탭 간 필터-카드 간격 및 리스트 레이아웃 구조 완전 일치 — 동행 화면의 contentContainerStyle과 불필요한 래퍼 뷰(group-scroll-content)를 제거하고, 나눔과 동일하게 ScrollView 직하위 styles.list(gap: 12, paddingBottom: 164) 컨테이너 및 CompanionCard marginHorizontal: 20 구조로 통일. 탭 상호 전환 시 필터-카드 간격(16px) 및 첫 번째 카드 상단 Y 위치를 완벽히 일치시켜 시각적 흔들림 제거
 - 동행 카테고리 필터 stickyControls 통합 및 도킹 구조 제거 — 내 소모임이 독립 세그먼트 탭으로 분리됨에 따라, 소모임 탭 상단의 복잡한 인라인 필터 앵커와 도킹 애니메이션을 제거하고 나눔과 동일하게 상단 stickyControls에 FilterChips를 직접 배치. 필터와 첫 번째 카드 사이 간격을 나눔 기준(16px)으로 일치시킴
 - 동행 HTTP data source — 라이브 목록(`type=SMALL_GROUP|VOLUNTEER`), `/my`, 상세, 멤버, 개설, 공지 CUD, `POST /api/communion/{id}/join`·`DELETE /api/communion/{id}/leave`를 `httpGroupDataSource`로 연결. 상세의 참여/탈퇴 버튼이 같은 경계를 사용. 상태/카테고리/타입은 common-codes 관측값만 매핑. 목록 `content`·일정·장소가 없어 설명/일정은 빈 문자열, 생성 요청에서 일정·장소 제외. 서버에 없는 카테고리(목장·선교·카풀·봉사)는 개설을 거절. development 기본값은 HTTP
@@ -91,10 +92,11 @@
 
 ## 데이터 타입
 
-`Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 화면 조회 모델 `GroupOverview`/`GroupDetail`/`GroupMemberDetail`은 목록·봉사·권한·멤버·공지 표시값을 포함하며 API DTO mapper의 출력 경계입니다. `GroupDetailNotice`는 수정 폼 재사용을 위한 전체 `content`를 포함하고, 공지 쓰기 경계는 `GroupNoticeInput`/`GroupNoticeUpdateInput`/`GroupNoticeTarget`으로 분리합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
+`Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 화면 조회 모델 `GroupOverview`/`GroupDetail`/`GroupMemberDetail`은 목록·봉사·권한·멤버·공지 표시값을 포함하며 API DTO mapper의 출력 경계입니다. `GroupDetailNotice`는 수정 폼 재사용을 위한 전체 `content`를 포함하고, 공지 쓰기 경계는 `GroupNoticeInput`/`GroupNoticeUpdateInput`/`GroupNoticeTarget`으로 분리합니다. 모임 관리 경계는 `GroupUpdateInput`, `GroupStatusUpdateInput`, `GroupKickMemberInput`을 사용합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-10-15) **동행/소모임 관리(수정/삭제/강퇴/상태변경) API를 HTTP 및 mock 경계에 완전 연동한다** — 방장 권한의 소모임 수정(`PUT /api/communion/{id}`), 소모임 삭제(`DELETE /api/communion/{id}`), 멤버 강퇴(`DELETE /api/communion/{id}/kick/{targetUserId}`), 모집 상태 변경(`PUT /api/communion/{id}/status`)을 `GroupDataSource` 인터페이스 및 `httpGroupDataSource`에 추가하고 `useUpdateGroup`, `useDeleteGroup`, `useKickGroupMember`, `useUpdateGroupStatus` 훅을 통해 화면에 연결합니다.
 - (2026-10-09) **동행 화면의 리스트 및 카드 레이아웃 구조는 나눔과 100% 동일하게 통일한다** — 나눔과 동행 탭을 상호 전환할 때 상단 필터와 첫 번째 카드 사이의 화면상 간격 및 위치가 달라 카드가 위아래로 움직이는 문제를 해결하기 위해, 동행 화면의 contentContainerStyle 및 이중 래퍼 뷰를 제거하고 나눔과 동일한 ScrollView 직하위 styles.list 컨테이너 및 카드 marginHorizontal 방식을 적용합니다. Issue #147.
 - (2026-10-09) **동행의 카테고리 필터는 나눔과 동일하게 상단 stickyControls에 통합한다** — 내 소모임이 세그먼트 탭으로 분리되어 본문 상단 가로 레일이 제거됨에 따라, 스크롤 위치에 따라 필터가 헤더에 도킹되던 복잡한 앵커 구조를 폐기하고 나눔과 동일하게 상단 `stickyControls` 내부에 카테고리 필터를 직접 배치합니다. 이를 통해 필터와 첫 번째 카드 사이 간격(16px) 및 스크롤 감추기/노출 동작을 나눔과 일치시키고 유지보수 복잡성을 대폭 낮춥니다. Issue #145.
 - (2026-10-10) **동행의 내 소모임은 나눔처럼 세그먼트 탭으로 분리하고 라벨을 '내 모임'으로 간결화한다** — 상단 세그먼트를 `소모임` | `봉사` | `내 모임` 3개로 구성하고, `내 모임` 선택 시 참여 중인 소모임 목록을 세로 카드로 표시한다. 기존 소모임 탭 상단의 가로 스크롤 '내 소모임' 레일은 제거해 화면 탐색을 단순화한다. Issue #141, #151.

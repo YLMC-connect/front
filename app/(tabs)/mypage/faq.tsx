@@ -1,33 +1,72 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import { Empty, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { useFaqs } from "../../../src/hooks/useSiteContent";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 
-const categories = ["전체", "계정", "중고·나눔", "소모임", "기도", "삶공부"];
+const fallbackCategories = [
+  "전체",
+  "계정",
+  "중고·나눔",
+  "소모임",
+  "기도",
+  "삶공부",
+];
 
-const faqs = [
+const fallbackFaqs = [
   {
-    open: true,
+    id: 1,
     question: "회원가입은 어떻게 하나요?",
     answer:
       "로그인 화면에서 회원가입을 선택한 뒤 약관 동의와 기본 정보를 입력하면 가입할 수 있습니다.",
   },
-  { open: false, question: "비밀번호는 어디서 변경하나요?", answer: "" },
-  { open: false, question: "중고거래 시 가격은 어떻게 정하나요?", answer: "" },
-  { open: false, question: "소모임을 직접 만들고 싶어요", answer: "" },
-  { open: false, question: "기도방은 어떻게 신청하나요?", answer: "" },
-  { open: false, question: "수강 신청 후 취소하려면?", answer: "" },
-  { open: false, question: "알림이 너무 자주 와요", answer: "" },
-  { open: false, question: "탈퇴하면 데이터는 어떻게 되나요?", answer: "" },
-] as const;
+  { id: 2, question: "비밀번호는 어디서 변경하나요?", answer: "" },
+  { id: 3, question: "중고거래 시 가격은 어떻게 정하나요?", answer: "" },
+  { id: 4, question: "소모임을 직접 만들고 싶어요", answer: "" },
+  { id: 5, question: "기도방은 어떻게 신청하나요?", answer: "" },
+  { id: 6, question: "수강 신청 후 취소하려면?", answer: "" },
+  { id: 7, question: "알림이 너무 자주 와요", answer: "" },
+  { id: 8, question: "탈퇴하면 데이터는 어떻게 되나요?", answer: "" },
+];
 
 export default function FaqScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ designVariant?: string }>();
   const empty = readDesignVariant(params.designVariant) === "empty";
+  const { data: faqCategories } = useFaqs();
+
+  const [selectedCategory, setSelectedCategory] = useState("전체");
+  const [openMap, setOpenMap] = useState<Record<string, boolean>>({
+    "회원가입은 어떻게 하나요?": true,
+  });
+
+  const categories = useMemo(() => {
+    if (faqCategories && faqCategories.length > 0) {
+      return ["전체", ...faqCategories.map((c) => c.name)];
+    }
+    return fallbackCategories;
+  }, [faqCategories]);
+
+  const activeFaqs = useMemo(() => {
+    if (faqCategories && faqCategories.length > 0) {
+      if (selectedCategory === "전체") {
+        return faqCategories.flatMap((c) => c.faqs);
+      }
+      return faqCategories.find((c) => c.name === selectedCategory)?.faqs ?? [];
+    }
+    return fallbackFaqs;
+  }, [faqCategories, selectedCategory]);
+
+  const toggleFaq = (key: string) => {
+    setOpenMap((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
 
   return (
     <Screen scroll={false} padded={false}>
@@ -50,43 +89,54 @@ export default function FaqScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.chips}
             >
-              {categories.map((category, index) => (
-                <Pressable
-                  key={category}
-                  accessibilityRole="button"
-                  style={[styles.chip, index === 0 ? styles.chipOn : null]}
-                >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      index === 0 ? styles.chipTextOn : null,
-                    ]}
+              {categories.map((category) => {
+                const isSelected = category === selectedCategory;
+                return (
+                  <Pressable
+                    key={category}
+                    accessibilityRole="button"
+                    onPress={() => setSelectedCategory(category)}
+                    style={[styles.chip, isSelected ? styles.chipOn : null]}
                   >
-                    {category}
-                  </Text>
-                </Pressable>
-              ))}
+                    <Text
+                      style={[
+                        styles.chipText,
+                        isSelected ? styles.chipTextOn : null,
+                      ]}
+                    >
+                      {category}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </ScrollView>
 
-            {faqs.map((faq, index) => (
-              <View key={faq.question} style={styles.faqRow}>
-                <View style={styles.questionRow}>
-                  <View style={styles.qMark}>
-                    <Text style={styles.qText}>Q</Text>
-                  </View>
-                  <Text style={styles.question}>{faq.question}</Text>
-                  <AppIcon
-                    name="chevron-right"
-                    size={18}
-                    color={theme.colors.inkMute}
-                    style={faq.open ? styles.chevronOpen : null}
-                  />
+            {activeFaqs.map((faq) => {
+              const isOpen = Boolean(openMap[faq.question]);
+              return (
+                <View key={faq.question} style={styles.faqRow}>
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => toggleFaq(faq.question)}
+                    style={styles.questionRow}
+                  >
+                    <View style={styles.qMark}>
+                      <Text style={styles.qText}>Q</Text>
+                    </View>
+                    <Text style={styles.question}>{faq.question}</Text>
+                    <AppIcon
+                      name="chevron-right"
+                      size={18}
+                      color={theme.colors.inkMute}
+                      style={isOpen ? styles.chevronOpen : null}
+                    />
+                  </Pressable>
+                  {isOpen && faq.answer ? (
+                    <Text style={styles.answer}>{faq.answer}</Text>
+                  ) : null}
                 </View>
-                {faq.open && faq.answer ? (
-                  <Text style={styles.answer}>{faq.answer}</Text>
-                ) : null}
-              </View>
-            ))}
+              );
+            })}
           </ScrollView>
         )}
       </View>

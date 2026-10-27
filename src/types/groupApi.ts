@@ -44,3 +44,14 @@ export interface CommunionNoticeDto {
   createdAt: string;
   updatedAt?: string;
 }
+
+export interface CommunionUpdateRequestDto {
+  title: string;
+  content: string;
+  categoryCode: string;
+  maxParticipants: number;
+}
+
+export interface CommunionStatusUpdateRequestDto {
+  status: string;
+}

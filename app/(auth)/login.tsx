@@ -1,8 +1,8 @@
-import { AppIcon } from "@/components/ui/app-icon";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Keyboard,
   Platform,
   Pressable,
@@ -14,13 +14,11 @@ import { AuthInput } from "../../src/components/auth/auth-input";
 import { Screen } from "../../src/components/layout/Screen";
 import {
   AppText,
-  Button,
   MotionEnter,
   MotionFadeIn,
   MotionPressable,
   MotionShake,
   Toast,
-  motionStaggerDelay,
 } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { authApiErrorMessages } from "../../src/constants/apiErrorMessages";
@@ -105,111 +103,116 @@ export default function LoginScreen() {
           testID="login-content"
           style={styles.content}
         >
-          <View style={styles.hero}>
-            <MotionEnter
-              enabled={enterMotion}
-              mode="settle"
-              delay={motionStaggerDelay(0)}
-            >
-              <View style={styles.logo}>
-                <AppIcon name="door-front" size={38} color="#fff" />
-              </View>
-            </MotionEnter>
-            <MotionEnter
-              enabled={enterMotion}
-              delay={motionStaggerDelay(1)}
-              style={styles.heroCopy}
-            >
-              <AppText variant="screenTitle" style={styles.title}>
-                열린문 커넥트
-              </AppText>
-              <AppText variant="body" tone="secondary" style={styles.subtitle}>
-                교회 가족과 함께하는 일상
-              </AppText>
+          <View style={styles.mainSection}>
+            <View style={styles.hero}>
+              <MotionEnter enabled={enterMotion} style={styles.heroCopy}>
+                <View style={styles.brandBadge}>
+                  <AppText
+                    variant="caption"
+                    tone="brand"
+                    style={styles.eyebrow}
+                  >
+                    열린문교회 커뮤니티
+                  </AppText>
+                </View>
+                <AppText variant="display" style={styles.title}>
+                  {"열린문 커넥트에\n오신 것을 환영합니다"}
+                </AppText>
+                <AppText
+                  variant="body"
+                  tone="secondary"
+                  style={styles.subtitle}
+                >
+                  교회 가족과 함께하는 따뜻한 일상
+                </AppText>
+              </MotionEnter>
+            </View>
+
+            <MotionEnter enabled={enterMotion} style={styles.form}>
+              <AuthField
+                testID="login-id-input"
+                label="아이디"
+                value={values.id}
+                onChangeText={(id) =>
+                  setValues((current) => ({ ...current, id }))
+                }
+                placeholder="아이디를 입력해주세요"
+                error={errors.id}
+                hasError={isError}
+              />
+              <AuthField
+                testID="login-password-input"
+                label="비밀번호"
+                value={values.password}
+                onChangeText={(password) =>
+                  setValues((current) => ({ ...current, password }))
+                }
+                placeholder="비밀번호를 입력해주세요"
+                secureTextEntry={!passwordVisible}
+                error={errors.password}
+                hasError={isError}
+                trailingIcon={passwordVisible ? "visibility" : "visibility-off"}
+                trailingLabel={
+                  passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"
+                }
+                onTrailingPress={() =>
+                  setPasswordVisible((visible) => !visible)
+                }
+              />
+              {formErrorMessage ? (
+                <MotionShake trigger={formErrorMessage}>
+                  <MotionFadeIn>
+                    <AppText variant="caption" tone="danger">
+                      {formErrorMessage}
+                    </AppText>
+                  </MotionFadeIn>
+                </MotionShake>
+              ) : null}
+
+              <MotionPressable
+                accessibilityRole="button"
+                disabled={
+                  (!isFilled && isDefault) || login.isPending || isLoading
+                }
+                onPress={onSubmit}
+                style={[
+                  styles.loginButton,
+                  !isFilled && isDefault ? styles.loginButtonDisabled : null,
+                ]}
+              >
+                {login.isPending || isLoading ? (
+                  <ActivityIndicator color={theme.colors.white} />
+                ) : (
+                  <AppText variant="body" style={styles.loginButtonText}>
+                    로그인
+                  </AppText>
+                )}
+              </MotionPressable>
             </MotionEnter>
           </View>
 
-          <MotionEnter
-            enabled={enterMotion}
-            delay={motionStaggerDelay(2)}
-            style={styles.form}
-          >
-            <AuthField
-              testID="login-id-input"
-              label="아이디"
-              value={values.id}
-              onChangeText={(id) =>
-                setValues((current) => ({ ...current, id }))
-              }
-              placeholder="아이디를 입력해주세요"
-              error={errors.id}
-              hasError={isError}
-            />
-            <AuthField
-              testID="login-password-input"
-              label="비밀번호"
-              value={values.password}
-              onChangeText={(password) =>
-                setValues((current) => ({ ...current, password }))
-              }
-              placeholder="비밀번호를 입력해주세요"
-              secureTextEntry={!passwordVisible}
-              error={errors.password}
-              hasError={isError}
-              trailingIcon={passwordVisible ? "visibility" : "visibility-off"}
-              trailingLabel={
-                passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"
-              }
-              onTrailingPress={() => setPasswordVisible((visible) => !visible)}
-            />
-            {formErrorMessage ? (
-              <MotionShake trigger={formErrorMessage}>
-                <MotionFadeIn>
-                  <AppText variant="caption" tone="danger">
-                    {formErrorMessage}
-                  </AppText>
-                </MotionFadeIn>
-              </MotionShake>
-            ) : null}
-          </MotionEnter>
-
-          <MotionEnter
-            enabled={enterMotion}
-            delay={motionStaggerDelay(3)}
-            style={styles.ctaBlock}
-          >
-            <Button
-              onPress={onSubmit}
-              loading={login.isPending || isLoading}
-              disabled={!isFilled && isDefault}
-            >
-              로그인
-            </Button>
-            <View style={styles.dividerRow}>
-              <View style={styles.divider} />
-              <AppText variant="caption" tone="disabled">
-                처음이신가요?
+          <MotionEnter enabled={enterMotion} style={styles.footerBlock}>
+            <View style={styles.signupCard}>
+              <AppText variant="caption" tone="secondary">
+                열린문 커넥트가 처음이신가요?
               </AppText>
-              <View style={styles.divider} />
-            </View>
-            <MotionPressable
-              accessibilityRole="link"
-              onPress={() => router.push("/signup")}
-              style={styles.signupButton}
-            >
-              <AppText
-                variant="body"
-                tone="brand"
-                style={styles.signupButtonText}
+              <MotionPressable
+                accessibilityRole="link"
+                hitSlop={8}
+                onPress={() => router.push("/signup")}
+                style={styles.signupLink}
               >
-                회원가입
-              </AppText>
-            </MotionPressable>
+                <AppText
+                  variant="caption"
+                  tone="brand"
+                  style={styles.signupLinkText}
+                >
+                  회원가입하기
+                </AppText>
+              </MotionPressable>
+            </View>
           </MotionEnter>
         </Pressable>
-        <AppText variant="caption" tone="disabled" style={styles.copy}>
-          © 열린문교회
-        </AppText>
       </ScrollView>
       <Toast
         message={isToast ? "네트워크 연결을 확인해주세요" : ""}
@@ -297,29 +300,36 @@ const styles = StyleSheet.create({
   },
   content: {
     flexGrow: 1,
-    justifyContent: "center",
-    paddingTop: theme.spacing[5],
-    paddingBottom: 72,
+    justifyContent: "space-between",
+    paddingTop: theme.spacing[8],
+    paddingBottom: theme.spacing[6],
   },
-  hero: { alignItems: "center" },
-  heroCopy: { alignItems: "center" },
-  logo: {
-    width: 72,
-    height: 72,
-    borderRadius: theme.radius.lg,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: theme.colors.primary,
-    ...theme.shadow.primary,
+  mainSection: {
+    gap: theme.spacing[8],
+  },
+  hero: { alignItems: "flex-start" },
+  heroCopy: { alignItems: "flex-start" },
+  brandBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.primarySoft,
+    marginBottom: theme.spacing[3],
+  },
+  eyebrow: {
+    fontWeight: theme.fontWeight.semibold,
   },
   title: {
-    marginTop: theme.spacing[4],
+    letterSpacing: -0.5,
+    lineHeight: 38,
   },
   subtitle: { marginTop: theme.spacing[2] },
-  form: { gap: theme.spacing[4], marginTop: theme.spacing[8] },
-  ctaBlock: { gap: theme.spacing[3], marginTop: theme.spacing[4] },
+  form: { gap: theme.spacing[5] },
+  footerBlock: {
+    marginTop: theme.spacing[8],
+  },
   fieldLabel: {
-    marginBottom: 6,
+    marginBottom: 8,
   },
   trailingButton: {
     width: 40,
@@ -329,29 +339,42 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   fieldError: { marginTop: 6 },
-  dividerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginTop: 4,
-    marginBottom: 2,
-  },
-  divider: { flex: 1, height: 1, backgroundColor: theme.colors.line },
-  signupButton: {
+  loginButton: {
+    minHeight: 52,
+    marginTop: theme.spacing[2],
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 24,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 15,
-    borderRadius: 999,
+    backgroundColor: theme.colors.primary,
+    ...theme.shadow.primary,
+  },
+  loginButtonDisabled: {
+    opacity: 0.45,
+  },
+  loginButtonText: {
+    color: theme.colors.white,
+    fontFamily: theme.font.semibold,
+    fontWeight: "normal",
+    fontSize: theme.fontSize.base,
+  },
+  signupCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: theme.spacing[4],
+    paddingVertical: 14,
+    borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.lineStrong,
+    borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
   },
-  signupButtonText: {
+  signupLink: {
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+  },
+  signupLinkText: {
     color: theme.colors.primaryDeep,
     fontWeight: theme.fontWeight.semibold,
-  },
-  copy: {
-    textAlign: "center",
-    paddingVertical: theme.spacing[3],
   },
 });

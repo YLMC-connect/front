@@ -99,8 +99,9 @@ describe("auth smoke screens", () => {
       StyleSheet.flatten(screen.getByTestId("login-content").props.style),
     ).toMatchObject({
       flexGrow: 1,
-      justifyContent: "center",
-      paddingBottom: 72,
+      justifyContent: "space-between",
+      paddingTop: theme.spacing[8],
+      paddingBottom: theme.spacing[6],
     });
 
     fireEvent(scroll, "layout", {

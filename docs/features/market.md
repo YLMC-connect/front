@@ -1,6 +1,6 @@
 # market (나눔)
 
-> 마지막 갱신: 2026-08-13 (httpMarketDataSource 라이브 관측 연결) | 담당 Phase: P1/P2/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-10-27 (나눔 목록 플랫 구분선 리스트 전환 및 카테고리 칩 표시) | 담당 Phase: P1/P2/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -89,6 +89,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-10-27) **나눔 목록 행은 외곽 카드 박스 대신 하단 1px 구분선 플랫 리스트로 표시하고 카테고리를 메타 줄에 함께 노출한다** — 개별 박스 테두리를 제거하고 `borderBottomWidth: 1`(`theme.colors.line`)과 상하 `16px` 패딩으로 정리하며, 각 행 하단 메타 줄에 `카테고리 · 작성자 · 작성시각`을 함께 표시한다.
 - (2026-10-15) **나눔 게시글 수정(`PUT /api/share/{id}`) API를 HTTP 및 mock 경계에 연동한다** — 나눔 게시글 수정 기능을 `MarketDataSource`, `httpMarketDataSource`, `useUpdateMarketPost` 훅에 연결하고 모달(`app/modal/market-new.tsx`)에서 제목, 설명, 카테고리, 물품 상태를 서버에 전송하도록 구현합니다.
 - (2026-10-10) **나눔 상세 뒤로가기 버튼 영역 sticky 고정 및 사진 영역 이탈 시 배경색/타이틀 전환** — 기존 hero 이미지 내부 absolute 버튼 대신 화면 상단 고정 헤더(`stickyHeader`, 높이 56px)로 분리하여 스크롤 시에도 뒤로가기 버튼이 상단에 유지되도록 하고, 스크롤이 사진 영역(`width - 56px`)을 벗어나면 새벽기도 말씀요약 상단과 동일한 배경색(`theme.colors.bg`), 하단 보더(`theme.colors.line`), "나눔 상세" 타이틀을 갖도록 전환 처리. Issue #167.
 - (2026-08-13) **나눔 HTTP는 라이브 관측값과 common-codes만 매핑한다** — `SHARE_STATUS` AVAILABLE/RESERVED/COMPLETED, `SHARE_CATEGORY` 7개, `SHARE_ITEM_STATUS` NEW/USED/DAMAGED. 목록 DTO에 `authorName`/`images`가 없어 목록 작성자는 `authorId`를 쓰고 썸네일은 기존 `thumbSeed`를 유지한다. 생성은 multipart이며 서버가 받지 않는 `location`은 보내지 않는다. 신고 `reportReasonCode` enum이 공통 코드에 없어 HTTP 신고는 활성화하지 않는다. development 기본 adapter는 `http`.

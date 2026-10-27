@@ -30,7 +30,6 @@ import {
   MotionPressable,
   MotionShake,
   TopBar,
-  motionStaggerDelay,
 } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { authApiErrorMessages } from "../../src/constants/apiErrorMessages";
@@ -282,28 +281,11 @@ export default function SignupScreen() {
             onPress={Keyboard.dismiss}
             style={{ flexGrow: 1 }}
           >
-            <MotionEnter enabled={enterMotion} delay={motionStaggerDelay(0)}>
+            <MotionEnter enabled={enterMotion}>
               <AppText variant="display">정보를 입력해주세요</AppText>
             </MotionEnter>
 
-            <MotionEnter
-              enabled={enterMotion}
-              delay={motionStaggerDelay(1)}
-              style={styles.avatarPreview}
-            >
-              <AutoAvatar name={values.userName} />
-              <AppText variant="caption" tone="muted">
-                {values.userName
-                  ? "이름 두 글자로 자동 생성된 프로필"
-                  : "이름을 입력하면 미리보기가 표시됩니다"}
-              </AppText>
-            </MotionEnter>
-
-            <MotionEnter
-              enabled={enterMotion}
-              delay={motionStaggerDelay(2)}
-              style={styles.form}
-            >
+            <MotionEnter enabled={enterMotion} style={styles.form}>
               <Field label="아이디">
                 <MotionShake trigger={idErrorMessage}>
                   <View style={styles.idRow}>
@@ -320,14 +302,34 @@ export default function SignupScreen() {
                       testID="signup-check-id"
                       accessibilityRole="button"
                       onPress={() => onCheckAvailability("id")}
-                      disabled={checkAvailability.isPending}
-                      style={styles.checkButton}
+                      disabled={
+                        checkAvailability.isPending ||
+                        currentIdAvailability === true
+                      }
+                      style={[
+                        styles.checkButton,
+                        currentIdAvailability === true
+                          ? styles.checkButtonVerified
+                          : null,
+                      ]}
                     >
-                      {checkAvailability.isPending ? (
+                      {checkAvailability.isPending &&
+                      lastAvailabilityTarget === "id" ? (
                         <ActivityIndicator
                           size="small"
                           color={theme.colors.primaryDeep}
                         />
+                      ) : currentIdAvailability === true ? (
+                        <View style={styles.checkButtonVerifiedContent}>
+                          <AppIcon
+                            name="check"
+                            size={14}
+                            color={theme.colors.primaryDeep}
+                          />
+                          <Text style={styles.checkButtonTextVerified}>
+                            확인 완료
+                          </Text>
+                        </View>
                       ) : (
                         <Text style={styles.checkButtonText}>중복 확인</Text>
                       )}
@@ -356,45 +358,53 @@ export default function SignupScreen() {
               </Field>
 
               <Field label="비밀번호">
-                <MotionShake
-                  trigger={
-                    passwordErrorMessage ?? (isPwError ? "pw-error" : undefined)
-                  }
-                >
-                  <SignupInput
-                    testID="signup-password-input"
-                    value={values.password}
-                    onChangeText={setField("password")}
-                    placeholder="비밀번호"
-                    secureTextEntry
-                    hasError={isPwError || Boolean(errors.password)}
-                  />
-                </MotionShake>
-                {isPwError || errors.password ? (
-                  <InlineError>{passwordErrorMessage}</InlineError>
-                ) : (
+                <View style={styles.passwordStack}>
+                  <View>
+                    <MotionShake
+                      trigger={
+                        passwordErrorMessage ??
+                        (isPwError ? "pw-error" : undefined)
+                      }
+                    >
+                      <SignupInput
+                        testID="signup-password-input"
+                        value={values.password}
+                        onChangeText={setField("password")}
+                        placeholder="비밀번호 (8자 이상, 영문·숫자 조합)"
+                        secureTextEntry
+                        hasError={isPwError || Boolean(errors.password)}
+                      />
+                    </MotionShake>
+                    {isPwError || errors.password ? (
+                      <InlineError>{passwordErrorMessage}</InlineError>
+                    ) : null}
+                  </View>
+
+                  <View>
+                    <MotionShake
+                      trigger={
+                        passwordConfirmErrorMessage ??
+                        (isPwError ? "pw-confirm-error" : undefined)
+                      }
+                    >
+                      <SignupInput
+                        testID="signup-password-confirm-input"
+                        value={values.passwordConfirm}
+                        onChangeText={setField("passwordConfirm")}
+                        placeholder="비밀번호 확인"
+                        secureTextEntry
+                        hasError={isPwError || Boolean(errors.passwordConfirm)}
+                      />
+                    </MotionShake>
+                    <InlineError>{passwordConfirmErrorMessage}</InlineError>
+                  </View>
+                </View>
+                {!isPwError && !errors.password && !errors.passwordConfirm ? (
                   <FieldHint>8자 이상, 영문·숫자 조합</FieldHint>
-                )}
+                ) : null}
               </Field>
 
-              <Field label="비밀번호 확인">
-                <MotionShake
-                  trigger={
-                    passwordConfirmErrorMessage ??
-                    (isPwError ? "pw-confirm-error" : undefined)
-                  }
-                >
-                  <SignupInput
-                    testID="signup-password-confirm-input"
-                    value={values.passwordConfirm}
-                    onChangeText={setField("passwordConfirm")}
-                    placeholder="비밀번호 확인"
-                    secureTextEntry
-                    hasError={isPwError || Boolean(errors.passwordConfirm)}
-                  />
-                </MotionShake>
-                <InlineError>{passwordConfirmErrorMessage}</InlineError>
-              </Field>
+              <View style={styles.sectionDivider} />
 
               <Field label="이름">
                 <MotionShake trigger={errors.userName}>
@@ -451,14 +461,34 @@ export default function SignupScreen() {
                       testID="signup-check-email"
                       accessibilityRole="button"
                       onPress={() => onCheckAvailability("email")}
-                      disabled={checkAvailability.isPending}
-                      style={styles.checkButton}
+                      disabled={
+                        checkAvailability.isPending ||
+                        currentEmailAvailability === true
+                      }
+                      style={[
+                        styles.checkButton,
+                        currentEmailAvailability === true
+                          ? styles.checkButtonVerified
+                          : null,
+                      ]}
                     >
-                      {checkAvailability.isPending ? (
+                      {checkAvailability.isPending &&
+                      lastAvailabilityTarget === "email" ? (
                         <ActivityIndicator
                           size="small"
                           color={theme.colors.primaryDeep}
                         />
+                      ) : currentEmailAvailability === true ? (
+                        <View style={styles.checkButtonVerifiedContent}>
+                          <AppIcon
+                            name="check"
+                            size={14}
+                            color={theme.colors.primaryDeep}
+                          />
+                          <Text style={styles.checkButtonTextVerified}>
+                            확인 완료
+                          </Text>
+                        </View>
                       ) : (
                         <Text style={styles.checkButtonText}>중복 확인</Text>
                       )}
@@ -501,7 +531,7 @@ export default function SignupScreen() {
           </Pressable>
         </ScrollView>
 
-        <MotionEnter enabled={enterMotion} delay={motionStaggerDelay(3)}>
+        <MotionEnter enabled={enterMotion}>
           <View style={styles.bottomFlat}>
             <SubmitButton
               disabled={isSubmitDisabled || signup.isPending || isLoading}
@@ -577,31 +607,6 @@ function SubmitButton({
         )}
       </MotionPressable>
     </Animated.View>
-  );
-}
-
-function AutoAvatar({ name }: { name?: string }) {
-  const trimmed = name?.trim() ?? "";
-  const filled = trimmed.length > 0;
-  const initials = filled ? trimmed.slice(-2) : "";
-
-  // Single layer only — dual empty/filled opacity layers stacked poorly on web.
-  if (!filled) {
-    return (
-      <View style={[styles.avatar, styles.avatarEmpty]}>
-        <AppIcon name="person-outline" size={34} color={theme.colors.inkHint} />
-      </View>
-    );
-  }
-
-  return (
-    <MotionPop key="avatar-filled">
-      <View style={[styles.avatar, styles.avatarFilled]}>
-        <MotionFadeIn key={initials}>
-          <Text style={styles.avatarInitials}>{initials}</Text>
-        </MotionFadeIn>
-      </View>
-    </MotionPop>
   );
 }
 
@@ -703,40 +708,17 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing[3],
     paddingBottom: theme.spacing[7],
   },
-  avatarPreview: {
+  form: {
     marginTop: theme.spacing[5],
-    alignItems: "center",
+    gap: theme.spacing[5],
+  },
+  passwordStack: {
     gap: theme.spacing[2],
   },
-  avatar: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarFilled: {
-    backgroundColor: theme.colors.primary,
-    shadowColor: "rgba(91,122,176,0.50)",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.22,
-    shadowRadius: 11,
-    elevation: 4,
-  },
-  avatarEmpty: {
-    backgroundColor: theme.colors.surface2,
-    borderWidth: 1.5,
-    borderStyle: "dashed",
-    borderColor: theme.colors.lineStrong,
-  },
-  avatarInitials: {
-    color: theme.colors.white,
-    fontSize: 30,
-    fontWeight: "900",
-  },
-  form: {
-    marginTop: theme.spacing[6],
-    gap: theme.spacing[5],
+  sectionDivider: {
+    height: 1,
+    backgroundColor: theme.colors.line,
+    marginVertical: theme.spacing[1],
   },
   label: {
     marginBottom: theme.spacing[2],
@@ -766,8 +748,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  checkButtonVerified: {
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primarySoft,
+  },
+  checkButtonVerifiedContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
   checkButtonText: {
     color: theme.colors.ink,
+    fontSize: theme.fontSize.sm + 1,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  checkButtonTextVerified: {
+    color: theme.colors.primaryDeep,
     fontSize: theme.fontSize.sm + 1,
     fontWeight: theme.fontWeight.semibold,
   },

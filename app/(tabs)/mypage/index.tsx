@@ -45,9 +45,6 @@ const supportItems: MenuItem[] = [
 
 const accountItems: MenuItem[] = [
   { label: "로그아웃", icon: "logout", action: "logout" },
-];
-
-const manageItems: MenuItem[] = [
   {
     label: "회원탈퇴",
     icon: "person-remove",
@@ -120,11 +117,6 @@ export default function MyPageScreen() {
           <MenuSection
             title="계정"
             items={accountItems}
-            onPress={handleMenuPress}
-          />
-          <MenuSection
-            title="계정 관리"
-            items={manageItems}
             onPress={handleMenuPress}
           />
 

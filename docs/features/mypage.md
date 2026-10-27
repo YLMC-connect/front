@@ -1,6 +1,6 @@
 # mypage (MY / 성도 프로필)
 
-> 마지막 갱신: 2026-10-09 | 담당 Phase: P4/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-10-27 (계정·계정 관리 섹션 통합) | 담당 Phase: P4/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -72,6 +72,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-10-27) **마이페이지 하단 ‘계정’과 ‘계정 관리’ 섹션을 하나의 ‘계정’ 카드로 통합한다** — 1줄짜리 카드로 분리되어 있던 `로그아웃`과 `회원탈퇴`를 단일 `계정` 섹션 카드 안에 2행으로 묶어 하단 카드 구획을 정돈한다.
 - (2026-10-15) **회원 비밀번호 확인/변경, 탈퇴 및 법적 문서/FAQ 조회를 실제 API로 연동한다** — 비밀번호 확인(`POST /api/member/verify-password`), 비밀번호 변경(`PUT /api/member/password`), 회원 탈퇴(`DELETE /api/member/me`)를 `authAdapter`에 추가하고, 사이트 정책(`GET /api/site-policies/{policyType}`)과 FAQ 목록(`GET /api/faqs`)을 `siteContentService`로 연결하여 하드코딩 fixture 대신 서버 데이터를 우선 렌더링하도록 전환합니다.
 - (2026-10-10) **활동 내역 화면 탭 전환 SPA 처리 및 중보기도 활동 이력 링크 보정** — `app/(tabs)/mypage/activity.tsx`의 탭(나눔 게시글/댓글/소모임) 전환 시 `router.push` 대신 `setActiveTab` 로컬 상태로 전환하여 뒤로가기 히스토리 스택 누적을 방지하고, 마이페이지 '중보기도 활동 이력' 메뉴는 fallback으로 열리던 `activity?tab=prayer` 대신 실제 기도제목/상태 관리 화면인 `/prayer/request`로 연결. Issue #175.
 - (2026-10-10) **마이페이지 중첩 Stack 레이아웃 적용으로 하위 페이지 뒤로가기 흐름 정상화** — `app/(tabs)/mypage/_layout.tsx`(`<Stack screenOptions={{ headerShown: false }} />`)을 추가하고, `app/(tabs)/_layout.tsx`의 개별 탭 등록을 `<Tabs.Screen name="mypage" options={{ href: null }} />`로 일원화하여 프로필 수정/활동 내역 등 하위 댑스에서 `router.back()` 실행 시 마이페이지 메인으로 정상 복귀하도록 수정. Issue #169.

@@ -1,6 +1,6 @@
 # prayer (중보기도)
 
-> 마지막 갱신: 2026-10-09 | 담당 Phase: P5/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-10-27 (기도제목 등록 모달 폼 구조·하단 글래스 바 통일) | 담당 Phase: P5/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -67,6 +67,8 @@
 `PrayerRoom`은 `weekday`, `leader`, `memberCount`, `isJoined`를 포함합니다. `PrayerTopic`은 `isAnonymous`, `prayerCount`, `hasPrayed`, `isAnswered`, `answer`를 포함합니다. 루트 화면 전용 `PrayerOverview`는 요일방 요약과 내 기도제목 상태 요약을 가지며 API DTO mapper의 출력 모델로 사용합니다. `PrayerCohortDto`, `PrayerCohortStatusDto`, `PrayerCompletionMemberDto`, `PrayerTopicDto`, `PrayerHistoryItem`은 Notion에 적힌 필드만 가집니다. `PrayerApplicationDto`와 `PrayerCategoryDto`는 이름만 있고 값 타입은 페이지에 없어 `unknown`입니다. 기도방 상세 성공 필드는 없어 빈 객체로만 읽습니다. `a / b`로 한 칸에 적힌 이름은 두 필드입니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-10-27) **기도제목 등록 모달(`modal/prayer-new.tsx`)을 나눔·소모임 작성 모달과 동일한 폼 구조로 통일** — 기존 카드 박스(`FormSection`)와 본문 내 `취소/등록` 2열 버튼을 제거하고, 공통 `ModalFormSection`·`ModalFormTextInput`·안내 박스(`infoBox`)·작성 중단 `ConfirmDialog` 및 하단 반투명 글래스 고정 CTA 바(`기도제목 등록`)로 통일한다.
 
 - (2026-10-15) **기도 DTO의 Nullable 필드 안전 파싱 및 getOverview 병렬 복구 적용** — 실제 서버 응답에서 `rejectReason`, `emergencyEndAt`, `answerContent`, `answeredAt`, `completedAt`이 null로 반환될 때 매퍼 검증 실패(`INVALID_RESPONSE`)가 발생하던 문제를 해결하기 위해 `requireNullableString`을 적용합니다. `getOverview()`는 `Promise.allSettled`를 통해 `cohorts/my`와 `topics/my`를 병렬로 안전하게 수집하여 일부 실패 시에도 화면이 정상 렌더링되도록 합니다. Issue #185.
 - (2026-10-10) **내 기도방 및 내 기도제목 빈 상태에 공통 Empty 컴포넌트 적용** — `data.rooms.length === 0`일 때 "참여 중인 기도방이 없어요 / 중보기도 신청을 통해 기도방에 참여해보세요.", `data.requests.length === 0`일 때 "등록된 기도제목이 없어요 / 기도제목 작성을 통해 기도제목을 나눠보세요." 공통 Empty 컴포넌트를 렌더링하도록 적용. Issue #164.

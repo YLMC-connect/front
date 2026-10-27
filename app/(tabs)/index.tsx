@@ -91,7 +91,6 @@ export default function HomeScreen() {
               style={styles.dailyCard}
               testID="home-daily-prayer"
             >
-              <View style={styles.dailyOrb} />
               <AppText
                 variant="caption"
                 tone="inverse"
@@ -197,16 +196,11 @@ const styles = StyleSheet.create({
   },
   greetingCard: {
     marginHorizontal: theme.layout.screenX,
+    paddingVertical: theme.spacing[1],
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 12,
-    borderRadius: theme.radius.lg,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface,
-    padding: theme.spacing[4],
-    ...theme.shadow.card,
   },
   greetingContent: {
     flex: 1,
@@ -221,31 +215,22 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderRadius: theme.radius.lg,
     backgroundColor: theme.colors.primary,
-    padding: theme.spacing[5],
-    minHeight: 168,
+    padding: theme.layout.cardPadding + 4,
     ...theme.shadow.primary,
   },
-  dailyOrb: {
-    position: "absolute",
-    right: -22,
-    bottom: -38,
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    backgroundColor: "rgba(255,255,255,0.16)",
-  },
   dailyEyebrow: {
+    marginBottom: theme.spacing[1],
     opacity: 0.92,
   },
   dailyTitle: {
-    marginTop: theme.spacing[2],
+    marginBottom: theme.spacing[2],
   },
   dailySummary: {
-    marginTop: theme.spacing[2],
+    marginBottom: theme.spacing[3],
     opacity: 0.92,
   },
   cardAction: {
-    marginTop: theme.spacing[4],
+    alignSelf: "flex-end",
     flexDirection: "row",
     alignItems: "center",
     gap: 2,
@@ -269,6 +254,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[3],
   },
   dawnAction: {
+    alignSelf: "flex-end",
     flexDirection: "row",
     alignItems: "center",
     gap: 2,

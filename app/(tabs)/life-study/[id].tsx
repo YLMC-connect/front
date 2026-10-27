@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import { Button, Card, DetailBadge, TopBar } from "../../../src/components/ui";
+import { LinearGradient } from "expo-linear-gradient";
 import { theme } from "../../../src/constants/theme";
 import { useLifeStudyOverview } from "../../../src/hooks/useLifeStudyCourses";
 import { readDesignVariant } from "../../../src/lib/designVariant";
@@ -210,7 +211,18 @@ export default function LifeStudyDetailScreen() {
           </Section>
         </ScrollView>
 
-        <View style={styles.bottomBar}>
+        <View pointerEvents="box-none" style={styles.bottomBar}>
+          <LinearGradient
+            colors={[
+              "rgba(246,247,249,0)",
+              "rgba(246,247,249,0.78)",
+              "rgba(246,247,249,0.96)",
+            ]}
+            locations={[0, 0.38, 1]}
+            pointerEvents="none"
+            style={StyleSheet.absoluteFill}
+            testID="life-study-detail-bottom-bar"
+          />
           <Button>{enrolled ? "수강 내역 보기" : "수강 신청"}</Button>
         </View>
       </View>
@@ -542,7 +554,9 @@ const styles = StyleSheet.create({
   },
   progressCard: {
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.sageSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface,
     padding: 16,
   },
   progressHead: {
@@ -564,7 +578,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     height: 6,
     borderRadius: theme.radius.pill,
-    backgroundColor: "rgba(255,255,255,0.55)",
+    backgroundColor: theme.colors.surfaceMuted,
     overflow: "hidden",
   },
   progressFill: {
@@ -581,7 +595,9 @@ const styles = StyleSheet.create({
   metric: {
     flex: 1,
     borderRadius: theme.radius.sm,
-    backgroundColor: "rgba(255,255,255,0.65)",
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface2,
     padding: 10,
   },
   metricValue: {
@@ -592,7 +608,9 @@ const styles = StyleSheet.create({
   },
   nextClass: {
     borderRadius: theme.radius.sm,
-    backgroundColor: theme.colors.primarySoft,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface2,
     padding: 12,
   },
   nextText: {
@@ -644,12 +662,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    paddingHorizontal: 18,
-    paddingTop: 12,
-    paddingBottom: 18,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.line,
-    backgroundColor: theme.colors.glass,
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: 24,
+    paddingBottom: 24,
   },
   curriculumRow: {
     flexDirection: "row",

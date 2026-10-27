@@ -119,10 +119,21 @@ export function AppTabBar({
   navigation,
 }: BottomTabBarProps) {
   const pathname = usePathname();
+  const [lastTabPathname, setLastTabPathname] = useState(pathname);
+  if (!pathname.startsWith("/modal/") && pathname !== lastTabPathname) {
+    setLastTabPathname(pathname);
+  }
+  const effectivePathname = pathname.startsWith("/modal/")
+    ? lastTabPathname
+    : pathname;
+
   const currentRoute = state.routes[state.index];
   const currentOptions = descriptors[currentRoute.key]?.options;
 
-  if (!rootTabPaths.has(pathname) || !currentOptions?.tabBarButtonTestID) {
+  if (
+    !rootTabPaths.has(effectivePathname) ||
+    !currentOptions?.tabBarButtonTestID
+  ) {
     return null;
   }
 
@@ -136,7 +147,7 @@ export function AppTabBar({
       state={state}
       descriptors={descriptors}
       navigation={navigation}
-      pathname={pathname}
+      pathname={effectivePathname}
       routes={routes}
     />
   );
@@ -374,7 +385,7 @@ const styles = StyleSheet.create({
     bottom: 7,
     borderRadius: 999,
     backgroundColor: theme.colors.primary,
-    shadowColor: "rgba(91, 122, 176, 0.74)",
+    shadowColor: "rgba(62, 104, 200, 0.74)",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.16,
     shadowRadius: 12,

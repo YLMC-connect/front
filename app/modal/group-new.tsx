@@ -1,4 +1,5 @@
 import { AppIcon } from "@/components/ui/app-icon";
+import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
@@ -288,7 +289,18 @@ export default function GroupNewModal() {
         </TouchableWithoutFeedback>
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View pointerEvents="box-none" style={styles.footer}>
+        <LinearGradient
+          colors={[
+            "rgba(246,247,249,0)",
+            "rgba(246,247,249,0.78)",
+            "rgba(246,247,249,0.96)",
+          ]}
+          locations={[0, 0.38, 1]}
+          pointerEvents="none"
+          style={StyleSheet.absoluteFill}
+          testID="group-new-bottom-bar"
+        />
         <Button
           onPress={submit}
           loading={createGroup.isPending || updateGroupMutation.isPending}
@@ -316,7 +328,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.bg,
     paddingTop: theme.layout.screenX,
   },
-  body: { paddingBottom: 24 },
+  body: { paddingBottom: 112 },
   chips: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -389,11 +401,12 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.sm,
   },
   footer: {
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.line,
-    backgroundColor: theme.colors.bg,
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
     paddingHorizontal: theme.layout.screenX,
-    paddingTop: 12,
+    paddingTop: 24,
     paddingBottom: Platform.OS === "ios" ? 28 : 16,
   },
 });

@@ -1,6 +1,6 @@
 # group (소모임)
 
-> 마지막 갱신: 2026-10-09 (카테고리 필터 stickyControls 통합) | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-10-27 (동행 목록 플랫 구분선 리스트 전환) | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -96,6 +96,7 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-10-27) **동행 목록 행은 나눔과 동일하게 외곽 카드 박스 대신 하단 1px 구분선 플랫 리스트로 표시한다** — `groupCard`의 외곽 테두리·배경을 제거하고 `borderBottomWidth: 1`(`theme.colors.line`)과 상하 `16px` 패딩, `minHeight: 120`을 유지한다.
 - (2026-10-15) **동행/소모임 관리(수정/삭제/강퇴/상태변경) API를 HTTP 및 mock 경계에 완전 연동한다** — 방장 권한의 소모임 수정(`PUT /api/communion/{id}`), 소모임 삭제(`DELETE /api/communion/{id}`), 멤버 강퇴(`DELETE /api/communion/{id}/kick/{targetUserId}`), 모집 상태 변경(`PUT /api/communion/{id}/status`)을 `GroupDataSource` 인터페이스 및 `httpGroupDataSource`에 추가하고 `useUpdateGroup`, `useDeleteGroup`, `useKickGroupMember`, `useUpdateGroupStatus` 훅을 통해 화면에 연결합니다.
 - (2026-10-09) **동행 화면의 리스트 및 카드 레이아웃 구조는 나눔과 100% 동일하게 통일한다** — 나눔과 동행 탭을 상호 전환할 때 상단 필터와 첫 번째 카드 사이의 화면상 간격 및 위치가 달라 카드가 위아래로 움직이는 문제를 해결하기 위해, 동행 화면의 contentContainerStyle 및 이중 래퍼 뷰를 제거하고 나눔과 동일한 ScrollView 직하위 styles.list 컨테이너 및 카드 marginHorizontal 방식을 적용합니다. Issue #147.
 - (2026-10-09) **동행의 카테고리 필터는 나눔과 동일하게 상단 stickyControls에 통합한다** — 내 소모임이 세그먼트 탭으로 분리되어 본문 상단 가로 레일이 제거됨에 따라, 스크롤 위치에 따라 필터가 헤더에 도킹되던 복잡한 앵커 구조를 폐기하고 나눔과 동일하게 상단 `stickyControls` 내부에 카테고리 필터를 직접 배치합니다. 이를 통해 필터와 첫 번째 카드 사이 간격(16px) 및 스크롤 감추기/노출 동작을 나눔과 일치시키고 유지보수 복잡성을 대폭 낮춥니다. Issue #145.

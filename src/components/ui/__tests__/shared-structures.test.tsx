@@ -176,9 +176,7 @@ describe("shared maintenance UI", () => {
       StyleSheet.flatten(screen.getByLabelText("뒤로").props.style),
     ).toMatchObject({
       height: theme.layout.touchTarget,
-      borderWidth: 1,
-      borderColor: theme.colors.line,
-      backgroundColor: theme.colors.surface2,
+      justifyContent: "flex-start",
     });
 
     fireEvent.press(screen.getByLabelText("뒤로"));

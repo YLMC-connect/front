@@ -165,7 +165,6 @@ export default function MarketScreen() {
           <MarketEmptyState
             status={isEmpty ? null : activeStatus}
             isSearching={Boolean(search.trim())}
-            onCreate={() => router.push("/modal/market-new")}
           />
         ) : (
           visiblePosts.map((post) => (
@@ -214,10 +213,16 @@ function PostRow({
           {post.title}
         </AppText>
         <AppText variant="caption" tone="muted" style={styles.postMeta}>
-          {post.authorName} · {post.createdLabel}
+          {categoryOf(post.category)} · {post.authorName} · {post.createdLabel}
         </AppText>
       </View>
     </Pressable>
+  );
+}
+
+function categoryOf(key: string) {
+  return (
+    MARKET_CATEGORIES.find((category) => category.key === key)?.label ?? "기타"
   );
 }
 
@@ -234,11 +239,9 @@ function StatusBadge() {
 function MarketEmptyState({
   status,
   isSearching,
-  onCreate,
 }: {
   status: MarketSegment | null;
   isSearching?: boolean;
-  onCreate: () => void;
 }) {
   const message = isSearching
     ? {
@@ -269,8 +272,6 @@ function MarketEmptyState({
         title={message.title}
         description={message.description}
         icon={isSearching ? "search" : "shopping-bag"}
-        actionLabel={isSearching ? undefined : "나눔 등록하기"}
-        onAction={isSearching ? undefined : onCreate}
       />
     </View>
   );
@@ -291,7 +292,6 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[2],
   },
   list: {
-    gap: theme.spacing[3],
     paddingBottom: 164,
   },
   loading: {
@@ -301,11 +301,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: theme.layout.listGap,
     marginHorizontal: theme.layout.screenX,
-    padding: theme.layout.cardPadding,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.surface,
+    paddingVertical: theme.spacing[4],
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
   },
   thumbWrap: {
     width: theme.layout.listThumb,
@@ -333,7 +331,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     justifyContent: "center",
-    gap: theme.spacing[1],
+    gap: theme.spacing[2],
     paddingVertical: 2,
   },
   rowTextDone: {

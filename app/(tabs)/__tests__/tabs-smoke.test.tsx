@@ -276,9 +276,9 @@ describe("v1 tab smoke screens", () => {
     expect(backStyle).toMatchObject({
       minWidth: 68,
       height: 44,
-      borderColor: theme.colors.line,
-      backgroundColor: theme.colors.surface2,
     });
+    expect(backStyle.borderWidth).toBeUndefined();
+    expect(backStyle.backgroundColor).toBeUndefined();
     expect(backStyle.shadowOpacity).toBeUndefined();
     expect(backStyle.elevation).toBeUndefined();
   });

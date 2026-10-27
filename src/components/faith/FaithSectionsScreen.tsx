@@ -443,7 +443,6 @@ function CourseCard({
       onPress={() => router.push(`/life-study/${course.id}`)}
       style={styles.courseCard}
     >
-      <View style={styles.courseOrb} />
       <View style={styles.badgeRow}>
         <View style={open ? styles.warnBadge : styles.muteBadge}>
           <Text style={open ? styles.statusBadgeText : styles.muteBadgeText}>
@@ -627,7 +626,9 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing[2],
     marginBottom: theme.spacing[3],
     borderRadius: theme.radius.lg,
-    backgroundColor: theme.colors.sageSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface,
     padding: theme.layout.cardPadding,
   },
   todayTop: {
@@ -642,7 +643,7 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing[4],
     borderRadius: theme.radius.pill,
     overflow: "hidden",
-    backgroundColor: "rgba(255,255,255,0.76)",
+    backgroundColor: theme.colors.surfaceMuted,
   },
   todayFill: {
     height: "100%",
@@ -697,7 +698,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.sageSoft,
+    backgroundColor: theme.colors.primaryTint,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
@@ -815,8 +816,8 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.layout.screenX,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: "rgba(107,130,96,0.14)",
-    backgroundColor: "#F4F8EE",
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface,
     padding: 16,
   },
   pathTop: {
@@ -832,7 +833,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     height: 8,
     borderRadius: theme.radius.pill,
-    backgroundColor: "rgba(255,255,255,0.72)",
+    backgroundColor: theme.colors.surfaceMuted,
     overflow: "hidden",
   },
   progressFill: {
@@ -848,7 +849,9 @@ const styles = StyleSheet.create({
   pathMetric: {
     flex: 1,
     borderRadius: theme.radius.sm,
-    backgroundColor: "rgba(255,255,255,0.70)",
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface2,
     padding: 11,
   },
   metricLabel: {
@@ -870,15 +873,6 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     padding: theme.spacing[4],
     ...theme.shadow.card,
-  },
-  courseOrb: {
-    position: "absolute",
-    right: -18,
-    top: -18,
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: theme.colors.primarySoft,
   },
   courseTitle: {
     marginTop: 8,

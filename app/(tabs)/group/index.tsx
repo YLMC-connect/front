@@ -501,16 +501,13 @@ const styles = StyleSheet.create({
   },
   list: {
     flex: 1,
-    gap: theme.spacing[3],
     paddingBottom: 164,
   },
   myListWrap: {
     flex: 1,
-    gap: theme.spacing[3],
   },
   fullList: {
     paddingBottom: theme.spacing[6],
-    gap: theme.spacing[3],
   },
   loading: {
     paddingTop: theme.spacing[2],
@@ -520,11 +517,9 @@ const styles = StyleSheet.create({
     gap: theme.layout.listGap,
     marginHorizontal: theme.layout.screenX,
     minHeight: 120,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface,
-    padding: theme.layout.cardPadding,
+    paddingVertical: theme.spacing[4],
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
   },
   groupCardBody: {
     flex: 1,
@@ -547,15 +542,15 @@ const styles = StyleSheet.create({
   badge: {
     flexShrink: 0,
     borderRadius: theme.radius.pill,
-    backgroundColor: "rgba(143,168,130,0.20)",
+    backgroundColor: theme.colors.primaryTint,
     paddingHorizontal: 10,
     paddingVertical: 3,
   },
   badgeClosed: {
-    backgroundColor: "rgba(30,41,32,0.06)",
+    backgroundColor: theme.colors.surfaceMuted,
   },
   badgeText: {
-    color: "#4F6B45",
+    color: theme.colors.primaryDeep,
     fontSize: theme.fontSize.xs,
     fontWeight: theme.fontWeight.bold,
   },

@@ -149,7 +149,7 @@ type MotionEnterProps = {
   children: ReactNode;
   delay?: number;
   enabled?: boolean;
-  mode?: "fadeUp" | "settle";
+  mode?: "fade" | "fadeUp" | "settle";
   style?: StyleProp<ViewStyle>;
   testID?: string;
 };
@@ -163,7 +163,7 @@ export function MotionEnter({
   children,
   delay = 0,
   enabled = true,
-  mode = "fadeUp",
+  mode = "fade",
   style,
   testID,
 }: MotionEnterProps) {
@@ -179,7 +179,7 @@ export function MotionEnter({
     progress.value = 0;
     progress.value = withDelay(
       delay,
-      withTiming(1, softTiming(theme.motion.duration.enter)),
+      withTiming(1, softTiming(theme.motion.duration.base)),
     );
   }, [delay, progress, shouldAnimate]);
 
@@ -194,13 +194,19 @@ export function MotionEnter({
       };
     }
 
+    if (mode === "fadeUp") {
+      return {
+        opacity: progress.value,
+        transform: [
+          {
+            translateY: theme.motion.distance.md * (1 - progress.value),
+          },
+        ],
+      };
+    }
+
     return {
       opacity: progress.value,
-      transform: [
-        {
-          translateY: theme.motion.distance.md * (1 - progress.value),
-        },
-      ],
     };
   });
 

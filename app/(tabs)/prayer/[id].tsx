@@ -10,6 +10,7 @@ import {
   TopBar,
   UnderlineTabs,
 } from "../../../src/components/ui";
+import { LinearGradient } from "expo-linear-gradient";
 import { theme } from "../../../src/constants/theme";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 import {
@@ -225,7 +226,18 @@ export default function PrayerDetailScreen() {
         </ScrollView>
 
         {activeTab === "pray" && !isPrayEmpty ? (
-          <View style={styles.bottomAction}>
+          <View pointerEvents="box-none" style={styles.bottomAction}>
+            <LinearGradient
+              colors={[
+                "rgba(246,247,249,0)",
+                "rgba(246,247,249,0.78)",
+                "rgba(246,247,249,0.96)",
+              ]}
+              locations={[0, 0.38, 1]}
+              pointerEvents="none"
+              style={StyleSheet.absoluteFill}
+              testID="prayer-detail-bottom-bar"
+            />
             <Pressable
               accessibilityRole="button"
               style={[
@@ -604,9 +616,12 @@ const styles = StyleSheet.create({
   },
   bottomAction: {
     position: "absolute",
-    left: 18,
-    right: 18,
-    bottom: 24,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: 24,
+    paddingBottom: 24,
   },
   prayButton: {
     height: 52,
@@ -620,7 +635,7 @@ const styles = StyleSheet.create({
   },
   prayButtonDone: {
     borderWidth: 1,
-    borderColor: "rgba(91,122,176,0.22)",
+    borderColor: "rgba(62,104,200,0.22)",
     backgroundColor: theme.colors.primarySoft,
     shadowOpacity: 0,
     elevation: 0,

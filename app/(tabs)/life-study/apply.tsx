@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import { TopBar, VisualThumb } from "../../../src/components/ui";
+import { LinearGradient } from "expo-linear-gradient";
 import { theme } from "../../../src/constants/theme";
 import {
   useApplyLifeStudyCohort,
@@ -218,7 +219,18 @@ export default function LifeStudyApplyScreenRoute() {
           </Pressable>
         </ScrollView>
 
-        <View style={styles.bottom}>
+        <View pointerEvents="box-none" style={styles.bottom}>
+          <LinearGradient
+            colors={[
+              "rgba(246,247,249,0)",
+              "rgba(246,247,249,0.78)",
+              "rgba(246,247,249,0.96)",
+            ]}
+            locations={[0, 0.38, 1]}
+            pointerEvents="none"
+            style={StyleSheet.absoluteFill}
+            testID="life-study-apply-bottom-bar"
+          />
           <Pressable
             accessibilityRole="button"
             disabled={applyMutation.isPending}
@@ -453,15 +465,12 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    paddingHorizontal: 18,
-    paddingTop: 12,
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: 24,
     paddingBottom: 24,
-    backgroundColor: theme.colors.glass,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.line,
   },
   submitButton: {
-    height: 54,
+    height: 52,
     borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.primary,
     alignItems: "center",

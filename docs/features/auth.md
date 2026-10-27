@@ -1,6 +1,6 @@
 # auth (인증)
 
-> 마지막 갱신: 2026-10-09 (로그인 키보드 위치 고정, 비밀번호 찾기 문구 제거, 로그인 성공 envelope) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-10-27 (로그인·회원가입 진입 모션 단일 페이드화 및 폼 UI 정돈) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -11,11 +11,11 @@
 ## ✅ 완료
 
 - 인증 HTTP adapter 활성화 — login/refresh 성공 envelope의 `data`에서 토큰 payload를 읽고, signup 후 login 합성, `/api/member/me`, `/api/member/duplicate`를 `httpAuthAdapter`로 연결. 회원가입은 아이디와 이메일을 필수 입력으로 받고 각각 중복확인을 통과해야 한다. 값이 바뀌면 기존 확인 결과를 폐기한다. development 기본값은 HTTP, 테스트/Maestro는 `EXPO_PUBLIC_AUTH_ADAPTER=mock`. API origin은 `EXPO_PUBLIC_API_URL`. 회원가입 중복확인 실패는 해당 필드에 표시. 로그인 성공 schema는 `ApiResponseLoginResponse`이고, 그 밖 Swagger 성공 schema가 비어 있는 항목 때문에 `test:api:contract` 실패는 남아 있다
-- 조용한 톤 인증 여백·위계 — 로그인 로고 그림자 완화·여백 토큰화, 회원가입 필드 간격·라벨 weight 정리, CTA 라벨 semibold; glass 하단 바 실험은 단순 `bottomFlat`으로 유지
-- 로그인·회원가입 절제 모션 (C-set) — 진입 stagger fade-up, 로고 1회 settle, 필드 검증 shake·인라인 에러 fade, 가입 아바타 empty↔filled morph, 중복확인 성공 체크 pop, CTA `MotionPressable`, 가입 버튼 enable soft 활성, auth Stack slide/fade. `designVariant=default`·`useReducedMotion`에서 진입 애니는 static
+- 조용한 톤 인증 여백·위계 — 로그인 상단 로고 아이콘과 회원가입 상단 점선 아바타 미리보기를 제거해 타이포그래피·폼 중심으로 정리하고(소프트 배지 `열린문교회 커뮤니티` + 2줄 환영 헤드라인 `열린문 커넥트에 오신 것을 환영합니다` 좌측 정렬), 로그인·회원가입 메인 CTA 곡률은 앱 공통 톤에 맞춰 `radius.pill`을 유지하며, 로그인 하단 회원가입 이동은 하단 서피스 카드로 배치하고 회원가입 비밀번호·비밀번호 확인을 단일 섹션으로 묶어 계정/성도 정보를 구분하며 중복확인 통과 시 버튼을 `확인 완료` 상태로 전환; glass 하단 바 실험은 단순 `bottomFlat`으로 유지
+- 로그인·회원가입 절제 모션 (C-set) — 진입은 이동(`translateY`)·시간차(`stagger`) 없는 단일 페이드(`opacity`), 필드 검증 shake·인라인 에러 fade, 중복확인 성공 체크 pop, CTA `MotionPressable`, 가입 버튼 enable soft 활성, auth Stack slide/fade. `designVariant !== default`·`useReducedMotion`에서 진입 애니는 static
 - 로그인·회원가입 입력 포커스 통일 — 인증 전용 공통 `AuthInput`으로 전체 입력 surface를 공유하고 웹 기본 내부 outline을 제거한 뒤 나눔·동행 검색·작성 입력과 같은 primary 2px focus border를 적용하며 오류 테두리는 danger 색상을 우선
 - 로그인 비밀번호 보기 아이콘 Material 복원 — 로그인 secure field의 `visibility / visibility-off`만 기존 Material Icons로 렌더링하고 나머지 앱 아이콘과 회원가입 아이콘은 Solar 체계를 유지
-- 로그인·회원가입 세로 배치 정리 — 로그인은 hero·입력·CTA를 하나의 스크롤 가능한 묶음으로 중앙보다 약간 위에 두고, 그 높이는 첫 레이아웃에 고정한다. 키보드가 열려도 다시 가운데로 올리지 않으며, iOS는 가려진 입력만 `automaticallyAdjustKeyboardInsets`로 올린다. 회원가입은 헤더 아래 24px에서 시작하고 하단 가입 버튼은 키보드 위에 둔다
+- 로그인·회원가입 세로 배치 정리 — 로그인은 상단(소프트 배지·2줄 환영 타이틀·입력 폼·로그인 버튼)과 하단(회원가입 안내 카드)을 `justifyContent: "space-between"`으로 배치해 상하 여백 균형을 맞추고, 그 높이는 첫 레이아웃에 고정한다. 키보드가 열려도 다시 계산하지 않으며, iOS는 가려진 입력만 `automaticallyAdjustKeyboardInsets`로 올린다. 회원가입은 헤더 아래 20px에서 시작하고 하단 가입 버튼은 키보드 위에 둔다
 - 약관 뒤로·닫기 의미 구분 — 약관 동의 page에는 공통 `chevron-left + 뒤로`와 `router.back()`을 연결하고 같은 화면의 약관 전문 sheet에는 `close + 닫기`를 표시해 sheet state만 해제
 - 기본 mock 로그인 계정 변경 — 개발·테스트 계정을 `admin / admin`으로 통일하고 mock adapter가 해당 자격증명만 허용하도록 고정
 - 인증 typography·접근성 정리 — 로그인/회원가입의 display·제목·본문·보조·오류 문구를 역할형 `AppText`와 semantic tone으로 정리하고 양쪽 비밀번호 입력에 44px 표시/숨김 버튼을 적용
@@ -94,7 +94,7 @@
 - (2026-09-08) **회원가입 중복확인 실패는 아이디 필드에 표시한다** — 성공(`available`)만 그리면 CORS/네트워크 오류가 무반응처럼 보인다. mutation error를 인라인 오류로 보여주고, 아이디가 바뀌면 이전 오류를 버린다.
 - (2026-08-13) **인증 HTTP는 관측한 필드만 연결한다** — signup 성공은 `{ userStatus }`만 주고 토큰이 없어 같은 자격증명으로 login을 이어서 호출한다. `/me`와 duplicate는 공통 envelope를 쓴다. 관측되지 않은 필드·역할·오류 코드는 만들지 않는다. development 기본 adapter는 `http`, 테스트와 Maestro mock 계정은 `EXPO_PUBLIC_AUTH_ADAPTER=mock`. (2026-10-09에 login/refresh 성공도 envelope `data`를 읽도록 변경)
 - (2026-07-23) **인증 화면도 공통 “조용한 깔끔함” 톤을 따른다** — 로고·CTA 그림자는 `theme.shadow.primary` 수준으로 약하게, 여백은 spacing 토큰, 라벨/버튼 weight는 medium·semibold. Issue #105.
-- (2026-07-23) **인증 화면 모션은 soft timing + 짧은 stagger 로 절제한다** — duration `enter 280ms`, distance `md 12px`, stagger `60ms`, easing은 완만한 bezier(앞당김 적은 soft out). 웹 겹침 방지를 위해 layout `entering` 대신 in-flow opacity/transform 을 쓰고, spring/pulse 루프·shared element·confetti는 쓰지 않습니다. 로고는 1회 settle(`scale enterFrom 0.92→1`)만 허용하고, 검증 오류는 shake 1회(`±distance.xs~5px`), 가입 아바타는 empty↔filled 단일 레이어 전환입니다. `useReducedMotion`과 `designVariant !== default` 캡처 화면에서는 진입 애니는 static이며 피드백 모션도 reduce 시 즉시 표시합니다. 공통 프리미티브는 `MotionEnter` / `MotionShake` / `MotionFadeIn` / `MotionPop` 입니다.
+- (2026-10-27) **인증 화면 진입 모션은 이동·시간차 없는 단일 페이드로 두고 폼 밀도를 정돈한다** — `MotionEnter` 기본 모드를 `fade`(`opacity`만 `duration.base 200ms`)로 두고 로그인·회원가입의 블록별 `stagger` 지연과 `translateY` 상승·로고 `settle` 스케일을 제거한다. 로그인 제목 위의 도어 로고 아이콘을 제거하고 상단 소프트 배지(`열린문교회 커뮤니티`)와 2줄 환영 헤드라인(`열린문 커넥트에 오신 것을 환영합니다`)을 좌측 정렬 `display`(28px)로 두며, 상단(헤드라인·입력 폼·로그인 버튼)과 하단(`열린문 커넥트가 처음이신가요? 회원가입하기` 서피스 카드)을 `space-between`으로 배치한다. 회원가입 상단 88px 점선 아바타 미리보기는 제거해 입력 흐름에 집중시킨다. 공통 `AuthInput`은 흰색 `surface` 배경과 `lineStrong` 테두리를 쓰고, 메인 CTA 곡률은 앱 공통 톤인 `radius.pill`을 유지한다. 회원가입은 비밀번호·비밀번호 확인을 하나의 그룹으로 묶은 뒤 계정 정보와 성도 정보 사이에 구분선을 두며, 중복확인 통과 시 버튼을 `확인 완료` 상태로 전환한다. Issue #190.
 - (2026-07-18) **인증 입력은 전체 surface에 공통 focus border를 표시한다** — 로그인·회원가입의 내부 `TextInput` 웹 outline은 제거하고 공통 `AuthInput` 외곽에 primary 2px를 표시하며, 오류가 함께 있으면 danger 색상을 우선합니다.
 - (2026-07-23) **회원가입 화면에서 목장·부서 배정 안내 배지와 연락처 하이픈 안내 문구는 두지 않는다** — 하단 info 배지(“목장과 부서는 가입 후…”)와 연락처 힌트는 제거하고, 연락처 하이픈 자동 포맷은 조용히 유지합니다.
 - (2026-07-23) **회원가입 연락처는 숫자만 받아 010-XXXX-XXXX 하이픈을 자동 삽입한다** — 입력은 최대 11자리 숫자로 제한하고 표시·제출 값은 `010-1234-5678` 형식을 쓰며, 검증은 하이픈을 제외한 숫자 길이(10자 이상)로 판단합니다.

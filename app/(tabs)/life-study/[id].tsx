@@ -3,7 +3,13 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import type { ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
-import { Button, Card, DetailBadge, TopBar } from "../../../src/components/ui";
+import {
+  AnimatedProgressFill,
+  Button,
+  Card,
+  DetailBadge,
+  TopBar,
+} from "../../../src/components/ui";
 import { LinearGradient } from "expo-linear-gradient";
 import { theme } from "../../../src/constants/theme";
 import { useLifeStudyOverview } from "../../../src/hooks/useLifeStudyCourses";
@@ -256,7 +262,7 @@ function EnrolledContent() {
             <Text style={styles.progressValue}>4 / 13</Text>
           </View>
           <View style={styles.progressTrack}>
-            <View style={styles.progressFill} />
+            <AnimatedProgressFill percent={33} style={styles.progressFill} />
           </View>
           <View style={styles.metricGrid}>
             <Metric label="출석" value="4 / 4" />
@@ -582,7 +588,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   progressFill: {
-    width: "33%",
     height: "100%",
     borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.primary,

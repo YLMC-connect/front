@@ -24,6 +24,10 @@ describe("home service", () => {
     const overview = await fetchHomeOverview(new Date("2026-07-25T09:00:00"));
     expect(overview.dailyPrayer.weekday).toBe("sat");
     expect(overview.dawnPrayer.href).toBe("/prayer/dawn");
+    expect(overview.sundaySermon.videoUrl).toBe(
+      "https://youtu.be/wyFldwl6hW8?si=RGgYZd4Om9QcJuoR",
+    );
+    expect(overview.sundaySermon.thumbnailUrl).toContain("wyFldwl6hW8");
     expect(overview.todos).toHaveLength(2);
     expect(overview.todos.map((todo) => todo.id)).toEqual([
       "dawn-word",

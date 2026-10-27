@@ -89,13 +89,9 @@ export function Screen({
           </Pressable>
         </ScrollView>
       ) : (
-        <Pressable
-          accessible={false}
-          onPress={Keyboard.dismiss}
-          style={[styles.fill, padded ? styles.padded : null]}
-        >
+        <View style={[styles.fill, padded ? styles.padded : null]}>
           {children}
-        </Pressable>
+        </View>
       )}
     </View>
   );

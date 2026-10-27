@@ -19,12 +19,14 @@ import type {
 } from "../../types/prayer";
 import { StickyHeaderScreen } from "../layout/StickyHeaderScreen";
 import {
+  AnimatedProgressFill,
   AppText,
   Empty,
   EmptyState,
   ErrorState,
   FloatingActionButton,
   ListSkeleton,
+  MotionEnter,
   MotionPressable,
   SearchField,
   SEARCH_FIELD_STICKY_HEIGHT,
@@ -127,7 +129,7 @@ function PrayerContent() {
     : 0;
 
   return (
-    <>
+    <MotionEnter>
       <View style={styles.todayCard}>
         <View style={styles.todayTop}>
           <View>
@@ -143,11 +145,9 @@ function PrayerContent() {
           </AppText>
         </View>
         <View style={styles.todayTrack}>
-          <View
-            style={[
-              styles.todayFill,
-              { width: `${todayPercent}%` as `${number}%` },
-            ]}
+          <AnimatedProgressFill
+            percent={todayPercent}
+            style={styles.todayFill}
           />
         </View>
         <AppText variant="caption" tone="muted" style={styles.todayMeta}>
@@ -169,10 +169,11 @@ function PrayerContent() {
             />
           ) : (
             data.rooms.map((room) => (
-              <Pressable
+              <MotionPressable
                 key={room.id}
                 accessibilityRole="button"
                 onPress={() => router.push(`/prayer/${room.id}`)}
+                pressedScale={0.985}
                 style={styles.roomCard}
               >
                 <PrayerDayBadge weekday={room.weekday} period={room.period} />
@@ -221,7 +222,7 @@ function PrayerContent() {
                     color={theme.colors.primaryDeep}
                   />
                 </View>
-              </Pressable>
+              </MotionPressable>
             ))
           )}
         </View>
@@ -275,7 +276,7 @@ function PrayerContent() {
           )}
         </View>
       </View>
-    </>
+    </MotionEnter>
   );
 }
 
@@ -314,7 +315,7 @@ function StudyContent({ search }: { search: string }) {
   }
 
   return (
-    <>
+    <MotionEnter>
       <View style={styles.section}>
         <AppText variant="sectionTitle" style={styles.sectionTitle}>
           내 학습경로
@@ -335,11 +336,9 @@ function StudyContent({ search }: { search: string }) {
             </AppText>
           </View>
           <View style={styles.progressTrack}>
-            <View
-              style={[
-                styles.progressFill,
-                { width: `${progressPercent}%` as `${number}%` },
-              ]}
+            <AnimatedProgressFill
+              percent={progressPercent}
+              style={styles.progressFill}
             />
           </View>
           <View style={styles.pathGrid}>
@@ -394,7 +393,7 @@ function StudyContent({ search }: { search: string }) {
           )}
         </View>
       </View>
-    </>
+    </MotionEnter>
   );
 }
 
@@ -438,9 +437,10 @@ function CourseCard({
   open?: boolean;
 }) {
   return (
-    <Pressable
+    <MotionPressable
       accessibilityRole="button"
       onPress={() => router.push(`/life-study/${course.id}`)}
+      pressedScale={0.985}
       style={styles.courseCard}
     >
       <View style={styles.badgeRow}>
@@ -482,7 +482,7 @@ function CourseCard({
       ) : (
         <Text style={styles.targetText}>신청대상: {course.target}</Text>
       )}
-    </Pressable>
+    </MotionPressable>
   );
 }
 
@@ -536,41 +536,49 @@ function PrayerFloatingMenu() {
       <View pointerEvents="box-none" style={styles.fabContainer}>
         {open ? (
           <View style={styles.fabMenu}>
-            <MotionPressable
-              accessibilityLabel="중보기도 신청"
-              accessibilityRole="button"
-              onPress={() => {
-                setOpen(false);
-                router.push("/prayer/apply");
-              }}
-              style={styles.fabMenuItem}
-              testID="prayer-fab-apply-item"
-            >
-              <AppIcon
-                name="prayer-apply"
-                size={18}
-                color={theme.colors.primaryDeep}
-              />
-              <AppText variant="caption" style={styles.fabMenuItemText}>
-                중보기도 신청
-              </AppText>
-            </MotionPressable>
+            <MotionEnter delay={40} mode="fadeUp">
+              <MotionPressable
+                accessibilityLabel="중보기도 신청"
+                accessibilityRole="button"
+                onPress={() => {
+                  setOpen(false);
+                  router.push("/prayer/apply");
+                }}
+                style={styles.fabMenuItem}
+                testID="prayer-fab-apply-item"
+              >
+                <AppIcon
+                  name="prayer-apply"
+                  size={18}
+                  color={theme.colors.primaryDeep}
+                />
+                <AppText variant="caption" style={styles.fabMenuItemText}>
+                  중보기도 신청
+                </AppText>
+              </MotionPressable>
+            </MotionEnter>
 
-            <MotionPressable
-              accessibilityLabel="기도제목 작성"
-              accessibilityRole="button"
-              onPress={() => {
-                setOpen(false);
-                router.push("/modal/prayer-new");
-              }}
-              style={styles.fabMenuItem}
-              testID="prayer-fab-write-item"
-            >
-              <AppIcon name="edit" size={18} color={theme.colors.primaryDeep} />
-              <AppText variant="caption" style={styles.fabMenuItemText}>
-                기도제목 작성
-              </AppText>
-            </MotionPressable>
+            <MotionEnter delay={0} mode="fadeUp">
+              <MotionPressable
+                accessibilityLabel="기도제목 작성"
+                accessibilityRole="button"
+                onPress={() => {
+                  setOpen(false);
+                  router.push("/modal/prayer-new");
+                }}
+                style={styles.fabMenuItem}
+                testID="prayer-fab-write-item"
+              >
+                <AppIcon
+                  name="edit"
+                  size={18}
+                  color={theme.colors.primaryDeep}
+                />
+                <AppText variant="caption" style={styles.fabMenuItemText}>
+                  기도제목 작성
+                </AppText>
+              </MotionPressable>
+            </MotionEnter>
           </View>
         ) : null}
 

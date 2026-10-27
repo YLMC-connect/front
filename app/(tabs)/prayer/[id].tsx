@@ -1,12 +1,15 @@
 import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import type { ReactNode } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useState, type ReactNode } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
+  AnimatedProgressFill,
   Card,
   DetailBadge,
+  MotionPop,
+  MotionPressable,
   TopBar,
   UnderlineTabs,
 } from "../../../src/components/ui";
@@ -179,6 +182,9 @@ export default function PrayerDetailScreen() {
   }>();
   const id = routeId(params.id);
   const variant = readDesignVariant(params.designVariant) ?? "pray";
+  const [completedOverride, setCompletedOverride] = useState<boolean | null>(
+    null,
+  );
   if (id && !params.designVariant && resolvePrayerAdapterMode() === "http") {
     return <LivePrayerDetail id={id} />;
   }
@@ -190,7 +196,7 @@ export default function PrayerDetailScreen() {
       : variant === "answers" || variant === "answers-empty"
         ? "answers"
         : "pray";
-  const isCompleted = variant === "pray-completed";
+  const isCompleted = completedOverride ?? variant === "pray-completed";
   const isPrayEmpty = variant === "pray-empty";
   const isStatusEmpty = variant === "status-empty";
   const isAnswersEmpty = variant === "answers-empty";
@@ -238,20 +244,28 @@ export default function PrayerDetailScreen() {
               style={StyleSheet.absoluteFill}
               testID="prayer-detail-bottom-bar"
             />
-            <Pressable
+            <MotionPressable
               accessibilityRole="button"
+              onPress={() =>
+                setCompletedOverride(
+                  (prev) => !(prev ?? variant === "pray-completed"),
+                )
+              }
+              pressedScale={0.96}
               style={[
                 styles.prayButton,
                 isCompleted ? styles.prayButtonDone : null,
               ]}
             >
-              <AppIcon
-                name="check"
-                size={18}
-                color={
-                  isCompleted ? theme.colors.primaryDeep : theme.colors.white
-                }
-              />
+              <MotionPop key={isCompleted ? "done" : "todo"}>
+                <AppIcon
+                  name="check"
+                  size={18}
+                  color={
+                    isCompleted ? theme.colors.primaryDeep : theme.colors.white
+                  }
+                />
+              </MotionPop>
               <Text
                 style={[
                   styles.prayButtonText,
@@ -260,7 +274,7 @@ export default function PrayerDetailScreen() {
               >
                 {isCompleted ? "오늘 기도 완료됨" : "오늘 기도 완료"}
               </Text>
-            </Pressable>
+            </MotionPressable>
           </View>
         ) : null}
       </View>
@@ -341,8 +355,9 @@ function StatusPanel({ empty }: { empty: boolean }) {
           <Stat label="참여율" value={rate} />
         </View>
         <View style={styles.progressBar}>
-          <View
-            style={[styles.progressFill, { width: empty ? "0%" : "75%" }]}
+          <AnimatedProgressFill
+            percent={empty ? 0 : 75}
+            style={styles.progressFill}
           />
         </View>
       </Card>

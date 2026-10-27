@@ -95,6 +95,7 @@ export const mockMarketDataSource: MarketDataSource = {
       id,
       thumbSeed:
         mockMarketOverview.items.length + mockCreatedOverviewItems.length,
+      ...(input.images.length > 0 ? { images: input.images } : {}),
       title: input.title,
       content: input.description,
       categoryLabel,
@@ -109,6 +110,7 @@ export const mockMarketDataSource: MarketDataSource = {
     mockCreatedOverviewItems.unshift({
       id,
       thumbSeed: detail.thumbSeed,
+      ...(input.images[0] ? { thumbnailUrl: input.images[0] } : {}),
       title: detail.title,
       authorName: detail.authorName,
       createdLabel: detail.createdLabel,

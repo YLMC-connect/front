@@ -1,5 +1,13 @@
 import { Stack } from "expo-router";
+import { theme } from "../../../src/constants/theme";
 
 export default function MarketLayout() {
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: theme.colors.bg },
+      }}
+    />
+  );
 }

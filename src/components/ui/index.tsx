@@ -18,6 +18,7 @@ export { AppText, type AppTextTone, type AppTextVariant } from "./app-text";
 export { ListSkeleton, Skeleton } from "./skeleton";
 
 export {
+  AnimatedProgressFill,
   MotionEnter,
   MotionFadeIn,
   MotionPop,

@@ -28,6 +28,15 @@ export interface HomeDawnPrayer {
   href: string;
 }
 
+export interface HomeSundaySermon {
+  id: string;
+  timeLabel: string;
+  title: string;
+  summary: string;
+  thumbnailUrl: string;
+  videoUrl: string;
+}
+
 export type HomeTodoId = "dawn-word" | "daily-prayer";
 
 export interface HomeTodoItem {
@@ -47,6 +56,7 @@ export interface HomeProgressStep {
 export interface HomeOverview {
   dailyPrayer: HomeDailyPrayer;
   dawnPrayer: HomeDawnPrayer;
+  sundaySermon: HomeSundaySermon;
   todos: readonly HomeTodoItem[];
   progressSteps: readonly HomeProgressStep[];
 }

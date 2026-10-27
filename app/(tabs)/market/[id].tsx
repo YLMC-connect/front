@@ -5,6 +5,9 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -15,6 +18,15 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native";
+import Animated, {
+  Extrapolation,
+  interpolate,
+  type SharedValue,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   AppText,
@@ -107,9 +119,16 @@ export default function MarketDetailScreen() {
     }
   }
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const [isPastHero, setIsPastHero] = useState(false);
-  const heroThreshold = Math.max(width - 56, 1);
+  const scrollX = useSharedValue(0);
+  const onHeroScroll = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollX.value = event.contentOffset.x;
+    },
+  });
+  const heroThreshold = Math.max(width - (insets.top + 56), 1);
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = event.nativeEvent.contentOffset.y;
     const past = offsetY >= heroThreshold;
@@ -144,7 +163,7 @@ export default function MarketDetailScreen() {
 
   if (detail.isPending) {
     return (
-      <Screen>
+      <Screen padded={false} applyTopInset={false}>
         <View style={styles.loading}>
           <Skeleton width="100%" height={360} radius={0} />
           <View style={styles.loadingBody}>
@@ -272,12 +291,15 @@ export default function MarketDetailScreen() {
   };
 
   return (
-    <Screen scroll={false} padded={false}>
+    <Screen scroll={false} padded={false} applyTopInset={false}>
       <View style={styles.root}>
         <View
           testID="market-detail-sticky-header"
           style={[
             styles.stickyHeader,
+            insets.top > 0
+              ? { paddingTop: insets.top, height: insets.top + 56 }
+              : null,
             isPastHero
               ? styles.stickyHeaderScrolled
               : styles.stickyHeaderTransparent,
@@ -293,7 +315,13 @@ export default function MarketDetailScreen() {
             <Text style={styles.backText}>뒤로</Text>
           </MotionPressable>
           {isPastHero ? (
-            <View pointerEvents="none" style={styles.headerTitleWrap}>
+            <View
+              pointerEvents="none"
+              style={[
+                styles.headerTitleWrap,
+                insets.top > 0 ? { top: insets.top } : null,
+              ]}
+            >
               <AppText numberOfLines={1} variant="sectionTitle">
                 나눔 상세
               </AppText>
@@ -303,16 +331,58 @@ export default function MarketDetailScreen() {
 
         <ScrollView
           contentContainerStyle={styles.content}
+          keyboardDismissMode="on-drag"
+          keyboardShouldPersistTaps="handled"
           onScroll={handleScroll}
           scrollEventThrottle={16}
           testID="market-detail-scroll"
         >
           <View style={[styles.hero, { height: width }]}>
-            <VisualThumb
-              size={width}
-              seed={market.thumbSeed}
-              style={styles.heroThumb}
-            />
+            <Animated.ScrollView
+              bounces={false}
+              decelerationRate="fast"
+              directionalLockEnabled
+              disableIntervalMomentum
+              horizontal
+              nestedScrollEnabled
+              onScroll={onHeroScroll}
+              pagingEnabled
+              scrollEventThrottle={16}
+              showsHorizontalScrollIndicator={false}
+              snapToAlignment="start"
+              snapToInterval={Math.max(width, 1)}
+              testID="market-hero-carousel"
+            >
+              {market.images && market.images.length > 0
+                ? market.images.map((uri, index) => (
+                    <CarouselSlide
+                      key={`${uri}-${index}`}
+                      index={index}
+                      scrollX={scrollX}
+                      width={width}
+                    >
+                      <Image
+                        resizeMode="cover"
+                        source={{ uri }}
+                        style={[styles.heroThumb, { width, height: width }]}
+                      />
+                    </CarouselSlide>
+                  ))
+                : [0, 1, 2].map((offset) => (
+                    <CarouselSlide
+                      key={offset}
+                      index={offset}
+                      scrollX={scrollX}
+                      width={width}
+                    >
+                      <VisualThumb
+                        size={width}
+                        seed={market.thumbSeed + offset}
+                        style={{ width, height: width, borderRadius: 0 }}
+                      />
+                    </CarouselSlide>
+                  ))}
+            </Animated.ScrollView>
             <LinearGradient
               colors={[
                 "rgba(20,30,18,0.22)",
@@ -329,15 +399,29 @@ export default function MarketDetailScreen() {
             {isReserved ? <CenterBadge label="예약중" /> : null}
             {isDone ? (
               <>
-                <View style={styles.doneOverlay} />
-                <Text style={styles.doneHeroText}>나눔완료</Text>
+                <View pointerEvents="none" style={styles.doneOverlay} />
+                <Text pointerEvents="none" style={styles.doneHeroText}>
+                  나눔완료
+                </Text>
               </>
             ) : null}
-            <View style={styles.dots}>
-              <View style={styles.dotOn} />
-              <View style={styles.dot} />
-              <View style={styles.dot} />
-            </View>
+            {!market.images ||
+            market.images.length === 0 ||
+            market.images.length > 1 ? (
+              <View pointerEvents="none" style={styles.dots}>
+                {(market.images && market.images.length > 1
+                  ? market.images
+                  : [0, 1, 2]
+                ).map((_, index) => (
+                  <CarouselDot
+                    key={index}
+                    index={index}
+                    scrollX={scrollX}
+                    width={width}
+                  />
+                ))}
+              </View>
+            ) : null}
           </View>
 
           {isReserved ? (
@@ -439,42 +523,81 @@ export default function MarketDetailScreen() {
           </View>
         </ScrollView>
 
-        <View style={styles.composer}>
-          {editingCommentId ? (
-            <Pressable
-              accessibilityRole="button"
-              onPress={resetCommentComposer}
-              style={styles.cancelEdit}
-            >
-              <Text style={styles.cancelEditText}>수정 취소</Text>
-            </Pressable>
-          ) : null}
-          <TextInput
-            testID="market-comment-input"
-            value={comment}
-            onChangeText={setComment}
-            editable={!isCommentPending}
-            placeholder={
-              editingCommentId ? "댓글을 수정해주세요" : "댓글을 입력해주세요"
-            }
-            placeholderTextColor={theme.colors.inkMute}
-            style={styles.commentInput}
-          />
-          <Pressable
-            testID="market-comment-submit"
-            accessibilityRole="button"
-            accessibilityLabel={editingCommentId ? "댓글 수정" : "댓글 등록"}
-            onPress={onSubmitComment}
-            disabled={!comment.trim() || isCommentPending}
-            style={styles.sendButton}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          pointerEvents="box-none"
+          style={styles.composer}
+        >
+          <View
+            pointerEvents="box-none"
+            style={styles.composerInner}
           >
-            {isCommentPending ? (
-              <ActivityIndicator size="small" color={theme.colors.white} />
-            ) : (
-              <AppIcon name="send" size={18} color={theme.colors.white} />
-            )}
-          </Pressable>
-        </View>
+            <LinearGradient
+              colors={[
+                "rgba(246,247,249,0)",
+                "rgba(246,247,249,0.78)",
+                "rgba(246,247,249,0.96)",
+              ]}
+              locations={[0, 0.38, 1]}
+              pointerEvents="none"
+              style={StyleSheet.absoluteFill}
+              testID="market-detail-composer-gradient"
+            />
+            <View style={styles.composerField}>
+              {editingCommentId ? (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={resetCommentComposer}
+                  style={styles.cancelEdit}
+                >
+                  <Text style={styles.cancelEditText}>수정 취소</Text>
+                </Pressable>
+              ) : null}
+              <TextInput
+                testID="market-comment-input"
+                value={comment}
+                onChangeText={setComment}
+                editable={!isCommentPending}
+                placeholder={
+                  editingCommentId
+                    ? "댓글을 수정해주세요"
+                    : "댓글을 입력해주세요"
+                }
+                placeholderTextColor={theme.colors.inkMute}
+                style={styles.commentInput}
+              />
+              <Pressable
+                testID="market-comment-submit"
+                accessibilityRole="button"
+                accessibilityLabel={
+                  editingCommentId ? "댓글 수정" : "댓글 등록"
+                }
+                onPress={onSubmitComment}
+                disabled={!comment.trim() || isCommentPending}
+                style={[
+                  styles.sendButton,
+                  !comment.trim() && !isCommentPending
+                    ? styles.sendButtonDisabled
+                    : null,
+                ]}
+              >
+                {isCommentPending ? (
+                  <ActivityIndicator size="small" color={theme.colors.white} />
+                ) : (
+                  <AppIcon
+                    name="send"
+                    size={17}
+                    color={
+                      !comment.trim()
+                        ? theme.colors.inkMute
+                        : theme.colors.white
+                    }
+                  />
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
         {createComment.isError ||
         updateComment.isError ||
         deleteComment.isError ? (
@@ -525,9 +648,81 @@ export default function MarketDetailScreen() {
   );
 }
 
+function CarouselSlide({
+  children,
+  index,
+  scrollX,
+  width,
+}: {
+  children: React.ReactNode;
+  index: number;
+  scrollX: SharedValue<number>;
+  width: number;
+}) {
+  const safeWidth = Math.max(width, 1);
+  const animatedStyle = useAnimatedStyle(() => {
+    const scale = interpolate(
+      scrollX.value,
+      [(index - 1) * safeWidth, index * safeWidth, (index + 1) * safeWidth],
+      [0.94, 1, 0.94],
+      Extrapolation.CLAMP,
+    );
+    const opacity = interpolate(
+      scrollX.value,
+      [(index - 1) * safeWidth, index * safeWidth, (index + 1) * safeWidth],
+      [0.78, 1, 0.78],
+      Extrapolation.CLAMP,
+    );
+    return {
+      opacity,
+      transform: [{ scale }],
+    };
+  });
+
+  return (
+    <Animated.View
+      style={[{ width, height: width, overflow: "hidden" }, animatedStyle]}
+    >
+      {children}
+    </Animated.View>
+  );
+}
+
+function CarouselDot({
+  index,
+  scrollX,
+  width,
+}: {
+  index: number;
+  scrollX: SharedValue<number>;
+  width: number;
+}) {
+  const safeWidth = Math.max(width, 1);
+  const animatedStyle = useAnimatedStyle(() => {
+    const dotWidth = interpolate(
+      scrollX.value,
+      [(index - 1) * safeWidth, index * safeWidth, (index + 1) * safeWidth],
+      [6, 18, 6],
+      Extrapolation.CLAMP,
+    );
+    const opacity = interpolate(
+      scrollX.value,
+      [(index - 1) * safeWidth, index * safeWidth, (index + 1) * safeWidth],
+      [0.55, 1, 0.55],
+      Extrapolation.CLAMP,
+    );
+    return {
+      width: dotWidth,
+      opacity,
+    };
+  });
+
+  return <Animated.View style={[styles.dotOn, animatedStyle]} />;
+}
+
 function CenterBadge({ label }: { label: string }) {
   return (
-    <View style={styles.centerBadge}>
+    <View pointerEvents="none" style={styles.centerBadge}>
       <Text style={styles.centerBadgeText}>{label}</Text>
     </View>
   );
@@ -689,9 +884,12 @@ const styles = StyleSheet.create({
   },
   headerTitleWrap: {
     position: "absolute",
+    top: 0,
+    bottom: 0,
     left: theme.layout.screenX + 68,
     right: theme.layout.screenX + 68,
     alignItems: "center",
+    justifyContent: "center",
   },
   backButton: {
     minWidth: 68,
@@ -933,18 +1131,31 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    minHeight: 64,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.line,
-    backgroundColor: "transparent",
+  },
+  composerInner: {
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: 24,
+    paddingBottom: 24,
+  },
+  composerField: {
+    height: 52,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: theme.colors.lineStrong,
+    backgroundColor: theme.colors.surface,
+    paddingLeft: 18,
+    paddingRight: 6,
+    paddingVertical: 6,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    padding: 8,
+    ...theme.shadow.card,
   },
   cancelEdit: {
-    paddingHorizontal: 8,
-    paddingVertical: 6,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.surfaceMuted,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
   cancelEditText: {
     color: theme.colors.inkSoft,
@@ -954,16 +1165,14 @@ const styles = StyleSheet.create({
   commentError: {
     position: "absolute",
     right: 18,
-    bottom: 72,
+    bottom: 82,
     color: theme.colors.danger,
     fontSize: theme.fontSize.xs,
   },
   commentInput: {
     flex: 1,
-    minHeight: 44,
-    borderRadius: theme.radius.pill,
-    backgroundColor: "transparent",
-    paddingHorizontal: 14,
+    minHeight: 38,
+    paddingVertical: 6,
     color: theme.colors.ink,
     fontSize: theme.fontSize.md,
   },
@@ -978,12 +1187,15 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.sm,
   },
   sendButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: theme.colors.primary,
+  },
+  sendButtonDisabled: {
+    backgroundColor: theme.colors.surfaceMuted,
   },
   exception: {
     flex: 1,

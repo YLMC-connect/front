@@ -87,6 +87,7 @@ export default function TabsLayout() {
         tabBar={(props) => <AppTabBar {...props} />}
         screenOptions={({ route }) => ({
           headerShown: false,
+          sceneStyle: { backgroundColor: theme.colors.bg },
           tabBarIcon: ({ color, size }) => {
             const tab = findRootTab(route.name);
             return (
@@ -129,18 +130,18 @@ export function AppTabBar({
 
   const currentRoute = state.routes[state.index];
   const currentOptions = descriptors[currentRoute.key]?.options;
-
-  if (
-    !rootTabPaths.has(effectivePathname) ||
-    !currentOptions?.tabBarButtonTestID
-  ) {
-    return null;
-  }
+  const visible =
+    rootTabPaths.has(effectivePathname) &&
+    Boolean(currentOptions?.tabBarButtonTestID);
 
   const routes = state.routes.filter((route) => {
     const options = descriptors[route.key]?.options;
     return options?.tabBarButtonTestID;
   });
+
+  if (routes.length === 0) {
+    return null;
+  }
 
   return (
     <VisibleTabBar
@@ -149,6 +150,7 @@ export function AppTabBar({
       navigation={navigation}
       pathname={effectivePathname}
       routes={routes}
+      visible={visible}
     />
   );
 }
@@ -159,9 +161,11 @@ function VisibleTabBar({
   navigation,
   pathname,
   routes,
+  visible,
 }: Pick<BottomTabBarProps, "state" | "descriptors" | "navigation"> & {
   pathname: string;
   routes: TabRoute[];
+  visible: boolean;
 }) {
   const blurTarget = useTabBlurTarget();
   const reduceMotion = useReducedMotion();
@@ -171,7 +175,19 @@ function VisibleTabBar({
       state.routes.findIndex((item) => item.key === route.key) === state.index,
   );
   const indicatorIndex = useSharedValue(Math.max(selectedIndex, 0));
+  const visibilityProgress = useSharedValue(visible ? 1 : 0);
   const didMount = useRef(false);
+
+  useEffect(() => {
+    const target = visible ? 1 : 0;
+    if (reduceMotion) {
+      visibilityProgress.value = target;
+      return;
+    }
+    visibilityProgress.value = withTiming(target, {
+      duration: 180,
+    });
+  }, [reduceMotion, visibilityProgress, visible]);
 
   useEffect(() => {
     const nextIndex = Math.max(selectedIndex, 0);
@@ -192,11 +208,16 @@ function VisibleTabBar({
     transform: [{ translateX: indicatorIndex.value * itemWidth }],
   }));
 
+  const shellVisibilityStyle = useAnimatedStyle(() => ({
+    opacity: visibilityProgress.value,
+    transform: [{ translateY: (1 - visibilityProgress.value) * 20 }],
+  }));
+
   return (
     <>
-      <View
+      <Animated.View
         pointerEvents="none"
-        style={styles.tabBottomBlurArea}
+        style={[styles.tabBottomBlurArea, shellVisibilityStyle]}
         testID="tab-bar-bottom-blur-area"
       >
         <GlassBackdrop
@@ -215,8 +236,12 @@ function VisibleTabBar({
           style={StyleSheet.absoluteFill}
           testID="tab-bar-bottom-gradient"
         />
-      </View>
-      <View style={styles.tabShell} testID="tab-bar-shell">
+      </Animated.View>
+      <Animated.View
+        pointerEvents={visible ? "auto" : "none"}
+        style={[styles.tabShell, shellVisibilityStyle]}
+        testID="tab-bar-shell"
+      >
         <View
           style={styles.tabSurface}
           testID="tab-bar-surface"
@@ -268,7 +293,7 @@ function VisibleTabBar({
             );
           })}
         </View>
-      </View>
+      </Animated.View>
     </>
   );
 }

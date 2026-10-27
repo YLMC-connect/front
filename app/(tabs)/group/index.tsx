@@ -6,14 +6,7 @@ import {
   type NativeStackNavigationProp,
 } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   AppText,
@@ -22,6 +15,8 @@ import {
   FilterChips,
   FloatingActionButton,
   ListSkeleton,
+  MotionEnter,
+  MotionPressable,
   SearchField,
   SEARCH_FIELD_STICKY_HEIGHT,
   SearchToggleButton,
@@ -321,17 +316,19 @@ export default function GroupScreen() {
               />
             </View>
           ) : (
-            serviceItems.map((item) => (
-              <CompanionCard
-                key={item.id}
-                kind="service"
-                item={item}
-                onPress={() => openGroupDetail(item.linkedGroupId)}
-              />
-            ))
+            <MotionEnter style={styles.myListWrap}>
+              {serviceItems.map((item) => (
+                <CompanionCard
+                  key={item.id}
+                  kind="service"
+                  item={item}
+                  onPress={() => openGroupDetail(item.linkedGroupId)}
+                />
+              ))}
+            </MotionEnter>
           )
         ) : section === "mine" ? (
-          <View style={styles.myListWrap} testID="group-my-list">
+          <MotionEnter style={styles.myListWrap} testID="group-my-list">
             {myGroups.length === 0 ? (
               <View style={styles.emptyWrapExpanded}>
                 <Empty
@@ -357,7 +354,7 @@ export default function GroupScreen() {
                 />
               ))
             )}
-          </View>
+          </MotionEnter>
         ) : groups.length === 0 ? (
           <View style={styles.emptyWrap}>
             <Empty
@@ -374,14 +371,16 @@ export default function GroupScreen() {
             />
           </View>
         ) : (
-          groups.map((group) => (
-            <CompanionCard
-              key={group.id}
-              kind="group"
-              item={group}
-              onPress={() => openGroupDetail(group.id)}
-            />
-          ))
+          <MotionEnter style={styles.myListWrap}>
+            {groups.map((group) => (
+              <CompanionCard
+                key={group.id}
+                kind="group"
+                item={group}
+                onPress={() => openGroupDetail(group.id)}
+              />
+            ))}
+          </MotionEnter>
         )}
       </View>
     </StickyHeaderScreen>
@@ -416,10 +415,11 @@ function CompanionCard(
     : categoryOf(props.item.category);
 
   return (
-    <Pressable
+    <MotionPressable
       testID={testID}
       accessibilityRole="button"
       onPress={props.onPress}
+      pressedScale={0.985}
       style={[styles.groupCard, closed ? styles.closedCard : null]}
     >
       <VisualThumb
@@ -465,7 +465,7 @@ function CompanionCard(
           </View>
         </View>
       </View>
-    </Pressable>
+    </MotionPressable>
   );
 }
 

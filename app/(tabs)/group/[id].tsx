@@ -213,6 +213,14 @@ export default function GroupDetailScreen() {
                   onPress={() => router.push(`/group/members?id=${id}`)}
                 />
                 <DetailAction
+                  testID="group-transfer-open"
+                  icon="sync-alt"
+                  label="이관"
+                  onPress={() =>
+                    router.push(`/group/members?id=${id}&mode=transfer`)
+                  }
+                />
+                <DetailAction
                   icon="delete-outline"
                   label="삭제"
                   danger

@@ -31,6 +31,7 @@ export default function GroupMembersScreenRoute() {
   const params = useLocalSearchParams<{
     id?: string;
     groupId?: string;
+    mode?: string;
     designVariant?: string;
   }>();
   const groupId = params.groupId ?? params.id ?? "1";
@@ -40,10 +41,18 @@ export default function GroupMembersScreenRoute() {
   const [kickingMember, setKickingMember] = useState<GroupMemberDetail | null>(
     null,
   );
+  const [selectedTransferMember, setSelectedTransferMember] =
+    useState<GroupMemberDetail | null>(null);
+  const [showTransferConfirm, setShowTransferConfirm] = useState(false);
   const [toastMessage, setToastMessage] = useState<string>();
   const members = membersQuery.data ?? [];
-  const isTransfer = variant === "transfer" || variant === "transfer-confirm";
-  const transferTarget = isTransfer ? "박정아" : null;
+  const isTransfer =
+    params.mode === "transfer" ||
+    variant === "transfer" ||
+    variant === "transfer-confirm";
+  const transferTargetName =
+    selectedTransferMember?.userName ??
+    (variant.startsWith("transfer") ? "박정아" : null);
 
   return (
     <Screen scroll={false} padded={false}>
@@ -54,7 +63,12 @@ export default function GroupMembersScreenRoute() {
           onBack={() => router.back()}
         />
 
-        <ScrollView contentContainerStyle={styles.body}>
+        <ScrollView
+          contentContainerStyle={[
+            styles.body,
+            isTransfer ? styles.bodyWithBottomBar : null,
+          ]}
+        >
           {membersQuery.isPending ? (
             <View style={styles.loading}>
               <ActivityIndicator color={theme.colors.primary} />
@@ -81,16 +95,26 @@ export default function GroupMembersScreenRoute() {
               key={member.userId}
               member={member}
               transfer={isTransfer}
-              selected={member.userName === transferTarget}
+              selected={
+                selectedTransferMember?.userId === member.userId ||
+                member.userName === transferTargetName
+              }
               last={index === members.length - 1}
               onKick={() => setKickingMember(member)}
+              onSelect={() => setSelectedTransferMember(member)}
             />
           ))}
         </ScrollView>
 
         {isTransfer && membersQuery.data ? (
           <View style={styles.bottomBar}>
-            <Button disabled={!transferTarget}>이관하기</Button>
+            <Button
+              testID="group-transfer-submit"
+              disabled={!transferTargetName}
+              onPress={() => setShowTransferConfirm(true)}
+            >
+              이관하기
+            </Button>
           </View>
         ) : null}
 
@@ -124,12 +148,28 @@ export default function GroupMembersScreenRoute() {
           }}
         />
         <ConfirmDialog
-          visible={variant === "transfer-confirm"}
-          title="박정아님께 소모임장을 이관할까요?"
+          visible={variant === "transfer-confirm" || showTransferConfirm}
+          title={`${transferTargetName ?? "멤버"}님께 소모임장을 이관할까요?`}
           message="이관 즉시 본인은 일반 멤버로 변경되며 되돌릴 수 없습니다."
           confirmText="이관"
-          onCancel={() => router.back()}
-          onConfirm={() => router.back()}
+          onCancel={() => {
+            if (variant === "transfer-confirm") {
+              router.back();
+            } else {
+              setShowTransferConfirm(false);
+            }
+          }}
+          onConfirm={() => {
+            if (variant === "transfer-confirm") {
+              router.back();
+              return;
+            }
+            setShowTransferConfirm(false);
+            setToastMessage(
+              `${transferTargetName}님께 소모임장이 이관되었습니다`,
+            );
+            setTimeout(() => router.back(), 700);
+          }}
         />
         <Toast
           message={
@@ -150,16 +190,18 @@ function MemberRow({
   selected,
   last,
   onKick,
+  onSelect,
 }: {
   member: GroupMemberDetail;
   transfer: boolean;
   selected: boolean;
   last: boolean;
   onKick?: () => void;
+  onSelect?: () => void;
 }) {
   const candidate = transfer && !member.isLeader;
 
-  return (
+  const content = (
     <View
       style={[
         styles.row,
@@ -194,6 +236,21 @@ function MemberRow({
       ) : null}
     </View>
   );
+
+  if (candidate && onSelect) {
+    return (
+      <Pressable
+        accessibilityRole="radio"
+        accessibilityState={{ selected }}
+        testID={`member-transfer-${member.userId}`}
+        onPress={onSelect}
+      >
+        {content}
+      </Pressable>
+    );
+  }
+
+  return content;
 }
 
 function RadioMark({ selected }: { selected: boolean }) {
@@ -210,6 +267,9 @@ const styles = StyleSheet.create({
   },
   body: {
     paddingBottom: 24,
+  },
+  bodyWithBottomBar: {
+    paddingBottom: 88,
   },
   loading: {
     paddingTop: 80,

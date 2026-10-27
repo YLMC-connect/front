@@ -689,6 +689,38 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("소모임장")).toBeTruthy();
   });
 
+  it("renders the group leader transfer screen and selects a member", async () => {
+    jest
+      .mocked(useLocalSearchParams)
+      .mockReturnValue({ id: "1", mode: "transfer" });
+    renderWithClient(<GroupMembersScreen />);
+
+    expect(screen.getByText("소모임장 이관")).toBeTruthy();
+    expect(
+      await screen.findByText(
+        "이관 후에는 일반 멤버로 변경되며 권한이 즉시 사라집니다.",
+      ),
+    ).toBeTruthy();
+
+    const transferButton = screen.getByTestId("group-transfer-submit");
+    expect(transferButton).toBeTruthy();
+
+    const memberCandidate = await screen.findByTestId(
+      "member-transfer-member-002",
+    );
+    fireEvent.press(memberCandidate);
+    fireEvent.press(transferButton);
+
+    expect(
+      screen.getByText(
+        "이관 즉시 본인은 일반 멤버로 변경되며 되돌릴 수 없습니다.",
+      ),
+    ).toBeTruthy();
+    fireEvent.press(screen.getByText("이관"));
+
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
+  });
+
   it("renders the prayer detail screen", () => {
     renderWithClient(<PrayerDetailScreen />);
 

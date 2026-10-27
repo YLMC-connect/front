@@ -115,6 +115,45 @@ export function createHttpGroupDataSource({
       };
     },
 
+    async getOverviewPage({
+      lastId,
+      size = 20,
+    }: {
+      lastId?: number | null;
+      size?: number;
+    } = {}) {
+      const query = new URLSearchParams({
+        size: String(size),
+        type: "SMALL_GROUP",
+      });
+      if (lastId != null) query.set("lastId", String(lastId));
+      const [groupsData, myGroups] = await Promise.all([
+        client.request<CommunionListResponseDto>(
+          `/api/communion?${query.toString()}`,
+        ),
+        fetchCommunionPages(client, "/api/communion/my?type=SMALL_GROUP"),
+      ]);
+      const joinedIds = new Set(
+        myGroups
+          .map((item) =>
+            item && typeof item === "object" && "id" in item
+              ? String((item as { id: unknown }).id)
+              : "",
+          )
+          .filter(Boolean),
+      );
+      const groups = (groupsData?.content ?? []).flatMap((item) => {
+        const mapped = mapCommunionOverviewItem(item, joinedIds);
+        return mapped ? [mapped] : [];
+      });
+      return {
+        groups,
+        services: [],
+        hasNext: Boolean(groupsData?.hasNext),
+        nextCursor: groupsData?.nextCursor ?? null,
+      };
+    },
+
     getDetail,
     getMembers,
 

@@ -11,6 +11,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  type TextInputProps,
   View,
 } from "react-native";
 import Animated, {
@@ -35,6 +36,7 @@ import { theme } from "../../src/constants/theme";
 import { authApiErrorMessages } from "../../src/constants/apiErrorMessages";
 import { useAuth } from "../../src/hooks/useAuth";
 import { getApiErrorMessage } from "../../src/lib/apiErrorMessage";
+import { isValidLoginId, sanitizeLoginId } from "../../src/lib/authValidation";
 import { readDesignVariant } from "../../src/lib/designVariant";
 
 type FormValues = {
@@ -73,6 +75,8 @@ function validateSignup(values: FormValues) {
   const errors: FormErrors = {};
   if (values.id.trim().length < 3) {
     errors.id = "아이디는 3자 이상 입력해주세요.";
+  } else if (!isValidLoginId(values.id.trim())) {
+    errors.id = "영문 소문자와 숫자만 입력할 수 있어요.";
   }
   if (values.password.length < 8) {
     errors.password = "비밀번호는 8자 이상 입력해주세요.";
@@ -144,7 +148,12 @@ export default function SignupScreen() {
   const setField =
     (field: keyof FormValues) =>
     (value: string): void => {
-      const nextValue = field === "phone" ? formatPhoneNumber(value) : value;
+      let nextValue = value;
+      if (field === "phone") {
+        nextValue = formatPhoneNumber(value);
+      } else if (field === "id") {
+        nextValue = sanitizeLoginId(value);
+      }
       setValues((current) => ({ ...current, [field]: nextValue }));
       if (field === "id" || field === "email") {
         if (field === "id") setIdAvailability(null);
@@ -156,12 +165,21 @@ export default function SignupScreen() {
 
   const onCheckAvailability = (target: "id" | "email") => {
     const value = values[target].trim();
-    if (target === "id" && value.length < 3) {
-      setErrors((current) => ({
-        ...current,
-        id: "아이디는 3자 이상 입력해주세요.",
-      }));
-      return;
+    if (target === "id") {
+      if (value.length < 3) {
+        setErrors((current) => ({
+          ...current,
+          id: "아이디는 3자 이상 입력해주세요.",
+        }));
+        return;
+      }
+      if (!isValidLoginId(value)) {
+        setErrors((current) => ({
+          ...current,
+          id: "영문 소문자와 숫자만 입력할 수 있어요.",
+        }));
+        return;
+      }
     }
     if (target === "email" && !emailPattern.test(value)) {
       setErrors((current) => ({
@@ -293,6 +311,9 @@ export default function SignupScreen() {
                       <SignupInput
                         testID="signup-id-input"
                         value={values.id}
+                        keyboardType="ascii-capable"
+                        autoCapitalize="none"
+                        autoCorrect={false}
                         onChangeText={setField("id")}
                         placeholder="아이디"
                         hasError={Boolean(idErrorMessage)}
@@ -628,6 +649,7 @@ function SignupInput({
   secureTextEntry,
   keyboardType = "default",
   autoCapitalize,
+  autoCorrect,
 }: {
   testID?: string;
   value?: string;
@@ -635,8 +657,9 @@ function SignupInput({
   placeholder: string;
   hasError?: boolean;
   secureTextEntry?: boolean;
-  keyboardType?: "default" | "phone-pad" | "email-address";
+  keyboardType?: TextInputProps["keyboardType"];
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
+  autoCorrect?: boolean;
 }) {
   const [passwordVisible, setPasswordVisible] = useState(false);
   return (
@@ -648,6 +671,7 @@ function SignupInput({
       secureTextEntry={secureTextEntry && !passwordVisible}
       keyboardType={keyboardType}
       autoCapitalize={autoCapitalize}
+      autoCorrect={autoCorrect}
       hasError={hasError}
       trailing={
         secureTextEntry ? (

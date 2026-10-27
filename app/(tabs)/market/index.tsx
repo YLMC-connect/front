@@ -1,6 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Image, StyleSheet, View } from "react-native";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   AppText,
@@ -11,9 +10,6 @@ import {
   ListSkeleton,
   MotionEnter,
   MotionPressable,
-  SearchField,
-  SEARCH_FIELD_STICKY_HEIGHT,
-  SearchToggleButton,
   SegmentedTabs,
   VisualThumb,
 } from "../../../src/components/ui";
@@ -43,8 +39,6 @@ export default function MarketScreen() {
   }>();
   const variant = readDesignVariant(params.designVariant);
   const overview = useMarketOverview();
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [search, setSearch] = useState("");
   const isError = variant === "network-error" || overview.isError;
   const isEmpty = variant === "empty";
   const routeStatus =
@@ -82,13 +76,8 @@ export default function MarketScreen() {
           : (overview.data?.items ?? []).filter(
               (post) => post.status === "sharing" || post.status === "reserved",
             );
-  const normalizedSearch = search.trim().toLocaleLowerCase();
   const visiblePosts = statusPosts.filter(
-    (post) =>
-      (category === "all" || post.category === category) &&
-      (!normalizedSearch ||
-        post.title.toLocaleLowerCase().includes(normalizedSearch) ||
-        post.authorName.toLocaleLowerCase().includes(normalizedSearch)),
+    (post) => category === "all" || post.category === category,
   );
   const isLoading = overview.isPending && !isError && !isEmpty;
 
@@ -97,18 +86,15 @@ export default function MarketScreen() {
       testID="screen-market"
       title="나눔"
       subtitle="이웃과 물건을 나누며 따뜻함을 전해요"
+      refreshing={overview.isRefetching}
+      onRefresh={() => void overview.refetch()}
+      onEndReached={() => {
+        if (overview.hasNextPage && !overview.isFetchingNextPage) {
+          void overview.fetchNextPage();
+        }
+      }}
       stickyControls={
         <View testID="market-sticky-controls-content">
-          {searchOpen ? (
-            <SearchField
-              autoFocus
-              accessibilityLabel="나눔 검색어"
-              value={search}
-              onChangeText={setSearch}
-              placeholder="제목 또는 작성자 검색"
-              testID="market-search-field"
-            />
-          ) : null}
           <SegmentedTabs
             items={statusTabs}
             active={activeStatus}
@@ -126,24 +112,9 @@ export default function MarketScreen() {
           />
         </View>
       }
-      stickyControlsHeight={
-        MARKET_STICKY_CONTROLS_HEIGHT +
-        (searchOpen ? SEARCH_FIELD_STICKY_HEIGHT : 0)
-      }
-      // 동행과 동일: 내릴 때 숨김 · 위로 살짝 올리면 세그먼트·필터 다시 표시. 검색 중 고정.
+      stickyControlsHeight={MARKET_STICKY_CONTROLS_HEIGHT}
+      // 동행과 동일: 내릴 때 숨김 · 위로 살짝 올리면 세그먼트·필터 다시 표시.
       stickyControlsHideMode="direction"
-      stickyControlsAlwaysVisible={searchOpen}
-      right={
-        <SearchToggleButton
-          accessibilityLabel={searchOpen ? "나눔 검색 닫기" : "나눔 검색"}
-          onPress={() => {
-            setSearchOpen((open) => !open);
-            if (searchOpen) setSearch("");
-          }}
-          open={searchOpen}
-          testID="market-search-toggle"
-        />
-      }
       overlay={
         <FloatingActionButton
           label="나눔하기"
@@ -166,7 +137,7 @@ export default function MarketScreen() {
         ) : visiblePosts.length === 0 ? (
           <MarketEmptyState
             status={isEmpty ? null : activeStatus}
-            isSearching={Boolean(search.trim())}
+            isSearching={false}
           />
         ) : (
           <MotionEnter>
@@ -179,6 +150,11 @@ export default function MarketScreen() {
             ))}
           </MotionEnter>
         )}
+        {overview.isFetchingNextPage ? (
+          <View style={styles.footerLoader}>
+            <ActivityIndicator color={theme.colors.primary} />
+          </View>
+        ) : null}
       </View>
     </StickyHeaderScreen>
   );
@@ -365,6 +341,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     paddingTop: 56,
     paddingBottom: 60,
+  },
+  footerLoader: {
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
   },
   fab: {
     position: "absolute",

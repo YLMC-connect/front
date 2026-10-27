@@ -18,6 +18,7 @@ export function Button({
   disabled,
   loading,
   icon,
+  testID,
 }: {
   children: ReactNode;
   onPress?: () => void;
@@ -25,6 +26,7 @@ export function Button({
   disabled?: boolean;
   loading?: boolean;
   icon?: IconName;
+  testID?: string;
 }) {
   const buttonStyle = StyleSheet.flatten([
     styles.button,
@@ -42,6 +44,7 @@ export function Button({
 
   return (
     <MotionPressable
+      testID={testID}
       accessibilityRole="button"
       disabled={disabled || loading}
       onPress={onPress}

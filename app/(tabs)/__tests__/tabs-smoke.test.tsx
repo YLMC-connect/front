@@ -31,7 +31,6 @@ import FaqScreen from "../mypage/faq";
 import MyPageTermsScreen from "../mypage/terms";
 import UserProfileScreen from "../mypage/user/[id]";
 import WithdrawScreen from "../mypage/withdraw";
-import NotificationsScreen from "../notifications";
 import PrayerDetailScreen from "../prayer/[id]";
 import PrayerApplyScreenRoute from "../prayer/apply";
 import PrayerScreen from "../prayer";
@@ -154,18 +153,6 @@ describe("v1 tab smoke screens", () => {
     expect(
       screen.getByTestId("screen-market-sticky-controls").props.pointerEvents,
     ).toBe("auto");
-
-    fireEvent.press(screen.getByLabelText("나눔 검색"));
-    expect(
-      screen.getByTestId("screen-market-sticky-controls").props.pointerEvents,
-    ).toBe("auto");
-    expect(
-      within(screen.getByTestId("market-sticky-controls-content")).getByTestId(
-        "market-search-field-container",
-      ),
-    ).toBeTruthy();
-    fireEvent.changeText(screen.getByLabelText("나눔 검색어"), "동화책");
-    expect(screen.getByText("어린이 동화책 30권 묶음 나눔")).toBeTruthy();
   });
 
   it("restores a market category from the list route", async () => {
@@ -392,22 +379,6 @@ describe("v1 tab smoke screens", () => {
     alert.mockRestore();
   });
 
-  it("reports another member's comment and handles a duplicate", async () => {
-    renderWithClient(<MarketDetailScreen />);
-
-    await screen.findByTestId("market-comment-report-comment-1");
-    fireEvent.press(screen.getByTestId("market-comment-report-comment-1"));
-    fireEvent.press(screen.getByText("나눔을 빙자한 홍보·광고"));
-    fireEvent.press(screen.getByText("신고하기"));
-
-    expect(await screen.findByText("신고가 접수되었습니다")).toBeTruthy();
-
-    fireEvent.press(screen.getByTestId("market-comment-report-comment-1"));
-    fireEvent.press(screen.getByText("신고하기"));
-
-    expect(await screen.findByText("이미 신고한 콘텐츠입니다")).toBeTruthy();
-  });
-
   it("deletes an owned market post and returns to the market list", async () => {
     const replace = jest.fn();
     jest.mocked(useRouter).mockReturnValue({ replace } as never);
@@ -482,16 +453,6 @@ describe("v1 tab smoke screens", () => {
     expect(
       screen.getByTestId("screen-group-sticky-controls").props.pointerEvents,
     ).toBe("auto");
-
-    fireEvent.press(screen.getByLabelText("동행 검색"));
-    expect(
-      screen.getByTestId("screen-group-sticky-controls").props.pointerEvents,
-    ).toBe("auto");
-    expect(
-      within(screen.getByTestId("group-sticky-controls-content")).getByTestId(
-        "group-search-field-container",
-      ),
-    ).toBeTruthy();
   });
 
   it("resets the existing group list without remounting it for detail", async () => {
@@ -624,34 +585,6 @@ describe("v1 tab smoke screens", () => {
     );
   });
 
-  it("opens group search and filters the visible list", async () => {
-    renderWithClient(<GroupScreen />);
-    await screen.findByTestId("group-card-1");
-
-    // 내릴 때 숨김
-    fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
-      nativeEvent: { contentOffset: { y: 13 } },
-    });
-    expect(
-      screen.getByTestId("screen-group-sticky-controls", {
-        includeHiddenElements: true,
-      }).props.pointerEvents,
-    ).toBe("none");
-
-    // 검색 열면 pin → 다시 표시
-    fireEvent.press(screen.getByLabelText("동행 검색"));
-    expect(
-      screen.getByTestId("screen-group-sticky-controls").props.pointerEvents,
-    ).toBe("auto");
-    expect(
-      within(screen.getByTestId("group-sticky-controls-content")).getByTestId(
-        "group-search-field-container",
-      ),
-    ).toBeTruthy();
-    fireEvent.changeText(screen.getByLabelText("동행 검색어"), "없는 모임");
-    expect(screen.getAllByText("검색 결과가 없어요").length).toBeGreaterThan(0);
-  });
-
   it("renders the group detail screen", async () => {
     renderWithClient(<GroupDetailScreen />);
 
@@ -754,6 +687,38 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("멤버 관리")).toBeTruthy();
     expect(await screen.findByText("전체 8명")).toBeTruthy();
     expect(screen.getByText("소모임장")).toBeTruthy();
+  });
+
+  it("renders the group leader transfer screen and selects a member", async () => {
+    jest
+      .mocked(useLocalSearchParams)
+      .mockReturnValue({ id: "1", mode: "transfer" });
+    renderWithClient(<GroupMembersScreen />);
+
+    expect(screen.getByText("소모임장 이관")).toBeTruthy();
+    expect(
+      await screen.findByText(
+        "이관 후에는 일반 멤버로 변경되며 권한이 즉시 사라집니다.",
+      ),
+    ).toBeTruthy();
+
+    const transferButton = screen.getByTestId("group-transfer-submit");
+    expect(transferButton).toBeTruthy();
+
+    const memberCandidate = await screen.findByTestId(
+      "member-transfer-member-002",
+    );
+    fireEvent.press(memberCandidate);
+    fireEvent.press(transferButton);
+
+    expect(
+      screen.getByText(
+        "이관 즉시 본인은 일반 멤버로 변경되며 되돌릴 수 없습니다.",
+      ),
+    ).toBeTruthy();
+    fireEvent.press(screen.getByText("이관"));
+
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
   });
 
   it("renders the prayer detail screen", () => {
@@ -860,13 +825,11 @@ describe("v1 tab smoke screens", () => {
     expect(router.push).toHaveBeenCalledWith("/life-study/apply");
   });
 
-  it("searches life study courses and opens a course", async () => {
+  it("opens a life study course", async () => {
     jest.mocked(router.push).mockClear();
     renderWithClient(<LifeStudyScreen />);
     await screen.findByText("내 학습경로");
 
-    fireEvent.press(screen.getByLabelText("삶공부 검색"));
-    fireEvent.changeText(screen.getByLabelText("삶공부 검색어"), "생명의 삶");
     fireEvent.press(screen.getAllByText("생명의 삶")[0]);
     expect(router.push).toHaveBeenCalledWith(
       "/life-study/life-overview-open-1",
@@ -952,7 +915,6 @@ describe("v1 tab smoke screens", () => {
 
     expect(screen.getByText("프로필")).toBeTruthy();
     expect(screen.getByText("박정아")).toBeTruthy();
-    expect(screen.getByText("차단")).toBeTruthy();
   });
 
   it("renders the FAQ screen", () => {
@@ -985,13 +947,5 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("이용약관")).toBeTruthy();
     expect(screen.getByText("시행일자: 2026년 1월 1일")).toBeTruthy();
     expect(screen.getByText("제1조 (목적)")).toBeTruthy();
-  });
-
-  it("renders the notifications screen", () => {
-    renderWithClient(<NotificationsScreen />);
-
-    expect(screen.getByText("알림")).toBeTruthy();
-    expect(screen.getByText("오늘")).toBeTruthy();
-    expect(screen.getByText("지난 알림")).toBeTruthy();
   });
 });

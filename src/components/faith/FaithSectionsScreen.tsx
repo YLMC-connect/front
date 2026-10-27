@@ -22,23 +22,21 @@ import {
   AnimatedProgressFill,
   AppText,
   Empty,
-  EmptyState,
   ErrorState,
   FloatingActionButton,
   ListSkeleton,
   MotionEnter,
   MotionPressable,
-  SearchField,
-  SEARCH_FIELD_STICKY_HEIGHT,
-  SearchToggleButton,
   SectionHeader,
 } from "../ui";
 
 type FaithSection = "pray" | "study";
 
 export function FaithSectionsScreen({ section }: { section: FaithSection }) {
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [search, setSearch] = useState("");
+  const prayerQuery = usePrayerOverview();
+  const studyQuery = useLifeStudyOverview();
+  const currentQuery = section === "study" ? studyQuery : prayerQuery;
+
   return (
     <StickyHeaderScreen
       contentContainerStyle={[styles.body, styles.bodyWithFab]}
@@ -49,35 +47,8 @@ export function FaithSectionsScreen({ section }: { section: FaithSection }) {
           ? "말씀으로 배우고 삶으로 자라가요"
           : "함께 기도하고 응답을 나눠요"
       }
-      stickyControls={
-        section === "study" && searchOpen ? (
-          <SearchField
-            autoFocus
-            accessibilityLabel="삶공부 검색어"
-            value={search}
-            onChangeText={setSearch}
-            placeholder="과정명 또는 강사 검색"
-            testID="life-study-search-field"
-          />
-        ) : undefined
-      }
-      stickyControlsAlwaysVisible={searchOpen}
-      stickyControlsHeight={
-        section === "study" && searchOpen ? SEARCH_FIELD_STICKY_HEIGHT : 0
-      }
-      right={
-        section === "study" ? (
-          <SearchToggleButton
-            accessibilityLabel={searchOpen ? "삶공부 검색 닫기" : "삶공부 검색"}
-            onPress={() => {
-              setSearchOpen((open) => !open);
-              if (searchOpen) setSearch("");
-            }}
-            open={searchOpen}
-            testID="life-study-search-toggle"
-          />
-        ) : undefined
-      }
+      refreshing={currentQuery.isRefetching}
+      onRefresh={() => void currentQuery.refetch()}
       overlay={
         section === "pray" ? (
           <PrayerFloatingMenu />
@@ -93,11 +64,7 @@ export function FaithSectionsScreen({ section }: { section: FaithSection }) {
         )
       }
     >
-      {section === "study" ? (
-        <StudyContent search={search} />
-      ) : (
-        <PrayerContent />
-      )}
+      {section === "study" ? <StudyContent /> : <PrayerContent />}
     </StickyHeaderScreen>
   );
 }
@@ -280,7 +247,7 @@ function PrayerContent() {
   );
 }
 
-function StudyContent({ search }: { search: string }) {
+function StudyContent() {
   const { data, isError, isPending, refetch } = useLifeStudyOverview();
 
   if (isPending) return <OverviewLoading />;
@@ -296,23 +263,8 @@ function StudyContent({ search }: { search: string }) {
   const progressPercent = data.path.totalRequired
     ? Math.round((data.path.completedRequired / data.path.totalRequired) * 100)
     : 0;
-  const normalizedSearch = search.trim().toLocaleLowerCase();
-  const matchesSearch = (course: LifeStudyOverviewCourse) =>
-    !normalizedSearch ||
-    course.title.toLocaleLowerCase().includes(normalizedSearch) ||
-    course.instructorName.toLocaleLowerCase().includes(normalizedSearch);
-  const openCourses = data.openCourses.filter(matchesSearch);
-  const courses = data.courses.filter(matchesSearch);
-
-  if (normalizedSearch && openCourses.length === 0 && courses.length === 0) {
-    return (
-      <EmptyState
-        title="검색 결과가 없어요"
-        description="과정명이나 강사 이름을 바꿔보세요."
-        icon="search-off"
-      />
-    );
-  }
+  const openCourses = data.openCourses;
+  const courses = data.courses;
 
   return (
     <MotionEnter>

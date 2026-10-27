@@ -107,7 +107,6 @@ export default function TabsLayout() {
             options={{ title: tab.title, tabBarButtonTestID: tab.testID }}
           />
         ))}
-        <Tabs.Screen name="notifications" options={{ href: null }} />
         <Tabs.Screen name="mypage" options={{ href: null }} />
       </Tabs>
     </TabBlurTargetContext.Provider>

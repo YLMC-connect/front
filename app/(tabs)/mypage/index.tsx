@@ -1,7 +1,14 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useRouter, type Href } from "expo-router";
 import { useState, type ComponentProps } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { Screen, Section } from "../../../src/components/layout/Screen";
 import {
   Avatar,
@@ -35,7 +42,6 @@ const activityItems: MenuItem[] = [
     icon: "menu-book",
     href: "/life-study/history?returnUrl=/mypage",
   },
-  { label: "차단 관리", icon: "block", href: "/mypage/blocked" },
 ];
 
 const supportItems: MenuItem[] = [
@@ -61,7 +67,8 @@ const accountItems: MenuItem[] = [
 export default function MyPageScreen() {
   const router = useRouter();
   const { logout } = useAuth();
-  const { data: member } = useMemberMe();
+  const memberQuery = useMemberMe();
+  const member = memberQuery.data;
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const memberName = member?.name || "사용자";
@@ -95,7 +102,17 @@ export default function MyPageScreen() {
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
         <TopBar title="마이페이지" back onBack={() => router.back()} />
-        <ScrollView contentContainerStyle={styles.body}>
+        <ScrollView
+          contentContainerStyle={styles.body}
+          refreshControl={
+            <RefreshControl
+              refreshing={memberQuery.isRefetching}
+              onRefresh={() => void memberQuery.refetch()}
+              tintColor={theme.colors.primary}
+              colors={[theme.colors.primary]}
+            />
+          }
+        >
           <Card style={styles.profileCard}>
             <Avatar
               name={memberName}

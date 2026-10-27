@@ -1,4 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useMemo } from "react";
 import { queryKeys } from "../lib/queryKeys";
 import {
   createMarketPost,
@@ -6,7 +12,7 @@ import {
   deleteMarketComment,
   deleteMarketPost,
   fetchMarketDetail,
-  fetchMarketOverview,
+  fetchMarketOverviewPage,
   reportMarketContent,
   updateMarketComment,
   updateMarketPost,
@@ -20,10 +26,25 @@ import type {
 } from "../types/market";
 
 export function useMarketOverview() {
-  return useQuery({
+  const query = useInfiniteQuery({
     queryKey: queryKeys.market.overview(),
-    queryFn: fetchMarketOverview,
+    queryFn: ({ pageParam }) => fetchMarketOverviewPage({ lastId: pageParam }),
+    initialPageParam: undefined as number | undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasNext && lastPage.nextCursor != null
+        ? lastPage.nextCursor
+        : undefined,
   });
+
+  const allItems = useMemo(
+    () => query.data?.pages.flatMap((page) => page.items) ?? [],
+    [query.data],
+  );
+
+  return {
+    ...query,
+    data: query.data ? { items: allItems } : undefined,
+  };
 }
 
 export function useCreateMarketPost() {

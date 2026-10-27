@@ -20,8 +20,19 @@ import type {
   GroupKickMemberInput,
 } from "../types/group";
 
+export interface GroupOverviewPage {
+  groups: GroupOverview["groups"];
+  services: GroupOverview["services"];
+  hasNext: boolean;
+  nextCursor?: number | null;
+}
+
 export interface GroupDataSource {
   getOverview(): Promise<GroupOverview>;
+  getOverviewPage?(params?: {
+    lastId?: number | null;
+    size?: number;
+  }): Promise<GroupOverviewPage>;
   getDetail(id: string): Promise<GroupDetail>;
   getMembers(id: string): Promise<GroupMemberDetail[]>;
   createGroup(input: GroupInput): Promise<GroupDetail>;
@@ -146,6 +157,37 @@ export const mockGroupDataSource: GroupDataSource = {
       groups: [...mockCreatedGroups, ...mockGroupOverview.groups].map(
         applyOverviewMembership,
       ),
+    };
+  },
+  async getOverviewPage({
+    lastId,
+    size = 10,
+  }: {
+    lastId?: number | null;
+    size?: number;
+  } = {}) {
+    await delay();
+    const allGroups = [...mockCreatedGroups, ...mockGroupOverview.groups].map(
+      applyOverviewMembership,
+    );
+    let startIndex = 0;
+    if (lastId != null) {
+      const idx = allGroups.findIndex((item) => Number(item.id) === lastId);
+      if (idx !== -1) {
+        startIndex = idx + 1;
+      }
+    }
+    const pageGroups = allGroups.slice(startIndex, startIndex + size);
+    const hasNext = startIndex + size < allGroups.length;
+    const nextCursor =
+      hasNext && pageGroups.length > 0
+        ? Number(pageGroups[pageGroups.length - 1].id) || null
+        : null;
+    return {
+      groups: pageGroups,
+      services: mockGroupOverview.services,
+      hasNext,
+      nextCursor,
     };
   },
   async getDetail(id) {
@@ -397,6 +439,17 @@ function normalizeNoticeInput<T extends GroupNoticeInput>(input: T): T {
 export function createGroupService(dataSource: GroupDataSource) {
   return {
     fetchOverview: () => dataSource.getOverview(),
+    fetchOverviewPage: (params?: { lastId?: number | null; size?: number }) => {
+      if (dataSource.getOverviewPage) {
+        return dataSource.getOverviewPage(params);
+      }
+      return dataSource.getOverview().then((res) => ({
+        groups: res.groups,
+        services: res.services,
+        hasNext: false,
+        nextCursor: null,
+      }));
+    },
     fetchDetail: (id: string) => dataSource.getDetail(id),
     fetchMembers: (id: string) => dataSource.getMembers(id),
     createGroup: (input: GroupInput) => {
@@ -487,6 +540,7 @@ const groupService = createGroupService(
 );
 
 export const fetchGroupOverview = groupService.fetchOverview;
+export const fetchGroupOverviewPage = groupService.fetchOverviewPage;
 export const fetchGroupDetail = groupService.fetchDetail;
 export const fetchGroupMembers = groupService.fetchMembers;
 export const createGroup = groupService.createGroup;

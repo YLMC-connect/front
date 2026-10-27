@@ -1,4 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useMemo } from "react";
 import { queryKeys } from "../lib/queryKeys";
 import {
   createGroup,
@@ -7,7 +13,7 @@ import {
   deleteGroupNotice,
   fetchGroupDetail,
   fetchGroupMembers,
-  fetchGroupOverview,
+  fetchGroupOverviewPage,
   joinGroup,
   kickGroupMember,
   leaveGroup,
@@ -25,10 +31,35 @@ import type {
 } from "../types/group";
 
 export function useGroupOverview() {
-  return useQuery({
+  const query = useInfiniteQuery({
     queryKey: queryKeys.group.overview(),
-    queryFn: fetchGroupOverview,
+    queryFn: ({ pageParam }) => fetchGroupOverviewPage({ lastId: pageParam }),
+    initialPageParam: undefined as number | undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasNext && lastPage.nextCursor != null
+        ? lastPage.nextCursor
+        : undefined,
   });
+
+  const allGroups = useMemo(
+    () => query.data?.pages.flatMap((page) => page.groups) ?? [],
+    [query.data],
+  );
+
+  const services = useMemo(
+    () => query.data?.pages[0]?.services ?? [],
+    [query.data],
+  );
+
+  return {
+    ...query,
+    data: query.data
+      ? {
+          groups: allGroups,
+          services,
+        }
+      : undefined,
+  };
 }
 
 export function useCreateGroup() {

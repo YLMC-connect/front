@@ -8,6 +8,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  type TextInputProps,
   View,
 } from "react-native";
 import { AuthInput } from "../../src/components/auth/auth-input";
@@ -24,6 +25,7 @@ import { theme } from "../../src/constants/theme";
 import { authApiErrorMessages } from "../../src/constants/apiErrorMessages";
 import { useAuth } from "../../src/hooks/useAuth";
 import { getApiErrorMessage } from "../../src/lib/apiErrorMessage";
+import { isValidLoginId, sanitizeLoginId } from "../../src/lib/authValidation";
 import { readDesignVariant } from "../../src/lib/designVariant";
 import { MOCK_LOGIN_CREDENTIALS } from "../../src/mocks/auth";
 
@@ -35,7 +37,11 @@ type FormValues = {
 type FormErrors = Partial<Record<keyof FormValues, string>>;
 function validateLogin(values: FormValues) {
   const errors: FormErrors = {};
-  if (!values.id.trim()) errors.id = "아이디를 입력해주세요.";
+  if (!values.id.trim()) {
+    errors.id = "아이디를 입력해주세요.";
+  } else if (!isValidLoginId(values.id.trim())) {
+    errors.id = "영문 소문자와 숫자만 입력할 수 있어요.";
+  }
   if (!values.password.trim()) errors.password = "비밀번호를 입력해주세요.";
   return errors;
 }
@@ -133,9 +139,16 @@ export default function LoginScreen() {
                 testID="login-id-input"
                 label="아이디"
                 value={values.id}
-                onChangeText={(id) =>
-                  setValues((current) => ({ ...current, id }))
-                }
+                keyboardType="ascii-capable"
+                autoCapitalize="none"
+                autoCorrect={false}
+                onChangeText={(id) => {
+                  const sanitized = sanitizeLoginId(id);
+                  setValues((current) => ({ ...current, id: sanitized }));
+                  if (errors.id) {
+                    setErrors((current) => ({ ...current, id: undefined }));
+                  }
+                }}
                 placeholder="아이디를 입력해주세요"
                 error={errors.id}
                 hasError={isError}
@@ -171,9 +184,7 @@ export default function LoginScreen() {
 
               <MotionPressable
                 accessibilityRole="button"
-                disabled={
-                  (!isFilled && isDefault) || login.isPending || isLoading
-                }
+                disabled={login.isPending || isLoading}
                 onPress={onSubmit}
                 style={[
                   styles.loginButton,
@@ -234,6 +245,9 @@ function AuthField({
   trailingIcon,
   trailingLabel,
   onTrailingPress,
+  autoCapitalize,
+  autoCorrect,
+  keyboardType,
 }: {
   testID?: string;
   label: string;
@@ -246,6 +260,9 @@ function AuthField({
   trailingIcon?: "visibility" | "visibility-off";
   trailingLabel?: string;
   onTrailingPress?: () => void;
+  autoCapitalize?: "none" | "sentences" | "words" | "characters";
+  autoCorrect?: boolean;
+  keyboardType?: TextInputProps["keyboardType"];
 }) {
   const shakeTrigger = error ?? (hasError ? "error" : undefined);
 
@@ -261,6 +278,9 @@ function AuthField({
         placeholder={placeholder}
         secureTextEntry={secureTextEntry}
         hasError={hasError || Boolean(error)}
+        autoCapitalize={autoCapitalize}
+        autoCorrect={autoCorrect}
+        keyboardType={keyboardType}
         trailing={
           trailingIcon ? (
             <MotionPressable

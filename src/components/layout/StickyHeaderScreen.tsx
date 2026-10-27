@@ -8,10 +8,12 @@ import {
   type RefObject,
 } from "react";
 import {
+  ActivityIndicator,
   Keyboard,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   type StyleProp,
@@ -65,6 +67,10 @@ export function StickyHeaderScreen({
   shouldHandleScroll,
   contentContainerStyle,
   testID,
+  refreshing,
+  onRefresh,
+  onEndReached,
+  onEndReachedThreshold,
 }: {
   title: string;
   subtitle?: string;
@@ -86,6 +92,10 @@ export function StickyHeaderScreen({
   shouldHandleScroll?: () => boolean;
   contentContainerStyle?: StyleProp<ViewStyle>;
   testID: string;
+  refreshing?: boolean;
+  onRefresh?: () => void | Promise<void>;
+  onEndReached?: () => void;
+  onEndReachedThreshold?: number;
 }) {
   const navigation = useNavigation();
   const localScrollRef = useRef<ScrollView | null>(null);
@@ -205,7 +215,24 @@ export function StickyHeaderScreen({
 
     lastScrollY.current = offsetY;
     onScrollOffsetChange?.(offsetY);
+
+    const { layoutMeasurement, contentSize } = event.nativeEvent;
+    const threshold = onEndReachedThreshold ?? 160;
+    if (
+      onEndReached &&
+      contentSize?.height != null &&
+      layoutMeasurement?.height != null &&
+      contentSize.height > layoutMeasurement.height &&
+      layoutMeasurement.height + offsetY >= contentSize.height - threshold
+    ) {
+      onEndReached();
+    }
   };
+
+  const totalTopPadding =
+    SCREEN_HEADER_HEIGHT +
+    topInset +
+    (hasStickyControls ? stickyControlsInset : 0);
 
   return (
     <Screen applyTopInset={false} scroll={false} padded={false} testID={testID}>
@@ -215,14 +242,22 @@ export function StickyHeaderScreen({
             ref={effectiveScrollRef}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
+            refreshControl={
+              onRefresh ? (
+                <RefreshControl
+                  refreshing={Boolean(refreshing)}
+                  onRefresh={onRefresh}
+                  tintColor={theme.colors.primary}
+                  colors={[theme.colors.primary]}
+                  progressViewOffset={totalTopPadding + 10}
+                />
+              ) : undefined
+            }
             contentContainerStyle={[
               styles.content,
               contentContainerStyle,
               {
-                paddingTop:
-                  SCREEN_HEADER_HEIGHT +
-                  topInset +
-                  (hasStickyControls ? stickyControlsInset : 0),
+                paddingTop: totalTopPadding,
               },
             ]}
             onScroll={handleScroll}
@@ -238,6 +273,14 @@ export function StickyHeaderScreen({
             </Pressable>
           </ScrollView>
         </BlurTargetView>
+        {hasStickyControls && refreshing ? (
+          <View
+            pointerEvents="none"
+            style={[styles.refreshIndicatorBar, { top: totalTopPadding + 4 }]}
+          >
+            <ActivityIndicator size="small" color={theme.colors.primary} />
+          </View>
+        ) : null}
         {hasStickyControls ? (
           <StickyControlsLayer
             blurTarget={blurTarget}
@@ -362,5 +405,14 @@ const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFill,
     zIndex: 25,
+  },
+  refreshIndicatorBar: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 15,
   },
 });

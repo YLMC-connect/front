@@ -3,7 +3,12 @@ import { useRouter, type Href } from "expo-router";
 import { useState, type ComponentProps } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen, Section } from "../../../src/components/layout/Screen";
-import { Avatar, Card, ConfirmDialog, TopBar } from "../../../src/components/ui";
+import {
+  Avatar,
+  Card,
+  ConfirmDialog,
+  TopBar,
+} from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import { useAuth } from "../../../src/hooks/useAuth";
 import { useMemberMe } from "../../../src/hooks/useMember";

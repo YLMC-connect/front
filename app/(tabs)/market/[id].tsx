@@ -528,10 +528,7 @@ export default function MarketDetailScreen() {
           pointerEvents="box-none"
           style={styles.composer}
         >
-          <View
-            pointerEvents="box-none"
-            style={styles.composerInner}
-          >
+          <View pointerEvents="box-none" style={styles.composerInner}>
             <LinearGradient
               colors={[
                 "rgba(246,247,249,0)",

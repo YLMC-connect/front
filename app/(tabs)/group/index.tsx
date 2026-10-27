@@ -6,7 +6,7 @@ import {
   type NativeStackNavigationProp,
 } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   AppText,
@@ -17,9 +17,6 @@ import {
   ListSkeleton,
   MotionEnter,
   MotionPressable,
-  SearchField,
-  SEARCH_FIELD_STICKY_HEIGHT,
-  SearchToggleButton,
   SegmentedTabs,
   VisualThumb,
 } from "../../../src/components/ui";
@@ -59,8 +56,6 @@ export default function GroupScreen() {
   }>();
   const variant = readDesignVariant(params.designVariant);
   const overview = useGroupOverview();
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [search, setSearch] = useState("");
   const listScrollRef = useRef<ScrollView | null>(null);
   const detailNavigationSuspended = useRef(false);
   const detailNavigationWasBlurred = useRef(false);
@@ -103,23 +98,13 @@ export default function GroupScreen() {
   );
   const isMyFull = variant === "my-full";
   const isError = variant === "network-error" || overview.isError;
-  const normalizedSearch = search.trim().toLocaleLowerCase();
-  const matchesSearch = (name: string, description: string) =>
-    !normalizedSearch ||
-    name.toLocaleLowerCase().includes(normalizedSearch) ||
-    description.toLocaleLowerCase().includes(normalizedSearch);
-  const searchedGroups = (overview.data?.groups ?? []).filter((group) =>
-    matchesSearch(group.name, group.description),
-  );
-  const groups = searchedGroups.filter(
+  const groups = (overview.data?.groups ?? []).filter(
     (group) => category === "all" || group.category === category,
   );
-  const serviceItems = (overview.data?.services ?? []).filter((item) =>
-    matchesSearch(item.name, item.description),
-  );
+  const serviceItems = overview.data?.services ?? [];
   const myGroups = isError
     ? []
-    : searchedGroups.filter((group) => group.isJoined);
+    : (overview.data?.groups ?? []).filter((group) => group.isJoined);
   const isLoading = overview.isPending && !isError;
 
   useEffect(() => {
@@ -191,12 +176,15 @@ export default function GroupScreen() {
         testID="screen-group"
         title="내 모임"
         right={
-          <SearchToggleButton
+          <Pressable
+            accessibilityRole="button"
             accessibilityLabel="내 모임 닫기"
             onPress={() => router.back()}
-            open
+            style={styles.closeButton}
             testID="group-my-list-close"
-          />
+          >
+            <AppIcon name="close" size={22} color={theme.colors.ink} />
+          </Pressable>
         }
       >
         {isLoading ? (
@@ -233,16 +221,6 @@ export default function GroupScreen() {
       scrollStateResetKey={scrollStateResetKey}
       stickyControls={
         <View testID="group-sticky-controls-content">
-          {searchOpen ? (
-            <SearchField
-              autoFocus
-              accessibilityLabel="동행 검색어"
-              value={search}
-              onChangeText={setSearch}
-              placeholder="소모임 또는 봉사 검색"
-              testID="group-search-field"
-            />
-          ) : null}
           <SegmentedTabs
             items={sections}
             active={section}
@@ -262,24 +240,11 @@ export default function GroupScreen() {
         </View>
       }
       stickyControlsHeight={
-        (hasCategoryFilter
+        hasCategoryFilter
           ? GROUP_STICKY_CONTROLS_HEIGHT
-          : GROUP_SEGMENT_STICKY_HEIGHT) +
-        (searchOpen ? SEARCH_FIELD_STICKY_HEIGHT : 0)
+          : GROUP_SEGMENT_STICKY_HEIGHT
       }
       stickyControlsHideMode="direction"
-      stickyControlsAlwaysVisible={searchOpen}
-      right={
-        <SearchToggleButton
-          accessibilityLabel={searchOpen ? "동행 검색 닫기" : "동행 검색"}
-          onPress={() => {
-            setSearchOpen((open) => !open);
-            if (searchOpen) setSearch("");
-          }}
-          open={searchOpen}
-          testID="group-search-toggle"
-        />
-      }
       overlay={
         <FloatingActionButton
           label="소모임 개설"
@@ -303,16 +268,8 @@ export default function GroupScreen() {
           serviceItems.length === 0 ? (
             <View style={styles.emptyWrapExpanded}>
               <Empty
-                title={
-                  normalizedSearch
-                    ? "검색 결과가 없어요"
-                    : "등록된 봉사활동이 없어요"
-                }
-                description={
-                  normalizedSearch
-                    ? "다른 검색어로 다시 찾아보세요."
-                    : "새로운 봉사활동이 등록되면 안내해 드릴게요."
-                }
+                title="등록된 봉사활동이 없어요"
+                description="새로운 봉사활동이 등록되면 안내해 드릴게요."
               />
             </View>
           ) : (
@@ -332,16 +289,8 @@ export default function GroupScreen() {
             {myGroups.length === 0 ? (
               <View style={styles.emptyWrapExpanded}>
                 <Empty
-                  title={
-                    normalizedSearch
-                      ? "검색 결과가 없어요"
-                      : "참여 중인 소모임이 없어요"
-                  }
-                  description={
-                    normalizedSearch
-                      ? "다른 검색어로 다시 찾아보세요."
-                      : "소모임 탭에서 관심 있는 모임에 참여해보세요."
-                  }
+                  title="참여 중인 소모임이 없어요"
+                  description="소모임 탭에서 관심 있는 모임에 참여해보세요."
                 />
               </View>
             ) : (
@@ -358,16 +307,8 @@ export default function GroupScreen() {
         ) : groups.length === 0 ? (
           <View style={styles.emptyWrap}>
             <Empty
-              title={
-                normalizedSearch
-                  ? "검색 결과가 없어요"
-                  : "등록된 소모임이 없어요"
-              }
-              description={
-                normalizedSearch
-                  ? "카테고리나 검색어를 바꿔보세요."
-                  : "소모임을 개설하거나 관심 있는 모임에 참여해보세요."
-              }
+              title="등록된 소모임이 없어요"
+              description="소모임을 개설하거나 관심 있는 모임에 참여해보세요."
             />
           </View>
         ) : (
@@ -486,6 +427,12 @@ function categoryOf(key: string) {
 }
 
 const styles = StyleSheet.create({
+  closeButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   segmented: {
     flexShrink: 0,
     height: 40,

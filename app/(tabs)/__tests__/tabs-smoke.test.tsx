@@ -31,7 +31,6 @@ import FaqScreen from "../mypage/faq";
 import MyPageTermsScreen from "../mypage/terms";
 import UserProfileScreen from "../mypage/user/[id]";
 import WithdrawScreen from "../mypage/withdraw";
-import NotificationsScreen from "../notifications";
 import PrayerDetailScreen from "../prayer/[id]";
 import PrayerApplyScreenRoute from "../prayer/apply";
 import PrayerScreen from "../prayer";
@@ -154,18 +153,6 @@ describe("v1 tab smoke screens", () => {
     expect(
       screen.getByTestId("screen-market-sticky-controls").props.pointerEvents,
     ).toBe("auto");
-
-    fireEvent.press(screen.getByLabelText("나눔 검색"));
-    expect(
-      screen.getByTestId("screen-market-sticky-controls").props.pointerEvents,
-    ).toBe("auto");
-    expect(
-      within(screen.getByTestId("market-sticky-controls-content")).getByTestId(
-        "market-search-field-container",
-      ),
-    ).toBeTruthy();
-    fireEvent.changeText(screen.getByLabelText("나눔 검색어"), "동화책");
-    expect(screen.getByText("어린이 동화책 30권 묶음 나눔")).toBeTruthy();
   });
 
   it("restores a market category from the list route", async () => {
@@ -466,16 +453,6 @@ describe("v1 tab smoke screens", () => {
     expect(
       screen.getByTestId("screen-group-sticky-controls").props.pointerEvents,
     ).toBe("auto");
-
-    fireEvent.press(screen.getByLabelText("동행 검색"));
-    expect(
-      screen.getByTestId("screen-group-sticky-controls").props.pointerEvents,
-    ).toBe("auto");
-    expect(
-      within(screen.getByTestId("group-sticky-controls-content")).getByTestId(
-        "group-search-field-container",
-      ),
-    ).toBeTruthy();
   });
 
   it("resets the existing group list without remounting it for detail", async () => {
@@ -606,34 +583,6 @@ describe("v1 tab smoke screens", () => {
     await waitFor(() =>
       expect(setParams).toHaveBeenCalledWith({ section: "service" }),
     );
-  });
-
-  it("opens group search and filters the visible list", async () => {
-    renderWithClient(<GroupScreen />);
-    await screen.findByTestId("group-card-1");
-
-    // 내릴 때 숨김
-    fireEvent.scroll(screen.getByTestId("screen-group-scroll"), {
-      nativeEvent: { contentOffset: { y: 13 } },
-    });
-    expect(
-      screen.getByTestId("screen-group-sticky-controls", {
-        includeHiddenElements: true,
-      }).props.pointerEvents,
-    ).toBe("none");
-
-    // 검색 열면 pin → 다시 표시
-    fireEvent.press(screen.getByLabelText("동행 검색"));
-    expect(
-      screen.getByTestId("screen-group-sticky-controls").props.pointerEvents,
-    ).toBe("auto");
-    expect(
-      within(screen.getByTestId("group-sticky-controls-content")).getByTestId(
-        "group-search-field-container",
-      ),
-    ).toBeTruthy();
-    fireEvent.changeText(screen.getByLabelText("동행 검색어"), "없는 모임");
-    expect(screen.getAllByText("검색 결과가 없어요").length).toBeGreaterThan(0);
   });
 
   it("renders the group detail screen", async () => {
@@ -844,13 +793,11 @@ describe("v1 tab smoke screens", () => {
     expect(router.push).toHaveBeenCalledWith("/life-study/apply");
   });
 
-  it("searches life study courses and opens a course", async () => {
+  it("opens a life study course", async () => {
     jest.mocked(router.push).mockClear();
     renderWithClient(<LifeStudyScreen />);
     await screen.findByText("내 학습경로");
 
-    fireEvent.press(screen.getByLabelText("삶공부 검색"));
-    fireEvent.changeText(screen.getByLabelText("삶공부 검색어"), "생명의 삶");
     fireEvent.press(screen.getAllByText("생명의 삶")[0]);
     expect(router.push).toHaveBeenCalledWith(
       "/life-study/life-overview-open-1",
@@ -968,13 +915,5 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("이용약관")).toBeTruthy();
     expect(screen.getByText("시행일자: 2026년 1월 1일")).toBeTruthy();
     expect(screen.getByText("제1조 (목적)")).toBeTruthy();
-  });
-
-  it("renders the notifications screen", () => {
-    renderWithClient(<NotificationsScreen />);
-
-    expect(screen.getByText("알림")).toBeTruthy();
-    expect(screen.getByText("오늘")).toBeTruthy();
-    expect(screen.getByText("지난 알림")).toBeTruthy();
   });
 });

@@ -8,6 +8,7 @@ import {
   type RefObject,
 } from "react";
 import {
+  ActivityIndicator,
   Keyboard,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -228,6 +229,11 @@ export function StickyHeaderScreen({
     }
   };
 
+  const totalTopPadding =
+    SCREEN_HEADER_HEIGHT +
+    topInset +
+    (hasStickyControls ? stickyControlsInset : 0);
+
   return (
     <Screen applyTopInset={false} scroll={false} padded={false} testID={testID}>
       <View style={styles.root}>
@@ -243,7 +249,7 @@ export function StickyHeaderScreen({
                   onRefresh={onRefresh}
                   tintColor={theme.colors.primary}
                   colors={[theme.colors.primary]}
-                  progressViewOffset={SCREEN_HEADER_HEIGHT + topInset}
+                  progressViewOffset={totalTopPadding + 10}
                 />
               ) : undefined
             }
@@ -251,10 +257,7 @@ export function StickyHeaderScreen({
               styles.content,
               contentContainerStyle,
               {
-                paddingTop:
-                  SCREEN_HEADER_HEIGHT +
-                  topInset +
-                  (hasStickyControls ? stickyControlsInset : 0),
+                paddingTop: totalTopPadding,
               },
             ]}
             onScroll={handleScroll}
@@ -270,6 +273,14 @@ export function StickyHeaderScreen({
             </Pressable>
           </ScrollView>
         </BlurTargetView>
+        {hasStickyControls && refreshing ? (
+          <View
+            pointerEvents="none"
+            style={[styles.refreshIndicatorBar, { top: totalTopPadding + 4 }]}
+          >
+            <ActivityIndicator size="small" color={theme.colors.primary} />
+          </View>
+        ) : null}
         {hasStickyControls ? (
           <StickyControlsLayer
             blurTarget={blurTarget}
@@ -394,5 +405,14 @@ const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFill,
     zIndex: 25,
+  },
+  refreshIndicatorBar: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 15,
   },
 });

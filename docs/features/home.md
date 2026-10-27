@@ -1,39 +1,44 @@
 # home (홈)
 
-> 마지막 갱신: 2026-10-09 | 담당 Phase: P5 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-10-27 | 담당 Phase: P5 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
-로그인 성도가 앱에 들어왔을 때 프로필·오늘 기도·새벽기도로 바로 이어지는 진입 허브입니다.
+로그인 성도가 앱에 들어왔을 때 프로필·오늘 기도·새벽기도·이번 주일 말씀으로 바로 이어지는 진입 허브입니다.
 
 ---
 
 ## ✅ 완료
 
-- 홈 3블록 카드 레이아웃 복원 — sticky 헤더 아바타→MY, 오늘 요일 기도 카드, 새벽기도 요약 카드.
+- 홈 카드 레이아웃 — sticky 헤더 + 프로필 행(`내 정보 >`), 오늘 요일 기도 카드, 새벽기도 요약 카드, 이번 주일 말씀(유튜브 썸네일) 카드.
 - 홈 overview mock 경계 — `types/home` · `mocks/home` · `homeService` · `useHome` · `queryKeys.home.overview/dawn`
 - 새벽기도 말씀요약 화면 — `/prayer/dawn` 본문·요약·적용 읽기 상세
 
 ## 주요 파일
 
-| 경로 | 역할 |
-|---|---|
-| `app/(tabs)/index.tsx` | 홈 루트 (카드형 UI) |
-| `app/(tabs)/prayer/dawn.tsx` | 말씀요약 상세 |
-| `src/types/home.ts` | HomeOverview / Daily / Dawn 타입 |
-| `src/mocks/home.ts` | 요일 기도·새벽기도 mock |
-| `src/services/homeService.ts` | fetch overview/dawn |
-| `src/hooks/useHome.ts` | TanStack Query hooks |
+| 경로                          | 역할                                            |
+| ----------------------------- | ----------------------------------------------- |
+| `app/(tabs)/index.tsx`        | 홈 루트 (카드형 UI)                             |
+| `app/(tabs)/prayer/dawn.tsx`  | 말씀요약 상세                                   |
+| `src/types/home.ts`           | HomeOverview / Daily / Dawn / SundaySermon 타입 |
+| `src/mocks/home.ts`           | 요일 기도·새벽기도·주일 말씀 mock               |
+| `src/services/homeService.ts` | fetch overview/dawn                             |
+| `src/hooks/useHome.ts`        | TanStack Query hooks                            |
 
 ## 데이터 타입
 
-`HomeOverview` = `{ dailyPrayer, dawnPrayer }` (타입에 `todos`, `progressSteps`가 공존하나 홈 화면은 `dailyPrayer`, `dawnPrayer`를 사용).  
+`HomeOverview` = `{ dailyPrayer, dawnPrayer, sundaySermon }` (타입에 `todos`, `progressSteps`가 공존하나 홈 화면은 `dailyPrayer`, `dawnPrayer`, `sundaySermon`을 사용).  
 `HomeDailyPrayer`는 날짜·요일 라벨·제목·요약·href.  
 `HomeDawnPrayer`는 시간 라벨·제목·요약·본문·href.  
+`HomeSundaySermon`은 라벨(`이번 주일 말씀`)·제목·요약(본문 구절·설교자)·유튜브 썸네일 URL·영상 URL.  
 프로필은 overview에 넣지 않고 `authStore.currentUser`를 사용합니다.
 
 ## 결정 사항 (최신 위)
 
+- (2026-10-27) **홈 상단 첫 번째 카드로 ‘이번 주일 말씀’ 유튜브 썸네일 카드(`sundaySermon`) 배치** — 프로필 행 바로 아래 최상단에 이번 주일 말씀 카드를 배치하고, 기존 새벽 말씀 카드(`dawnCard`)와 동일한 외곽 카드 스타일(`surface` 배경 + `line` 테두리)과 상단 타이포 위계(`이번 주일 말씀` → 설교 제목 → 본문·설교자 요약)를 유지하되, 정적 16:9 유튜브 썸네일과 재생 아이콘 배지를 배치하고 탭 시 자동 재생 없이 `Linking.openURL`로 외부 유튜브 영상을 연다.
+
+- (2026-10-27) **홈 상단 프로필 행을 좌측 `아바타 + 이름`, 우측 알약 없는 `내 정보 >` 텍스트 링크로 단순화** — 시간대별 인삿말과 보조 문구를 제거하고, 좌측에 사용자 아바타와 이름을 나란히 배치하며 우측 `내 정보` 버튼은 알약 테두리·배경을 걷어낸 텍스트+화살표 형태로 정리한다.
+- (2026-10-27) **홈 상단 인삿말 영역의 외곽 카드 박스를 제거하고 배경 위 타이포그래피로 배치** — `greetingCard`의 흰색 배경·테두리를 걷어내어 ‘박스 인 박스’ 답답함을 해소하고, 우측 `내 정보` 아바타 버튼과 하단 두 기도 카드(`dailyCard`, `dawnCard`)의 위계를 살리며 `dailyCard` 우하단 장식 원(`dailyOrb`)을 제거해 깔끔한 단색 카드로 정리한다.
 - (2026-10-10) **내 정보 진입을 헤더에서 인삿말 카드(`greetingCard`)로 통합하고 카드 간격을 화면 좌우 패딩과 통일** — StickyHeaderScreen의 헤더 right 버튼에서 본문 상단 인삿말 카드 우측 아바타 칩으로 통합하여 단일 카드로 구성하고, 카드 간격(`gap`)을 화면 좌우 패딩(`theme.layout.screenX` = 20px)으로 맞춤. Issue #163.
 - (2026-10-09) **홈 화면을 카드형 레이아웃(PR #111)으로 복원한다** — 히어로 배너·진행 카드 대신 StickyHeaderScreen 상단 헤더(“열린문 커넥트”, “내 정보” 칩), 인삿말, 오늘의 기도 카드(`dailyCard`), 새벽 말씀 카드(`dawnCard`) 3칸으로 복원한다. Issue #139.
 - (2026-07-25) **홈 1차 범위는 프로필 진입 + 오늘 기도 + 새벽기도 요약만 둔다** — 내 활동 요약·나눔/동행 미리보기는 넣지 않습니다. Issue #109.

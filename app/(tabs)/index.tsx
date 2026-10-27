@@ -1,32 +1,27 @@
 import { AppIcon } from "@/components/ui/app-icon";
+import { Image } from "expo-image";
 import { useRouter, type Href } from "expo-router";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Linking, StyleSheet, View } from "react-native";
 import { StickyHeaderScreen } from "../../src/components/layout/StickyHeaderScreen";
 import {
   AppText,
   Avatar,
   ErrorState,
   ListSkeleton,
+  MotionEnter,
   MotionPressable,
 } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { useHomeOverview } from "../../src/hooks/useHome";
-import { getGivenName } from "../../src/lib/koreanName";
+import { homeSundaySermon } from "../../src/mocks/home";
 import { useAuthStore } from "../../src/store/authStore";
-
-function greetingForHour(hour: number): string {
-  if (hour < 12) return "좋은 아침이에요";
-  if (hour < 18) return "좋은 오후예요";
-  return "좋은 저녁이에요";
-}
 
 export default function HomeScreen() {
   const router = useRouter();
   const currentUser = useAuthStore((state) => state.currentUser);
   const overview = useHomeOverview();
   const fullName = currentUser?.name?.trim() || "성도";
-  const givenName = getGivenName(fullName) || fullName;
-  const greeting = greetingForHour(new Date().getHours());
+  const sundaySermon = overview.data?.sundaySermon ?? homeSundaySermon;
 
   return (
     <StickyHeaderScreen
@@ -36,16 +31,10 @@ export default function HomeScreen() {
     >
       <View style={styles.body}>
         <View style={styles.greetingCard} testID="home-greeting">
-          <View style={styles.greetingContent}>
-            <AppText variant="sectionTitle">
-              {givenName} 님, {greeting}
-            </AppText>
-            <AppText
-              variant="caption"
-              tone="secondary"
-              style={styles.greetingSub}
-            >
-              오늘도 은혜 가운데 하루를 열어 보세요.
+          <View style={styles.userRow}>
+            <Avatar name={fullName} size={36} seed={fullName} />
+            <AppText variant="sectionTitle" style={styles.userName}>
+              {fullName}
             </AppText>
           </View>
           <MotionPressable
@@ -57,8 +46,6 @@ export default function HomeScreen() {
             style={styles.profileButton}
             testID="home-open-mypage"
           >
-            {/* Circle: given name (성 제외). Label: 내 정보. */}
-            <Avatar name={fullName} size={32} seed={fullName} />
             <AppText variant="caption" tone="brand" style={styles.profileLabel}>
               내 정보
             </AppText>
@@ -82,16 +69,72 @@ export default function HomeScreen() {
             />
           </View>
         ) : (
-          <>
-            <Pressable
+          <MotionEnter style={styles.cardsWrap}>
+            <MotionPressable
+              accessibilityHint="유튜브에서 이번 주일 말씀 영상을 엽니다"
+              accessibilityLabel={`${sundaySermon.timeLabel} ${sundaySermon.title}`}
+              accessibilityRole="link"
+              onPress={() => void Linking.openURL(sundaySermon.videoUrl)}
+              pressedScale={0.985}
+              style={styles.dawnCard}
+              testID="home-sunday-sermon"
+            >
+              <AppText
+                variant="caption"
+                tone="muted"
+                style={styles.dawnEyebrow}
+              >
+                {sundaySermon.timeLabel}
+              </AppText>
+              <AppText variant="sectionTitle" style={styles.dawnTitle}>
+                {sundaySermon.title}
+              </AppText>
+              <AppText
+                variant="body"
+                tone="secondary"
+                style={styles.dawnSummary}
+              >
+                {sundaySermon.summary}
+              </AppText>
+              <View style={styles.sermonThumbWrap}>
+                <Image
+                  accessibilityIgnoresInvertColors
+                  contentFit="cover"
+                  source={{ uri: sundaySermon.thumbnailUrl }}
+                  style={styles.sermonThumb}
+                  testID="home-sunday-sermon-thumbnail"
+                  transition={180}
+                />
+                <View pointerEvents="none" style={styles.sermonPlayBadge}>
+                  <AppIcon
+                    color={theme.colors.white}
+                    fill={theme.colors.white}
+                    name="play"
+                    size={20}
+                  />
+                </View>
+              </View>
+              <View style={styles.dawnAction}>
+                <AppText variant="caption" tone="brand">
+                  유튜브로 말씀 보기
+                </AppText>
+                <AppIcon
+                  name="chevron-right"
+                  size={18}
+                  color={theme.colors.primaryDeep}
+                />
+              </View>
+            </MotionPressable>
+
+            <MotionPressable
               accessibilityRole="button"
               onPress={() =>
                 router.push(overview.data.dailyPrayer.href as Href)
               }
+              pressedScale={0.985}
               style={styles.dailyCard}
               testID="home-daily-prayer"
             >
-              <View style={styles.dailyOrb} />
               <AppText
                 variant="caption"
                 tone="inverse"
@@ -120,11 +163,12 @@ export default function HomeScreen() {
                 </AppText>
                 <AppIcon name="chevron-right" size={18} color="#fff" />
               </View>
-            </Pressable>
+            </MotionPressable>
 
-            <Pressable
+            <MotionPressable
               accessibilityRole="button"
               onPress={() => router.push(overview.data.dawnPrayer.href as Href)}
+              pressedScale={0.985}
               style={styles.dawnCard}
               testID="home-dawn-prayer"
             >
@@ -155,8 +199,8 @@ export default function HomeScreen() {
                   color={theme.colors.primaryDeep}
                 />
               </View>
-            </Pressable>
-          </>
+            </MotionPressable>
+          </MotionEnter>
         )}
       </View>
     </StickyHeaderScreen>
@@ -168,17 +212,11 @@ const styles = StyleSheet.create({
     paddingBottom: 112,
   },
   profileButton: {
-    minWidth: 108,
     minHeight: theme.layout.touchTarget,
-    paddingHorizontal: theme.spacing[2],
     paddingVertical: theme.spacing[1],
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    borderRadius: theme.radius.pill,
-    borderWidth: 1,
-    borderColor: theme.colors.lineStrong,
-    backgroundColor: theme.colors.surface,
+    gap: 2,
   },
   profileLabel: {
     fontWeight: theme.fontWeight.semibold,
@@ -195,25 +233,26 @@ const styles = StyleSheet.create({
     gap: theme.layout.screenX,
     paddingTop: theme.spacing[1],
   },
+  cardsWrap: {
+    gap: theme.layout.screenX,
+  },
   greetingCard: {
     marginHorizontal: theme.layout.screenX,
+    paddingVertical: theme.spacing[1],
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 12,
-    borderRadius: theme.radius.lg,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface,
-    padding: theme.spacing[4],
-    ...theme.shadow.card,
   },
-  greetingContent: {
+  userRow: {
     flex: 1,
     minWidth: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
-  greetingSub: {
-    marginTop: theme.spacing[1],
+  userName: {
+    flexShrink: 1,
   },
   dailyCard: {
     marginHorizontal: theme.layout.screenX,
@@ -221,31 +260,22 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderRadius: theme.radius.lg,
     backgroundColor: theme.colors.primary,
-    padding: theme.spacing[5],
-    minHeight: 168,
+    padding: theme.layout.cardPadding + 4,
     ...theme.shadow.primary,
   },
-  dailyOrb: {
-    position: "absolute",
-    right: -22,
-    bottom: -38,
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    backgroundColor: "rgba(255,255,255,0.16)",
-  },
   dailyEyebrow: {
+    marginBottom: theme.spacing[1],
     opacity: 0.92,
   },
   dailyTitle: {
-    marginTop: theme.spacing[2],
+    marginBottom: theme.spacing[2],
   },
   dailySummary: {
-    marginTop: theme.spacing[2],
+    marginBottom: theme.spacing[3],
     opacity: 0.92,
   },
   cardAction: {
-    marginTop: theme.spacing[4],
+    alignSelf: "flex-end",
     flexDirection: "row",
     alignItems: "center",
     gap: 2,
@@ -269,8 +299,36 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[3],
   },
   dawnAction: {
+    alignSelf: "flex-end",
     flexDirection: "row",
     alignItems: "center",
     gap: 2,
+  },
+  sermonThumbWrap: {
+    position: "relative",
+    width: "100%",
+    aspectRatio: 16 / 9,
+    borderRadius: theme.radius.sm,
+    overflow: "hidden",
+    backgroundColor: theme.colors.surfaceMuted,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    marginBottom: theme.spacing[3],
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sermonThumb: {
+    width: "100%",
+    height: "100%",
+  },
+  sermonPlayBadge: {
+    position: "absolute",
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(25, 31, 40, 0.68)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingLeft: 2,
   },
 });

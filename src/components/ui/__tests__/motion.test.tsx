@@ -42,6 +42,9 @@ describe("common motion", () => {
       </MotionEnter>,
     );
     expect(enter.getByTestId("enter-block")).toBeTruthy();
+    expect(
+      StyleSheet.flatten(enter.getByTestId("enter-block").props.style),
+    ).not.toHaveProperty("transform");
     expect(enter.getByText("진입")).toBeTruthy();
 
     const shake = render(

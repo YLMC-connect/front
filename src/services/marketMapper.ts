@@ -1,3 +1,4 @@
+import Constants from "expo-constants";
 import { ApiError } from "../lib/apiClient";
 import type {
   MarketCategory,
@@ -78,6 +79,39 @@ function readId(value: unknown) {
   return readString(value);
 }
 
+function resolveImageUrl(raw: string): string {
+  if (/^(https?:|file:|content:|data:)/.test(raw)) return raw;
+  const apiUrl =
+    Constants.expoConfig?.extra?.apiUrl ?? process.env.EXPO_PUBLIC_API_URL;
+  if (typeof apiUrl === "string" && /^https?:\/\//.test(apiUrl)) {
+    const base = apiUrl.replace(/\/+$/, "");
+    return raw.startsWith("/") ? `${base}${raw}` : `${base}/${raw}`;
+  }
+  return raw;
+}
+
+function readShareImageUrls(data: Record<string, unknown>): string[] {
+  const urls: string[] = [];
+  if (Array.isArray(data.images)) {
+    for (const item of data.images) {
+      if (typeof item === "string" && item.trim()) {
+        urls.push(resolveImageUrl(item.trim()));
+      } else if (isRecord(item)) {
+        const candidate =
+          readString(item.imageUrl) ??
+          readString(item.url) ??
+          readString(item.fileUrl);
+        if (candidate) urls.push(resolveImageUrl(candidate));
+      }
+    }
+  }
+  const single = readString(data.thumbnailUrl) ?? readString(data.imageUrl);
+  if (single && urls.length === 0) {
+    urls.push(resolveImageUrl(single));
+  }
+  return urls;
+}
+
 export function formatShareCreatedLabel(
   createdAt: string,
   now: Date = new Date(),
@@ -124,9 +158,12 @@ export function mapShareOverviewItem(
     return null;
   }
 
+  const images = readShareImageUrls(data);
+
   return {
     id,
     thumbSeed: Number.parseInt(id, 10) || 0,
+    ...(images[0] ? { thumbnailUrl: images[0] } : {}),
     title,
     authorName: authorId,
     createdLabel: formatShareCreatedLabel(createdAt, now),
@@ -173,9 +210,12 @@ export function mapShareDetail(
       readString(dto.itemStatus) as keyof typeof SHARE_ITEM_STATUS_LABEL
     ] ?? "";
 
+  const images = readShareImageUrls(data);
+
   return {
     id: mappedId,
     thumbSeed: Number.parseInt(mappedId, 10) || 0,
+    ...(images.length > 0 ? { images } : {}),
     title: mappedTitle,
     content,
     categoryLabel: CATEGORY_LABEL[mappedCategory],

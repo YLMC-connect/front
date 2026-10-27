@@ -1,15 +1,19 @@
 import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import type { ReactNode } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useState, type ReactNode } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
+  AnimatedProgressFill,
   Card,
   DetailBadge,
+  MotionPop,
+  MotionPressable,
   TopBar,
   UnderlineTabs,
 } from "../../../src/components/ui";
+import { LinearGradient } from "expo-linear-gradient";
 import { theme } from "../../../src/constants/theme";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 import {
@@ -178,6 +182,9 @@ export default function PrayerDetailScreen() {
   }>();
   const id = routeId(params.id);
   const variant = readDesignVariant(params.designVariant) ?? "pray";
+  const [completedOverride, setCompletedOverride] = useState<boolean | null>(
+    null,
+  );
   if (id && !params.designVariant && resolvePrayerAdapterMode() === "http") {
     return <LivePrayerDetail id={id} />;
   }
@@ -189,7 +196,7 @@ export default function PrayerDetailScreen() {
       : variant === "answers" || variant === "answers-empty"
         ? "answers"
         : "pray";
-  const isCompleted = variant === "pray-completed";
+  const isCompleted = completedOverride ?? variant === "pray-completed";
   const isPrayEmpty = variant === "pray-empty";
   const isStatusEmpty = variant === "status-empty";
   const isAnswersEmpty = variant === "answers-empty";
@@ -225,21 +232,40 @@ export default function PrayerDetailScreen() {
         </ScrollView>
 
         {activeTab === "pray" && !isPrayEmpty ? (
-          <View style={styles.bottomAction}>
-            <Pressable
+          <View pointerEvents="box-none" style={styles.bottomAction}>
+            <LinearGradient
+              colors={[
+                "rgba(246,247,249,0)",
+                "rgba(246,247,249,0.78)",
+                "rgba(246,247,249,0.96)",
+              ]}
+              locations={[0, 0.38, 1]}
+              pointerEvents="none"
+              style={StyleSheet.absoluteFill}
+              testID="prayer-detail-bottom-bar"
+            />
+            <MotionPressable
               accessibilityRole="button"
+              onPress={() =>
+                setCompletedOverride(
+                  (prev) => !(prev ?? variant === "pray-completed"),
+                )
+              }
+              pressedScale={0.96}
               style={[
                 styles.prayButton,
                 isCompleted ? styles.prayButtonDone : null,
               ]}
             >
-              <AppIcon
-                name="check"
-                size={18}
-                color={
-                  isCompleted ? theme.colors.primaryDeep : theme.colors.white
-                }
-              />
+              <MotionPop key={isCompleted ? "done" : "todo"}>
+                <AppIcon
+                  name="check"
+                  size={18}
+                  color={
+                    isCompleted ? theme.colors.primaryDeep : theme.colors.white
+                  }
+                />
+              </MotionPop>
               <Text
                 style={[
                   styles.prayButtonText,
@@ -248,7 +274,7 @@ export default function PrayerDetailScreen() {
               >
                 {isCompleted ? "오늘 기도 완료됨" : "오늘 기도 완료"}
               </Text>
-            </Pressable>
+            </MotionPressable>
           </View>
         ) : null}
       </View>
@@ -329,8 +355,9 @@ function StatusPanel({ empty }: { empty: boolean }) {
           <Stat label="참여율" value={rate} />
         </View>
         <View style={styles.progressBar}>
-          <View
-            style={[styles.progressFill, { width: empty ? "0%" : "75%" }]}
+          <AnimatedProgressFill
+            percent={empty ? 0 : 75}
+            style={styles.progressFill}
           />
         </View>
       </Card>
@@ -604,9 +631,12 @@ const styles = StyleSheet.create({
   },
   bottomAction: {
     position: "absolute",
-    left: 18,
-    right: 18,
-    bottom: 24,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: 24,
+    paddingBottom: 24,
   },
   prayButton: {
     height: 52,
@@ -620,7 +650,7 @@ const styles = StyleSheet.create({
   },
   prayButtonDone: {
     borderWidth: 1,
-    borderColor: "rgba(91,122,176,0.22)",
+    borderColor: "rgba(62,104,200,0.22)",
     backgroundColor: theme.colors.primarySoft,
     shadowOpacity: 0,
     elevation: 0,

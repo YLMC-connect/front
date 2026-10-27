@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   AppText,
@@ -9,6 +9,8 @@ import {
   FilterChips,
   FloatingActionButton,
   ListSkeleton,
+  MotionEnter,
+  MotionPressable,
   SearchField,
   SEARCH_FIELD_STICKY_HEIGHT,
   SearchToggleButton,
@@ -78,7 +80,7 @@ export default function MarketScreen() {
         : activeStatus === "mine"
           ? (overview.data?.items ?? []).filter((post) => post.isMine)
           : (overview.data?.items ?? []).filter(
-              (post) => post.status === "sharing",
+              (post) => post.status === "sharing" || post.status === "reserved",
             );
   const normalizedSearch = search.trim().toLocaleLowerCase();
   const visiblePosts = statusPosts.filter(
@@ -165,16 +167,17 @@ export default function MarketScreen() {
           <MarketEmptyState
             status={isEmpty ? null : activeStatus}
             isSearching={Boolean(search.trim())}
-            onCreate={() => router.push("/modal/market-new")}
           />
         ) : (
-          visiblePosts.map((post) => (
-            <PostRow
-              key={post.id}
-              post={post}
-              onPress={() => router.push(`/market/${post.id}`)}
-            />
-          ))
+          <MotionEnter>
+            {visiblePosts.map((post) => (
+              <PostRow
+                key={post.id}
+                post={post}
+                onPress={() => router.push(`/market/${post.id}`)}
+              />
+            ))}
+          </MotionEnter>
         )}
       </View>
     </StickyHeaderScreen>
@@ -192,9 +195,22 @@ function PostRow({
   const reserved = post.status === "reserved";
 
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={styles.row}>
+    <MotionPressable
+      accessibilityRole="button"
+      onPress={onPress}
+      pressedScale={0.985}
+      style={styles.row}
+    >
       <View style={styles.thumbWrap}>
-        <VisualThumb size={theme.layout.listThumb} seed={post.thumbSeed} />
+        {post.thumbnailUrl ? (
+          <Image
+            resizeMode="cover"
+            source={{ uri: post.thumbnailUrl }}
+            style={styles.thumbImage}
+          />
+        ) : (
+          <VisualThumb size={theme.layout.listThumb} seed={post.thumbSeed} />
+        )}
         {done ? (
           <View style={styles.doneOverlay}>
             <AppText variant="caption" tone="inverse">
@@ -214,10 +230,16 @@ function PostRow({
           {post.title}
         </AppText>
         <AppText variant="caption" tone="muted" style={styles.postMeta}>
-          {post.authorName} · {post.createdLabel}
+          {categoryOf(post.category)} · {post.authorName} · {post.createdLabel}
         </AppText>
       </View>
-    </Pressable>
+    </MotionPressable>
+  );
+}
+
+function categoryOf(key: string) {
+  return (
+    MARKET_CATEGORIES.find((category) => category.key === key)?.label ?? "기타"
   );
 }
 
@@ -234,11 +256,9 @@ function StatusBadge() {
 function MarketEmptyState({
   status,
   isSearching,
-  onCreate,
 }: {
   status: MarketSegment | null;
   isSearching?: boolean;
-  onCreate: () => void;
 }) {
   const message = isSearching
     ? {
@@ -269,8 +289,6 @@ function MarketEmptyState({
         title={message.title}
         description={message.description}
         icon={isSearching ? "search" : "shopping-bag"}
-        actionLabel={isSearching ? undefined : "나눔 등록하기"}
-        onAction={isSearching ? undefined : onCreate}
       />
     </View>
   );
@@ -291,7 +309,6 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[2],
   },
   list: {
-    gap: theme.spacing[3],
     paddingBottom: 164,
   },
   loading: {
@@ -301,11 +318,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: theme.layout.listGap,
     marginHorizontal: theme.layout.screenX,
-    padding: theme.layout.cardPadding,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.surface,
+    paddingVertical: theme.spacing[4],
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
   },
   thumbWrap: {
     width: theme.layout.listThumb,
@@ -313,6 +328,10 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.md,
     overflow: "hidden",
     flexShrink: 0,
+  },
+  thumbImage: {
+    width: "100%",
+    height: "100%",
   },
   doneOverlay: {
     ...StyleSheet.absoluteFill,
@@ -333,7 +352,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     justifyContent: "center",
-    gap: theme.spacing[1],
+    gap: theme.spacing[2],
     paddingVertical: 2,
   },
   rowTextDone: {

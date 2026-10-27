@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import { Badge, Empty, TopBar } from "../../../src/components/ui";
+import { LinearGradient } from "expo-linear-gradient";
 import { theme } from "../../../src/constants/theme";
 import {
   fetchMyPrayerTopics,
@@ -153,7 +154,18 @@ export default function PrayerRequestScreenRoute() {
           </View>
         </ScrollView>
 
-        <View style={styles.bottom}>
+        <View pointerEvents="box-none" style={styles.bottom}>
+          <LinearGradient
+            colors={[
+              "rgba(246,247,249,0)",
+              "rgba(246,247,249,0.78)",
+              "rgba(246,247,249,0.96)",
+            ]}
+            locations={[0, 0.38, 1]}
+            pointerEvents="none"
+            style={StyleSheet.absoluteFill}
+            testID="prayer-request-bottom-bar"
+          />
           <Pressable accessibilityRole="button" style={styles.submitButton}>
             <Text style={styles.submitText}>응답완료 요청하기</Text>
           </Pressable>
@@ -234,12 +246,15 @@ const styles = StyleSheet.create({
   },
   bottom: {
     position: "absolute",
-    left: 18,
-    right: 18,
-    bottom: 24,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: 24,
+    paddingBottom: 24,
   },
   submitButton: {
-    height: 54,
+    height: 52,
     borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.primary,
     alignItems: "center",

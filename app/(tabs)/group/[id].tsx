@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
   },
   recruitChip: {
     borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.sageSoft,
+    backgroundColor: theme.colors.primaryTint,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface2,
   },
   recruitText: {
-    color: theme.colors.success,
+    color: theme.colors.primaryDeep,
     fontSize: theme.fontSize.xs,
     fontWeight: theme.fontWeight.bold,
   },

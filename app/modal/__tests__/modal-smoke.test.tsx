@@ -141,7 +141,7 @@ describe("modal smoke screens", () => {
   it("renders the prayer create modal with top padding matching horizontal screen inset", () => {
     renderWithClient(<PrayerNewModal />);
 
-    expect(screen.getByText("기도제목 등록")).toBeTruthy();
+    expect(screen.getAllByText("기도제목 등록")).toHaveLength(2);
     expect(screen.getByLabelText("뒤로")).toBeTruthy();
     expect(
       StyleSheet.flatten(screen.getByLabelText("뒤로").props.style).marginLeft,

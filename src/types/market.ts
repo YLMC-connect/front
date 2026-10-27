@@ -48,6 +48,7 @@ export interface MarketUpdateInput {
 export interface MarketOverviewItem {
   id: string;
   thumbSeed: number;
+  thumbnailUrl?: string;
   title: string;
   authorName: string;
   createdLabel: string;
@@ -101,6 +102,7 @@ export interface MarketReportInput {
 export interface MarketDetail {
   id: string;
   thumbSeed: number;
+  images?: string[];
   title: string;
   content: string;
   categoryLabel: string;

@@ -20,8 +20,8 @@ type HomeHeroVisualProps = {
   children?: ReactNode;
 };
 
-/** App canvas cream — theme.colors.bg (#F6F7F2). */
-const BG_CREAM = "rgb(246, 247, 242)";
+/** App canvas off-white — theme.colors.bg (#F6F7F9). */
+const BG_CREAM = "rgb(246, 247, 249)";
 
 /**
  * 상단 히어로: 단일 배너 + idle 모션 + 하단 크림 페이드(시트와 이음).
@@ -68,9 +68,9 @@ export function HomeHeroVisual({ fadeHeight, children }: HomeHeroVisualProps) {
       </Animated.View>
       <LinearGradient
         colors={[
-          "rgba(246,247,242,0)",
-          "rgba(246,247,242,0.35)",
-          "rgba(246,247,242,0.82)",
+          "rgba(246,247,249,0)",
+          "rgba(246,247,249,0.35)",
+          "rgba(246,247,249,0.82)",
           BG_CREAM,
         ]}
         locations={[0, 0.35, 0.72, 1]}

@@ -6,14 +6,7 @@ import {
   type NativeStackNavigationProp,
 } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   AppText,
@@ -22,6 +15,8 @@ import {
   FilterChips,
   FloatingActionButton,
   ListSkeleton,
+  MotionEnter,
+  MotionPressable,
   SearchField,
   SEARCH_FIELD_STICKY_HEIGHT,
   SearchToggleButton,
@@ -321,17 +316,19 @@ export default function GroupScreen() {
               />
             </View>
           ) : (
-            serviceItems.map((item) => (
-              <CompanionCard
-                key={item.id}
-                kind="service"
-                item={item}
-                onPress={() => openGroupDetail(item.linkedGroupId)}
-              />
-            ))
+            <MotionEnter style={styles.myListWrap}>
+              {serviceItems.map((item) => (
+                <CompanionCard
+                  key={item.id}
+                  kind="service"
+                  item={item}
+                  onPress={() => openGroupDetail(item.linkedGroupId)}
+                />
+              ))}
+            </MotionEnter>
           )
         ) : section === "mine" ? (
-          <View style={styles.myListWrap} testID="group-my-list">
+          <MotionEnter style={styles.myListWrap} testID="group-my-list">
             {myGroups.length === 0 ? (
               <View style={styles.emptyWrapExpanded}>
                 <Empty
@@ -357,7 +354,7 @@ export default function GroupScreen() {
                 />
               ))
             )}
-          </View>
+          </MotionEnter>
         ) : groups.length === 0 ? (
           <View style={styles.emptyWrap}>
             <Empty
@@ -374,14 +371,16 @@ export default function GroupScreen() {
             />
           </View>
         ) : (
-          groups.map((group) => (
-            <CompanionCard
-              key={group.id}
-              kind="group"
-              item={group}
-              onPress={() => openGroupDetail(group.id)}
-            />
-          ))
+          <MotionEnter style={styles.myListWrap}>
+            {groups.map((group) => (
+              <CompanionCard
+                key={group.id}
+                kind="group"
+                item={group}
+                onPress={() => openGroupDetail(group.id)}
+              />
+            ))}
+          </MotionEnter>
         )}
       </View>
     </StickyHeaderScreen>
@@ -416,10 +415,11 @@ function CompanionCard(
     : categoryOf(props.item.category);
 
   return (
-    <Pressable
+    <MotionPressable
       testID={testID}
       accessibilityRole="button"
       onPress={props.onPress}
+      pressedScale={0.985}
       style={[styles.groupCard, closed ? styles.closedCard : null]}
     >
       <VisualThumb
@@ -465,7 +465,7 @@ function CompanionCard(
           </View>
         </View>
       </View>
-    </Pressable>
+    </MotionPressable>
   );
 }
 
@@ -501,16 +501,13 @@ const styles = StyleSheet.create({
   },
   list: {
     flex: 1,
-    gap: theme.spacing[3],
     paddingBottom: 164,
   },
   myListWrap: {
     flex: 1,
-    gap: theme.spacing[3],
   },
   fullList: {
     paddingBottom: theme.spacing[6],
-    gap: theme.spacing[3],
   },
   loading: {
     paddingTop: theme.spacing[2],
@@ -520,11 +517,9 @@ const styles = StyleSheet.create({
     gap: theme.layout.listGap,
     marginHorizontal: theme.layout.screenX,
     minHeight: 120,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface,
-    padding: theme.layout.cardPadding,
+    paddingVertical: theme.spacing[4],
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
   },
   groupCardBody: {
     flex: 1,
@@ -547,15 +542,15 @@ const styles = StyleSheet.create({
   badge: {
     flexShrink: 0,
     borderRadius: theme.radius.pill,
-    backgroundColor: "rgba(143,168,130,0.20)",
+    backgroundColor: theme.colors.primaryTint,
     paddingHorizontal: 10,
     paddingVertical: 3,
   },
   badgeClosed: {
-    backgroundColor: "rgba(30,41,32,0.06)",
+    backgroundColor: theme.colors.surfaceMuted,
   },
   badgeText: {
-    color: "#4F6B45",
+    color: theme.colors.primaryDeep,
     fontSize: theme.fontSize.xs,
     fontWeight: theme.fontWeight.bold,
   },

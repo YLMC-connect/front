@@ -110,35 +110,35 @@ const motion = {
 const shadow = {
   /** List cards use border only; keep a near-flat token for rare call sites. */
   card: {
-    shadowColor: "rgba(20,30,18,0.12)",
+    shadowColor: "rgba(25,31,40,0.12)",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0,
     shadowRadius: 0,
     elevation: 0,
   },
   raised: {
-    shadowColor: "rgba(20,30,18,0.18)",
+    shadowColor: "rgba(25,31,40,0.18)",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.12,
     shadowRadius: 10,
     elevation: 3,
   },
   float: {
-    shadowColor: "rgba(20,30,18,0.22)",
+    shadowColor: "rgba(25,31,40,0.22)",
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.12,
     shadowRadius: 14,
     elevation: 5,
   },
   fab: {
-    shadowColor: "rgba(20,30,18,0.28)",
+    shadowColor: "rgba(25,31,40,0.28)",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.16,
     shadowRadius: 12,
     elevation: 5,
   },
   primary: {
-    shadowColor: "rgba(91,122,176,0.35)",
+    shadowColor: "rgba(62,104,200,0.32)",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.16,
     shadowRadius: 8,

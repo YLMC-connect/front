@@ -11,7 +11,7 @@ import {
   useNavigation,
   useRouter,
 } from "expo-router";
-import { Alert, StyleSheet } from "react-native";
+import { Alert, Linking, StyleSheet } from "react-native";
 import GroupDetailScreen from "../group/[id]";
 import GroupMembersScreen from "../group/members";
 import GroupScreen from "../group";
@@ -48,13 +48,18 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("열린문 커넥트")).toBeTruthy();
     expect(screen.queryByText("홈")).toBeNull();
     expect(screen.getByLabelText(/내 정보/)).toBeTruthy();
-    // Logged-out fallback label is given-name style ("성도" has no surname strip).
     expect(screen.getByTestId("home-open-mypage")).toBeTruthy();
     expect(await screen.findByTestId("home-greeting")).toBeTruthy();
-    expect(screen.getByText(/님,/)).toBeTruthy();
+    expect(
+      within(screen.getByTestId("home-greeting")).getAllByText("성도").length,
+    ).toBeGreaterThanOrEqual(1);
     expect(await screen.findByTestId("home-daily-prayer")).toBeTruthy();
     expect(screen.getByTestId("home-dawn-prayer")).toBeTruthy();
     expect(screen.getByText("새벽기도 말씀요약")).toBeTruthy();
+    expect(screen.getByTestId("home-sunday-sermon")).toBeTruthy();
+    expect(screen.getByTestId("home-sunday-sermon-thumbnail")).toBeTruthy();
+    expect(screen.getByText("이번 주일 말씀")).toBeTruthy();
+    expect(screen.getByText("믿음이 흔들릴 때")).toBeTruthy();
     expect(screen.queryByText("내 활동 요약")).toBeNull();
   });
 
@@ -68,8 +73,11 @@ describe("v1 tab smoke screens", () => {
     expect(push).toHaveBeenCalledWith("/mypage");
   });
 
-  it("opens prayer routes from home prayer cards", async () => {
+  it("opens prayer routes and youtube sermon link from home cards", async () => {
     const push = jest.fn();
+    const openURLSpy = jest
+      .spyOn(Linking, "openURL")
+      .mockResolvedValueOnce(true);
     jest.mocked(useRouter).mockReturnValue({ push } as never);
     renderWithClient(<HomeScreen />);
 
@@ -78,6 +86,11 @@ describe("v1 tab smoke screens", () => {
     expect(push).toHaveBeenCalledWith("/prayer");
     fireEvent.press(screen.getByTestId("home-dawn-prayer"));
     expect(push).toHaveBeenCalledWith("/prayer/dawn");
+    fireEvent.press(screen.getByTestId("home-sunday-sermon"));
+    expect(openURLSpy).toHaveBeenCalledWith(
+      "https://youtu.be/wyFldwl6hW8?si=RGgYZd4Om9QcJuoR",
+    );
+    openURLSpy.mockRestore();
   });
 
   it("renders the market screen", async () => {
@@ -104,6 +117,7 @@ describe("v1 tab smoke screens", () => {
         "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
       ),
     ).toBeTruthy();
+    expect(screen.getByText("토스터기·전기주전자 세트 나눔해요")).toBeTruthy();
   });
 
   it("filters and searches market posts", async () => {
@@ -276,9 +290,9 @@ describe("v1 tab smoke screens", () => {
     expect(backStyle).toMatchObject({
       minWidth: 68,
       height: 44,
-      borderColor: theme.colors.line,
-      backgroundColor: theme.colors.surface2,
     });
+    expect(backStyle.borderWidth).toBeUndefined();
+    expect(backStyle.backgroundColor).toBeUndefined();
     expect(backStyle.shadowOpacity).toBeUndefined();
     expect(backStyle.elevation).toBeUndefined();
   });
@@ -887,7 +901,7 @@ describe("v1 tab smoke screens", () => {
     expect(back).toHaveBeenCalledTimes(1);
   });
 
-  it("clears the session before leaving my page on logout", async () => {
+  it("shows confirmation dialog and clears the session on confirmed logout", async () => {
     const logout = jest
       .spyOn(authService, "logout")
       .mockRejectedValueOnce(new Error("keystore delete failed"));
@@ -895,12 +909,26 @@ describe("v1 tab smoke screens", () => {
     jest.mocked(useRouter).mockReturnValue({ replace } as never);
     renderWithClient(<MyPageScreen />);
 
-    fireEvent.press(screen.getByText("로그아웃"));
+    fireEvent.press(screen.getByTestId("mypage-logout"));
+    expect(screen.getByText("로그아웃 하시겠어요?")).toBeTruthy();
+
+    const logoutButtons = screen.getAllByText("로그아웃");
+    fireEvent.press(logoutButtons[logoutButtons.length - 1]);
 
     await waitFor(() => {
       expect(logout).toHaveBeenCalledTimes(1);
       expect(replace).toHaveBeenCalledWith("/login");
     });
+  });
+
+  it("closes the logout dialog when cancelled", () => {
+    renderWithClient(<MyPageScreen />);
+
+    fireEvent.press(screen.getByTestId("mypage-logout"));
+    expect(screen.getByText("로그아웃 하시겠어요?")).toBeTruthy();
+
+    fireEvent.press(screen.getByText("취소"));
+    expect(screen.queryByText("로그아웃 하시겠어요?")).toBeNull();
   });
 
   it("renders the profile edit screen", () => {

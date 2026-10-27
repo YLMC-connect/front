@@ -71,4 +71,35 @@ describe("root tab bar", () => {
     expect(navigate).toHaveBeenCalledWith("prayer");
     expect(router.replace).toHaveBeenCalledWith("/prayer");
   });
+
+  it("keeps the tab bar mounted while a root modal is presented over a root tab", () => {
+    jest.mocked(usePathname).mockReturnValue("/group");
+    const routes = rootRoutes.map((route) => ({
+      key: route.key,
+      name: route.name,
+    }));
+    const descriptors = Object.fromEntries(
+      rootRoutes.map((route) => [
+        route.key,
+        {
+          options: {
+            title: route.title,
+            tabBarButtonTestID: route.testID,
+          },
+        },
+      ]),
+    );
+    const props = {
+      state: { index: 2, routes },
+      descriptors,
+      navigation: { navigate: jest.fn() },
+    } as unknown as BottomTabBarProps;
+
+    const { rerender } = renderWithClient(<AppTabBar {...props} />);
+    expect(screen.getByTestId("tab-bar-shell")).toBeTruthy();
+
+    jest.mocked(usePathname).mockReturnValue("/modal/group-new");
+    rerender(<AppTabBar {...props} />);
+    expect(screen.getByTestId("tab-bar-shell")).toBeTruthy();
+  });
 });

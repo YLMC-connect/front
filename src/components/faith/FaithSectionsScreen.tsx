@@ -19,12 +19,14 @@ import type {
 } from "../../types/prayer";
 import { StickyHeaderScreen } from "../layout/StickyHeaderScreen";
 import {
+  AnimatedProgressFill,
   AppText,
   Empty,
   EmptyState,
   ErrorState,
   FloatingActionButton,
   ListSkeleton,
+  MotionEnter,
   MotionPressable,
   SearchField,
   SEARCH_FIELD_STICKY_HEIGHT,
@@ -127,7 +129,7 @@ function PrayerContent() {
     : 0;
 
   return (
-    <>
+    <MotionEnter>
       <View style={styles.todayCard}>
         <View style={styles.todayTop}>
           <View>
@@ -143,11 +145,9 @@ function PrayerContent() {
           </AppText>
         </View>
         <View style={styles.todayTrack}>
-          <View
-            style={[
-              styles.todayFill,
-              { width: `${todayPercent}%` as `${number}%` },
-            ]}
+          <AnimatedProgressFill
+            percent={todayPercent}
+            style={styles.todayFill}
           />
         </View>
         <AppText variant="caption" tone="muted" style={styles.todayMeta}>
@@ -169,10 +169,11 @@ function PrayerContent() {
             />
           ) : (
             data.rooms.map((room) => (
-              <Pressable
+              <MotionPressable
                 key={room.id}
                 accessibilityRole="button"
                 onPress={() => router.push(`/prayer/${room.id}`)}
+                pressedScale={0.985}
                 style={styles.roomCard}
               >
                 <PrayerDayBadge weekday={room.weekday} period={room.period} />
@@ -221,7 +222,7 @@ function PrayerContent() {
                     color={theme.colors.primaryDeep}
                   />
                 </View>
-              </Pressable>
+              </MotionPressable>
             ))
           )}
         </View>
@@ -275,7 +276,7 @@ function PrayerContent() {
           )}
         </View>
       </View>
-    </>
+    </MotionEnter>
   );
 }
 
@@ -314,7 +315,7 @@ function StudyContent({ search }: { search: string }) {
   }
 
   return (
-    <>
+    <MotionEnter>
       <View style={styles.section}>
         <AppText variant="sectionTitle" style={styles.sectionTitle}>
           내 학습경로
@@ -335,11 +336,9 @@ function StudyContent({ search }: { search: string }) {
             </AppText>
           </View>
           <View style={styles.progressTrack}>
-            <View
-              style={[
-                styles.progressFill,
-                { width: `${progressPercent}%` as `${number}%` },
-              ]}
+            <AnimatedProgressFill
+              percent={progressPercent}
+              style={styles.progressFill}
             />
           </View>
           <View style={styles.pathGrid}>
@@ -394,7 +393,7 @@ function StudyContent({ search }: { search: string }) {
           )}
         </View>
       </View>
-    </>
+    </MotionEnter>
   );
 }
 
@@ -438,12 +437,12 @@ function CourseCard({
   open?: boolean;
 }) {
   return (
-    <Pressable
+    <MotionPressable
       accessibilityRole="button"
       onPress={() => router.push(`/life-study/${course.id}`)}
+      pressedScale={0.985}
       style={styles.courseCard}
     >
-      <View style={styles.courseOrb} />
       <View style={styles.badgeRow}>
         <View style={open ? styles.warnBadge : styles.muteBadge}>
           <Text style={open ? styles.statusBadgeText : styles.muteBadgeText}>
@@ -483,7 +482,7 @@ function CourseCard({
       ) : (
         <Text style={styles.targetText}>신청대상: {course.target}</Text>
       )}
-    </Pressable>
+    </MotionPressable>
   );
 }
 
@@ -537,41 +536,49 @@ function PrayerFloatingMenu() {
       <View pointerEvents="box-none" style={styles.fabContainer}>
         {open ? (
           <View style={styles.fabMenu}>
-            <MotionPressable
-              accessibilityLabel="중보기도 신청"
-              accessibilityRole="button"
-              onPress={() => {
-                setOpen(false);
-                router.push("/prayer/apply");
-              }}
-              style={styles.fabMenuItem}
-              testID="prayer-fab-apply-item"
-            >
-              <AppIcon
-                name="prayer-apply"
-                size={18}
-                color={theme.colors.primaryDeep}
-              />
-              <AppText variant="caption" style={styles.fabMenuItemText}>
-                중보기도 신청
-              </AppText>
-            </MotionPressable>
+            <MotionEnter delay={40} mode="fadeUp">
+              <MotionPressable
+                accessibilityLabel="중보기도 신청"
+                accessibilityRole="button"
+                onPress={() => {
+                  setOpen(false);
+                  router.push("/prayer/apply");
+                }}
+                style={styles.fabMenuItem}
+                testID="prayer-fab-apply-item"
+              >
+                <AppIcon
+                  name="prayer-apply"
+                  size={18}
+                  color={theme.colors.primaryDeep}
+                />
+                <AppText variant="caption" style={styles.fabMenuItemText}>
+                  중보기도 신청
+                </AppText>
+              </MotionPressable>
+            </MotionEnter>
 
-            <MotionPressable
-              accessibilityLabel="기도제목 작성"
-              accessibilityRole="button"
-              onPress={() => {
-                setOpen(false);
-                router.push("/modal/prayer-new");
-              }}
-              style={styles.fabMenuItem}
-              testID="prayer-fab-write-item"
-            >
-              <AppIcon name="edit" size={18} color={theme.colors.primaryDeep} />
-              <AppText variant="caption" style={styles.fabMenuItemText}>
-                기도제목 작성
-              </AppText>
-            </MotionPressable>
+            <MotionEnter delay={0} mode="fadeUp">
+              <MotionPressable
+                accessibilityLabel="기도제목 작성"
+                accessibilityRole="button"
+                onPress={() => {
+                  setOpen(false);
+                  router.push("/modal/prayer-new");
+                }}
+                style={styles.fabMenuItem}
+                testID="prayer-fab-write-item"
+              >
+                <AppIcon
+                  name="edit"
+                  size={18}
+                  color={theme.colors.primaryDeep}
+                />
+                <AppText variant="caption" style={styles.fabMenuItemText}>
+                  기도제목 작성
+                </AppText>
+              </MotionPressable>
+            </MotionEnter>
           </View>
         ) : null}
 
@@ -627,7 +634,9 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing[2],
     marginBottom: theme.spacing[3],
     borderRadius: theme.radius.lg,
-    backgroundColor: theme.colors.sageSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface,
     padding: theme.layout.cardPadding,
   },
   todayTop: {
@@ -642,7 +651,7 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing[4],
     borderRadius: theme.radius.pill,
     overflow: "hidden",
-    backgroundColor: "rgba(255,255,255,0.76)",
+    backgroundColor: theme.colors.surfaceMuted,
   },
   todayFill: {
     height: "100%",
@@ -697,7 +706,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.sageSoft,
+    backgroundColor: theme.colors.primaryTint,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
@@ -815,8 +824,8 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.layout.screenX,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: "rgba(107,130,96,0.14)",
-    backgroundColor: "#F4F8EE",
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface,
     padding: 16,
   },
   pathTop: {
@@ -832,7 +841,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     height: 8,
     borderRadius: theme.radius.pill,
-    backgroundColor: "rgba(255,255,255,0.72)",
+    backgroundColor: theme.colors.surfaceMuted,
     overflow: "hidden",
   },
   progressFill: {
@@ -848,7 +857,9 @@ const styles = StyleSheet.create({
   pathMetric: {
     flex: 1,
     borderRadius: theme.radius.sm,
-    backgroundColor: "rgba(255,255,255,0.70)",
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface2,
     padding: 11,
   },
   metricLabel: {
@@ -870,15 +881,6 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     padding: theme.spacing[4],
     ...theme.shadow.card,
-  },
-  courseOrb: {
-    position: "absolute",
-    right: -18,
-    top: -18,
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: theme.colors.primarySoft,
   },
   courseTitle: {
     marginTop: 8,

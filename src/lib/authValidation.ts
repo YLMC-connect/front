@@ -1,10 +1,12 @@
 export const LOGIN_ID_PATTERN = /^[a-z0-9]+$/;
 
 /**
- * Sanitizes input ID: converts to lowercase and strips non-alphanumeric chars (korean, special chars, spaces).
+ * Sanitizes input ID: converts uppercase characters to lowercase.
+ * Characters like Korean or spaces are not stripped on input so the user can see what was typed,
+ * and will be caught by validation (isValidLoginId).
  */
 export function sanitizeLoginId(input: string): string {
-  return input.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return input.toLowerCase();
 }
 
 /**

@@ -213,7 +213,7 @@ describe("auth smoke screens", () => {
     );
     renderWithClient(<SignupScreenRoute />);
 
-    fireEvent.changeText(screen.getByPlaceholderText("아이디"), "new-member");
+    fireEvent.changeText(screen.getByPlaceholderText("아이디"), "newmember");
     fireEvent.press(screen.getByTestId("signup-check-id"));
 
     expect(
@@ -224,7 +224,7 @@ describe("auth smoke screens", () => {
   it("shows that a new member id is available", async () => {
     renderWithClient(<SignupScreenRoute />);
 
-    fireEvent.changeText(screen.getByPlaceholderText("아이디"), "new-member");
+    fireEvent.changeText(screen.getByPlaceholderText("아이디"), "newmember");
     fireEvent.press(screen.getByTestId("signup-check-id"));
 
     await waitFor(() =>
@@ -296,13 +296,13 @@ describe("auth smoke screens", () => {
   it("invalidates an available id result when the input changes", async () => {
     renderWithClient(<SignupScreenRoute />);
 
-    fireEvent.changeText(screen.getByTestId("signup-id-input"), "new-member");
+    fireEvent.changeText(screen.getByTestId("signup-id-input"), "newmember");
     fireEvent.press(screen.getByTestId("signup-check-id"));
     await screen.findByText("사용 가능한 아이디입니다");
 
     fireEvent.changeText(
       screen.getByTestId("signup-id-input"),
-      "another-member",
+      "anothermember",
     );
     fireEvent.changeText(
       screen.getByTestId("signup-password-input"),
@@ -335,7 +335,7 @@ describe("auth smoke screens", () => {
   it("requires an available email before signup", async () => {
     renderWithClient(<SignupScreenRoute />);
 
-    fireEvent.changeText(screen.getByTestId("signup-id-input"), "new-member");
+    fireEvent.changeText(screen.getByTestId("signup-id-input"), "newmember");
     fireEvent.press(screen.getByTestId("signup-check-id"));
     await screen.findByText("사용 가능한 아이디입니다");
     fireEvent.changeText(
@@ -441,19 +441,19 @@ describe("auth smoke screens", () => {
     });
   });
 
-  it("sanitizes login ID to lowercase letters and numbers only", () => {
+  it("converts uppercase login ID to lowercase while keeping characters for validation", () => {
     renderWithClient(<LoginScreenRoute />);
     const idInput = screen.getByTestId("login-id-input");
 
     fireEvent.changeText(idInput, "AdminUser123!@#한글");
-    expect(idInput.props.value).toBe("adminuser123");
+    expect(idInput.props.value).toBe("adminuser123!@#한글");
   });
 
-  it("sanitizes signup ID to lowercase letters and numbers only", () => {
+  it("converts uppercase signup ID to lowercase while keeping characters for validation", () => {
     renderWithClient(<SignupScreenRoute />);
     const idInput = screen.getByTestId("signup-id-input");
 
     fireEvent.changeText(idInput, "NewUser99!홍길동");
-    expect(idInput.props.value).toBe("newuser99");
+    expect(idInput.props.value).toBe("newuser99!홍길동");
   });
 });

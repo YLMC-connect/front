@@ -7,14 +7,11 @@ describe("authValidation", () => {
       expect(sanitizeLoginId("TEST1234")).toBe("test1234");
     });
 
-    it("removes whitespace and special characters", () => {
-      expect(sanitizeLoginId("user-name!@#")).toBe("username");
-      expect(sanitizeLoginId(" user 123 ")).toBe("user123");
-    });
-
-    it("removes Korean characters", () => {
-      expect(sanitizeLoginId("홍길동123")).toBe("123");
-      expect(sanitizeLoginId("user홍길동")).toBe("user");
+    it("does not strip Korean, whitespace, or special characters during typing", () => {
+      expect(sanitizeLoginId("홍길동123")).toBe("홍길동123");
+      expect(sanitizeLoginId("user홍길동")).toBe("user홍길동");
+      expect(sanitizeLoginId("user-name!@#")).toBe("user-name!@#");
+      expect(sanitizeLoginId(" user 123 ")).toBe(" user 123 ");
     });
 
     it("keeps lowercase english letters and digits intact", () => {

@@ -11,6 +11,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  type TextInputProps,
   View,
 } from "react-native";
 import Animated, {
@@ -310,6 +311,7 @@ export default function SignupScreen() {
                       <SignupInput
                         testID="signup-id-input"
                         value={values.id}
+                        keyboardType="ascii-capable"
                         autoCapitalize="none"
                         autoCorrect={false}
                         onChangeText={setField("id")}
@@ -655,7 +657,7 @@ function SignupInput({
   placeholder: string;
   hasError?: boolean;
   secureTextEntry?: boolean;
-  keyboardType?: "default" | "phone-pad" | "email-address";
+  keyboardType?: TextInputProps["keyboardType"];
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
   autoCorrect?: boolean;
 }) {

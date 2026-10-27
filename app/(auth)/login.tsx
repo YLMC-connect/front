@@ -8,6 +8,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  type TextInputProps,
   View,
 } from "react-native";
 import { AuthInput } from "../../src/components/auth/auth-input";
@@ -138,6 +139,7 @@ export default function LoginScreen() {
                 testID="login-id-input"
                 label="아이디"
                 value={values.id}
+                keyboardType="ascii-capable"
                 autoCapitalize="none"
                 autoCorrect={false}
                 onChangeText={(id) => {
@@ -245,6 +247,7 @@ function AuthField({
   onTrailingPress,
   autoCapitalize,
   autoCorrect,
+  keyboardType,
 }: {
   testID?: string;
   label: string;
@@ -259,6 +262,7 @@ function AuthField({
   onTrailingPress?: () => void;
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
   autoCorrect?: boolean;
+  keyboardType?: TextInputProps["keyboardType"];
 }) {
   const shakeTrigger = error ?? (hasError ? "error" : undefined);
 
@@ -276,6 +280,7 @@ function AuthField({
         hasError={hasError || Boolean(error)}
         autoCapitalize={autoCapitalize}
         autoCorrect={autoCorrect}
+        keyboardType={keyboardType}
         trailing={
           trailingIcon ? (
             <MotionPressable

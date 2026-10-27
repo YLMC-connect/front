@@ -378,7 +378,7 @@ describe("auth smoke screens", () => {
   it("stores a signup session after checking id availability", async () => {
     renderWithClient(<SignupScreenRoute />);
 
-    fireEvent.changeText(screen.getByTestId("signup-id-input"), "new-member");
+    fireEvent.changeText(screen.getByTestId("signup-id-input"), "newmember");
     fireEvent.press(screen.getByTestId("signup-check-id"));
     await screen.findByText("사용 가능한 아이디입니다");
     fireEvent.changeText(
@@ -407,7 +407,7 @@ describe("auth smoke screens", () => {
     });
     expect(SecureStore.setItemAsync).toHaveBeenCalledTimes(2);
     expect(useAuthStore.getState()).toMatchObject({
-      currentUser: { id: "member-new-member", name: "새성도" },
+      currentUser: { id: "member-newmember", name: "새성도" },
       isLoggedIn: true,
       status: "authenticated",
     });
@@ -424,6 +424,8 @@ describe("auth smoke screens", () => {
     renderWithClient(<MyPageScreen />);
 
     fireEvent.press(screen.getByTestId("mypage-logout"));
+    const logoutButtons = screen.getAllByText("로그아웃");
+    fireEvent.press(logoutButtons[logoutButtons.length - 1]);
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith("/login"));
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(
@@ -437,5 +439,21 @@ describe("auth smoke screens", () => {
       isLoggedIn: false,
       status: "anonymous",
     });
+  });
+
+  it("sanitizes login ID to lowercase letters and numbers only", () => {
+    renderWithClient(<LoginScreenRoute />);
+    const idInput = screen.getByTestId("login-id-input");
+
+    fireEvent.changeText(idInput, "AdminUser123!@#한글");
+    expect(idInput.props.value).toBe("adminuser123");
+  });
+
+  it("sanitizes signup ID to lowercase letters and numbers only", () => {
+    renderWithClient(<SignupScreenRoute />);
+    const idInput = screen.getByTestId("signup-id-input");
+
+    fireEvent.changeText(idInput, "NewUser99!홍길동");
+    expect(idInput.props.value).toBe("newuser99");
   });
 });

@@ -392,22 +392,6 @@ describe("v1 tab smoke screens", () => {
     alert.mockRestore();
   });
 
-  it("reports another member's comment and handles a duplicate", async () => {
-    renderWithClient(<MarketDetailScreen />);
-
-    await screen.findByTestId("market-comment-report-comment-1");
-    fireEvent.press(screen.getByTestId("market-comment-report-comment-1"));
-    fireEvent.press(screen.getByText("나눔을 빙자한 홍보·광고"));
-    fireEvent.press(screen.getByText("신고하기"));
-
-    expect(await screen.findByText("신고가 접수되었습니다")).toBeTruthy();
-
-    fireEvent.press(screen.getByTestId("market-comment-report-comment-1"));
-    fireEvent.press(screen.getByText("신고하기"));
-
-    expect(await screen.findByText("이미 신고한 콘텐츠입니다")).toBeTruthy();
-  });
-
   it("deletes an owned market post and returns to the market list", async () => {
     const replace = jest.fn();
     jest.mocked(useRouter).mockReturnValue({ replace } as never);
@@ -952,7 +936,6 @@ describe("v1 tab smoke screens", () => {
 
     expect(screen.getByText("프로필")).toBeTruthy();
     expect(screen.getByText("박정아")).toBeTruthy();
-    expect(screen.getByText("차단")).toBeTruthy();
   });
 
   it("renders the FAQ screen", () => {

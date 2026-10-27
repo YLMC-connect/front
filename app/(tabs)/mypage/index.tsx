@@ -35,7 +35,6 @@ const activityItems: MenuItem[] = [
     icon: "menu-book",
     href: "/life-study/history?returnUrl=/mypage",
   },
-  { label: "차단 관리", icon: "block", href: "/mypage/blocked" },
 ];
 
 const supportItems: MenuItem[] = [

@@ -647,6 +647,7 @@ function SignupInput({
   secureTextEntry,
   keyboardType = "default",
   autoCapitalize,
+  autoCorrect,
 }: {
   testID?: string;
   value?: string;
@@ -656,6 +657,7 @@ function SignupInput({
   secureTextEntry?: boolean;
   keyboardType?: "default" | "phone-pad" | "email-address";
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
+  autoCorrect?: boolean;
 }) {
   const [passwordVisible, setPasswordVisible] = useState(false);
   return (
@@ -667,6 +669,7 @@ function SignupInput({
       secureTextEntry={secureTextEntry && !passwordVisible}
       keyboardType={keyboardType}
       autoCapitalize={autoCapitalize}
+      autoCorrect={autoCorrect}
       hasError={hasError}
       trailing={
         secureTextEntry ? (

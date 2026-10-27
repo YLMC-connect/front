@@ -1,8 +1,8 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../../src/components/layout/Screen";
-import { ConfirmDialog, Toast, TopBar } from "../../../../src/components/ui";
+import { TopBar } from "../../../../src/components/ui";
 import { theme } from "../../../../src/constants/theme";
 import { readDesignVariant } from "../../../../src/lib/designVariant";
 
@@ -83,27 +83,7 @@ export default function UserProfileScreen() {
               <Text style={styles.withdrawnText}>탈퇴한 사용자</Text>
             ) : null}
           </View>
-
-          {!isWithdrawn ? (
-            <Pressable accessibilityRole="button" style={styles.blockButton}>
-              <AppIcon name="block" size={18} color={theme.colors.inkSoft} />
-              <Text style={styles.blockButtonText}>차단</Text>
-            </Pressable>
-          ) : null}
         </View>
-
-        <ConfirmDialog
-          visible={variant === "block-confirm"}
-          title={`${name}님을 차단할까요?`}
-          message="차단한 사용자의 게시글과 댓글은 보이지 않으며, 상대도 회원님의 활동을 볼 수 없어요."
-          confirmText="차단"
-          danger
-          onCancel={() => router.back()}
-          onConfirm={() => router.back()}
-        />
-        <Toast
-          message={variant === "block-toast" ? "차단되었습니다" : undefined}
-        />
       </View>
     </Screen>
   );

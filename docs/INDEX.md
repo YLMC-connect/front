@@ -27,12 +27,12 @@
 |---|---|---|---|---|
 | common (공통 인프라) | 4 | 59 | 2026-10-27 | [features/common.md](features/common.md) |
 | auth (인증) | 1 | 18 | 2026-10-27 | [features/auth.md](features/auth.md) |
-| home (홈) | 0 | 3 | 2026-10-15 | [features/home.md](features/home.md) |
+| home (홈) | 1 | 3 | 2026-10-28 | [features/home.md](features/home.md) |
 | market (나눔장터) | 2 | 25 | 2026-10-28 | [features/market.md](features/market.md) |
 | group (소모임) | 3 | 34 | 2026-10-28 | [features/group.md](features/group.md) |
 | mypage (MY) | 0 | 12 | 2026-10-27 | [features/mypage.md](features/mypage.md) |
-| life-study (삶공부) | 0 | 15 | 2026-10-27 | [features/life-study.md](features/life-study.md) |
-| prayer (중보기도) | 0 | 21 | 2026-10-27 | [features/prayer.md](features/prayer.md) |
+| life-study (삶공부) | 1 | 15 | 2026-10-28 | [features/life-study.md](features/life-study.md) |
+| prayer (중보기도) | 1 | 21 | 2026-10-28 | [features/prayer.md](features/prayer.md) |
 
 <!-- AUTO-GENERATED-END: domain-status -->
 

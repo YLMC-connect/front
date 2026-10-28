@@ -204,7 +204,7 @@ export default function LoginScreen() {
 
           <MotionEnter enabled={enterMotion} style={styles.footerBlock}>
             <View style={styles.signupCard}>
-              <AppText variant="caption" tone="secondary">
+              <AppText tone="secondary" style={styles.signupCardText}>
                 열린문 커넥트가 처음이신가요?
               </AppText>
               <MotionPressable
@@ -214,7 +214,6 @@ export default function LoginScreen() {
                 style={styles.signupLink}
               >
                 <AppText
-                  variant="caption"
                   tone="brand"
                   style={styles.signupLinkText}
                 >
@@ -389,12 +388,16 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
   },
+  signupCardText: {
+    fontSize: 13.5,
+  },
   signupLink: {
     paddingVertical: 4,
     paddingHorizontal: 4,
   },
   signupLinkText: {
     color: theme.colors.primaryDeep,
+    fontSize: 13.5,
     fontWeight: theme.fontWeight.semibold,
   },
 });

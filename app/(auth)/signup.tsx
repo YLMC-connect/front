@@ -1288,6 +1288,7 @@ const styles = StyleSheet.create({
   },
   passwordRulesRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 14,
     marginTop: 8,
     paddingHorizontal: 2,
@@ -1372,7 +1373,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 4,
-    minHeight: 32,
+    minHeight: 36,
   },
   termsCheckWrap: {
     flexDirection: "row",

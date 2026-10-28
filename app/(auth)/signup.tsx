@@ -318,6 +318,45 @@ export default function SignupScreen() {
   const hasAlphaNumeric =
     /[a-zA-Z]/.test(values.password) && /\d/.test(values.password);
 
+  // Progressive card unlock conditions
+  const isCard1Complete = Boolean(
+    values.id.trim().length >= 3 &&
+      isValidLoginId(values.id.trim()) &&
+      currentIdAvailability === true &&
+      hasMinLength &&
+      hasAlphaNumeric &&
+      !errors.password,
+  );
+
+  const isCard2Complete = Boolean(
+    values.userName.trim().length >= 2 &&
+      !errors.userName &&
+      phoneDigits(values.phone).length >= 10 &&
+      !errors.phone &&
+      !isPhoneError &&
+      !isPhoneDup &&
+      emailPattern.test(values.email.trim()) &&
+      !errors.email,
+  );
+
+  const [unlockedStep, setUnlockedStep] = useState<number>(() => {
+    if (isCard1Complete && isCard2Complete) return 3;
+    if (isCard1Complete) return 2;
+    return 1;
+  });
+
+  useEffect(() => {
+    if (isCard1Complete) {
+      setUnlockedStep((prev) => Math.max(prev, 2));
+    }
+  }, [isCard1Complete]);
+
+  useEffect(() => {
+    if (unlockedStep >= 2 && isCard2Complete) {
+      setUnlockedStep((prev) => Math.max(prev, 3));
+    }
+  }, [unlockedStep, isCard2Complete]);
+
   return (
     <Screen scroll={false} padded={false}>
       <KeyboardAvoidingView
@@ -454,7 +493,13 @@ export default function SignupScreen() {
                       autoComplete="new-password"
                       textContentType="newPassword"
                       returnKeyType="next"
-                      onSubmitEditing={() => nameInputRef.current?.focus()}
+                      onSubmitEditing={() => {
+                        if (nameInputRef.current) {
+                          nameInputRef.current.focus();
+                        } else {
+                          setTimeout(() => nameInputRef.current?.focus(), 60);
+                        }
+                      }}
                       hasError={isPwError || Boolean(errors.password)}
                     />
                   </MotionShake>
@@ -508,208 +553,224 @@ export default function SignupScreen() {
               </View>
 
               {/* 섹션 2: 성도 정보 */}
-              <View style={styles.sectionCard}>
-                <View style={styles.sectionHeader}>
-                  <View style={styles.sectionBadge}>
-                    <Text style={styles.sectionBadgeText}>2</Text>
-                  </View>
-                  <Text style={styles.sectionTitle}>성도 정보</Text>
-                </View>
+              {unlockedStep >= 2 ? (
+                <MotionEnter mode="fade" enabled={enterMotion}>
+                  <View style={styles.sectionCard}>
+                    <View style={styles.sectionHeader}>
+                      <View style={styles.sectionBadge}>
+                        <Text style={styles.sectionBadgeText}>2</Text>
+                      </View>
+                      <Text style={styles.sectionTitle}>성도 정보</Text>
+                    </View>
 
-                <Field label="이름">
-                  <MotionShake trigger={errors.userName}>
-                    <SignupInput
-                      ref={nameInputRef}
-                      testID="signup-name-input"
-                      value={values.userName}
-                      onChangeText={setField("userName")}
-                      placeholder="실명을 입력해주세요"
-                      autoComplete="name"
-                      textContentType="name"
-                      returnKeyType="next"
-                      onSubmitEditing={() => phoneInputRef.current?.focus()}
-                      hasError={Boolean(errors.userName)}
-                    />
-                  </MotionShake>
-                  <InlineError>{errors.userName}</InlineError>
-                  {!errors.userName ? (
-                    <FieldHint>2~10자, 특수문자는 사용할 수 없어요</FieldHint>
-                  ) : null}
-                </Field>
+                    <Field label="이름">
+                      <MotionShake trigger={errors.userName}>
+                        <SignupInput
+                          ref={nameInputRef}
+                          testID="signup-name-input"
+                          value={values.userName}
+                          onChangeText={setField("userName")}
+                          placeholder="실명을 입력해주세요"
+                          autoComplete="name"
+                          textContentType="name"
+                          returnKeyType="next"
+                          onSubmitEditing={() => phoneInputRef.current?.focus()}
+                          hasError={Boolean(errors.userName)}
+                        />
+                      </MotionShake>
+                      <InlineError>{errors.userName}</InlineError>
+                      {!errors.userName ? (
+                        <FieldHint>2~10자, 특수문자는 사용할 수 없어요</FieldHint>
+                      ) : null}
+                    </Field>
 
-                <Field label="연락처">
-                  <MotionShake
-                    trigger={
-                      phoneErrorMessage ??
-                      (isPhoneError || isPhoneDup ? "phone-error" : undefined)
-                    }
-                  >
-                    <SignupInput
-                      ref={phoneInputRef}
-                      testID="signup-phone-input"
-                      value={values.phone}
-                      onChangeText={setField("phone")}
-                      placeholder="010-XXXX-XXXX"
-                      keyboardType="phone-pad"
-                      autoComplete="tel"
-                      textContentType="telephoneNumber"
-                      returnKeyType="next"
-                      onSubmitEditing={() => emailInputRef.current?.focus()}
-                      hasError={
-                        isPhoneError || isPhoneDup || Boolean(errors.phone)
-                      }
-                    />
-                  </MotionShake>
-                  <InlineError>{phoneErrorMessage}</InlineError>
-                </Field>
+                    <Field label="연락처">
+                      <MotionShake
+                        trigger={
+                          phoneErrorMessage ??
+                          (isPhoneError || isPhoneDup ? "phone-error" : undefined)
+                        }
+                      >
+                        <SignupInput
+                          ref={phoneInputRef}
+                          testID="signup-phone-input"
+                          value={values.phone}
+                          onChangeText={setField("phone")}
+                          placeholder="010-XXXX-XXXX"
+                          keyboardType="phone-pad"
+                          autoComplete="tel"
+                          textContentType="telephoneNumber"
+                          returnKeyType="next"
+                          onSubmitEditing={() => emailInputRef.current?.focus()}
+                          hasError={
+                            isPhoneError || isPhoneDup || Boolean(errors.phone)
+                          }
+                        />
+                      </MotionShake>
+                      <InlineError>{phoneErrorMessage}</InlineError>
+                    </Field>
 
-                <Field label="이메일">
-                  <MotionShake trigger={emailErrorMessage}>
-                    <SignupInput
-                      ref={emailInputRef}
-                      testID="signup-email-input"
-                      value={values.email}
-                      onChangeText={setField("email")}
-                      placeholder="이메일 주소"
-                      keyboardType="email-address"
-                      autoComplete="email"
-                      textContentType="emailAddress"
-                      autoCapitalize="none"
-                      returnKeyType="done"
-                      onBlur={onEmailBlur}
-                      onSubmitEditing={() => {
-                        if (!isSubmitDisabled) onSubmit();
-                      }}
-                      hasError={Boolean(emailErrorMessage)}
-                      trailing={
-                        checkAvailability.isPending &&
-                        lastAvailabilityTarget === "email" ? (
-                          <ActivityIndicator
-                            size="small"
-                            color={theme.colors.primaryDeep}
-                          />
-                        ) : currentEmailAvailability === true ? (
-                          <MotionPop>
+                    <Field label="이메일">
+                      <MotionShake trigger={emailErrorMessage}>
+                        <SignupInput
+                          ref={emailInputRef}
+                          testID="signup-email-input"
+                          value={values.email}
+                          onChangeText={setField("email")}
+                          placeholder="이메일 주소"
+                          keyboardType="email-address"
+                          autoComplete="email"
+                          textContentType="emailAddress"
+                          autoCapitalize="none"
+                          returnKeyType="done"
+                          onBlur={onEmailBlur}
+                          onSubmitEditing={() => {
+                            emailInputRef.current?.blur();
+                            onEmailBlur();
+                          }}
+                          hasError={Boolean(emailErrorMessage)}
+                          trailing={
+                            checkAvailability.isPending &&
+                            lastAvailabilityTarget === "email" ? (
+                              <ActivityIndicator
+                                size="small"
+                                color={theme.colors.primaryDeep}
+                              />
+                            ) : currentEmailAvailability === true ? (
+                              <MotionPop>
+                                <AppIcon
+                                  name="check-circle"
+                                  size={18}
+                                  color={theme.colors.success}
+                                />
+                              </MotionPop>
+                            ) : null
+                          }
+                        />
+                      </MotionShake>
+                      {/* Invisible trigger for automated tests and scripts */}
+                      <Pressable
+                        testID="signup-check-email"
+                        accessibilityRole="button"
+                        accessibilityLabel="이메일 중복 확인"
+                        onPress={() => onCheckAvailability("email")}
+                        style={styles.hiddenTrigger}
+                      />
+                      <InlineError>{emailErrorMessage}</InlineError>
+                      {currentEmailAvailability === true ? (
+                        <MotionPop>
+                          <View style={styles.successRow}>
                             <AppIcon
                               name="check-circle"
-                              size={18}
+                              size={14}
                               color={theme.colors.success}
                             />
-                          </MotionPop>
-                        ) : null
-                      }
-                    />
-                  </MotionShake>
-                  {/* Invisible trigger for automated tests and scripts */}
-                  <Pressable
-                    testID="signup-check-email"
-                    accessibilityRole="button"
-                    accessibilityLabel="이메일 중복 확인"
-                    onPress={() => onCheckAvailability("email")}
-                    style={styles.hiddenTrigger}
-                  />
-                  <InlineError>{emailErrorMessage}</InlineError>
-                  {currentEmailAvailability === true ? (
-                    <MotionPop>
-                      <View style={styles.successRow}>
-                        <AppIcon
-                          name="check-circle"
-                          size={14}
-                          color={theme.colors.success}
-                        />
-                        <AppText
-                          variant="caption"
-                          tone="success"
-                          style={styles.successHint}
-                        >
-                          사용 가능한 이메일입니다
-                        </AppText>
-                      </View>
-                    </MotionPop>
-                  ) : null}
-                </Field>
-              </View>
+                            <AppText
+                              variant="caption"
+                              tone="success"
+                              style={styles.successHint}
+                            >
+                              사용 가능한 이메일입니다
+                            </AppText>
+                          </View>
+                        </MotionPop>
+                      ) : null}
+                    </Field>
+                  </View>
+                </MotionEnter>
+              ) : null}
 
               {/* 섹션 3: 약관 동의 */}
-              <View style={styles.termsCard}>
-                <Pressable
-                  testID="signup-terms-all"
-                  accessibilityRole="checkbox"
-                  accessibilityState={{ checked: allTermsAgreed }}
-                  onPress={toggleAllTerms}
-                  style={[
-                    styles.termsAllRow,
-                    allTermsAgreed ? styles.termsAllRowOn : null,
-                  ]}
-                >
-                  <CheckBadge on={allTermsAgreed} big />
-                  <Text style={styles.termsAllText}>약관 전체 동의하기</Text>
-                </Pressable>
+              {unlockedStep >= 3 ? (
+                <MotionEnter mode="fade" enabled={enterMotion}>
+                  <View style={styles.termsCard}>
+                    <View style={styles.sectionHeader}>
+                      <View style={styles.sectionBadge}>
+                        <Text style={styles.sectionBadgeText}>3</Text>
+                      </View>
+                      <Text style={styles.sectionTitle}>약관 동의</Text>
+                    </View>
 
-                <View style={styles.termsList}>
-                  <View style={styles.termsRow}>
                     <Pressable
+                      testID="signup-terms-all"
                       accessibilityRole="checkbox"
-                      accessibilityState={{ checked: agreedTerms.tos }}
-                      onPress={() =>
-                        setAgreedTerms((prev) => ({
-                          ...prev,
-                          tos: !prev.tos,
-                        }))
-                      }
-                      style={styles.termsCheckWrap}
+                      accessibilityState={{ checked: allTermsAgreed }}
+                      onPress={toggleAllTerms}
+                      style={[
+                        styles.termsAllRow,
+                        allTermsAgreed ? styles.termsAllRowOn : null,
+                      ]}
                     >
-                      <CheckBadge on={agreedTerms.tos} />
-                      <Text style={styles.termsItemText}>
-                        <Text style={styles.termsRequired}>[필수]</Text> 서비스
-                        이용약관
-                      </Text>
+                      <CheckBadge on={allTermsAgreed} big />
+                      <Text style={styles.termsAllText}>약관 전체 동의하기</Text>
                     </Pressable>
-                    <Pressable
-                      onPress={() => setTermsSheetKey("tos")}
-                      style={styles.termsDetailButton}
-                    >
-                      <Text style={styles.termsDetailText}>보기</Text>
-                      <AppIcon
-                        name="chevron-right"
-                        size={14}
-                        color={theme.colors.inkMute}
-                      />
-                    </Pressable>
-                  </View>
 
-                  <View style={styles.termsRow}>
-                    <Pressable
-                      accessibilityRole="checkbox"
-                      accessibilityState={{ checked: agreedTerms.privacy }}
-                      onPress={() =>
-                        setAgreedTerms((prev) => ({
-                          ...prev,
-                          privacy: !prev.privacy,
-                        }))
-                      }
-                      style={styles.termsCheckWrap}
-                    >
-                      <CheckBadge on={agreedTerms.privacy} />
-                      <Text style={styles.termsItemText}>
-                        <Text style={styles.termsRequired}>[필수]</Text> 개인정보
-                        처리방침
-                      </Text>
-                    </Pressable>
-                    <Pressable
-                      onPress={() => setTermsSheetKey("privacy")}
-                      style={styles.termsDetailButton}
-                    >
-                      <Text style={styles.termsDetailText}>보기</Text>
-                      <AppIcon
-                        name="chevron-right"
-                        size={14}
-                        color={theme.colors.inkMute}
-                      />
-                    </Pressable>
+                    <View style={styles.termsList}>
+                      <View style={styles.termsRow}>
+                        <Pressable
+                          accessibilityRole="checkbox"
+                          accessibilityState={{ checked: agreedTerms.tos }}
+                          onPress={() =>
+                            setAgreedTerms((prev) => ({
+                              ...prev,
+                              tos: !prev.tos,
+                            }))
+                          }
+                          style={styles.termsCheckWrap}
+                        >
+                          <CheckBadge on={agreedTerms.tos} />
+                          <Text style={styles.termsItemText}>
+                            <Text style={styles.termsRequired}>[필수]</Text> 서비스
+                            이용약관
+                          </Text>
+                        </Pressable>
+                        <Pressable
+                          onPress={() => setTermsSheetKey("tos")}
+                          style={styles.termsDetailButton}
+                        >
+                          <Text style={styles.termsDetailText}>보기</Text>
+                          <AppIcon
+                            name="chevron-right"
+                            size={14}
+                            color={theme.colors.inkMute}
+                          />
+                        </Pressable>
+                      </View>
+
+                      <View style={styles.termsRow}>
+                        <Pressable
+                          accessibilityRole="checkbox"
+                          accessibilityState={{ checked: agreedTerms.privacy }}
+                          onPress={() =>
+                            setAgreedTerms((prev) => ({
+                              ...prev,
+                              privacy: !prev.privacy,
+                            }))
+                          }
+                          style={styles.termsCheckWrap}
+                        >
+                          <CheckBadge on={agreedTerms.privacy} />
+                          <Text style={styles.termsItemText}>
+                            <Text style={styles.termsRequired}>[필수]</Text> 개인정보
+                            처리방침
+                          </Text>
+                        </Pressable>
+                        <Pressable
+                          onPress={() => setTermsSheetKey("privacy")}
+                          style={styles.termsDetailButton}
+                        >
+                          <Text style={styles.termsDetailText}>보기</Text>
+                          <AppIcon
+                            name="chevron-right"
+                            size={14}
+                            color={theme.colors.inkMute}
+                          />
+                        </Pressable>
+                      </View>
+                    </View>
                   </View>
-                </View>
-              </View>
+                </MotionEnter>
+              ) : null}
             </MotionEnter>
 
             {signup.error ? (

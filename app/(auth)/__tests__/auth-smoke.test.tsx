@@ -301,12 +301,12 @@ describe("auth smoke screens", () => {
     await screen.findByText("사용 가능한 아이디입니다");
 
     fireEvent.changeText(
-      screen.getByTestId("signup-id-input"),
-      "anothermember",
-    );
-    fireEvent.changeText(
       screen.getByTestId("signup-password-input"),
       "password1",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("signup-id-input"),
+      "anothermember",
     );
     fireEvent.changeText(screen.getByTestId("signup-name-input"), "새성도");
     fireEvent.changeText(
@@ -357,6 +357,14 @@ describe("auth smoke screens", () => {
 
   it("shows that a known email is unavailable", async () => {
     renderWithClient(<SignupScreenRoute />);
+
+    fireEvent.changeText(screen.getByTestId("signup-id-input"), "newmember");
+    fireEvent.press(screen.getByTestId("signup-check-id"));
+    await screen.findByText("사용 가능한 아이디입니다");
+    fireEvent.changeText(
+      screen.getByTestId("signup-password-input"),
+      "password1",
+    );
 
     fireEvent.changeText(
       screen.getByTestId("signup-email-input"),
@@ -462,6 +470,23 @@ describe("auth smoke screens", () => {
     fireEvent(screen.getByTestId("signup-id-input"), "blur");
     await screen.findByText("사용 가능한 아이디입니다");
 
+    // Complete password to unlock Card 2
+    fireEvent.changeText(
+      screen.getByTestId("signup-password-input"),
+      "password1",
+    );
+
+    // Complete Card 2 to unlock Card 3 (terms)
+    fireEvent.changeText(screen.getByTestId("signup-name-input"), "새성도");
+    fireEvent.changeText(
+      screen.getByTestId("signup-phone-input"),
+      "01012345678",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("signup-email-input"),
+      "new-member@example.com",
+    );
+
     // Terms agreement checkboxes and sheet viewer
     const termsAll = screen.getByTestId("signup-terms-all");
     expect(termsAll.props.accessibilityState.checked).toBe(false);
@@ -475,5 +500,44 @@ describe("auth smoke screens", () => {
     expect(await screen.findByText("시행일자: 2026년 1월 1일")).toBeTruthy();
     fireEvent.press(screen.getByLabelText("닫기"));
     expect(screen.queryByText("시행일자: 2026년 1월 1일")).toBeNull();
+  });
+
+  it("reveals cards progressively as each section is completed", async () => {
+    renderWithClient(<SignupScreenRoute />);
+
+    // Initially only Section 1 is visible
+    expect(screen.getByTestId("signup-id-input")).toBeTruthy();
+    expect(screen.getByTestId("signup-password-input")).toBeTruthy();
+    expect(screen.queryByTestId("signup-name-input")).toBeNull();
+    expect(screen.queryByTestId("signup-terms-all")).toBeNull();
+
+    // Complete Section 1
+    fireEvent.changeText(screen.getByTestId("signup-id-input"), "newmember");
+    fireEvent.press(screen.getByTestId("signup-check-id"));
+    await screen.findByText("사용 가능한 아이디입니다");
+    fireEvent.changeText(
+      screen.getByTestId("signup-password-input"),
+      "password1",
+    );
+
+    // Section 2 is now revealed
+    expect(screen.getByTestId("signup-name-input")).toBeTruthy();
+    expect(screen.getByTestId("signup-phone-input")).toBeTruthy();
+    expect(screen.getByTestId("signup-email-input")).toBeTruthy();
+    expect(screen.queryByTestId("signup-terms-all")).toBeNull();
+
+    // Complete Section 2
+    fireEvent.changeText(screen.getByTestId("signup-name-input"), "홍길동");
+    fireEvent.changeText(
+      screen.getByTestId("signup-phone-input"),
+      "01012345678",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("signup-email-input"),
+      "hong@example.com",
+    );
+
+    // Section 3 (terms) is now revealed
+    expect(screen.getByTestId("signup-terms-all")).toBeTruthy();
   });
 });

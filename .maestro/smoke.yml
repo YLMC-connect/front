@@ -75,13 +75,6 @@ tags:
 - tapOn:
     id: signup-password-input
 - inputText: password1
-- scrollUntilVisible:
-    element:
-      id: signup-password-confirm-input
-    direction: DOWN
-- tapOn:
-    id: signup-password-confirm-input
-- inputText: password1
 - hideKeyboard
 - scrollUntilVisible:
     element:

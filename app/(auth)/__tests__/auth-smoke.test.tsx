@@ -528,14 +528,14 @@ describe("auth smoke screens", () => {
 
     // Realtime member info criteria chips are displayed
     expect(screen.getByText("2~10자")).toBeTruthy();
-    expect(screen.getByText("숫자·특수문자 제외")).toBeTruthy();
+    expect(screen.getByText("한글만 입력")).toBeTruthy();
     expect(screen.getByText("010 시작")).toBeTruthy();
     expect(screen.getByText("10~11자리")).toBeTruthy();
     expect(screen.getByText("이메일 형식")).toBeTruthy();
     expect(screen.getByText("중복 확인 완료")).toBeTruthy();
 
-    // Entering a name with a number does not unlock Section 3
-    fireEvent.changeText(screen.getByTestId("signup-name-input"), "홍길동1");
+    // Entering an English name or name with number does not unlock Section 3
+    fireEvent.changeText(screen.getByTestId("signup-name-input"), "John");
     fireEvent.changeText(
       screen.getByTestId("signup-phone-input"),
       "01012345678",
@@ -546,7 +546,10 @@ describe("auth smoke screens", () => {
     );
     expect(screen.queryByTestId("signup-terms-all")).toBeNull();
 
-    // Complete Section 2 with valid name without numbers
+    fireEvent.changeText(screen.getByTestId("signup-name-input"), "홍길동1");
+    expect(screen.queryByTestId("signup-terms-all")).toBeNull();
+
+    // Complete Section 2 with valid Korean name
     fireEvent.changeText(screen.getByTestId("signup-name-input"), "홍길동");
     fireEvent.changeText(
       screen.getByTestId("signup-phone-input"),

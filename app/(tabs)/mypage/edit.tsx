@@ -411,8 +411,8 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: 6,
     color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.semibold,
+    fontSize: theme.typography.formLabel.fontSize,
+    fontWeight: theme.typography.formLabel.fontWeight,
   },
   input: {
     height: 46,
@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     paddingHorizontal: 14,
     color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
+    fontSize: theme.fontSize.lg,
   },
   inputError: {
     borderColor: theme.colors.danger,

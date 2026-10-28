@@ -288,8 +288,8 @@ const styles = StyleSheet.create({
   fieldLabel: {
     marginBottom: 6,
     color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.semibold,
+    fontSize: theme.typography.formLabel.fontSize,
+    fontWeight: theme.typography.formLabel.fontWeight,
   },
   input: {
     height: 46,
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface2,
     paddingHorizontal: 14,
     color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
+    fontSize: theme.fontSize.lg,
   },
   textarea: {
     minHeight: 86,

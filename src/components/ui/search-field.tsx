@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
+    fontSize: theme.fontSize.lg,
     outlineColor: "transparent",
     outlineWidth: 0,
   },

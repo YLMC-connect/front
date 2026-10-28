@@ -1045,7 +1045,7 @@ const styles = StyleSheet.create({
     minHeight: 38,
     paddingVertical: 6,
     color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
+    fontSize: theme.fontSize.lg,
   },
 
   sendButton: {

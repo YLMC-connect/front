@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     color: theme.colors.ink,
-    fontSize: theme.fontSize.sm,
+    fontSize: theme.typography.formLabel.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   required: {
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
+    fontSize: theme.fontSize.lg,
   },
   textarea: {
     minHeight: 250,

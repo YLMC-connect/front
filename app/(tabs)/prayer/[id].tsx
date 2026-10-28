@@ -820,8 +820,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     gap: 4,
-    borderLeftWidth: 3,
-    borderLeftColor: theme.colors.primary,
   },
   answerHeader: {
     flexDirection: "row",

@@ -1190,7 +1190,7 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     marginTop: 6,
     color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
+    fontSize: theme.fontSize.md,
   },
   bottom: {
     position: "absolute",
@@ -1220,28 +1220,30 @@ const styles = StyleSheet.create({
     paddingBottom: 2,
   },
   sectionBadge: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: theme.colors.primaryTint,
     alignItems: "center",
     justifyContent: "center",
   },
   sectionBadgeText: {
     color: theme.colors.primaryDeep,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: theme.fontWeight.extrabold,
   },
   sectionTitle: {
     color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.bold,
+    fontSize: theme.typography.cardTitle.fontSize,
+    lineHeight: theme.typography.cardTitle.lineHeight,
+    fontWeight: theme.typography.cardTitle.fontWeight,
   },
   label: {
     marginBottom: theme.spacing[2],
     color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.medium,
+    fontSize: theme.typography.formLabel.fontSize,
+    lineHeight: theme.typography.formLabel.lineHeight,
+    fontWeight: theme.typography.formLabel.fontWeight,
   },
   idRow: {
     flexDirection: "row",
@@ -1297,7 +1299,7 @@ const styles = StyleSheet.create({
   },
   ruleText: {
     color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
+    fontSize: theme.fontSize.sm,
     fontWeight: theme.fontWeight.medium,
   },
   ruleTextPass: {
@@ -1319,8 +1321,8 @@ const styles = StyleSheet.create({
   inlineError: {
     flex: 1,
     color: theme.colors.danger,
-    fontSize: theme.fontSize.sm,
-    lineHeight: theme.lineHeight.sm,
+    fontSize: 13,
+    lineHeight: 18,
     fontWeight: theme.fontWeight.medium,
   },
   successRow: {
@@ -1356,7 +1358,7 @@ const styles = StyleSheet.create({
   },
   termsAllText: {
     color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
+    fontSize: theme.typography.cardTitle.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   termsList: {
@@ -1380,7 +1382,7 @@ const styles = StyleSheet.create({
   },
   termsItemText: {
     color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
+    fontSize: 13,
   },
   termsRequired: {
     color: theme.colors.primaryDeep,
@@ -1395,7 +1397,7 @@ const styles = StyleSheet.create({
   },
   termsDetailText: {
     color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
+    fontSize: theme.fontSize.sm,
   },
   checkBadge: {
     borderWidth: 1.5,
@@ -1418,7 +1420,7 @@ const styles = StyleSheet.create({
   },
   submitText: {
     color: theme.colors.white,
-    fontSize: theme.fontSize.md,
+    fontSize: theme.fontSize.base,
     fontWeight: theme.fontWeight.bold,
   },
   error: { color: theme.colors.danger, fontSize: 13 },

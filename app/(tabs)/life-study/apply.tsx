@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: 7,
     color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
+    fontSize: theme.typography.formLabel.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   input: {
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     paddingHorizontal: 14,
     color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
+    fontSize: theme.fontSize.lg,
   },
   textarea: {
     minHeight: 98,
@@ -482,7 +482,7 @@ const styles = StyleSheet.create({
   },
   submitText: {
     color: theme.colors.white,
-    fontSize: theme.fontSize.md,
+    fontSize: theme.fontSize.base,
     fontWeight: theme.fontWeight.bold,
   },
 });

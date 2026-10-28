@@ -65,6 +65,11 @@ const typography = {
     lineHeight: 17,
     fontWeight: fontWeight.medium,
   },
+  formLabel: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: fontWeight.medium,
+  },
 } as const;
 
 const layout = {

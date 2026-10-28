@@ -16,6 +16,7 @@ describe("design system foundations", () => {
       "cardTitle",
       "body",
       "caption",
+      "formLabel",
     ]);
     expect(theme.font).toEqual(appFont);
   });

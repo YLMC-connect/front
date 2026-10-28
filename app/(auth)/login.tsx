@@ -268,7 +268,7 @@ function AuthField({
 
   return (
     <MotionShake trigger={shakeTrigger}>
-      <AppText variant="caption" tone="secondary" style={styles.fieldLabel}>
+      <AppText variant="formLabel" tone="secondary" style={styles.fieldLabel}>
         {label}
       </AppText>
       <AuthInput

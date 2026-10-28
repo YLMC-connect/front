@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 공통 폼 타이포그래피 토큰(formLabel) 정의 및 전역 폼·버튼 글꼴 통일 — `theme.typography`에 `formLabel`(14px, medium)을 정식 추가하고 `AppText` variant로 연동. 입력창(`AuthInput`, `ModalFormTextInput`, `TextField`)은 모바일 폼 표준인 16px(`fontSize.lg`)로 상향 일원화하고, 라벨은 `formLabel`(14px), 메인 CTA 버튼은 `fontSize.base`(15px Bold)로 통일하여 회원가입·로그인·신청 화면 전반의 시각적 계층과 가독성을 개선.
 - 회원가입 신규 카드 등장 트랜지션 및 타이핑 디바운스 완화 — 조건 충족 시 다음 카드가 딱딱하게 튀어나오지 않도록 `FadeInDown`(진입 페이드 및 하향 슬라이드)과 `LinearTransition`(기존 카드의 부드러운 하향 이동 레이아웃 트랜지션), 그리고 플랫폼 네이티브 `LayoutAnimation`을 결합. 타이핑 도중 급작스러운 레이아웃 밀림을 방지하기 위해 500ms 입력 멈춤 디바운스(`AUTO_ADVANCE_DEBOUNCE`, 테스트 환경은 0ms)를 두고, 카드 확장 애니메이션이 자연스럽게 안착된 후 350ms 딜레이(`FOCUS_HANDOFF_DELAY`, 테스트 환경 0ms)를 거쳐 새 카드의 첫 번째 입력 필드로 포커스를 부드럽게 인계. 키보드의 '다음' 액션 시에는 즉시 레이아웃 애니메이션과 함께 다음 단계로 진행.
 - 회원가입 신규 카드 상단 추가 및 전체 카드 펼침 상태 유지 — 완료된 카드를 1줄 요약으로 접지 않고 모든 필드를 항상 펼쳐진 상태로 유지하며, 새로 작성할 카드(2단계 성도 정보, 3단계 약관 동의)가 이전 완료 카드보다 물리적으로 위(상단)에 나타나도록 배치. 수동 다음 버튼 없이 조건 충족 시 자동으로 다음 카드가 상단에 나타나며(디바운스/키보드 다음 액션), 이전 카드들도 아래에 온전히 펼쳐져 있어 언제든 직접 확인 및 수정할 수 있다.
 - 회원가입 하단 플로팅 CTA 바 및 그라데이션 하단 확장 — 삶공부·중보기도 신청 화면(`apply.tsx`)과 동일하게 버튼 자체는 100% 완전 불투명 솔리드(`theme.colors.primary`)로 고정하고(미완료 시 opacity 반투명 애니메이션 제거), 하단 바(`styles.bottom`)를 화면 최하단에 플로팅 배치(`position: "absolute", bottom: 0, left: 0, right: 0`)하여 불투명 그라데이션(`LinearGradient`)이 기기 바닥 Safe Area까지 빈틈없이 확장되도록 통일. 본문 스크롤(`ScrollView`)은 버튼 뒤로 자연스럽게 통과(`paddingBottom: 130`).

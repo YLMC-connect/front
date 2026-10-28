@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
+    fontSize: theme.typography.formLabel.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   required: {
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     paddingHorizontal: 14,
     color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
+    fontSize: theme.fontSize.lg,
     outlineColor: "transparent",
     outlineWidth: 0,
   },

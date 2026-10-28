@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 44,
     color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
+    fontSize: theme.fontSize.lg,
     padding: 0,
     outlineColor: "transparent",
     outlineWidth: 0,

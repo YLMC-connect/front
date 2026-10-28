@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   },
   submitText: {
     color: theme.colors.white,
-    fontSize: theme.fontSize.md,
+    fontSize: theme.fontSize.base,
     fontWeight: theme.fontWeight.bold,
   },
   emptyWrap: {

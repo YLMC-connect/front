@@ -6,7 +6,7 @@ import { Screen } from "../layout/Screen";
 import { TopBar } from "../ui";
 import { theme } from "../../constants/theme";
 
-type TermKey = "tos" | "privacy" | "loc" | "mkt";
+export type TermKey = "tos" | "privacy" | "loc" | "mkt";
 
 const terms = [
   { key: "tos", label: "서비스 이용약관", required: true },
@@ -180,7 +180,7 @@ function CheckCircle({ on, big = false }: { on: boolean; big?: boolean }) {
   );
 }
 
-function TermsSheet({
+export function TermsSheet({
   termKey,
   onClose,
 }: {

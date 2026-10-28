@@ -1,7 +1,13 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router, useLocalSearchParams } from "expo-router";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   Keyboard,
@@ -11,6 +17,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   type TextInputProps,
   View,
 } from "react-native";
@@ -22,6 +29,10 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { AuthInput } from "../../src/components/auth/auth-input";
+import {
+  type TermKey,
+  TermsSheet,
+} from "../../src/components/auth/TermsAgreementScreen";
 import { Screen } from "../../src/components/layout/Screen";
 import {
   AppText,
@@ -81,11 +92,6 @@ function validateSignup(values: FormValues) {
   if (values.password.length < 8) {
     errors.password = "비밀번호는 8자 이상 입력해주세요.";
   }
-  if (!values.passwordConfirm) {
-    errors.passwordConfirm = "비밀번호를 한 번 더 입력해주세요.";
-  } else if (values.password !== values.passwordConfirm) {
-    errors.passwordConfirm = "비밀번호가 일치하지 않습니다";
-  }
   if (values.userName.trim().length < 2) {
     errors.userName = "이름을 입력해주세요.";
   }
@@ -108,6 +114,13 @@ export default function SignupScreen() {
   const isPhoneError = variant === "phone-error";
   const isPhoneDup = variant === "phone-dup";
   const isLoading = variant === "loading";
+
+  const idInputRef = useRef<TextInput>(null);
+  const passwordInputRef = useRef<TextInput>(null);
+  const nameInputRef = useRef<TextInput>(null);
+  const phoneInputRef = useRef<TextInput>(null);
+  const emailInputRef = useRef<TextInput>(null);
+
   const [values, setValues] = useState<FormValues>(
     isDefault
       ? {
@@ -121,7 +134,7 @@ export default function SignupScreen() {
       : {
           id: "admin",
           password: isPwError ? "1234" : "spring2026!",
-          passwordConfirm: isPwError ? "spring2026" : "spring2026!",
+          passwordConfirm: isPwError ? "1234" : "spring2026!",
           userName: "김은혜",
           phone: isPhoneError ? "010-2222" : "010-2345-6789",
           email: "",
@@ -136,6 +149,23 @@ export default function SignupScreen() {
   const [lastAvailabilityTarget, setLastAvailabilityTarget] = useState<
     "id" | "email" | null
   >(null);
+
+  // Terms state (default agreed for smooth onboard, user can uncheck)
+  const [termsSheetKey, setTermsSheetKey] = useState<TermKey | null>(null);
+  const [agreedTerms, setAgreedTerms] = useState<{
+    tos: boolean;
+    privacy: boolean;
+  }>({
+    tos: true,
+    privacy: true,
+  });
+
+  const allTermsAgreed = agreedTerms.tos && agreedTerms.privacy;
+  const toggleAllTerms = () => {
+    const next = !allTermsAgreed;
+    setAgreedTerms({ tos: next, privacy: next });
+  };
+
   const currentIdAvailability =
     idAvailability?.value === values.id.trim()
       ? idAvailability.available
@@ -154,7 +184,12 @@ export default function SignupScreen() {
       } else if (field === "id") {
         nextValue = sanitizeLoginId(value);
       }
-      setValues((current) => ({ ...current, [field]: nextValue }));
+      setValues((current) => ({
+        ...current,
+        [field]: nextValue,
+        // Keep password and passwordConfirm in sync automatically
+        ...(field === "password" ? { passwordConfirm: nextValue } : {}),
+      }));
       if (field === "id" || field === "email") {
         if (field === "id") setIdAvailability(null);
         if (field === "email") setEmailAvailability(null);
@@ -203,6 +238,24 @@ export default function SignupScreen() {
     );
   };
 
+  const onIdBlur = () => {
+    const trimmed = values.id.trim();
+    if (
+      trimmed.length >= 3 &&
+      isValidLoginId(trimmed) &&
+      currentIdAvailability === null
+    ) {
+      onCheckAvailability("id");
+    }
+  };
+
+  const onEmailBlur = () => {
+    const trimmed = values.email.trim();
+    if (emailPattern.test(trimmed) && currentEmailAvailability === null) {
+      onCheckAvailability("email");
+    }
+  };
+
   const onSubmit = () => {
     const nextErrors = validateSignup(values);
     if (isDefault && currentIdAvailability !== true) {
@@ -220,15 +273,16 @@ export default function SignupScreen() {
       onSuccess: () => router.replace("/"),
     });
   };
+
   const allFilled = Boolean(
     values.id &&
     values.password &&
-    values.passwordConfirm &&
     values.userName &&
     values.phone &&
     values.email,
   );
-  const isSubmitDisabled = !allFilled && isDefault;
+  const isSubmitDisabled = (!allFilled || !allTermsAgreed) && isDefault;
+
   const availabilityErrorMessage = checkAvailability.error
     ? getApiErrorMessage(
         checkAvailability.error,
@@ -253,14 +307,16 @@ export default function SignupScreen() {
   const passwordErrorMessage = isPwError
     ? "비밀번호는 8자 이상, 영문·숫자를 모두 포함해야 합니다"
     : errors.password;
-  const passwordConfirmErrorMessage = isPwError
-    ? "비밀번호가 일치하지 않습니다"
-    : errors.passwordConfirm;
   const phoneErrorMessage = isPhoneError
     ? "연락처는 010-XXXX-XXXX 형식으로 입력해주세요"
     : isPhoneDup
       ? "이미 가입된 연락처입니다"
       : errors.phone;
+
+  // Realtime password criteria
+  const hasMinLength = values.password.length >= 8;
+  const hasAlphaNumeric =
+    /[a-zA-Z]/.test(values.password) && /\d/.test(values.password);
 
   return (
     <Screen scroll={false} padded={false}>
@@ -301,241 +357,390 @@ export default function SignupScreen() {
           >
             <MotionEnter enabled={enterMotion}>
               <AppText variant="display">정보를 입력해주세요</AppText>
+              <Text style={styles.headerSubtitle}>
+                열린문 커넥트의 성도로 함께 소통해요
+              </Text>
             </MotionEnter>
 
             <MotionEnter enabled={enterMotion} style={styles.form}>
-              <Field label="아이디">
-                <MotionShake trigger={idErrorMessage}>
-                  <View style={styles.idRow}>
-                    <View style={styles.idInputWrap}>
-                      <SignupInput
-                        testID="signup-id-input"
-                        value={values.id}
-                        keyboardType="ascii-capable"
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                        onChangeText={setField("id")}
-                        placeholder="아이디"
-                        hasError={Boolean(idErrorMessage)}
-                      />
-                    </View>
-                    <MotionPressable
-                      testID="signup-check-id"
-                      accessibilityRole="button"
-                      onPress={() => onCheckAvailability("id")}
-                      disabled={
-                        checkAvailability.isPending ||
-                        currentIdAvailability === true
-                      }
-                      style={[
-                        styles.checkButton,
-                        currentIdAvailability === true
-                          ? styles.checkButtonVerified
-                          : null,
-                      ]}
-                    >
-                      {checkAvailability.isPending &&
-                      lastAvailabilityTarget === "id" ? (
-                        <ActivityIndicator
-                          size="small"
-                          color={theme.colors.primaryDeep}
+              {/* 섹션 1: 계정 정보 */}
+              <View style={styles.sectionCard}>
+                <View style={styles.sectionHeader}>
+                  <View style={styles.sectionBadge}>
+                    <Text style={styles.sectionBadgeText}>1</Text>
+                  </View>
+                  <Text style={styles.sectionTitle}>계정 정보</Text>
+                </View>
+
+                <Field label="아이디">
+                  <MotionShake trigger={idErrorMessage}>
+                    <View style={styles.idRow}>
+                      <View style={styles.idInputWrap}>
+                        <SignupInput
+                          ref={idInputRef}
+                          testID="signup-id-input"
+                          value={values.id}
+                          keyboardType="ascii-capable"
+                          autoCapitalize="none"
+                          autoCorrect={false}
+                          autoComplete="username"
+                          textContentType="username"
+                          returnKeyType="next"
+                          onSubmitEditing={() =>
+                            passwordInputRef.current?.focus()
+                          }
+                          onBlur={onIdBlur}
+                          onChangeText={setField("id")}
+                          placeholder="아이디"
+                          hasError={Boolean(idErrorMessage)}
                         />
-                      ) : currentIdAvailability === true ? (
-                        <View style={styles.checkButtonVerifiedContent}>
-                          <AppIcon
-                            name="check"
-                            size={14}
+                      </View>
+                      <MotionPressable
+                        testID="signup-check-id"
+                        accessibilityRole="button"
+                        onPress={() => onCheckAvailability("id")}
+                        disabled={
+                          checkAvailability.isPending ||
+                          currentIdAvailability === true
+                        }
+                        style={[
+                          styles.checkButton,
+                          currentIdAvailability === true
+                            ? styles.checkButtonVerified
+                            : null,
+                        ]}
+                      >
+                        {checkAvailability.isPending &&
+                        lastAvailabilityTarget === "id" ? (
+                          <ActivityIndicator
+                            size="small"
                             color={theme.colors.primaryDeep}
                           />
-                          <Text style={styles.checkButtonTextVerified}>
-                            확인 완료
-                          </Text>
-                        </View>
-                      ) : (
-                        <Text style={styles.checkButtonText}>중복 확인</Text>
-                      )}
-                    </MotionPressable>
-                  </View>
-                </MotionShake>
-                <InlineError>{idErrorMessage}</InlineError>
-                {currentIdAvailability === true ? (
-                  <MotionPop>
-                    <View style={styles.successRow}>
-                      <AppIcon
-                        name="check-circle"
-                        size={14}
-                        color={theme.colors.success}
-                      />
-                      <AppText
-                        variant="caption"
-                        tone="success"
-                        style={styles.successHint}
-                      >
-                        사용 가능한 아이디입니다
-                      </AppText>
+                        ) : currentIdAvailability === true ? (
+                          <View style={styles.checkButtonVerifiedContent}>
+                            <AppIcon
+                              name="check"
+                              size={14}
+                              color={theme.colors.primaryDeep}
+                            />
+                            <Text style={styles.checkButtonTextVerified}>
+                              확인 완료
+                            </Text>
+                          </View>
+                        ) : (
+                          <Text style={styles.checkButtonText}>중복 확인</Text>
+                        )}
+                      </MotionPressable>
                     </View>
-                  </MotionPop>
-                ) : null}
-              </Field>
+                  </MotionShake>
+                  <InlineError>{idErrorMessage}</InlineError>
+                  {currentIdAvailability === true ? (
+                    <MotionPop>
+                      <View style={styles.successRow}>
+                        <AppIcon
+                          name="check-circle"
+                          size={14}
+                          color={theme.colors.success}
+                        />
+                        <AppText
+                          variant="caption"
+                          tone="success"
+                          style={styles.successHint}
+                        >
+                          사용 가능한 아이디입니다
+                        </AppText>
+                      </View>
+                    </MotionPop>
+                  ) : null}
+                </Field>
 
-              <Field label="비밀번호">
-                <View style={styles.passwordStack}>
-                  <View>
-                    <MotionShake
-                      trigger={
-                        passwordErrorMessage ??
-                        (isPwError ? "pw-error" : undefined)
-                      }
-                    >
-                      <SignupInput
-                        testID="signup-password-input"
-                        value={values.password}
-                        onChangeText={setField("password")}
-                        placeholder="비밀번호 (8자 이상, 영문·숫자 조합)"
-                        secureTextEntry
-                        hasError={isPwError || Boolean(errors.password)}
+                <Field label="비밀번호">
+                  <MotionShake
+                    trigger={
+                      passwordErrorMessage ??
+                      (isPwError ? "pw-error" : undefined)
+                    }
+                  >
+                    <SignupInput
+                      ref={passwordInputRef}
+                      testID="signup-password-input"
+                      value={values.password}
+                      onChangeText={setField("password")}
+                      placeholder="비밀번호 입력"
+                      secureTextEntry
+                      autoComplete="new-password"
+                      textContentType="newPassword"
+                      returnKeyType="next"
+                      onSubmitEditing={() => nameInputRef.current?.focus()}
+                      hasError={isPwError || Boolean(errors.password)}
+                    />
+                  </MotionShake>
+
+                  {/* Realtime password criteria feedback */}
+                  <View style={styles.passwordRulesRow}>
+                    <View style={styles.ruleItem}>
+                      <AppIcon
+                        name={hasMinLength ? "check" : "circle"}
+                        size={12}
+                        color={
+                          hasMinLength
+                            ? theme.colors.primaryDeep
+                            : theme.colors.inkMute
+                        }
                       />
-                    </MotionShake>
-                    {isPwError || errors.password ? (
-                      <InlineError>{passwordErrorMessage}</InlineError>
-                    ) : null}
+                      <Text
+                        style={[
+                          styles.ruleText,
+                          hasMinLength ? styles.ruleTextPass : null,
+                        ]}
+                      >
+                        8자 이상
+                      </Text>
+                    </View>
+                    <View style={styles.ruleItem}>
+                      <AppIcon
+                        name={hasAlphaNumeric ? "check" : "circle"}
+                        size={12}
+                        color={
+                          hasAlphaNumeric
+                            ? theme.colors.primaryDeep
+                            : theme.colors.inkMute
+                        }
+                      />
+                      <Text
+                        style={[
+                          styles.ruleText,
+                          hasAlphaNumeric ? styles.ruleTextPass : null,
+                        ]}
+                      >
+                        영문·숫자 조합
+                      </Text>
+                    </View>
                   </View>
 
-                  <View>
-                    <MotionShake
-                      trigger={
-                        passwordConfirmErrorMessage ??
-                        (isPwError ? "pw-confirm-error" : undefined)
+                  {isPwError || errors.password ? (
+                    <InlineError>{passwordErrorMessage}</InlineError>
+                  ) : null}
+                </Field>
+              </View>
+
+              {/* 섹션 2: 성도 정보 */}
+              <View style={styles.sectionCard}>
+                <View style={styles.sectionHeader}>
+                  <View style={styles.sectionBadge}>
+                    <Text style={styles.sectionBadgeText}>2</Text>
+                  </View>
+                  <Text style={styles.sectionTitle}>성도 정보</Text>
+                </View>
+
+                <Field label="이름">
+                  <MotionShake trigger={errors.userName}>
+                    <SignupInput
+                      ref={nameInputRef}
+                      testID="signup-name-input"
+                      value={values.userName}
+                      onChangeText={setField("userName")}
+                      placeholder="실명을 입력해주세요"
+                      autoComplete="name"
+                      textContentType="name"
+                      returnKeyType="next"
+                      onSubmitEditing={() => phoneInputRef.current?.focus()}
+                      hasError={Boolean(errors.userName)}
+                    />
+                  </MotionShake>
+                  <InlineError>{errors.userName}</InlineError>
+                  {!errors.userName ? (
+                    <FieldHint>2~10자, 특수문자는 사용할 수 없어요</FieldHint>
+                  ) : null}
+                </Field>
+
+                <Field label="연락처">
+                  <MotionShake
+                    trigger={
+                      phoneErrorMessage ??
+                      (isPhoneError || isPhoneDup ? "phone-error" : undefined)
+                    }
+                  >
+                    <SignupInput
+                      ref={phoneInputRef}
+                      testID="signup-phone-input"
+                      value={values.phone}
+                      onChangeText={setField("phone")}
+                      placeholder="010-XXXX-XXXX"
+                      keyboardType="phone-pad"
+                      autoComplete="tel"
+                      textContentType="telephoneNumber"
+                      returnKeyType="next"
+                      onSubmitEditing={() => emailInputRef.current?.focus()}
+                      hasError={
+                        isPhoneError || isPhoneDup || Boolean(errors.phone)
                       }
+                    />
+                  </MotionShake>
+                  <InlineError>{phoneErrorMessage}</InlineError>
+                </Field>
+
+                <Field label="이메일">
+                  <MotionShake trigger={emailErrorMessage}>
+                    <View style={styles.idRow}>
+                      <View style={styles.idInputWrap}>
+                        <SignupInput
+                          ref={emailInputRef}
+                          testID="signup-email-input"
+                          value={values.email}
+                          onChangeText={setField("email")}
+                          placeholder="이메일 주소"
+                          keyboardType="email-address"
+                          autoComplete="email"
+                          textContentType="emailAddress"
+                          autoCapitalize="none"
+                          returnKeyType="done"
+                          onBlur={onEmailBlur}
+                          onSubmitEditing={() => {
+                            if (!isSubmitDisabled) onSubmit();
+                          }}
+                          hasError={Boolean(emailErrorMessage)}
+                        />
+                      </View>
+                      <MotionPressable
+                        testID="signup-check-email"
+                        accessibilityRole="button"
+                        onPress={() => onCheckAvailability("email")}
+                        disabled={
+                          checkAvailability.isPending ||
+                          currentEmailAvailability === true
+                        }
+                        style={[
+                          styles.checkButton,
+                          currentEmailAvailability === true
+                            ? styles.checkButtonVerified
+                            : null,
+                        ]}
+                      >
+                        {checkAvailability.isPending &&
+                        lastAvailabilityTarget === "email" ? (
+                          <ActivityIndicator
+                            size="small"
+                            color={theme.colors.primaryDeep}
+                          />
+                        ) : currentEmailAvailability === true ? (
+                          <View style={styles.checkButtonVerifiedContent}>
+                            <AppIcon
+                              name="check"
+                              size={14}
+                              color={theme.colors.primaryDeep}
+                            />
+                            <Text style={styles.checkButtonTextVerified}>
+                              확인 완료
+                            </Text>
+                          </View>
+                        ) : (
+                          <Text style={styles.checkButtonText}>중복 확인</Text>
+                        )}
+                      </MotionPressable>
+                    </View>
+                  </MotionShake>
+                  <InlineError>{emailErrorMessage}</InlineError>
+                  {currentEmailAvailability === true ? (
+                    <MotionPop>
+                      <View style={styles.successRow}>
+                        <AppIcon
+                          name="check-circle"
+                          size={14}
+                          color={theme.colors.success}
+                        />
+                        <AppText
+                          variant="caption"
+                          tone="success"
+                          style={styles.successHint}
+                        >
+                          사용 가능한 이메일입니다
+                        </AppText>
+                      </View>
+                    </MotionPop>
+                  ) : null}
+                </Field>
+              </View>
+
+              {/* 섹션 3: 약관 동의 */}
+              <View style={styles.termsCard}>
+                <Pressable
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: allTermsAgreed }}
+                  onPress={toggleAllTerms}
+                  style={[
+                    styles.termsAllRow,
+                    allTermsAgreed ? styles.termsAllRowOn : null,
+                  ]}
+                >
+                  <CheckBadge on={allTermsAgreed} big />
+                  <Text style={styles.termsAllText}>약관 전체 동의하기</Text>
+                </Pressable>
+
+                <View style={styles.termsList}>
+                  <View style={styles.termsRow}>
+                    <Pressable
+                      accessibilityRole="checkbox"
+                      accessibilityState={{ checked: agreedTerms.tos }}
+                      onPress={() =>
+                        setAgreedTerms((prev) => ({
+                          ...prev,
+                          tos: !prev.tos,
+                        }))
+                      }
+                      style={styles.termsCheckWrap}
                     >
-                      <SignupInput
-                        testID="signup-password-confirm-input"
-                        value={values.passwordConfirm}
-                        onChangeText={setField("passwordConfirm")}
-                        placeholder="비밀번호 확인"
-                        secureTextEntry
-                        hasError={isPwError || Boolean(errors.passwordConfirm)}
+                      <CheckBadge on={agreedTerms.tos} />
+                      <Text style={styles.termsItemText}>
+                        <Text style={styles.termsRequired}>[필수]</Text> 서비스
+                        이용약관
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => setTermsSheetKey("tos")}
+                      style={styles.termsDetailButton}
+                    >
+                      <Text style={styles.termsDetailText}>보기</Text>
+                      <AppIcon
+                        name="chevron-right"
+                        size={14}
+                        color={theme.colors.inkMute}
                       />
-                    </MotionShake>
-                    <InlineError>{passwordConfirmErrorMessage}</InlineError>
+                    </Pressable>
+                  </View>
+
+                  <View style={styles.termsRow}>
+                    <Pressable
+                      accessibilityRole="checkbox"
+                      accessibilityState={{ checked: agreedTerms.privacy }}
+                      onPress={() =>
+                        setAgreedTerms((prev) => ({
+                          ...prev,
+                          privacy: !prev.privacy,
+                        }))
+                      }
+                      style={styles.termsCheckWrap}
+                    >
+                      <CheckBadge on={agreedTerms.privacy} />
+                      <Text style={styles.termsItemText}>
+                        <Text style={styles.termsRequired}>[필수]</Text> 개인정보
+                        처리방침
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => setTermsSheetKey("privacy")}
+                      style={styles.termsDetailButton}
+                    >
+                      <Text style={styles.termsDetailText}>보기</Text>
+                      <AppIcon
+                        name="chevron-right"
+                        size={14}
+                        color={theme.colors.inkMute}
+                      />
+                    </Pressable>
                   </View>
                 </View>
-                {!isPwError && !errors.password && !errors.passwordConfirm ? (
-                  <FieldHint>8자 이상, 영문·숫자 조합</FieldHint>
-                ) : null}
-              </Field>
-
-              <View style={styles.sectionDivider} />
-
-              <Field label="이름">
-                <MotionShake trigger={errors.userName}>
-                  <SignupInput
-                    testID="signup-name-input"
-                    value={values.userName}
-                    onChangeText={setField("userName")}
-                    placeholder="실명을 입력해주세요"
-                    hasError={Boolean(errors.userName)}
-                  />
-                </MotionShake>
-                <InlineError>{errors.userName}</InlineError>
-                {!errors.userName ? (
-                  <FieldHint>2~10자, 특수문자는 사용할 수 없어요</FieldHint>
-                ) : null}
-              </Field>
-
-              <Field label="연락처">
-                <MotionShake
-                  trigger={
-                    phoneErrorMessage ??
-                    (isPhoneError || isPhoneDup ? "phone-error" : undefined)
-                  }
-                >
-                  <SignupInput
-                    testID="signup-phone-input"
-                    value={values.phone}
-                    onChangeText={setField("phone")}
-                    placeholder="010-XXXX-XXXX"
-                    keyboardType="phone-pad"
-                    hasError={
-                      isPhoneError || isPhoneDup || Boolean(errors.phone)
-                    }
-                  />
-                </MotionShake>
-                <InlineError>{phoneErrorMessage}</InlineError>
-              </Field>
-
-              <Field label="이메일">
-                <MotionShake trigger={emailErrorMessage}>
-                  <View style={styles.idRow}>
-                    <View style={styles.idInputWrap}>
-                      <SignupInput
-                        testID="signup-email-input"
-                        value={values.email}
-                        onChangeText={setField("email")}
-                        placeholder="이메일"
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        hasError={Boolean(emailErrorMessage)}
-                      />
-                    </View>
-                    <MotionPressable
-                      testID="signup-check-email"
-                      accessibilityRole="button"
-                      onPress={() => onCheckAvailability("email")}
-                      disabled={
-                        checkAvailability.isPending ||
-                        currentEmailAvailability === true
-                      }
-                      style={[
-                        styles.checkButton,
-                        currentEmailAvailability === true
-                          ? styles.checkButtonVerified
-                          : null,
-                      ]}
-                    >
-                      {checkAvailability.isPending &&
-                      lastAvailabilityTarget === "email" ? (
-                        <ActivityIndicator
-                          size="small"
-                          color={theme.colors.primaryDeep}
-                        />
-                      ) : currentEmailAvailability === true ? (
-                        <View style={styles.checkButtonVerifiedContent}>
-                          <AppIcon
-                            name="check"
-                            size={14}
-                            color={theme.colors.primaryDeep}
-                          />
-                          <Text style={styles.checkButtonTextVerified}>
-                            확인 완료
-                          </Text>
-                        </View>
-                      ) : (
-                        <Text style={styles.checkButtonText}>중복 확인</Text>
-                      )}
-                    </MotionPressable>
-                  </View>
-                </MotionShake>
-                <InlineError>{emailErrorMessage}</InlineError>
-                {currentEmailAvailability === true ? (
-                  <MotionPop>
-                    <View style={styles.successRow}>
-                      <AppIcon
-                        name="check-circle"
-                        size={14}
-                        color={theme.colors.success}
-                      />
-                      <AppText
-                        variant="caption"
-                        tone="success"
-                        style={styles.successHint}
-                      >
-                        사용 가능한 이메일입니다
-                      </AppText>
-                    </View>
-                  </MotionPop>
-                ) : null}
-              </Field>
+              </View>
             </MotionEnter>
 
             {signup.error ? (
@@ -561,8 +766,30 @@ export default function SignupScreen() {
             />
           </View>
         </MotionEnter>
+
+        <TermsSheet
+          termKey={termsSheetKey}
+          onClose={() => setTermsSheetKey(null)}
+        />
       </KeyboardAvoidingView>
     </Screen>
+  );
+}
+
+function CheckBadge({ on, big = false }: { on: boolean; big?: boolean }) {
+  const size = big ? 22 : 18;
+  return (
+    <View
+      style={[
+        styles.checkBadge,
+        { width: size, height: size, borderRadius: size / 2 },
+        on ? styles.checkBadgeOn : null,
+      ]}
+    >
+      {on ? (
+        <AppIcon name="check" size={size * 0.65} color={theme.colors.white} />
+      ) : null}
+    </View>
   );
 }
 
@@ -640,30 +867,47 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function SignupInput({
-  testID,
-  value,
-  onChangeText,
-  placeholder,
-  hasError,
-  secureTextEntry,
-  keyboardType = "default",
-  autoCapitalize,
-  autoCorrect,
-}: {
-  testID?: string;
-  value?: string;
-  onChangeText: (value: string) => void;
-  placeholder: string;
-  hasError?: boolean;
-  secureTextEntry?: boolean;
-  keyboardType?: TextInputProps["keyboardType"];
-  autoCapitalize?: "none" | "sentences" | "words" | "characters";
-  autoCorrect?: boolean;
-}) {
+const SignupInput = forwardRef<
+  TextInput,
+  {
+    testID?: string;
+    value?: string;
+    onChangeText: (value: string) => void;
+    placeholder: string;
+    hasError?: boolean;
+    secureTextEntry?: boolean;
+    keyboardType?: TextInputProps["keyboardType"];
+    autoCapitalize?: "none" | "sentences" | "words" | "characters";
+    autoCorrect?: boolean;
+    autoComplete?: TextInputProps["autoComplete"];
+    textContentType?: TextInputProps["textContentType"];
+    returnKeyType?: TextInputProps["returnKeyType"];
+    onSubmitEditing?: TextInputProps["onSubmitEditing"];
+    onBlur?: TextInputProps["onBlur"];
+  }
+>(function SignupInput(
+  {
+    testID,
+    value,
+    onChangeText,
+    placeholder,
+    hasError,
+    secureTextEntry,
+    keyboardType = "default",
+    autoCapitalize,
+    autoCorrect,
+    autoComplete,
+    textContentType,
+    returnKeyType,
+    onSubmitEditing,
+    onBlur,
+  },
+  ref,
+) {
   const [passwordVisible, setPasswordVisible] = useState(false);
   return (
     <AuthInput
+      ref={ref}
       testID={testID}
       value={value}
       onChangeText={onChangeText}
@@ -672,6 +916,11 @@ function SignupInput({
       keyboardType={keyboardType}
       autoCapitalize={autoCapitalize}
       autoCorrect={autoCorrect}
+      autoComplete={autoComplete}
+      textContentType={textContentType}
+      returnKeyType={returnKeyType}
+      onSubmitEditing={onSubmitEditing}
+      onBlur={onBlur}
       hasError={hasError}
       trailing={
         secureTextEntry ? (
@@ -694,7 +943,7 @@ function SignupInput({
       }
     />
   );
-}
+});
 
 function InlineError({ children }: { children?: ReactNode }) {
   if (!children) {
@@ -727,6 +976,11 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing[5],
     paddingBottom: theme.spacing[4],
   },
+  headerSubtitle: {
+    marginTop: 6,
+    color: theme.colors.inkMute,
+    fontSize: theme.fontSize.sm,
+  },
   bottomFlat: {
     paddingHorizontal: theme.layout.screenX,
     paddingTop: theme.spacing[3],
@@ -734,15 +988,39 @@ const styles = StyleSheet.create({
   },
   form: {
     marginTop: theme.spacing[5],
-    gap: theme.spacing[5],
+    gap: theme.spacing[4],
   },
-  passwordStack: {
-    gap: theme.spacing[2],
+  sectionCard: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    padding: 16,
+    gap: theme.spacing[4],
   },
-  sectionDivider: {
-    height: 1,
-    backgroundColor: theme.colors.line,
-    marginVertical: theme.spacing[1],
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingBottom: 2,
+  },
+  sectionBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: theme.colors.primaryTint,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sectionBadgeText: {
+    color: theme.colors.primaryDeep,
+    fontSize: 12,
+    fontWeight: theme.fontWeight.extrabold,
+  },
+  sectionTitle: {
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.base,
+    fontWeight: theme.fontWeight.bold,
   },
   label: {
     marginBottom: theme.spacing[2],
@@ -791,6 +1069,26 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.sm + 1,
     fontWeight: theme.fontWeight.semibold,
   },
+  passwordRulesRow: {
+    flexDirection: "row",
+    gap: 14,
+    marginTop: 8,
+    paddingHorizontal: 2,
+  },
+  ruleItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  ruleText: {
+    color: theme.colors.inkMute,
+    fontSize: theme.fontSize.xs,
+    fontWeight: theme.fontWeight.medium,
+  },
+  ruleTextPass: {
+    color: theme.colors.primaryDeep,
+    fontWeight: theme.fontWeight.bold,
+  },
   errorRow: {
     marginTop: 6,
     flexDirection: "row",
@@ -815,6 +1113,79 @@ const styles = StyleSheet.create({
   },
   hint: {
     marginTop: 6,
+  },
+  termsCard: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    padding: 14,
+    gap: 10,
+  },
+  termsAllRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+    borderRadius: theme.radius.md,
+  },
+  termsAllRowOn: {
+    backgroundColor: theme.colors.primaryTint,
+  },
+  termsAllText: {
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.base,
+    fontWeight: theme.fontWeight.bold,
+  },
+  termsList: {
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.line,
+    paddingTop: 8,
+    gap: 8,
+  },
+  termsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 4,
+    minHeight: 32,
+  },
+  termsCheckWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    flex: 1,
+  },
+  termsItemText: {
+    color: theme.colors.inkSoft,
+    fontSize: theme.fontSize.sm,
+  },
+  termsRequired: {
+    color: theme.colors.primaryDeep,
+    fontWeight: theme.fontWeight.bold,
+  },
+  termsDetailButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+  },
+  termsDetailText: {
+    color: theme.colors.inkMute,
+    fontSize: theme.fontSize.xs,
+  },
+  checkBadge: {
+    borderWidth: 1.5,
+    borderColor: theme.colors.lineStrong,
+    backgroundColor: theme.colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkBadgeOn: {
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primary,
   },
   submitButton: {
     height: 52,

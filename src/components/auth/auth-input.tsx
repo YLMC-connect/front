@@ -1,58 +1,64 @@
-import { useState, type ReactNode } from "react";
+import { forwardRef, useState, type ReactNode } from "react";
 import { StyleSheet, TextInput, type TextInputProps, View } from "react-native";
 import { theme } from "../../constants/theme";
 
-type AuthInputProps = Omit<TextInputProps, "style"> & {
+export type AuthInputProps = Omit<TextInputProps, "style"> & {
   hasError?: boolean;
   trailing?: ReactNode;
 };
 
-export function AuthInput({
-  hasError = false,
-  onBlur,
-  onFocus,
-  testID,
-  trailing,
-  ...inputProps
-}: AuthInputProps) {
-  const [focused, setFocused] = useState(false);
+export const AuthInput = forwardRef<TextInput, AuthInputProps>(
+  function AuthInput(
+    {
+      hasError = false,
+      onBlur,
+      onFocus,
+      testID,
+      trailing,
+      ...inputProps
+    }: AuthInputProps,
+    ref,
+  ) {
+    const [focused, setFocused] = useState(false);
 
-  return (
-    <View
-      testID={testID ? `${testID}-container` : undefined}
-      style={[
-        styles.surface,
-        hasError ? styles.surfaceError : null,
-        trailing ? styles.surfaceWithTrailing : null,
-      ]}
-    >
-      <TextInput
-        {...inputProps}
-        testID={testID}
-        onBlur={(event) => {
-          setFocused(false);
-          onBlur?.(event);
-        }}
-        onFocus={(event) => {
-          setFocused(true);
-          onFocus?.(event);
-        }}
-        placeholderTextColor={
-          inputProps.placeholderTextColor ?? theme.colors.inkMute
-        }
-        style={styles.input}
-      />
-      {trailing}
-      {focused ? (
-        <View
-          pointerEvents="none"
-          testID={testID ? `${testID}-focus-ring` : undefined}
-          style={[styles.focusRing, hasError ? styles.focusRingError : null]}
+    return (
+      <View
+        testID={testID ? `${testID}-container` : undefined}
+        style={[
+          styles.surface,
+          hasError ? styles.surfaceError : null,
+          trailing ? styles.surfaceWithTrailing : null,
+        ]}
+      >
+        <TextInput
+          {...inputProps}
+          ref={ref}
+          testID={testID}
+          onBlur={(event) => {
+            setFocused(false);
+            onBlur?.(event);
+          }}
+          onFocus={(event) => {
+            setFocused(true);
+            onFocus?.(event);
+          }}
+          placeholderTextColor={
+            inputProps.placeholderTextColor ?? theme.colors.inkMute
+          }
+          style={styles.input}
         />
-      ) : null}
-    </View>
-  );
-}
+        {trailing}
+        {focused ? (
+          <View
+            pointerEvents="none"
+            testID={testID ? `${testID}-focus-ring` : undefined}
+            style={[styles.focusRing, hasError ? styles.focusRingError : null]}
+          />
+        ) : null}
+      </View>
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   surface: {

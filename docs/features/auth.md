@@ -1,6 +1,6 @@
 # auth (인증)
 
-> 마지막 갱신: 2026-10-27 (로그인·회원가입 진입 모션 단일 페이드화 및 폼 UI 정돈) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-10-28 (회원가입 비밀번호 단일화·약관 동의 통합·키보드 포커스 체인 적용) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 회원가입 폼 UX 개선 및 단일 비밀번호 적용 — 비밀번호 확인 입력을 제거하고 단일 비밀번호 입력(8자 이상, 영문·숫자 조합 실시간 가이드)으로 간소화하되 전송 시 passwordConfirm을 자동 동기화. 아이디·이메일 필드 blur 시 자동 중복확인 트리거 및 '다음(next)' 키보드 포커스 체인과 모바일 자동완성 속성(username, new-password, name, tel, email)을 적용하고, 폼 하단에 약관 전체 동의 및 필수 약관(이용약관, 개인정보) 전문 보기 바텀시트를 통합
 - 인증 HTTP adapter 활성화 — login/refresh 성공 envelope의 `data`에서 토큰 payload를 읽고, signup 후 login 합성, `/api/member/me`, `/api/member/duplicate`를 `httpAuthAdapter`로 연결. 회원가입은 아이디와 이메일을 필수 입력으로 받고 각각 중복확인을 통과해야 한다. 값이 바뀌면 기존 확인 결과를 폐기한다. development 기본값은 HTTP, 테스트/Maestro는 `EXPO_PUBLIC_AUTH_ADAPTER=mock`. API origin은 `EXPO_PUBLIC_API_URL`. 회원가입 중복확인 실패는 해당 필드에 표시. 로그인 성공 schema는 `ApiResponseLoginResponse`이고, 그 밖 Swagger 성공 schema가 비어 있는 항목 때문에 `test:api:contract` 실패는 남아 있다
 - 조용한 톤 인증 여백·위계 — 로그인 상단 로고 아이콘과 회원가입 상단 점선 아바타 미리보기를 제거해 타이포그래피·폼 중심으로 정리하고(소프트 배지 `열린문교회 커뮤니티` + 2줄 환영 헤드라인 `열린문 커넥트에 오신 것을 환영합니다` 좌측 정렬), 로그인·회원가입 메인 CTA 곡률은 앱 공통 톤에 맞춰 `radius.pill`을 유지하며, 로그인 하단 회원가입 이동은 하단 서피스 카드로 배치하고 회원가입 비밀번호·비밀번호 확인을 단일 섹션으로 묶어 계정/성도 정보를 구분하며 중복확인 통과 시 버튼을 `확인 완료` 상태로 전환; glass 하단 바 실험은 단순 `bottomFlat`으로 유지
 - 로그인·회원가입 절제 모션 (C-set) — 진입은 이동(`translateY`)·시간차(`stagger`) 없는 단일 페이드(`opacity`), 필드 검증 shake·인라인 에러 fade, 중복확인 성공 체크 pop, CTA `MotionPressable`, 가입 버튼 enable soft 활성, auth Stack slide/fade. `designVariant !== default`·`useReducedMotion`에서 진입 애니는 static
@@ -87,6 +88,8 @@
 `LoginInput`, `SignupInput`, `MemberDuplicateInput`, `MemberAvailability`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`와 `UserRole`을 사용하며, 역할은 `ADMIN`, `USER`, `MANAGER_COMMUNION`, `MANAGER_SHARE`, `MANAGER_LIFESTUDY`, `MANAGER_PRAYER` 중 하나입니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리합니다. 중복확인 요청은 Swagger의 `searchType: id | phone | email`, `searchValue` 계약을 따르며 화면에는 `available` 도메인 결과만 노출합니다. 실제 HTTP mapper는 공통 envelope의 `data`만 사용합니다. 중복확인은 `available`, login/refresh는 `accessToken`, `refreshToken`, `userId`, `userName`, `role`, `/api/member/me`는 회원 필드입니다. 로그인 성공 schema는 `ApiResponseLoginResponse`입니다. 그 밖 Swagger 성공 schema가 비어 있는 항목은 `test:api:contract`가 계속 실패합니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-10-28) **회원가입 비밀번호 확인 입력 제거 및 약관 동의 폼 통합** — 중복 비밀번호 확인 입력을 제거하여 단일 비밀번호 필드로 간소화하고, 유효성 검증과 서버 전송 시 passwordConfirm을 password 값과 자동 동기화한다. 입력 편의를 위해 키보드 '다음(next)' 포커스 체인과 onBlur 시 자동 중복확인을 지원하며, 가입 폼 하단에 서비스 이용약관 및 개인정보 처리방침 동의(전문 보기 TermsSheet 지원)를 통합하여 필수 동의 시에만 가입 버튼이 활성화되도록 한다.
 
 - (2026-10-27) **로그인·회원가입 아이디 영문 소문자·숫자 제한(`^[a-z0-9]+$`) 및 영문 키보드 호출 적용** — 아이디 입력 필드는 기본 영문 키보드(`ascii-capable`)를 호출하고 대문자는 자동으로 소문자로 변환(`sanitizeLoginId`)한다. 타이핑 중 한글 입력을 실시간으로 강제 제거하지 않고 노출하되, 유효하지 않은 문자나 3자 미만 입력 시 인라인 안내 문구("영문 소문자와 숫자만 입력할 수 있어요.")로 유효성 검증(`isValidLoginId`)한다. Issue #193.
 - (2026-10-27) **인증 화면 진입 모션은 이동·시간차 없는 단일 페이드로 두고 폼 밀도를 정돈한다** — `MotionEnter` 기본 모드를 `fade`(`opacity`만 `duration.base 200ms`)로 두고 로그인·회원가입의 블록별 `stagger` 지연과 `translateY` 상승·로고 `settle` 스케일을 제거한다. 로그인 제목 위의 도어 로고 아이콘을 제거하고 상단 소프트 배지(`열린문교회 커뮤니티`)와 2줄 환영 헤드라인(`열린문 커넥트에 오신 것을 환영합니다`)을 좌측 정렬 `display`(28px)로 두며, 상단(헤드라인·입력 폼·로그인 버튼)과 하단(`열린문 커넥트가 처음이신가요? 회원가입하기` 서피스 카드)을 `space-between`으로 배치한다. 회원가입 상단 88px 점선 아바타 미리보기는 제거해 입력 흐름에 집중시킨다. 공통 `AuthInput`은 흰색 `surface` 배경과 `lineStrong` 테두리를 쓰고, 메인 CTA 곡률은 앱 공통 톤인 `radius.pill`을 유지한다. 회원가입은 비밀번호·비밀번호 확인을 하나의 그룹으로 묶은 뒤 계정 정보와 성도 정보 사이에 구분선을 두며, 중복확인 통과 시 버튼을 `확인 완료` 상태로 전환한다. Issue #190.

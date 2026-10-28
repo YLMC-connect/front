@@ -272,7 +272,7 @@ describe("auth smoke screens", () => {
     renderWithClient(<SignupScreenRoute />);
     const visibilityButtons = screen.getAllByLabelText("비밀번호 보기");
 
-    expect(visibilityButtons).toHaveLength(2);
+    expect(visibilityButtons).toHaveLength(1);
     expect(
       screen.getByTestId("signup-password-input").props.secureTextEntry,
     ).toBe(true);
@@ -308,10 +308,6 @@ describe("auth smoke screens", () => {
       screen.getByTestId("signup-password-input"),
       "password1",
     );
-    fireEvent.changeText(
-      screen.getByTestId("signup-password-confirm-input"),
-      "password1",
-    );
     fireEvent.changeText(screen.getByTestId("signup-name-input"), "새성도");
     fireEvent.changeText(
       screen.getByTestId("signup-phone-input"),
@@ -340,10 +336,6 @@ describe("auth smoke screens", () => {
     await screen.findByText("사용 가능한 아이디입니다");
     fireEvent.changeText(
       screen.getByTestId("signup-password-input"),
-      "password1",
-    );
-    fireEvent.changeText(
-      screen.getByTestId("signup-password-confirm-input"),
       "password1",
     );
     fireEvent.changeText(screen.getByTestId("signup-name-input"), "새성도");
@@ -383,10 +375,6 @@ describe("auth smoke screens", () => {
     await screen.findByText("사용 가능한 아이디입니다");
     fireEvent.changeText(
       screen.getByTestId("signup-password-input"),
-      "password1",
-    );
-    fireEvent.changeText(
-      screen.getByTestId("signup-password-confirm-input"),
       "password1",
     );
     fireEvent.changeText(screen.getByTestId("signup-name-input"), "새성도");
@@ -455,5 +443,31 @@ describe("auth smoke screens", () => {
 
     fireEvent.changeText(idInput, "NewUser99!홍길동");
     expect(idInput.props.value).toBe("newuser99!홍길동");
+  });
+
+  it("renders single password input with criteria, terms agreement and sheet, and blur check", async () => {
+    renderWithClient(<SignupScreenRoute />);
+
+    // Single password input check
+    expect(screen.getByTestId("signup-password-input")).toBeTruthy();
+    expect(screen.queryByTestId("signup-password-confirm-input")).toBeNull();
+    expect(screen.getByText("8자 이상")).toBeTruthy();
+    expect(screen.getByText("영문·숫자 조합")).toBeTruthy();
+
+    // Auto blur availability check on ID
+    fireEvent.changeText(screen.getByTestId("signup-id-input"), "newmember");
+    fireEvent(screen.getByTestId("signup-id-input"), "blur");
+    await screen.findByText("사용 가능한 아이디입니다");
+
+    // Terms agreement checkboxes and sheet viewer
+    expect(screen.getByText("약관 전체 동의하기")).toBeTruthy();
+    const viewButtons = screen.getAllByText("보기");
+    expect(viewButtons.length).toBeGreaterThanOrEqual(2);
+
+    // Open terms sheet
+    fireEvent.press(viewButtons[0]);
+    expect(await screen.findByText("시행일자: 2026년 1월 1일")).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("닫기"));
+    expect(screen.queryByText("시행일자: 2026년 1월 1일")).toBeNull();
   });
 });

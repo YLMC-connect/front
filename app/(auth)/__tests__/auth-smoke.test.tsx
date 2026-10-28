@@ -545,20 +545,16 @@ describe("auth smoke screens", () => {
       "hong@example.com",
     );
 
-    // Section 3 (terms) is now revealed
+    // Section 3 (terms) is now revealed at top, while Section 2 and Section 1 remain fully expanded below
     expect(screen.getByTestId("signup-terms-all")).toBeTruthy();
-    expect(screen.getByTestId("signup-edit-card-1")).toBeTruthy();
-
-    // Advancing to Section 3 collapses Section 2 into summary
-    fireEvent(screen.getByTestId("signup-email-input"), "submitEditing");
-    expect(screen.getByTestId("signup-edit-card-2")).toBeTruthy();
-
-    // Tapping edit on Section 1 re-activates Section 1
-    fireEvent.press(screen.getByTestId("signup-edit-card-1"));
+    expect(screen.getByTestId("signup-name-input")).toBeTruthy();
     expect(screen.getByTestId("signup-id-input")).toBeTruthy();
 
-    // Tapping edit on Section 2 re-activates Section 2
-    fireEvent.press(screen.getByTestId("signup-edit-card-2"));
-    expect(screen.getByTestId("signup-name-input")).toBeTruthy();
+    // All fields are directly editable without needing summary expand buttons
+    fireEvent.changeText(screen.getByTestId("signup-name-input"), "새이름");
+    expect(screen.getByTestId("signup-name-input").props.value).toBe("새이름");
+
+    fireEvent.changeText(screen.getByTestId("signup-id-input"), "newid");
+    expect(screen.getByTestId("signup-id-input").props.value).toBe("newid");
   });
 });

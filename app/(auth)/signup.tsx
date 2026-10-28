@@ -162,6 +162,8 @@ export default function SignupScreen() {
 
   const allTermsAgreed = agreedTerms.tos && agreedTerms.privacy;
   const toggleAllTerms = () => {
+    setActiveStep(3);
+    setUnlockedStep((prev) => Math.max(prev, 3));
     const next = !allTermsAgreed;
     setAgreedTerms({ tos: next, privacy: next });
   };
@@ -178,6 +180,16 @@ export default function SignupScreen() {
   const setField =
     (field: keyof FormValues) =>
     (value: string): void => {
+      if (field === "id" || field === "password") {
+        setActiveStep(1);
+      } else if (
+        field === "userName" ||
+        field === "phone" ||
+        field === "email"
+      ) {
+        setUnlockedStep((prev) => Math.max(prev, 2));
+        setActiveStep(2);
+      }
       let nextValue = value;
       if (field === "phone") {
         nextValue = formatPhoneNumber(value);
@@ -265,6 +277,14 @@ export default function SignupScreen() {
       nextErrors.email = "이메일 중복 확인이 필요합니다.";
     }
     setErrors(nextErrors);
+    if (nextErrors.id || nextErrors.password) {
+      setActiveStep(1);
+      return;
+    }
+    if (nextErrors.userName || nextErrors.phone || nextErrors.email) {
+      setActiveStep(2);
+      return;
+    }
     if (Object.keys(nextErrors).length > 0) return;
 
     const { passwordConfirm: _passwordConfirm, ...signupInput } = values;
@@ -345,6 +365,13 @@ export default function SignupScreen() {
     return 1;
   });
 
+  // Active step for Toss/KakaoBank style upward push & collapse
+  const [activeStep, setActiveStep] = useState<number>(1);
+
+  const isCard1Collapsed = unlockedStep >= 2 && activeStep !== 1;
+  const isCard2Collapsed = unlockedStep >= 3 && activeStep !== 2;
+  const isCard3Collapsed = allTermsAgreed && activeStep !== 3;
+
   useEffect(() => {
     if (isCard1Complete) {
       setUnlockedStep((prev) => Math.max(prev, 2));
@@ -402,8 +429,50 @@ export default function SignupScreen() {
             </MotionEnter>
 
             <MotionEnter enabled={enterMotion} style={styles.form}>
+              {/* 섹션 1: 계정 정보 요약 카드 (접힘 상태) */}
+              {isCard1Collapsed ? (
+                <MotionEnter mode="fade" enabled={enterMotion}>
+                  <View style={styles.summaryCard}>
+                    <View style={styles.summaryLeft}>
+                      <View style={styles.summaryBadge}>
+                        <AppIcon
+                          name="check"
+                          size={12}
+                          color={theme.colors.success}
+                        />
+                      </View>
+                      <View style={styles.summaryContent}>
+                        <Text style={styles.summaryTitle}>1. 계정 정보</Text>
+                        <Text style={styles.summaryValue} numberOfLines={1}>
+                          {values.id} · 비밀번호 완료
+                        </Text>
+                      </View>
+                    </View>
+                    <MotionPressable
+                      testID="signup-edit-card-1"
+                      accessibilityRole="button"
+                      accessibilityLabel="계정 정보 수정"
+                      onPress={() => setActiveStep(1)}
+                      style={styles.summaryEditButton}
+                    >
+                      <AppIcon
+                        name="edit"
+                        size={12}
+                        color={theme.colors.primaryDeep}
+                      />
+                      <Text style={styles.summaryEditText}>수정</Text>
+                    </MotionPressable>
+                  </View>
+                </MotionEnter>
+              ) : null}
+
               {/* 섹션 1: 계정 정보 */}
-              <View style={styles.sectionCard}>
+              <View
+                style={[
+                  styles.sectionCard,
+                  isCard1Collapsed ? styles.collapsedCardBody : null,
+                ]}
+              >
                 <View style={styles.sectionHeader}>
                   <View style={styles.sectionBadge}>
                     <Text style={styles.sectionBadgeText}>1</Text>
@@ -494,10 +563,12 @@ export default function SignupScreen() {
                       textContentType="newPassword"
                       returnKeyType="next"
                       onSubmitEditing={() => {
-                        if (nameInputRef.current) {
-                          nameInputRef.current.focus();
-                        } else {
+                        if (isCard1Complete) {
+                          setUnlockedStep((prev) => Math.max(prev, 2));
+                          setActiveStep(2);
                           setTimeout(() => nameInputRef.current?.focus(), 60);
+                        } else if (nameInputRef.current) {
+                          nameInputRef.current.focus();
                         }
                       }}
                       hasError={isPwError || Boolean(errors.password)}
@@ -549,227 +620,412 @@ export default function SignupScreen() {
                   {isPwError || errors.password ? (
                     <InlineError>{passwordErrorMessage}</InlineError>
                   ) : null}
+
+                  {/* 다음 버튼 */}
+                  <MotionPressable
+                    testID="signup-next-card-1"
+                    accessibilityRole="button"
+                    accessibilityLabel="성도 정보 입력으로 이동"
+                    disabled={!isCard1Complete}
+                    onPress={() => {
+                      if (isCard1Complete) {
+                        setUnlockedStep((prev) => Math.max(prev, 2));
+                        setActiveStep(2);
+                        setTimeout(() => nameInputRef.current?.focus(), 60);
+                      }
+                    }}
+                    style={[
+                      styles.cardNextButton,
+                      isCard1Complete ? styles.cardNextButtonActive : null,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.cardNextButtonText,
+                        isCard1Complete
+                          ? styles.cardNextButtonTextActive
+                          : null,
+                      ]}
+                    >
+                      다음 (성도 정보)
+                    </Text>
+                    <AppIcon
+                      name="chevron-right"
+                      size={14}
+                      color={
+                        isCard1Complete
+                          ? theme.colors.primaryDeep
+                          : theme.colors.inkMute
+                      }
+                    />
+                  </MotionPressable>
                 </Field>
               </View>
 
               {/* 섹션 2: 성도 정보 */}
               {unlockedStep >= 2 ? (
-                <MotionEnter mode="fade" enabled={enterMotion}>
-                  <View style={styles.sectionCard}>
-                    <View style={styles.sectionHeader}>
-                      <View style={styles.sectionBadge}>
-                        <Text style={styles.sectionBadgeText}>2</Text>
-                      </View>
-                      <Text style={styles.sectionTitle}>성도 정보</Text>
-                    </View>
-
-                    <Field label="이름">
-                      <MotionShake trigger={errors.userName}>
-                        <SignupInput
-                          ref={nameInputRef}
-                          testID="signup-name-input"
-                          value={values.userName}
-                          onChangeText={setField("userName")}
-                          placeholder="실명을 입력해주세요"
-                          autoComplete="name"
-                          textContentType="name"
-                          returnKeyType="next"
-                          onSubmitEditing={() => phoneInputRef.current?.focus()}
-                          hasError={Boolean(errors.userName)}
-                        />
-                      </MotionShake>
-                      <InlineError>{errors.userName}</InlineError>
-                      {!errors.userName ? (
-                        <FieldHint>2~10자, 특수문자는 사용할 수 없어요</FieldHint>
-                      ) : null}
-                    </Field>
-
-                    <Field label="연락처">
-                      <MotionShake
-                        trigger={
-                          phoneErrorMessage ??
-                          (isPhoneError || isPhoneDup ? "phone-error" : undefined)
-                        }
-                      >
-                        <SignupInput
-                          ref={phoneInputRef}
-                          testID="signup-phone-input"
-                          value={values.phone}
-                          onChangeText={setField("phone")}
-                          placeholder="010-XXXX-XXXX"
-                          keyboardType="phone-pad"
-                          autoComplete="tel"
-                          textContentType="telephoneNumber"
-                          returnKeyType="next"
-                          onSubmitEditing={() => emailInputRef.current?.focus()}
-                          hasError={
-                            isPhoneError || isPhoneDup || Boolean(errors.phone)
-                          }
-                        />
-                      </MotionShake>
-                      <InlineError>{phoneErrorMessage}</InlineError>
-                    </Field>
-
-                    <Field label="이메일">
-                      <MotionShake trigger={emailErrorMessage}>
-                        <SignupInput
-                          ref={emailInputRef}
-                          testID="signup-email-input"
-                          value={values.email}
-                          onChangeText={setField("email")}
-                          placeholder="이메일 주소"
-                          keyboardType="email-address"
-                          autoComplete="email"
-                          textContentType="emailAddress"
-                          autoCapitalize="none"
-                          returnKeyType="done"
-                          onBlur={onEmailBlur}
-                          onSubmitEditing={() => {
-                            emailInputRef.current?.blur();
-                            onEmailBlur();
-                          }}
-                          hasError={Boolean(emailErrorMessage)}
-                          trailing={
-                            checkAvailability.isPending &&
-                            lastAvailabilityTarget === "email" ? (
-                              <ActivityIndicator
-                                size="small"
-                                color={theme.colors.primaryDeep}
-                              />
-                            ) : currentEmailAvailability === true ? (
-                              <MotionPop>
-                                <AppIcon
-                                  name="check-circle"
-                                  size={18}
-                                  color={theme.colors.success}
-                                />
-                              </MotionPop>
-                            ) : null
-                          }
-                        />
-                      </MotionShake>
-                      {/* Invisible trigger for automated tests and scripts */}
-                      <Pressable
-                        testID="signup-check-email"
-                        accessibilityRole="button"
-                        accessibilityLabel="이메일 중복 확인"
-                        onPress={() => onCheckAvailability("email")}
-                        style={styles.hiddenTrigger}
-                      />
-                      <InlineError>{emailErrorMessage}</InlineError>
-                      {currentEmailAvailability === true ? (
-                        <MotionPop>
-                          <View style={styles.successRow}>
+                <>
+                  {/* 섹션 2 요약 카드 (접힘 상태) */}
+                  {isCard2Collapsed ? (
+                    <MotionEnter mode="fade" enabled={enterMotion}>
+                      <View style={styles.summaryCard}>
+                        <View style={styles.summaryLeft}>
+                          <View style={styles.summaryBadge}>
                             <AppIcon
-                              name="check-circle"
-                              size={14}
+                              name="check"
+                              size={12}
                               color={theme.colors.success}
                             />
-                            <AppText
-                              variant="caption"
-                              tone="success"
-                              style={styles.successHint}
-                            >
-                              사용 가능한 이메일입니다
-                            </AppText>
                           </View>
-                        </MotionPop>
-                      ) : null}
-                    </Field>
-                  </View>
-                </MotionEnter>
+                          <View style={styles.summaryContent}>
+                            <Text style={styles.summaryTitle}>2. 성도 정보</Text>
+                            <Text style={styles.summaryValue} numberOfLines={1}>
+                              {values.userName} · {values.phone}
+                            </Text>
+                          </View>
+                        </View>
+                        <MotionPressable
+                          testID="signup-edit-card-2"
+                          accessibilityRole="button"
+                          accessibilityLabel="성도 정보 수정"
+                          onPress={() => setActiveStep(2)}
+                          style={styles.summaryEditButton}
+                        >
+                          <AppIcon
+                            name="edit"
+                            size={12}
+                            color={theme.colors.primaryDeep}
+                          />
+                          <Text style={styles.summaryEditText}>수정</Text>
+                        </MotionPressable>
+                      </View>
+                    </MotionEnter>
+                  ) : null}
+
+                  {/* 섹션 2 본문 */}
+                  <MotionEnter
+                    mode="fade"
+                    enabled={enterMotion}
+                    style={
+                      isCard2Collapsed ? styles.collapsedCardBody : undefined
+                    }
+                  >
+                    <View style={styles.sectionCard}>
+                      <View style={styles.sectionHeader}>
+                        <View style={styles.sectionBadge}>
+                          <Text style={styles.sectionBadgeText}>2</Text>
+                        </View>
+                        <Text style={styles.sectionTitle}>성도 정보</Text>
+                      </View>
+
+                      <Field label="이름">
+                        <MotionShake trigger={errors.userName}>
+                          <SignupInput
+                            ref={nameInputRef}
+                            testID="signup-name-input"
+                            value={values.userName}
+                            onChangeText={setField("userName")}
+                            placeholder="실명을 입력해주세요"
+                            autoComplete="name"
+                            textContentType="name"
+                            returnKeyType="next"
+                            onSubmitEditing={() =>
+                              phoneInputRef.current?.focus()
+                            }
+                            hasError={Boolean(errors.userName)}
+                          />
+                        </MotionShake>
+                        <InlineError>{errors.userName}</InlineError>
+                        {!errors.userName ? (
+                          <FieldHint>
+                            2~10자, 특수문자는 사용할 수 없어요
+                          </FieldHint>
+                        ) : null}
+                      </Field>
+
+                      <Field label="연락처">
+                        <MotionShake
+                          trigger={
+                            phoneErrorMessage ??
+                            (isPhoneError || isPhoneDup
+                              ? "phone-error"
+                              : undefined)
+                          }
+                        >
+                          <SignupInput
+                            ref={phoneInputRef}
+                            testID="signup-phone-input"
+                            value={values.phone}
+                            onChangeText={setField("phone")}
+                            placeholder="010-XXXX-XXXX"
+                            keyboardType="phone-pad"
+                            autoComplete="tel"
+                            textContentType="telephoneNumber"
+                            returnKeyType="next"
+                            onSubmitEditing={() =>
+                              emailInputRef.current?.focus()
+                            }
+                            hasError={
+                              isPhoneError ||
+                              isPhoneDup ||
+                              Boolean(errors.phone)
+                            }
+                          />
+                        </MotionShake>
+                        <InlineError>{phoneErrorMessage}</InlineError>
+                      </Field>
+
+                      <Field label="이메일">
+                        <MotionShake trigger={emailErrorMessage}>
+                          <SignupInput
+                            ref={emailInputRef}
+                            testID="signup-email-input"
+                            value={values.email}
+                            onChangeText={setField("email")}
+                            placeholder="이메일 주소"
+                            keyboardType="email-address"
+                            autoComplete="email"
+                            textContentType="emailAddress"
+                            autoCapitalize="none"
+                            returnKeyType="done"
+                            onBlur={onEmailBlur}
+                            onSubmitEditing={() => {
+                              emailInputRef.current?.blur();
+                              onEmailBlur();
+                              if (isCard2Complete) {
+                                setUnlockedStep((prev) => Math.max(prev, 3));
+                                setActiveStep(3);
+                              }
+                            }}
+                            hasError={Boolean(emailErrorMessage)}
+                            trailing={
+                              checkAvailability.isPending &&
+                              lastAvailabilityTarget === "email" ? (
+                                <ActivityIndicator
+                                  size="small"
+                                  color={theme.colors.primaryDeep}
+                                />
+                              ) : currentEmailAvailability === true ? (
+                                <MotionPop>
+                                  <AppIcon
+                                    name="check-circle"
+                                    size={18}
+                                    color={theme.colors.success}
+                                  />
+                                </MotionPop>
+                              ) : null
+                            }
+                          />
+                        </MotionShake>
+                        {/* Invisible trigger for automated tests and scripts */}
+                        <Pressable
+                          testID="signup-check-email"
+                          accessibilityRole="button"
+                          accessibilityLabel="이메일 중복 확인"
+                          onPress={() => onCheckAvailability("email")}
+                          style={styles.hiddenTrigger}
+                        />
+                        <InlineError>{emailErrorMessage}</InlineError>
+                        {currentEmailAvailability === true ? (
+                          <MotionPop>
+                            <View style={styles.successRow}>
+                              <AppIcon
+                                name="check-circle"
+                                size={14}
+                                color={theme.colors.success}
+                              />
+                              <AppText
+                                variant="caption"
+                                tone="success"
+                                style={styles.successHint}
+                              >
+                                사용 가능한 이메일입니다
+                              </AppText>
+                            </View>
+                          </MotionPop>
+                        ) : null}
+
+                        {/* 다음 버튼 */}
+                        <MotionPressable
+                          testID="signup-next-card-2"
+                          accessibilityRole="button"
+                          accessibilityLabel="약관 동의로 이동"
+                          disabled={!isCard2Complete}
+                          onPress={() => {
+                            if (isCard2Complete) {
+                              setUnlockedStep((prev) => Math.max(prev, 3));
+                              setActiveStep(3);
+                            }
+                          }}
+                          style={[
+                            styles.cardNextButton,
+                            isCard2Complete
+                              ? styles.cardNextButtonActive
+                              : null,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.cardNextButtonText,
+                              isCard2Complete
+                                ? styles.cardNextButtonTextActive
+                                : null,
+                            ]}
+                          >
+                            다음 (약관 동의)
+                          </Text>
+                          <AppIcon
+                            name="chevron-right"
+                            size={14}
+                            color={
+                              isCard2Complete
+                                ? theme.colors.primaryDeep
+                                : theme.colors.inkMute
+                            }
+                          />
+                        </MotionPressable>
+                      </Field>
+                    </View>
+                  </MotionEnter>
+                </>
               ) : null}
 
               {/* 섹션 3: 약관 동의 */}
               {unlockedStep >= 3 ? (
-                <MotionEnter mode="fade" enabled={enterMotion}>
-                  <View style={styles.termsCard}>
-                    <View style={styles.sectionHeader}>
-                      <View style={styles.sectionBadge}>
-                        <Text style={styles.sectionBadgeText}>3</Text>
-                      </View>
-                      <Text style={styles.sectionTitle}>약관 동의</Text>
-                    </View>
-
-                    <Pressable
-                      testID="signup-terms-all"
-                      accessibilityRole="checkbox"
-                      accessibilityState={{ checked: allTermsAgreed }}
-                      onPress={toggleAllTerms}
-                      style={[
-                        styles.termsAllRow,
-                        allTermsAgreed ? styles.termsAllRowOn : null,
-                      ]}
-                    >
-                      <CheckBadge on={allTermsAgreed} big />
-                      <Text style={styles.termsAllText}>약관 전체 동의하기</Text>
-                    </Pressable>
-
-                    <View style={styles.termsList}>
-                      <View style={styles.termsRow}>
-                        <Pressable
-                          accessibilityRole="checkbox"
-                          accessibilityState={{ checked: agreedTerms.tos }}
-                          onPress={() =>
-                            setAgreedTerms((prev) => ({
-                              ...prev,
-                              tos: !prev.tos,
-                            }))
-                          }
-                          style={styles.termsCheckWrap}
+                <>
+                  {/* 섹션 3 요약 카드 (접힘 상태) */}
+                  {isCard3Collapsed ? (
+                    <MotionEnter mode="fade" enabled={enterMotion}>
+                      <View style={styles.summaryCard}>
+                        <View style={styles.summaryLeft}>
+                          <View style={styles.summaryBadge}>
+                            <AppIcon
+                              name="check"
+                              size={12}
+                              color={theme.colors.success}
+                            />
+                          </View>
+                          <View style={styles.summaryContent}>
+                            <Text style={styles.summaryTitle}>3. 약관 동의</Text>
+                            <Text style={styles.summaryValue} numberOfLines={1}>
+                              필수 약관 동의 완료
+                            </Text>
+                          </View>
+                        </View>
+                        <MotionPressable
+                          testID="signup-edit-card-3"
+                          accessibilityRole="button"
+                          accessibilityLabel="약관 동의 수정"
+                          onPress={() => setActiveStep(3)}
+                          style={styles.summaryEditButton}
                         >
-                          <CheckBadge on={agreedTerms.tos} />
-                          <Text style={styles.termsItemText}>
-                            <Text style={styles.termsRequired}>[필수]</Text> 서비스
-                            이용약관
-                          </Text>
-                        </Pressable>
-                        <Pressable
-                          onPress={() => setTermsSheetKey("tos")}
-                          style={styles.termsDetailButton}
-                        >
-                          <Text style={styles.termsDetailText}>보기</Text>
                           <AppIcon
-                            name="chevron-right"
-                            size={14}
-                            color={theme.colors.inkMute}
+                            name="edit"
+                            size={12}
+                            color={theme.colors.primaryDeep}
                           />
-                        </Pressable>
+                          <Text style={styles.summaryEditText}>수정</Text>
+                        </MotionPressable>
+                      </View>
+                    </MotionEnter>
+                  ) : null}
+
+                  {/* 섹션 3 본문 */}
+                  <MotionEnter
+                    mode="fade"
+                    enabled={enterMotion}
+                    style={
+                      isCard3Collapsed ? styles.collapsedCardBody : undefined
+                    }
+                  >
+                    <View style={styles.termsCard}>
+                      <View style={styles.sectionHeader}>
+                        <View style={styles.sectionBadge}>
+                          <Text style={styles.sectionBadgeText}>3</Text>
+                        </View>
+                        <Text style={styles.sectionTitle}>약관 동의</Text>
                       </View>
 
-                      <View style={styles.termsRow}>
-                        <Pressable
-                          accessibilityRole="checkbox"
-                          accessibilityState={{ checked: agreedTerms.privacy }}
-                          onPress={() =>
-                            setAgreedTerms((prev) => ({
-                              ...prev,
-                              privacy: !prev.privacy,
-                            }))
-                          }
-                          style={styles.termsCheckWrap}
-                        >
-                          <CheckBadge on={agreedTerms.privacy} />
-                          <Text style={styles.termsItemText}>
-                            <Text style={styles.termsRequired}>[필수]</Text> 개인정보
-                            처리방침
-                          </Text>
-                        </Pressable>
-                        <Pressable
-                          onPress={() => setTermsSheetKey("privacy")}
-                          style={styles.termsDetailButton}
-                        >
-                          <Text style={styles.termsDetailText}>보기</Text>
-                          <AppIcon
-                            name="chevron-right"
-                            size={14}
-                            color={theme.colors.inkMute}
-                          />
-                        </Pressable>
+                      <Pressable
+                        testID="signup-terms-all"
+                        accessibilityRole="checkbox"
+                        accessibilityState={{ checked: allTermsAgreed }}
+                        onPress={toggleAllTerms}
+                        style={[
+                          styles.termsAllRow,
+                          allTermsAgreed ? styles.termsAllRowOn : null,
+                        ]}
+                      >
+                        <CheckBadge on={allTermsAgreed} big />
+                        <Text style={styles.termsAllText}>약관 전체 동의하기</Text>
+                      </Pressable>
+
+                      <View style={styles.termsList}>
+                        <View style={styles.termsRow}>
+                          <Pressable
+                            accessibilityRole="checkbox"
+                            accessibilityState={{ checked: agreedTerms.tos }}
+                            onPress={() =>
+                              setAgreedTerms((prev) => ({
+                                ...prev,
+                                tos: !prev.tos,
+                              }))
+                            }
+                            style={styles.termsCheckWrap}
+                          >
+                            <CheckBadge on={agreedTerms.tos} />
+                            <Text style={styles.termsItemText}>
+                              <Text style={styles.termsRequired}>[필수]</Text> 서비스
+                              이용약관
+                            </Text>
+                          </Pressable>
+                          <Pressable
+                            onPress={() => setTermsSheetKey("tos")}
+                            style={styles.termsDetailButton}
+                          >
+                            <Text style={styles.termsDetailText}>보기</Text>
+                            <AppIcon
+                              name="chevron-right"
+                              size={14}
+                              color={theme.colors.inkMute}
+                            />
+                          </Pressable>
+                        </View>
+
+                        <View style={styles.termsRow}>
+                          <Pressable
+                            accessibilityRole="checkbox"
+                            accessibilityState={{ checked: agreedTerms.privacy }}
+                            onPress={() =>
+                              setAgreedTerms((prev) => ({
+                                ...prev,
+                                privacy: !prev.privacy,
+                              }))
+                            }
+                            style={styles.termsCheckWrap}
+                          >
+                            <CheckBadge on={agreedTerms.privacy} />
+                            <Text style={styles.termsItemText}>
+                              <Text style={styles.termsRequired}>[필수]</Text> 개인정보
+                              처리방침
+                            </Text>
+                          </Pressable>
+                          <Pressable
+                            onPress={() => setTermsSheetKey("privacy")}
+                            style={styles.termsDetailButton}
+                          >
+                            <Text style={styles.termsDetailText}>보기</Text>
+                            <AppIcon
+                              name="chevron-right"
+                              size={14}
+                              color={theme.colors.inkMute}
+                            />
+                          </Pressable>
+                        </View>
                       </View>
                     </View>
-                  </View>
-                </MotionEnter>
+                  </MotionEnter>
+                </>
               ) : null}
             </MotionEnter>
 
@@ -1241,4 +1497,84 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.semibold,
   },
   error: { color: theme.colors.danger, fontSize: 13 },
+  summaryCard: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  summaryLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    flex: 1,
+    marginRight: 8,
+  },
+  summaryBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: theme.colors.primaryTint,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  summaryContent: {
+    flex: 1,
+    gap: 2,
+  },
+  summaryTitle: {
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.bold,
+  },
+  summaryValue: {
+    color: theme.colors.inkMute,
+    fontSize: theme.fontSize.xs,
+  },
+  summaryEditButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: theme.radius.sm,
+    backgroundColor: theme.colors.primaryTint,
+  },
+  summaryEditText: {
+    color: theme.colors.primaryDeep,
+    fontSize: theme.fontSize.xs,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  collapsedCardBody: {
+    display: "none",
+  },
+  cardNextButton: {
+    height: 44,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.line,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginTop: 10,
+  },
+  cardNextButtonActive: {
+    backgroundColor: theme.colors.primaryTint,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+  },
+  cardNextButtonText: {
+    color: theme.colors.inkMute,
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  cardNextButtonTextActive: {
+    color: theme.colors.primaryDeep,
+    fontWeight: theme.fontWeight.bold,
+  },
 });

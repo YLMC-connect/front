@@ -539,5 +539,18 @@ describe("auth smoke screens", () => {
 
     // Section 3 (terms) is now revealed
     expect(screen.getByTestId("signup-terms-all")).toBeTruthy();
+    expect(screen.getByTestId("signup-edit-card-1")).toBeTruthy();
+
+    // Advancing to Section 3 collapses Section 2 into summary
+    fireEvent.press(screen.getByTestId("signup-next-card-2"));
+    expect(screen.getByTestId("signup-edit-card-2")).toBeTruthy();
+
+    // Tapping edit on Section 1 re-activates Section 1
+    fireEvent.press(screen.getByTestId("signup-edit-card-1"));
+    expect(screen.getByTestId("signup-next-card-1")).toBeTruthy();
+
+    // Tapping next on Section 1 advances to Section 2
+    fireEvent.press(screen.getByTestId("signup-next-card-1"));
+    expect(screen.getByTestId("signup-next-card-2")).toBeTruthy();
   });
 });

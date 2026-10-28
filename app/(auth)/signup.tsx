@@ -2,6 +2,7 @@ import { AppIcon } from "@/components/ui/app-icon";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   forwardRef,
   type ReactNode,
@@ -130,6 +131,7 @@ function validateSignup(values: FormValues) {
 }
 
 export default function SignupScreen() {
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ designVariant?: string }>();
   const { checkAvailability, signup } = useAuth();
   const variant = readDesignVariant(params.designVariant) ?? "default";
@@ -476,16 +478,7 @@ export default function SignupScreen() {
 
   return (
     <Screen scroll={false} padded={false}>
-      <KeyboardAvoidingView
-        behavior={
-          Platform.OS === "ios"
-            ? "padding"
-            : Platform.OS === "android"
-              ? "height"
-              : undefined
-        }
-        style={styles.root}
-      >
+      <View style={styles.root}>
         <TopBar
           title="회원가입"
           back
@@ -1000,32 +993,44 @@ export default function SignupScreen() {
           </Pressable>
         </ScrollView>
 
-        <MotionEnter enabled={enterMotion}>
-          <View pointerEvents="box-none" style={styles.bottomFlat}>
-            <LinearGradient
-              colors={[
-                "rgba(246,247,249,0)",
-                "rgba(246,247,249,0.78)",
-                "rgba(246,247,249,0.96)",
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          pointerEvents="box-none"
+          style={styles.bottomFloating}
+        >
+          <MotionEnter enabled={enterMotion}>
+            <View
+              pointerEvents="box-none"
+              style={[
+                styles.bottomFlat,
+                { paddingBottom: Math.max(insets.bottom, 20) },
               ]}
-              locations={[0, 0.38, 1]}
-              pointerEvents="none"
-              style={StyleSheet.absoluteFill}
-              testID="signup-bottom-bar-gradient"
-            />
-            <SubmitButton
-              disabled={isSubmitDisabled || signup.isPending || isLoading}
-              loading={signup.isPending || isLoading}
-              onPress={onSubmit}
-            />
-          </View>
-        </MotionEnter>
+            >
+              <LinearGradient
+                colors={[
+                  "rgba(246,247,249,0)",
+                  "rgba(246,247,249,0.78)",
+                  "rgba(246,247,249,0.96)",
+                ]}
+                locations={[0, 0.38, 1]}
+                pointerEvents="none"
+                style={StyleSheet.absoluteFill}
+                testID="signup-bottom-bar-gradient"
+              />
+              <SubmitButton
+                disabled={isSubmitDisabled || signup.isPending || isLoading}
+                loading={signup.isPending || isLoading}
+                onPress={onSubmit}
+              />
+            </View>
+          </MotionEnter>
+        </KeyboardAvoidingView>
 
         <TermsSheet
           termKey={termsSheetKey}
           onClose={() => setTermsSheetKey(null)}
         />
-      </KeyboardAvoidingView>
+      </View>
     </Screen>
   );
 }
@@ -1232,17 +1237,22 @@ const styles = StyleSheet.create({
   body: {
     paddingHorizontal: theme.layout.screenX,
     paddingTop: theme.spacing[5],
-    paddingBottom: theme.spacing[4],
+    paddingBottom: 130,
   },
   headerSubtitle: {
     marginTop: 6,
     color: theme.colors.inkMute,
     fontSize: theme.fontSize.sm,
   },
+  bottomFloating: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
   bottomFlat: {
     paddingHorizontal: theme.layout.screenX,
-    paddingTop: 20,
-    paddingBottom: theme.spacing[7],
+    paddingTop: 28,
   },
   form: {
     marginTop: theme.spacing[5],

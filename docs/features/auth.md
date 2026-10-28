@@ -1,6 +1,6 @@
 # auth (인증)
 
-> 마지막 갱신: 2026-10-28 (회원가입 신규 카드 상단 추가 및 전체 카드 펼침 상태 유지 적용) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-10-28 (회원가입 신규 카드 등장 트랜지션 및 타이핑 디바운스 완화 적용) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 회원가입 신규 카드 등장 트랜지션 및 타이핑 디바운스 완화 — 조건 충족 시 다음 카드가 딱딱하게 튀어나오지 않도록 `FadeInDown`(진입 페이드 및 하향 슬라이드)과 `LinearTransition`(기존 카드의 부드러운 하향 이동 레이아웃 트랜지션), 그리고 플랫폼 네이티브 `LayoutAnimation`을 결합. 타이핑 도중 급작스러운 레이아웃 밀림을 방지하기 위해 500ms 입력 멈춤 디바운스(`AUTO_ADVANCE_DEBOUNCE`, 테스트 환경은 0ms)를 두고, 카드 확장 애니메이션이 자연스럽게 안착된 후 350ms 딜레이(`FOCUS_HANDOFF_DELAY`, 테스트 환경 0ms)를 거쳐 새 카드의 첫 번째 입력 필드로 포커스를 부드럽게 인계. 키보드의 '다음' 액션 시에는 즉시 레이아웃 애니메이션과 함께 다음 단계로 진행.
 - 회원가입 신규 카드 상단 추가 및 전체 카드 펼침 상태 유지 — 완료된 카드를 1줄 요약으로 접지 않고 모든 필드를 항상 펼쳐진 상태로 유지하며, 새로 작성할 카드(2단계 성도 정보, 3단계 약관 동의)가 이전 완료 카드보다 물리적으로 위(상단)에 나타나도록 배치. 수동 다음 버튼 없이 조건 충족 시 자동으로 다음 카드가 상단에 나타나며(디바운스/키보드 다음 액션), 이전 카드들도 아래에 온전히 펼쳐져 있어 언제든 직접 확인 및 수정할 수 있다.
 - 성도 정보 실시간 규칙 피드백 — 이름(2~10자, 특수문자 제외), 연락처(010 시작, 10~11자리), 이메일(이메일 형식, 중복 확인 완료) 각 필드 하단에 실시간 규칙 충족 칩과 우측 trailing 체크 아이콘을 적용.
 - 인증 HTTP adapter 활성화 — login/refresh 성공 envelope의 `data`에서 토큰 payload를 읽고, signup 후 login 합성, `/api/member/me`, `/api/member/duplicate`를 `httpAuthAdapter`로 연결. 회원가입은 아이디와 이메일을 필수 입력으로 받고 각각 중복확인을 통과해야 한다. 값이 바뀌면 기존 확인 결과를 폐기한다. development 기본값은 HTTP, 테스트/Maestro는 `EXPO_PUBLIC_AUTH_ADAPTER=mock`. API origin은 `EXPO_PUBLIC_API_URL`. 회원가입 중복확인 실패는 해당 필드에 표시. 로그인 성공 schema는 `ApiResponseLoginResponse`이고, 그 밖 Swagger 성공 schema가 비어 있는 항목 때문에 `test:api:contract` 실패는 남아 있다
@@ -89,6 +90,8 @@
 `LoginInput`, `SignupInput`, `MemberDuplicateInput`, `MemberAvailability`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`와 `UserRole`을 사용하며, 역할은 `ADMIN`, `USER`, `MANAGER_COMMUNION`, `MANAGER_SHARE`, `MANAGER_LIFESTUDY`, `MANAGER_PRAYER` 중 하나입니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리합니다. 중복확인 요청은 Swagger의 `searchType: id | phone | email`, `searchValue` 계약을 따르며 화면에는 `available` 도메인 결과만 노출합니다. 실제 HTTP mapper는 공통 envelope의 `data`만 사용합니다. 중복확인은 `available`, login/refresh는 `accessToken`, `refreshToken`, `userId`, `userName`, `role`, `/api/member/me`는 회원 필드입니다. 로그인 성공 schema는 `ApiResponseLoginResponse`입니다. 그 밖 Swagger 성공 schema가 비어 있는 항목은 `test:api:contract`가 계속 실패합니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-10-28) **회원가입 신규 카드 등장 트랜지션 및 타이핑 디바운스 완화 적용** — 입력 완료 즉시 카드가 딱딱하게 밀려나는 인지적 부담을 없애기 위해, `FadeInDown` 및 `LinearTransition` 레이아웃 애니메이션과 `LayoutAnimation.Presets.easeInEaseOut`을 적용하였다. 또한 타이핑 도중 급작스러운 레이아웃 변화를 방지하기 위해 500ms 디바운스(입력 정지 감지) 후 카드가 확장되도록 하였으며, 키보드 완료(Return/Next) 시에는 지체 없이 부드러운 레이아웃 전환과 함께 포커스를 인계하도록 최적화하였다(테스트 환경은 0ms 즉시 실행으로 회귀 방지).
 
 - (2026-10-28) **회원가입 신규 카드 상단 추가(Top-Prepend) 및 전체 카드 펼침 상태 유지 적용** — 완료된 카드를 접어서 요약 카드(summaryCard)로 축소하지 않고 모든 필드를 항상 펼쳐진 상태로 유지한다. 다음 단계로 진행 시 새로 작성해야 하는 카드(2단계 성도 정보, 3단계 약관 동의)가 이전 카드보다 물리적으로 화면 위쪽(상단)에 나타나며, 수동 '다음' 버튼 없이 유효성 충족 시 자동으로 다음 카드가 상단에 추가되고 포커스가 이동하도록 구현하였다.
 

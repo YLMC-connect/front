@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
+  LayoutAnimation,
   Platform,
   Pressable,
   ScrollView,
@@ -19,10 +20,13 @@ import {
   Text,
   TextInput,
   type TextInputProps,
+  UIManager,
   View,
 } from "react-native";
 import Animated, {
   Easing,
+  FadeInDown,
+  LinearTransition,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -67,6 +71,24 @@ type Availability = {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const softEasing = Easing.out(Easing.cubic);
+
+const AUTO_ADVANCE_DEBOUNCE = process.env.NODE_ENV === "test" ? 0 : 500;
+const FOCUS_HANDOFF_DELAY = process.env.NODE_ENV === "test" ? 0 : 350;
+
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const animateLayout = () => {
+  try {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+  } catch {
+    // Non-native fallback
+  }
+};
 
 /** Korean mobile display: digits only → 010-XXXX-XXXX (max 11 digits). */
 function formatPhoneNumber(input: string): string {
@@ -364,21 +386,40 @@ export default function SignupScreen() {
     return 1;
   });
 
-  // Auto-advance to Step 2 when Card 1 is completed
+  // Auto-advance to Step 2 when Card 1 is completed (settle debounce, then focus after card expansion)
   useEffect(() => {
     if (isCard1Complete && unlockedStep < 2) {
-      setUnlockedStep(2);
-      const timer = setTimeout(() => {
+      if (AUTO_ADVANCE_DEBOUNCE === 0) {
+        animateLayout();
+        setUnlockedStep(2);
         nameInputRef.current?.focus();
-      }, 350);
+        return;
+      }
+      const timer = setTimeout(() => {
+        animateLayout();
+        setUnlockedStep(2);
+        const focusTimer = setTimeout(() => {
+          nameInputRef.current?.focus();
+        }, FOCUS_HANDOFF_DELAY);
+        return () => clearTimeout(focusTimer);
+      }, AUTO_ADVANCE_DEBOUNCE);
       return () => clearTimeout(timer);
     }
   }, [isCard1Complete, unlockedStep]);
 
-  // Auto-advance to Step 3 when Card 2 is completed
+  // Auto-advance to Step 3 when Card 2 is completed (settle debounce)
   useEffect(() => {
     if (unlockedStep >= 2 && isCard2Complete && unlockedStep < 3) {
-      setUnlockedStep(3);
+      if (AUTO_ADVANCE_DEBOUNCE === 0) {
+        animateLayout();
+        setUnlockedStep(3);
+        return;
+      }
+      const timer = setTimeout(() => {
+        animateLayout();
+        setUnlockedStep(3);
+      }, AUTO_ADVANCE_DEBOUNCE);
+      return () => clearTimeout(timer);
     }
   }, [unlockedStep, isCard2Complete]);
 
@@ -429,385 +470,411 @@ export default function SignupScreen() {
             <MotionEnter enabled={enterMotion} style={styles.form}>
               {/* 섹션 3: 약관 동의 (새로 작성할 카드가 위쪽에 추가) */}
               {unlockedStep >= 3 ? (
-                <MotionEnter mode="fade" enabled={enterMotion}>
-                  <View style={styles.termsCard}>
-                    <View style={styles.sectionHeader}>
-                      <View style={styles.sectionBadge}>
-                        <Text style={styles.sectionBadgeText}>3</Text>
-                      </View>
-                      <Text style={styles.sectionTitle}>약관 동의</Text>
+                <Animated.View
+                  entering={
+                    enterMotion
+                      ? FadeInDown.duration(380).easing(
+                          Easing.out(Easing.cubic),
+                        )
+                      : undefined
+                  }
+                  layout={LinearTransition.duration(350).easing(
+                    Easing.out(Easing.cubic),
+                  )}
+                  style={styles.termsCard}
+                >
+                  <View style={styles.sectionHeader}>
+                    <View style={styles.sectionBadge}>
+                      <Text style={styles.sectionBadgeText}>3</Text>
+                    </View>
+                    <Text style={styles.sectionTitle}>약관 동의</Text>
+                  </View>
+
+                  <Pressable
+                    testID="signup-terms-all"
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: allTermsAgreed }}
+                    onPress={toggleAllTerms}
+                    style={[
+                      styles.termsAllRow,
+                      allTermsAgreed ? styles.termsAllRowOn : null,
+                    ]}
+                  >
+                    <CheckBadge on={allTermsAgreed} big />
+                    <Text style={styles.termsAllText}>약관 전체 동의하기</Text>
+                  </Pressable>
+
+                  <View style={styles.termsList}>
+                    <View style={styles.termsRow}>
+                      <Pressable
+                        accessibilityRole="checkbox"
+                        accessibilityState={{ checked: agreedTerms.tos }}
+                        onPress={() =>
+                          setAgreedTerms((prev) => ({
+                            ...prev,
+                            tos: !prev.tos,
+                          }))
+                        }
+                        style={styles.termsCheckWrap}
+                      >
+                        <CheckBadge on={agreedTerms.tos} />
+                        <Text style={styles.termsItemText}>
+                          <Text style={styles.termsRequired}>[필수]</Text> 서비스
+                          이용약관
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        onPress={() => setTermsSheetKey("tos")}
+                        style={styles.termsDetailButton}
+                      >
+                        <Text style={styles.termsDetailText}>보기</Text>
+                        <AppIcon
+                          name="chevron-right"
+                          size={14}
+                          color={theme.colors.inkMute}
+                        />
+                      </Pressable>
                     </View>
 
-                    <Pressable
-                      testID="signup-terms-all"
-                      accessibilityRole="checkbox"
-                      accessibilityState={{ checked: allTermsAgreed }}
-                      onPress={toggleAllTerms}
-                      style={[
-                        styles.termsAllRow,
-                        allTermsAgreed ? styles.termsAllRowOn : null,
-                      ]}
-                    >
-                      <CheckBadge on={allTermsAgreed} big />
-                      <Text style={styles.termsAllText}>약관 전체 동의하기</Text>
-                    </Pressable>
-
-                    <View style={styles.termsList}>
-                      <View style={styles.termsRow}>
-                        <Pressable
-                          accessibilityRole="checkbox"
-                          accessibilityState={{ checked: agreedTerms.tos }}
-                          onPress={() =>
-                            setAgreedTerms((prev) => ({
-                              ...prev,
-                              tos: !prev.tos,
-                            }))
-                          }
-                          style={styles.termsCheckWrap}
-                        >
-                          <CheckBadge on={agreedTerms.tos} />
-                          <Text style={styles.termsItemText}>
-                            <Text style={styles.termsRequired}>[필수]</Text> 서비스
-                            이용약관
-                          </Text>
-                        </Pressable>
-                        <Pressable
-                          onPress={() => setTermsSheetKey("tos")}
-                          style={styles.termsDetailButton}
-                        >
-                          <Text style={styles.termsDetailText}>보기</Text>
-                          <AppIcon
-                            name="chevron-right"
-                            size={14}
-                            color={theme.colors.inkMute}
-                          />
-                        </Pressable>
-                      </View>
-
-                      <View style={styles.termsRow}>
-                        <Pressable
-                          accessibilityRole="checkbox"
-                          accessibilityState={{ checked: agreedTerms.privacy }}
-                          onPress={() =>
-                            setAgreedTerms((prev) => ({
-                              ...prev,
-                              privacy: !prev.privacy,
-                            }))
-                          }
-                          style={styles.termsCheckWrap}
-                        >
-                          <CheckBadge on={agreedTerms.privacy} />
-                          <Text style={styles.termsItemText}>
-                            <Text style={styles.termsRequired}>[필수]</Text> 개인정보
-                            처리방침
-                          </Text>
-                        </Pressable>
-                        <Pressable
-                          onPress={() => setTermsSheetKey("privacy")}
-                          style={styles.termsDetailButton}
-                        >
-                          <Text style={styles.termsDetailText}>보기</Text>
-                          <AppIcon
-                            name="chevron-right"
-                            size={14}
-                            color={theme.colors.inkMute}
-                          />
-                        </Pressable>
-                      </View>
+                    <View style={styles.termsRow}>
+                      <Pressable
+                        accessibilityRole="checkbox"
+                        accessibilityState={{ checked: agreedTerms.privacy }}
+                        onPress={() =>
+                          setAgreedTerms((prev) => ({
+                            ...prev,
+                            privacy: !prev.privacy,
+                          }))
+                        }
+                        style={styles.termsCheckWrap}
+                      >
+                        <CheckBadge on={agreedTerms.privacy} />
+                        <Text style={styles.termsItemText}>
+                          <Text style={styles.termsRequired}>[필수]</Text> 개인정보
+                          처리방침
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        onPress={() => setTermsSheetKey("privacy")}
+                        style={styles.termsDetailButton}
+                      >
+                        <Text style={styles.termsDetailText}>보기</Text>
+                        <AppIcon
+                          name="chevron-right"
+                          size={14}
+                          color={theme.colors.inkMute}
+                        />
+                      </Pressable>
                     </View>
                   </View>
-                </MotionEnter>
+                </Animated.View>
               ) : null}
 
               {/* 섹션 2: 성도 정보 (새로 작성할 카드가 위쪽에 추가) */}
               {unlockedStep >= 2 ? (
-                <MotionEnter mode="fade" enabled={enterMotion}>
-                  <View style={styles.sectionCard}>
-                    <View style={styles.sectionHeader}>
-                      <View style={styles.sectionBadge}>
-                        <Text style={styles.sectionBadgeText}>2</Text>
+                <Animated.View
+                  entering={
+                    enterMotion
+                      ? FadeInDown.duration(380).easing(
+                          Easing.out(Easing.cubic),
+                        )
+                      : undefined
+                  }
+                  layout={LinearTransition.duration(350).easing(
+                    Easing.out(Easing.cubic),
+                  )}
+                  style={styles.sectionCard}
+                >
+                  <View style={styles.sectionHeader}>
+                    <View style={styles.sectionBadge}>
+                      <Text style={styles.sectionBadgeText}>2</Text>
+                    </View>
+                    <Text style={styles.sectionTitle}>성도 정보</Text>
+                  </View>
+
+                  <Field label="이름">
+                    <MotionShake trigger={errors.userName}>
+                      <SignupInput
+                        ref={nameInputRef}
+                        testID="signup-name-input"
+                        value={values.userName}
+                        onChangeText={setField("userName")}
+                        placeholder="실명을 입력해주세요"
+                        autoComplete="name"
+                        textContentType="name"
+                        returnKeyType="next"
+                        onSubmitEditing={() =>
+                          phoneInputRef.current?.focus()
+                        }
+                        hasError={Boolean(errors.userName)}
+                        trailing={
+                          isNameValid ? (
+                            <MotionPop>
+                              <AppIcon
+                                name="check-circle"
+                                size={18}
+                                color={theme.colors.success}
+                              />
+                            </MotionPop>
+                          ) : null
+                        }
+                      />
+                    </MotionShake>
+
+                    {/* Realtime name criteria feedback */}
+                    <View style={styles.passwordRulesRow}>
+                      <View style={styles.ruleItem}>
+                        <AppIcon
+                          name={hasNameLength ? "check" : "circle"}
+                          size={12}
+                          color={
+                            hasNameLength
+                              ? theme.colors.primaryDeep
+                              : theme.colors.inkMute
+                          }
+                        />
+                        <Text
+                          style={[
+                            styles.ruleText,
+                            hasNameLength ? styles.ruleTextPass : null,
+                          ]}
+                        >
+                          2~10자
+                        </Text>
                       </View>
-                      <Text style={styles.sectionTitle}>성도 정보</Text>
+                      <View style={styles.ruleItem}>
+                        <AppIcon
+                          name={hasNoSpecialChars ? "check" : "circle"}
+                          size={12}
+                          color={
+                            hasNoSpecialChars
+                              ? theme.colors.primaryDeep
+                              : theme.colors.inkMute
+                          }
+                        />
+                        <Text
+                          style={[
+                            styles.ruleText,
+                            hasNoSpecialChars ? styles.ruleTextPass : null,
+                          ]}
+                        >
+                          특수문자 제외
+                        </Text>
+                      </View>
                     </View>
 
-                    <Field label="이름">
-                      <MotionShake trigger={errors.userName}>
-                        <SignupInput
-                          ref={nameInputRef}
-                          testID="signup-name-input"
-                          value={values.userName}
-                          onChangeText={setField("userName")}
-                          placeholder="실명을 입력해주세요"
-                          autoComplete="name"
-                          textContentType="name"
-                          returnKeyType="next"
-                          onSubmitEditing={() =>
-                            phoneInputRef.current?.focus()
-                          }
-                          hasError={Boolean(errors.userName)}
-                          trailing={
-                            isNameValid ? (
-                              <MotionPop>
-                                <AppIcon
-                                  name="check-circle"
-                                  size={18}
-                                  color={theme.colors.success}
-                                />
-                              </MotionPop>
-                            ) : null
-                          }
-                        />
-                      </MotionShake>
+                    <InlineError>{errors.userName}</InlineError>
+                  </Field>
 
-                      {/* Realtime name criteria feedback */}
-                      <View style={styles.passwordRulesRow}>
-                        <View style={styles.ruleItem}>
-                          <AppIcon
-                            name={hasNameLength ? "check" : "circle"}
-                            size={12}
-                            color={
-                              hasNameLength
-                                ? theme.colors.primaryDeep
-                                : theme.colors.inkMute
-                            }
-                          />
-                          <Text
-                            style={[
-                              styles.ruleText,
-                              hasNameLength ? styles.ruleTextPass : null,
-                            ]}
-                          >
-                            2~10자
-                          </Text>
-                        </View>
-                        <View style={styles.ruleItem}>
-                          <AppIcon
-                            name={hasNoSpecialChars ? "check" : "circle"}
-                            size={12}
-                            color={
-                              hasNoSpecialChars
-                                ? theme.colors.primaryDeep
-                                : theme.colors.inkMute
-                            }
-                          />
-                          <Text
-                            style={[
-                              styles.ruleText,
-                              hasNoSpecialChars ? styles.ruleTextPass : null,
-                            ]}
-                          >
-                            특수문자 제외
-                          </Text>
-                        </View>
-                      </View>
-
-                      <InlineError>{errors.userName}</InlineError>
-                    </Field>
-
-                    <Field label="연락처">
-                      <MotionShake
-                        trigger={
-                          phoneErrorMessage ??
-                          (isPhoneError || isPhoneDup
-                            ? "phone-error"
-                            : undefined)
+                  <Field label="연락처">
+                    <MotionShake
+                      trigger={
+                        phoneErrorMessage ??
+                        (isPhoneError || isPhoneDup
+                          ? "phone-error"
+                          : undefined)
+                      }
+                    >
+                      <SignupInput
+                        ref={phoneInputRef}
+                        testID="signup-phone-input"
+                        value={values.phone}
+                        onChangeText={setField("phone")}
+                        placeholder="010-XXXX-XXXX"
+                        keyboardType="phone-pad"
+                        autoComplete="tel"
+                        textContentType="telephoneNumber"
+                        returnKeyType="next"
+                        onSubmitEditing={() =>
+                          emailInputRef.current?.focus()
                         }
-                      >
-                        <SignupInput
-                          ref={phoneInputRef}
-                          testID="signup-phone-input"
-                          value={values.phone}
-                          onChangeText={setField("phone")}
-                          placeholder="010-XXXX-XXXX"
-                          keyboardType="phone-pad"
-                          autoComplete="tel"
-                          textContentType="telephoneNumber"
-                          returnKeyType="next"
-                          onSubmitEditing={() =>
-                            emailInputRef.current?.focus()
-                          }
-                          hasError={
-                            isPhoneError ||
-                            isPhoneDup ||
-                            Boolean(errors.phone)
-                          }
-                          trailing={
-                            isPhoneValid ? (
-                              <MotionPop>
-                                <AppIcon
-                                  name="check-circle"
-                                  size={18}
-                                  color={theme.colors.success}
-                                />
-                              </MotionPop>
-                            ) : null
-                          }
-                        />
-                      </MotionShake>
-
-                      {/* Realtime phone criteria feedback */}
-                      <View style={styles.passwordRulesRow}>
-                        <View style={styles.ruleItem}>
-                          <AppIcon
-                            name={hasPhonePrefix ? "check" : "circle"}
-                            size={12}
-                            color={
-                              hasPhonePrefix
-                                ? theme.colors.primaryDeep
-                                : theme.colors.inkMute
-                            }
-                          />
-                          <Text
-                            style={[
-                              styles.ruleText,
-                              hasPhonePrefix ? styles.ruleTextPass : null,
-                            ]}
-                          >
-                            010 시작
-                          </Text>
-                        </View>
-                        <View style={styles.ruleItem}>
-                          <AppIcon
-                            name={hasPhoneLength ? "check" : "circle"}
-                            size={12}
-                            color={
-                              hasPhoneLength
-                                ? theme.colors.primaryDeep
-                                : theme.colors.inkMute
-                            }
-                          />
-                          <Text
-                            style={[
-                              styles.ruleText,
-                              hasPhoneLength ? styles.ruleTextPass : null,
-                            ]}
-                          >
-                            10~11자리
-                          </Text>
-                        </View>
-                      </View>
-
-                      <InlineError>{phoneErrorMessage}</InlineError>
-                    </Field>
-
-                    <Field label="이메일">
-                      <MotionShake trigger={emailErrorMessage}>
-                        <SignupInput
-                          ref={emailInputRef}
-                          testID="signup-email-input"
-                          value={values.email}
-                          onChangeText={setField("email")}
-                          placeholder="이메일 주소"
-                          keyboardType="email-address"
-                          autoComplete="email"
-                          textContentType="emailAddress"
-                          autoCapitalize="none"
-                          returnKeyType="done"
-                          onBlur={onEmailBlur}
-                          onSubmitEditing={() => {
-                            emailInputRef.current?.blur();
-                            onEmailBlur();
-                            if (isCard2Complete) {
-                              setUnlockedStep((prev) => Math.max(prev, 3));
-                            }
-                          }}
-                          hasError={Boolean(emailErrorMessage)}
-                          trailing={
-                            checkAvailability.isPending &&
-                            lastAvailabilityTarget === "email" ? (
-                              <ActivityIndicator
-                                size="small"
-                                color={theme.colors.primaryDeep}
+                        hasError={
+                          isPhoneError ||
+                          isPhoneDup ||
+                          Boolean(errors.phone)
+                        }
+                        trailing={
+                          isPhoneValid ? (
+                            <MotionPop>
+                              <AppIcon
+                                name="check-circle"
+                                size={18}
+                                color={theme.colors.success}
                               />
-                            ) : currentEmailAvailability === true ? (
-                              <MotionPop>
-                                <AppIcon
-                                  name="check-circle"
-                                  size={18}
-                                  color={theme.colors.success}
-                                />
-                              </MotionPop>
-                            ) : null
+                            </MotionPop>
+                          ) : null
+                        }
+                      />
+                    </MotionShake>
+
+                    {/* Realtime phone criteria feedback */}
+                    <View style={styles.passwordRulesRow}>
+                      <View style={styles.ruleItem}>
+                        <AppIcon
+                          name={hasPhonePrefix ? "check" : "circle"}
+                          size={12}
+                          color={
+                            hasPhonePrefix
+                              ? theme.colors.primaryDeep
+                              : theme.colors.inkMute
                           }
                         />
-                      </MotionShake>
-
-                      {/* Realtime email criteria feedback */}
-                      <View style={styles.passwordRulesRow}>
-                        <View style={styles.ruleItem}>
-                          <AppIcon
-                            name={hasValidEmailFormat ? "check" : "circle"}
-                            size={12}
-                            color={
-                              hasValidEmailFormat
-                                ? theme.colors.primaryDeep
-                                : theme.colors.inkMute
-                            }
-                          />
-                          <Text
-                            style={[
-                              styles.ruleText,
-                              hasValidEmailFormat ? styles.ruleTextPass : null,
-                            ]}
-                          >
-                            이메일 형식
-                          </Text>
-                        </View>
-                        <View style={styles.ruleItem}>
-                          <AppIcon
-                            name={isEmailChecked ? "check" : "circle"}
-                            size={12}
-                            color={
-                              isEmailChecked
-                                ? theme.colors.primaryDeep
-                                : theme.colors.inkMute
-                            }
-                          />
-                          <Text
-                            style={[
-                              styles.ruleText,
-                              isEmailChecked ? styles.ruleTextPass : null,
-                            ]}
-                          >
-                            중복 확인 완료
-                          </Text>
-                        </View>
+                        <Text
+                          style={[
+                            styles.ruleText,
+                            hasPhonePrefix ? styles.ruleTextPass : null,
+                          ]}
+                        >
+                          010 시작
+                        </Text>
                       </View>
+                      <View style={styles.ruleItem}>
+                        <AppIcon
+                          name={hasPhoneLength ? "check" : "circle"}
+                          size={12}
+                          color={
+                            hasPhoneLength
+                              ? theme.colors.primaryDeep
+                              : theme.colors.inkMute
+                          }
+                        />
+                        <Text
+                          style={[
+                            styles.ruleText,
+                            hasPhoneLength ? styles.ruleTextPass : null,
+                          ]}
+                        >
+                          10~11자리
+                        </Text>
+                      </View>
+                    </View>
 
-                      {/* Invisible trigger for automated tests and scripts */}
-                      <Pressable
-                        testID="signup-check-email"
-                        accessibilityRole="button"
-                        accessibilityLabel="이메일 중복 확인"
-                        onPress={() => onCheckAvailability("email")}
-                        style={styles.hiddenTrigger}
-                      />
-                      <InlineError>{emailErrorMessage}</InlineError>
-                      {currentEmailAvailability === true ? (
-                        <MotionPop>
-                          <View style={styles.successRow}>
-                            <AppIcon
-                              name="check-circle"
-                              size={14}
-                              color={theme.colors.success}
+                    <InlineError>{phoneErrorMessage}</InlineError>
+                  </Field>
+
+                  <Field label="이메일">
+                    <MotionShake trigger={emailErrorMessage}>
+                      <SignupInput
+                        ref={emailInputRef}
+                        testID="signup-email-input"
+                        value={values.email}
+                        onChangeText={setField("email")}
+                        placeholder="이메일 주소"
+                        keyboardType="email-address"
+                        autoComplete="email"
+                        textContentType="emailAddress"
+                        autoCapitalize="none"
+                        returnKeyType="done"
+                        onBlur={onEmailBlur}
+                        onSubmitEditing={() => {
+                          emailInputRef.current?.blur();
+                          onEmailBlur();
+                          if (isCard2Complete) {
+                            animateLayout();
+                            setUnlockedStep((prev) => Math.max(prev, 3));
+                          }
+                        }}
+                        hasError={Boolean(emailErrorMessage)}
+                        trailing={
+                          checkAvailability.isPending &&
+                          lastAvailabilityTarget === "email" ? (
+                            <ActivityIndicator
+                              size="small"
+                              color={theme.colors.primaryDeep}
                             />
-                            <AppText
-                              variant="caption"
-                              tone="success"
-                              style={styles.successHint}
-                            >
-                              사용 가능한 이메일입니다
-                            </AppText>
-                          </View>
-                        </MotionPop>
-                      ) : null}
-                    </Field>
-                  </View>
-                </MotionEnter>
+                          ) : currentEmailAvailability === true ? (
+                            <MotionPop>
+                              <AppIcon
+                                name="check-circle"
+                                size={18}
+                                color={theme.colors.success}
+                              />
+                            </MotionPop>
+                          ) : null
+                        }
+                      />
+                    </MotionShake>
+
+                    {/* Realtime email criteria feedback */}
+                    <View style={styles.passwordRulesRow}>
+                      <View style={styles.ruleItem}>
+                        <AppIcon
+                          name={hasValidEmailFormat ? "check" : "circle"}
+                          size={12}
+                          color={
+                            hasValidEmailFormat
+                              ? theme.colors.primaryDeep
+                              : theme.colors.inkMute
+                          }
+                        />
+                        <Text
+                          style={[
+                            styles.ruleText,
+                            hasValidEmailFormat ? styles.ruleTextPass : null,
+                          ]}
+                        >
+                          이메일 형식
+                        </Text>
+                      </View>
+                      <View style={styles.ruleItem}>
+                        <AppIcon
+                          name={isEmailChecked ? "check" : "circle"}
+                          size={12}
+                          color={
+                            isEmailChecked
+                              ? theme.colors.primaryDeep
+                              : theme.colors.inkMute
+                          }
+                        />
+                        <Text
+                          style={[
+                            styles.ruleText,
+                            isEmailChecked ? styles.ruleTextPass : null,
+                          ]}
+                        >
+                          중복 확인 완료
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Invisible trigger for automated tests and scripts */}
+                    <Pressable
+                      testID="signup-check-email"
+                      accessibilityRole="button"
+                      accessibilityLabel="이메일 중복 확인"
+                      onPress={() => onCheckAvailability("email")}
+                      style={styles.hiddenTrigger}
+                    />
+                    <InlineError>{emailErrorMessage}</InlineError>
+                    {currentEmailAvailability === true ? (
+                      <MotionPop>
+                        <View style={styles.successRow}>
+                          <AppIcon
+                            name="check-circle"
+                            size={14}
+                            color={theme.colors.success}
+                          />
+                          <AppText
+                            variant="caption"
+                            tone="success"
+                            style={styles.successHint}
+                          >
+                            사용 가능한 이메일입니다
+                          </AppText>
+                        </View>
+                      </MotionPop>
+                    ) : null}
+                  </Field>
+                </Animated.View>
               ) : null}
 
               {/* 섹션 1: 계정 정보 (최하단) */}
-              <View style={styles.sectionCard}>
+              <Animated.View
+                layout={LinearTransition.duration(350).easing(
+                  Easing.out(Easing.cubic),
+                )}
+                style={styles.sectionCard}
+              >
                 <View style={styles.sectionHeader}>
                   <View style={styles.sectionBadge}>
                     <Text style={styles.sectionBadgeText}>1</Text>
@@ -899,8 +966,9 @@ export default function SignupScreen() {
                       returnKeyType="next"
                       onSubmitEditing={() => {
                         if (isCard1Complete) {
+                          animateLayout();
                           setUnlockedStep((prev) => Math.max(prev, 2));
-                          setTimeout(() => nameInputRef.current?.focus(), 60);
+                          setTimeout(() => nameInputRef.current?.focus(), 250);
                         } else if (nameInputRef.current) {
                           nameInputRef.current.focus();
                         }
@@ -955,7 +1023,7 @@ export default function SignupScreen() {
                     <InlineError>{passwordErrorMessage}</InlineError>
                   ) : null}
                 </Field>
-              </View>
+              </Animated.View>
             </MotionEnter>
 
             {signup.error ? (

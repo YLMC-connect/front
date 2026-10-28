@@ -727,6 +727,28 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("월요일 오전 기도방")).toBeTruthy();
     expect(screen.getByText("긴급 기도제목")).toBeTruthy();
     expect(screen.getByText("오늘 기도 완료")).toBeTruthy();
+    expect(screen.getByText("75%")).toBeTruthy();
+
+    // Toggle prayer completion
+    fireEvent.press(screen.getByText("오늘 기도 완료"));
+    expect(screen.getByText("오늘 기도 완료됨")).toBeTruthy();
+
+    // Switch to answers tab
+    fireEvent.press(screen.getByRole("tab", { name: "응답" }));
+    expect(screen.getByText("새로운 자리 적응")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "첫 주를 잘 마쳤고 팀 안에서 좋은 도움을 받고 있습니다.",
+      ),
+    ).toBeTruthy();
+
+    // Switch to status tab
+    fireEvent.press(screen.getByRole("tab", { name: "현황" }));
+    expect(screen.getByText("기도 현황")).toBeTruthy();
+    expect(screen.getByText("기도 완료한 성도")).toBeTruthy();
+    expect(screen.getByText("김은혜")).toBeTruthy();
+    expect(screen.getByText("아직 완료 전")).toBeTruthy();
+    expect(screen.getByText("한수연")).toBeTruthy();
   });
 
   it("renders the direct prayer screen", async () => {

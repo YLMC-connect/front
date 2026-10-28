@@ -135,62 +135,89 @@ function PrayerContent() {
               testID="prayer-rooms-empty"
             />
           ) : (
-            data.rooms.map((room) => (
-              <MotionPressable
-                key={room.id}
-                accessibilityRole="button"
-                onPress={() => router.push(`/prayer/${room.id}`)}
-                pressedScale={0.985}
-                style={styles.roomCard}
-              >
-                <PrayerDayBadge weekday={room.weekday} period={room.period} />
-                <View style={styles.cardText}>
-                  <View style={styles.badgeRow}>
-                    <AppText variant="cardTitle">
-                      {room.title ??
-                        `${weekdayLabels[room.weekday].long} ${periodLabels[room.period]}`}
-                    </AppText>
+            data.rooms.map((room) => {
+              const rate =
+                room.participationRate ??
+                (room.completedCount && room.memberCount
+                  ? Math.round((room.completedCount / room.memberCount) * 100)
+                  : 0);
+
+              return (
+                <MotionPressable
+                  key={room.id}
+                  accessibilityRole="button"
+                  onPress={() => router.push(`/prayer/${room.id}`)}
+                  pressedScale={0.985}
+                  style={styles.roomCard}
+                >
+                  <View style={styles.roomCardMain}>
+                    <PrayerDayBadge weekday={room.weekday} period={room.period} />
+                    <View style={styles.cardText}>
+                      <View style={styles.badgeRow}>
+                        <AppText variant="cardTitle">
+                          {room.title ??
+                            `${weekdayLabels[room.weekday].long} ${periodLabels[room.period]}`}
+                        </AppText>
+                        <View
+                          style={[
+                            styles.statusBadge,
+                            room.status !== "joined" ? styles.warnBadge : null,
+                          ]}
+                        >
+                          <Text style={styles.statusBadgeText}>
+                            {roomStatusLabels[room.status]}
+                          </Text>
+                        </View>
+                      </View>
+                      <AppText
+                        variant="caption"
+                        tone="muted"
+                        style={styles.mutedText}
+                      >
+                        멤버 {room.memberCount}명 · 오늘 완료{" "}
+                        {room.completedCount == null
+                          ? "승인 대기"
+                          : `${room.completedCount}명`}
+                      </AppText>
+                    </View>
                     <View
-                      style={[
-                        styles.statusBadge,
-                        room.status !== "joined" ? styles.warnBadge : null,
-                      ]}
+                      testID={`prayer-room-${room.id}-action`}
+                      style={styles.roomAction}
                     >
-                      <Text style={styles.statusBadgeText}>
-                        {roomStatusLabels[room.status]}
-                      </Text>
+                      <AppText variant="caption" tone="brand" style={styles.roomActionText}>
+                        기도방 보기
+                      </AppText>
+                      <AppIcon
+                        name="chevron-right"
+                        size={16}
+                        color={theme.colors.primaryDeep}
+                      />
                     </View>
                   </View>
-                  <AppText
-                    variant="caption"
-                    tone="muted"
-                    style={styles.mutedText}
-                  >
-                    멤버 {room.memberCount}명 · 오늘 완료{" "}
-                    {room.completedCount == null
-                      ? "승인 대기"
-                      : `${room.completedCount}명`}{" "}
-                    · 참여율{" "}
-                    {room.participationRate == null
-                      ? "-"
-                      : `${room.participationRate}%`}
-                  </AppText>
-                </View>
-                <View
-                  testID={`prayer-room-${room.id}-action`}
-                  style={styles.roomAction}
-                >
-                  <AppText variant="caption" tone="brand">
-                    기도방 보기
-                  </AppText>
-                  <AppIcon
-                    name="chevron-right"
-                    size={18}
-                    color={theme.colors.primaryDeep}
-                  />
-                </View>
-              </MotionPressable>
-            ))
+
+                  {room.status === "joined" ? (
+                    <View style={styles.roomProgressSection}>
+                      <View style={styles.roomProgressHeader}>
+                        <AppText variant="caption" tone="muted">
+                          오늘 기도 참여율
+                        </AppText>
+                        <AppText variant="caption" tone="brand" style={styles.roomRateText}>
+                          {rate}%
+                        </AppText>
+                      </View>
+                      <View style={styles.roomProgressTrack}>
+                        <View
+                          style={[
+                            styles.roomProgressFill,
+                            { width: `${Math.min(rate, 100)}%` },
+                          ]}
+                        />
+                      </View>
+                    </View>
+                  ) : null}
+                </MotionPressable>
+              );
+            })
           )}
         </View>
       </View>
@@ -637,27 +664,62 @@ const styles = StyleSheet.create({
     gap: theme.spacing[3],
   },
   roomCard: {
-    minHeight: 84,
-    borderRadius: theme.radius.md,
+    borderRadius: theme.radius.lg,
     borderWidth: 1,
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
     padding: theme.spacing[4],
+    gap: 12,
+    ...theme.shadow.card,
+  },
+  roomCardMain: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    ...theme.shadow.card,
   },
   roomAction: {
     flexDirection: "row",
     alignItems: "center",
     gap: 2,
     flexShrink: 0,
+    backgroundColor: theme.colors.primarySoft,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: theme.radius.pill,
+  },
+  roomActionText: {
+    fontSize: 11,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  roomProgressSection: {
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.line,
+    gap: 6,
+  },
+  roomProgressHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  roomRateText: {
+    fontWeight: theme.fontWeight.bold,
+  },
+  roomProgressTrack: {
+    height: 5,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.surfaceMuted,
+    overflow: "hidden",
+  },
+  roomProgressFill: {
+    height: "100%",
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.primary,
   },
   dayBadge: {
     width: 48,
     height: 48,
-    borderRadius: theme.radius.md,
+    borderRadius: 14,
     backgroundColor: theme.colors.primaryTint,
     alignItems: "center",
     justifyContent: "center",

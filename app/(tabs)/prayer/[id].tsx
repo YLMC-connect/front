@@ -6,6 +6,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   AnimatedProgressFill,
+  Avatar,
   Card,
   DetailBadge,
   MotionPop,
@@ -30,7 +31,17 @@ const tabs: readonly { key: TabKey; label: string }[] = [
   { key: "status", label: "현황" },
 ];
 
-const urgent = [
+interface PrayerItemData {
+  category: string;
+  title: string;
+  author: string;
+  text: string;
+  answer?: string;
+  when: string;
+  urgent?: boolean;
+}
+
+const defaultUrgent: readonly PrayerItemData[] = [
   {
     category: "치유",
     title: "수술 후 회복을 위해",
@@ -39,9 +50,9 @@ const urgent = [
     when: "오늘",
     urgent: true,
   },
-] as const;
+];
 
-const progress = [
+const defaultProgress: readonly PrayerItemData[] = [
   {
     category: "구원",
     title: "가족의 신앙 회복",
@@ -56,9 +67,9 @@ const progress = [
     text: "새 학기 친구 관계와 학업을 지혜롭게 감당하도록 기도해주세요.",
     when: "2일 전",
   },
-] as const;
+];
 
-const answers = [
+const defaultAnswers: readonly PrayerItemData[] = [
   {
     category: "일반",
     title: "새로운 자리 적응",
@@ -75,103 +86,30 @@ const answers = [
     answer: "서로 이야기를 시작했고 함께 예배드리기로 했습니다.",
     when: "3일 전",
   },
-] as const;
+];
 
-function LivePrayerDetail({ id }: { id: string }) {
-  const router = useRouter();
-  const status = useQuery({
-    queryKey: ["prayer", "cohort-status", id],
-    queryFn: () => fetchPrayerCohortStatus(id),
-  });
-  const board = useQuery({
-    queryKey: ["prayer", "topic-board"],
-    queryFn: fetchPrayerTopicBoard,
-  });
-  const room = status.data;
-  const topics = [
-    ...(board.data?.emergency ?? []),
-    ...(board.data?.ongoing ?? []),
-    ...(board.data?.recentAnswers ?? []),
-  ];
-  const pending = status.isPending || board.isPending;
-
-  return (
-    <Screen scroll={false} padded={false}>
-      <View style={styles.root}>
-        <TopBar
-          title={room?.cohortName || "기도방"}
-          back
-          onBack={() => router.back()}
-        />
-        <ScrollView contentContainerStyle={styles.body}>
-          <View style={styles.stack}>
-            {pending ? (
-              <Text style={styles.emptyDesc}>서버에서 불러오는 중입니다.</Text>
-            ) : null}
-            {status.isError || board.isError ? (
-              <Text style={styles.emptyDesc}>기도방을 다시 불러와주세요.</Text>
-            ) : null}
-            {room ? (
-              <Card style={styles.prayerCard}>
-                <Text style={styles.prayerTitle}>
-                  멤버 {room.totalMembers}명 · 오늘 완료 {room.completedCount}명
-                </Text>
-                <Text style={styles.prayerText}>
-                  {room.scheduledDate} · 참여율 {room.completionRate}%
-                </Text>
-              </Card>
-            ) : null}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>기도제목 게시판</Text>
-              {!pending && topics.length === 0 ? (
-                <Text style={styles.prayerText}>
-                  게시된 기도제목이 없습니다.
-                </Text>
-              ) : null}
-              {topics.map((topic) => (
-                <Card key={topic.id} style={styles.prayerCard}>
-                  <Text style={styles.prayerTitle}>{topic.title}</Text>
-                  <Text style={styles.prayerText}>
-                    {topic.categoryName} · {topic.writerName}
-                  </Text>
-                  <Text style={styles.prayerText}>{topic.content}</Text>
-                </Card>
-              ))}
-            </View>
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>오늘 완료</Text>
-              {(room?.completed ?? []).map((member) => (
-                <Text key={member.userId} style={styles.prayerText}>
-                  {member.userName}
-                </Text>
-              ))}
-              {room && room.completed.length === 0 ? (
-                <Text style={styles.prayerText}>완료한 멤버가 없습니다.</Text>
-              ) : null}
-            </View>
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>아직 미완료</Text>
-              {(room?.notCompleted ?? []).map((member) => (
-                <Text key={member.userId} style={styles.prayerText}>
-                  {member.userName}
-                </Text>
-              ))}
-              {room && room.notCompleted.length === 0 ? (
-                <Text style={styles.prayerText}>미완료 멤버가 없습니다.</Text>
-              ) : null}
-            </View>
-          </View>
-        </ScrollView>
-      </View>
-    </Screen>
-  );
-}
-
-const completedPeople = ["김은혜", "박정아", "이수진", "김지영"];
-const pendingPeople = ["한수연", "오지연"];
+const defaultCompletedPeople = ["김은혜", "박정아", "이수진", "김지영"];
+const defaultPendingPeople = ["한수연", "오지연"];
 
 function routeId(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
+}
+
+function parseDayAndPeriod(id?: string, name?: string): { day: string; period: string } {
+  const text = (name ?? id ?? "").toLowerCase();
+  let day = "월";
+  if (text.includes("화") || text.includes("tue")) day = "화";
+  else if (text.includes("수") || text.includes("wed")) day = "수";
+  else if (text.includes("목") || text.includes("thu")) day = "목";
+  else if (text.includes("금") || text.includes("fri")) day = "금";
+  else if (text.includes("토") || text.includes("sat")) day = "토";
+  else if (text.includes("일") || text.includes("sun")) day = "일";
+
+  let period = "오전";
+  if (text.includes("오후") || text.includes("pm") || text.includes("저녁")) {
+    period = "오후";
+  }
+  return { day, period };
 }
 
 export default function PrayerDetailScreen() {
@@ -182,13 +120,9 @@ export default function PrayerDetailScreen() {
   }>();
   const id = routeId(params.id);
   const variant = readDesignVariant(params.designVariant) ?? "pray";
-  const [completedOverride, setCompletedOverride] = useState<boolean | null>(
-    null,
-  );
-  if (id && !params.designVariant && resolvePrayerAdapterMode() === "http") {
-    return <LivePrayerDetail id={id} />;
-  }
-  const activeTab: TabKey =
+  const [completedOverride, setCompletedOverride] = useState<boolean | null>(null);
+
+  const initialTab: TabKey =
     variant === "status" ||
     variant === "status-empty" ||
     variant === "leader-status"
@@ -196,25 +130,130 @@ export default function PrayerDetailScreen() {
       : variant === "answers" || variant === "answers-empty"
         ? "answers"
         : "pray";
-  const isCompleted = completedOverride ?? variant === "pray-completed";
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
+
+  const isHttp = resolvePrayerAdapterMode() === "http" && !params.designVariant;
+  const statusQuery = useQuery({
+    queryKey: ["prayer", "cohort-status", id ?? "1"],
+    queryFn: () => fetchPrayerCohortStatus(id ?? "1"),
+    enabled: isHttp && Boolean(id),
+  });
+  const boardQuery = useQuery({
+    queryKey: ["prayer", "topic-board"],
+    queryFn: fetchPrayerTopicBoard,
+    enabled: isHttp,
+  });
+
+  const room = statusQuery.data;
+  const board = boardQuery.data;
+
+  const roomTitle = room?.cohortName || "월요일 오전 기도방";
+  const { day, period } = parseDayAndPeriod(id, roomTitle);
+
   const isPrayEmpty = variant === "pray-empty";
   const isStatusEmpty = variant === "status-empty";
   const isAnswersEmpty = variant === "answers-empty";
 
+  const isCompleted =
+    completedOverride ?? (room ? room.myCompleted : variant === "pray-completed");
+
+  const totalMembers = room?.totalMembers ?? 45;
+  const completedCount =
+    room?.completedCount ?? (isCompleted ? 35 : 34);
+  const pendingCount =
+    room?.notCompletedCount ?? (isCompleted ? 10 : 11);
+  const completionRate =
+    room?.completionRate ?? (isCompleted ? 78 : 75);
+
+  const urgentItems: readonly PrayerItemData[] =
+    board?.emergency && board.emergency.length > 0
+      ? board.emergency.map((t) => ({
+          category: t.categoryName || "긴급",
+          title: t.title,
+          author: t.writerName || "성도",
+          text: t.content,
+          when: "오늘",
+          urgent: true,
+        }))
+      : defaultUrgent;
+
+  const ongoingItems: readonly PrayerItemData[] =
+    board?.ongoing && board.ongoing.length > 0
+      ? board.ongoing.map((t) => ({
+          category: t.categoryName || "일반",
+          title: t.title,
+          author: t.writerName || "성도",
+          text: t.content,
+          when: "진행 중",
+        }))
+      : defaultProgress;
+
+  const answerItems: readonly PrayerItemData[] =
+    board?.recentAnswers && board.recentAnswers.length > 0
+      ? board.recentAnswers.map((t) => ({
+          category: t.categoryName || "일반",
+          title: t.title,
+          author: t.writerName || "성도",
+          text: t.content,
+          answer: t.answerContent ?? "기도에 응답해 주셨습니다.",
+          when: "최근",
+        }))
+      : defaultAnswers;
+
+  const completedPeople =
+    room?.completed && room.completed.length > 0
+      ? room.completed.map((m) => m.userName)
+      : defaultCompletedPeople;
+
+  const pendingPeople =
+    room?.notCompleted && room.notCompleted.length > 0
+      ? room.notCompleted.map((m) => m.userName)
+      : defaultPendingPeople;
+
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
-        <TopBar title="월요일 오전 기도방" back onBack={() => router.back()} />
-        <View style={styles.badges}>
-          <DetailBadge tone="primary">참여중</DetailBadge>
-          <DetailBadge>멤버 45명</DetailBadge>
-          <DetailBadge tone="warn">오늘 긴급 1건</DetailBadge>
-          {isCompleted ? (
-            <DetailBadge tone="primary">오늘 완료</DetailBadge>
-          ) : null}
+        <TopBar title={roomTitle} back onBack={() => router.back()} />
+
+        <View style={styles.heroSection}>
+          <Card style={styles.heroCard}>
+            <View style={styles.heroTopRow}>
+              <View style={styles.dayBadge}>
+                <Text style={styles.dayText}>{day}</Text>
+                <Text style={styles.timeText}>{period}</Text>
+              </View>
+              <View style={styles.heroMetaCol}>
+                <View style={styles.badges}>
+                  <DetailBadge tone="primary">참여중</DetailBadge>
+                  <DetailBadge>{`멤버 ${totalMembers}명`}</DetailBadge>
+                  {urgentItems.length > 0 ? (
+                    <DetailBadge tone="warn">{`오늘 긴급 ${urgentItems.length}건`}</DetailBadge>
+                  ) : null}
+                  {isCompleted ? (
+                    <DetailBadge tone="primary">오늘 완료</DetailBadge>
+                  ) : null}
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.heroProgressSection}>
+              <View style={styles.heroProgressHeader}>
+                <Text style={styles.heroProgressLabel}>
+                  오늘 완료 {completedCount}명 / 전체 {totalMembers}명
+                </Text>
+                <Text style={styles.heroProgressRate}>{completionRate}%</Text>
+              </View>
+              <View style={styles.heroProgressBar}>
+                <AnimatedProgressFill
+                  percent={completionRate}
+                  style={styles.heroProgressFill}
+                />
+              </View>
+            </View>
+          </Card>
         </View>
 
-        <UnderlineTabs items={tabs} active={activeTab} />
+        <UnderlineTabs items={tabs} active={activeTab} onChange={setActiveTab} />
 
         <ScrollView
           contentContainerStyle={[
@@ -223,11 +262,25 @@ export default function PrayerDetailScreen() {
           ]}
         >
           {activeTab === "status" ? (
-            <StatusPanel empty={isStatusEmpty} />
+            <StatusPanel
+              empty={isStatusEmpty}
+              completedCount={completedCount}
+              pendingCount={pendingCount}
+              completionRate={completionRate}
+              completedPeople={completedPeople}
+              pendingPeople={pendingPeople}
+              day={day}
+              period={period}
+            />
           ) : activeTab === "answers" ? (
-            <AnswersPanel empty={isAnswersEmpty} />
+            <AnswersPanel empty={isAnswersEmpty} items={answerItems} />
           ) : (
-            <PrayerPanel empty={isPrayEmpty} />
+            <PrayerPanel
+              empty={isPrayEmpty}
+              urgent={urgentItems}
+              progress={ongoingItems}
+              answers={answerItems}
+            />
           )}
         </ScrollView>
 
@@ -248,7 +301,7 @@ export default function PrayerDetailScreen() {
               accessibilityRole="button"
               onPress={() =>
                 setCompletedOverride(
-                  (prev) => !(prev ?? variant === "pray-completed"),
+                  (prev) => !(prev ?? isCompleted),
                 )
               }
               pressedScale={0.96}
@@ -282,7 +335,17 @@ export default function PrayerDetailScreen() {
   );
 }
 
-function PrayerPanel({ empty }: { empty: boolean }) {
+function PrayerPanel({
+  empty,
+  urgent,
+  progress,
+  answers,
+}: {
+  empty: boolean;
+  urgent: readonly PrayerItemData[];
+  progress: readonly PrayerItemData[];
+  answers: readonly PrayerItemData[];
+}) {
   if (empty) {
     return (
       <EmptyMessage
@@ -295,27 +358,39 @@ function PrayerPanel({ empty }: { empty: boolean }) {
 
   return (
     <View style={styles.stack}>
-      <Section title="긴급 기도제목">
-        {urgent.map((item) => (
-          <PrayerItem key={item.title} item={item} />
-        ))}
-      </Section>
-      <Section title="최근 기도응답">
-        {answers.slice(0, 1).map((item) => (
-          <PrayerItem key={item.title} item={item} answer />
-        ))}
-      </Section>
-      <Section title="진행 중 기도제목">
-        {progress.map((item) => (
-          <PrayerItem key={item.title} item={item} />
-        ))}
-      </Section>
+      {urgent.length > 0 ? (
+        <Section title="긴급 기도제목">
+          {urgent.map((item) => (
+            <PrayerItem key={item.title} item={item} />
+          ))}
+        </Section>
+      ) : null}
+      {answers.length > 0 ? (
+        <Section title="최근 기도응답">
+          {answers.slice(0, 1).map((item) => (
+            <PrayerItem key={item.title} item={item} answer />
+          ))}
+        </Section>
+      ) : null}
+      {progress.length > 0 ? (
+        <Section title="진행 중 기도제목">
+          {progress.map((item) => (
+            <PrayerItem key={item.title} item={item} />
+          ))}
+        </Section>
+      ) : null}
     </View>
   );
 }
 
-function AnswersPanel({ empty }: { empty: boolean }) {
-  if (empty) {
+function AnswersPanel({
+  empty,
+  items,
+}: {
+  empty: boolean;
+  items: readonly PrayerItemData[];
+}) {
+  if (empty || items.length === 0) {
     return (
       <EmptyMessage
         icon="check-circle"
@@ -327,36 +402,57 @@ function AnswersPanel({ empty }: { empty: boolean }) {
 
   return (
     <View style={styles.stack}>
-      {answers.map((item) => (
+      {items.map((item) => (
         <PrayerItem key={item.title} item={item} answer />
       ))}
     </View>
   );
 }
 
-function StatusPanel({ empty }: { empty: boolean }) {
-  const completed = empty ? "0명" : "34명";
-  const pending = empty ? "0명" : "11명";
-  const rate = empty ? "-" : "75%";
+function StatusPanel({
+  empty,
+  completedCount,
+  pendingCount,
+  completionRate,
+  completedPeople,
+  pendingPeople,
+  day,
+  period,
+}: {
+  empty: boolean;
+  completedCount: number;
+  pendingCount: number;
+  completionRate: number;
+  completedPeople: readonly string[];
+  pendingPeople: readonly string[];
+  day: string;
+  period: string;
+}) {
+  const completedText = empty ? "0명" : `${completedCount}명`;
+  const pendingText = empty ? "0명" : `${pendingCount}명`;
+  const rateText = empty ? "-" : `${completionRate}%`;
 
   return (
     <View style={styles.stack}>
       <Card style={styles.statusCard}>
         <View style={styles.statusHead}>
           <View style={styles.dayBadge}>
-            <Text style={styles.dayText}>월</Text>
-            <Text style={styles.timeText}>오전</Text>
+            <Text style={styles.dayText}>{day}</Text>
+            <Text style={styles.timeText}>{period}</Text>
           </View>
-          <Text style={styles.statusTitle}>기도 현황</Text>
+          <View style={styles.statusHeadInfo}>
+            <Text style={styles.statusTitle}>기도 현황</Text>
+            <Text style={styles.smallMuted}>오늘의 기도 참여 현황이에요</Text>
+          </View>
         </View>
         <View style={styles.stats}>
-          <Stat label="완료" value={completed} active />
-          <Stat label="미완료" value={pending} />
-          <Stat label="참여율" value={rate} />
+          <Stat label="완료" value={completedText} active />
+          <Stat label="미완료" value={pendingText} />
+          <Stat label="참여율" value={rateText} />
         </View>
         <View style={styles.progressBar}>
           <AnimatedProgressFill
-            percent={empty ? 0 : 75}
+            percent={empty ? 0 : completionRate}
             style={styles.progressFill}
           />
         </View>
@@ -364,7 +460,7 @@ function StatusPanel({ empty }: { empty: boolean }) {
 
       <Card style={styles.statusCard}>
         <View style={styles.statusListHead}>
-          <Text style={styles.statusListTitle}>기도 완료한 사람</Text>
+          <Text style={styles.statusListTitle}>기도 완료한 성도</Text>
           <Text style={styles.smallMuted}>
             {empty ? 0 : completedPeople.length}명
           </Text>
@@ -381,7 +477,7 @@ function StatusPanel({ empty }: { empty: boolean }) {
             <PersonRow key={name} name={name} done />
           ))
         )}
-        {!empty ? (
+        {!empty && pendingPeople.length > 0 ? (
           <>
             <View style={styles.pendingHead}>
               <Text style={styles.statusListTitle}>아직 완료 전</Text>
@@ -410,54 +506,91 @@ function PrayerItem({
   item,
   answer = false,
 }: {
-  item: {
-    category: string;
-    title: string;
-    author: string;
-    text: string;
-    answer?: string;
-    when: string;
-    urgent?: boolean;
-  };
+  item: PrayerItemData;
   answer?: boolean;
 }) {
+  const [prayed, setPrayed] = useState(false);
+
   return (
     <Card style={styles.prayerCard}>
       <View style={styles.prayerTop}>
-        <View
-          style={[styles.topicChip, item.urgent ? styles.topicChipWarn : null]}
-        >
-          <Text
+        <View style={styles.authorRow}>
+          <Avatar name={item.author} size={22} />
+          <Text style={styles.authorName}>{item.author}</Text>
+          <Text style={styles.dot}>·</Text>
+          <Text style={styles.smallMuted}>{item.when}</Text>
+        </View>
+
+        <View style={styles.chipRow}>
+          {item.urgent ? (
+            <View style={styles.urgentBadge}>
+              <AppIcon name="warning-amber" size={10} color="#DC2626" />
+              <Text style={styles.urgentBadgeText}>긴급</Text>
+            </View>
+          ) : null}
+          <View
             style={[
-              styles.topicChipText,
-              item.urgent ? styles.topicChipTextWarn : null,
+              styles.topicChip,
+              item.urgent ? styles.topicChipWarn : null,
             ]}
           >
-            {item.category}
-          </Text>
+            <Text
+              style={[
+                styles.topicChipText,
+                item.urgent ? styles.topicChipTextWarn : null,
+              ]}
+            >
+              {item.category}
+            </Text>
+          </View>
         </View>
-        <Text style={styles.smallMuted}>{item.when}</Text>
       </View>
+
       <Text style={styles.prayerTitle}>{item.title}</Text>
       <Text style={styles.prayerText}>{item.text}</Text>
+
       {answer && item.answer ? (
         <View style={styles.answerBox}>
-          <Text style={styles.answerLabel}>응답</Text>
+          <View style={styles.answerHeader}>
+            <AppIcon
+              name="check-circle"
+              size={14}
+              color={theme.colors.primaryDeep}
+            />
+            <Text style={styles.answerLabel}>응답</Text>
+          </View>
           <Text style={styles.answerText}>{item.answer}</Text>
         </View>
       ) : null}
+
       <View style={styles.prayerFooter}>
-        <Text style={styles.smallMuted}>{item.author}</Text>
-        <View style={styles.pillAction}>
+        <MotionPressable
+          accessibilityRole="button"
+          onPress={() => setPrayed((prev) => !prev)}
+          pressedScale={0.94}
+          style={[
+            styles.pillAction,
+            prayed ? styles.pillActionActive : null,
+          ]}
+        >
           <AppIcon
             name={answer ? "check" : "favorite"}
             size={14}
-            color={theme.colors.primaryDeep}
+            color={
+              answer || prayed
+                ? theme.colors.primaryDeep
+                : theme.colors.inkMute
+            }
           />
-          <Text style={styles.pillActionText}>
-            {answer ? "응답완료" : "함께 기도"}
+          <Text
+            style={[
+              styles.pillActionText,
+              prayed ? styles.pillActionTextActive : null,
+            ]}
+          >
+            {answer ? "응답완료" : prayed ? "기도 중" : "함께 기도"}
           </Text>
-        </View>
+        </MotionPressable>
       </View>
     </Card>
   );
@@ -466,15 +599,28 @@ function PrayerItem({
 function PersonRow({ name, done = false }: { name: string; done?: boolean }) {
   return (
     <View style={styles.personRow}>
-      <View style={[styles.personDot, done ? styles.personDotDone : null]}>
+      <Avatar name={name} size={30} />
+      <Text style={styles.personName}>{name}</Text>
+      <View
+        style={[
+          styles.personBadge,
+          done ? styles.personBadgeDone : styles.personBadgePending,
+        ]}
+      >
         <AppIcon
           name={done ? "check" : "schedule"}
-          size={13}
-          color={done ? theme.colors.white : theme.colors.inkMute}
+          size={11}
+          color={done ? theme.colors.primaryDeep : theme.colors.inkMute}
         />
+        <Text
+          style={[
+            styles.personBadgeText,
+            done ? styles.personBadgeTextDone : styles.personBadgeTextPending,
+          ]}
+        >
+          {done ? "완료" : "대기"}
+        </Text>
       </View>
-      <Text style={styles.personName}>{name}</Text>
-      <Text style={styles.smallMuted}>{done ? "완료" : "대기"}</Text>
     </View>
   );
 }
@@ -522,12 +668,60 @@ function EmptyMessage({
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  heroSection: {
+    paddingHorizontal: 18,
+    paddingBottom: 10,
+  },
+  heroCard: {
+    padding: 14,
+    gap: 12,
+  },
+  heroTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  heroMetaCol: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: "center",
+  },
   badges: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
-    paddingHorizontal: 18,
-    paddingBottom: 12,
+    gap: 6,
+  },
+  heroProgressSection: {
+    gap: 6,
+    paddingTop: 4,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.line,
+  },
+  heroProgressHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  heroProgressLabel: {
+    color: theme.colors.inkMute,
+    fontSize: theme.fontSize.xs,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  heroProgressRate: {
+    color: theme.colors.primaryDeep,
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.extrabold,
+  },
+  heroProgressBar: {
+    height: 6,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.surface2,
+    overflow: "hidden",
+  },
+  heroProgressFill: {
+    height: "100%",
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.primary,
   },
   body: {
     paddingHorizontal: 18,
@@ -553,18 +747,51 @@ const styles = StyleSheet.create({
   },
   prayerCard: {
     padding: 15,
-    gap: 8,
+    gap: 10,
   },
   prayerTop: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
+  authorRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  authorName: {
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.xs,
+    fontWeight: theme.fontWeight.bold,
+  },
+  dot: {
+    color: theme.colors.inkHint,
+    fontSize: theme.fontSize.xs,
+  },
+  chipRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  urgentBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    backgroundColor: "#FEE2E2",
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+  },
+  urgentBadgeText: {
+    color: "#DC2626",
+    fontSize: 10,
+    fontWeight: theme.fontWeight.extrabold,
+  },
   topicChip: {
     borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.primaryTint,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
   },
   topicChipWarn: {
     backgroundColor: theme.colors.amberSoft,
@@ -593,6 +820,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     gap: 4,
+    borderLeftWidth: 3,
+    borderLeftColor: theme.colors.primary,
+  },
+  answerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
   },
   answerLabel: {
     color: theme.colors.primaryDeep,
@@ -607,8 +841,7 @@ const styles = StyleSheet.create({
   prayerFooter: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    gap: 8,
+    justifyContent: "flex-end",
   },
   smallMuted: {
     color: theme.colors.inkMute,
@@ -620,14 +853,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 4,
     borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.primarySoft,
-    paddingHorizontal: 10,
+    backgroundColor: theme.colors.surface2,
+    paddingHorizontal: 11,
     paddingVertical: 6,
   },
+  pillActionActive: {
+    backgroundColor: theme.colors.primarySoft,
+  },
   pillActionText: {
-    color: theme.colors.primaryDeep,
+    color: theme.colors.inkMute,
     fontSize: theme.fontSize.xs,
     fontWeight: theme.fontWeight.bold,
+  },
+  pillActionTextActive: {
+    color: theme.colors.primaryDeep,
   },
   bottomAction: {
     position: "absolute",
@@ -672,23 +911,31 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
   },
+  statusHeadInfo: {
+    flex: 1,
+    gap: 2,
+  },
   dayBadge: {
-    width: 46,
-    height: 46,
-    borderRadius: 15,
-    backgroundColor: theme.colors.primary,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: theme.colors.primaryTint,
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
   },
   dayText: {
-    color: theme.colors.white,
-    fontSize: theme.fontSize.lg,
-    fontWeight: theme.fontWeight.extrabold,
+    color: theme.colors.primaryDeep,
+    fontSize: 15,
+    lineHeight: 16,
+    fontWeight: "800",
   },
   timeText: {
-    color: "rgba(255,255,255,0.82)",
-    fontSize: 10,
-    fontWeight: theme.fontWeight.bold,
+    marginTop: 2,
+    color: theme.colors.primaryDeep,
+    fontSize: 9,
+    lineHeight: 10,
+    fontWeight: "800",
   },
   statusTitle: {
     color: theme.colors.ink,
@@ -703,7 +950,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: theme.radius.md,
     backgroundColor: theme.colors.surface2,
-    paddingVertical: 10,
+    paddingVertical: 12,
     alignItems: "center",
     gap: 4,
   },
@@ -748,29 +995,42 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   personRow: {
-    minHeight: 40,
+    minHeight: 46,
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 12,
     borderTopWidth: 1,
     borderTopColor: theme.colors.line,
-  },
-  personDot: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: theme.colors.surface2,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  personDotDone: {
-    backgroundColor: theme.colors.primary,
   },
   personName: {
     flex: 1,
     color: theme.colors.ink,
     fontSize: theme.fontSize.md,
     fontWeight: theme.fontWeight.semibold,
+  },
+  personBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: theme.radius.pill,
+  },
+  personBadgeDone: {
+    backgroundColor: theme.colors.primarySoft,
+  },
+  personBadgePending: {
+    backgroundColor: theme.colors.surface2,
+  },
+  personBadgeText: {
+    fontSize: theme.fontSize.xs,
+    fontWeight: theme.fontWeight.bold,
+  },
+  personBadgeTextDone: {
+    color: theme.colors.primaryDeep,
+  },
+  personBadgeTextPending: {
+    color: theme.colors.inkMute,
   },
   empty: {
     alignItems: "center",

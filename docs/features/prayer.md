@@ -1,6 +1,6 @@
 # prayer (중보기도)
 
-> 마지막 갱신: 2026-10-27 (기도제목 등록 모달 폼 구조·하단 글래스 바 통일) | 담당 Phase: P5/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-10-28 (내 기도방 카드 및 기도방 상세 화면 디자인 고도화) | 담당 Phase: P5/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 내 기도방 카드 및 기도방 상세 화면 디자인 고도화 — 기도 탭 루트의 내 기도방 카드에 참여율 게이지 바 및 정돈된 요일 배지를 적용하고, 기도방 상세(/prayer/[id])에는 상단 요약 카드(요일/시간 배지, 참여/인원/긴급 배지, 오늘 참여율 게이지), 인터랙티브 언더라인 탭(기도·응답·현황 전환), 성도 아바타와 긴급 칩이 적용된 기도제목 카드, 성도별 완료 상태 배지가 포함된 현황 패널을 일관되게 적용
 - 기도 탭 API 로딩 정상화 및 Nullable 매퍼 안정화 — 서버의 nullable 필드(rejectReason, emergencyEndAt, answerContent, answeredAt, completedAt, description)를 안전하게 파싱하도록 requireNullableString을 적용하고, getOverview에서 Promise.allSettled를 통해 일부 엔드포인트 실패 또는 데이터 부재 시에도 화면 오류 없이 복구
 - 기도 신청·작성 플로팅 메뉴 통합 — 우측 하단에 '중보기도 신청'과 '기도제목 작성'을 토글하는 Speed Dial 플로팅 메뉴를 추가하고, 메뉴 오픈 시 딤처리(backdrop)가 상단 glass 헤더까지 온전히 덮도록 overlay 레이어 zIndex 보정. 본문 내 불필요한 중보기도 신청 카드를 제거해 신청/작성 진입점을 플로팅 메뉴로 일원화
 - 중보기도 사용자 HTTP adapter — development 기본값은 나눔과 같이 http다. 내 기도방·내 기도제목은 mock 행 위에 덮지 않고 `GET /api/prayer/cohorts/my`와 `GET /api/prayer/topics/my`로 만든다. 테스트와 `EXPO_PUBLIC_PRAYER_ADAPTER=mock`은 기존 mock service를 쓴다. 작성 화면의 `createPrayerTopic`은 `categoryId`가 없어 등록 API를 호출하지 않는다
@@ -67,6 +68,8 @@
 `PrayerRoom`은 `weekday`, `leader`, `memberCount`, `isJoined`를 포함합니다. `PrayerTopic`은 `isAnonymous`, `prayerCount`, `hasPrayed`, `isAnswered`, `answer`를 포함합니다. 루트 화면 전용 `PrayerOverview`는 요일방 요약과 내 기도제목 상태 요약을 가지며 API DTO mapper의 출력 모델로 사용합니다. `PrayerCohortDto`, `PrayerCohortStatusDto`, `PrayerCompletionMemberDto`, `PrayerTopicDto`, `PrayerHistoryItem`은 Notion에 적힌 필드만 가집니다. `PrayerApplicationDto`와 `PrayerCategoryDto`는 이름만 있고 값 타입은 페이지에 없어 `unknown`입니다. 기도방 상세 성공 필드는 없어 빈 객체로만 읽습니다. `a / b`로 한 칸에 적힌 이름은 두 필드입니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-10-28) **내 기도방 카드 및 상세 화면(/prayer/[id]) 디자인 통일 및 일관화** — 기존에 분리되어 있던 mock 화면과 HTTP 프로토타입(LivePrayerDetail)을 단일 상세 화면으로 통합하여 모드에 무관하게 일관된 고품질 UI(Hero Summary Card, UnderlineTabs 전환, 성도 아바타, 응답 박스, 성도별 출석 배지)를 제공한다. 루트 내 기도방 카드에는 오늘 참여율 게이지 바를 추가하여 시각적 일관성을 확보한다.
 
 - (2026-10-27) **기도제목 등록 모달(`modal/prayer-new.tsx`)을 나눔·소모임 작성 모달과 동일한 폼 구조로 통일** — 기존 카드 박스(`FormSection`)와 본문 내 `취소/등록` 2열 버튼을 제거하고, 공통 `ModalFormSection`·`ModalFormTextInput`·안내 박스(`infoBox`)·작성 중단 `ConfirmDialog` 및 하단 반투명 글래스 고정 CTA 바(`기도제목 등록`)로 통일한다.
 

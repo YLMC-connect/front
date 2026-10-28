@@ -1,6 +1,6 @@
 # auth (인증)
 
-> 마지막 갱신: 2026-10-28 (회원가입 토스/뱅킹 스타일 상향 축소 및 접힘 요약 인터랙션 적용) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-10-28 (성도 정보 실시간 유효성 규칙 표시 및 자동 카드 전환 적용) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,7 +10,8 @@
 
 ## ✅ 완료
 
-- 회원가입 폼 UX 개선 및 토스·뱅킹 스타일 상향 축소 인터랙션 적용 — 단일 비밀번호 입력(8자 이상, 영문·숫자 조합 실시간 가이드)으로 간소화하고 전송 시 passwordConfirm을 자동 동기화. 아이디 및 이메일의 별도 중복확인 버튼을 제거하여 인라인 전폭 필드(trailing 스피너/체크 아이콘)로 통합하고 onBlur 시 자동 검증. 단계별 집중도를 높이기 위해 이전 완료 카드는 상단으로 밀려 올라가며 1줄 요약 카드(✓ 배지 + 타이틀 + 입력 요약 + [수정] 버튼)로 축소되고, 새 카드는 키보드 바로 위 활성 영역에 펼쳐지는 상향 축소(Upward Collapse) 인터랙션을 적용. '다음' 버튼 및 키보드 다음 키로 단계 전환을 지원하며, [수정] 터치 시 언제든 이전 단계 카드가 다시 펼쳐져 수정할 수 있다.
+- 성도 정보 실시간 규칙 피드백 및 자동 카드 전환 — 이름(2~10자, 특수문자 제외), 연락처(010 시작, 10~11자리), 이메일(이메일 형식, 중복 확인 완료) 각 필드 하단에 실시간 규칙 충족 칩과 우측 trailing 체크 아이콘을 적용. 불필요한 수동 '다음' 버튼을 제거하고, 각 섹션의 입력 조건이 충족되면 자동으로 다음 단계 카드로 전환·확장(디바운스 및 키보드 다음 액션)하여 가입 진행 마찰을 최소화.
+- 회원가입 폼 UX 개선 및 토스·뱅킹 스타일 상향 축소 인터랙션 적용 — 단일 비밀번호 입력(8자 이상, 영문·숫자 조합 실시간 가이드)으로 간소화하고 전송 시 passwordConfirm을 자동 동기화. 아이디 및 이메일의 별도 중복확인 버튼을 제거하여 인라인 전폭 필드(trailing 스피너/체크 아이콘)로 통합하고 onBlur 시 자동 검증. 단계별 집중도를 높이기 위해 이전 완료 카드는 상단으로 밀려 올라가며 1줄 요약 카드(✓ 배지 + 타이틀 + 입력 요약 + [수정] 버튼)로 축소되고, 새 카드는 키보드 바로 위 활성 영역에 펼쳐지는 상향 축소(Upward Collapse) 인터랙션을 적용. [수정] 터치 시 언제든 이전 단계 카드가 다시 펼쳐져 수정할 수 있다.
 - 인증 HTTP adapter 활성화 — login/refresh 성공 envelope의 `data`에서 토큰 payload를 읽고, signup 후 login 합성, `/api/member/me`, `/api/member/duplicate`를 `httpAuthAdapter`로 연결. 회원가입은 아이디와 이메일을 필수 입력으로 받고 각각 중복확인을 통과해야 한다. 값이 바뀌면 기존 확인 결과를 폐기한다. development 기본값은 HTTP, 테스트/Maestro는 `EXPO_PUBLIC_AUTH_ADAPTER=mock`. API origin은 `EXPO_PUBLIC_API_URL`. 회원가입 중복확인 실패는 해당 필드에 표시. 로그인 성공 schema는 `ApiResponseLoginResponse`이고, 그 밖 Swagger 성공 schema가 비어 있는 항목 때문에 `test:api:contract` 실패는 남아 있다
 - 조용한 톤 인증 여백·위계 — 로그인 상단 로고 아이콘과 회원가입 상단 점선 아바타 미리보기를 제거해 타이포그래피·폼 중심으로 정리하고(소프트 배지 `열린문교회 커뮤니티` + 2줄 환영 헤드라인 `열린문 커넥트에 오신 것을 환영합니다` 좌측 정렬), 로그인·회원가입 메인 CTA 곡률은 앱 공통 톤에 맞춰 `radius.pill`을 유지하며, 로그인 하단 회원가입 이동은 하단 서피스 카드로 배치하고 회원가입 비밀번호·비밀번호 확인을 단일 섹션으로 묶어 계정/성도 정보를 구분하며 중복확인 통과 시 버튼을 `확인 완료` 상태로 전환; glass 하단 바 실험은 단순 `bottomFlat`으로 유지
 - 로그인·회원가입 절제 모션 (C-set) — 진입은 이동(`translateY`)·시간차(`stagger`) 없는 단일 페이드(`opacity`), 필드 검증 shake·인라인 에러 fade, 중복확인 성공 체크 pop, CTA `MotionPressable`, 가입 버튼 enable soft 활성, auth Stack slide/fade. `designVariant !== default`·`useReducedMotion`에서 진입 애니는 static
@@ -88,6 +89,8 @@
 `LoginInput`, `SignupInput`, `MemberDuplicateInput`, `MemberAvailability`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`와 `UserRole`을 사용하며, 역할은 `ADMIN`, `USER`, `MANAGER_COMMUNION`, `MANAGER_SHARE`, `MANAGER_LIFESTUDY`, `MANAGER_PRAYER` 중 하나입니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리합니다. 중복확인 요청은 Swagger의 `searchType: id | phone | email`, `searchValue` 계약을 따르며 화면에는 `available` 도메인 결과만 노출합니다. 실제 HTTP mapper는 공통 envelope의 `data`만 사용합니다. 중복확인은 `available`, login/refresh는 `accessToken`, `refreshToken`, `userId`, `userName`, `role`, `/api/member/me`는 회원 필드입니다. 로그인 성공 schema는 `ApiResponseLoginResponse`입니다. 그 밖 Swagger 성공 schema가 비어 있는 항목은 `test:api:contract`가 계속 실패합니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-10-28) **성도 정보 실시간 유효성 규칙 칩 제공 및 자동 카드 전환(수동 다음 버튼 제거)** — 성도 정보의 각 필드(이름: 2~10자·특수문자 제외, 연락처: 010 시작·10~11자리, 이메일: 형식·중복확인) 하단에 실시간 규칙 충족 여부를 보여주는 인터랙티브 가이드 칩과 완료 체크 아이콘을 적용하였다. 또한 사용자가 조건을 모두 충족하면 수동 '다음' 버튼을 누를 필요 없이 자동으로 다음 섹션 카드가 활성화 및 펼쳐지도록 하여 가입 흐름의 마찰을 최소화하였다.
 
 - (2026-10-28) **회원가입 토스·뱅킹 스타일 상향 축소(Upward Collapse) 및 접힘 요약 인터랙션 적용** — 화면에 긴 폼이 계속 늘어나는 대신, 이전 완료된 카드는 상단으로 밀려 올라가며 1줄 컴팩트 요약 카드(체크 배지, 주요 값 요약, [수정] 버튼)로 접히고, 현재 입력 중인 카드만 키보드 바로 위 최적 시야에 활성화된다. 각 카드 내 '다음' CTA 및 키보드 '다음' 액션으로 순차 진행되며, 요약 카드의 [수정] 버튼을 누르면 언제든지 해당 카드가 다시 펼쳐져 입력값을 변경할 수 있다. 폼 제출 시 에러가 발생한 항목이 있는 카드가 자동으로 재확장되어 오류를 즉시 인지하도록 한다.
 

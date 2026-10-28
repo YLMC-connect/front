@@ -348,15 +348,34 @@ export default function SignupScreen() {
       !errors.password,
   );
 
+  // Realtime member info criteria
+  const trimmedName = values.userName.trim();
+  const hasNameLength = trimmedName.length >= 2 && trimmedName.length <= 10;
+  const hasNoSpecialChars =
+    trimmedName.length > 0 && /^[a-zA-Z가-힣0-9\s]+$/.test(trimmedName);
+  const isNameValid = hasNameLength && hasNoSpecialChars;
+
+  const rawPhoneDigits = phoneDigits(values.phone);
+  const hasPhonePrefix = rawPhoneDigits.startsWith("010");
+  const hasPhoneLength =
+    rawPhoneDigits.length >= 10 && rawPhoneDigits.length <= 11;
+  const isPhoneValid =
+    hasPhonePrefix && hasPhoneLength && !isPhoneError && !isPhoneDup;
+
+  const trimmedEmail = values.email.trim();
+  const hasValidEmailFormat = emailPattern.test(trimmedEmail);
+  const isEmailChecked = currentEmailAvailability === true;
+
   const isCard2Complete = Boolean(
-    values.userName.trim().length >= 2 &&
+    isNameValid &&
+      isPhoneValid &&
+      hasValidEmailFormat &&
+      currentEmailAvailability !== false &&
       !errors.userName &&
-      phoneDigits(values.phone).length >= 10 &&
       !errors.phone &&
+      !errors.email &&
       !isPhoneError &&
-      !isPhoneDup &&
-      emailPattern.test(values.email.trim()) &&
-      !errors.email,
+      !isPhoneDup,
   );
 
   const [unlockedStep, setUnlockedStep] = useState<number>(() => {
@@ -372,17 +391,28 @@ export default function SignupScreen() {
   const isCard2Collapsed = unlockedStep >= 3 && activeStep !== 2;
   const isCard3Collapsed = allTermsAgreed && activeStep !== 3;
 
+  // Auto-advance to Step 2 when Card 1 is completed
   useEffect(() => {
-    if (isCard1Complete) {
+    if (isCard1Complete && activeStep === 1) {
       setUnlockedStep((prev) => Math.max(prev, 2));
+      const timer = setTimeout(() => {
+        setActiveStep(2);
+        nameInputRef.current?.focus();
+      }, 400);
+      return () => clearTimeout(timer);
     }
-  }, [isCard1Complete]);
+  }, [isCard1Complete, activeStep]);
 
+  // Auto-advance to Step 3 when Card 2 is completed
   useEffect(() => {
-    if (unlockedStep >= 2 && isCard2Complete) {
+    if (unlockedStep >= 2 && isCard2Complete && activeStep === 2) {
       setUnlockedStep((prev) => Math.max(prev, 3));
+      const timer = setTimeout(() => {
+        setActiveStep(3);
+      }, 350);
+      return () => clearTimeout(timer);
     }
-  }, [unlockedStep, isCard2Complete]);
+  }, [unlockedStep, isCard2Complete, activeStep]);
 
   return (
     <Screen scroll={false} padded={false}>
@@ -620,45 +650,6 @@ export default function SignupScreen() {
                   {isPwError || errors.password ? (
                     <InlineError>{passwordErrorMessage}</InlineError>
                   ) : null}
-
-                  {/* 다음 버튼 */}
-                  <MotionPressable
-                    testID="signup-next-card-1"
-                    accessibilityRole="button"
-                    accessibilityLabel="성도 정보 입력으로 이동"
-                    disabled={!isCard1Complete}
-                    onPress={() => {
-                      if (isCard1Complete) {
-                        setUnlockedStep((prev) => Math.max(prev, 2));
-                        setActiveStep(2);
-                        setTimeout(() => nameInputRef.current?.focus(), 60);
-                      }
-                    }}
-                    style={[
-                      styles.cardNextButton,
-                      isCard1Complete ? styles.cardNextButtonActive : null,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.cardNextButtonText,
-                        isCard1Complete
-                          ? styles.cardNextButtonTextActive
-                          : null,
-                      ]}
-                    >
-                      다음 (성도 정보)
-                    </Text>
-                    <AppIcon
-                      name="chevron-right"
-                      size={14}
-                      color={
-                        isCard1Complete
-                          ? theme.colors.primaryDeep
-                          : theme.colors.inkMute
-                      }
-                    />
-                  </MotionPressable>
                 </Field>
               </View>
 
@@ -733,14 +724,63 @@ export default function SignupScreen() {
                               phoneInputRef.current?.focus()
                             }
                             hasError={Boolean(errors.userName)}
+                            trailing={
+                              isNameValid ? (
+                                <MotionPop>
+                                  <AppIcon
+                                    name="check-circle"
+                                    size={18}
+                                    color={theme.colors.success}
+                                  />
+                                </MotionPop>
+                              ) : null
+                            }
                           />
                         </MotionShake>
+
+                        {/* Realtime name criteria feedback */}
+                        <View style={styles.passwordRulesRow}>
+                          <View style={styles.ruleItem}>
+                            <AppIcon
+                              name={hasNameLength ? "check" : "circle"}
+                              size={12}
+                              color={
+                                hasNameLength
+                                  ? theme.colors.primaryDeep
+                                  : theme.colors.inkMute
+                              }
+                            />
+                            <Text
+                              style={[
+                                styles.ruleText,
+                                hasNameLength ? styles.ruleTextPass : null,
+                              ]}
+                            >
+                              2~10자
+                            </Text>
+                          </View>
+                          <View style={styles.ruleItem}>
+                            <AppIcon
+                              name={hasNoSpecialChars ? "check" : "circle"}
+                              size={12}
+                              color={
+                                hasNoSpecialChars
+                                  ? theme.colors.primaryDeep
+                                  : theme.colors.inkMute
+                              }
+                            />
+                            <Text
+                              style={[
+                                styles.ruleText,
+                                hasNoSpecialChars ? styles.ruleTextPass : null,
+                              ]}
+                            >
+                              특수문자 제외
+                            </Text>
+                          </View>
+                        </View>
+
                         <InlineError>{errors.userName}</InlineError>
-                        {!errors.userName ? (
-                          <FieldHint>
-                            2~10자, 특수문자는 사용할 수 없어요
-                          </FieldHint>
-                        ) : null}
                       </Field>
 
                       <Field label="연락처">
@@ -770,8 +810,62 @@ export default function SignupScreen() {
                               isPhoneDup ||
                               Boolean(errors.phone)
                             }
+                            trailing={
+                              isPhoneValid ? (
+                                <MotionPop>
+                                  <AppIcon
+                                    name="check-circle"
+                                    size={18}
+                                    color={theme.colors.success}
+                                  />
+                                </MotionPop>
+                              ) : null
+                            }
                           />
                         </MotionShake>
+
+                        {/* Realtime phone criteria feedback */}
+                        <View style={styles.passwordRulesRow}>
+                          <View style={styles.ruleItem}>
+                            <AppIcon
+                              name={hasPhonePrefix ? "check" : "circle"}
+                              size={12}
+                              color={
+                                hasPhonePrefix
+                                  ? theme.colors.primaryDeep
+                                  : theme.colors.inkMute
+                              }
+                            />
+                            <Text
+                              style={[
+                                styles.ruleText,
+                                hasPhonePrefix ? styles.ruleTextPass : null,
+                              ]}
+                            >
+                              010 시작
+                            </Text>
+                          </View>
+                          <View style={styles.ruleItem}>
+                            <AppIcon
+                              name={hasPhoneLength ? "check" : "circle"}
+                              size={12}
+                              color={
+                                hasPhoneLength
+                                  ? theme.colors.primaryDeep
+                                  : theme.colors.inkMute
+                              }
+                            />
+                            <Text
+                              style={[
+                                styles.ruleText,
+                                hasPhoneLength ? styles.ruleTextPass : null,
+                              ]}
+                            >
+                              10~11자리
+                            </Text>
+                          </View>
+                        </View>
+
                         <InlineError>{phoneErrorMessage}</InlineError>
                       </Field>
 
@@ -817,6 +911,49 @@ export default function SignupScreen() {
                             }
                           />
                         </MotionShake>
+
+                        {/* Realtime email criteria feedback */}
+                        <View style={styles.passwordRulesRow}>
+                          <View style={styles.ruleItem}>
+                            <AppIcon
+                              name={hasValidEmailFormat ? "check" : "circle"}
+                              size={12}
+                              color={
+                                hasValidEmailFormat
+                                  ? theme.colors.primaryDeep
+                                  : theme.colors.inkMute
+                              }
+                            />
+                            <Text
+                              style={[
+                                styles.ruleText,
+                                hasValidEmailFormat ? styles.ruleTextPass : null,
+                              ]}
+                            >
+                              이메일 형식
+                            </Text>
+                          </View>
+                          <View style={styles.ruleItem}>
+                            <AppIcon
+                              name={isEmailChecked ? "check" : "circle"}
+                              size={12}
+                              color={
+                                isEmailChecked
+                                  ? theme.colors.primaryDeep
+                                  : theme.colors.inkMute
+                              }
+                            />
+                            <Text
+                              style={[
+                                styles.ruleText,
+                                isEmailChecked ? styles.ruleTextPass : null,
+                              ]}
+                            >
+                              중복 확인 완료
+                            </Text>
+                          </View>
+                        </View>
+
                         {/* Invisible trigger for automated tests and scripts */}
                         <Pressable
                           testID="signup-check-email"
@@ -844,46 +981,6 @@ export default function SignupScreen() {
                             </View>
                           </MotionPop>
                         ) : null}
-
-                        {/* 다음 버튼 */}
-                        <MotionPressable
-                          testID="signup-next-card-2"
-                          accessibilityRole="button"
-                          accessibilityLabel="약관 동의로 이동"
-                          disabled={!isCard2Complete}
-                          onPress={() => {
-                            if (isCard2Complete) {
-                              setUnlockedStep((prev) => Math.max(prev, 3));
-                              setActiveStep(3);
-                            }
-                          }}
-                          style={[
-                            styles.cardNextButton,
-                            isCard2Complete
-                              ? styles.cardNextButtonActive
-                              : null,
-                          ]}
-                        >
-                          <Text
-                            style={[
-                              styles.cardNextButtonText,
-                              isCard2Complete
-                                ? styles.cardNextButtonTextActive
-                                : null,
-                            ]}
-                          >
-                            다음 (약관 동의)
-                          </Text>
-                          <AppIcon
-                            name="chevron-right"
-                            size={14}
-                            color={
-                              isCard2Complete
-                                ? theme.colors.primaryDeep
-                                : theme.colors.inkMute
-                            }
-                          />
-                        </MotionPressable>
                       </Field>
                     </View>
                   </MotionEnter>
@@ -1552,29 +1649,5 @@ const styles = StyleSheet.create({
   },
   collapsedCardBody: {
     display: "none",
-  },
-  cardNextButton: {
-    height: 44,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.line,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    marginTop: 10,
-  },
-  cardNextButtonActive: {
-    backgroundColor: theme.colors.primaryTint,
-    borderWidth: 1,
-    borderColor: theme.colors.primary,
-  },
-  cardNextButtonText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  cardNextButtonTextActive: {
-    color: theme.colors.primaryDeep,
-    fontWeight: theme.fontWeight.bold,
   },
 });

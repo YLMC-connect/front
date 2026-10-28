@@ -526,6 +526,14 @@ describe("auth smoke screens", () => {
     expect(screen.getByTestId("signup-email-input")).toBeTruthy();
     expect(screen.queryByTestId("signup-terms-all")).toBeNull();
 
+    // Realtime member info criteria chips are displayed
+    expect(screen.getByText("2~10자")).toBeTruthy();
+    expect(screen.getByText("특수문자 제외")).toBeTruthy();
+    expect(screen.getByText("010 시작")).toBeTruthy();
+    expect(screen.getByText("10~11자리")).toBeTruthy();
+    expect(screen.getByText("이메일 형식")).toBeTruthy();
+    expect(screen.getByText("중복 확인 완료")).toBeTruthy();
+
     // Complete Section 2
     fireEvent.changeText(screen.getByTestId("signup-name-input"), "홍길동");
     fireEvent.changeText(
@@ -542,15 +550,15 @@ describe("auth smoke screens", () => {
     expect(screen.getByTestId("signup-edit-card-1")).toBeTruthy();
 
     // Advancing to Section 3 collapses Section 2 into summary
-    fireEvent.press(screen.getByTestId("signup-next-card-2"));
+    fireEvent(screen.getByTestId("signup-email-input"), "submitEditing");
     expect(screen.getByTestId("signup-edit-card-2")).toBeTruthy();
 
     // Tapping edit on Section 1 re-activates Section 1
     fireEvent.press(screen.getByTestId("signup-edit-card-1"));
-    expect(screen.getByTestId("signup-next-card-1")).toBeTruthy();
+    expect(screen.getByTestId("signup-id-input")).toBeTruthy();
 
-    // Tapping next on Section 1 advances to Section 2
-    fireEvent.press(screen.getByTestId("signup-next-card-1"));
-    expect(screen.getByTestId("signup-next-card-2")).toBeTruthy();
+    // Tapping edit on Section 2 re-activates Section 2
+    fireEvent.press(screen.getByTestId("signup-edit-card-2"));
+    expect(screen.getByTestId("signup-name-input")).toBeTruthy();
   });
 });

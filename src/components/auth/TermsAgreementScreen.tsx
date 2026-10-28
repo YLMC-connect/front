@@ -1,11 +1,18 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  Keyboard,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import Animated, {
   Easing,
   FadeIn,
-  SlideInUp,
+  SlideInDown,
   useReducedMotion,
 } from "react-native-reanimated";
 import { Screen } from "../layout/Screen";
@@ -136,7 +143,10 @@ export function TermsAgreementScreen({
                 </Pressable>
                 <Pressable
                   accessibilityRole="button"
-                  onPress={() => setSheet(term.key)}
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    setSheet(term.key);
+                  }}
                   style={styles.detailButton}
                 >
                   <Text style={styles.detailText}>전문 보기</Text>
@@ -194,6 +204,13 @@ export function TermsSheet({
   onClose: () => void;
 }) {
   const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (termKey) {
+      Keyboard.dismiss();
+    }
+  }, [termKey]);
+
   if (!termKey) return null;
   const term = fullText[termKey];
 
@@ -214,7 +231,7 @@ export function TermsSheet({
         entering={
           reduceMotion
             ? undefined
-            : SlideInUp.duration(320).easing(Easing.out(Easing.cubic))
+            : SlideInDown.duration(320).easing(Easing.out(Easing.cubic))
         }
         style={styles.sheet}
       >

@@ -534,8 +534,13 @@ describe("auth smoke screens", () => {
     expect(screen.getByText("이메일 형식")).toBeTruthy();
     expect(screen.getByText("중복 확인 완료")).toBeTruthy();
 
-    // Entering an English name or name with number shows error and does not unlock Section 3
+    // Entering an incomplete or invalid name does NOT prematurely show error while typing (e.g. intermediate jamo "이ㅅ")
+    fireEvent.changeText(screen.getByTestId("signup-name-input"), "이ㅅ");
+    expect(screen.queryByText("이름은 한글만 입력할 수 있어요.")).toBeNull();
+
+    // Leaving field with invalid name shows error on blur and does not unlock Section 3
     fireEvent.changeText(screen.getByTestId("signup-name-input"), "John");
+    fireEvent(screen.getByTestId("signup-name-input"), "blur");
     expect(screen.getByText("이름은 한글만 입력할 수 있어요.")).toBeTruthy();
     fireEvent.changeText(
       screen.getByTestId("signup-phone-input"),
@@ -548,6 +553,7 @@ describe("auth smoke screens", () => {
     expect(screen.queryByTestId("signup-terms-all")).toBeNull();
 
     fireEvent.changeText(screen.getByTestId("signup-name-input"), "홍길동1");
+    fireEvent(screen.getByTestId("signup-name-input"), "blur");
     expect(screen.getByText("이름은 한글만 입력할 수 있어요.")).toBeTruthy();
     expect(screen.queryByTestId("signup-terms-all")).toBeNull();
 

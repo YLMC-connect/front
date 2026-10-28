@@ -176,6 +176,10 @@ export default function SignupScreen() {
 
   // Terms state (unchecked by default)
   const [termsSheetKey, setTermsSheetKey] = useState<TermKey | null>(null);
+  const openTermsSheet = (key: TermKey) => {
+    Keyboard.dismiss();
+    setTermsSheetKey(key);
+  };
   const [agreedTerms, setAgreedTerms] = useState<{
     tos: boolean;
     privacy: boolean;
@@ -394,13 +398,7 @@ export default function SignupScreen() {
   const hasNameLength = trimmedName.length >= 2 && trimmedName.length <= 10;
   const isKoreanOnly = trimmedName.length > 0 && /^[가-힣]+$/.test(trimmedName);
   const isNameValid = hasNameLength && isKoreanOnly;
-  const nameErrorMessage =
-    errors.userName ??
-    (trimmedName.length > 0 && !isKoreanOnly
-      ? "이름은 한글만 입력할 수 있어요."
-      : trimmedName.length > 10
-        ? "이름은 10자 이하로 입력해주세요."
-        : undefined);
+  const nameErrorMessage = errors.userName;
 
   const rawPhoneDigits = phoneDigits(values.phone);
   const hasPhonePrefix = rawPhoneDigits.startsWith("010");
@@ -412,10 +410,7 @@ export default function SignupScreen() {
     ? "연락처는 010-XXXX-XXXX 형식으로 입력해주세요"
     : isPhoneDup
       ? "이미 가입된 연락처입니다"
-      : errors.phone ??
-        (rawPhoneDigits.length >= 3 && !hasPhonePrefix
-          ? "연락처는 010으로 시작해야 해요."
-          : undefined);
+      : errors.phone;
 
   const trimmedEmail = values.email.trim();
   const hasValidEmailFormat = emailPattern.test(trimmedEmail);
@@ -579,7 +574,7 @@ export default function SignupScreen() {
                         </Text>
                       </Pressable>
                       <Pressable
-                        onPress={() => setTermsSheetKey("tos")}
+                        onPress={() => openTermsSheet("tos")}
                         style={styles.termsDetailButton}
                       >
                         <Text style={styles.termsDetailText}>보기</Text>
@@ -610,7 +605,7 @@ export default function SignupScreen() {
                         </Text>
                       </Pressable>
                       <Pressable
-                        onPress={() => setTermsSheetKey("privacy")}
+                        onPress={() => openTermsSheet("privacy")}
                         style={styles.termsDetailButton}
                       >
                         <Text style={styles.termsDetailText}>보기</Text>

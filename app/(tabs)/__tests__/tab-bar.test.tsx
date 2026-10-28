@@ -63,13 +63,13 @@ describe("root tab bar", () => {
     }
   });
 
-  it("opens a different root tab and navigates to its root page", () => {
+  it("opens a different root tab and navigates via navigation.navigate without forced replace", () => {
     const { navigate } = renderTabBar(1, "/market");
 
     fireEvent.press(screen.getByTestId("tab-prayer"));
 
     expect(navigate).toHaveBeenCalledWith("prayer");
-    expect(router.replace).toHaveBeenCalledWith("/prayer");
+    expect(router.replace).not.toHaveBeenCalled();
   });
 
   it("keeps the tab bar mounted while a root modal is presented over a root tab", () => {

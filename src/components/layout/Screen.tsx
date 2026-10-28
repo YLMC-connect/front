@@ -27,7 +27,7 @@ export function Screen({
   scroll = true,
   padded = true,
   applyTopInset = true,
-  resetScrollOnFocus = true,
+  resetScrollOnFocus = false,
   backgroundColor,
   style,
   testID,

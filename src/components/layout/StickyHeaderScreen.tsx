@@ -63,7 +63,7 @@ export function StickyHeaderScreen({
   scrollStateResetKey,
   onScrollOffsetChange,
   scrollRef,
-  resetScrollOnFocus = true,
+  resetScrollOnFocus = false,
   shouldHandleScroll,
   contentContainerStyle,
   testID,

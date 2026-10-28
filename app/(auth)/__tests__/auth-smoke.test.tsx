@@ -322,6 +322,7 @@ describe("auth smoke screens", () => {
     );
     fireEvent.press(screen.getByTestId("signup-check-email"));
     await screen.findByText("사용 가능한 이메일입니다");
+    fireEvent.press(screen.getByTestId("signup-terms-all"));
     fireEvent.press(screen.getByTestId("signup-submit"));
 
     expect(screen.getByText("아이디 중복 확인이 필요합니다.")).toBeTruthy();
@@ -347,6 +348,7 @@ describe("auth smoke screens", () => {
       screen.getByTestId("signup-email-input"),
       "new-member@example.com",
     );
+    fireEvent.press(screen.getByTestId("signup-terms-all"));
     fireEvent.press(screen.getByTestId("signup-submit"));
 
     expect(screen.getByText("이메일 중복 확인이 필요합니다.")).toBeTruthy();
@@ -388,6 +390,7 @@ describe("auth smoke screens", () => {
     );
     fireEvent.press(screen.getByTestId("signup-check-email"));
     await screen.findByText("사용 가능한 이메일입니다");
+    fireEvent.press(screen.getByTestId("signup-terms-all"));
     fireEvent.press(screen.getByTestId("signup-submit"));
 
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/"), {
@@ -460,6 +463,9 @@ describe("auth smoke screens", () => {
     await screen.findByText("사용 가능한 아이디입니다");
 
     // Terms agreement checkboxes and sheet viewer
+    const termsAll = screen.getByTestId("signup-terms-all");
+    expect(termsAll.props.accessibilityState.checked).toBe(false);
+    expect(screen.getByTestId("signup-submit").props.accessibilityState.disabled).toBe(true);
     expect(screen.getByText("약관 전체 동의하기")).toBeTruthy();
     const viewButtons = screen.getAllByText("보기");
     expect(viewButtons.length).toBeGreaterThanOrEqual(2);

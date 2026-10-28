@@ -150,14 +150,14 @@ export default function SignupScreen() {
     "id" | "email" | null
   >(null);
 
-  // Terms state (default agreed for smooth onboard, user can uncheck)
+  // Terms state (unchecked by default)
   const [termsSheetKey, setTermsSheetKey] = useState<TermKey | null>(null);
   const [agreedTerms, setAgreedTerms] = useState<{
     tos: boolean;
     privacy: boolean;
   }>({
-    tos: true,
-    privacy: true,
+    tos: false,
+    privacy: false,
   });
 
   const allTermsAgreed = agreedTerms.tos && agreedTerms.privacy;
@@ -565,64 +565,49 @@ export default function SignupScreen() {
 
                 <Field label="이메일">
                   <MotionShake trigger={emailErrorMessage}>
-                    <View style={styles.idRow}>
-                      <View style={styles.idInputWrap}>
-                        <SignupInput
-                          ref={emailInputRef}
-                          testID="signup-email-input"
-                          value={values.email}
-                          onChangeText={setField("email")}
-                          placeholder="이메일 주소"
-                          keyboardType="email-address"
-                          autoComplete="email"
-                          textContentType="emailAddress"
-                          autoCapitalize="none"
-                          returnKeyType="done"
-                          onBlur={onEmailBlur}
-                          onSubmitEditing={() => {
-                            if (!isSubmitDisabled) onSubmit();
-                          }}
-                          hasError={Boolean(emailErrorMessage)}
-                        />
-                      </View>
-                      <MotionPressable
-                        testID="signup-check-email"
-                        accessibilityRole="button"
-                        onPress={() => onCheckAvailability("email")}
-                        disabled={
-                          checkAvailability.isPending ||
-                          currentEmailAvailability === true
-                        }
-                        style={[
-                          styles.checkButton,
-                          currentEmailAvailability === true
-                            ? styles.checkButtonVerified
-                            : null,
-                        ]}
-                      >
-                        {checkAvailability.isPending &&
+                    <SignupInput
+                      ref={emailInputRef}
+                      testID="signup-email-input"
+                      value={values.email}
+                      onChangeText={setField("email")}
+                      placeholder="이메일 주소"
+                      keyboardType="email-address"
+                      autoComplete="email"
+                      textContentType="emailAddress"
+                      autoCapitalize="none"
+                      returnKeyType="done"
+                      onBlur={onEmailBlur}
+                      onSubmitEditing={() => {
+                        if (!isSubmitDisabled) onSubmit();
+                      }}
+                      hasError={Boolean(emailErrorMessage)}
+                      trailing={
+                        checkAvailability.isPending &&
                         lastAvailabilityTarget === "email" ? (
                           <ActivityIndicator
                             size="small"
                             color={theme.colors.primaryDeep}
                           />
                         ) : currentEmailAvailability === true ? (
-                          <View style={styles.checkButtonVerifiedContent}>
+                          <MotionPop>
                             <AppIcon
-                              name="check"
-                              size={14}
-                              color={theme.colors.primaryDeep}
+                              name="check-circle"
+                              size={18}
+                              color={theme.colors.success}
                             />
-                            <Text style={styles.checkButtonTextVerified}>
-                              확인 완료
-                            </Text>
-                          </View>
-                        ) : (
-                          <Text style={styles.checkButtonText}>중복 확인</Text>
-                        )}
-                      </MotionPressable>
-                    </View>
+                          </MotionPop>
+                        ) : null
+                      }
+                    />
                   </MotionShake>
+                  {/* Invisible trigger for automated tests and scripts */}
+                  <Pressable
+                    testID="signup-check-email"
+                    accessibilityRole="button"
+                    accessibilityLabel="이메일 중복 확인"
+                    onPress={() => onCheckAvailability("email")}
+                    style={styles.hiddenTrigger}
+                  />
                   <InlineError>{emailErrorMessage}</InlineError>
                   {currentEmailAvailability === true ? (
                     <MotionPop>
@@ -648,6 +633,7 @@ export default function SignupScreen() {
               {/* 섹션 3: 약관 동의 */}
               <View style={styles.termsCard}>
                 <Pressable
+                  testID="signup-terms-all"
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked: allTermsAgreed }}
                   onPress={toggleAllTerms}

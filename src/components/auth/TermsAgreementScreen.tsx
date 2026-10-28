@@ -2,6 +2,12 @@ import { AppIcon } from "@/components/ui/app-icon";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import Animated, {
+  Easing,
+  FadeIn,
+  SlideInUp,
+  useReducedMotion,
+} from "react-native-reanimated";
 import { Screen } from "../layout/Screen";
 import { TopBar } from "../ui";
 import { theme } from "../../constants/theme";
@@ -187,13 +193,31 @@ export function TermsSheet({
   termKey: TermKey | null;
   onClose: () => void;
 }) {
+  const reduceMotion = useReducedMotion();
   if (!termKey) return null;
   const term = fullText[termKey];
 
   return (
     <View style={styles.sheetLayer}>
-      <Pressable style={styles.sheetDim} onPress={onClose} />
-      <View style={styles.sheet}>
+      <Animated.View
+        entering={reduceMotion ? undefined : FadeIn.duration(260)}
+        style={StyleSheet.absoluteFill}
+      >
+        <Pressable
+          style={styles.sheetDim}
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel="배경 닫기"
+        />
+      </Animated.View>
+      <Animated.View
+        entering={
+          reduceMotion
+            ? undefined
+            : SlideInUp.duration(320).easing(Easing.out(Easing.cubic))
+        }
+        style={styles.sheet}
+      >
         <View style={styles.handleWrap}>
           <View style={styles.handle} />
         </View>
@@ -213,7 +237,7 @@ export function TermsSheet({
           <Text style={styles.effectiveDate}>시행일자: 2026년 1월 1일</Text>
           <Text style={styles.fullText}>{term.body}</Text>
         </ScrollView>
-      </View>
+      </Animated.View>
     </View>
   );
 }

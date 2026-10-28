@@ -116,6 +116,8 @@ function validateSignup(values: FormValues) {
   }
   if (values.userName.trim().length < 2) {
     errors.userName = "이름을 입력해주세요.";
+  } else if (!/^[a-zA-Z가-힣\s]+$/.test(values.userName.trim())) {
+    errors.userName = "이름에는 숫자나 특수문자가 들어갈 수 없어요.";
   }
   if (phoneDigits(values.phone).length < 10) {
     errors.phone = "연락처를 입력해주세요.";
@@ -353,9 +355,9 @@ export default function SignupScreen() {
   // Realtime member info criteria
   const trimmedName = values.userName.trim();
   const hasNameLength = trimmedName.length >= 2 && trimmedName.length <= 10;
-  const hasNoSpecialChars =
-    trimmedName.length > 0 && /^[a-zA-Z가-힣0-9\s]+$/.test(trimmedName);
-  const isNameValid = hasNameLength && hasNoSpecialChars;
+  const hasNoNumberOrSpecial =
+    trimmedName.length > 0 && /^[a-zA-Z가-힣\s]+$/.test(trimmedName);
+  const isNameValid = hasNameLength && hasNoNumberOrSpecial;
 
   const rawPhoneDigits = phoneDigits(values.phone);
   const hasPhonePrefix = rawPhoneDigits.startsWith("010");
@@ -644,10 +646,10 @@ export default function SignupScreen() {
                       </View>
                       <View style={styles.ruleItem}>
                         <AppIcon
-                          name={hasNoSpecialChars ? "check" : "circle"}
+                          name={hasNoNumberOrSpecial ? "check" : "circle"}
                           size={12}
                           color={
-                            hasNoSpecialChars
+                            hasNoNumberOrSpecial
                               ? theme.colors.primaryDeep
                               : theme.colors.inkMute
                           }
@@ -655,10 +657,10 @@ export default function SignupScreen() {
                         <Text
                           style={[
                             styles.ruleText,
-                            hasNoSpecialChars ? styles.ruleTextPass : null,
+                            hasNoNumberOrSpecial ? styles.ruleTextPass : null,
                           ]}
                         >
-                          특수문자 제외
+                          숫자·특수문자 제외
                         </Text>
                       </View>
                     </View>

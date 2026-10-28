@@ -510,6 +510,7 @@ describe("shared maintenance UI", () => {
           scrollRef={scrollRef as any}
           testID="focus-reset-screen"
           title="홈"
+          resetScrollOnFocus
         >
           <Text>본문</Text>
         </StickyHeaderScreen>

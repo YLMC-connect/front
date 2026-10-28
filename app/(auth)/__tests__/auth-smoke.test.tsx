@@ -526,11 +526,11 @@ describe("auth smoke screens", () => {
     expect(screen.getByTestId("signup-email-input")).toBeTruthy();
     expect(screen.queryByTestId("signup-terms-all")).toBeNull();
 
-    // Realtime member info criteria chips are displayed
-    expect(screen.getByText("2~10자")).toBeTruthy();
-    expect(screen.getByText("한글만 입력")).toBeTruthy();
-    expect(screen.getByText("010 시작")).toBeTruthy();
-    expect(screen.getByText("10~11자리")).toBeTruthy();
+    // Name and phone chips are removed for minimal UI, email criteria chips remain
+    expect(screen.queryByText("2~10자")).toBeNull();
+    expect(screen.queryByText("한글만 입력")).toBeNull();
+    expect(screen.queryByText("010 시작")).toBeNull();
+    expect(screen.queryByText("10~11자리")).toBeNull();
     expect(screen.getByText("이메일 형식")).toBeTruthy();
     expect(screen.getByText("중복 확인 완료")).toBeTruthy();
 

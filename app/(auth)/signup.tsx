@@ -622,48 +622,6 @@ export default function SignupScreen() {
                       />
                     </MotionShake>
 
-                    {/* Realtime name criteria feedback */}
-                    <View style={styles.passwordRulesRow}>
-                      <View style={styles.ruleItem}>
-                        <AppIcon
-                          name={hasNameLength ? "check" : "circle"}
-                          size={12}
-                          color={
-                            hasNameLength
-                              ? theme.colors.primaryDeep
-                              : theme.colors.inkMute
-                          }
-                        />
-                        <Text
-                          style={[
-                            styles.ruleText,
-                            hasNameLength ? styles.ruleTextPass : null,
-                          ]}
-                        >
-                          2~10자
-                        </Text>
-                      </View>
-                      <View style={styles.ruleItem}>
-                        <AppIcon
-                          name={isKoreanOnly ? "check" : "circle"}
-                          size={12}
-                          color={
-                            isKoreanOnly
-                              ? theme.colors.primaryDeep
-                              : theme.colors.inkMute
-                          }
-                        />
-                        <Text
-                          style={[
-                            styles.ruleText,
-                            isKoreanOnly ? styles.ruleTextPass : null,
-                          ]}
-                        >
-                          한글만 입력
-                        </Text>
-                      </View>
-                    </View>
-
                     <InlineError>{errors.userName}</InlineError>
                   </Field>
 
@@ -707,48 +665,6 @@ export default function SignupScreen() {
                         }
                       />
                     </MotionShake>
-
-                    {/* Realtime phone criteria feedback */}
-                    <View style={styles.passwordRulesRow}>
-                      <View style={styles.ruleItem}>
-                        <AppIcon
-                          name={hasPhonePrefix ? "check" : "circle"}
-                          size={12}
-                          color={
-                            hasPhonePrefix
-                              ? theme.colors.primaryDeep
-                              : theme.colors.inkMute
-                          }
-                        />
-                        <Text
-                          style={[
-                            styles.ruleText,
-                            hasPhonePrefix ? styles.ruleTextPass : null,
-                          ]}
-                        >
-                          010 시작
-                        </Text>
-                      </View>
-                      <View style={styles.ruleItem}>
-                        <AppIcon
-                          name={hasPhoneLength ? "check" : "circle"}
-                          size={12}
-                          color={
-                            hasPhoneLength
-                              ? theme.colors.primaryDeep
-                              : theme.colors.inkMute
-                          }
-                        />
-                        <Text
-                          style={[
-                            styles.ruleText,
-                            hasPhoneLength ? styles.ruleTextPass : null,
-                          ]}
-                        >
-                          10~11자리
-                        </Text>
-                      </View>
-                    </View>
 
                     <InlineError>{phoneErrorMessage}</InlineError>
                   </Field>

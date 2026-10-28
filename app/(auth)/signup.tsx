@@ -13,7 +13,6 @@ import {
 import {
   ActivityIndicator,
   Keyboard,
-  KeyboardAvoidingView,
   LayoutAnimation,
   Platform,
   Pressable,
@@ -29,10 +28,6 @@ import Animated, {
   Easing,
   FadeInDown,
   LinearTransition,
-  useAnimatedStyle,
-  useReducedMotion,
-  useSharedValue,
-  withTiming,
 } from "react-native-reanimated";
 import { AuthInput } from "../../src/components/auth/auth-input";
 import {
@@ -993,38 +988,30 @@ export default function SignupScreen() {
           </Pressable>
         </ScrollView>
 
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        <View
           pointerEvents="box-none"
-          style={styles.bottomFloating}
+          style={[
+            styles.bottom,
+            { paddingBottom: Math.max(insets.bottom, 24) },
+          ]}
         >
-          <MotionEnter enabled={enterMotion}>
-            <View
-              pointerEvents="box-none"
-              style={[
-                styles.bottomFlat,
-                { paddingBottom: Math.max(insets.bottom, 20) },
-              ]}
-            >
-              <LinearGradient
-                colors={[
-                  "rgba(246,247,249,0)",
-                  "rgba(246,247,249,0.78)",
-                  "rgba(246,247,249,0.96)",
-                ]}
-                locations={[0, 0.38, 1]}
-                pointerEvents="none"
-                style={StyleSheet.absoluteFill}
-                testID="signup-bottom-bar-gradient"
-              />
-              <SubmitButton
-                disabled={isSubmitDisabled || signup.isPending || isLoading}
-                loading={signup.isPending || isLoading}
-                onPress={onSubmit}
-              />
-            </View>
-          </MotionEnter>
-        </KeyboardAvoidingView>
+          <LinearGradient
+            colors={[
+              "rgba(246,247,249,0)",
+              "rgba(246,247,249,0.78)",
+              "rgba(246,247,249,0.96)",
+            ]}
+            locations={[0, 0.38, 1]}
+            pointerEvents="none"
+            style={StyleSheet.absoluteFill}
+            testID="signup-bottom-bar-gradient"
+          />
+          <SubmitButton
+            disabled={isSubmitDisabled || signup.isPending || isLoading}
+            loading={signup.isPending || isLoading}
+            onPress={onSubmit}
+          />
+        </View>
 
         <TermsSheet
           termKey={termsSheetKey}
@@ -1061,59 +1048,20 @@ function SubmitButton({
   loading: boolean;
   onPress: () => void;
 }) {
-  const reduceMotion = useReducedMotion();
-  const enabledProgress = useSharedValue(disabled ? 0 : 1);
-  const wasDisabled = useRef(disabled);
-
-  useEffect(() => {
-    const becameEnabled = wasDisabled.current && !disabled;
-    wasDisabled.current = disabled;
-
-    if (reduceMotion) {
-      enabledProgress.value = disabled ? 0 : 1;
-      return;
-    }
-
-    if (becameEnabled) {
-      enabledProgress.value = 0;
-      enabledProgress.value = withTiming(1, {
-        duration: theme.motion.duration.base,
-        easing: softEasing,
-      });
-      return;
-    }
-
-    enabledProgress.value = withTiming(disabled ? 0 : 1, {
-      duration: theme.motion.duration.fast,
-      easing: softEasing,
-    });
-  }, [disabled, enabledProgress, reduceMotion]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: 0.4 + enabledProgress.value * 0.6,
-    transform: [
-      {
-        scale: 0.98 + enabledProgress.value * 0.02,
-      },
-    ],
-  }));
-
   return (
-    <Animated.View style={animatedStyle}>
-      <MotionPressable
-        testID="signup-submit"
-        accessibilityRole="button"
-        onPress={onPress}
-        disabled={disabled}
-        style={styles.submitButton}
-      >
-        {loading ? (
-          <ActivityIndicator size="small" color={theme.colors.white} />
-        ) : (
-          <Text style={styles.submitText}>회원 가입</Text>
-        )}
-      </MotionPressable>
-    </Animated.View>
+    <MotionPressable
+      testID="signup-submit"
+      accessibilityRole="button"
+      onPress={onPress}
+      disabled={disabled || loading}
+      style={styles.submitButton}
+    >
+      {loading ? (
+        <ActivityIndicator size="small" color={theme.colors.white} />
+      ) : (
+        <Text style={styles.submitText}>회원 가입</Text>
+      )}
+    </MotionPressable>
   );
 }
 
@@ -1244,15 +1192,14 @@ const styles = StyleSheet.create({
     color: theme.colors.inkMute,
     fontSize: theme.fontSize.sm,
   },
-  bottomFloating: {
+  bottom: {
     position: "absolute",
     left: 0,
     right: 0,
     bottom: 0,
-  },
-  bottomFlat: {
     paddingHorizontal: theme.layout.screenX,
-    paddingTop: 28,
+    paddingTop: 24,
+    paddingBottom: 24,
   },
   form: {
     marginTop: theme.spacing[5],
@@ -1464,15 +1411,15 @@ const styles = StyleSheet.create({
   submitButton: {
     height: 52,
     borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.primary,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: theme.colors.primary,
     ...theme.shadow.primary,
   },
   submitText: {
     color: theme.colors.white,
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.semibold,
+    fontSize: theme.fontSize.md,
+    fontWeight: theme.fontWeight.bold,
   },
   error: { color: theme.colors.danger, fontSize: 13 },
 });

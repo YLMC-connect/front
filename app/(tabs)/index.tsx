@@ -81,23 +81,6 @@ export default function HomeScreen() {
               style={styles.dawnCard}
               testID="home-sunday-sermon"
             >
-              <AppText
-                variant="caption"
-                tone="muted"
-                style={styles.dawnEyebrow}
-              >
-                {sundaySermon.timeLabel}
-              </AppText>
-              <AppText variant="sectionTitle" style={styles.dawnTitle}>
-                {sundaySermon.title}
-              </AppText>
-              <AppText
-                variant="body"
-                tone="secondary"
-                style={styles.dawnSummary}
-              >
-                {sundaySermon.summary}
-              </AppText>
               <View style={styles.sermonThumbWrap}>
                 <Image
                   accessibilityIgnoresInvertColors
@@ -112,19 +95,38 @@ export default function HomeScreen() {
                     color={theme.colors.white}
                     fill={theme.colors.white}
                     name="play"
-                    size={20}
+                    size={22}
                   />
                 </View>
               </View>
-              <View style={styles.dawnAction}>
-                <AppText variant="caption" tone="brand">
-                  유튜브로 말씀 보기
+              <View style={styles.sermonContent}>
+                <AppText
+                  variant="caption"
+                  tone="muted"
+                  style={styles.dawnEyebrow}
+                >
+                  {sundaySermon.timeLabel}
                 </AppText>
-                <AppIcon
-                  name="chevron-right"
-                  size={18}
-                  color={theme.colors.primaryDeep}
-                />
+                <AppText variant="sectionTitle" style={styles.dawnTitle}>
+                  {sundaySermon.title}
+                </AppText>
+                <AppText
+                  variant="body"
+                  tone="secondary"
+                  style={styles.dawnSummary}
+                >
+                  {sundaySermon.summary}
+                </AppText>
+                <View style={styles.dawnAction}>
+                  <AppText variant="caption" tone="brand">
+                    유튜브로 말씀 보기
+                  </AppText>
+                  <AppIcon
+                    name="chevron-right"
+                    size={18}
+                    color={theme.colors.primaryDeep}
+                  />
+                </View>
               </View>
             </MotionPressable>
 
@@ -289,7 +291,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
-    padding: theme.layout.cardPadding + 4,
+    overflow: "hidden",
+  },
+  sermonContent: {
+    padding: theme.spacing[4],
   },
   dawnEyebrow: {
     marginBottom: theme.spacing[1],
@@ -310,12 +315,7 @@ const styles = StyleSheet.create({
     position: "relative",
     width: "100%",
     aspectRatio: 16 / 9,
-    borderRadius: theme.radius.sm,
-    overflow: "hidden",
     backgroundColor: theme.colors.surfaceMuted,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    marginBottom: theme.spacing[3],
     alignItems: "center",
     justifyContent: "center",
   },
@@ -325,12 +325,14 @@ const styles = StyleSheet.create({
   },
   sermonPlayBadge: {
     position: "absolute",
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "rgba(25, 31, 40, 0.68)",
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "rgba(25, 31, 40, 0.65)",
+    borderWidth: 1.5,
+    borderColor: "rgba(255, 255, 255, 0.3)",
     alignItems: "center",
     justifyContent: "center",
-    paddingLeft: 2,
+    paddingLeft: 3,
   },
 });

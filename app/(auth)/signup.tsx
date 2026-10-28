@@ -1,5 +1,6 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import {
   forwardRef,
@@ -1000,7 +1001,18 @@ export default function SignupScreen() {
         </ScrollView>
 
         <MotionEnter enabled={enterMotion}>
-          <View style={styles.bottomFlat}>
+          <View pointerEvents="box-none" style={styles.bottomFlat}>
+            <LinearGradient
+              colors={[
+                "rgba(246,247,249,0)",
+                "rgba(246,247,249,0.78)",
+                "rgba(246,247,249,0.96)",
+              ]}
+              locations={[0, 0.38, 1]}
+              pointerEvents="none"
+              style={StyleSheet.absoluteFill}
+              testID="signup-bottom-bar-gradient"
+            />
             <SubmitButton
               disabled={isSubmitDisabled || signup.isPending || isLoading}
               loading={signup.isPending || isLoading}
@@ -1229,7 +1241,7 @@ const styles = StyleSheet.create({
   },
   bottomFlat: {
     paddingHorizontal: theme.layout.screenX,
-    paddingTop: theme.spacing[3],
+    paddingTop: 20,
     paddingBottom: theme.spacing[7],
   },
   form: {

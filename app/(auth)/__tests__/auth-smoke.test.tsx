@@ -534,8 +534,9 @@ describe("auth smoke screens", () => {
     expect(screen.getByText("이메일 형식")).toBeTruthy();
     expect(screen.getByText("중복 확인 완료")).toBeTruthy();
 
-    // Entering an English name or name with number does not unlock Section 3
+    // Entering an English name or name with number shows error and does not unlock Section 3
     fireEvent.changeText(screen.getByTestId("signup-name-input"), "John");
+    expect(screen.getByText("이름은 한글만 입력할 수 있어요.")).toBeTruthy();
     fireEvent.changeText(
       screen.getByTestId("signup-phone-input"),
       "01012345678",
@@ -547,10 +548,12 @@ describe("auth smoke screens", () => {
     expect(screen.queryByTestId("signup-terms-all")).toBeNull();
 
     fireEvent.changeText(screen.getByTestId("signup-name-input"), "홍길동1");
+    expect(screen.getByText("이름은 한글만 입력할 수 있어요.")).toBeTruthy();
     expect(screen.queryByTestId("signup-terms-all")).toBeNull();
 
-    // Complete Section 2 with valid Korean name
+    // Complete Section 2 with valid Korean name clears error
     fireEvent.changeText(screen.getByTestId("signup-name-input"), "홍길동");
+    expect(screen.queryByText("이름은 한글만 입력할 수 있어요.")).toBeNull();
     fireEvent.changeText(
       screen.getByTestId("signup-phone-input"),
       "01012345678",

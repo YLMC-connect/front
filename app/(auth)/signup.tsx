@@ -214,6 +214,9 @@ export default function SignupScreen() {
         // Keep password and passwordConfirm in sync automatically
         ...(field === "password" ? { passwordConfirm: nextValue } : {}),
       }));
+      setErrors((current) =>
+        current[field] ? { ...current, [field]: undefined } : current,
+      );
       if (field === "id" || field === "email") {
         if (field === "id") setIdAvailability(null);
         if (field === "email") setEmailAvailability(null);
@@ -280,6 +283,45 @@ export default function SignupScreen() {
     }
   };
 
+  const onNameBlur = () => {
+    const trimmed = values.userName.trim();
+    if (trimmed.length > 0) {
+      if (!/^[가-힣]+$/.test(trimmed)) {
+        setErrors((current) => ({
+          ...current,
+          userName: "이름은 한글만 입력할 수 있어요.",
+        }));
+      } else if (trimmed.length < 2) {
+        setErrors((current) => ({
+          ...current,
+          userName: "이름을 2자 이상 입력해주세요.",
+        }));
+      } else if (trimmed.length > 10) {
+        setErrors((current) => ({
+          ...current,
+          userName: "이름은 10자 이하로 입력해주세요.",
+        }));
+      }
+    }
+  };
+
+  const onPhoneBlur = () => {
+    const raw = phoneDigits(values.phone);
+    if (raw.length > 0) {
+      if (!raw.startsWith("010")) {
+        setErrors((current) => ({
+          ...current,
+          phone: "연락처는 010으로 시작해야 해요.",
+        }));
+      } else if (raw.length < 10) {
+        setErrors((current) => ({
+          ...current,
+          phone: "연락처는 10~11자리로 입력해주세요.",
+        }));
+      }
+    }
+  };
+
   const onSubmit = () => {
     const nextErrors = validateSignup(values);
     if (isDefault && currentIdAvailability !== true) {
@@ -331,11 +373,6 @@ export default function SignupScreen() {
   const passwordErrorMessage = isPwError
     ? "비밀번호는 8자 이상, 영문·숫자를 모두 포함해야 합니다"
     : errors.password;
-  const phoneErrorMessage = isPhoneError
-    ? "연락처는 010-XXXX-XXXX 형식으로 입력해주세요"
-    : isPhoneDup
-      ? "이미 가입된 연락처입니다"
-      : errors.phone;
 
   // Realtime password criteria
   const hasMinLength = values.password.length >= 8;
@@ -357,6 +394,13 @@ export default function SignupScreen() {
   const hasNameLength = trimmedName.length >= 2 && trimmedName.length <= 10;
   const isKoreanOnly = trimmedName.length > 0 && /^[가-힣]+$/.test(trimmedName);
   const isNameValid = hasNameLength && isKoreanOnly;
+  const nameErrorMessage =
+    errors.userName ??
+    (trimmedName.length > 0 && !isKoreanOnly
+      ? "이름은 한글만 입력할 수 있어요."
+      : trimmedName.length > 10
+        ? "이름은 10자 이하로 입력해주세요."
+        : undefined);
 
   const rawPhoneDigits = phoneDigits(values.phone);
   const hasPhonePrefix = rawPhoneDigits.startsWith("010");
@@ -364,6 +408,14 @@ export default function SignupScreen() {
     rawPhoneDigits.length >= 10 && rawPhoneDigits.length <= 11;
   const isPhoneValid =
     hasPhonePrefix && hasPhoneLength && !isPhoneError && !isPhoneDup;
+  const phoneErrorMessage = isPhoneError
+    ? "연락처는 010-XXXX-XXXX 형식으로 입력해주세요"
+    : isPhoneDup
+      ? "이미 가입된 연락처입니다"
+      : errors.phone ??
+        (rawPhoneDigits.length >= 3 && !hasPhonePrefix
+          ? "연락처는 010으로 시작해야 해요."
+          : undefined);
 
   const trimmedEmail = values.email.trim();
   const hasValidEmailFormat = emailPattern.test(trimmedEmail);
@@ -371,7 +423,9 @@ export default function SignupScreen() {
 
   const isCard2Complete = Boolean(
     isNameValid &&
+      !nameErrorMessage &&
       isPhoneValid &&
+      !phoneErrorMessage &&
       hasValidEmailFormat &&
       currentEmailAvailability !== false &&
       !errors.userName &&
@@ -594,20 +648,22 @@ export default function SignupScreen() {
                   </View>
 
                   <Field label="이름">
-                    <MotionShake trigger={errors.userName}>
+                    <MotionShake trigger={nameErrorMessage}>
                       <SignupInput
                         ref={nameInputRef}
                         testID="signup-name-input"
                         value={values.userName}
                         onChangeText={setField("userName")}
+                        onBlur={onNameBlur}
                         placeholder="실명을 입력해주세요"
                         autoComplete="name"
                         textContentType="name"
                         returnKeyType="next"
-                        onSubmitEditing={() =>
-                          phoneInputRef.current?.focus()
-                        }
-                        hasError={Boolean(errors.userName)}
+                        onSubmitEditing={() => {
+                          onNameBlur();
+                          phoneInputRef.current?.focus();
+                        }}
+                        hasError={Boolean(nameErrorMessage)}
                         trailing={
                           isNameValid ? (
                             <MotionPop>
@@ -622,36 +678,27 @@ export default function SignupScreen() {
                       />
                     </MotionShake>
 
-                    <InlineError>{errors.userName}</InlineError>
+                    <InlineError>{nameErrorMessage}</InlineError>
                   </Field>
 
                   <Field label="연락처">
-                    <MotionShake
-                      trigger={
-                        phoneErrorMessage ??
-                        (isPhoneError || isPhoneDup
-                          ? "phone-error"
-                          : undefined)
-                      }
-                    >
+                    <MotionShake trigger={phoneErrorMessage}>
                       <SignupInput
                         ref={phoneInputRef}
                         testID="signup-phone-input"
                         value={values.phone}
                         onChangeText={setField("phone")}
+                        onBlur={onPhoneBlur}
                         placeholder="010-XXXX-XXXX"
                         keyboardType="phone-pad"
                         autoComplete="tel"
                         textContentType="telephoneNumber"
                         returnKeyType="next"
-                        onSubmitEditing={() =>
-                          emailInputRef.current?.focus()
-                        }
-                        hasError={
-                          isPhoneError ||
-                          isPhoneDup ||
-                          Boolean(errors.phone)
-                        }
+                        onSubmitEditing={() => {
+                          onPhoneBlur();
+                          emailInputRef.current?.focus();
+                        }}
+                        hasError={Boolean(phoneErrorMessage)}
                         trailing={
                           isPhoneValid ? (
                             <MotionPop>

@@ -12,7 +12,7 @@
 
 - 회원가입 신규 카드 등장 트랜지션 및 타이핑 디바운스 완화 — 조건 충족 시 다음 카드가 딱딱하게 튀어나오지 않도록 `FadeInDown`(진입 페이드 및 하향 슬라이드)과 `LinearTransition`(기존 카드의 부드러운 하향 이동 레이아웃 트랜지션), 그리고 플랫폼 네이티브 `LayoutAnimation`을 결합. 타이핑 도중 급작스러운 레이아웃 밀림을 방지하기 위해 500ms 입력 멈춤 디바운스(`AUTO_ADVANCE_DEBOUNCE`, 테스트 환경은 0ms)를 두고, 카드 확장 애니메이션이 자연스럽게 안착된 후 350ms 딜레이(`FOCUS_HANDOFF_DELAY`, 테스트 환경 0ms)를 거쳐 새 카드의 첫 번째 입력 필드로 포커스를 부드럽게 인계. 키보드의 '다음' 액션 시에는 즉시 레이아웃 애니메이션과 함께 다음 단계로 진행.
 - 회원가입 신규 카드 상단 추가 및 전체 카드 펼침 상태 유지 — 완료된 카드를 1줄 요약으로 접지 않고 모든 필드를 항상 펼쳐진 상태로 유지하며, 새로 작성할 카드(2단계 성도 정보, 3단계 약관 동의)가 이전 완료 카드보다 물리적으로 위(상단)에 나타나도록 배치. 수동 다음 버튼 없이 조건 충족 시 자동으로 다음 카드가 상단에 나타나며(디바운스/키보드 다음 액션), 이전 카드들도 아래에 온전히 펼쳐져 있어 언제든 직접 확인 및 수정할 수 있다.
-- 성도 정보 입력 피드백 다이어트 — 이름과 연락처는 불필요한 하단 규칙 칩(2~10자, 한글만, 010 시작 등)을 제거하여 시각적 과밀을 없애고 인풋 우측 trailing 체크 아이콘, 자동 하이픈 포맷팅, 인라인 에러 문구로 피드백을 담백하게 정리. 복잡한 보안 규칙이 필요한 비밀번호 규칙 칩과 이메일 형식/중복확인 안내는 유지.
+- 성도 정보 입력 피드백 다이어트 및 실시간/이탈 오류 안내 — 불필요한 하단 규칙 칩(2~10자, 한글만 등)을 제거하는 대신, 이름에 숫자/영문/특수문자가 들어가면 즉시 붉은색 테두리와 함께 "이름은 한글만 입력할 수 있어요." 인라인 에러를 노출하고 1자 입력 후 이탈(onBlur) 시 "이름을 2자 이상 입력해주세요."를 안내. 연락처 역시 010 외 번호 입력 시 실시간 오류("연락처는 010으로 시작해야 해요.") 및 자리수 미달 이탈 시 안내를 제공하며, 올바른 입력 시 오류가 즉시 해제되고 초록색 체크 아이콘(`check-circle`)이 표시된다.
 - 인증 HTTP adapter 활성화 — login/refresh 성공 envelope의 `data`에서 토큰 payload를 읽고, signup 후 login 합성, `/api/member/me`, `/api/member/duplicate`를 `httpAuthAdapter`로 연결. 회원가입은 아이디와 이메일을 필수 입력으로 받고 각각 중복확인을 통과해야 한다. 값이 바뀌면 기존 확인 결과를 폐기한다. development 기본값은 HTTP, 테스트/Maestro는 `EXPO_PUBLIC_AUTH_ADAPTER=mock`. API origin은 `EXPO_PUBLIC_API_URL`. 회원가입 중복확인 실패는 해당 필드에 표시. 로그인 성공 schema는 `ApiResponseLoginResponse`이고, 그 밖 Swagger 성공 schema가 비어 있는 항목 때문에 `test:api:contract` 실패는 남아 있다
 - 조용한 톤 인증 여백·위계 — 로그인 상단 로고 아이콘과 회원가입 상단 점선 아바타 미리보기를 제거해 타이포그래피·폼 중심으로 정리하고(소프트 배지 `열린문교회 커뮤니티` + 2줄 환영 헤드라인 `열린문 커넥트에 오신 것을 환영합니다` 좌측 정렬), 로그인·회원가입 메인 CTA 곡률은 앱 공통 톤에 맞춰 `radius.pill`을 유지하며, 로그인 하단 회원가입 이동은 하단 서피스 카드로 배치하고 회원가입 비밀번호·비밀번호 확인을 단일 섹션으로 묶어 계정/성도 정보를 구분하며 중복확인 통과 시 버튼을 `확인 완료` 상태로 전환; glass 하단 바 실험은 단순 `bottomFlat`으로 유지
 - 로그인·회원가입 절제 모션 (C-set) — 진입은 이동(`translateY`)·시간차(`stagger`) 없는 단일 페이드(`opacity`), 필드 검증 shake·인라인 에러 fade, 중복확인 성공 체크 pop, CTA `MotionPressable`, 가입 버튼 enable soft 활성, auth Stack slide/fade. `designVariant !== default`·`useReducedMotion`에서 진입 애니는 static
@@ -90,6 +90,8 @@
 `LoginInput`, `SignupInput`, `MemberDuplicateInput`, `MemberAvailability`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`와 `UserRole`을 사용하며, 역할은 `ADMIN`, `USER`, `MANAGER_COMMUNION`, `MANAGER_SHARE`, `MANAGER_LIFESTUDY`, `MANAGER_PRAYER` 중 하나입니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리합니다. 중복확인 요청은 Swagger의 `searchType: id | phone | email`, `searchValue` 계약을 따르며 화면에는 `available` 도메인 결과만 노출합니다. 실제 HTTP mapper는 공통 envelope의 `data`만 사용합니다. 중복확인은 `available`, login/refresh는 `accessToken`, `refreshToken`, `userId`, `userName`, `role`, `/api/member/me`는 회원 필드입니다. 로그인 성공 schema는 `ApiResponseLoginResponse`입니다. 그 밖 Swagger 성공 schema가 비어 있는 항목은 `test:api:contract`가 계속 실패합니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-10-28) **성도 정보(이름·연락처) 오류 피드백 즉시 노출(인라인 에러 및 테두리 강조) 적용** — 하단 칩을 제거한 상태에서 사용자가 잘못된 값(숫자, 영문, 010 외 번호 등)을 입력했을 때 이유를 인지할 수 있도록, 입력 즉시 및 포커스 이탈(onBlur) 시점에 붉은색 테두리(`hasError`)와 인라인 에러 문구를 즉각 노출하도록 보강하였다.
 
 - (2026-10-28) **성도 정보(이름·연락처) 규칙 칩 제거 및 피드백 다이어트 적용** — 이름과 전화번호는 한국 사용자에게 당연한 기본 입력값이므로 하단 규칙 칩을 제거하여 시각적 과밀과 입력 압박감을 해소하였다. 유효성 검증(한글 2~10자, 010 번호) 및 우측 완료 체크 아이콘 피드백은 그대로 유지하여 깔끔하고 편안한 입력 경험을 제공한다.
 

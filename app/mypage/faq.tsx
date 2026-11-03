@@ -73,6 +73,7 @@ export default function FaqScreen() {
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
+                style={styles.chipsScroll}
                 contentContainerStyle={styles.chips}
               >
                 {categories.map((category) => {
@@ -146,6 +147,10 @@ const styles = StyleSheet.create({
   body: {
     flexGrow: 1,
     paddingBottom: 20,
+  },
+  chipsScroll: {
+    flexGrow: 0,
+    flexShrink: 0,
   },
   chips: {
     gap: 8,

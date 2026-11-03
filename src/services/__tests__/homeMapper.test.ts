@@ -1,4 +1,5 @@
 import {
+  cleanSermonTitle,
   extractYoutubeVideoId,
   formatSermonDate,
   getYoutubeThumbnailUrl,
@@ -32,10 +33,10 @@ describe("homeMapper", () => {
       ).toBeNull();
     });
 
-    it("generates correct hqdefault thumbnail URL", () => {
+    it("generates correct maxresdefault thumbnail URL", () => {
       expect(
         getYoutubeThumbnailUrl("https://www.youtube.com/watch?v=1t5SPGmJxsg"),
-      ).toBe("https://img.youtube.com/vi/1t5SPGmJxsg/hqdefault.jpg");
+      ).toBe("https://img.youtube.com/vi/1t5SPGmJxsg/maxresdefault.jpg");
     });
 
     it("uses fallback when url is null or invalid", () => {
@@ -91,15 +92,22 @@ describe("homeMapper", () => {
       youtubeUrl: "https://www.youtube.com/watch?v=1t5SPGmJxsg",
     };
 
-    it("maps SermonResponse to HomeSundaySermon correctly", () => {
+    it("maps SermonResponse to HomeSundaySermon correctly and strips redundant scripture suffix", () => {
       const mapped = mapSermonToSundaySermon(mockSermon);
       expect(mapped.id).toBe("1");
-      expect(mapped.title).toBe("넘쳐 흐르는 위로(고후1:1~11)");
+      expect(mapped.title).toBe("넘쳐 흐르는 위로");
       expect(mapped.timeLabel).toBe("이번 주일 말씀 · 11월 1일");
+      expect(mapped.dateLabel).toBe("11월 1일 일요일");
       expect(mapped.summary).toBe("고린도후서 1장 1 ~ 11절 · 이재홍 전도사");
       expect(mapped.videoUrl).toBe(mockSermon.youtubeUrl);
       expect(mapped.thumbnailUrl).toBe(
-        "https://img.youtube.com/vi/1t5SPGmJxsg/hqdefault.jpg",
+        "https://img.youtube.com/vi/1t5SPGmJxsg/maxresdefault.jpg",
+      );
+    });
+
+    it("cleanSermonTitle keeps parenthesized text when it is not a scripture reference", () => {
+      expect(cleanSermonTitle("믿음의 여정(특집)", "히브리서 11장 1절")).toBe(
+        "믿음의 여정(특집)",
       );
     });
   });
@@ -117,11 +125,13 @@ describe("homeMapper", () => {
       const html = "<p>본문 요약입니다.</p>";
       const mapped = mapDailyQtToDawnPrayer(mockQt, html);
       expect(mapped.id).toBe("dawn-1");
-      expect(mapped.timeLabel).toBe("새벽기도 말씀요약 · 11월 3일 (화)");
+      expect(mapped.timeLabel).toBe("새벽기도 말씀요약 · 11월 3일 화요일");
+      expect(mapped.dateLabel).toBe("11월 3일 화요일");
+      expect(mapped.fullDateLabel).toBe("2026년 11월 3일 화요일");
       expect(mapped.title).toBe("고린도후서 1:23~2:17");
       expect(mapped.summary).toBe("본문 요약입니다.");
       expect(mapped.body).toBe("본문 요약입니다.");
-      expect(mapped.href).toBe("/prayer/dawn?id=1");
+      expect(mapped.href).toBe("/dawn?id=1");
     });
   });
 });

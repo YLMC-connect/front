@@ -174,6 +174,12 @@ export default function GroupScreen() {
   );
 
   const hasCategoryFilter = section === "groups";
+  const isCurrentSectionEmpty =
+    section === "service"
+      ? serviceItems.length === 0
+      : section === "mine"
+        ? myGroups.length === 0
+        : groups.length === 0;
 
   if (isMyFull) {
     return (
@@ -274,7 +280,15 @@ export default function GroupScreen() {
         />
       }
     >
-      <View style={styles.list} testID="group-scroll-content">
+      <View
+        style={[
+          styles.list,
+          !isLoading && (isError || isCurrentSectionEmpty)
+            ? styles.listEmpty
+            : null,
+        ]}
+        testID="group-scroll-content"
+      >
         {isLoading ? (
           <View style={styles.loading}>
             <ListSkeleton rows={4} thumbnail={false} />
@@ -471,6 +485,9 @@ const styles = StyleSheet.create({
   list: {
     flex: 1,
     paddingBottom: 164,
+  },
+  listEmpty: {
+    paddingBottom: 120,
   },
   myListWrap: {
     flex: 1,

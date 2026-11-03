@@ -10,10 +10,12 @@ import type {
 import type {
   LifeStudyAttendanceRoster,
   LifeStudyClassList,
+  LifeStudyCohortDetailDto,
   LifeStudyCohortDto,
   LifeStudyCompletionRoster,
   LifeStudyCompletionStudent,
   LifeStudyDto,
+  LifeStudyLessonDto,
   LifeStudyMyCompletion,
 } from "../types/lifeStudyApi";
 
@@ -330,6 +332,39 @@ export function tryReadLifeStudyCohortList(
   return result;
 }
 
+export function tryReadLifeStudyCohortDetail(
+  data: unknown,
+): LifeStudyCohortDetailDto | null {
+  if (!isRecord(data)) return null;
+  const baseList = tryReadLifeStudyCohortList([data]);
+  if (baseList.length === 0) return null;
+  const base = baseList[0];
+  const lessons: LifeStudyLessonDto[] = [];
+  if (Array.isArray(data.lessons)) {
+    for (const item of data.lessons) {
+      if (
+        isRecord(item) &&
+        typeof item.id === "number" &&
+        typeof item.lessonName === "string"
+      ) {
+        lessons.push({
+          id: item.id,
+          lessonName: item.lessonName,
+          orderNum:
+            typeof item.orderNum === "number"
+              ? item.orderNum
+              : lessons.length + 1,
+        });
+      }
+    }
+  }
+  return {
+    ...base,
+    applied: typeof data.applied === "boolean" ? data.applied : false,
+    lessons,
+  };
+}
+
 export type LifeStudyOverviewSource =
   | unknown
   | {
@@ -371,12 +406,19 @@ export function buildLifeStudyOverview(
         : undefined;
     return {
       id: String(cohort.lifeStudyId),
+      cohortId: String(cohort.id),
+      cohortNumber: cohort.cohortNumber ?? undefined,
       title: cohort.lifeStudyName,
       kind: cohort.required ? "required" : "optional",
       weekCount: cohort.weekCount ?? 0,
       instructorName: cohort.instructor ?? cohort.teamLeaderName ?? "",
+      teamLeaderName: cohort.teamLeaderName ?? undefined,
+      bookName: cohort.bookName ?? undefined,
       summary: cohort.studyContent ?? "",
       applicationPeriod: appPeriod,
+      lifeStudyDate: cohort.lifeStudyDate ?? undefined,
+      studyPlace: cohort.studyPlace ?? undefined,
+      eligibility: cohort.eligibility ?? undefined,
       capacity: cohort.userNum ?? undefined,
       enrolledCount:
         cohort.appliedCount != null ? Number(cohort.appliedCount) : undefined,
@@ -389,12 +431,17 @@ export function buildLifeStudyOverview(
   if (lifeStudies.length > 0) {
     courses = lifeStudies.map((study) => {
       const isCompleted = completedIds.has(String(study.id));
+      const matchingOpen = openCourses.find((c) => c.id === String(study.id));
       return {
         id: String(study.id),
+        cohortId: matchingOpen?.cohortId,
         title: study.name,
         kind: study.required ? "required" : "optional",
         weekCount: study.weekCount ?? 0,
         instructorName: study.teamLeader ?? "",
+        teamLeaderName: study.teamLeader ?? undefined,
+        bookName: study.bookName ?? undefined,
+        eligibility: study.eligibility ?? undefined,
         summary: study.studyContent ?? "",
         status: isCompleted ? "completed" : "pending",
         target: study.studyTarget ?? undefined,

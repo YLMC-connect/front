@@ -13,7 +13,10 @@ describe("httpGroupDataSource", () => {
   it("loads small groups and volunteer lists separately", async () => {
     const { request, dataSource } = setup();
     request.mockImplementation(async (path: string) => {
-      if (path.startsWith("/api/communion?type=SMALL_GROUP")) {
+      if (
+        path.includes("type=SMALL_GROUP") &&
+        path.startsWith("/api/communion?")
+      ) {
         return {
           content: [
             {
@@ -68,6 +71,17 @@ describe("httpGroupDataSource", () => {
       services: [
         expect.objectContaining({ id: "2", linkedGroupId: "2", schedule: "" }),
       ],
+    });
+
+    await expect(dataSource.getOverviewPage?.()).resolves.toMatchObject({
+      groups: [
+        expect.objectContaining({ id: "1", isJoined: true, category: "hobby" }),
+      ],
+      services: [
+        expect.objectContaining({ id: "2", linkedGroupId: "2", schedule: "" }),
+      ],
+      hasNext: false,
+      nextCursor: null,
     });
   });
 

@@ -28,6 +28,7 @@ export function AuthRouteNavigator() {
       </Stack.Protected>
       <Stack.Protected guard={isAuthenticated}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="dawn" options={{ animation: "slide_from_right" }} />
         <Stack.Screen
           name="mypage"
           options={{ animation: "slide_from_right" }}

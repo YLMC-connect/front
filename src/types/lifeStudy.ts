@@ -34,12 +34,19 @@ export type LifeStudyOverviewStatus = "completed" | "recommended" | "pending";
 
 export interface LifeStudyOverviewCourse {
   id: string;
+  cohortId?: string;
+  cohortNumber?: number;
   title: string;
   kind: LifeStudyCourseKind;
   weekCount: number;
   instructorName: string;
+  teamLeaderName?: string;
+  bookName?: string;
   summary: string;
   applicationPeriod?: string;
+  lifeStudyDate?: string;
+  studyPlace?: string;
+  eligibility?: string;
   capacity?: number;
   enrolledCount?: number;
   status?: LifeStudyOverviewStatus;

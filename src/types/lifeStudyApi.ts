@@ -91,6 +91,17 @@ export interface LifeStudyMyCompletion {
   completedAt: string | null;
 }
 
+export interface LifeStudyLessonDto {
+  id: number;
+  lessonName: string;
+  orderNum: number;
+}
+
+export interface LifeStudyCohortDetailDto extends LifeStudyCohortDto {
+  applied: boolean;
+  lessons: LifeStudyLessonDto[];
+}
+
 export interface LifeStudyAttendRequest {
   userYear: string;
   userFaithYears: string;

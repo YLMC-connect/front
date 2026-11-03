@@ -369,7 +369,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.sheetOverlay,
   },
   sheet: {
-    maxHeight: "80%",
+    height: "90%",
+    maxHeight: "90%",
     borderTopLeftRadius: theme.radius.xl,
     borderTopRightRadius: theme.radius.xl,
     backgroundColor: theme.colors.bg,

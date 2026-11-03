@@ -124,7 +124,14 @@ export default function MarketScreen() {
         />
       }
     >
-      <View style={styles.list}>
+      <View
+        style={[
+          styles.list,
+          !isLoading && (isError || visiblePosts.length === 0)
+            ? styles.listEmpty
+            : null,
+        ]}
+      >
         {isLoading ? (
           <View style={styles.loading}>
             <ListSkeleton rows={4} />
@@ -283,7 +290,11 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[2],
   },
   list: {
+    flex: 1,
     paddingBottom: 164,
+  },
+  listEmpty: {
+    paddingBottom: 120,
   },
   loading: {
     paddingTop: theme.spacing[2],

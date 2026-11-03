@@ -71,7 +71,7 @@ describe("v1 tab smoke screens", () => {
         summary: "2026. 11. 3. 화요일 ㅡ 고린도후서 1:23~2:17",
         timeLabel: "새벽기도 말씀요약 · 11월 3일",
         body: "본문",
-        href: "/prayer/dawn?id=1",
+        href: "/dawn?id=1",
       },
       sundaySermon: {
         id: "1",
@@ -609,10 +609,12 @@ describe("v1 tab smoke screens", () => {
     ).toBeGreaterThanOrEqual(1);
     expect(await screen.findByTestId("home-daily-prayer")).toBeTruthy();
     expect(screen.getByTestId("home-dawn-prayer")).toBeTruthy();
-    expect(screen.getByText("새벽기도 말씀요약 · 11월 3일")).toBeTruthy();
+    expect(screen.getByText("새벽기도 말씀요약")).toBeTruthy();
+    expect(screen.getByText("11월 3일")).toBeTruthy();
     expect(screen.getByTestId("home-sunday-sermon")).toBeTruthy();
     expect(screen.getByTestId("home-sunday-sermon-thumbnail")).toBeTruthy();
-    expect(screen.getByText("이번 주일 말씀 · 11월 1일")).toBeTruthy();
+    expect(screen.getByText("이번 주일 말씀")).toBeTruthy();
+    expect(screen.getByText("11월 1일")).toBeTruthy();
     expect(screen.getByText("넘쳐 흐르는 위로(고후1:1~11)")).toBeTruthy();
     expect(screen.queryByText("내 활동 요약")).toBeNull();
   });
@@ -636,10 +638,8 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<HomeScreen />);
 
     await screen.findByTestId("home-daily-prayer");
-    fireEvent.press(screen.getByTestId("home-daily-prayer"));
-    expect(push).toHaveBeenCalledWith("/prayer");
     fireEvent.press(screen.getByTestId("home-dawn-prayer"));
-    expect(push).toHaveBeenCalledWith("/prayer/dawn?id=1");
+    expect(push).toHaveBeenCalledWith("/dawn?id=1");
     fireEvent.press(screen.getByTestId("home-sunday-sermon"));
     expect(openURLSpy).toHaveBeenCalledWith(
       "https://www.youtube.com/watch?v=1t5SPGmJxsg",
@@ -1557,8 +1557,8 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("말씀으로 배우고 삶으로 자라가요")).toBeTruthy();
     expect(await screen.findByText("내 학습경로")).toBeTruthy();
     expect(screen.queryByText("중보기도")).toBeNull();
-    fireEvent.press(screen.getByLabelText("삶공부 신청"));
-    expect(router.push).toHaveBeenCalledWith("/life-study/apply");
+    expect(screen.queryByLabelText("삶공부 신청")).toBeNull();
+    expect(screen.getByText("과정 확인 및 수강 신청")).toBeTruthy();
   });
 
   it("opens a life study course", async () => {

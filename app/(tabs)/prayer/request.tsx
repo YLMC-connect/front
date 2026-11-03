@@ -116,7 +116,14 @@ export default function PrayerRequestScreenRoute() {
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
         <TopBar title="내 기도제목" back />
-        <ScrollView contentContainerStyle={styles.body}>
+        <ScrollView
+          contentContainerStyle={[
+            styles.body,
+            !topics.isPending && !topics.isError && rows.length === 0
+              ? styles.bodyEmpty
+              : null,
+          ]}
+        >
           <View style={styles.noticeCard}>
             <Text style={styles.noticeTitle}>
               기도제목은 승인 후 공개됩니다
@@ -127,7 +134,14 @@ export default function PrayerRequestScreenRoute() {
             </Text>
           </View>
 
-          <View style={styles.stack}>
+          <View
+            style={[
+              styles.stack,
+              !topics.isPending && !topics.isError && rows.length === 0
+                ? styles.stackEmpty
+                : null,
+            ]}
+          >
             {topics.isPending ? (
               <Text style={styles.desc}>
                 서버에서 기도제목을 불러오는 중입니다.
@@ -197,6 +211,9 @@ const styles = StyleSheet.create({
     paddingTop: 4,
     paddingBottom: 112,
   },
+  bodyEmpty: {
+    paddingBottom: 112,
+  },
   noticeCard: {
     marginBottom: 14,
     borderRadius: theme.radius.lg,
@@ -217,6 +234,9 @@ const styles = StyleSheet.create({
   stack: {
     flex: 1,
     gap: 10,
+  },
+  stackEmpty: {
+    justifyContent: "center",
   },
   card: {
     borderRadius: theme.radius.lg,

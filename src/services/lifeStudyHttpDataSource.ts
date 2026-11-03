@@ -9,6 +9,7 @@ import {
   buildLifeStudyOverview,
   readAttendanceRoster,
   requireCompletionRoster,
+  tryReadLifeStudyCohortDetail,
 } from "./lifeStudyMapper";
 
 type LifeStudyApiClient = {
@@ -118,6 +119,13 @@ export function createHttpLifeStudyDataSource({
         },
       );
       return requireCompletionRoster(data);
+    },
+
+    async getCohortDetail(cohortId) {
+      const data = await client.request<unknown>(
+        `/api/life-study/cohorts/${cohortId}`,
+      );
+      return tryReadLifeStudyCohortDetail(data);
     },
 
     async applyCohort(cohortId, input) {

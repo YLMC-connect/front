@@ -159,8 +159,10 @@ describe("httpLifeStudyDataSource", () => {
     const overview = await dataSource.getOverview();
     expect(overview.openCourses).toHaveLength(1);
     expect(overview.openCourses[0].title).toBe("생명의 삶");
+    expect(overview.openCourses[0].cohortId).toBe("10");
     expect(overview.courses).toHaveLength(1);
     expect(overview.courses[0].title).toBe("생명의 삶");
+    expect(overview.courses[0].cohortId).toBe("10");
     expect(overview.path.totalRequired).toBe(1);
     expect(overview.path.completedRequired).toBe(0);
     expect(overview.path.nextRecommendation).toBe("생명의 삶");

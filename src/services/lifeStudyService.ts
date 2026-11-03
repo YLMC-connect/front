@@ -9,6 +9,7 @@ import type {
   LifeStudyAttendanceRoster,
   LifeStudyAttendanceUserRequest,
   LifeStudyAttendRequest,
+  LifeStudyCohortDetailDto,
   LifeStudyCompletionRoster,
   LifeStudyCompletionUserRequest,
 } from "../types/lifeStudyApi";
@@ -18,6 +19,9 @@ export interface LifeStudyDataSource {
   getOverview(): Promise<LifeStudyOverview>;
   getCourses(filter?: LifeStudyStatus): Promise<LifeStudyCourse[]>;
   getMyCompletions(): Promise<LifeStudyHistory[]>;
+  getCohortDetail?(
+    cohortId: string | number,
+  ): Promise<LifeStudyCohortDetailDto | null>;
   applyClassesToCourse(
     cohortId: string,
     course: LifeStudyOverviewCourse,
@@ -52,6 +56,10 @@ export function createLifeStudyService(dataSource: LifeStudyDataSource) {
     fetchOverview: () => dataSource.getOverview(),
     fetchCourses: (filter?: LifeStudyStatus) => dataSource.getCourses(filter),
     fetchMyCompletions: () => dataSource.getMyCompletions(),
+    fetchCohortDetail: (cohortId: string | number) =>
+      dataSource.getCohortDetail
+        ? dataSource.getCohortDetail(cohortId)
+        : Promise.resolve(null),
     applyClassesToCourse: (cohortId: string, course: LifeStudyOverviewCourse) =>
       dataSource.applyClassesToCourse(cohortId, course),
     applyCohort: (cohortId: string | number, input: LifeStudyAttendRequest) =>
@@ -80,6 +88,7 @@ const lifeStudyService = createLifeStudyService(httpLifeStudyDataSource);
 export const fetchLifeStudyOverview = lifeStudyService.fetchOverview;
 export const fetchLifeStudyCourses = lifeStudyService.fetchCourses;
 export const fetchMyLifeStudyCompletions = lifeStudyService.fetchMyCompletions;
+export const fetchLifeStudyCohortDetail = lifeStudyService.fetchCohortDetail;
 export const applyLifeStudyClassesToCourse =
   lifeStudyService.applyClassesToCourse;
 export const applyLifeStudyCohort = lifeStudyService.applyCohort;

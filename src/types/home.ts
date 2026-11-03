@@ -17,6 +17,8 @@ export interface HomeDawnPrayer {
   title: string;
   summary: string;
   timeLabel: string;
+  dateLabel?: string;
+  fullDateLabel?: string;
   body: string;
   href: string;
 }
@@ -24,6 +26,7 @@ export interface HomeDawnPrayer {
 export interface HomeSundaySermon {
   id: string;
   timeLabel: string;
+  dateLabel?: string;
   title: string;
   summary: string;
   thumbnailUrl: string;

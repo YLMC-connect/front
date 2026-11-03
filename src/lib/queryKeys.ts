@@ -1,8 +1,8 @@
 export const queryKeys = {
   home: {
     all: ["home"] as const,
-    overview: () => [...queryKeys.home.all, "overview", "http-v3"] as const,
-    dawn: () => [...queryKeys.home.all, "dawn", "http-v3"] as const,
+    overview: () => [...queryKeys.home.all, "overview", "http-v6"] as const,
+    dawn: () => [...queryKeys.home.all, "dawn", "http-v6"] as const,
   },
   market: {
     all: ["market"] as const,
@@ -18,7 +18,10 @@ export const queryKeys = {
   },
   lifeStudy: {
     all: ["lifeStudy"] as const,
-    overview: () => [...queryKeys.lifeStudy.all, "overview"] as const,
+    overview: () =>
+      [...queryKeys.lifeStudy.all, "overview", "http-v2"] as const,
+    cohortDetail: (cohortId: string) =>
+      [...queryKeys.lifeStudy.all, "cohort", cohortId] as const,
     lists: () => [...queryKeys.lifeStudy.all, "list"] as const,
     list: (filter?: unknown) =>
       [...queryKeys.lifeStudy.lists(), filter ?? "all"] as const,

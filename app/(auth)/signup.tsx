@@ -62,7 +62,6 @@ type Availability = {
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const AUTO_ADVANCE_DEBOUNCE = process.env.NODE_ENV === "test" ? 0 : 500;
-const FOCUS_HANDOFF_DELAY = process.env.NODE_ENV === "test" ? 0 : 350;
 
 if (
   Platform.OS === "android" &&
@@ -128,6 +127,7 @@ export default function SignupScreen() {
   const isPhoneDup = variant === "phone-dup";
   const isLoading = variant === "loading";
 
+  const scrollRef = useRef<ScrollView>(null);
   const idInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
   const nameInputRef = useRef<TextInput>(null);
@@ -198,6 +198,10 @@ export default function SignupScreen() {
       let nextValue = value;
       if (field === "phone") {
         nextValue = formatPhoneNumber(value);
+        const raw = phoneDigits(nextValue);
+        if (raw.length === 11 && raw.startsWith("010")) {
+          emailInputRef.current?.focus();
+        }
       } else if (field === "id") {
         nextValue = sanitizeLoginId(value);
       }
@@ -433,40 +437,31 @@ export default function SignupScreen() {
     }
   }
 
-  // Auto-advance to Step 2 when Card 1 is completed (settle debounce, then focus after card expansion)
+  // Test-only immediate focus when AUTO_ADVANCE_DEBOUNCE === 0
   useEffect(() => {
-    if (isCard1Complete && unlockedStep < 2) {
-      if (AUTO_ADVANCE_DEBOUNCE === 0) {
-        nameInputRef.current?.focus();
-        return;
-      }
-      const timer = setTimeout(() => {
-        animateLayout();
-        setUnlockedStep(2);
-        const focusTimer = setTimeout(() => {
-          nameInputRef.current?.focus();
-        }, FOCUS_HANDOFF_DELAY);
-        return () => clearTimeout(focusTimer);
-      }, AUTO_ADVANCE_DEBOUNCE);
-      return () => clearTimeout(timer);
+    if (AUTO_ADVANCE_DEBOUNCE === 0 && isCard1Complete && unlockedStep < 2) {
+      nameInputRef.current?.focus();
     }
   }, [isCard1Complete, unlockedStep]);
 
-  // Auto-advance to Step 3 when Card 2 is completed (settle debounce)
+  // Auto-advance to Step 3 when Card 2 is completed and email availability is verified
   useEffect(() => {
     if (
       AUTO_ADVANCE_DEBOUNCE > 0 &&
       unlockedStep >= 2 &&
       isCard2Complete &&
+      currentEmailAvailability === true &&
       unlockedStep < 3
     ) {
       const timer = setTimeout(() => {
         animateLayout();
         setUnlockedStep(3);
-      }, AUTO_ADVANCE_DEBOUNCE);
+        Keyboard.dismiss();
+        scrollRef.current?.scrollTo({ y: 0, animated: true });
+      }, 80);
       return () => clearTimeout(timer);
     }
-  }, [unlockedStep, isCard2Complete]);
+  }, [unlockedStep, isCard2Complete, currentEmailAvailability]);
 
   return (
     <Screen scroll={false} padded={false}>
@@ -484,6 +479,7 @@ export default function SignupScreen() {
           }}
         />
         <ScrollView
+          ref={scrollRef}
           testID="signup-scroll"
           style={styles.scroll}
           contentContainerStyle={[styles.body, { flexGrow: 1 }]}
@@ -717,6 +713,10 @@ export default function SignupScreen() {
                           if (isCard2Complete) {
                             animateLayout();
                             setUnlockedStep((prev) => Math.max(prev, 3));
+                            scrollRef.current?.scrollTo({
+                              y: 0,
+                              animated: true,
+                            });
                           }
                         }}
                         hasError={Boolean(emailErrorMessage)}
@@ -909,10 +909,18 @@ export default function SignupScreen() {
                       autoComplete="new-password"
                       textContentType="newPassword"
                       returnKeyType="next"
+                      onBlur={() => {
+                        if (isCard1Complete && unlockedStep < 2) {
+                          animateLayout();
+                          setUnlockedStep(2);
+                          scrollRef.current?.scrollTo({ y: 0, animated: true });
+                        }
+                      }}
                       onSubmitEditing={() => {
                         if (isCard1Complete) {
                           animateLayout();
                           setUnlockedStep((prev) => Math.max(prev, 2));
+                          scrollRef.current?.scrollTo({ y: 0, animated: true });
                           setTimeout(() => nameInputRef.current?.focus(), 250);
                         } else if (nameInputRef.current) {
                           nameInputRef.current.focus();

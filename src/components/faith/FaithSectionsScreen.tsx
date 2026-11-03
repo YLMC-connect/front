@@ -35,9 +35,21 @@ export function FaithSectionsScreen({ section }: { section: FaithSection }) {
   const studyQuery = useLifeStudyOverview();
   const currentQuery = section === "study" ? studyQuery : prayerQuery;
 
+  const isLastSectionEmpty =
+    section === "study"
+      ? (studyQuery.data?.courses.length ?? 0) === 0
+      : (prayerQuery.data?.requests.length ?? 0) === 0;
+
   return (
     <StickyHeaderScreen
-      contentContainerStyle={[styles.body, styles.bodyWithFab]}
+      contentContainerStyle={[
+        styles.body,
+        isLastSectionEmpty
+          ? styles.bodyWhenLastEmpty
+          : section === "pray"
+            ? styles.bodyWithFab
+            : styles.bodyWithTab,
+      ]}
       testID="screen-faith"
       title={section === "study" ? "삶공부" : "기도"}
       subtitle={
@@ -47,20 +59,7 @@ export function FaithSectionsScreen({ section }: { section: FaithSection }) {
       }
       refreshing={currentQuery.isRefetching}
       onRefresh={() => void currentQuery.refetch()}
-      overlay={
-        section === "pray" ? (
-          <PrayerFloatingMenu />
-        ) : (
-          <FloatingActionButton
-            accessibilityLabel="삶공부 신청"
-            label="삶공부 신청"
-            icon="add"
-            style={styles.fab}
-            testID="life-study-apply-fab"
-            onPress={() => router.push("/life-study/apply")}
-          />
-        )
-      }
+      overlay={section === "pray" ? <PrayerFloatingMenu /> : undefined}
     >
       {section === "study" ? <StudyContent /> : <PrayerContent />}
     </StickyHeaderScreen>
@@ -94,7 +93,7 @@ function PrayerContent() {
     : 0;
 
   return (
-    <MotionEnter>
+    <MotionEnter style={styles.contentFill}>
       <View style={styles.todayCard}>
         <View style={styles.todayTop}>
           <View>
@@ -130,6 +129,7 @@ function PrayerContent() {
               icon="groups"
               title="참여 중인 기도방이 없어요"
               description="중보기도 신청을 통해 기도방에 참여해보세요."
+              style={styles.inlineEmpty}
               testID="prayer-rooms-empty"
             />
           ) : (
@@ -231,19 +231,30 @@ function PrayerContent() {
         </View>
       </View>
 
-      <View style={styles.section}>
+      <View
+        style={[
+          styles.section,
+          data.requests.length === 0 ? styles.lastSectionEmpty : null,
+        ]}
+      >
         <SectionHeader
           title="내 기도제목"
           onViewAll={() => router.push("/prayer/request")}
           style={styles.sectionHeader}
           testID="prayer-request-section-header"
         />
-        <View style={styles.stack}>
+        <View
+          style={[
+            styles.stack,
+            data.requests.length === 0 ? styles.stackEmpty : null,
+          ]}
+        >
           {data.requests.length === 0 ? (
             <Empty
               icon="hands-pray"
               title="등록된 기도제목이 없어요"
               description="기도제목 작성을 통해 기도제목을 나눠보세요."
+              style={styles.inlineEmpty}
               testID="prayer-requests-empty"
             />
           ) : (
@@ -304,7 +315,7 @@ function StudyContent() {
   const courses = data.courses;
 
   return (
-    <MotionEnter>
+    <MotionEnter style={styles.contentFill}>
       <View style={styles.section}>
         <AppText variant="sectionTitle" style={styles.sectionTitle}>
           내 학습경로
@@ -354,6 +365,7 @@ function StudyContent() {
               icon="book-open-page-variant-outline"
               title="지금 신청 가능한 과정이 없어요"
               description="새로운 과정이 개설되면 안내해 드릴게요."
+              style={styles.inlineEmpty}
               testID="life-study-open-courses-empty"
             />
           ) : (
@@ -364,16 +376,27 @@ function StudyContent() {
         </View>
       </View>
 
-      <View style={styles.section}>
+      <View
+        style={[
+          styles.section,
+          courses.length === 0 ? styles.lastSectionEmpty : null,
+        ]}
+      >
         <AppText variant="sectionTitle" style={styles.sectionTitle}>
           전체 과정
         </AppText>
-        <View style={styles.stack}>
+        <View
+          style={[
+            styles.stack,
+            courses.length === 0 ? styles.stackEmpty : null,
+          ]}
+        >
           {courses.length === 0 ? (
             <Empty
               icon="book-open-page-variant-outline"
               title="개설된 과정이 없어요"
               description="개설 예정인 삶공부 과정을 준비 중이에요."
+              style={styles.inlineEmpty}
               testID="life-study-courses-empty"
             />
           ) : (
@@ -417,10 +440,15 @@ function CourseCard({
   course: LifeStudyOverviewCourse;
   open?: boolean;
 }) {
+  const detailHref =
+    open && course.cohortId
+      ? (`/life-study/${course.id}?cohortId=${course.cohortId}` as const)
+      : (`/life-study/${course.id}` as const);
+
   return (
     <MotionPressable
       accessibilityRole="button"
-      onPress={() => router.push(`/life-study/${course.id}`)}
+      onPress={() => router.push(detailHref)}
       pressedScale={0.985}
       style={styles.courseCard}
     >
@@ -448,18 +476,34 @@ function CourseCard({
         {course.summary}
       </AppText>
       {open ? (
-        <View style={styles.courseGrid}>
-          <View style={styles.courseMetric}>
-            <Text style={styles.metricLabel}>신청 기간</Text>
-            <Text style={styles.metricValue}>{course.applicationPeriod}</Text>
+        <>
+          <View style={styles.courseGrid}>
+            <View style={styles.courseMetric}>
+              <Text style={styles.metricLabel}>신청 기간</Text>
+              <Text style={styles.metricValue}>{course.applicationPeriod}</Text>
+            </View>
+            <View style={styles.courseMetric}>
+              <Text style={styles.metricLabel}>정원</Text>
+              <Text style={styles.metricValue}>
+                {course.enrolledCount} / {course.capacity}명
+              </Text>
+            </View>
           </View>
-          <View style={styles.courseMetric}>
-            <Text style={styles.metricLabel}>정원</Text>
-            <Text style={styles.metricValue}>
-              {course.enrolledCount} / {course.capacity}명
-            </Text>
+          <View style={styles.openCourseActionRow}>
+            <AppText
+              variant="caption"
+              tone="brand"
+              style={styles.openCourseActionText}
+            >
+              과정 확인 및 수강 신청
+            </AppText>
+            <AppIcon
+              name="chevron-right"
+              size={16}
+              color={theme.colors.primaryDeep}
+            />
           </View>
-        </View>
+        </>
       ) : (
         <Text style={styles.targetText}>신청대상: {course.target}</Text>
       )}
@@ -610,6 +654,10 @@ const styles = StyleSheet.create({
   },
   bodyWithFab: { paddingBottom: 164 },
   bodyWithTab: { paddingBottom: 116 },
+  bodyWhenLastEmpty: { paddingBottom: 116 },
+  contentFill: {
+    flex: 1,
+  },
   todayCard: {
     marginHorizontal: theme.layout.screenX,
     marginTop: theme.spacing[2],
@@ -646,6 +694,9 @@ const styles = StyleSheet.create({
   section: {
     marginTop: theme.spacing[2],
   },
+  lastSectionEmpty: {
+    flex: 1,
+  },
   sectionTitle: {
     paddingHorizontal: theme.layout.screenX,
     paddingTop: theme.spacing[5],
@@ -664,6 +715,14 @@ const styles = StyleSheet.create({
   stack: {
     paddingHorizontal: theme.layout.screenX,
     gap: theme.spacing[3],
+  },
+  stackEmpty: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  inlineEmpty: {
+    paddingTop: 28,
+    paddingBottom: 32,
   },
   roomCard: {
     borderRadius: theme.radius.lg,
@@ -921,9 +980,14 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.xs,
     fontWeight: theme.fontWeight.bold,
   },
-  fab: {
-    position: "absolute",
-    right: theme.layout.screenX,
-    bottom: 86,
+  openCourseActionRow: {
+    marginTop: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 2,
+  },
+  openCourseActionText: {
+    fontWeight: theme.fontWeight.bold,
   },
 });

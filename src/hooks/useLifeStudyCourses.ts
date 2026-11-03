@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../lib/queryKeys";
 import {
   applyLifeStudyCohort,
+  fetchLifeStudyCohortDetail,
   fetchLifeStudyCourses,
   fetchLifeStudyOverview,
 } from "../services/lifeStudyService";
@@ -19,6 +20,15 @@ export function useLifeStudyOverview() {
   return useQuery({
     queryKey: queryKeys.lifeStudy.overview(),
     queryFn: fetchLifeStudyOverview,
+  });
+}
+
+export function useLifeStudyCohortDetail(cohortId?: string) {
+  return useQuery({
+    queryKey: queryKeys.lifeStudy.cohortDetail(cohortId ?? ""),
+    queryFn: () =>
+      cohortId ? fetchLifeStudyCohortDetail(cohortId) : Promise.resolve(null),
+    enabled: Boolean(cohortId),
   });
 }
 

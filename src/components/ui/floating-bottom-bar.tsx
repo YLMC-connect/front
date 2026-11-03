@@ -80,7 +80,14 @@ export function FloatingBottomBar({
             {loading ? (
               <ActivityIndicator color={theme.colors.white} size="small" />
             ) : (
-              <Text style={styles.buttonText}>{label}</Text>
+              <Text
+                style={[
+                  styles.buttonText,
+                  disabled && !loading ? styles.buttonTextDisabled : null,
+                ]}
+              >
+                {label}
+              </Text>
             )}
           </MotionPressable>
         ) : null)}
@@ -112,11 +119,16 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.danger,
   },
   buttonDisabled: {
-    opacity: 0.6,
+    backgroundColor: theme.colors.surfaceMuted,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   buttonText: {
     color: theme.colors.white,
     fontSize: theme.fontSize.base,
     fontWeight: theme.fontWeight.bold,
+  },
+  buttonTextDisabled: {
+    color: theme.colors.inkHint,
   },
 });

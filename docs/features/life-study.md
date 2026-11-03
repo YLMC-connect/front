@@ -65,6 +65,8 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-11-03) **삶공부 우측 하단 `+ 삶공부 신청` 플로팅 버튼(FAB) 제거 및 ‘지금 신청 가능한 과정’ 기반 신청 단일화** — 과정 구분 없이 단일 신청 화면으로 이동하던 우측 하단 플로팅 버튼(`life-study-apply-fab`)을 제거하고, `GET /api/life-study/cohorts`로 조회된 ‘지금 신청 가능한 과정’ 카드를 통해서만 기수 상세(`GET /api/life-study/cohorts/{id}`) 확인 후 하단 `[수강 신청하기]` 버튼(`POST /api/life-study/cohorts/{cohortId}/attend`)으로 신청하도록 일원화한다. 모집 중인 기수가 없는 과정 상세에서는 신청 버튼을 노출하지 않으며, 이미 신청한 기수(`applied: true`)는 버튼에 신청 완료 상태를 표시한다.
+
 - (2026-11-03) **런타임 목 어댑터(`resolveLifeStudyAdapterMode`, `mockLifeStudyDataSource`), 목 오버레이 매퍼 및 `src/mocks/lifeStudy.ts` 제거** — 전 도메인 HTTP 단일화에 따라 `httpLifeStudyDataSource`로 일원화하고, 미사용 목 오버레이 헬퍼(`applyMyCompletionsToOverview`, `applyMyCompletionsToCourses`, `applyMyCompletionsToHistories`), 수강 내역 화면(`app/(tabs)/life-study/history.tsx`)의 죽은 목업 배열/JSX 및 `"목업 데이터"` 문구를 제거.
 
 - (2026-10-28) **삶공부 상세(/life-study/[id]) 미존재 과정 및 커리큘럼 빈 상태에 공통 Empty 연동** — ID에 해당하는 삶공부 과정이 존재하지 않거나 커리큘럼 정보가 아직 등록되지 않은 경우, 화면이 비정상 렌더링되거나 빈 박스로 방치되지 않도록 공통 feedback 컴포넌트(`<Empty />`)를 렌더링하도록 일관화.

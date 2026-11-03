@@ -1,15 +1,15 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { router, useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, View } from "react-native";
-import { Screen } from "../../../src/components/layout/Screen";
+import { Screen } from "../src/components/layout/Screen";
 import {
   AppText,
   ErrorState,
   ListSkeleton,
   TopBar,
-} from "../../../src/components/ui";
-import { theme } from "../../../src/constants/theme";
-import { useDawnPrayerDetail } from "../../../src/hooks/useHome";
+} from "../src/components/ui";
+import { theme } from "../src/constants/theme";
+import { useDawnPrayerDetail } from "../src/hooks/useHome";
 
 function splitReaderParagraphs(body: string): string[] {
   if (!body) return [];
@@ -56,20 +56,22 @@ export default function DawnPrayerScreen() {
         >
           <View style={styles.heroCard}>
             <View style={styles.heroBadgeRow}>
-              <View style={styles.heroIconWrap}>
+              <View style={styles.heroDateBadge}>
                 <AppIcon
                   name="book-open-page-variant-outline"
-                  size={16}
+                  size={15}
                   color={theme.colors.primaryDeep}
                 />
+                <AppText
+                  variant="formLabel"
+                  tone="brand"
+                  style={styles.heroDateText}
+                >
+                  {detail.data.fullDateLabel ||
+                    detail.data.dateLabel ||
+                    detail.data.timeLabel}
+                </AppText>
               </View>
-              <AppText
-                variant="caption"
-                tone="brand"
-                style={styles.heroEyebrow}
-              >
-                {detail.data.timeLabel}
-              </AppText>
             </View>
             <AppText variant="screenTitle" style={styles.title}>
               {detail.data.title}
@@ -125,18 +127,19 @@ const styles = StyleSheet.create({
   heroBadgeRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
   },
-  heroIconWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: theme.colors.primaryTint,
+  heroDateBadge: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.primaryTint,
   },
-  heroEyebrow: {
-    fontWeight: theme.fontWeight.semibold,
+  heroDateText: {
+    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.primaryDeep,
   },
   title: {
     marginTop: 2,

@@ -12,7 +12,10 @@ import {
   TopBar,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
-import { useLifeStudyOverview } from "../../../src/hooks/useLifeStudyCourses";
+import {
+  useLifeStudyCohortDetail,
+  useLifeStudyOverview,
+} from "../../../src/hooks/useLifeStudyCourses";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 import type { LifeStudyOverviewStatus } from "../../../src/types/lifeStudy";
 
@@ -85,13 +88,27 @@ function routeId(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function LiveLifeStudyDetail({ id }: { id: string }) {
+function LiveLifeStudyDetail({
+  id,
+  cohortIdParam,
+}: {
+  id: string;
+  cohortIdParam?: string;
+}) {
   const router = useRouter();
   const overview = useLifeStudyOverview();
-  const course = [
-    ...(overview.data?.courses ?? []),
-    ...(overview.data?.openCourses ?? []),
-  ].find((item) => item.id === id);
+  const openCohort = overview.data?.openCourses.find(
+    (item) =>
+      (cohortIdParam && item.cohortId === cohortIdParam) ||
+      item.cohortId === id ||
+      item.id === id,
+  );
+  const catalogCourse = overview.data?.courses.find((item) => item.id === id);
+  const course = openCohort ?? catalogCourse;
+  const activeCohortId = cohortIdParam || openCohort?.cohortId;
+  const cohortDetailQuery = useLifeStudyCohortDetail(activeCohortId);
+  const cohortDetail = cohortDetailQuery.data;
+  const isAlreadyApplied = Boolean(cohortDetail?.applied);
 
   return (
     <Screen scroll={false} padded={false}>
@@ -101,7 +118,12 @@ function LiveLifeStudyDetail({ id }: { id: string }) {
           back
           onBack={() => router.back()}
         />
-        <ScrollView contentContainerStyle={styles.body}>
+        <ScrollView
+          contentContainerStyle={[
+            styles.body,
+            !openCohort ? styles.bodyNoBottomBar : null,
+          ]}
+        >
           <View style={styles.hero}>
             {overview.isPending ? (
               <Text style={styles.desc}>서버에서 불러오는 중입니다.</Text>
@@ -118,36 +140,160 @@ function LiveLifeStudyDetail({ id }: { id: string }) {
             ) : null}
             {course ? (
               <>
+                <View style={styles.badgeRow}>
+                  <DetailBadge bordered tone={openCohort ? "warn" : "mute"}>
+                    {openCohort
+                      ? "신청 가능"
+                      : lifeStudyStatusLabel[course.status ?? "pending"]}
+                  </DetailBadge>
+                  <DetailBadge bordered>
+                    {course.kind === "required" ? "필수" : "선택"}
+                  </DetailBadge>
+                  {course.weekCount > 0 ? (
+                    <Text style={styles.caption}>
+                      {course.weekCount}주 과정
+                    </Text>
+                  ) : null}
+                </View>
+
                 <Text style={styles.title}>{course.title || "이름 없음"}</Text>
-                <Text style={styles.caption}>
-                  {lifeStudyStatusLabel[course.status ?? "pending"]}
-                </Text>
                 {course.summary ? (
                   <Text style={styles.desc}>{course.summary}</Text>
                 ) : null}
-                {course.instructorName || course.weekCount > 0 ? (
+
+                {course.instructorName ||
+                course.teamLeaderName ||
+                course.bookName ||
+                course.target ||
+                course.eligibility ||
+                course.weekCount > 0 ? (
                   <Card style={styles.infoCard}>
                     <Text style={styles.infoTitle}>과정 정보</Text>
                     {course.instructorName ? (
                       <InfoRow label="강사" value={course.instructorName} />
+                    ) : null}
+                    {course.teamLeaderName &&
+                    course.teamLeaderName !== course.instructorName ? (
+                      <InfoRow label="팀장" value={course.teamLeaderName} />
+                    ) : null}
+                    {course.bookName ? (
+                      <InfoRow label="교재" value={course.bookName} />
+                    ) : null}
+                    {course.target ? (
+                      <InfoRow label="수강 대상" value={course.target} />
+                    ) : null}
+                    {course.eligibility ? (
+                      <InfoRow label="신청 조건" value={course.eligibility} />
                     ) : null}
                     {course.weekCount > 0 ? (
                       <InfoRow label="주 수" value={`${course.weekCount}주`} />
                     ) : null}
                   </Card>
                 ) : null}
-                <View style={styles.sectionMargin}>
+
+                {openCohort ? (
+                  <View style={styles.sectionMargin}>
+                    <Text style={styles.subSectionTitle}>신청 안내</Text>
+                    <Card style={styles.infoCard}>
+                      {openCohort.applicationPeriod ? (
+                        <InfoRow
+                          label="신청 기간"
+                          value={openCohort.applicationPeriod}
+                        />
+                      ) : null}
+                      {openCohort.lifeStudyDate ? (
+                        <InfoRow
+                          label="개강일"
+                          value={openCohort.lifeStudyDate}
+                        />
+                      ) : null}
+                      {openCohort.studyPlace ? (
+                        <InfoRow
+                          label="수업 장소"
+                          value={openCohort.studyPlace}
+                        />
+                      ) : null}
+                      {openCohort.capacity != null ? (
+                        <InfoRow
+                          label="정원"
+                          value={`${openCohort.enrolledCount ?? 0} / ${openCohort.capacity}명`}
+                        />
+                      ) : null}
+                    </Card>
+                  </View>
+                ) : null}
+
+                <View
+                  style={[
+                    styles.sectionMargin,
+                    !(cohortDetail?.lessons && cohortDetail.lessons.length > 0)
+                      ? styles.sectionMarginFill
+                      : null,
+                  ]}
+                >
                   <Text style={styles.subSectionTitle}>커리큘럼</Text>
-                  <Empty
-                    icon="book-open-page-variant-outline"
-                    title="등록된 커리큘럼이 없어요"
-                    description="개강 시 주차별 강의 커리큘럼이 공개됩니다."
-                  />
+                  {cohortDetail?.lessons && cohortDetail.lessons.length > 0 ? (
+                    <Card style={styles.infoCard}>
+                      {cohortDetail.lessons.map((lesson, index) => (
+                        <View
+                          key={lesson.id}
+                          style={[
+                            styles.curriculumRow,
+                            index < cohortDetail.lessons.length - 1
+                              ? styles.rowBorder
+                              : null,
+                          ]}
+                        >
+                          <View style={styles.weekBadge}>
+                            <Text style={styles.weekNumber}>
+                              {lesson.orderNum}
+                            </Text>
+                          </View>
+                          <View style={styles.rowText}>
+                            <Text style={styles.caption}>
+                              WEEK {lesson.orderNum}
+                            </Text>
+                            <Text style={styles.curriculumTitle}>
+                              {lesson.lessonName}
+                            </Text>
+                          </View>
+                        </View>
+                      ))}
+                    </Card>
+                  ) : (
+                    <Empty
+                      icon="book-open-page-variant-outline"
+                      title="등록된 커리큘럼이 없어요"
+                      description="개강 시 주차별 강의 커리큘럼이 공개됩니다."
+                    />
+                  )}
                 </View>
               </>
             ) : null}
           </View>
         </ScrollView>
+
+        {openCohort ? (
+          <FloatingBottomBar
+            disabled={isAlreadyApplied}
+            label={
+              isAlreadyApplied ? "이미 수강 신청한 과정입니다" : "수강 신청하기"
+            }
+            onPress={() => {
+              if (!isAlreadyApplied) {
+                router.push({
+                  pathname: "/life-study/apply",
+                  params: {
+                    cohortId: activeCohortId ?? openCohort.id,
+                    courseId: openCohort.id,
+                    courseTitle: openCohort.title,
+                  },
+                });
+              }
+            }}
+            testID="life-study-detail-bottom-bar"
+          />
+        ) : null}
       </View>
     </Screen>
   );
@@ -157,12 +303,14 @@ export default function LifeStudyDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
     id?: string;
+    cohortId?: string;
     designVariant?: string;
   }>();
   const id = routeId(params.id);
+  const cohortIdParam = routeId(params.cohortId);
   const variant = readDesignVariant(params.designVariant);
   if (id && !params.designVariant) {
-    return <LiveLifeStudyDetail id={id} />;
+    return <LiveLifeStudyDetail id={id} cohortIdParam={cohortIdParam} />;
   }
   const enrolled = variant === "enrolled";
 
@@ -464,6 +612,9 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: 100,
   },
+  bodyNoBottomBar: {
+    paddingBottom: 24,
+  },
   hero: {
     flex: 1,
     paddingHorizontal: 18,
@@ -709,6 +860,9 @@ const styles = StyleSheet.create({
   },
   sectionMargin: {
     marginTop: 24,
+  },
+  sectionMarginFill: {
+    flex: 1,
   },
   subSectionTitle: {
     color: theme.colors.ink,

@@ -1,6 +1,7 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { Image } from "expo-image";
 import { useRouter, type Href } from "expo-router";
+import { useState } from "react";
 import { Linking, StyleSheet, View } from "react-native";
 import { StickyHeaderScreen } from "../../src/components/layout/StickyHeaderScreen";
 import {
@@ -15,13 +16,38 @@ import { theme } from "../../src/constants/theme";
 import { useHomeOverview } from "../../src/hooks/useHome";
 import { useAuthStore } from "../../src/store/authStore";
 
+function resolveCategoryAndDate(
+  timeLabel: string,
+  explicitDate?: string,
+): { category: string; date: string } {
+  const parts = timeLabel.split(" · ");
+  const category = parts[0]?.trim() || timeLabel;
+  const date = explicitDate?.trim() || parts.slice(1).join(" · ").trim();
+  return { category, date };
+}
+
 export default function HomeScreen() {
   const router = useRouter();
   const currentUser = useAuthStore((state) => state.currentUser);
   const overview = useHomeOverview();
+  const [sermonThumbFallback, setSermonThumbFallback] = useState(false);
   const fullName = currentUser?.name?.trim() || "성도";
   const sundaySermon = overview.data?.sundaySermon ?? null;
   const dawnPrayer = overview.data?.dawnPrayer ?? null;
+  const sermonMeta = sundaySermon
+    ? resolveCategoryAndDate(sundaySermon.timeLabel, sundaySermon.dateLabel)
+    : null;
+  const dawnMeta = dawnPrayer
+    ? resolveCategoryAndDate(dawnPrayer.timeLabel, dawnPrayer.dateLabel)
+    : null;
+  const sermonThumbnailUri = sundaySermon
+    ? sermonThumbFallback
+      ? sundaySermon.thumbnailUrl.replace(
+          "/maxresdefault.jpg",
+          "/hqdefault.jpg",
+        )
+      : sundaySermon.thumbnailUrl
+    : "";
 
   return (
     <StickyHeaderScreen
@@ -87,73 +113,78 @@ export default function HomeScreen() {
                 style={styles.dawnCard}
                 testID="home-sunday-sermon"
               >
-                <View style={styles.sermonThumbWrap}>
+                <View style={styles.sermonHeader}>
+                  <View style={styles.categoryBadge}>
+                    <AppText
+                      variant="caption"
+                      tone="brand"
+                      style={styles.categoryBadgeText}
+                    >
+                      {sermonMeta?.category ?? sundaySermon.timeLabel}
+                    </AppText>
+                  </View>
+                  {sermonMeta?.date ? (
+                    <AppText variant="formLabel" style={styles.cardDateText}>
+                      {sermonMeta.date}
+                    </AppText>
+                  ) : null}
+                </View>
+                <View style={styles.sermonInsetThumbWrap}>
                   <Image
                     accessibilityIgnoresInvertColors
                     contentFit="cover"
-                    source={{ uri: sundaySermon.thumbnailUrl }}
+                    onError={() => {
+                      if (!sermonThumbFallback) {
+                        setSermonThumbFallback(true);
+                      }
+                    }}
+                    source={{ uri: sermonThumbnailUri }}
                     style={styles.sermonThumb}
                     testID="home-sunday-sermon-thumbnail"
                     transition={180}
                   />
-                  <View pointerEvents="none" style={styles.sermonPlayBadge}>
-                    <AppIcon
-                      color={theme.colors.white}
-                      fill={theme.colors.white}
-                      name="play"
-                      size={22}
-                    />
+                  <View pointerEvents="none" style={styles.sermonYoutubeBadge}>
+                    <View style={styles.sermonYoutubeDot} />
+                    <AppText
+                      variant="caption"
+                      tone="inverse"
+                      style={styles.sermonYoutubeBadgeText}
+                    >
+                      YouTube 설교 보기
+                    </AppText>
                   </View>
                 </View>
                 <View style={styles.sermonContent}>
-                  <AppText
-                    variant="caption"
-                    tone="muted"
-                    style={styles.dawnEyebrow}
-                  >
-                    {sundaySermon.timeLabel}
-                  </AppText>
                   <AppText variant="sectionTitle" style={styles.dawnTitle}>
                     {sundaySermon.title}
                   </AppText>
-                  <AppText
-                    variant="body"
-                    tone="secondary"
-                    style={styles.dawnSummary}
-                  >
+                  <AppText variant="body" tone="secondary">
                     {sundaySermon.summary}
                   </AppText>
-                  <View style={styles.dawnAction}>
-                    <AppText variant="caption" tone="brand">
-                      유튜브로 말씀 보기
-                    </AppText>
-                    <AppIcon
-                      name="chevron-right"
-                      size={18}
-                      color={theme.colors.primaryDeep}
-                    />
-                  </View>
                 </View>
               </MotionPressable>
             ) : null}
 
-            <MotionPressable
-              accessibilityRole="button"
-              onPress={() =>
-                router.push(overview.data.dailyPrayer.href as Href)
-              }
-              pressedScale={0.985}
-              style={styles.dailyCard}
-              testID="home-daily-prayer"
-            >
-              <AppText
-                variant="caption"
-                tone="inverse"
-                style={styles.dailyEyebrow}
-              >
-                오늘의 기도 · {overview.data.dailyPrayer.dateLabel}{" "}
-                {overview.data.dailyPrayer.weekdayLabel}
-              </AppText>
+            <View style={styles.dailyCard} testID="home-daily-prayer">
+              <View style={styles.cardHeaderRow}>
+                <View style={styles.dailyCategoryBadge}>
+                  <AppText
+                    variant="caption"
+                    tone="inverse"
+                    style={styles.dailyCategoryBadgeText}
+                  >
+                    오늘의 기도
+                  </AppText>
+                </View>
+                <AppText
+                  variant="formLabel"
+                  tone="inverse"
+                  style={styles.dailyDateText}
+                >
+                  {overview.data.dailyPrayer.dateLabel}{" "}
+                  {overview.data.dailyPrayer.weekdayLabel}
+                </AppText>
+              </View>
               <AppText
                 variant="sectionTitle"
                 tone="inverse"
@@ -162,19 +193,13 @@ export default function HomeScreen() {
                 {overview.data.dailyPrayer.title}
               </AppText>
               <AppText
-                variant="caption"
+                variant="body"
                 tone="inverse"
                 style={styles.dailySummary}
               >
                 {overview.data.dailyPrayer.summary}
               </AppText>
-              <View style={styles.cardAction}>
-                <AppText variant="caption" tone="inverse">
-                  기도 보러가기
-                </AppText>
-                <AppIcon name="chevron-right" size={18} color="#fff" />
-              </View>
-            </MotionPressable>
+            </View>
 
             {dawnPrayer ? (
               <MotionPressable
@@ -185,21 +210,21 @@ export default function HomeScreen() {
                 testID="home-dawn-prayer"
               >
                 <View style={styles.sermonContent}>
-                  <View style={styles.dawnHeaderRow}>
-                    <View style={styles.dawnIconBadge}>
-                      <AppIcon
-                        name="book-open-page-variant-outline"
-                        size={14}
-                        color={theme.colors.primaryDeep}
-                      />
+                  <View style={styles.cardHeaderRow}>
+                    <View style={styles.categoryBadge}>
+                      <AppText
+                        variant="caption"
+                        tone="brand"
+                        style={styles.categoryBadgeText}
+                      >
+                        {dawnMeta?.category ?? dawnPrayer.timeLabel}
+                      </AppText>
                     </View>
-                    <AppText
-                      variant="caption"
-                      tone="muted"
-                      style={styles.dawnEyebrowText}
-                    >
-                      {dawnPrayer.timeLabel}
-                    </AppText>
+                    {dawnMeta?.date ? (
+                      <AppText variant="formLabel" style={styles.cardDateText}>
+                        {dawnMeta.date}
+                      </AppText>
+                    ) : null}
                   </View>
                   <AppText variant="sectionTitle" style={styles.dawnTitle}>
                     {dawnPrayer.title}
@@ -287,7 +312,8 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderRadius: theme.radius.lg,
     backgroundColor: theme.colors.primary,
-    padding: theme.layout.cardPadding + 4,
+    paddingHorizontal: theme.spacing[5],
+    paddingVertical: theme.spacing[5] + 2,
     ...theme.shadow.primary,
   },
   dailyEyebrow: {
@@ -295,18 +321,14 @@ const styles = StyleSheet.create({
     opacity: 0.92,
   },
   dailyTitle: {
-    marginBottom: theme.spacing[2],
+    fontSize: theme.fontSize.xl,
+    lineHeight: 26,
+    marginTop: theme.spacing[1],
+    marginBottom: theme.spacing[2] + 2,
   },
   dailySummary: {
-    marginBottom: theme.spacing[3],
+    lineHeight: 22,
     opacity: 0.92,
-  },
-  cardAction: {
-    alignSelf: "flex-end",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 2,
-    opacity: 0.96,
   },
   dawnCard: {
     marginHorizontal: theme.layout.screenX,
@@ -319,26 +341,41 @@ const styles = StyleSheet.create({
   sermonContent: {
     padding: theme.spacing[4],
   },
-  dawnHeaderRow: {
+  cardHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    marginBottom: theme.spacing[2],
+    justifyContent: "space-between",
+    gap: 8,
+    marginBottom: theme.spacing[2] + 2,
   },
-  dawnIconBadge: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+  categoryBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.primaryTint,
-    alignItems: "center",
-    justifyContent: "center",
   },
-  dawnEyebrowText: {
-    flex: 1,
-    fontWeight: theme.fontWeight.medium,
+  categoryBadgeText: {
+    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.primaryDeep,
   },
-  dawnEyebrow: {
-    marginBottom: theme.spacing[1],
+  cardDateText: {
+    fontSize: theme.fontSize.md,
+    fontWeight: theme.fontWeight.semibold,
+    color: theme.colors.inkSoft,
+  },
+  dailyCategoryBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: theme.radius.pill,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+  },
+  dailyCategoryBadgeText: {
+    fontWeight: theme.fontWeight.bold,
+  },
+  dailyDateText: {
+    fontSize: theme.fontSize.md,
+    fontWeight: theme.fontWeight.semibold,
+    opacity: 0.96,
   },
   dawnTitle: {
     marginBottom: theme.spacing[2],
@@ -352,10 +389,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 2,
   },
-  sermonThumbWrap: {
+  sermonHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    paddingHorizontal: theme.spacing[4],
+    paddingTop: theme.spacing[4],
+    paddingBottom: theme.spacing[3],
+  },
+  sermonInsetThumbWrap: {
     position: "relative",
-    width: "100%",
+    marginHorizontal: theme.spacing[4],
     aspectRatio: 16 / 9,
+    borderRadius: theme.radius.md,
+    overflow: "hidden",
     backgroundColor: theme.colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
@@ -364,16 +412,28 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  sermonPlayBadge: {
+  sermonYoutubeBadge: {
     position: "absolute",
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "rgba(25, 31, 40, 0.65)",
-    borderWidth: 1.5,
-    borderColor: "rgba(255, 255, 255, 0.3)",
+    right: 12,
+    bottom: 12,
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    paddingLeft: 3,
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: theme.radius.pill,
+    backgroundColor: "rgba(25, 31, 40, 0.76)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.16)",
+  },
+  sermonYoutubeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#FF3B30",
+  },
+  sermonYoutubeBadgeText: {
+    fontSize: 11,
+    fontWeight: theme.fontWeight.semibold,
   },
 });

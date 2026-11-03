@@ -127,14 +127,20 @@ export function createHttpGroupDataSource({
         type: "SMALL_GROUP",
       });
       if (lastId != null) query.set("lastId", String(lastId));
-      const [groupsData, myGroups] = await Promise.all([
+      const [groupsData, services, myGroups, myServices] = await Promise.all([
         client.request<CommunionListResponseDto>(
           `/api/communion?${query.toString()}`,
         ),
+        lastId == null
+          ? fetchCommunionPages(client, "/api/communion?type=VOLUNTEER")
+          : Promise.resolve([]),
         fetchCommunionPages(client, "/api/communion/my?type=SMALL_GROUP"),
+        lastId == null
+          ? fetchCommunionPages(client, "/api/communion/my?type=VOLUNTEER")
+          : Promise.resolve([]),
       ]);
       const joinedIds = new Set(
-        myGroups
+        [...myGroups, ...myServices]
           .map((item) =>
             item && typeof item === "object" && "id" in item
               ? String((item as { id: unknown }).id)
@@ -146,9 +152,13 @@ export function createHttpGroupDataSource({
         const mapped = mapCommunionOverviewItem(item, joinedIds);
         return mapped ? [mapped] : [];
       });
+      const mappedServices = services.flatMap((item) => {
+        const mapped = mapCommunionServiceItem(item);
+        return mapped ? [mapped] : [];
+      });
       return {
         groups,
-        services: [],
+        services: mappedServices,
         hasNext: Boolean(groupsData?.hasNext),
         nextCursor: groupsData?.nextCursor ?? null,
       };

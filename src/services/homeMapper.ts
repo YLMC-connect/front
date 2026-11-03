@@ -135,7 +135,7 @@ export function extractYoutubeVideoId(
 }
 
 /**
- * YouTube 비디오 URL로부터 썸네일 주소 생성
+ * YouTube 비디오 URL로부터 16:9 고화질 썸네일 주소 생성
  */
 export function getYoutubeThumbnailUrl(
   url: string | null | undefined,
@@ -143,9 +143,21 @@ export function getYoutubeThumbnailUrl(
 ): string {
   const videoId = extractYoutubeVideoId(url);
   if (videoId) {
-    return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
   }
   return fallback;
+}
+
+/**
+ * 설교 제목 끝에 붙은 괄호 성경구절(예: "(고후1:1~11)")을 본문 구절이 별도로 있을 때 제거
+ */
+export function cleanSermonTitle(
+  title: string,
+  bibleText?: string | null,
+): string {
+  const trimmed = title.trim();
+  if (!bibleText) return trimmed;
+  return trimmed.replace(/\s*\([^()]+\d+[:장절~,-][^()]*\)\s*$/, "").trim();
 }
 
 /**
@@ -228,7 +240,7 @@ export function formatSermonDate(dateStr?: string): string {
 }
 
 /**
- * 날짜 문자열(YYYY-MM-DD)을 'M월 D일 (요일)' 형식으로 포맷팅
+ * 날짜 문자열(YYYY-MM-DD)을 'M월 D일 요일' 형식으로 포맷팅
  */
 export function formatDateWithWeekday(dateStr?: string): string {
   if (!dateStr) return "";
@@ -240,7 +252,26 @@ export function formatDateWithWeekday(dateStr?: string): string {
     if (!Number.isNaN(year) && !Number.isNaN(month) && !Number.isNaN(day)) {
       const date = new Date(year, month - 1, day);
       const dow = koreanWeekdays[date.getDay()];
-      return `${month}월 ${day}일 (${dow})`;
+      return `${month}월 ${day}일 ${dow}요일`;
+    }
+  }
+  return formatSermonDate(dateStr);
+}
+
+/**
+ * 날짜 문자열(YYYY-MM-DD)을 'YYYY년 M월 D일 요일' 형식으로 포맷팅
+ */
+export function formatFullDateWithWeekday(dateStr?: string): string {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-");
+  if (parts.length === 3) {
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+    if (!Number.isNaN(year) && !Number.isNaN(month) && !Number.isNaN(day)) {
+      const date = new Date(year, month - 1, day);
+      const dow = koreanWeekdays[date.getDay()];
+      return `${year}년 ${month}월 ${day}일 ${dow}요일`;
     }
   }
   return formatSermonDate(dateStr);
@@ -253,6 +284,7 @@ export function mapSermonToSundaySermon(
   sermon: SermonResponse,
 ): HomeSundaySermon {
   const dateFormatted = formatSermonDate(sermon.sermonDate);
+  const dateLabel = formatDateWithWeekday(sermon.sermonDate);
   const timeLabel = dateFormatted
     ? `이번 주일 말씀 · ${dateFormatted}`
     : "이번 주일 말씀";
@@ -264,7 +296,8 @@ export function mapSermonToSundaySermon(
   return {
     id: String(sermon.id),
     timeLabel,
-    title: sermon.title,
+    dateLabel,
+    title: cleanSermonTitle(sermon.title, sermon.bibleText),
     summary: summary || "열린문교회 주일 설교",
     videoUrl: sermon.youtubeUrl ?? "",
     thumbnailUrl: getYoutubeThumbnailUrl(sermon.youtubeUrl),
@@ -278,9 +311,10 @@ export function mapDailyQtToDawnPrayer(
   qt: DailyQtResponse,
   detailContent?: string | null,
 ): HomeDawnPrayer {
-  const dateFormatted = formatDateWithWeekday(qt.qtDate);
-  const timeLabel = dateFormatted
-    ? `새벽기도 말씀요약 · ${dateFormatted}`
+  const dateLabel = formatDateWithWeekday(qt.qtDate);
+  const fullDateLabel = formatFullDateWithWeekday(qt.qtDate);
+  const timeLabel = dateLabel
+    ? `새벽기도 말씀요약 · ${dateLabel}`
     : "새벽기도 말씀요약";
 
   const rawBody = detailContent || qt.content || "";
@@ -290,9 +324,11 @@ export function mapDailyQtToDawnPrayer(
   return {
     id: `dawn-${qt.id}`,
     timeLabel,
+    dateLabel,
+    fullDateLabel,
     title: qt.bibleText || qt.title || "새벽기도 말씀요약",
     summary,
     body,
-    href: `/prayer/dawn?id=${qt.id}`,
+    href: `/dawn?id=${qt.id}`,
   };
 }

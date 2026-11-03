@@ -167,7 +167,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
-    paddingBottom: 60,
+    paddingTop: 12,
+    paddingBottom: 88,
     gap: 12,
   },
   stateIcon: {

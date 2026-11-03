@@ -97,6 +97,8 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-11-03) **동행 목록 페이지네이션(`getOverviewPage`) 시 첫 페이지 봉사(`type=VOLUNTEER`) API 연동 복구** — `useGroupOverview`가 `getOverviewPage`를 호출할 때 `services: []`로 고정되어 봉사 탭 목록이 비어 있던 문제를 수정하여, 첫 페이지(`lastId == null`) 로드 시 `/api/communion?type=VOLUNTEER` 및 `/api/communion/my?type=VOLUNTEER`를 함께 조회해 `mapCommunionServiceItem`으로 매핑하도록 연결.
+
 - (2026-11-03) **런타임 목 어댑터(`resolveGroupAdapterMode`, `mockGroupDataSource`) 및 `src/mocks/groups.ts` 제거** — 전 도메인 HTTP 단일화에 따라 환경변수 어댑터 분기(`EXPO_PUBLIC_GROUP_ADAPTER`)와 런타임 목데이터를 제거하고 `httpGroupDataSource`만 사용하도록 정리.
 
 - (2026-11-01) **소모임 개설/수정 폼(`modal/group-new`) 2단계 정보 구조화 및 빠른 컨트롤 칩 적용** — '기본 정보(카테고리/소모임명/설명)'와 '활동 및 운영 안내(인원/일정/장소)'로 의미 단위를 그룹화하고, 상단 안내 배너를 서두로 재배치. 정원은 `[-] / [+]` 스텝 버튼과 `4, 8, 12, 20명` 빠른 칩을 추가하고, 일정 및 장소에도 대표 프리셋 칩을 제공해 모바일 터치 편의성을 강화.

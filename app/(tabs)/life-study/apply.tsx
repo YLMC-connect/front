@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
+  Empty,
   FloatingBottomBar,
   TopBar,
   VisualThumb,
@@ -30,20 +31,43 @@ export default function LifeStudyApplyScreenRoute() {
   const router = useRouter();
   const params = useLocalSearchParams<{
     cohortId?: string;
+    courseId?: string;
     courseTitle?: string;
   }>();
   const { data: member } = useMemberMe();
-  const { data: overview } = useLifeStudyOverview();
+  const { data: overview, isPending } = useLifeStudyOverview();
 
   const openCohort =
-    overview?.openCourses.find((c) => String(c.id) === params.cohortId) ??
-    overview?.openCourses[0];
+    overview?.openCourses.find(
+      (c) =>
+        (params.cohortId &&
+          (c.cohortId === params.cohortId ||
+            String(c.id) === params.cohortId)) ||
+        (params.courseId && String(c.id) === params.courseId),
+    ) ?? overview?.openCourses[0];
   const cohortId =
-    params.cohortId || (openCohort ? String(openCohort.id) : "1");
-  const courseTitle = params.courseTitle || openCohort?.title || "생명의 삶";
-  const courseMeta = openCohort
-    ? `${openCohort.summary ? `${openCohort.summary} · ` : ""}총 ${openCohort.weekCount || 13}주`
-    : "매주 수 19:30 · 본당 3층 소예배실\n2026.07.08 ~ 2026.10.07 (총 13주)";
+    openCohort?.cohortId ||
+    params.cohortId ||
+    (openCohort ? String(openCohort.id) : "");
+  const courseTitle = openCohort?.title || params.courseTitle || "삶공부 과정";
+  const weekCount = openCohort?.weekCount || 13;
+  const courseMetaParts = [
+    openCohort?.instructorName ? `강사 ${openCohort.instructorName}` : null,
+    openCohort?.studyPlace || null,
+    `총 ${weekCount}주`,
+  ].filter(Boolean);
+  const courseMeta =
+    courseMetaParts.join(" · ") ||
+    (openCohort?.summary
+      ? `${openCohort.summary} · 총 ${weekCount}주`
+      : `총 ${weekCount}주 과정`);
+  const applicationPeriodLabel = openCohort?.applicationPeriod || "-";
+  const capacityLabel =
+    openCohort?.capacity != null
+      ? `${openCohort.enrolledCount ?? 0} / ${openCohort.capacity}명`
+      : "-";
+  const hasNoOpenCourse =
+    !isPending && overview != null && !openCohort && !params.cohortId;
 
   const memberName = member?.name || "사용자";
   const memberPhone = member?.phone || "010-1234-5678";
@@ -59,6 +83,10 @@ export default function LifeStudyApplyScreenRoute() {
 
   const handleSubmit = async () => {
     setFormError(null);
+    if (!cohortId) {
+      setFormError("현재 신청 가능한 삶공부 기수가 없습니다.");
+      return;
+    }
     const trimmedYear = userYear.trim();
     if (!/^\d{4}$/.test(trimmedYear)) {
       setFormError("생년은 4자리 숫자로 입력해주세요 (예: 1994).");
@@ -98,136 +126,157 @@ export default function LifeStudyApplyScreenRoute() {
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
         <TopBar title="수강 신청" back onBack={() => router.back()} />
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-          contentContainerStyle={[styles.body, { flexGrow: 1 }]}
-        >
-          <Pressable
-            accessible={false}
-            onPress={Keyboard.dismiss}
-            style={{ flexGrow: 1 }}
-          >
-            <View style={styles.summaryCard}>
-              <VisualThumb size={72} seed={1} icon="menu-book" />
-              <View style={styles.summaryText}>
-                <Text style={styles.courseTitle}>{courseTitle}</Text>
-                <Text style={styles.courseMeta}>{courseMeta}</Text>
-              </View>
-            </View>
-
-            <View style={styles.infoBox}>
-              <InfoRow label="신청 기간" value="6.24 ~ 7.05" />
-              <InfoRow label="정원" value="18 / 24명" />
-              <Text style={styles.infoHint}>
-                생명의 삶은 이후 필수·선택 과정을 위한 첫 과정입니다.
-              </Text>
-            </View>
-
-            <View style={styles.form}>
-              <Field label="이름" value={memberName} editable={false} />
-              <View style={styles.twoCols}>
-                <Field label="연락처" value={memberPhone} editable={false} />
-                <Field
-                  label="생년"
-                  value={userYear}
-                  onChangeText={setUserYear}
-                  keyboardType="number-pad"
-                  maxLength={4}
-                  placeholder="예: 1988"
-                />
-              </View>
-              <Field
-                label="소속 부서"
-                value={userPart}
-                onChangeText={setUserPart}
-                placeholder="예) 4부 청장년부"
-              />
-
-              <View>
-                <Text style={styles.label}>신앙 연차</Text>
-                <View style={styles.chips}>
-                  {faithYears.map((item, index) => {
-                    const selected = index === faithYearIndex;
-                    return (
-                      <Pressable
-                        key={item}
-                        accessibilityRole="button"
-                        onPress={() => setFaithYearIndex(index)}
-                        style={[styles.chip, selected ? styles.chipOn : null]}
-                      >
-                        <Text
-                          style={[
-                            styles.chipText,
-                            selected ? styles.chipTextOn : null,
-                          ]}
-                        >
-                          {item}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              </View>
-
-              <View>
-                <Text style={styles.label}>신청 동기</Text>
-                <TextInput
-                  multiline
-                  placeholder="신청하시는 이유를 자유롭게 적어주세요"
-                  placeholderTextColor={theme.colors.inkHint}
-                  style={[styles.input, styles.textarea]}
-                  value={memo}
-                  onChangeText={setMemo}
-                />
-              </View>
-
+        {hasNoOpenCourse ? (
+          <View style={styles.emptyWrap}>
+            <Empty
+              icon="book-open-page-variant-outline"
+              title="지금 신청 가능한 과정이 없어요"
+              description="모집 기간 중인 삶공부 과정만 신청할 수 있습니다."
+            />
+          </View>
+        ) : (
+          <>
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+              contentContainerStyle={[styles.body, { flexGrow: 1 }]}
+            >
               <Pressable
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: promiseAgreed }}
-                onPress={() => setPromiseAgreed(!promiseAgreed)}
-                style={styles.promiseBox}
+                accessible={false}
+                onPress={Keyboard.dismiss}
+                style={{ flexGrow: 1 }}
               >
-                <View
-                  style={[
-                    styles.checkBox,
-                    !promiseAgreed ? styles.checkBoxOff : null,
-                  ]}
-                >
-                  {promiseAgreed ? (
-                    <AppIcon
-                      name="check"
-                      size={14}
-                      color={theme.colors.white}
-                    />
+                <View style={styles.summaryCard}>
+                  <VisualThumb size={72} seed={1} icon="menu-book" />
+                  <View style={styles.summaryText}>
+                    <Text style={styles.courseTitle}>{courseTitle}</Text>
+                    <Text style={styles.courseMeta}>{courseMeta}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.infoBox}>
+                  <InfoRow label="신청 기간" value={applicationPeriodLabel} />
+                  <InfoRow label="정원" value={capacityLabel} />
+                  {openCohort?.eligibility ? (
+                    <Text style={styles.infoHint}>
+                      신청 조건: {openCohort.eligibility}
+                    </Text>
                   ) : null}
                 </View>
-                <Text style={styles.promiseText}>
-                  <Text style={styles.promiseStrong}>
-                    수강 약속에 동의합니다
-                  </Text>
-                  {"\n"}
-                  <Text style={styles.promiseMuted}>
-                    13주 과정 중 80% 이상 출석하며, 매주 묵상 과제를 성실히
-                    수행하겠습니다.
-                  </Text>
-                </Text>
+
+                <View style={styles.form}>
+                  <Field label="이름" value={memberName} editable={false} />
+                  <View style={styles.twoCols}>
+                    <Field
+                      label="연락처"
+                      value={memberPhone}
+                      editable={false}
+                    />
+                    <Field
+                      label="생년"
+                      value={userYear}
+                      onChangeText={setUserYear}
+                      keyboardType="number-pad"
+                      maxLength={4}
+                      placeholder="예: 1988"
+                    />
+                  </View>
+                  <Field
+                    label="소속 부서"
+                    value={userPart}
+                    onChangeText={setUserPart}
+                    placeholder="예) 4부 청장년부"
+                  />
+
+                  <View>
+                    <Text style={styles.label}>신앙 연차</Text>
+                    <View style={styles.chips}>
+                      {faithYears.map((item, index) => {
+                        const selected = index === faithYearIndex;
+                        return (
+                          <Pressable
+                            key={item}
+                            accessibilityRole="button"
+                            onPress={() => setFaithYearIndex(index)}
+                            style={[
+                              styles.chip,
+                              selected ? styles.chipOn : null,
+                            ]}
+                          >
+                            <Text
+                              style={[
+                                styles.chipText,
+                                selected ? styles.chipTextOn : null,
+                              ]}
+                            >
+                              {item}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
+
+                  <View>
+                    <Text style={styles.label}>신청 동기</Text>
+                    <TextInput
+                      multiline
+                      placeholder="신청하시는 이유를 자유롭게 적어주세요"
+                      placeholderTextColor={theme.colors.inkHint}
+                      style={[styles.input, styles.textarea]}
+                      value={memo}
+                      onChangeText={setMemo}
+                    />
+                  </View>
+
+                  <Pressable
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: promiseAgreed }}
+                    onPress={() => setPromiseAgreed(!promiseAgreed)}
+                    style={styles.promiseBox}
+                  >
+                    <View
+                      style={[
+                        styles.checkBox,
+                        !promiseAgreed ? styles.checkBoxOff : null,
+                      ]}
+                    >
+                      {promiseAgreed ? (
+                        <AppIcon
+                          name="check"
+                          size={14}
+                          color={theme.colors.white}
+                        />
+                      ) : null}
+                    </View>
+                    <Text style={styles.promiseText}>
+                      <Text style={styles.promiseStrong}>
+                        수강 약속에 동의합니다
+                      </Text>
+                      {"\n"}
+                      <Text style={styles.promiseMuted}>
+                        {weekCount}주 과정 중 80% 이상 출석하며, 매주 묵상
+                        과제를 성실히 수행하겠습니다.
+                      </Text>
+                    </Text>
+                  </Pressable>
+
+                  {formError ? (
+                    <Text style={styles.errorText}>{formError}</Text>
+                  ) : null}
+                </View>
               </Pressable>
+            </ScrollView>
 
-              {formError ? (
-                <Text style={styles.errorText}>{formError}</Text>
-              ) : null}
-            </View>
-          </Pressable>
-        </ScrollView>
-
-        <FloatingBottomBar
-          disabled={applyMutation.isPending}
-          label="수강 신청하기"
-          loading={applyMutation.isPending}
-          onPress={handleSubmit}
-          testID="life-study-apply"
-        />
+            <FloatingBottomBar
+              disabled={applyMutation.isPending || !cohortId}
+              label="수강 신청하기"
+              loading={applyMutation.isPending}
+              onPress={handleSubmit}
+              testID="life-study-apply"
+            />
+          </>
+        )}
       </View>
     </Screen>
   );
@@ -279,6 +328,11 @@ function Field({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+  },
+  emptyWrap: {
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: theme.layout.screenX,
   },
   body: {
     paddingHorizontal: 18,

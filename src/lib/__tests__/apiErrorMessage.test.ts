@@ -1,4 +1,7 @@
-import { authApiErrorMessages } from "../../constants/apiErrorMessages";
+import {
+  authApiErrorMessages,
+  lifeStudyApiErrorMessages,
+} from "../../constants/apiErrorMessages";
 import { ApiError } from "../apiClient";
 import { getApiErrorMessage } from "../apiErrorMessage";
 
@@ -13,6 +16,18 @@ describe("getApiErrorMessage", () => {
     expect(
       getApiErrorMessage(error, authApiErrorMessages, "가입에 실패했습니다."),
     ).toBe("이미 사용 중인 아이디입니다.");
+  });
+
+  it("maps life-study API error codes correctly", () => {
+    const error = new ApiError({
+      code: "LST001",
+      message: "course not found",
+      status: 404,
+    });
+
+    expect(
+      getApiErrorMessage(error, lifeStudyApiErrorMessages, "과정 조회 실패"),
+    ).toBe("삶공부 과정을 찾을 수 없습니다.");
   });
 
   it("uses a common message for transport and response failures", () => {

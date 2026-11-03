@@ -303,9 +303,10 @@ describe("shared maintenance UI", () => {
       zIndex: 20,
     });
     expect(headerStyle).not.toHaveProperty("borderBottomWidth");
-    expect(screen.getByTestId("screen-header-blur").props).toMatchObject({
+    const headerBlurProps = screen.getByTestId("screen-header-blur").props;
+    expect(headerBlurProps.blurTarget).toBe(sharedBlurTarget);
+    expect(headerBlurProps).toMatchObject({
       blurMethod: "dimezisBlurViewSdk31Plus",
-      blurTarget: sharedBlurTarget,
       intensity: 32,
       tint: "light",
     });
@@ -351,11 +352,11 @@ describe("shared maintenance UI", () => {
           .contentContainerStyle,
       ),
     ).toMatchObject({ paddingTop: 149 });
-    expect(
-      screen.getByTestId("sticky-controls-screen-sticky-controls-glass-blur")
-        .props,
-    ).toMatchObject({
-      blurTarget: sharedBlurTarget,
+    const stickyBlurProps = screen.getByTestId(
+      "sticky-controls-screen-sticky-controls-glass-blur",
+    ).props;
+    expect(stickyBlurProps.blurTarget).toBe(sharedBlurTarget);
+    expect(stickyBlurProps).toMatchObject({
       intensity: 32,
       tint: "light",
     });

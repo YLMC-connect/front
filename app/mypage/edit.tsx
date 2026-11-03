@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native";
 import { Screen } from "../../src/components/layout/Screen";
-import { TopBar } from "../../src/components/ui";
+import { Avatar, TopBar } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import {
   useChangePassword,
@@ -19,7 +19,6 @@ import {
   useUpdateMemberMe,
 } from "../../src/hooks/useMember";
 import { readDesignVariant } from "../../src/lib/designVariant";
-import { getGivenName } from "../../src/lib/koreanName";
 
 type Variant =
   | "default"
@@ -105,9 +104,7 @@ export default function EditProfileScreen() {
   const [pwMismatchError, setPwMismatchError] = useState<string | null>(null);
 
   const phone = phoneInput ?? member?.phone ?? "";
-
   const memberName = member?.name || "사용자";
-  const avatarText = getGivenName(memberName) || memberName;
 
   const isPhoneDup = isMockVariant
     ? variant === "phone-dup"
@@ -247,9 +244,7 @@ export default function EditProfileScreen() {
             style={{ flexGrow: 1 }}
           >
             <View style={styles.profileCard}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{avatarText}</Text>
-              </View>
+              <Avatar name={memberName} size={48} seed={memberName} />
               <View style={styles.profileText}>
                 <Text style={styles.readonlyLabel}>이름</Text>
                 <Text style={styles.name}>{memberName}</Text>
@@ -370,19 +365,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
-  },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(120,120,120,0.32)",
-  },
-  avatarText: {
-    color: "rgba(255,255,255,0.85)",
-    fontSize: 20,
-    fontWeight: theme.fontWeight.extrabold,
   },
   profileText: {
     flex: 1,

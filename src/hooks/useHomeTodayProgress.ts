@@ -27,6 +27,33 @@ async function writeDoneIds(ids: HomeTodoId[], date = new Date()) {
   await AsyncStorage.setItem(storageKey(date), JSON.stringify(ids));
 }
 
+export async function cleanupOldProgressKeys(
+  currentDate = new Date(),
+  maxDays = 7,
+) {
+  try {
+    const allKeys = await AsyncStorage.getAllKeys();
+    const progressKeys = allKeys.filter((k) =>
+      k.startsWith("ylmc.home.progress."),
+    );
+    const currentMs = currentDate.getTime();
+    const thresholdMs = maxDays * 24 * 60 * 60 * 1000;
+
+    const keysToRemove = progressKeys.filter((key) => {
+      const dateStr = key.replace("ylmc.home.progress.", "");
+      const keyDate = new Date(dateStr);
+      if (Number.isNaN(keyDate.getTime())) return true;
+      return currentMs - keyDate.getTime() > thresholdMs;
+    });
+
+    if (keysToRemove.length > 0) {
+      await AsyncStorage.multiRemove(keysToRemove);
+    }
+  } catch {
+    // Ignore cleanup failures silently
+  }
+}
+
 /** Local day-scoped completion for home todos (mock-first). */
 export function useHomeTodayProgress(todoIds: readonly HomeTodoId[]) {
   const [doneIds, setDoneIds] = useState<HomeTodoId[]>([]);
@@ -40,6 +67,7 @@ export function useHomeTodayProgress(todoIds: readonly HomeTodoId[]) {
         setReady(true);
       }
     });
+    void cleanupOldProgressKeys();
     return () => {
       cancelled = true;
     };

@@ -28,6 +28,11 @@ export {
 } from "./motion";
 
 export { Button, FloatingActionButton } from "./buttons";
+export {
+  FloatingBottomBar,
+  FLOATING_BOTTOM_BAR_INSET,
+  type FloatingBottomBarProps,
+} from "./floating-bottom-bar";
 export { Avatar, Badge, Card, Chip, VisualCover, VisualThumb } from "./display";
 export { FormSection, ImagePickerField, TextField, Textarea } from "./inputs";
 export { HorizontalChips, SegmentedTabs, TopBar } from "./navigation";

@@ -29,6 +29,10 @@ export function AuthRouteNavigator() {
       <Stack.Protected guard={isAuthenticated}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen
+          name="mypage"
+          options={{ animation: "slide_from_right" }}
+        />
+        <Stack.Screen
           name="modal/market-new"
           options={{ presentation: "modal" }}
         />

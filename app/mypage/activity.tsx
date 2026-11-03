@@ -2,28 +2,26 @@ import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { Screen } from "../../../src/components/layout/Screen";
+import { Screen } from "../../src/components/layout/Screen";
 import {
   Badge,
   Empty,
   TopBar,
   UnderlineTabs,
   VisualThumb,
-} from "../../../src/components/ui";
-import { theme } from "../../../src/constants/theme";
-import { readDesignVariant } from "../../../src/lib/designVariant";
+} from "../../src/components/ui";
+import { theme } from "../../src/constants/theme";
+import { readDesignVariant } from "../../src/lib/designVariant";
 import type {
   MyPageActivityComment,
   MyPageActivityGroup,
   MyPageActivityPost,
-} from "../../../src/types/mypage";
+} from "../../src/types/mypage";
 import {
   fetchMyPageActivityComments,
   fetchMyPageActivityGroups,
   fetchMyPageActivityPosts,
-  readLocalMyPageActivity,
-  resolveMyPageAdapterMode,
-} from "../../../src/services/mypageService";
+} from "../../src/services/mypageService";
 
 type ActivityTab = "posts" | "comments" | "groups";
 
@@ -54,20 +52,13 @@ export default function ActivityScreen() {
   const [activeTab, setActiveTab] = useState<ActivityTab>(
     isDesignEmpty ? "posts" : initialVariant,
   );
-  const localActivity = readLocalMyPageActivity();
-  const httpAdapter = resolveMyPageAdapterMode() === "http";
-  const [posts, setPosts] = useState<readonly MyPageActivityPost[]>(
-    httpAdapter ? [] : localActivity.posts,
-  );
+  const [posts, setPosts] = useState<readonly MyPageActivityPost[]>([]);
   const [comments, setComments] = useState<readonly MyPageActivityComment[]>(
-    httpAdapter ? [] : localActivity.comments,
+    [],
   );
-  const [groups, setGroups] = useState<readonly MyPageActivityGroup[]>(
-    httpAdapter ? [] : localActivity.groups,
-  );
+  const [groups, setGroups] = useState<readonly MyPageActivityGroup[]>([]);
 
   useEffect(() => {
-    if (!httpAdapter) return undefined;
     let cancelled = false;
     void Promise.all([
       fetchMyPageActivityPosts(),
@@ -84,15 +75,12 @@ export default function ActivityScreen() {
     return () => {
       cancelled = true;
     };
-  }, [httpAdapter]);
+  }, []);
 
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
         <TopBar title="활동 내역" back onBack={() => router.back()} />
-        {__DEV__ && !httpAdapter ? (
-          <Text style={styles.sourceCaption}>목업 데이터</Text>
-        ) : null}
         <UnderlineTabs
           items={tabs}
           active={activeTab}
@@ -102,23 +90,20 @@ export default function ActivityScreen() {
 
         <ScrollView contentContainerStyle={styles.body}>
           {isDesignEmpty ? (
-            <View style={styles.emptyWrap}>
-              <Empty
-                icon="schedule"
-                title="활동 내역이 없어요"
-                description={
-                  "나눔 게시글, 댓글, 소모임 참여가\n이곳에 모여서 쉽게 살펴볼 수 있어요."
-                }
-              />
-            </View>
+            <Empty
+              icon="schedule"
+              title="활동 내역이 없어요"
+              description={
+                "나눔 게시글, 댓글, 소모임 참여가\n이곳에 모여서 쉽게 살펴볼 수 있어요."
+              }
+            />
           ) : activeTab === "posts" ? (
             posts.length === 0 ? (
-              <View style={styles.emptyWrap}>
-                <Empty
-                  title="작성한 나눔 게시글이 없어요"
-                  description="나눔 탭에서 첫 글을 올려보세요."
-                />
-              </View>
+              <Empty
+                icon="inbox"
+                title="작성한 게시글이 없어요"
+                description="나눔 탭에서 물품을 등록해보세요."
+              />
             ) : (
               posts.map((post, index) => (
                 <PostRow
@@ -130,12 +115,11 @@ export default function ActivityScreen() {
             )
           ) : activeTab === "comments" ? (
             comments.length === 0 ? (
-              <View style={styles.emptyWrap}>
-                <Empty
-                  title="작성한 댓글이 없어요"
-                  description="게시글에 따뜻한 댓글을 남겨보세요."
-                />
-              </View>
+              <Empty
+                icon="description"
+                title="작성한 댓글이 없어요"
+                description="게시글에 따뜻한 댓글을 남겨보세요."
+              />
             ) : (
               comments.map((comment, index) => (
                 <CommentRow
@@ -146,12 +130,11 @@ export default function ActivityScreen() {
               ))
             )
           ) : groups.length === 0 ? (
-            <View style={styles.emptyWrap}>
-              <Empty
-                title="참여 중인 소모임이 없어요"
-                description="소모임 탭에서 관심 있는 모임에 참여해보세요."
-              />
-            </View>
+            <Empty
+              icon="groups"
+              title="참여한 소모임이 없어요"
+              description="관심 있는 소모임에 참여해보세요."
+            />
           ) : (
             groups.map((group, index) => (
               <GroupRow
@@ -238,6 +221,7 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.xs,
   },
   body: {
+    flexGrow: 1,
     paddingHorizontal: 18,
     paddingTop: 12,
     paddingBottom: 16,

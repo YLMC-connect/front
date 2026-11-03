@@ -35,5 +35,6 @@ const persister = createAsyncStoragePersister({
 persistQueryClient({
   queryClient,
   persister,
+  buster: "http-only-v1",
   maxAge: 1000 * 60 * 60 * 24,
 });

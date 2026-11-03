@@ -8,6 +8,9 @@ import PrayerNewModal from "../prayer-new";
 import { ConfirmDialog, ModalFormTextInput } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import { renderWithClient } from "../../../src/test/renderWithClient";
+import * as groupService from "../../../src/services/groupService";
+import * as marketService from "../../../src/services/marketService";
+import * as prayerService from "../../../src/services/prayerService";
 
 describe("modal smoke screens", () => {
   const router = { back: jest.fn(), push: jest.fn(), replace: jest.fn() };
@@ -16,6 +19,7 @@ describe("modal smoke screens", () => {
     jest.clearAllMocks();
     jest.mocked(useRouter).mockReturnValue(router as never);
     jest.spyOn(Keyboard, "dismiss");
+    jest.spyOn(prayerService, "fetchPrayerCategories").mockResolvedValue([]);
   });
 
   it("renders the market create modal", () => {
@@ -93,6 +97,20 @@ describe("modal smoke screens", () => {
   });
 
   it("submits a valid market form and opens the created detail", async () => {
+    jest.spyOn(marketService, "createMarketPost").mockResolvedValueOnce({
+      id: "mock-market-1",
+      thumbSeed: 1,
+      images: ["file://market.jpg"],
+      title: "새 나눔",
+      content: "깨끗하게 사용한 물품입니다.",
+      categoryLabel: "생활·주방",
+      conditionLabel: "사용감 있음",
+      status: "sharing",
+      authorName: "김은혜",
+      createdLabel: "방금 전",
+      isMine: true,
+      comments: [],
+    });
     jest
       .mocked(ImagePicker.requestMediaLibraryPermissionsAsync)
       .mockResolvedValue({ granted: true } as never);
@@ -120,6 +138,20 @@ describe("modal smoke screens", () => {
   });
 
   it("submits a valid group form and opens the created detail", async () => {
+    jest.spyOn(groupService, "createGroup").mockResolvedValueOnce({
+      id: "mock-group-1",
+      name: "새 소모임",
+      description: "함께 말씀을 나누는 모임입니다.",
+      categoryLabel: "운동·건강",
+      currentMembers: 1,
+      maxMembers: 10,
+      status: "open",
+      leaderName: "김은혜",
+      isLeader: true,
+      isJoined: true,
+      members: ["김은혜"],
+      notices: [],
+    });
     renderWithClient(<GroupNewModal />);
 
     fireEvent.changeText(screen.getByLabelText("소모임 이름"), "새 소모임");
@@ -136,6 +168,30 @@ describe("modal smoke screens", () => {
         expect.stringMatching(/^\/group\/mock-group-/),
       ),
     );
+  });
+
+  it("updates capacity with stepper buttons and quick preset chips", () => {
+    renderWithClient(<GroupNewModal />);
+
+    const capacityInput = screen.getByLabelText("소모임 최대인원");
+    expect(capacityInput.props.value).toBe("10");
+
+    fireEvent.press(screen.getByLabelText("정원 1명 증가"));
+    expect(capacityInput.props.value).toBe("11");
+
+    fireEvent.press(screen.getByLabelText("정원 1명 감소"));
+    expect(capacityInput.props.value).toBe("10");
+
+    fireEvent.press(screen.getByText("20명"));
+    expect(capacityInput.props.value).toBe("20");
+
+    fireEvent.press(screen.getByText("매주 토요일"));
+    expect(screen.getByLabelText("소모임 일정").props.value).toBe(
+      "매주 토요일",
+    );
+
+    fireEvent.press(screen.getByText("교회"));
+    expect(screen.getByLabelText("소모임 장소").props.value).toBe("교회");
   });
 
   it("renders the prayer create modal with top padding matching horizontal screen inset", () => {

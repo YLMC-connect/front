@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigation, usePathname } from "expo-router";
 import {
   Keyboard,
@@ -50,9 +50,22 @@ export function Screen({
   const navigation = useNavigation();
   const scrollRef = useRef<ScrollView | null>(null);
   const insets = useSafeAreaInsets();
+  const [isPullRefreshing, setIsPullRefreshing] = useState(false);
+  const [prevRefreshing, setPrevRefreshing] = useState(refreshing);
+  if (refreshing !== prevRefreshing) {
+    setPrevRefreshing(refreshing);
+    if (!refreshing) {
+      setIsPullRefreshing(false);
+    }
+  }
   const contentStyle = rootTabPaths.has(pathname)
     ? styles.contentWithTab
     : styles.content;
+
+  const handlePullRefresh = () => {
+    setIsPullRefreshing(true);
+    onRefresh?.();
+  };
 
   useEffect(() => {
     if (!resetScrollOnFocus || !scroll) return;
@@ -82,8 +95,8 @@ export function Screen({
           refreshControl={
             onRefresh ? (
               <RefreshControl
-                refreshing={Boolean(refreshing)}
-                onRefresh={onRefresh}
+                refreshing={Boolean(refreshing && isPullRefreshing)}
+                onRefresh={handlePullRefresh}
                 tintColor={theme.colors.primary}
                 colors={[theme.colors.primary]}
               />

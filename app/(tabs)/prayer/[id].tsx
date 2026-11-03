@@ -2,25 +2,26 @@ import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState, type ReactNode } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   AnimatedProgressFill,
   Avatar,
   Card,
   DetailBadge,
+  Empty,
+  FloatingBottomBar,
   MotionPop,
   MotionPressable,
   TopBar,
   UnderlineTabs,
 } from "../../../src/components/ui";
-import { LinearGradient } from "expo-linear-gradient";
 import { theme } from "../../../src/constants/theme";
 import { readDesignVariant } from "../../../src/lib/designVariant";
+import { useTogglePrayerCompletion } from "../../../src/hooks/usePrayers";
 import {
   fetchPrayerCohortStatus,
   fetchPrayerTopicBoard,
-  resolvePrayerAdapterMode,
 } from "../../../src/services/prayerService";
 
 type TabKey = "pray" | "answers" | "status";
@@ -41,61 +42,14 @@ interface PrayerItemData {
   urgent?: boolean;
 }
 
-const defaultUrgent: readonly PrayerItemData[] = [
-  {
-    category: "치유",
-    title: "수술 후 회복을 위해",
-    author: "박지훈",
-    text: "어머니 수술 후 회복 과정이 안정되도록 함께 기도해주세요.",
-    when: "오늘",
-    urgent: true,
-  },
-];
-
-const defaultProgress: readonly PrayerItemData[] = [
-  {
-    category: "구원",
-    title: "가족의 신앙 회복",
-    author: "김은혜",
-    text: "오랫동안 교회를 떠난 가족이 다시 예배 자리로 돌아오도록 기도합니다.",
-    when: "어제",
-  },
-  {
-    category: "자녀",
-    title: "학교 적응과 관계",
-    author: "한수연",
-    text: "새 학기 친구 관계와 학업을 지혜롭게 감당하도록 기도해주세요.",
-    when: "2일 전",
-  },
-];
-
-const defaultAnswers: readonly PrayerItemData[] = [
-  {
-    category: "일반",
-    title: "새로운 자리 적응",
-    author: "이준호",
-    text: "새로운 자리에서 선한 관계를 세우도록 함께 기도했던 제목입니다.",
-    answer: "첫 주를 잘 마쳤고 팀 안에서 좋은 도움을 받고 있습니다.",
-    when: "오늘",
-  },
-  {
-    category: "일반",
-    title: "가족 대화 회복",
-    author: "정하은",
-    text: "대화가 끊겼던 가족과의 회복을 위해 함께 기도했던 제목입니다.",
-    answer: "서로 이야기를 시작했고 함께 예배드리기로 했습니다.",
-    when: "3일 전",
-  },
-];
-
-const defaultCompletedPeople = ["김은혜", "박정아", "이수진", "김지영"];
-const defaultPendingPeople = ["한수연", "오지연"];
-
 function routeId(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function parseDayAndPeriod(id?: string, name?: string): { day: string; period: string } {
+function parseDayAndPeriod(
+  id?: string,
+  name?: string,
+): { day: string; period: string } {
   const text = (name ?? id ?? "").toLowerCase();
   let day = "월";
   if (text.includes("화") || text.includes("tue")) day = "화";
@@ -120,7 +74,9 @@ export default function PrayerDetailScreen() {
   }>();
   const id = routeId(params.id);
   const variant = readDesignVariant(params.designVariant) ?? "pray";
-  const [completedOverride, setCompletedOverride] = useState<boolean | null>(null);
+  const [completedOverride, setCompletedOverride] = useState<boolean | null>(
+    null,
+  );
 
   const initialTab: TabKey =
     variant === "status" ||
@@ -132,16 +88,16 @@ export default function PrayerDetailScreen() {
         : "pray";
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
 
-  const isHttp = resolvePrayerAdapterMode() === "http" && !params.designVariant;
+  const isHttp = !params.designVariant;
+  const toggleCompletion = useTogglePrayerCompletion(id ?? "1");
   const statusQuery = useQuery({
     queryKey: ["prayer", "cohort-status", id ?? "1"],
     queryFn: () => fetchPrayerCohortStatus(id ?? "1"),
-    enabled: isHttp && Boolean(id),
+    enabled: Boolean(id),
   });
   const boardQuery = useQuery({
     queryKey: ["prayer", "topic-board"],
     queryFn: fetchPrayerTopicBoard,
-    enabled: isHttp,
   });
 
   const room = statusQuery.data;
@@ -150,20 +106,14 @@ export default function PrayerDetailScreen() {
   const roomTitle = room?.cohortName || "월요일 오전 기도방";
   const { day, period } = parseDayAndPeriod(id, roomTitle);
 
-  const isPrayEmpty = variant === "pray-empty";
-  const isStatusEmpty = variant === "status-empty";
-  const isAnswersEmpty = variant === "answers-empty";
-
   const isCompleted =
-    completedOverride ?? (room ? room.myCompleted : variant === "pray-completed");
+    completedOverride ??
+    (room ? room.myCompleted : variant === "pray-completed");
 
-  const totalMembers = room?.totalMembers ?? 45;
-  const completedCount =
-    room?.completedCount ?? (isCompleted ? 35 : 34);
-  const pendingCount =
-    room?.notCompletedCount ?? (isCompleted ? 10 : 11);
-  const completionRate =
-    room?.completionRate ?? (isCompleted ? 78 : 75);
+  const totalMembers = room?.totalMembers ?? 0;
+  const completedCount = room?.completedCount ?? 0;
+  const pendingCount = room?.notCompletedCount ?? 0;
+  const completionRate = room?.completionRate ?? 0;
 
   const urgentItems: readonly PrayerItemData[] =
     board?.emergency && board.emergency.length > 0
@@ -175,7 +125,7 @@ export default function PrayerDetailScreen() {
           when: "오늘",
           urgent: true,
         }))
-      : defaultUrgent;
+      : [];
 
   const ongoingItems: readonly PrayerItemData[] =
     board?.ongoing && board.ongoing.length > 0
@@ -186,7 +136,7 @@ export default function PrayerDetailScreen() {
           text: t.content,
           when: "진행 중",
         }))
-      : defaultProgress;
+      : [];
 
   const answerItems: readonly PrayerItemData[] =
     board?.recentAnswers && board.recentAnswers.length > 0
@@ -198,17 +148,43 @@ export default function PrayerDetailScreen() {
           answer: t.answerContent ?? "기도에 응답해 주셨습니다.",
           when: "최근",
         }))
-      : defaultAnswers;
+      : [];
 
   const completedPeople =
     room?.completed && room.completed.length > 0
       ? room.completed.map((m) => m.userName)
-      : defaultCompletedPeople;
+      : [];
 
   const pendingPeople =
     room?.notCompleted && room.notCompleted.length > 0
       ? room.notCompleted.map((m) => m.userName)
-      : defaultPendingPeople;
+      : [];
+
+  const isPrayEmpty =
+    variant === "pray-empty" ||
+    (urgentItems.length === 0 && ongoingItems.length === 0);
+  const isStatusEmpty =
+    variant === "status-empty" ||
+    (completedPeople.length === 0 && pendingPeople.length === 0);
+  const isAnswersEmpty =
+    variant === "answers-empty" || answerItems.length === 0;
+
+  const handleToggleCompletion = () => {
+    if (isHttp && id) {
+      toggleCompletion.mutate(Boolean(isCompleted), {
+        onError: (err) => {
+          Alert.alert(
+            "기도 완료 실패",
+            err instanceof Error
+              ? err.message
+              : "기도 완료 처리에 실패했습니다. 다시 시도해주세요.",
+          );
+        },
+      });
+    } else {
+      setCompletedOverride((prev) => !(prev ?? isCompleted));
+    }
+  };
 
   return (
     <Screen scroll={false} padded={false}>
@@ -253,7 +229,11 @@ export default function PrayerDetailScreen() {
           </Card>
         </View>
 
-        <UnderlineTabs items={tabs} active={activeTab} onChange={setActiveTab} />
+        <UnderlineTabs
+          items={tabs}
+          active={activeTab}
+          onChange={setActiveTab}
+        />
 
         <ScrollView
           contentContainerStyle={[
@@ -285,29 +265,16 @@ export default function PrayerDetailScreen() {
         </ScrollView>
 
         {activeTab === "pray" && !isPrayEmpty ? (
-          <View pointerEvents="box-none" style={styles.bottomAction}>
-            <LinearGradient
-              colors={[
-                "rgba(246,247,249,0)",
-                "rgba(246,247,249,0.78)",
-                "rgba(246,247,249,0.96)",
-              ]}
-              locations={[0, 0.38, 1]}
-              pointerEvents="none"
-              style={StyleSheet.absoluteFill}
-              testID="prayer-detail-bottom-bar"
-            />
+          <FloatingBottomBar testID="prayer-detail-bottom-bar">
             <MotionPressable
               accessibilityRole="button"
-              onPress={() =>
-                setCompletedOverride(
-                  (prev) => !(prev ?? isCompleted),
-                )
-              }
+              disabled={toggleCompletion.isPending}
+              onPress={handleToggleCompletion}
               pressedScale={0.96}
               style={[
                 styles.prayButton,
                 isCompleted ? styles.prayButtonDone : null,
+                toggleCompletion.isPending ? { opacity: 0.7 } : null,
               ]}
             >
               <MotionPop key={isCompleted ? "done" : "todo"}>
@@ -328,7 +295,7 @@ export default function PrayerDetailScreen() {
                 {isCompleted ? "오늘 기도 완료됨" : "오늘 기도 완료"}
               </Text>
             </MotionPressable>
-          </View>
+          </FloatingBottomBar>
         ) : null}
       </View>
     </Screen>
@@ -568,18 +535,13 @@ function PrayerItem({
           accessibilityRole="button"
           onPress={() => setPrayed((prev) => !prev)}
           pressedScale={0.94}
-          style={[
-            styles.pillAction,
-            prayed ? styles.pillActionActive : null,
-          ]}
+          style={[styles.pillAction, prayed ? styles.pillActionActive : null]}
         >
           <AppIcon
             name={answer ? "check" : "favorite"}
             size={14}
             color={
-              answer || prayed
-                ? theme.colors.primaryDeep
-                : theme.colors.inkMute
+              answer || prayed ? theme.colors.primaryDeep : theme.colors.inkMute
             }
           />
           <Text
@@ -646,24 +608,13 @@ function EmptyMessage({
   icon,
   title,
   desc,
-  compact = false,
 }: {
   icon: AppIconName;
   title: string;
   desc: string;
   compact?: boolean;
 }) {
-  return (
-    <View style={[styles.empty, compact ? styles.emptyCompact : null]}>
-      <AppIcon
-        name={icon}
-        size={compact ? 26 : 36}
-        color={theme.colors.inkHint}
-      />
-      <Text style={styles.emptyTitle}>{title}</Text>
-      <Text style={styles.emptyDesc}>{desc}</Text>
-    </View>
-  );
+  return <Empty icon={icon} title={title} description={desc} />;
 }
 
 const styles = StyleSheet.create({
@@ -724,6 +675,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
   },
   body: {
+    flexGrow: 1,
     paddingHorizontal: 18,
     paddingTop: 14,
     paddingBottom: 22,

@@ -1,5 +1,4 @@
 import { AppIcon } from "@/components/ui/app-icon";
-import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
@@ -14,8 +13,8 @@ import {
   View,
 } from "react-native";
 import {
-  Button,
   ConfirmDialog,
+  FloatingBottomBar,
   ImagePickerField,
   ModalFormSection as Section,
   ModalFormTextInput as FormInput,
@@ -78,6 +77,7 @@ export default function MarketNewModal() {
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
   const createPost = useCreateMarketPost();
   const updatePost = useUpdateMarketPost(params.id ?? "");
+  const isPending = createPost.isPending || updatePost.isPending;
   const isDirty = JSON.stringify(values) !== JSON.stringify(initialValues);
 
   const update = <Key extends keyof MarketInput>(
@@ -263,22 +263,13 @@ export default function MarketNewModal() {
         </TouchableWithoutFeedback>
       </ScrollView>
 
-      <View pointerEvents="box-none" style={styles.footer}>
-        <LinearGradient
-          colors={[
-            "rgba(246,247,249,0)",
-            "rgba(246,247,249,0.78)",
-            "rgba(246,247,249,0.96)",
-          ]}
-          locations={[0, 0.38, 1]}
-          pointerEvents="none"
-          style={StyleSheet.absoluteFill}
-          testID="market-new-bottom-bar"
-        />
-        <Button onPress={submit} loading={createPost.isPending}>
-          {isEdit ? "변경사항 저장" : "나눔 등록"}
-        </Button>
-      </View>
+      <FloatingBottomBar
+        disabled={isPending}
+        label={isEdit ? "변경사항 저장" : "나눔 등록"}
+        loading={isPending}
+        onPress={submit}
+        testID="market-new"
+      />
 
       <ConfirmDialog
         visible={showCloseConfirm}

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import { render, screen } from "@testing-library/react-native";
 import { Empty, EmptyState, SuccessState } from "../index";
 
 describe("Empty / EmptyState", () => {
@@ -17,6 +17,7 @@ describe("Empty / EmptyState", () => {
       screen.getByText("중보기도 신청을 통해 기도방에 참여해보세요."),
     ).toBeTruthy();
   });
+
   it("renders the empty title and description", () => {
     render(
       <EmptyState
@@ -27,20 +28,6 @@ describe("Empty / EmptyState", () => {
 
     expect(screen.getByText("표시할 항목이 없습니다")).toBeTruthy();
     expect(screen.getByText("mock 데이터가 없을 때 보여줍니다.")).toBeTruthy();
-  });
-
-  it("runs the contextual empty-state action", () => {
-    const onAction = jest.fn();
-    render(
-      <EmptyState
-        title="나눔이 없습니다"
-        actionLabel="나눔 등록하기"
-        onAction={onAction}
-      />,
-    );
-
-    fireEvent.press(screen.getByText("나눔 등록하기"));
-    expect(onAction).toHaveBeenCalledTimes(1);
   });
 
   it("renders a reusable success state", () => {

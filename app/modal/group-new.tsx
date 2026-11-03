@@ -1,5 +1,4 @@
 import { AppIcon } from "@/components/ui/app-icon";
-import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
@@ -14,10 +13,12 @@ import {
   View,
 } from "react-native";
 import {
-  Button,
+  AppText,
   ConfirmDialog,
+  FloatingBottomBar,
   ModalFormSection as Section,
   ModalFormTextInput as FormInput,
+  SectionDivider,
   TopBar,
 } from "../../src/components/ui";
 import { GROUP_CATEGORIES } from "../../src/constants/domainOptions";
@@ -34,6 +35,15 @@ const categories = GROUP_CATEGORIES.slice(1) as readonly {
   key: GroupInput["category"];
   label: string;
 }[];
+
+const CAPACITY_PRESETS = [4, 8, 12, 20] as const;
+const SCHEDULE_PRESETS = [
+  "매주 토요일",
+  "매주 주일",
+  "격주 토요일",
+  "평일 저녁",
+] as const;
+const LOCATION_PRESETS = ["교회", "온라인 (Zoom)", "외부 모임"] as const;
 
 const filledValues: GroupInput = {
   category: "sport",
@@ -67,6 +77,7 @@ export default function GroupNewModal() {
   const useFilledValues = isEdit || variant === "create-filled";
   const createGroup = useCreateGroup();
   const updateGroupMutation = useUpdateGroup(params.id ?? "");
+  const isPending = createGroup.isPending || updateGroupMutation.isPending;
   const existingDetail = useGroupDetail(params.id ?? "");
   const detailData = existingDetail.data;
 
@@ -113,6 +124,18 @@ export default function GroupNewModal() {
   ) => {
     setError(undefined);
     setValues((current) => ({ ...current, [key]: value }));
+  };
+
+  const changeCapacity = (delta: number) => {
+    const current = Number(capacity) || values.maxMembers || 2;
+    const next = Math.max(2, Math.min(100, current + delta));
+    setCapacity(String(next));
+    update("maxMembers", next);
+  };
+
+  const setCapacityPreset = (target: number) => {
+    setCapacity(String(target));
+    update("maxMembers", target);
   };
 
   const close = () => {
@@ -169,6 +192,24 @@ export default function GroupNewModal() {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View>
+            <View style={styles.infoBox}>
+              <AppIcon name="info" size={16} color={theme.colors.primaryDeep} />
+              <Text style={styles.infoText}>
+                비슷한 목적의 소모임이 이미 있다면 기존 소모임 참여를 먼저
+                고려해주세요.
+              </Text>
+            </View>
+
+            {/* 그룹 1: 기본 정보 */}
+            <View style={styles.groupHeader}>
+              <AppText variant="cardTitle" style={styles.groupTitle}>
+                기본 정보
+              </AppText>
+              <AppText variant="caption" tone="muted">
+                어떤 소모임인지 소개해 주세요
+              </AppText>
+            </View>
+
             <Section label="카테고리" required>
               <View style={styles.chips}>
                 {categories.map((category) => {
@@ -227,22 +268,105 @@ export default function GroupNewModal() {
               />
             </Section>
 
+            <SectionDivider />
+
+            {/* 그룹 2: 모임 활동 안내 */}
+            <View style={styles.groupHeader}>
+              <AppText variant="cardTitle" style={styles.groupTitle}>
+                활동 및 운영 안내
+              </AppText>
+              <AppText variant="caption" tone="muted">
+                언제, 어디서, 몇 명이 함께 모이나요?
+              </AppText>
+            </View>
+
             <Section label="최대인원" required>
-              <View style={styles.capacityRow}>
-                <FormInput
-                  accessibilityLabel="소모임 최대인원"
-                  keyboardType="number-pad"
-                  value={capacity}
-                  onChangeText={(text) => {
-                    setCapacity(text);
-                    update("maxMembers", Number(text) || 0);
-                  }}
-                  placeholder="숫자"
-                  style={styles.capacityInput}
-                />
-                <Text style={styles.capacityUnit}>명</Text>
+              <View style={styles.capacityStepperRow}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="정원 1명 감소"
+                  disabled={Number(capacity) <= 2}
+                  onPress={() => changeCapacity(-1)}
+                  style={[
+                    styles.stepperButton,
+                    Number(capacity) <= 2 ? styles.stepperButtonDisabled : null,
+                  ]}
+                >
+                  <AppIcon
+                    name="remove"
+                    size={18}
+                    color={
+                      Number(capacity) <= 2
+                        ? theme.colors.inkMute
+                        : theme.colors.ink
+                    }
+                  />
+                </Pressable>
+                <View style={styles.capacityInputWrap}>
+                  <FormInput
+                    accessibilityLabel="소모임 최대인원"
+                    keyboardType="number-pad"
+                    value={capacity}
+                    onChangeText={(text) => {
+                      setCapacity(text);
+                      update("maxMembers", Number(text) || 0);
+                    }}
+                    placeholder="숫자"
+                    style={styles.capacityInput}
+                  />
+                  <Text style={styles.capacityUnit}>명</Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="정원 1명 증가"
+                  disabled={Number(capacity) >= 100}
+                  onPress={() => changeCapacity(1)}
+                  style={[
+                    styles.stepperButton,
+                    Number(capacity) >= 100
+                      ? styles.stepperButtonDisabled
+                      : null,
+                  ]}
+                >
+                  <AppIcon
+                    name="add"
+                    size={18}
+                    color={
+                      Number(capacity) >= 100
+                        ? theme.colors.inkMute
+                        : theme.colors.ink
+                    }
+                  />
+                </Pressable>
+              </View>
+
+              <View style={styles.quickPresetRow}>
+                {CAPACITY_PRESETS.map((preset) => (
+                  <Pressable
+                    key={preset}
+                    onPress={() => setCapacityPreset(preset)}
+                    style={[
+                      styles.quickPresetChip,
+                      values.maxMembers === preset
+                        ? styles.quickPresetChipActive
+                        : null,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.quickPresetText,
+                        values.maxMembers === preset
+                          ? styles.quickPresetTextActive
+                          : null,
+                      ]}
+                    >
+                      {preset}명
+                    </Text>
+                  </Pressable>
+                ))}
                 <Text style={styles.capacityHint}>2~100명</Text>
               </View>
+
               {variant === "range-error" ? (
                 <Text style={styles.inlineError}>
                   2~100명 사이로 입력해주세요
@@ -262,6 +386,31 @@ export default function GroupNewModal() {
                 onChangeText={(schedule) => update("schedule", schedule)}
                 placeholder="예: 매주 토요일 오전 10시"
               />
+              <View style={styles.quickPresetRow}>
+                {SCHEDULE_PRESETS.map((schedule) => (
+                  <Pressable
+                    key={schedule}
+                    onPress={() => update("schedule", schedule)}
+                    style={[
+                      styles.quickPresetChip,
+                      values.schedule === schedule
+                        ? styles.quickPresetChipActive
+                        : null,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.quickPresetText,
+                        values.schedule === schedule
+                          ? styles.quickPresetTextActive
+                          : null,
+                      ]}
+                    >
+                      {schedule}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
             </Section>
 
             <Section label="모임 장소" required>
@@ -271,15 +420,33 @@ export default function GroupNewModal() {
                 onChangeText={(location) => update("location", location)}
                 placeholder="예: 교육관 2층"
               />
+              <View style={styles.quickPresetRow}>
+                {LOCATION_PRESETS.map((location) => (
+                  <Pressable
+                    key={location}
+                    onPress={() => update("location", location)}
+                    style={[
+                      styles.quickPresetChip,
+                      values.location === location
+                        ? styles.quickPresetChipActive
+                        : null,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.quickPresetText,
+                        values.location === location
+                          ? styles.quickPresetTextActive
+                          : null,
+                      ]}
+                    >
+                      {location}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
             </Section>
 
-            <View style={styles.infoBox}>
-              <AppIcon name="info" size={16} color={theme.colors.primaryDeep} />
-              <Text style={styles.infoText}>
-                비슷한 목적의 소모임이 이미 있다면 기존 소모임 참여를 먼저
-                고려해주세요.
-              </Text>
-            </View>
             {error ? (
               <Text accessibilityRole="alert" style={styles.errorText}>
                 {error}
@@ -289,25 +456,13 @@ export default function GroupNewModal() {
         </TouchableWithoutFeedback>
       </ScrollView>
 
-      <View pointerEvents="box-none" style={styles.footer}>
-        <LinearGradient
-          colors={[
-            "rgba(246,247,249,0)",
-            "rgba(246,247,249,0.78)",
-            "rgba(246,247,249,0.96)",
-          ]}
-          locations={[0, 0.38, 1]}
-          pointerEvents="none"
-          style={StyleSheet.absoluteFill}
-          testID="group-new-bottom-bar"
-        />
-        <Button
-          onPress={submit}
-          loading={createGroup.isPending || updateGroupMutation.isPending}
-        >
-          {isEdit ? "변경사항 저장" : "소모임 개설"}
-        </Button>
-      </View>
+      <FloatingBottomBar
+        disabled={isPending}
+        label={isEdit ? "변경사항 저장" : "소모임 개설"}
+        loading={isPending}
+        onPress={submit}
+        testID="group-new"
+      />
 
       <ConfirmDialog
         visible={showCloseConfirm}
@@ -360,8 +515,61 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: theme.layout.screenX,
   },
+  capacityStepperRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: theme.layout.screenX,
+  },
+  stepperButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  stepperButtonDisabled: {
+    opacity: 0.4,
+  },
+  capacityInputWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  quickPresetRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: theme.layout.screenX,
+    marginTop: 10,
+  },
+  quickPresetChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+  },
+  quickPresetChipActive: {
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: theme.colors.primary,
+  },
+  quickPresetText: {
+    fontSize: 12.5,
+    color: theme.colors.inkSoft,
+    fontWeight: theme.fontWeight.medium,
+  },
+  quickPresetTextActive: {
+    color: theme.colors.primaryDeep,
+    fontWeight: theme.fontWeight.bold,
+  },
   capacityInput: {
-    width: 120,
+    width: 100,
     height: 48,
     marginHorizontal: 0,
     textAlign: "center",
@@ -378,9 +586,19 @@ const styles = StyleSheet.create({
     color: theme.colors.danger,
     fontSize: theme.fontSize.sm,
   },
+  groupHeader: {
+    paddingHorizontal: 22,
+    paddingTop: 16,
+    paddingBottom: 4,
+    gap: 3,
+  },
+  groupTitle: {
+    fontWeight: theme.fontWeight.bold,
+  },
   infoBox: {
     marginHorizontal: theme.layout.screenX,
-    marginTop: 22,
+    marginTop: 10,
+    marginBottom: 8,
     borderRadius: theme.radius.md,
     backgroundColor: theme.colors.primarySoft,
     flexDirection: "row",

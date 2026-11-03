@@ -13,7 +13,6 @@ import {
 } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { useHomeOverview } from "../../src/hooks/useHome";
-import { homeSundaySermon } from "../../src/mocks/home";
 import { useAuthStore } from "../../src/store/authStore";
 
 export default function HomeScreen() {
@@ -21,10 +20,12 @@ export default function HomeScreen() {
   const currentUser = useAuthStore((state) => state.currentUser);
   const overview = useHomeOverview();
   const fullName = currentUser?.name?.trim() || "성도";
-  const sundaySermon = overview.data?.sundaySermon ?? homeSundaySermon;
+  const sundaySermon = overview.data?.sundaySermon ?? null;
+  const dawnPrayer = overview.data?.dawnPrayer ?? null;
 
   return (
     <StickyHeaderScreen
+      compact
       contentContainerStyle={styles.content}
       testID="screen-home"
       title="열린문 커넥트"
@@ -72,63 +73,69 @@ export default function HomeScreen() {
           </View>
         ) : (
           <MotionEnter style={styles.cardsWrap}>
-            <MotionPressable
-              accessibilityHint="유튜브에서 이번 주일 말씀 영상을 엽니다"
-              accessibilityLabel={`${sundaySermon.timeLabel} ${sundaySermon.title}`}
-              accessibilityRole="link"
-              onPress={() => void Linking.openURL(sundaySermon.videoUrl)}
-              pressedScale={0.985}
-              style={styles.dawnCard}
-              testID="home-sunday-sermon"
-            >
-              <View style={styles.sermonThumbWrap}>
-                <Image
-                  accessibilityIgnoresInvertColors
-                  contentFit="cover"
-                  source={{ uri: sundaySermon.thumbnailUrl }}
-                  style={styles.sermonThumb}
-                  testID="home-sunday-sermon-thumbnail"
-                  transition={180}
-                />
-                <View pointerEvents="none" style={styles.sermonPlayBadge}>
-                  <AppIcon
-                    color={theme.colors.white}
-                    fill={theme.colors.white}
-                    name="play"
-                    size={22}
+            {sundaySermon ? (
+              <MotionPressable
+                accessibilityHint="유튜브에서 이번 주일 말씀 영상을 엽니다"
+                accessibilityLabel={`${sundaySermon.timeLabel} ${sundaySermon.title}`}
+                accessibilityRole="link"
+                onPress={() => {
+                  if (sundaySermon.videoUrl) {
+                    void Linking.openURL(sundaySermon.videoUrl);
+                  }
+                }}
+                pressedScale={0.985}
+                style={styles.dawnCard}
+                testID="home-sunday-sermon"
+              >
+                <View style={styles.sermonThumbWrap}>
+                  <Image
+                    accessibilityIgnoresInvertColors
+                    contentFit="cover"
+                    source={{ uri: sundaySermon.thumbnailUrl }}
+                    style={styles.sermonThumb}
+                    testID="home-sunday-sermon-thumbnail"
+                    transition={180}
                   />
+                  <View pointerEvents="none" style={styles.sermonPlayBadge}>
+                    <AppIcon
+                      color={theme.colors.white}
+                      fill={theme.colors.white}
+                      name="play"
+                      size={22}
+                    />
+                  </View>
                 </View>
-              </View>
-              <View style={styles.sermonContent}>
-                <AppText
-                  variant="caption"
-                  tone="muted"
-                  style={styles.dawnEyebrow}
-                >
-                  {sundaySermon.timeLabel}
-                </AppText>
-                <AppText variant="sectionTitle" style={styles.dawnTitle}>
-                  {sundaySermon.title}
-                </AppText>
-                <AppText
-                  variant="body"
-                  tone="secondary"
-                  style={styles.dawnSummary}
-                >
-                  {sundaySermon.summary}
-                </AppText>
-                <View style={styles.dawnAction}>
-                  <AppText variant="caption" tone="brand">
-                    유튜브로 말씀 보기
+                <View style={styles.sermonContent}>
+                  <AppText
+                    variant="caption"
+                    tone="muted"
+                    style={styles.dawnEyebrow}
+                  >
+                    {sundaySermon.timeLabel}
                   </AppText>
-                  <AppIcon
-                    name="chevron-right"
-                    size={18}
-                    color={theme.colors.primaryDeep}
-                  />
+                  <AppText variant="sectionTitle" style={styles.dawnTitle}>
+                    {sundaySermon.title}
+                  </AppText>
+                  <AppText
+                    variant="body"
+                    tone="secondary"
+                    style={styles.dawnSummary}
+                  >
+                    {sundaySermon.summary}
+                  </AppText>
+                  <View style={styles.dawnAction}>
+                    <AppText variant="caption" tone="brand">
+                      유튜브로 말씀 보기
+                    </AppText>
+                    <AppIcon
+                      name="chevron-right"
+                      size={18}
+                      color={theme.colors.primaryDeep}
+                    />
+                  </View>
                 </View>
-              </View>
-            </MotionPressable>
+              </MotionPressable>
+            ) : null}
 
             <MotionPressable
               accessibilityRole="button"
@@ -169,41 +176,57 @@ export default function HomeScreen() {
               </View>
             </MotionPressable>
 
-            <MotionPressable
-              accessibilityRole="button"
-              onPress={() => router.push(overview.data.dawnPrayer.href as Href)}
-              pressedScale={0.985}
-              style={styles.dawnCard}
-              testID="home-dawn-prayer"
-            >
-              <AppText
-                variant="caption"
-                tone="muted"
-                style={styles.dawnEyebrow}
+            {dawnPrayer ? (
+              <MotionPressable
+                accessibilityRole="button"
+                onPress={() => router.push(dawnPrayer.href as Href)}
+                pressedScale={0.985}
+                style={styles.dawnCard}
+                testID="home-dawn-prayer"
               >
-                {overview.data.dawnPrayer.timeLabel}
-              </AppText>
-              <AppText variant="sectionTitle" style={styles.dawnTitle}>
-                {overview.data.dawnPrayer.title}
-              </AppText>
-              <AppText
-                variant="body"
-                tone="secondary"
-                style={styles.dawnSummary}
-              >
-                {overview.data.dawnPrayer.summary}
-              </AppText>
-              <View style={styles.dawnAction}>
-                <AppText variant="caption" tone="brand">
-                  말씀요약 더 보기
-                </AppText>
-                <AppIcon
-                  name="chevron-right"
-                  size={18}
-                  color={theme.colors.primaryDeep}
-                />
-              </View>
-            </MotionPressable>
+                <View style={styles.sermonContent}>
+                  <View style={styles.dawnHeaderRow}>
+                    <View style={styles.dawnIconBadge}>
+                      <AppIcon
+                        name="book-open-page-variant-outline"
+                        size={14}
+                        color={theme.colors.primaryDeep}
+                      />
+                    </View>
+                    <AppText
+                      variant="caption"
+                      tone="muted"
+                      style={styles.dawnEyebrowText}
+                    >
+                      {dawnPrayer.timeLabel}
+                    </AppText>
+                  </View>
+                  <AppText variant="sectionTitle" style={styles.dawnTitle}>
+                    {dawnPrayer.title}
+                  </AppText>
+                  {dawnPrayer.summary ? (
+                    <AppText
+                      variant="body"
+                      tone="secondary"
+                      numberOfLines={2}
+                      style={styles.dawnSummary}
+                    >
+                      {dawnPrayer.summary}
+                    </AppText>
+                  ) : null}
+                  <View style={styles.dawnAction}>
+                    <AppText variant="caption" tone="brand">
+                      말씀요약 더 보기
+                    </AppText>
+                    <AppIcon
+                      name="chevron-right"
+                      size={18}
+                      color={theme.colors.primaryDeep}
+                    />
+                  </View>
+                </View>
+              </MotionPressable>
+            ) : null}
           </MotionEnter>
         )}
       </View>
@@ -295,6 +318,24 @@ const styles = StyleSheet.create({
   },
   sermonContent: {
     padding: theme.spacing[4],
+  },
+  dawnHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: theme.spacing[2],
+  },
+  dawnIconBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: theme.colors.primaryTint,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dawnEyebrowText: {
+    flex: 1,
+    fontWeight: theme.fontWeight.medium,
   },
   dawnEyebrow: {
     marginBottom: theme.spacing[1],

@@ -1,9 +1,3 @@
-import Constants from "expo-constants";
-import {
-  mockLifeStudyCourses,
-  mockLifeStudyHistory,
-  mockLifeStudyOverview,
-} from "../mocks/lifeStudy";
 import type {
   LifeStudyCourse,
   LifeStudyHistory,
@@ -53,61 +47,6 @@ export interface LifeStudyDataSource {
   ): Promise<LifeStudyCompletionRoster>;
 }
 
-const delay = (ms = 180) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const courses: LifeStudyCourse[] = [...mockLifeStudyCourses];
-
-const mockLifeStudyDataSource: LifeStudyDataSource = {
-  async getOverview() {
-    await delay();
-    return mockLifeStudyOverview;
-  },
-
-  async getCourses(filter: LifeStudyStatus = "all") {
-    await delay();
-    if (filter === "all") return courses;
-    return courses.filter((course) => course.status === filter);
-  },
-
-  async getMyCompletions() {
-    await delay();
-    return mockLifeStudyHistory.map((history) => ({ ...history }));
-  },
-
-  async applyClassesToCourse(_cohortId, course) {
-    await delay();
-    return { ...course };
-  },
-
-  async getAttendance(_classId) {
-    await delay();
-    return null;
-  },
-
-  async replaceAttendance(_classId, _attendedUserIds) {
-    await delay();
-  },
-
-  async updateAttendanceUser(_classId, _input) {
-    await delay();
-  },
-
-  async applyRosterToCourse(_cohortId, course) {
-    await delay();
-    return { ...course };
-  },
-
-  async updateCompletionUser() {
-    await delay();
-    throw new Error("목 데이터에는 수료 명단이 없습니다.");
-  },
-
-  async applyCohort() {
-    await delay();
-    return 1;
-  },
-};
-
 export function createLifeStudyService(dataSource: LifeStudyDataSource) {
   return {
     fetchOverview: () => dataSource.getOverview(),
@@ -136,19 +75,7 @@ export function createLifeStudyService(dataSource: LifeStudyDataSource) {
   };
 }
 
-export function resolveLifeStudyAdapterMode(): "http" | "mock" {
-  const fromEnv = process.env.EXPO_PUBLIC_LIFE_STUDY_ADAPTER;
-  if (fromEnv === "http" || fromEnv === "mock") return fromEnv;
-  return Constants.expoConfig?.extra?.lifeStudyAdapter === "http"
-    ? "http"
-    : "mock";
-}
-
-const lifeStudyService = createLifeStudyService(
-  resolveLifeStudyAdapterMode() === "http"
-    ? httpLifeStudyDataSource
-    : mockLifeStudyDataSource,
-);
+const lifeStudyService = createLifeStudyService(httpLifeStudyDataSource);
 
 export const fetchLifeStudyOverview = lifeStudyService.fetchOverview;
 export const fetchLifeStudyCourses = lifeStudyService.fetchCourses;

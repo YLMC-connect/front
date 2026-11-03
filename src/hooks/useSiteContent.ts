@@ -8,11 +8,16 @@ export const SITE_POLICY_QUERY_KEY = (policyType: SitePolicyType) =>
 export const FAQS_QUERY_KEY = (categoryId?: number) =>
   ["faqs", categoryId ?? "all"] as const;
 
-export function useActiveSitePolicy(policyType: SitePolicyType) {
+export function useActiveSitePolicy(
+  policyType?: SitePolicyType | null,
+  options?: { enabled?: boolean },
+) {
   return useQuery({
-    queryKey: SITE_POLICY_QUERY_KEY(policyType),
-    queryFn: () => getActiveSitePolicy(policyType),
+    queryKey: SITE_POLICY_QUERY_KEY(policyType ?? 1),
+    queryFn: () => (policyType ? getActiveSitePolicy(policyType) : null),
     staleTime: 1000 * 60 * 30,
+    enabled:
+      options?.enabled !== undefined ? options.enabled : policyType != null,
   });
 }
 

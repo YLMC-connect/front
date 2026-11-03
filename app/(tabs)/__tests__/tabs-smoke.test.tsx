@@ -23,14 +23,14 @@ import LifeStudyHistoryScreen from "../life-study/history";
 import LifeStudyScreen from "../life-study";
 import MarketScreen from "../market";
 import MarketDetailScreen from "../market/[id]";
-import MyPageScreen from "../mypage";
-import ActivityScreen from "../mypage/activity";
-import BlockedScreen from "../mypage/blocked";
-import EditProfileScreen from "../mypage/edit";
-import FaqScreen from "../mypage/faq";
-import MyPageTermsScreen from "../mypage/terms";
-import UserProfileScreen from "../mypage/user/[id]";
-import WithdrawScreen from "../mypage/withdraw";
+import MyPageScreen from "../../mypage";
+import ActivityScreen from "../../mypage/activity";
+import BlockedScreen from "../../mypage/blocked";
+import EditProfileScreen from "../../mypage/edit";
+import FaqScreen from "../../mypage/faq";
+import MyPageTermsScreen from "../../mypage/terms";
+import UserProfileScreen from "../../mypage/user/[id]";
+import WithdrawScreen from "../../mypage/withdraw";
 import PrayerDetailScreen from "../prayer/[id]";
 import PrayerApplyScreenRoute from "../prayer/apply";
 import PrayerScreen from "../prayer";
@@ -38,9 +38,564 @@ import PrayerRequestScreenRoute from "../prayer/request";
 import { theme } from "../../../src/constants/theme";
 import { renderWithClient } from "../../../src/test/renderWithClient";
 import * as authService from "../../../src/services/authService";
+import * as groupService from "../../../src/services/groupService";
+import * as homeService from "../../../src/services/homeService";
+import * as lifeStudyService from "../../../src/services/lifeStudyService";
+import * as marketService from "../../../src/services/marketService";
+import * as mypageService from "../../../src/services/mypageService";
 import * as prayerService from "../../../src/services/prayerService";
+import * as siteContentService from "../../../src/services/siteContentService";
+import type { GroupDetail, GroupOverview } from "../../../src/types/group";
+import type {
+  MarketDetail,
+  MarketOverviewItem,
+} from "../../../src/types/market";
 
 describe("v1 tab smoke screens", () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
+
+    jest.spyOn(homeService, "fetchHomeOverview").mockResolvedValue({
+      dailyPrayer: {
+        dateLabel: "4월 16일 목요일",
+        weekday: "thu",
+        weekdayLabel: "목요일의 기도",
+        title: "일터와 가정을 지키는 지혜",
+        summary: "우리의 계획보다 주님의 인도하심을 신뢰하게 하소서.",
+        href: "/prayer",
+      },
+      dawnPrayer: {
+        id: "dawn-1",
+        title: "고린도후서 1:23~2:17",
+        summary: "2026. 11. 3. 화요일 ㅡ 고린도후서 1:23~2:17",
+        timeLabel: "새벽기도 말씀요약 · 11월 3일",
+        body: "본문",
+        href: "/prayer/dawn?id=1",
+      },
+      sundaySermon: {
+        id: "1",
+        timeLabel: "이번 주일 말씀 · 11월 1일",
+        title: "넘쳐 흐르는 위로(고후1:1~11)",
+        summary: "고린도후서 1장 1 ~ 11절 · 이재홍 전도사",
+        thumbnailUrl: "https://img.youtube.com/vi/1t5SPGmJxsg/hqdefault.jpg",
+        videoUrl: "https://www.youtube.com/watch?v=1t5SPGmJxsg",
+      },
+      todos: [],
+      progressSteps: [],
+    });
+
+    const marketItems: MarketOverviewItem[] = [
+      {
+        id: "1",
+        thumbSeed: 0,
+        title: "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
+        authorName: "김은혜",
+        createdLabel: "10분 전",
+        status: "sharing",
+        category: "baby",
+        isMine: true,
+      },
+      {
+        id: "2",
+        thumbSeed: 1,
+        title: "토스터기·전기주전자 세트 나눔해요",
+        authorName: "이요셉",
+        createdLabel: "1시간 전",
+        status: "sharing",
+        category: "home",
+        isMine: false,
+      },
+      {
+        id: "3",
+        thumbSeed: 2,
+        title: "어린이 동화책 30권 묶음 나눔",
+        authorName: "박한나",
+        createdLabel: "2시간 전",
+        status: "sharing",
+        category: "book",
+        isMine: false,
+      },
+      {
+        id: "4",
+        thumbSeed: 3,
+        title: "유아용 카시트 (사용감 있음)",
+        authorName: "최성도",
+        createdLabel: "어제",
+        status: "reserved",
+        category: "baby",
+        isMine: false,
+      },
+    ];
+    let marketDetailState: MarketDetail = {
+      id: "1",
+      thumbSeed: 0,
+      title: "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
+      content: "아이가 커서 정리합니다.",
+      categoryLabel: "육아·아동",
+      conditionLabel: "상태 좋음",
+      status: "sharing",
+      authorName: "김은혜",
+      createdLabel: "10분 전",
+      isMine: true,
+      comments: [
+        {
+          id: "comment-1",
+          authorName: "이요셉",
+          createdLabel: "8분 전",
+          content: "나눔 감사합니다!",
+          isMine: false,
+          isEdited: false,
+          isDeleted: false,
+        },
+        {
+          id: "comment-2",
+          authorName: "박한나",
+          createdLabel: "5분 전",
+          content: "혹시 주일 예배 후 수령 가능할까요?",
+          isMine: false,
+          isEdited: false,
+          isDeleted: false,
+        },
+        {
+          id: "comment-3",
+          authorName: "최성도",
+          createdLabel: "3분 전",
+          isMine: false,
+          isEdited: false,
+          isDeleted: true,
+        },
+        {
+          id: "comment-4",
+          authorName: "김은혜",
+          createdLabel: "1분 전",
+          content: "아직 남아있을까요? 늦었지만 가능하면 부탁드려요.",
+          isMine: true,
+          isEdited: false,
+          isDeleted: false,
+        },
+      ],
+    };
+
+    jest.spyOn(marketService, "fetchMarketOverview").mockResolvedValue({
+      items: marketItems,
+    });
+    jest.spyOn(marketService, "fetchMarketOverviewPage").mockResolvedValue({
+      items: marketItems,
+      hasNext: false,
+      nextCursor: null,
+    });
+    jest
+      .spyOn(marketService, "fetchMarketDetail")
+      .mockImplementation(async (id) => {
+        if (id === "missing") throw new Error("존재하지 않는 나눔입니다.");
+        return {
+          ...marketDetailState,
+          comments: marketDetailState.comments.map((c) => ({ ...c })),
+        };
+      });
+    jest
+      .spyOn(marketService, "createMarketComment")
+      .mockImplementation(async (input) => {
+        const created = {
+          id: `comment-${Date.now()}`,
+          authorName: "김은혜",
+          createdLabel: "방금 전",
+          content: input.content,
+          isMine: true,
+          isEdited: false,
+          isDeleted: false,
+        };
+        marketDetailState = {
+          ...marketDetailState,
+          comments: [...marketDetailState.comments, created],
+        };
+        return created;
+      });
+    jest
+      .spyOn(marketService, "updateMarketComment")
+      .mockImplementation(async (input) => {
+        const updated = {
+          id: input.commentId,
+          authorName: "김은혜",
+          createdLabel: "1분 전",
+          content: input.content,
+          isMine: true,
+          isEdited: true,
+          isDeleted: false,
+        };
+        marketDetailState = {
+          ...marketDetailState,
+          comments: marketDetailState.comments.map((c) =>
+            c.id === input.commentId ? updated : c,
+          ),
+        };
+        return updated;
+      });
+    jest
+      .spyOn(marketService, "deleteMarketComment")
+      .mockImplementation(async (input) => {
+        marketDetailState = {
+          ...marketDetailState,
+          comments: marketDetailState.comments.map((c) =>
+            c.id === input.commentId
+              ? { ...c, content: undefined, isDeleted: true }
+              : c,
+          ),
+        };
+      });
+    jest.spyOn(marketService, "deleteMarketPost").mockResolvedValue(undefined);
+
+    const groupOverviewData: GroupOverview = {
+      groups: [
+        {
+          id: "1",
+          name: "토요 산악회",
+          description: "함께 산을 오르며 교제해요",
+          category: "hobby",
+          currentMembers: 6,
+          maxMembers: 12,
+          status: "open",
+          coverSeed: 0,
+          isJoined: true,
+        },
+        {
+          id: "2",
+          name: "독서 나눔",
+          description: "신앙 서적을 함께 읽어요",
+          category: "bible",
+          currentMembers: 8,
+          maxMembers: 10,
+          status: "open",
+          coverSeed: 1,
+          isJoined: true,
+        },
+        {
+          id: "3",
+          name: "엄마들의 수다방",
+          description: "육아와 신앙을 나눠요",
+          category: "cell",
+          currentMembers: 10,
+          maxMembers: 15,
+          status: "open",
+          coverSeed: 2,
+          isJoined: true,
+        },
+        {
+          id: "4",
+          name: "화요 새벽기도회",
+          description: "화요일 새벽을 깨워요",
+          category: "pray",
+          currentMembers: 5,
+          maxMembers: 20,
+          status: "open",
+          coverSeed: 3,
+          isJoined: false,
+        },
+        {
+          id: "5",
+          name: "찬양 동아리",
+          description: "찬양으로 하나되는 모임",
+          category: "hobby",
+          currentMembers: 18,
+          maxMembers: 24,
+          status: "open",
+          coverSeed: 4,
+          isJoined: false,
+        },
+      ],
+      services: [
+        {
+          id: "service-1",
+          linkedGroupId: "5",
+          name: "주방 봉사팀",
+          schedule: "주일 10:30",
+          description: "성도들의 식사를 섬겨요",
+          currentMembers: 18,
+          maxMembers: 24,
+          statusLabel: "모집중",
+          coverSeed: 0,
+        },
+      ],
+    };
+    let groupDetailState: GroupDetail = {
+      id: "1",
+      name: "토요 산악회",
+      description: "함께 산을 오르며 교제해요",
+      categoryLabel: "취미·문화",
+      currentMembers: 6,
+      maxMembers: 12,
+      status: "open",
+      leaderName: "김은혜",
+      isLeader: true,
+      isJoined: true,
+      members: ["김은혜", "이요셉", "박한나", "최성도", "정다윗", "한수연"],
+      notices: [
+        {
+          id: "notice-1",
+          title: "5월 18일 토요일 모임 안내",
+          content: "오전 8시에 집결합니다.",
+          preview: "오전 8시에 집결합니다.",
+          createdLabel: "2일 전",
+          isEdited: false,
+        },
+        {
+          id: "notice-2",
+          title: "신규 멤버 환영합니다",
+          content: "함께하게 되어 기쁩니다.",
+          preview: "함께하게 되어 기쁩니다.",
+          createdLabel: "1주 전",
+          isEdited: false,
+        },
+      ],
+    };
+
+    jest
+      .spyOn(groupService, "fetchGroupOverview")
+      .mockResolvedValue(groupOverviewData);
+    jest.spyOn(groupService, "fetchGroupOverviewPage").mockResolvedValue({
+      ...groupOverviewData,
+      hasNext: false,
+      nextCursor: null,
+    });
+    jest
+      .spyOn(groupService, "fetchGroupDetail")
+      .mockImplementation(async () => ({
+        ...groupDetailState,
+        notices: groupDetailState.notices.map((n) => ({ ...n })),
+      }));
+    jest.spyOn(groupService, "fetchGroupMembers").mockResolvedValue([
+      {
+        userId: "member-001",
+        userName: "김은혜",
+        joinedLabel: "2026.01",
+        isLeader: true,
+        isMine: true,
+      },
+      {
+        userId: "member-002",
+        userName: "이요셉",
+        joinedLabel: "2026.02",
+        isLeader: false,
+        isMine: false,
+      },
+      {
+        userId: "member-003",
+        userName: "박한나",
+        joinedLabel: "2026.02",
+        isLeader: false,
+        isMine: false,
+      },
+      {
+        userId: "member-004",
+        userName: "최성도",
+        joinedLabel: "2026.03",
+        isLeader: false,
+        isMine: false,
+      },
+      {
+        userId: "member-005",
+        userName: "정다윗",
+        joinedLabel: "2026.03",
+        isLeader: false,
+        isMine: false,
+      },
+      {
+        userId: "member-006",
+        userName: "한수연",
+        joinedLabel: "2026.03",
+        isLeader: false,
+        isMine: false,
+      },
+      {
+        userId: "member-007",
+        userName: "강다니엘",
+        joinedLabel: "2026.04",
+        isLeader: false,
+        isMine: false,
+      },
+      {
+        userId: "member-008",
+        userName: "윤사라",
+        joinedLabel: "2026.04",
+        isLeader: false,
+        isMine: false,
+      },
+    ]);
+    jest
+      .spyOn(groupService, "createGroupNotice")
+      .mockImplementation(async (input) => {
+        const notice = {
+          id: `notice-${Date.now()}`,
+          title: input.title,
+          content: input.content,
+          preview: input.content,
+          createdLabel: "방금 전",
+          isEdited: false,
+        };
+        groupDetailState = {
+          ...groupDetailState,
+          notices: [notice, ...groupDetailState.notices],
+        };
+        return notice;
+      });
+    jest
+      .spyOn(groupService, "updateGroupNotice")
+      .mockImplementation(async (input) => {
+        const updated = {
+          id: input.noticeId,
+          title: input.title,
+          content: input.content,
+          preview: input.content,
+          createdLabel: "방금 전",
+          isEdited: true,
+        };
+        groupDetailState = {
+          ...groupDetailState,
+          notices: groupDetailState.notices.map((n) =>
+            n.id === input.noticeId ? updated : n,
+          ),
+        };
+        return updated;
+      });
+    jest
+      .spyOn(groupService, "deleteGroupNotice")
+      .mockImplementation(async (input) => {
+        groupDetailState = {
+          ...groupDetailState,
+          notices: groupDetailState.notices.filter(
+            (n) => n.id !== input.noticeId,
+          ),
+        };
+      });
+
+    jest.spyOn(prayerService, "fetchPrayerOverview").mockResolvedValue({
+      rooms: [
+        {
+          id: "prayer-overview-room-mon-am",
+          weekday: "mon",
+          period: "morning",
+          memberCount: 24,
+          completedCount: 16,
+          participationRate: 67,
+          status: "joined",
+        },
+        {
+          id: "prayer-overview-room-thu-pm",
+          weekday: "thu",
+          period: "afternoon",
+          memberCount: 19,
+          status: "pending",
+        },
+      ],
+      requests: [
+        {
+          id: "prayer-overview-request-1",
+          title: "어머님 수술과 회복을 위해",
+          category: "건강·치유",
+          status: "reviewing",
+          description: "관리자 검토 후 공개됩니다",
+        },
+      ],
+    });
+    jest
+      .spyOn(prayerService, "fetchPrayerCohortStatus")
+      .mockResolvedValue(null);
+    jest.spyOn(prayerService, "fetchPrayerTopicBoard").mockResolvedValue(null);
+    jest.spyOn(prayerService, "fetchMyPrayerTopics").mockResolvedValue([]);
+
+    jest.spyOn(lifeStudyService, "fetchLifeStudyOverview").mockResolvedValue({
+      path: {
+        completedRequired: 1,
+        totalRequired: 5,
+        nextRecommendation: "생명언어의 삶",
+        eligibility: "생명의 삶 이후 가능",
+      },
+      openCourses: [
+        {
+          id: "life-overview-open-1",
+          title: "생명의 삶",
+          kind: "required",
+          weekCount: 13,
+          instructorName: "박귀원",
+          summary: "신앙의 근본을 바로 세우는 가장 기본 과정",
+          applicationPeriod: "6.24 ~ 7.05",
+          capacity: 24,
+          enrolledCount: 18,
+        },
+      ],
+      courses: [
+        {
+          id: "life-overview-course-1",
+          title: "생명의 삶",
+          kind: "required",
+          weekCount: 13,
+          instructorName: "박귀원",
+          status: "completed",
+          summary: "구원의 확신과 신앙의 기본을 세우는 과정",
+          target: "등록교인 누구나",
+        },
+      ],
+    });
+    jest
+      .spyOn(lifeStudyService, "fetchMyLifeStudyCompletions")
+      .mockResolvedValue([
+        {
+          id: "1-1",
+          courseId: "1",
+          title: "말씀통독의 삶",
+          enrolledAt: "2025-03-01",
+          completedSessions: 12,
+          completedAt: "2026-02-15",
+          certificateIssued: true,
+        },
+      ]);
+
+    jest.spyOn(mypageService, "fetchMyPageActivityPosts").mockResolvedValue({
+      items: [
+        {
+          id: "post-1",
+          thumb: 0,
+          title: "유아용 카시트 나눔해요",
+          status: "나눔중",
+          tone: "primary",
+          date: "2026.10.22",
+        },
+      ],
+      currentPage: 1,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+      hasNext: false,
+      nextPage: null,
+    });
+    jest.spyOn(mypageService, "fetchMyPageActivityComments").mockResolvedValue({
+      items: [],
+      currentPage: 1,
+      size: 20,
+      totalElements: 0,
+      totalPages: 0,
+      hasNext: false,
+      nextPage: null,
+    });
+    jest.spyOn(mypageService, "fetchMyPageActivityGroups").mockResolvedValue({
+      items: [
+        {
+          id: "group-1",
+          name: "토요 산악회",
+          members: 6,
+          joined: "2026.10.21 가입",
+          seed: 0,
+        },
+      ],
+      currentPage: 1,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+      hasNext: false,
+      nextPage: null,
+    });
+  });
   it("renders the home screen", async () => {
     renderWithClient(<HomeScreen />);
 
@@ -54,11 +609,11 @@ describe("v1 tab smoke screens", () => {
     ).toBeGreaterThanOrEqual(1);
     expect(await screen.findByTestId("home-daily-prayer")).toBeTruthy();
     expect(screen.getByTestId("home-dawn-prayer")).toBeTruthy();
-    expect(screen.getByText("새벽기도 말씀요약")).toBeTruthy();
+    expect(screen.getByText("새벽기도 말씀요약 · 11월 3일")).toBeTruthy();
     expect(screen.getByTestId("home-sunday-sermon")).toBeTruthy();
     expect(screen.getByTestId("home-sunday-sermon-thumbnail")).toBeTruthy();
-    expect(screen.getByText("이번 주일 말씀")).toBeTruthy();
-    expect(screen.getByText("믿음이 흔들릴 때")).toBeTruthy();
+    expect(screen.getByText("이번 주일 말씀 · 11월 1일")).toBeTruthy();
+    expect(screen.getByText("넘쳐 흐르는 위로(고후1:1~11)")).toBeTruthy();
     expect(screen.queryByText("내 활동 요약")).toBeNull();
   });
 
@@ -84,10 +639,10 @@ describe("v1 tab smoke screens", () => {
     fireEvent.press(screen.getByTestId("home-daily-prayer"));
     expect(push).toHaveBeenCalledWith("/prayer");
     fireEvent.press(screen.getByTestId("home-dawn-prayer"));
-    expect(push).toHaveBeenCalledWith("/prayer/dawn");
+    expect(push).toHaveBeenCalledWith("/prayer/dawn?id=1");
     fireEvent.press(screen.getByTestId("home-sunday-sermon"));
     expect(openURLSpy).toHaveBeenCalledWith(
-      "https://youtu.be/wyFldwl6hW8?si=RGgYZd4Om9QcJuoR",
+      "https://www.youtube.com/watch?v=1t5SPGmJxsg",
     );
     openURLSpy.mockRestore();
   });
@@ -721,21 +1276,178 @@ describe("v1 tab smoke screens", () => {
     jest.mocked(useLocalSearchParams).mockReturnValue({});
   });
 
-  it("renders the prayer detail screen", () => {
+  it("renders the prayer detail screen in empty state", () => {
     renderWithClient(<PrayerDetailScreen />);
 
     expect(screen.getByText("월요일 오전 기도방")).toBeTruthy();
+    expect(screen.getByText("기도할 제목이 없어요")).toBeTruthy();
+    expect(
+      screen.getByText("새 기도제목이 승인되면 이곳에 표시됩니다."),
+    ).toBeTruthy();
+
+    // Switch to answers tab
+    fireEvent.press(screen.getByRole("tab", { name: "응답" }));
+    expect(screen.getByText("응답완료된 기도제목이 없어요")).toBeTruthy();
+
+    // Switch to status tab
+    fireEvent.press(screen.getByRole("tab", { name: "현황" }));
+    expect(screen.getByText("기도 현황")).toBeTruthy();
+    expect(screen.getByText("기도 완료한 성도")).toBeTruthy();
+    expect(screen.getByText("기도 완료 현황이 없어요")).toBeTruthy();
+  });
+
+  it("renders the prayer detail screen with topics and completion toggle", async () => {
+    jest.mocked(useLocalSearchParams).mockReturnValue({ id: "1" });
+    jest.spyOn(prayerService, "fetchPrayerCohortStatus").mockResolvedValueOnce({
+      cohortId: 1,
+      cohortName: "화요일 오후 기도방",
+      weekStartDate: "2026-10-26",
+      scheduledDate: "2026-10-27",
+      myCompleted: false,
+      canComplete: true,
+      completedCount: 3,
+      notCompletedCount: 1,
+      totalMembers: 4,
+      completionRate: 75,
+      completed: [
+        {
+          userId: "1",
+          userName: "김은혜",
+          userPhone: "010-0000-0001",
+          memberRole: "MEMBER",
+          completionId: 10,
+          completedAt: "2026-10-27T10:00:00Z",
+          likeCount: 0,
+          liked: false,
+        },
+      ],
+      notCompleted: [
+        {
+          userId: "2",
+          userName: "한수연",
+          userPhone: "010-0000-0002",
+          memberRole: "MEMBER",
+          completionId: null,
+          completedAt: null,
+          likeCount: 0,
+          liked: false,
+        },
+      ],
+    });
+    jest.spyOn(prayerService, "fetchPrayerTopicBoard").mockResolvedValue({
+      emergency: [
+        {
+          id: 1,
+          categoryId: 1,
+          categoryName: "건강",
+          title: "긴급 수술 회복",
+          content: "회복을 위해 기도 부탁드립니다.",
+          status: "OPEN",
+          rejectReason: null,
+          writerName: "이성도",
+          mine: false,
+          emergency: true,
+          emergencyEndAt: null,
+          answerContent: null,
+          answeredAt: null,
+          createdAt: "2026-10-28",
+        },
+      ],
+      ongoing: [
+        {
+          id: 2,
+          categoryId: 2,
+          categoryName: "진로",
+          title: "새로운 자리 적응",
+          content: "진행 중인 기도제목입니다.",
+          status: "OPEN",
+          rejectReason: null,
+          writerName: "박성도",
+          mine: false,
+          emergency: false,
+          emergencyEndAt: null,
+          answerContent: null,
+          answeredAt: null,
+          createdAt: "2026-10-28",
+        },
+      ],
+      recentAnswers: [
+        {
+          id: 3,
+          categoryId: 3,
+          categoryName: "직장",
+          title: "취업 응답 감사",
+          content: "새로운 부서로 발령받아 적응 중입니다.",
+          status: "ANSWERED",
+          rejectReason: null,
+          writerName: "최성도",
+          mine: false,
+          emergency: false,
+          emergencyEndAt: null,
+          answerContent:
+            "첫 주를 잘 마쳤고 팀 안에서 좋은 도움을 받고 있습니다.",
+          answeredAt: "2026-10-28",
+          createdAt: "2026-10-28",
+        },
+      ],
+    });
+
+    renderWithClient(<PrayerDetailScreen />);
+
+    expect(await screen.findByText("화요일 오후 기도방")).toBeTruthy();
     expect(screen.getByText("긴급 기도제목")).toBeTruthy();
     expect(screen.getByText("오늘 기도 완료")).toBeTruthy();
     expect(screen.getByText("75%")).toBeTruthy();
 
     // Toggle prayer completion
+    const completedStatus = {
+      cohortId: 1,
+      cohortName: "화요일 오후 기도방",
+      weekStartDate: "2026-10-26",
+      scheduledDate: "2026-10-27",
+      myCompleted: true,
+      canComplete: true,
+      completedCount: 4,
+      notCompletedCount: 0,
+      totalMembers: 4,
+      completionRate: 100,
+      completed: [
+        {
+          userId: "1",
+          userName: "김은혜",
+          userPhone: "010-0000-0001",
+          memberRole: "MEMBER" as const,
+          completionId: 10,
+          completedAt: "2026-10-27T10:00:00Z",
+          likeCount: 0,
+          liked: false,
+        },
+      ],
+      notCompleted: [
+        {
+          userId: "2",
+          userName: "한수연",
+          userPhone: "010-0000-0002",
+          memberRole: "MEMBER" as const,
+          completionId: null,
+          completedAt: null,
+          likeCount: 0,
+          liked: false,
+        },
+      ],
+    };
+    jest
+      .spyOn(prayerService, "completePrayerCohort")
+      .mockResolvedValueOnce(completedStatus);
+    jest
+      .spyOn(prayerService, "fetchPrayerCohortStatus")
+      .mockResolvedValueOnce(completedStatus);
     fireEvent.press(screen.getByText("오늘 기도 완료"));
-    expect(screen.getByText("오늘 기도 완료됨")).toBeTruthy();
+    expect(await screen.findByText("오늘 기도 완료됨")).toBeTruthy();
 
     // Switch to answers tab
     fireEvent.press(screen.getByRole("tab", { name: "응답" }));
-    expect(screen.getByText("새로운 자리 적응")).toBeTruthy();
+    expect(screen.getByText("취업 응답 감사")).toBeTruthy();
     expect(
       screen.getByText(
         "첫 주를 잘 마쳤고 팀 안에서 좋은 도움을 받고 있습니다.",
@@ -749,6 +1461,8 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("김은혜")).toBeTruthy();
     expect(screen.getByText("아직 완료 전")).toBeTruthy();
     expect(screen.getByText("한수연")).toBeTruthy();
+
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
   });
 
   it("renders the direct prayer screen", async () => {
@@ -828,10 +1542,10 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("응답완료 요청하기")).toBeTruthy();
   });
 
-  it("renders the life study detail screen", () => {
+  it("renders the life study detail screen", async () => {
     renderWithClient(<LifeStudyDetailScreen />);
 
-    expect(screen.getByText("생명의 삶")).toBeTruthy();
+    expect(await screen.findByText("생명의 삶")).toBeTruthy();
     expect(screen.getByText("신청 안내")).toBeTruthy();
     expect(screen.getByText("커리큘럼")).toBeTruthy();
   });
@@ -866,12 +1580,12 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("수강 신청하기")).toBeTruthy();
   });
 
-  it("renders the life study history screen", () => {
+  it("renders the life study history screen", async () => {
     renderWithClient(<LifeStudyHistoryScreen />);
 
     expect(screen.getByText("수강 내역")).toBeTruthy();
-    expect(screen.getByText("신청중")).toBeTruthy();
-    expect(screen.getByText("수료 과목 2개")).toBeTruthy();
+    expect(screen.getByText("내 수료 기록")).toBeTruthy();
+    expect(await screen.findByText("말씀통독의 삶")).toBeTruthy();
   });
 
   it("renders the my page screen", () => {
@@ -924,12 +1638,12 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByPlaceholderText("현재 비밀번호")).toBeTruthy();
   });
 
-  it("renders the activity screen", () => {
+  it("renders the activity screen", async () => {
     renderWithClient(<ActivityScreen />);
 
     expect(screen.getByText("활동 내역")).toBeTruthy();
     expect(screen.getByText("나눔 게시글")).toBeTruthy();
-    expect(screen.getByText("유아용 카시트 나눔해요")).toBeTruthy();
+    expect(await screen.findByText("유아용 카시트 나눔해요")).toBeTruthy();
   });
 
   it("renders the user profile screen", () => {
@@ -939,12 +1653,28 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("박정아")).toBeTruthy();
   });
 
-  it("renders the FAQ screen", () => {
+  it("renders the FAQ screen", async () => {
+    jest.spyOn(siteContentService, "getFaqs").mockResolvedValueOnce([
+      {
+        id: 1,
+        name: "계정",
+        faqs: [
+          {
+            id: 1,
+            question: "회원가입은 어떻게 하나요?",
+            answer:
+              "로그인 화면에서 회원가입을 선택한 뒤 약관 동의와 기본 정보를 입력하면 가입할 수 있습니다.",
+          },
+        ],
+      },
+    ]);
+
     renderWithClient(<FaqScreen />);
 
     expect(screen.getByText("자주 묻는 질문")).toBeTruthy();
-    expect(screen.getByText("회원가입은 어떻게 하나요?")).toBeTruthy();
+    expect(await screen.findByText("회원가입은 어떻게 하나요?")).toBeTruthy();
     expect(screen.getByText("전체")).toBeTruthy();
+    expect(screen.getByText("계정")).toBeTruthy();
   });
 
   it("renders the blocked users screen", () => {
@@ -963,11 +1693,21 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("탈퇴하기")).toBeTruthy();
   });
 
-  it("renders the legal document screen", () => {
+  it("renders the legal document screen", async () => {
+    jest
+      .spyOn(siteContentService, "getActiveSitePolicy")
+      .mockResolvedValueOnce({
+        id: 1,
+        policyType: 1,
+        title: "서비스 이용약관",
+        content: "제1조 (목적)\n약관 내용입니다.",
+        enforcedAt: "2026-01-01",
+      });
+
     renderWithClient(<MyPageTermsScreen />);
 
-    expect(screen.getByText("이용약관")).toBeTruthy();
+    expect(await screen.findByText("서비스 이용약관")).toBeTruthy();
     expect(screen.getByText("시행일자: 2026년 1월 1일")).toBeTruthy();
-    expect(screen.getByText("제1조 (목적)")).toBeTruthy();
+    expect(screen.getByText(/제1조 \(목적\)/)).toBeTruthy();
   });
 });

@@ -1,54 +1,72 @@
-import { mockActivityPosts } from "../../mocks/mypageActivity";
 import {
-  fetchMyPageActivityComments,
-  fetchMyPageActivityGroups,
-  fetchMyPageActivityLifeStudies,
-  fetchMyPageActivityPosts,
-  fetchMyPageActivityPrayers,
-  readLocalMyPageActivity,
-  resolveMyPageAdapterMode,
+  createMyPageService,
+  type MyPageActivityDataSource,
 } from "../mypageService";
 
 describe("mypageService", () => {
-  it("returns the local activity rows when the adapter is mock", async () => {
-    expect(resolveMyPageAdapterMode()).toBe("mock");
-    expect(readLocalMyPageActivity().posts).toBe(mockActivityPosts);
+  it("delegates activity queries through the data source", async () => {
+    const dataSource: MyPageActivityDataSource = {
+      getPosts: jest.fn().mockResolvedValue({
+        items: [
+          {
+            id: "1",
+            title: "유아용 카시트 나눔해요",
+            date: "2026.10.15",
+            statusLabel: "나눔 가능",
+            statusTone: "primary",
+          },
+        ],
+        currentPage: 1,
+        size: 10,
+        totalElements: 1,
+        totalPages: 1,
+        hasNext: false,
+        nextPage: null,
+      }),
+      getComments: jest.fn().mockResolvedValue({
+        items: [],
+        currentPage: 1,
+        size: 10,
+        totalElements: 0,
+        totalPages: 0,
+        hasNext: false,
+        nextPage: null,
+      }),
+      getGroups: jest.fn().mockResolvedValue({
+        items: [],
+        currentPage: 1,
+        size: 10,
+        totalElements: 0,
+        totalPages: 0,
+        hasNext: false,
+        nextPage: null,
+      }),
+      getLifeStudies: jest.fn().mockResolvedValue({
+        completionCount: 0,
+        applications: [],
+        ongoing: [],
+        completed: [],
+      }),
+      getPrayers: jest.fn().mockResolvedValue({
+        activeCount: 0,
+        totalPeriod: "",
+        totalPeriodDays: 0,
+        totalRoomCount: 0,
+        currentActivities: [],
+        pastActivities: [],
+      }),
+    };
 
-    const posts = await fetchMyPageActivityPosts();
-    const comments = await fetchMyPageActivityComments();
-    const groups = await fetchMyPageActivityGroups();
+    const service = createMyPageService(dataSource);
+    const posts = await service.fetchPosts({ page: 0, size: 10 });
 
-    expect(posts.currentPage).toBe(1);
-    expect(posts.nextPage).toBeNull();
-    expect(posts.items[0]).toMatchObject({
-      title: "유아용 카시트 나눔해요",
-    });
-    expect(comments.items[0]).toMatchObject({
-      content: "저희 목장 아이도 몇 달 전까지 이거 잘 썰어요! 공감이네요 ツ",
-      date: "오늘",
-    });
-    expect(groups.items.map((group) => group.name)).toEqual([
-      "토요 산악회",
-      "독서 나눔",
-      "엄마들의 수다방",
-      "찬양 프도는 이와 함께",
-    ]);
-  });
-
-  it("returns empty life-study and prayer histories from the local adapter", async () => {
-    await expect(fetchMyPageActivityLifeStudies()).resolves.toEqual({
+    expect(dataSource.getPosts).toHaveBeenCalledWith({ page: 0, size: 10 });
+    expect(posts.items[0]?.title).toBe("유아용 카시트 나눔해요");
+    await expect(service.fetchLifeStudies()).resolves.toMatchObject({
       completionCount: 0,
-      applications: [],
-      ongoing: [],
-      completed: [],
     });
-    await expect(fetchMyPageActivityPrayers()).resolves.toEqual({
+    await expect(service.fetchPrayers()).resolves.toMatchObject({
       activeCount: 0,
-      totalPeriod: "",
-      totalPeriodDays: 0,
-      totalRoomCount: 0,
-      currentActivities: [],
-      pastActivities: [],
     });
   });
 });

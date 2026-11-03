@@ -1,6 +1,6 @@
 # group (소모임)
 
-> 마지막 갱신: 2026-10-27 (동행 목록 플랫 구분선 리스트 전환) | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-11-03 (런타임 목 어댑터 및 `src/mocks/groups.ts` 제거) | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 소모임 개설 폼 2단계 정보 구조화 및 모바일 친화적 입력 컨트롤 개선 — 소모임 개설/수정 화면(`modal/group-new`)을 '기본 정보(소개)'와 '활동 및 운영 안내' 2대 섹션 카드로 명확히 그룹화. 상단 유의사항 배너 재배치, 정원 설정용 `[-] / [+]` 스텝 버튼 및 빠른 정원 칩(`4명`, `8명`, `12명`, `20명`), 일정 및 장소 빠른 추천 칩을 적용하여 모바일 입력 편의성을 대폭 개선.
 - 소모임장 이관 플로우 및 동행 목록 무한스크롤 / 당겨서 새로고침 — 소모임 상세 관리 메뉴에 `이관` 액션을 추가하고 멤버 관리 화면에서 후보 멤버 라디오 선택 및 이관 확인 모달 플로우를 구현. 동행 목록은 `useInfiniteQuery` 기반 `getOverviewPage` 커서 페이징과 하단 로딩 스피너를 연동하고 `StickyHeaderScreen` 및 소모임 상세 스크롤에 `RefreshControl`을 연결하여 상단 당김 새로고침 지원.
 - 동행/소모임 관리(수정/삭제/강퇴/상태변경) API 연동 — `PUT /api/communion/{id}`(소모임 수정), `DELETE /api/communion/{id}`(소모임 삭제), `DELETE /api/communion/{id}/kick/{targetUserId}`(멤버 강퇴), `PUT /api/communion/{id}/status`(모집 상태 변경)를 `httpGroupDataSource`, `groupService`, `useGroups` 훅과 UI 화면(`group/[id]`, `group-new`, `group/members`)에 완전 연동.
 - 동행과 나눔 탭 간 필터-카드 간격 및 리스트 레이아웃 구조 완전 일치 — 동행 화면의 contentContainerStyle과 불필요한 래퍼 뷰(group-scroll-content)를 제거하고, 나눔과 동일하게 ScrollView 직하위 styles.list(gap: 12, paddingBottom: 164) 컨테이너 및 CompanionCard marginHorizontal: 20 구조로 통일. 탭 상호 전환 시 필터-카드 간격(16px) 및 첫 번째 카드 상단 Y 위치를 완벽히 일치시켜 시각적 흔들림 제거
@@ -79,8 +80,7 @@
 | `app/(tabs)/group/notices.tsx`                 | 소모임 공지 작성/수정/삭제                    |
 | `app/(tabs)/group/members.tsx`                 | 소모임 멤버 관리와 소모임장 이관              |
 | `app/modal/group-new.tsx`                      | 소모임 개설 모달                              |
-| `src/mocks/groups.ts`                          | 소모임 mock 데이터                            |
-| `src/services/groupService.ts`                 | 교체 가능한 동행 조회·참여/탈퇴·공지 CUD 경계 |
+| `src/services/groupService.ts`                 | 동행 조회·참여/탈퇴·공지 CUD HTTP 서비스      |
 | `src/services/groupHttpDataSource.ts`          | 라이브 동행 HTTP data source                  |
 | `src/services/groupMapper.ts`                  | Communion DTO → 화면 모델                     |
 | `src/types/groupApi.ts`                        | 관측된 동행 서버 DTO                          |
@@ -96,6 +96,10 @@
 `Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 화면 조회 모델 `GroupOverview`/`GroupDetail`/`GroupMemberDetail`은 목록·봉사·권한·멤버·공지 표시값을 포함하며 API DTO mapper의 출력 경계입니다. `GroupDetailNotice`는 수정 폼 재사용을 위한 전체 `content`를 포함하고, 공지 쓰기 경계는 `GroupNoticeInput`/`GroupNoticeUpdateInput`/`GroupNoticeTarget`으로 분리합니다. 모임 관리 경계는 `GroupUpdateInput`, `GroupStatusUpdateInput`, `GroupKickMemberInput`을 사용합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-11-03) **런타임 목 어댑터(`resolveGroupAdapterMode`, `mockGroupDataSource`) 및 `src/mocks/groups.ts` 제거** — 전 도메인 HTTP 단일화에 따라 환경변수 어댑터 분기(`EXPO_PUBLIC_GROUP_ADAPTER`)와 런타임 목데이터를 제거하고 `httpGroupDataSource`만 사용하도록 정리.
+
+- (2026-11-01) **소모임 개설/수정 폼(`modal/group-new`) 2단계 정보 구조화 및 빠른 컨트롤 칩 적용** — '기본 정보(카테고리/소모임명/설명)'와 '활동 및 운영 안내(인원/일정/장소)'로 의미 단위를 그룹화하고, 상단 안내 배너를 서두로 재배치. 정원은 `[-] / [+]` 스텝 버튼과 `4, 8, 12, 20명` 빠른 칩을 추가하고, 일정 및 장소에도 대표 프리셋 칩을 제공해 모바일 터치 편의성을 강화.
 
 - (2026-10-27) **동행 목록 행은 나눔과 동일하게 외곽 카드 박스 대신 하단 1px 구분선 플랫 리스트로 표시한다** — `groupCard`의 외곽 테두리·배경을 제거하고 `borderBottomWidth: 1`(`theme.colors.line`)과 상하 `16px` 패딩, `minHeight: 120`을 유지한다.
 - (2026-10-15) **동행/소모임 관리(수정/삭제/강퇴/상태변경) API를 HTTP 및 mock 경계에 완전 연동한다** — 방장 권한의 소모임 수정(`PUT /api/communion/{id}`), 소모임 삭제(`DELETE /api/communion/{id}`), 멤버 강퇴(`DELETE /api/communion/{id}/kick/{targetUserId}`), 모집 상태 변경(`PUT /api/communion/{id}/status`)을 `GroupDataSource` 인터페이스 및 `httpGroupDataSource`에 추가하고 `useUpdateGroup`, `useDeleteGroup`, `useKickGroupMember`, `useUpdateGroupStatus` 훅을 통해 화면에 연결합니다.

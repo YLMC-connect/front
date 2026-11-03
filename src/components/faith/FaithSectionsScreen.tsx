@@ -5,8 +5,6 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { theme } from "../../constants/theme";
 import { useLifeStudyOverview } from "../../hooks/useLifeStudyCourses";
 import { usePrayerOverview } from "../../hooks/usePrayers";
-import { resolveLifeStudyAdapterMode } from "../../services/lifeStudyService";
-import { resolvePrayerAdapterMode } from "../../services/prayerService";
 import type {
   LifeStudyOverviewCourse,
   LifeStudyOverviewStatus,
@@ -126,10 +124,10 @@ function PrayerContent() {
         <AppText variant="sectionTitle" style={styles.sectionTitle}>
           내 기도방
         </AppText>
-        <DataSourceCaption mode={resolvePrayerAdapterMode()} />
         <View style={styles.stack}>
           {data.rooms.length === 0 ? (
             <Empty
+              icon="groups"
               title="참여 중인 기도방이 없어요"
               description="중보기도 신청을 통해 기도방에 참여해보세요."
               testID="prayer-rooms-empty"
@@ -151,7 +149,10 @@ function PrayerContent() {
                   style={styles.roomCard}
                 >
                   <View style={styles.roomCardMain}>
-                    <PrayerDayBadge weekday={room.weekday} period={room.period} />
+                    <PrayerDayBadge
+                      weekday={room.weekday}
+                      period={room.period}
+                    />
                     <View style={styles.cardText}>
                       <View style={styles.badgeRow}>
                         <AppText variant="cardTitle">
@@ -184,7 +185,11 @@ function PrayerContent() {
                       testID={`prayer-room-${room.id}-action`}
                       style={styles.roomAction}
                     >
-                      <AppText variant="caption" tone="brand" style={styles.roomActionText}>
+                      <AppText
+                        variant="caption"
+                        tone="brand"
+                        style={styles.roomActionText}
+                      >
                         기도방 보기
                       </AppText>
                       <AppIcon
@@ -201,7 +206,11 @@ function PrayerContent() {
                         <AppText variant="caption" tone="muted">
                           오늘 기도 참여율
                         </AppText>
-                        <AppText variant="caption" tone="brand" style={styles.roomRateText}>
+                        <AppText
+                          variant="caption"
+                          tone="brand"
+                          style={styles.roomRateText}
+                        >
                           {rate}%
                         </AppText>
                       </View>
@@ -232,6 +241,7 @@ function PrayerContent() {
         <View style={styles.stack}>
           {data.requests.length === 0 ? (
             <Empty
+              icon="hands-pray"
               title="등록된 기도제목이 없어요"
               description="기도제목 작성을 통해 기도제목을 나눠보세요."
               testID="prayer-requests-empty"
@@ -299,7 +309,6 @@ function StudyContent() {
         <AppText variant="sectionTitle" style={styles.sectionTitle}>
           내 학습경로
         </AppText>
-        <DataSourceCaption mode={resolveLifeStudyAdapterMode()} />
         <View style={styles.pathCard}>
           <View style={styles.pathTop}>
             <View>
@@ -342,6 +351,7 @@ function StudyContent() {
         <View style={styles.stack}>
           {openCourses.length === 0 ? (
             <Empty
+              icon="book-open-page-variant-outline"
               title="지금 신청 가능한 과정이 없어요"
               description="새로운 과정이 개설되면 안내해 드릴게요."
               testID="life-study-open-courses-empty"
@@ -361,6 +371,7 @@ function StudyContent() {
         <View style={styles.stack}>
           {courses.length === 0 ? (
             <Empty
+              icon="book-open-page-variant-outline"
               title="개설된 과정이 없어요"
               description="개설 예정인 삶공부 과정을 준비 중이에요."
               testID="life-study-courses-empty"
@@ -373,15 +384,6 @@ function StudyContent() {
         </View>
       </View>
     </MotionEnter>
-  );
-}
-
-function DataSourceCaption({ mode }: { mode: "http" | "mock" }) {
-  if (!__DEV__ || mode === "http") return null;
-  return (
-    <AppText variant="caption" tone="muted" style={styles.sourceCaption}>
-      목업 데이터
-    </AppText>
   );
 }
 

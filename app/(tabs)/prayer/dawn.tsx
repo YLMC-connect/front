@@ -1,4 +1,5 @@
-import { router } from "expo-router";
+import { AppIcon } from "@/components/ui/app-icon";
+import { router, useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
@@ -10,8 +11,19 @@ import {
 import { theme } from "../../../src/constants/theme";
 import { useDawnPrayerDetail } from "../../../src/hooks/useHome";
 
+function splitReaderParagraphs(body: string): string[] {
+  if (!body) return [];
+  return body
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+    .filter((paragraph) => !/^본문(\s*말씀)?\s*:/i.test(paragraph));
+}
+
 export default function DawnPrayerScreen() {
-  const detail = useDawnPrayerDetail();
+  const params = useLocalSearchParams<{ id?: string }>();
+  const detail = useDawnPrayerDetail(params.id);
+  const paragraphs = splitReaderParagraphs(detail.data?.body ?? "");
 
   return (
     <Screen scroll={false} padded={false} testID="screen-dawn-prayer">
@@ -42,19 +54,44 @@ export default function DawnPrayerScreen() {
           contentContainerStyle={styles.body}
           showsVerticalScrollIndicator={false}
         >
-          <AppText variant="caption" tone="muted">
-            {detail.data.timeLabel}
-          </AppText>
-          <AppText variant="display" style={styles.title}>
-            {detail.data.title}
-          </AppText>
-          <AppText variant="body" tone="secondary" style={styles.summary}>
-            {detail.data.summary}
-          </AppText>
-          <View style={styles.panel}>
-            <AppText variant="body" style={styles.bodyText}>
-              {detail.data.body}
+          <View style={styles.heroCard}>
+            <View style={styles.heroBadgeRow}>
+              <View style={styles.heroIconWrap}>
+                <AppIcon
+                  name="book-open-page-variant-outline"
+                  size={16}
+                  color={theme.colors.primaryDeep}
+                />
+              </View>
+              <AppText
+                variant="caption"
+                tone="brand"
+                style={styles.heroEyebrow}
+              >
+                {detail.data.timeLabel}
+              </AppText>
+            </View>
+            <AppText variant="screenTitle" style={styles.title}>
+              {detail.data.title}
             </AppText>
+          </View>
+
+          <View style={styles.panel}>
+            {paragraphs.length > 0 ? (
+              paragraphs.map((paragraph, index) => (
+                <AppText
+                  key={`${index}-${paragraph.slice(0, 16)}`}
+                  variant="body"
+                  style={styles.bodyText}
+                >
+                  {paragraph}
+                </AppText>
+              ))
+            ) : (
+              <AppText variant="body" tone="muted" style={styles.bodyText}>
+                등록된 본문 내용이 없습니다.
+              </AppText>
+            )}
           </View>
         </ScrollView>
       )}
@@ -73,24 +110,49 @@ const styles = StyleSheet.create({
   },
   body: {
     paddingHorizontal: theme.layout.screenX,
-    paddingTop: theme.spacing[4],
+    paddingTop: theme.spacing[3],
     paddingBottom: theme.spacing[10],
+    gap: theme.spacing[3],
+  },
+  heroCard: {
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    backgroundColor: theme.colors.surface,
+    padding: theme.spacing[4],
     gap: theme.spacing[2],
   },
-  title: {
-    marginTop: theme.spacing[1],
+  heroBadgeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
-  summary: {
-    marginBottom: theme.spacing[4],
+  heroIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: theme.colors.primaryTint,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  heroEyebrow: {
+    fontWeight: theme.fontWeight.semibold,
+  },
+  title: {
+    marginTop: 2,
+    color: theme.colors.ink,
   },
   panel: {
     borderRadius: theme.radius.lg,
     borderWidth: 1,
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
-    padding: theme.layout.cardPadding + 4,
+    padding: theme.spacing[5],
+    gap: theme.spacing[4],
   },
   bodyText: {
-    lineHeight: theme.lineHeight.lg + 4,
+    fontSize: theme.fontSize.lg,
+    lineHeight: 27,
+    color: theme.colors.ink,
   },
 });

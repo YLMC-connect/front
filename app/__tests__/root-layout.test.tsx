@@ -1,7 +1,13 @@
 import { render, screen } from "@testing-library/react-native";
 import { AuthRouteNavigator } from "../../src/components/auth/AuthRouteNavigator";
 import { useAuthStore } from "../../src/store/authStore";
-import { MOCK_USER } from "../../src/mocks/auth";
+import type { Member } from "../../src/types/common";
+
+const TEST_USER: Member = {
+  id: "member-001",
+  name: "김은혜",
+  role: "USER",
+};
 
 describe("root auth route guard", () => {
   beforeEach(() => {
@@ -34,7 +40,7 @@ describe("root auth route guard", () => {
   );
 
   it("allows app and modal routes only after authentication", () => {
-    useAuthStore.getState().setAuthenticated(MOCK_USER);
+    useAuthStore.getState().setAuthenticated(TEST_USER);
 
     render(<AuthRouteNavigator />);
 

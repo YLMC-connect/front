@@ -4,9 +4,6 @@ import type {
   PrayerOverviewRoom,
   PrayerPeriod,
   PrayerRequestStatus,
-  PrayerRequestSummary,
-  PrayerRoom,
-  PrayerTopic,
   PrayerWeekday,
 } from "../types/prayer";
 import type {
@@ -33,13 +30,6 @@ const TOPIC_STATUSES = [
   "REJECTED",
   "HIDDEN",
 ] as const;
-
-const REQUEST_STATUS: Partial<Record<PrayerTopicStatus, PrayerRequestStatus>> =
-  {
-    REVIEW: "reviewing",
-    OPEN: "published",
-    REJECTED: "rejected",
-  };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -330,8 +320,14 @@ export function readPrayerApplications(data: unknown): PrayerApplicationDto[] {
 }
 
 export function readPrayerCategories(data: unknown): PrayerCategoryDto[] {
-  return readList(data, (item, source) =>
-    readNamedFields(item, source, CATEGORY_KEYS),
+  return readList(
+    data,
+    (item, source) =>
+      readNamedFields(
+        item,
+        source,
+        CATEGORY_KEYS,
+      ) as unknown as PrayerCategoryDto,
   );
 }
 
@@ -384,61 +380,6 @@ function periodFromTimeSlot(timeSlot: string): PrayerPeriod | undefined {
   return undefined;
 }
 
-function indexById<T extends { id: number }>(rows: readonly T[]) {
-  const indexed = new Map<string, T>();
-  for (const row of rows) indexed.set(String(row.id), row);
-  return indexed;
-}
-
-function applyCohortToOverviewRoom(
-  room: PrayerOverviewRoom,
-  cohort: PrayerCohortDto | undefined,
-): PrayerOverviewRoom {
-  if (!cohort) return { ...room };
-  const weekday = weekdayFromYoil(cohort.yoil);
-  const period = periodFromTimeSlot(cohort.timeSlot);
-  const joined = cohort.myRole === "LEADER" || cohort.myRole === "MEMBER";
-  return {
-    ...room,
-    weekday: weekday ?? room.weekday,
-    period: period ?? room.period,
-    memberCount: cohort.memberCount,
-    completedCount: cohort.weekCompletedCount,
-    participationRate: cohort.completionRate,
-    status: joined ? "joined" : room.status,
-  };
-}
-
-function applyTopicToRequest(
-  request: PrayerRequestSummary,
-  topic: PrayerTopicDto | undefined,
-): PrayerRequestSummary {
-  if (!topic) return { ...request };
-  return {
-    ...request,
-    title: topic.title,
-    category: topic.categoryName,
-    status: REQUEST_STATUS[topic.status] ?? request.status,
-  };
-}
-
-export function applyPrayerApiToOverview(
-  overview: PrayerOverview,
-  cohorts: readonly PrayerCohortDto[],
-  topics: readonly PrayerTopicDto[],
-): PrayerOverview {
-  const cohortById = indexById(cohorts);
-  const topicById = indexById(topics);
-  return {
-    rooms: overview.rooms.map((room) =>
-      applyCohortToOverviewRoom(room, cohortById.get(room.id)),
-    ),
-    requests: overview.requests.map((request) =>
-      applyTopicToRequest(request, topicById.get(request.id)),
-    ),
-  };
-}
-
 const TOPIC_REQUEST_STATUS: Record<PrayerTopicStatus, PrayerRequestStatus> = {
   REVIEW: "reviewing",
   OPEN: "published",
@@ -487,50 +428,4 @@ export function buildPrayerOverview(
       description: topic.content,
     })),
   };
-}
-
-export function applyCohortsToRooms(
-  rooms: readonly PrayerRoom[],
-  cohorts: readonly PrayerCohortDto[],
-): PrayerRoom[] {
-  const cohortById = indexById(cohorts);
-  return rooms.map((room) => {
-    const cohort = cohortById.get(room.id);
-    if (!cohort) return { ...room };
-    const weekday = weekdayFromYoil(cohort.yoil);
-    return {
-      ...room,
-      title: cohort.cohortName,
-      weekday: weekday ?? room.weekday,
-      description: cohort.description,
-      memberCount: cohort.memberCount,
-      isJoined: cohort.myRole === "LEADER" || cohort.myRole === "MEMBER",
-    };
-  });
-}
-
-export function applyTopicsToTopics(
-  topics: readonly PrayerTopic[],
-  rows: readonly PrayerTopicDto[],
-): PrayerTopic[] {
-  const topicById = indexById(rows);
-  return topics.map((topic) => {
-    const row = topicById.get(topic.id);
-    if (!row) return { ...topic };
-    const answered = row.status === "ANSWERED";
-    const next: PrayerTopic = {
-      id: topic.id,
-      roomId: topic.roomId,
-      title: row.title,
-      content: row.content,
-      author: topic.author,
-      isAnonymous: topic.isAnonymous,
-      prayerCount: topic.prayerCount,
-      hasPrayed: topic.hasPrayed,
-      isAnswered: answered,
-      createdAt: row.createdAt,
-    };
-    if (answered) next.answer = row.answerContent ?? undefined;
-    return next;
-  });
 }

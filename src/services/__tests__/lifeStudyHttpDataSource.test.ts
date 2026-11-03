@@ -1,10 +1,42 @@
 import { ApiError } from "../../lib/apiClient";
-import {
-  mockLifeStudyCourses,
-  mockLifeStudyOverview,
-} from "../../mocks/lifeStudy";
-import type { LifeStudyCourse } from "../../types/lifeStudy";
+import type {
+  LifeStudyCourse,
+  LifeStudyOverviewCourse,
+} from "../../types/lifeStudy";
 import { createHttpLifeStudyDataSource } from "../lifeStudyHttpDataSource";
+
+const baseOverviewCourse: LifeStudyOverviewCourse = {
+  id: "life-overview-open-1",
+  title: "생명의 삶",
+  kind: "required",
+  weekCount: 13,
+  instructorName: "박귀원",
+  summary: "신앙의 근본을 바로 세우는 가장 기본 과정",
+  applicationPeriod: "6.24 ~ 7.05",
+  capacity: 24,
+  enrolledCount: 18,
+};
+
+const baseCourse: LifeStudyCourse = {
+  id: "3",
+  title: "경건의 삶",
+  description: "매일의 QT, 기도, 말씀 묵상 습관을 세우는 경건 훈련입니다.",
+  instructor: {
+    id: "member-006",
+    name: "정다윗",
+    role: "USER",
+  },
+  schedule: "매주 목요일 20:00",
+  location: "교육관 202호",
+  status: "completed",
+  sessions: 10,
+  currentSession: 10,
+  capacity: 15,
+  enrolledCount: 15,
+  isEnrolled: true,
+  isCompleted: false,
+  curriculum: [],
+};
 
 const completion = {
   lifeStudyId: 3,
@@ -80,7 +112,6 @@ describe("httpLifeStudyDataSource", () => {
       "/api/life-study/cohorts",
       "/api/life-study/completions",
     ]);
-    expect(mockLifeStudyOverview.path.completedRequired).toBe(1);
   });
 
   it("builds overview with open courses and all courses from life-study API", async () => {
@@ -185,7 +216,7 @@ describe("httpLifeStudyDataSource", () => {
   });
 
   it("calls the class list endpoint and copies weekCount only", async () => {
-    const course = mockLifeStudyOverview.openCourses[0];
+    const course = { ...baseOverviewCourse };
     const { request, dataSource } = setup();
     request.mockResolvedValue({
       cohortId: 15,
@@ -243,11 +274,7 @@ describe("httpLifeStudyDataSource", () => {
   });
 
   it("maps a completion roster onto the matching course", async () => {
-    const base: LifeStudyCourse = {
-      ...mockLifeStudyCourses[2],
-      id: "3",
-      isCompleted: false,
-    };
+    const base: LifeStudyCourse = { ...baseCourse };
     const { request, dataSource } = setup();
     request.mockResolvedValue(roster);
 
@@ -257,7 +284,7 @@ describe("httpLifeStudyDataSource", () => {
     expect(request).toHaveBeenCalledWith(
       "/api/life-study/cohorts/15/completions",
     );
-    expect(base.instructor).toBe(mockLifeStudyCourses[2].instructor);
+    expect(base.instructor).toBe(baseCourse.instructor);
     expect(base.sessions).toBe(10);
   });
 
@@ -285,10 +312,7 @@ describe("httpLifeStudyDataSource", () => {
     request.mockResolvedValue({ cohortId: 15, weekCount: 8 });
 
     await expect(
-      dataSource.applyClassesToCourse(
-        "15",
-        mockLifeStudyOverview.openCourses[0],
-      ),
+      dataSource.applyClassesToCourse("15", baseOverviewCourse),
     ).rejects.toBeInstanceOf(ApiError);
   });
 

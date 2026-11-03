@@ -1,6 +1,6 @@
 # auth (인증)
 
-> 마지막 갱신: 2026-10-28 (회원가입 신규 카드 등장 트랜지션 및 타이핑 디바운스 완화 적용) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-11-03 (런타임 목 어댑터 및 `src/mocks/auth.ts` 제거) | 담당 Phase: P1/P6 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,6 +10,7 @@
 
 ## ✅ 완료
 
+- 로그인 화면 아이디 저장(Remember ID) 및 자동 복원 — 비밀번호 입력 필드 하단에 `[ ] 아이디 저장` 체크박스를 추가하고, 체크 후 로그인 성공 시 `AsyncStorage`(`ylmc.saved_login_id`)에 아이디를 보관. 체크 해제 시에는 저장된 아이디를 삭제하며, 이후 로그인 화면 재진입 시 저장된 아이디가 있으면 입력 필드에 자동 입력 및 체크박스 활성화.
 - 공통 폼 타이포그래피 토큰(formLabel) 정의 및 전역 폼·버튼 글꼴 통일 — `theme.typography`에 `formLabel`(14px, medium)을 정식 추가하고 `AppText` variant로 연동. 입력창(`AuthInput`, `ModalFormTextInput`, `TextField`)은 모바일 폼 표준인 16px(`fontSize.lg`)로 상향 일원화하고, 라벨은 `formLabel`(14px), 메인 CTA 버튼은 `fontSize.base`(15px Bold)로 통일하여 회원가입·로그인·신청 화면 전반의 시각적 계층과 가독성을 개선.
 - 회원가입 신규 카드 등장 트랜지션 및 타이핑 디바운스 완화 — 조건 충족 시 다음 카드가 딱딱하게 튀어나오지 않도록 `FadeInDown`(진입 페이드 및 하향 슬라이드)과 `LinearTransition`(기존 카드의 부드러운 하향 이동 레이아웃 트랜지션), 그리고 플랫폼 네이티브 `LayoutAnimation`을 결합. 타이핑 도중 급작스러운 레이아웃 밀림을 방지하기 위해 500ms 입력 멈춤 디바운스(`AUTO_ADVANCE_DEBOUNCE`, 테스트 환경은 0ms)를 두고, 카드 확장 애니메이션이 자연스럽게 안착된 후 350ms 딜레이(`FOCUS_HANDOFF_DELAY`, 테스트 환경 0ms)를 거쳐 새 카드의 첫 번째 입력 필드로 포커스를 부드럽게 인계. 키보드의 '다음' 액션 시에는 즉시 레이아웃 애니메이션과 함께 다음 단계로 진행.
 - 회원가입 신규 카드 상단 추가 및 전체 카드 펼침 상태 유지 — 완료된 카드를 1줄 요약으로 접지 않고 모든 필드를 항상 펼쳐진 상태로 유지하며, 새로 작성할 카드(2단계 성도 정보, 3단계 약관 동의)가 이전 완료 카드보다 물리적으로 위(상단)에 나타나도록 배치. 수동 다음 버튼 없이 조건 충족 시 자동으로 다음 카드가 상단에 나타나며(디바운스/키보드 다음 액션), 이전 카드들도 아래에 온전히 펼쳐져 있어 언제든 직접 확인 및 수정할 수 있다.
@@ -73,16 +74,15 @@
 | `app/(auth)/signup.tsx`                      | 회원가입 화면                                        |
 | `src/components/auth/auth-input.tsx`         | 로그인·회원가입 공통 focus input surface             |
 | `src/store/authStore.ts`                     | Zustand 인증 상태                                    |
-| `src/services/authService.ts`                | 인증 mock service                                    |
+| `src/services/authService.ts`                | 인증 서비스                                          |
 | `src/services/authSessionService.ts`         | 토큰 저장·복원·재발급·로그아웃 상태 전이             |
-| `src/services/authAdapter.ts`                | mock/http auth adapter 스위치 지점                   |
+| `src/services/authAdapter.ts`                | HTTP 인증 adapter                                    |
 | `src/services/authMapper.ts`                 | 관측된 서버 DTO → 도메인 세션/회원                   |
 | `src/hooks/useAuth.ts`                       | 인증 액션 hook                                       |
 | `src/types/auth.ts`                          | 인증 입력/응답 타입                                  |
 | `src/types/authApi.ts`                       | 라이브 관측 인증 서버 DTO                            |
 | `src/lib/rolePermissions.ts`                 | 관리자 도메인별 역할 접근 판별                       |
 | `src/types/api.ts`                           | 공통 `ApiResponse<T>` envelope                       |
-| `src/mocks/auth.ts`                          | mock 로그인 계정과 사용자/성도 데이터                |
 | `src/lib/apiClient.ts`                       | 공통 응답·오류·Authorization 처리                    |
 | `src/lib/apiErrorMessage.ts`                 | API 오류 코드→사용자 문구 변환                       |
 | `src/constants/apiErrorMessages.ts`          | 문서화된 인증 오류 코드 메시지 표                    |
@@ -94,6 +94,12 @@
 `LoginInput`, `SignupInput`, `MemberDuplicateInput`, `MemberAvailability`, `AuthSession`, `AuthStatus`를 `src/types/auth.ts`에 정의합니다. `AuthStatus`는 `restoring / authenticated / anonymous / unavailable`을 구분합니다. 성도 기본 정보는 `src/types/common.ts`의 `Member`와 `UserRole`을 사용하며, 역할은 `ADMIN`, `USER`, `MANAGER_COMMUNION`, `MANAGER_SHARE`, `MANAGER_LIFESTUDY`, `MANAGER_PRAYER` 중 하나입니다. 서버 공통 envelope는 `src/types/api.ts`의 `ApiResponse<T>`로 분리합니다. 중복확인 요청은 Swagger의 `searchType: id | phone | email`, `searchValue` 계약을 따르며 화면에는 `available` 도메인 결과만 노출합니다. 실제 HTTP mapper는 공통 envelope의 `data`만 사용합니다. 중복확인은 `available`, login/refresh는 `accessToken`, `refreshToken`, `userId`, `userName`, `role`, `/api/member/me`는 회원 필드입니다. 로그인 성공 schema는 `ApiResponseLoginResponse`입니다. 그 밖 Swagger 성공 schema가 비어 있는 항목은 `test:api:contract`가 계속 실패합니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-11-03) **런타임 목 어댑터(`mockAuthAdapter`, `resolveAuthAdapterMode`) 및 `src/mocks/auth.ts` 제거** — 전 도메인 HTTP 단일화에 따라 환경변수 어댑터 분기(`EXPO_PUBLIC_AUTH_ADAPTER`)와 런타임 목데이터를 걷어내고 `httpAuthAdapter`만 사용하도록 정리.
+
+- (2026-11-01) **로그인 화면 아이디 저장(`Remember ID`) 체크박스 및 로컬 스토리지 연동** — 모바일 앱의 표준 UX에 따라 자동 로그인은 토큰 기반으로 항상 기본 유지하고, 로그인 화면 비밀번호 하단에 `[ ] 아이디 저장` 체크박스만 제공. 체크 시 입력한 아이디를 `AsyncStorage`(`ylmc.saved_login_id`)에 영구 보관하고, 재진입 시 자동으로 불러와 채워주도록 구현. 체크 해제 시에는 저장된 아이디를 삭제.
+
+- (2026-10-29) **약관 전문 바텀시트(`TermsSheet`) 실제 정책 API(`GET /api/site-policies/{policyType}`) 연동 및 목데이터 제거** — `src/components/auth/TermsAgreementScreen.tsx`의 하드코딩된 `fullText` 목데이터(이용약관, 개인정보 처리방침)를 제거하고, `useActiveSitePolicy` 훅을 통해 서버 정책 데이터를 조회하여 약관 제목·시행일자·본문을 렌더링하도록 일원화.
 
 - (2026-10-28) **회원가입 하단 플로팅 CTA 바 및 하단 확장 그라데이션 적용** — 기존에 버튼이 인플로우로 묶여 콘텐츠가 뒤로 스크롤되지 않던 문제를 해결하기 위해, 삶공부/중보기도 신청 화면과 동일하게 `bottomFloating` 절대 위치 및 스크롤뷰 관통 구조로 변경하고, 그라데이션을 기기 맨 하단(`bottom: 0`, safe area 포함)까지 완벽히 확장하였다.
 

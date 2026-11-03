@@ -185,25 +185,6 @@ export function requireCompletionRoster(
   return roster;
 }
 
-function groupByCourseId(rows: readonly LifeStudyMyCompletion[]) {
-  const grouped = new Map<string, LifeStudyMyCompletion[]>();
-  for (const row of rows) {
-    const key = String(row.lifeStudyId);
-    const current = grouped.get(key);
-    if (current) current.push(row);
-    else grouped.set(key, [row]);
-  }
-  return grouped;
-}
-
-function uniqueCompletion(
-  grouped: ReadonlyMap<string, LifeStudyMyCompletion[]>,
-  courseId: string,
-) {
-  const matches = grouped.get(courseId);
-  return matches?.length === 1 ? matches[0] : undefined;
-}
-
 function withTitle<T extends { title: string }>(
   model: T,
   lifeStudyName: string | null,
@@ -485,58 +466,6 @@ export function buildLifeStudyCourses(data: unknown): LifeStudyCourse[] {
 
 export function buildLifeStudyHistories(data: unknown): LifeStudyHistory[] {
   return readMyCompletions(data).map(historyFromCompletion);
-}
-
-export function applyMyCompletionsToOverview(
-  overview: LifeStudyOverview,
-  data: unknown,
-): LifeStudyOverview {
-  const grouped = groupByCourseId(readMyCompletions(data));
-  const mapCourse = (course: LifeStudyOverviewCourse) => {
-    const row = uniqueCompletion(grouped, course.id);
-    return row ? withTitle({ ...course }, row.lifeStudyName) : { ...course };
-  };
-  return {
-    path: { ...overview.path },
-    openCourses: overview.openCourses.map(mapCourse),
-    courses: overview.courses.map(mapCourse),
-  };
-}
-
-export function applyMyCompletionsToCourses(
-  courses: readonly LifeStudyCourse[],
-  data: unknown,
-): LifeStudyCourse[] {
-  const grouped = groupByCourseId(readMyCompletions(data));
-  return courses.map((course) => {
-    const row = uniqueCompletion(grouped, course.id);
-    if (!row) return { ...course };
-    return withTitle({ ...course, isCompleted: true }, row.lifeStudyName);
-  });
-}
-
-export function applyMyCompletionsToHistories(
-  histories: readonly LifeStudyHistory[],
-  data: unknown,
-): LifeStudyHistory[] {
-  const grouped = groupByCourseId(readMyCompletions(data));
-  return histories.map((history) => {
-    const row = uniqueCompletion(grouped, history.courseId);
-    if (!row) return { ...history };
-    const next: LifeStudyHistory = {
-      id: history.id,
-      courseId: history.courseId,
-      title: history.title,
-      enrolledAt: history.enrolledAt,
-      completedSessions: history.completedSessions,
-      certificateIssued: history.certificateIssued,
-    };
-    const titled = withTitle(next, row.lifeStudyName);
-    if (typeof row.completedAt === "string") {
-      titled.completedAt = row.completedAt;
-    }
-    return titled;
-  });
 }
 
 export function applyClassListToOverviewCourse(

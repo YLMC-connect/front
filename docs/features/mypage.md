@@ -1,6 +1,6 @@
 # mypage (MY / 성도 프로필)
 
-> 마지막 갱신: 2026-10-27 (계정·계정 관리 섹션 통합) | 담당 Phase: P4/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-11-03 (런타임 활동 목 어댑터 및 `src/mocks/mypageActivity.ts` 제거) | 담당 Phase: P4/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,8 +10,9 @@
 
 ## ✅ 완료
 
+- 마이페이지 루트 Stack 승격 및 이동 모션 일관화 — 마이페이지를 하단 탭(`app/(tabs)/mypage`)에서 루트 Stack(`app/mypage`)으로 승격하여, 홈에서 '내 정보' 진입 시 네이티브 우측 슬라이드(`slide_from_right`) 인/아웃 모션을 적용하고 하단 탭 바 노출 깜빡임 해소. 또한 마이페이지 내 메뉴인 '중보기도 활동 이력'(`app/mypage/prayer-history.tsx`)과 '삶공부 수료'(`app/mypage/life-study-history.tsx`)를 마이페이지 스택 내부 라우트로 래핑하여 탭 점프 없이 모든 서브 메뉴가 동일한 우측 슬라이드 모션으로 열리도록 통일
 - 회원 비밀번호 확인·변경 및 탈퇴 API 연동 — `POST /api/member/verify-password`(비밀번호 확인), `PUT /api/member/password`(비밀번호 변경), `DELETE /api/member/me`(회원 탈퇴)를 `authAdapter`와 `useMember` 훅에 연결하고 `mypage/edit` 및 `mypage/withdraw` 화면에 실시간 반영.
-- 사이트 이용약관/개인정보처리방침 및 FAQ 조회 API 연동 — `GET /api/site-policies/{policyType}`(이용약관: 1, 개인정보처리방침: 2), `GET /api/faqs`(categoryId 필터링)를 `siteContentHttpDataSource` 및 `useSiteContent` 훅에 연결하여 `mypage/terms`, `mypage/privacy`, `mypage/faq`에 동적 데이터 바인딩.
+- 사이트 이용약관/개인정보처리방침 및 FAQ 조회 API 연동 — `GET /api/site-policies/{policyType}`(이용약관: 1, 개인정보처리방침: 2), `GET /api/faqs`(categoryId 필터링)를 `siteContentHttpDataSource` 및 `useSiteContent` 훅에 연결하여 `mypage/terms`, `mypage/privacy`, `mypage/faq`에 동적 데이터 바인딩. FAQ 화면은 하드코딩된 fallback 목데이터를 제거하고 실제 API 데이터 기반 카테고리 필터링과 로딩/Empty 상태 렌더링으로 일원화.
 - 내 정보 조회 HTTP 연동 — `/api/member/me` 내 정보 조회 API 연동 및 프로필 카드/수정 화면, 삶공부/중보기도 신청 화면의 하드코딩된 이름/연락처를 현재 로그인 사용자 정보로 바인딩
 - 마이페이지 활동 HTTP adapter — development 기본값은 나눔과 같이 http다. 활동 화면은 `GET /api/mypage/activities`의 나눔 글·댓글·소모임을 보여 준다. 테스트와 `EXPO_PUBLIC_MYPAGE_ADAPTER=mock`은 기존 로컬 목록을 쓴다
 - 홈 진입 MY 뒤로가기 보완 — 하단 탭이 아닌 홈 '내 정보'에서 push되는 `/mypage` 루트에도 공통 `chevron-left + 뒤로`를 표시하고 `router.back()`으로 홈에 복귀하며, Screen의 이중 여백을 제거하고 `theme.layout.screenX`(20px) 기준으로 뒤로 버튼과 본문 컨텐츠 좌우 여백을 일치
@@ -47,21 +48,22 @@
 
 | 경로                                    | 역할                              |
 | --------------------------------------- | --------------------------------- |
-| `app/(tabs)/mypage/_layout.tsx`         | 마이페이지 하위 화면 중첩 Stack   |
-| `app/(tabs)/mypage/index.tsx`           | 홈에서 진입하는 MY·로그아웃 화면  |
-| `app/(tabs)/mypage/edit.tsx`            | 프로필 수정 연락처/비밀번호 화면  |
-| `app/(tabs)/mypage/activity.tsx`        | 나눔 게시글/댓글/소모임 활동 내역 |
-| `src/services/mypageService.ts`         | 활동 mock 기본, http adapter 전환 |
+| `app/mypage/_layout.tsx`                | 마이페이지 루트 Stack 레이아웃    |
+| `app/mypage/index.tsx`                  | 홈에서 진입하는 MY·로그아웃 화면  |
+| `app/mypage/edit.tsx`                   | 프로필 수정 연락처/비밀번호 화면  |
+| `app/mypage/activity.tsx`               | 나눔 게시글/댓글/소모임 활동 내역 |
+| `app/mypage/prayer-history.tsx`         | 마이페이지 전용 중보기도 활동 이력 스택 화면 |
+| `app/mypage/life-study-history.tsx`     | 마이페이지 전용 삶공부 수료 내역 스택 화면 |
+| `src/services/mypageService.ts`         | 활동 HTTP 서비스                  |
 | `src/services/mypageHttpDataSource.ts`  | 활동 5종 HTTP data source         |
 | `src/services/mypageMapper.ts`          | Notion DTO → 활동 화면 행         |
 | `src/hooks/useMember.ts`                | 내 정보 조회 및 수정 훅           |
-| `src/mocks/mypageActivity.ts`           | 활동 화면 로컬 목록               |
-| `app/(tabs)/mypage/blocked.tsx`         | 차단 사용자 목록과 해제 상태      |
-| `app/(tabs)/mypage/faq.tsx`             | FAQ 목록과 empty state            |
-| `app/(tabs)/mypage/terms.tsx`           | 이용약관 전문 문서                |
-| `app/(tabs)/mypage/privacy.tsx`         | 개인정보처리방침 전문 문서        |
-| `app/(tabs)/mypage/withdraw.tsx`        | 회원 탈퇴 안내와 확인             |
-| `app/(tabs)/mypage/user/[id].tsx`       | 타 성도 프로필과 차단 상태        |
+| `app/mypage/blocked.tsx`                | 차단 사용자 목록과 해제 상태      |
+| `app/mypage/faq.tsx`                    | FAQ 목록과 empty state            |
+| `app/mypage/terms.tsx`                  | 이용약관 전문 문서                |
+| `app/mypage/privacy.tsx`                | 개인정보처리방침 전문 문서        |
+| `app/mypage/withdraw.tsx`               | 회원 탈퇴 안내와 확인             |
+| `app/mypage/user/[id].tsx`              | 타 성도 프로필과 차단 상태        |
 | `src/types/mypage.ts`                   | MY 화면 모델                      |
 | `src/types/mypageApi.ts`                | Notion 필드만 담은 활동 DTO       |
 | `scripts/check-mypage-api-contract.mjs` | 활동 OpenAPI 계약 검사            |
@@ -71,6 +73,14 @@
 `MyPageData`는 나눔, 소모임, 삶공부, 기도방, 관심 제목, FAQ 목록을 묶어 반환합니다. 활동 화면 행은 `MyPageActivityPost`, `MyPageActivityComment`, `MyPageActivityGroup`입니다. `MyPagePostDto`, `MyPageCommentDto`, `MyPageGroupDto`와 `MyPageActivityPage`는 Notion에 적힌 필드만 가집니다. 요청 `page`는 0부터이고 응답 `currentPage`는 1부터입니다. `MyPageLifeStudyHistoryDto`의 신청·수강·수료 원소는 이름만 있고 값 타입이 없어 `unknown`입니다. `MyPagePrayerHistoryDto`와 `MyPagePrayerActivityItem`은 Notion에 적힌 필드만 가집니다. `a / b`로 한 칸에 적힌 이름은 두 필드입니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-11-03) **런타임 활동 목 어댑터(`resolveMyPageAdapterMode`, `mockMyPageDataSource`) 및 `src/mocks/mypageActivity.ts` 제거** — 전 도메인 HTTP 단일화에 따라 활동 내역 화면(`app/mypage/activity.tsx`)의 로컬 목업 폴백과 `"목업 데이터"` 문구를 제거하고 `httpMyPageDataSource`만 사용하도록 정리.
+
+- (2026-10-29) **약관 및 개인정보 처리방침의 fallback 목데이터를 제거하고 실제 API 결과 기반으로 통일한다** — `src/components/mypage/LegalDocumentScreen.tsx`의 하드코딩된 fallback 조항 목록(`defaultSections`) 및 기본 날짜를 제거하고, `useActiveSitePolicy` 조회 결과에 따라 전문 텍스트 및 시행일자를 렌더링하도록 변경. 로딩 인디케이터 및 내용 부재 시 Empty 화면을 처리.
+
+- (2026-10-29) **FAQ 화면의 fallback 목데이터를 제거하고 실제 API 결과 기반으로 통일한다** — `app/mypage/faq.tsx`의 하드코딩된 fallback 카테고리/질문 배열을 완전히 제거하고, `useFaqs()` 호출 결과에 따라 카테고리 칩 목록 및 질문 필터링을 동적으로 구성하며, 로딩 중 인디케이터 및 질문 부재 시 Empty 화면을 일원화해 처리합니다.
+
+- (2026-10-28) **마이페이지 루트 Stack 승격 및 이동 모션 일관화** — 마이페이지를 하단 탭(`app/(tabs)/mypage`)에서 루트 Stack(`app/mypage`)으로 승격하여, 홈에서 '내 정보' 진입 시 네이티브 우측 슬라이드(`slide_from_right`) 인/아웃 모션을 적용하고 하단 탭 바 노출 깜빡임 해소. 또한 마이페이지 내 메뉴인 '중보기도 활동 이력'(`app/mypage/prayer-history.tsx`)과 '삶공부 수료'(`app/mypage/life-study-history.tsx`)를 마이페이지 스택 내부 라우트로 래핑하여 탭 점프 없이 모든 서브 메뉴가 동일한 우측 슬라이드 모션으로 열리도록 통일.
 
 - (2026-10-27) **로그아웃 시 확인 다이얼로그(`ConfirmDialog`) 적용** — 마이페이지 메뉴에서 로그아웃 선택 시 즉시 세션을 종료하지 않고, '로그아웃 하시겠어요?' 확인 다이얼로그를 띄워 확인 시에만 `useAuth.logout()` 및 로그인 화면(`/login`) 이동을 수행한다. Issue #191.
 - (2026-10-27) **마이페이지 하단 ‘계정’과 ‘계정 관리’ 섹션을 하나의 ‘계정’ 카드로 통합한다** — 1줄짜리 카드로 분리되어 있던 `로그아웃`과 `회원탈퇴`를 단일 `계정` 섹션 카드 안에 2행으로 묶어 하단 카드 구획을 정돈한다.

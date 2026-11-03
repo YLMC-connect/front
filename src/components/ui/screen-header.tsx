@@ -5,7 +5,9 @@ import { AppText } from "./app-text";
 import { GlassBackdrop } from "./glass-backdrop";
 
 export const SCREEN_HEADER_HEIGHT = 89;
+export const SCREEN_HEADER_COMPACT_HEIGHT = 60;
 export const SCREEN_HEADER_VERTICAL_PADDING = 20;
+export const SCREEN_HEADER_COMPACT_VERTICAL_PADDING = 15;
 const SCREEN_HEADER_ACTION_TOP =
   (SCREEN_HEADER_HEIGHT - theme.layout.touchTarget) / 2;
 
@@ -15,6 +17,7 @@ export function ScreenHeader({
   right,
   blurTarget,
   topInset = 0,
+  compact = false,
   testID = "screen-header",
 }: {
   title: string;
@@ -22,17 +25,28 @@ export function ScreenHeader({
   right?: ReactNode;
   blurTarget?: RefObject<View | null>;
   topInset?: number;
+  compact?: boolean;
   testID?: string;
 }) {
+  const headerHeight = compact
+    ? SCREEN_HEADER_COMPACT_HEIGHT
+    : SCREEN_HEADER_HEIGHT;
+  const verticalPadding = compact
+    ? SCREEN_HEADER_COMPACT_VERTICAL_PADDING
+    : SCREEN_HEADER_VERTICAL_PADDING;
+  const actionTop = compact
+    ? (SCREEN_HEADER_COMPACT_HEIGHT - theme.layout.touchTarget) / 2
+    : SCREEN_HEADER_ACTION_TOP;
+
   return (
     <View
       testID={testID}
       style={[
         styles.header,
         {
-          height: SCREEN_HEADER_HEIGHT + topInset,
-          paddingTop: SCREEN_HEADER_VERTICAL_PADDING + topInset,
-          paddingBottom: SCREEN_HEADER_VERTICAL_PADDING,
+          height: headerHeight + topInset,
+          paddingTop: verticalPadding + topInset,
+          paddingBottom: verticalPadding,
         },
       ]}
     >
@@ -46,9 +60,7 @@ export function ScreenHeader({
         ) : null}
       </View>
       {right ? (
-        <View
-          style={[styles.action, { top: SCREEN_HEADER_ACTION_TOP + topInset }]}
-        >
+        <View style={[styles.action, { top: actionTop + topInset }]}>
           {right}
         </View>
       ) : null}

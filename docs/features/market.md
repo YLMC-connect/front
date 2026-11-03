@@ -1,6 +1,6 @@
 # market (나눔)
 
-> 마지막 갱신: 2026-10-27 (나눔 목록 플랫 구분선 리스트 전환 및 카테고리 칩 표시) | 담당 Phase: P1/P2/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-11-03 (런타임 목 어댑터 및 `src/mocks/market.ts` 제거) | 담당 Phase: P1/P2/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -74,8 +74,7 @@
 | `app/(tabs)/market/index.tsx`           | 나눔 목록, 상태/카테고리 필터                                    |
 | `app/(tabs)/market/[id].tsx`            | 나눔 상세, 게시글 삭제, 댓글, 신고                               |
 | `app/modal/market-new.tsx`              | 나눔 작성 모달                                                   |
-| `src/mocks/market.ts`                   | 나눔 mock 데이터                                                 |
-| `src/services/marketService.ts`         | 교체 가능한 나눔 조회·게시글 삭제·댓글 CUD·신고 data source 경계 |
+| `src/services/marketService.ts`         | 나눔 조회·게시글 삭제·댓글 CUD·신고 HTTP 서비스                  |
 | `src/services/marketHttpDataSource.ts`  | 라이브 나눔 HTTP data source                                     |
 | `src/services/marketMapper.ts`          | Share DTO → 화면 모델                                            |
 | `src/types/marketApi.ts`                | 관측된 나눔 서버 DTO                                             |
@@ -89,6 +88,8 @@
 `MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. 화면 조회 모델 `MarketOverview`/`MarketDetail`은 목록 표시값, 작성자 소유 여부, 댓글 상태를 포함하며 API DTO mapper의 출력 경계입니다. `MarketOverviewItem.isMine`은 `내 나눔` 목록 필터의 기준이며 새 mock 작성 결과에도 `true`로 저장됩니다. 게시글 삭제 대상은 `MarketPostTarget`, 댓글 CUD는 `MarketCommentInput`, `MarketCommentUpdateInput`, `MarketCommentTarget`으로 게시글 ID와 댓글 ID를 구분하고 결과는 목록/상세 제거 또는 `MarketDetailComment` 삭제 tombstone으로 정규화합니다. 신고는 `MarketReportInput`에서 게시글/댓글 대상, 프런트 사유, 선택 상세를 분리하며 서버 enum이 확정되면 HTTP mapper가 코드 변환을 소유합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-11-03) **런타임 목 어댑터(`resolveMarketAdapterMode`, `mockMarketDataSource`) 및 `src/mocks/market.ts` 제거** — 전 도메인 HTTP 단일화에 따라 환경변수 어댑터 분기(`EXPO_PUBLIC_MARKET_ADAPTER`)와 런타임 목데이터를 제거하고 `httpMarketDataSource`만 사용하도록 정리.
 
 - (2026-10-27) **나눔 목록·상세 실제 사진(`thumbnailUrl` / `images`) 바인딩 및 하단 댓글 입력창(Composer) 알약 카드화** — `marketMapper`와 `mockMarketDataSource`에서 서버·작성 이미지 URI 배열을 `MarketOverviewItem.thumbnailUrl` 및 `MarketDetail.images`로 매핑해 실제 사진이 있을 때는 `<Image resizeMode="cover" />`(상세는 가로 스와이프 갤러리 + 페이지 점 인디케이터 연동)를 표시하고 없을 때만 `VisualThumb`을 사용한다. 또한 상세 하단 댓글 입력창의 불필요한 상단 `1px` 실선과 완전 투명 입력 박스를 제거하고, 상단 투명 그라데이션(`LinearGradient`) 위에 흰색 알약형 입력 컨테이너(`composerField`)와 기기 하단 Safe Area(`insets.bottom`) 여백을 적용한다.
 - (2026-10-27) **나눔 상세 대표 이미지(`hero`)를 화면 최상단 상태바 끝까지 확장(`applyTopInset={false}`)** — `Screen`의 기본 상단 패딩을 비활성화해 이미지가 상단 끝까지 빈틈없이 이어지도록 하고, `stickyHeader`와 `heroScrim`에만 기기 `insets.top`을 반영해 `뒤로` 버튼과 스크롤 타이틀이 상태바 아래 안전한 위치에 놓이도록 처리한다.

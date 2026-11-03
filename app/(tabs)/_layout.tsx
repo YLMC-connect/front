@@ -1,9 +1,9 @@
 import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { LinearGradient } from "expo-linear-gradient";
-import { Tabs, usePathname } from "expo-router";
+import { router, Tabs, usePathname } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { type LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useReducedMotion,
@@ -107,7 +107,6 @@ export default function TabsLayout() {
             options={{ title: tab.title, tabBarButtonTestID: tab.testID }}
           />
         ))}
-        <Tabs.Screen name="mypage" options={{ href: null }} />
       </Tabs>
     </TabBlurTargetContext.Provider>
   );
@@ -169,11 +168,18 @@ function VisibleTabBar({
   const blurTarget = useTabBlurTarget();
   const reduceMotion = useReducedMotion();
   const [itemWidth, setItemWidth] = useState(0);
+  const [tabLayouts, setTabLayouts] = useState<
+    Record<string, { x: number; width: number }>
+  >({});
   const selectedIndex = routes.findIndex(
     (route) =>
       state.routes.findIndex((item) => item.key === route.key) === state.index,
   );
-  const indicatorIndex = useSharedValue(Math.max(selectedIndex, 0));
+  const selectedRoute = routes[selectedIndex];
+  const activeLayout = selectedRoute ? tabLayouts[selectedRoute.key] : null;
+
+  const indicatorX = useSharedValue(0);
+  const indicatorWidth = useSharedValue(0);
   const visibilityProgress = useSharedValue(visible ? 1 : 0);
   const didMount = useRef(false);
 
@@ -190,21 +196,37 @@ function VisibleTabBar({
 
   useEffect(() => {
     const nextIndex = Math.max(selectedIndex, 0);
+    const targetX = activeLayout ? activeLayout.x : 6 + nextIndex * itemWidth;
+    const targetW = activeLayout ? activeLayout.width : itemWidth;
+
+    if (targetW <= 0) return;
+
     if (!didMount.current || reduceMotion) {
-      indicatorIndex.value = nextIndex;
+      indicatorX.value = targetX;
+      indicatorWidth.value = targetW;
       didMount.current = true;
       return;
     }
 
-    indicatorIndex.value = withTiming(nextIndex, {
+    indicatorX.value = withTiming(targetX, {
       duration: theme.motion.duration.base,
     });
-  }, [indicatorIndex, reduceMotion, selectedIndex]);
+    indicatorWidth.value = withTiming(targetW, {
+      duration: theme.motion.duration.base,
+    });
+  }, [
+    activeLayout,
+    indicatorWidth,
+    indicatorX,
+    itemWidth,
+    reduceMotion,
+    selectedIndex,
+  ]);
 
   const indicatorStyle = useAnimatedStyle(() => ({
-    opacity: itemWidth > 0 ? 1 : 0,
-    width: itemWidth,
-    transform: [{ translateX: indicatorIndex.value * itemWidth }],
+    opacity: indicatorWidth.value > 0 ? 1 : 0,
+    width: indicatorWidth.value,
+    transform: [{ translateX: indicatorX.value }],
   }));
 
   const shellVisibilityStyle = useAnimatedStyle(() => ({
@@ -278,9 +300,23 @@ function VisibleTabBar({
                 label={label}
                 focused={focused}
                 testID={options.tabBarButtonTestID}
+                onLayout={(e) => {
+                  const { x, width } = e.nativeEvent.layout;
+                  setTabLayouts((prev) => {
+                    if (
+                      prev[route.key]?.x === x &&
+                      prev[route.key]?.width === width
+                    ) {
+                      return prev;
+                    }
+                    return { ...prev, [route.key]: { x, width } };
+                  });
+                }}
                 onPress={() => {
-                  if (focused) return;
-                  navigation.navigate(route.name);
+                  const tab = findRootTab(route.name);
+                  if (!tab) return;
+                  if (pathname === tab.href) return;
+                  router.replace(tab.href);
                 }}
               />
             );
@@ -297,12 +333,14 @@ function AppTabButton({
   focused,
   testID,
   onPress,
+  onLayout,
 }: {
   route: TabRoute;
   label: string;
   focused: boolean;
   testID?: string;
   onPress: () => void;
+  onLayout?: (event: LayoutChangeEvent) => void;
 }) {
   const reduceMotion = useReducedMotion();
   const iconScale = useSharedValue(1);
@@ -338,6 +376,7 @@ function AppTabButton({
       accessibilityRole="tab"
       accessibilityState={focused ? { selected: true } : {}}
       testID={testID}
+      onLayout={onLayout}
       onPress={onPress}
       style={styles.tabItem}
     >
@@ -353,7 +392,16 @@ function AppTabButton({
           weight={focused ? "bold" : "linear"}
         />
       </Animated.View>
-      <Text style={[styles.tabLabel, { color }]}>{label}</Text>
+      <Text
+        numberOfLines={1}
+        style={[
+          styles.tabLabel,
+          { color },
+          label.length >= 3 ? styles.tabLabelCompact : null,
+        ]}
+      >
+        {label}
+      </Text>
     </MotionPressable>
   );
 }
@@ -398,7 +446,7 @@ const styles = StyleSheet.create({
   },
   tabIndicator: {
     position: "absolute",
-    left: 6,
+    left: 0,
     top: 7,
     bottom: 7,
     borderRadius: 999,
@@ -412,5 +460,8 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontSize: theme.typography.caption.fontSize,
     fontWeight: "700",
+  },
+  tabLabelCompact: {
+    letterSpacing: -0.3,
   },
 });

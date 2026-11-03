@@ -6,6 +6,7 @@ export default function GroupLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
+        animation: "slide_from_right",
         contentStyle: { backgroundColor: theme.colors.bg },
       }}
     />

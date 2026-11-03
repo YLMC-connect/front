@@ -202,12 +202,11 @@ export default function GroupScreen() {
             <ListSkeleton rows={3} thumbnail={false} />
           </View>
         ) : myGroups.length === 0 ? (
-          <View style={styles.emptyWrapExpanded}>
-            <Empty
-              title="참여 중인 소모임이 없어요"
-              description="소모임 탭에서 관심 있는 모임에 참여해보세요."
-            />
-          </View>
+          <Empty
+            icon="groups"
+            title="참여 중인 소모임이 없어요"
+            description="관심 있는 소모임에 참여해보세요."
+          />
         ) : (
           myGroups.map((group) => (
             <CompanionCard
@@ -287,12 +286,11 @@ export default function GroupScreen() {
           />
         ) : section === "service" ? (
           serviceItems.length === 0 ? (
-            <View style={styles.emptyWrapExpanded}>
-              <Empty
-                title="등록된 봉사활동이 없어요"
-                description="새로운 봉사활동이 등록되면 안내해 드릴게요."
-              />
-            </View>
+            <Empty
+              icon="groups"
+              title="등록된 봉사활동이 없어요"
+              description="새로운 봉사활동이 등록되면 안내해 드릴게요."
+            />
           ) : (
             <MotionEnter style={styles.myListWrap}>
               {serviceItems.map((item) => (
@@ -308,12 +306,11 @@ export default function GroupScreen() {
         ) : section === "mine" ? (
           <MotionEnter style={styles.myListWrap} testID="group-my-list">
             {myGroups.length === 0 ? (
-              <View style={styles.emptyWrapExpanded}>
-                <Empty
-                  title="참여 중인 소모임이 없어요"
-                  description="소모임 탭에서 관심 있는 모임에 참여해보세요."
-                />
-              </View>
+              <Empty
+                icon="groups"
+                title="참여 중인 소모임이 없어요"
+                description="관심 있는 소모임에 참여해보세요."
+              />
             ) : (
               myGroups.map((group) => (
                 <CompanionCard
@@ -326,12 +323,11 @@ export default function GroupScreen() {
             )}
           </MotionEnter>
         ) : groups.length === 0 ? (
-          <View style={styles.emptyWrap}>
-            <Empty
-              title="등록된 소모임이 없어요"
-              description="소모임을 개설하거나 관심 있는 모임에 참여해보세요."
-            />
-          </View>
+          <Empty
+            icon="groups"
+            title="등록된 소모임이 없어요"
+            description="소모임을 개설하거나 관심 있는 모임에 참여해보세요."
+          />
         ) : (
           <MotionEnter style={styles.myListWrap}>
             {groups.map((group) => (

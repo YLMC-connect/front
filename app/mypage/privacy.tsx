@@ -1,4 +1,4 @@
-import { LegalDocumentScreen } from "../../../src/components/mypage/LegalDocumentScreen";
+import { LegalDocumentScreen } from "../../src/components/mypage/LegalDocumentScreen";
 
 export default function PrivacyScreen() {
   return (

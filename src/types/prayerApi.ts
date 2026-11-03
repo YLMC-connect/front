@@ -120,12 +120,11 @@ export interface PrayerHistoryItem {
   active: boolean;
 }
 
-/** 이름만 있고 값 타입은 페이지에 없다. */
 export interface PrayerCategoryDto {
-  id: unknown;
-  categoryCode: unknown;
-  categoryName: unknown;
-  orderNum: unknown;
+  id: number;
+  categoryCode: string;
+  categoryName: string;
+  orderNum: number;
 }
 
 /** 래퍼 이름 없이 세 배열만 있다. */

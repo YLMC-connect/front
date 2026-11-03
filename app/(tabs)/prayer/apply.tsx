@@ -2,6 +2,7 @@ import { AppIcon } from "@/components/ui/app-icon";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   Keyboard,
   Pressable,
   ScrollView,
@@ -11,12 +12,20 @@ import {
   View,
 } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
-import { Badge, TopBar } from "../../../src/components/ui";
-import { LinearGradient } from "expo-linear-gradient";
+import { Badge, FloatingBottomBar, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import { useMemberMe } from "../../../src/hooks/useMember";
+import { useCreatePrayerApplication } from "../../../src/hooks/usePrayers";
 
 const days = ["월", "화", "수", "목", "금", "토"] as const;
+const dayToYoil: Record<(typeof days)[number], number> = {
+  월: 1,
+  화: 2,
+  수: 3,
+  목: 4,
+  금: 5,
+  토: 6,
+};
 const dayNames: Record<(typeof days)[number], string> = {
   월: "월요일",
   화: "화요일",
@@ -33,9 +42,40 @@ export default function PrayerApplyScreenRoute() {
   const [selectedDay, setSelectedDay] = useState<(typeof days)[number]>("월");
   const [selectedTime, setSelectedTime] =
     useState<(typeof times)[number]>("오전");
+  const [memo, setMemo] = useState("");
+  const createApplication = useCreatePrayerApplication();
   const selectedLabel = `${dayNames[selectedDay]} ${selectedTime} 기도방`;
   const memberName = member?.name || "사용자";
   const memberPhone = member?.phone || "010-1234-5678";
+
+  const handleSubmit = () => {
+    createApplication.mutate(
+      {
+        yoil: dayToYoil[selectedDay],
+        timeSlot: selectedTime === "오전" ? "AM" : "PM",
+        applicantName: memberName,
+        applicantPhone: memberPhone,
+        applyMemo: memo.trim() || undefined,
+      },
+      {
+        onSuccess: () => {
+          Alert.alert(
+            "신청 완료",
+            `${selectedLabel} 참여 신청이 접수되었습니다.`,
+            [{ text: "확인", onPress: () => router.back() }],
+          );
+        },
+        onError: (err) => {
+          Alert.alert(
+            "신청 실패",
+            err instanceof Error
+              ? err.message
+              : "기도방 참여 신청에 실패했습니다. 다시 시도해주세요.",
+          );
+        },
+      },
+    );
+  };
 
   return (
     <Screen scroll={false} padded={false}>
@@ -105,11 +145,13 @@ export default function PrayerApplyScreenRoute() {
                 <View>
                   <Text style={styles.fieldLabel}>신청 메모</Text>
                   <TextInput
-                    editable={false}
+                    editable={!createApplication.isPending}
                     multiline
+                    onChangeText={setMemo}
                     placeholder="기도방 참여를 희망하는 이유를 적어주세요"
                     placeholderTextColor={theme.colors.inkHint}
                     style={[styles.input, styles.textarea]}
+                    value={memo}
                   />
                 </View>
               </View>
@@ -129,22 +171,13 @@ export default function PrayerApplyScreenRoute() {
           </Pressable>
         </ScrollView>
 
-        <View pointerEvents="box-none" style={styles.bottom}>
-          <LinearGradient
-            colors={[
-              "rgba(246,247,249,0)",
-              "rgba(246,247,249,0.78)",
-              "rgba(246,247,249,0.96)",
-            ]}
-            locations={[0, 0.38, 1]}
-            pointerEvents="none"
-            style={StyleSheet.absoluteFill}
-            testID="prayer-apply-bottom-bar"
-          />
-          <Pressable accessibilityRole="button" style={styles.submitButton}>
-            <Text style={styles.submitText}>{selectedLabel} 신청하기</Text>
-          </Pressable>
-        </View>
+        <FloatingBottomBar
+          disabled={createApplication.isPending}
+          label={`${selectedLabel} 신청하기`}
+          loading={createApplication.isPending}
+          onPress={handleSubmit}
+          testID="prayer-apply"
+        />
       </View>
     </Screen>
   );

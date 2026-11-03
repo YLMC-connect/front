@@ -65,6 +65,7 @@ export function TopBar({
         <MotionPressable
           accessibilityLabel="뒤로"
           accessibilityRole="button"
+          hitSlop={8}
           onPress={handleBack}
           style={styles.backButton}
         >

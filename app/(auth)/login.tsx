@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -344,7 +343,7 @@ function AuthField({
               onPress={onTrailingPress}
               style={styles.trailingButton}
             >
-              <MaterialIcons
+              <AppIcon
                 name={trailingIcon}
                 size={20}
                 color={theme.colors.inkMute}

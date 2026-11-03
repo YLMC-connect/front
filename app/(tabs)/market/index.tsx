@@ -1,5 +1,6 @@
+import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ActivityIndicator, Image, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   AppText,
@@ -187,9 +188,10 @@ function PostRow({
       <View style={styles.thumbWrap}>
         {post.thumbnailUrl ? (
           <Image
-            resizeMode="cover"
+            contentFit="cover"
             source={{ uri: post.thumbnailUrl }}
             style={styles.thumbImage}
+            transition={150}
           />
         ) : (
           <VisualThumb size={theme.layout.listThumb} seed={post.thumbSeed} />
@@ -329,7 +331,7 @@ const styles = StyleSheet.create({
     left: 6,
     top: 6,
     borderRadius: theme.radius.xs,
-    backgroundColor: "#E89A3C",
+    backgroundColor: theme.colors.warn,
     paddingHorizontal: 8,
     paddingVertical: 3,
   },

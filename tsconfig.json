@@ -10,7 +10,6 @@
   "include": [
     "app",
     "src",
-    "app.config.ts",
-    "nativewind-env.d.ts"
+    "app.config.ts"
   ]
 }

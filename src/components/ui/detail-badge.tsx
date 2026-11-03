@@ -67,6 +67,6 @@ const styles = StyleSheet.create({
     color: theme.colors.white,
   },
   warnText: {
-    color: "#9B6B20",
+    color: theme.colors.warn,
   },
 });

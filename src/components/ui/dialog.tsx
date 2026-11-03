@@ -465,7 +465,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.white,
   },
   radioDotCompact: {
     width: 7,
@@ -500,6 +500,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(217,131,92,0.10)",
   },
   radioHintDangerText: {
-    color: "#A8643F",
+    color: theme.colors.primaryDeep,
   },
 });

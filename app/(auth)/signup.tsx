@@ -1,5 +1,4 @@
 import { AppIcon } from "@/components/ui/app-icon";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router, useLocalSearchParams } from "expo-router";
 import { forwardRef, type ReactNode, useEffect, useRef, useState } from "react";
 import {
@@ -1084,7 +1083,7 @@ const SignupInput = forwardRef<
       onPress={() => setPasswordVisible((visible) => !visible)}
       style={styles.visibilityButton}
     >
-      <MaterialIcons
+      <AppIcon
         name={passwordVisible ? "visibility" : "visibility-off"}
         size={20}
         color={theme.colors.inkMute}

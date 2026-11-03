@@ -491,7 +491,11 @@ function PrayerItem({
         <View style={styles.chipRow}>
           {item.urgent ? (
             <View style={styles.urgentBadge}>
-              <AppIcon name="warning-amber" size={10} color="#DC2626" />
+              <AppIcon
+                name="warning-amber"
+                size={10}
+                color={theme.colors.danger}
+              />
               <Text style={styles.urgentBadgeText}>긴급</Text>
             </View>
           ) : null}
@@ -729,13 +733,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
-    backgroundColor: "#FEE2E2",
+    backgroundColor: "rgba(184, 102, 88, 0.12)",
     borderRadius: theme.radius.pill,
     paddingHorizontal: 7,
     paddingVertical: 2,
   },
   urgentBadgeText: {
-    color: "#DC2626",
+    color: theme.colors.danger,
     fontSize: 10,
     fontWeight: theme.fontWeight.extrabold,
   },
@@ -754,7 +758,7 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.bold,
   },
   topicChipTextWarn: {
-    color: "#9B6B20",
+    color: theme.colors.warn,
   },
   prayerTitle: {
     color: theme.colors.ink,

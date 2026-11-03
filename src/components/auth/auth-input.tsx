@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   },
   surfaceError: {
     borderColor: theme.colors.danger,
-    backgroundColor: "#FDF4F1",
+    backgroundColor: "rgba(184, 102, 88, 0.08)",
   },
   surfaceWithTrailing: {
     paddingRight: 10,

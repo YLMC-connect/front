@@ -720,7 +720,7 @@ const styles = StyleSheet.create({
   content: { paddingBottom: 152 },
   hero: {
     position: "relative",
-    backgroundColor: "#E2DED3",
+    backgroundColor: theme.colors.surfaceMuted,
   },
   heroThumb: {
     width: "100%",
@@ -814,7 +814,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     top: "45%",
     borderRadius: theme.radius.sm,
-    backgroundColor: "#E89A3C",
+    backgroundColor: theme.colors.warn,
     paddingHorizontal: 22,
     paddingVertical: 10,
     ...theme.shadow.raised,
@@ -837,8 +837,8 @@ const styles = StyleSheet.create({
   },
   bannerWarn: {
     borderWidth: 1,
-    borderColor: "rgba(232,154,60,0.32)",
-    backgroundColor: "rgba(232,154,60,0.12)",
+    borderColor: "rgba(185,130,45,0.32)",
+    backgroundColor: "rgba(185,130,45,0.12)",
   },
   bannerIcon: {
     width: 28,
@@ -849,7 +849,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(20,30,18,0.85)",
   },
   bannerIconWarn: {
-    backgroundColor: "#E89A3C",
+    backgroundColor: theme.colors.warn,
   },
   bannerTextWrap: { flex: 1 },
   bannerTitle: {
@@ -858,7 +858,7 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.bold,
   },
   bannerTitleWarn: {
-    color: "#8A5A1F",
+    color: theme.colors.warn,
   },
   bannerText: {
     marginTop: 2,
@@ -866,7 +866,7 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.sm,
   },
   bannerTextWarn: {
-    color: "#A87B3A",
+    color: theme.colors.warn,
   },
   doneContent: {
     opacity: 0.6,

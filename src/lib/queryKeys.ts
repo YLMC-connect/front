@@ -25,10 +25,22 @@ export const queryKeys = {
     lists: () => [...queryKeys.lifeStudy.all, "list"] as const,
     list: (filter?: unknown) =>
       [...queryKeys.lifeStudy.lists(), filter ?? "all"] as const,
+    myCompletions: () => [...queryKeys.lifeStudy.all, "myCompletions"] as const,
   },
   prayer: {
     all: ["prayer"] as const,
     overview: () => [...queryKeys.prayer.all, "overview"] as const,
     detail: (id: string) => [...queryKeys.prayer.all, "detail", id] as const,
+  },
+  member: {
+    all: ["member"] as const,
+    me: () => [...queryKeys.member.all, "me"] as const,
+  },
+  siteContent: {
+    all: ["siteContent"] as const,
+    terms: (type: string) =>
+      [...queryKeys.siteContent.all, "terms", type] as const,
+    faqs: (category?: string) =>
+      [...queryKeys.siteContent.all, "faqs", category ?? "all"] as const,
   },
 } as const;

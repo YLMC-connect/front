@@ -54,7 +54,7 @@ export function Button({
         <ActivityIndicator
           color={
             variant === "primary" || variant === "danger"
-              ? "#fff"
+              ? theme.colors.white
               : theme.colors.primaryDeep
           }
         />
@@ -66,7 +66,7 @@ export function Button({
               size={20}
               color={
                 variant === "primary" || variant === "danger"
-                  ? "#fff"
+                  ? theme.colors.white
                   : theme.colors.primaryDeep
               }
             />
@@ -102,7 +102,7 @@ export function FloatingActionButton({
       {...pressableProps}
       style={fabStyle}
     >
-      <AppIcon name={icon} size={18} color="#fff" />
+      <AppIcon name={icon} size={18} color={theme.colors.white} />
       <Text style={styles.fabText}>{label}</Text>
     </MotionPressable>
   );

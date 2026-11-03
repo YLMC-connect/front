@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "../lib/queryKeys";
 import {
   changePassword,
   getCurrentMember,
@@ -12,14 +13,14 @@ import type {
   MemberVerifyPasswordRequest,
 } from "../types/authApi";
 
-export const MEMBER_ME_QUERY_KEY = ["member", "me"] as const;
+export const MEMBER_ME_QUERY_KEY = queryKeys.member.me();
 
 export function useMemberMe() {
   const currentUser = useAuthStore((state) => state.currentUser);
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
   return useQuery({
-    queryKey: MEMBER_ME_QUERY_KEY,
+    queryKey: queryKeys.member.me(),
     queryFn: getCurrentMember,
     enabled: isLoggedIn,
     initialData: currentUser ?? undefined,
@@ -33,7 +34,7 @@ export function useUpdateMemberMe() {
   return useMutation({
     mutationFn: (input: { phone: string }) => updateCurrentMember(input),
     onSuccess: (updated) => {
-      queryClient.setQueryData(MEMBER_ME_QUERY_KEY, updated);
+      queryClient.setQueryData(queryKeys.member.me(), updated);
     },
   });
 }

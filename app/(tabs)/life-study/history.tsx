@@ -3,11 +3,12 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import { Empty, TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { queryKeys } from "../../../src/lib/queryKeys";
 import { fetchMyLifeStudyCompletions } from "../../../src/services/lifeStudyService";
 
 export default function LifeStudyHistoryScreen() {
   const completions = useQuery({
-    queryKey: ["lifeStudy", "my-completions", "history-screen"],
+    queryKey: queryKeys.lifeStudy.myCompletions(),
     queryFn: fetchMyLifeStudyCompletions,
   });
 

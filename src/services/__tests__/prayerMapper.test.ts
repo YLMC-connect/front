@@ -1,15 +1,7 @@
 import { ApiError } from "../../lib/apiClient";
-import { mockPrayerRooms, mockPrayerTopics } from "../../mocks/prayers";
-import type {
-  PrayerOverview,
-  PrayerRoom,
-  PrayerTopic,
-} from "../../types/prayer";
 import type { PrayerCohortDto, PrayerTopicDto } from "../../types/prayerApi";
 import {
-  applyCohortsToRooms,
-  applyPrayerApiToOverview,
-  applyTopicsToTopics,
+  buildPrayerOverview,
   readPrayerApplications,
   readPrayerCategories,
   readPrayerCohortDetail,
@@ -55,164 +47,33 @@ const topic: PrayerTopicDto = {
   createdAt: "2026-10-02T01:02:03",
 };
 
-const overview: PrayerOverview = {
-  rooms: [
-    {
-      id: "15",
-      weekday: "fri",
-      period: "afternoon",
-      memberCount: 10,
-      status: "pending",
-    },
-    {
-      id: "prayer-overview-room-thu-pm",
-      weekday: "thu",
-      period: "afternoon",
-      memberCount: 10,
-      status: "pending",
-    },
-  ],
-  requests: [
-    {
-      id: "7",
-      title: "기존 제목",
-      category: "일반",
-      status: "reviewing",
-      description: "관리자 검토 후 공개됩니다",
-    },
-  ],
-};
-
 describe("prayerMapper", () => {
-  it("overlays a matching cohort and leaves unknown rooms on the mock", () => {
-    const mapped = applyPrayerApiToOverview(overview, [cohort], []);
-
-    expect(mapped.rooms).toEqual([
-      {
-        id: "15",
-        weekday: "mon",
-        period: "morning",
-        memberCount: 40,
-        completedCount: 30,
-        participationRate: 75,
-        status: "joined",
-      },
-      overview.rooms[1],
-    ]);
-    expect(mapped.rooms).toHaveLength(2);
-    expect(overview.rooms[0].status).toBe("pending");
-    expect(overview.rooms[0].memberCount).toBe(10);
-  });
-
-  it("does not turn a missing role or weekend yoil into a new room status", () => {
-    const mapped = applyPrayerApiToOverview(
-      overview,
-      [
-        {
-          ...cohort,
-          yoil: 6,
-          timeSlot: "PM",
-          myRole: null,
-          status: "ACTIVE",
-        },
-      ],
-      [],
-    );
-
-    expect(mapped.rooms[0]).toEqual({
-      ...overview.rooms[0],
-      memberCount: 40,
-      completedCount: 30,
-      participationRate: 75,
-    });
-  });
-
-  it("lets a later cohort with the same id win", () => {
-    const mapped = applyPrayerApiToOverview(
-      overview,
-      [cohort, { ...cohort, memberCount: 3, myRole: "LEADER" }],
-      [],
-    );
-
-    expect(mapped.rooms[0].memberCount).toBe(3);
-    expect(mapped.rooms[0].status).toBe("joined");
-  });
-
-  it("maps only topic statuses the overview already has", () => {
-    const published = applyPrayerApiToOverview(overview, [], [topic]);
-    expect(published.requests).toEqual([
-      {
-        ...overview.requests[0],
-        title: "어머니 회복",
-        category: "치유",
-        status: "published",
-      },
-    ]);
-
-    const answered = applyPrayerApiToOverview(
-      overview,
-      [],
-      [{ ...topic, status: "ANSWERED" }],
-    );
-    expect(answered.requests[0].status).toBe("reviewing");
-    expect(answered.requests[0].description).toBe("관리자 검토 후 공개됩니다");
-
-    const rejected = applyPrayerApiToOverview(
-      overview,
-      [],
-      [{ ...topic, status: "REJECTED", id: 99 }],
-    );
-    expect(rejected.requests).toEqual([...overview.requests]);
-  });
-
-  it("maps room fields that exist and keeps the leader", () => {
-    const room: PrayerRoom = { ...mockPrayerRooms[0], id: "15" };
-    const [mapped] = applyCohortsToRooms(
-      [room],
-      [{ ...cohort, yoil: 0, myRole: null }],
-    );
+  it("builds prayer overview from cohorts and topics", () => {
+    const mapped = buildPrayerOverview([cohort], [topic]);
 
     expect(mapped).toEqual({
-      ...room,
-      title: "월요일 오전 기도방",
-      description: "한 주를 시작합니다",
-      memberCount: 40,
-      isJoined: false,
+      rooms: [
+        {
+          id: "15",
+          title: "월요일 오전 기도방",
+          weekday: "mon",
+          period: "morning",
+          memberCount: 40,
+          completedCount: 30,
+          participationRate: 75,
+          status: "joined",
+        },
+      ],
+      requests: [
+        {
+          id: "7",
+          title: "어머니 회복",
+          category: "치유",
+          status: "published",
+          description: "수술이 잘 끝나기를",
+        },
+      ],
     });
-    expect(mapped.leader).toBe(room.leader);
-    expect(mapped.weekday).toBe(room.weekday);
-  });
-
-  it("maps answered topic text without inventing the author or room", () => {
-    const base: PrayerTopic = {
-      ...mockPrayerTopics[0],
-      id: "7",
-      isAnswered: false,
-      answer: "기존 응답",
-    };
-    const [answered] = applyTopicsToTopics(
-      [base],
-      [{ ...topic, status: "ANSWERED" }],
-    );
-
-    expect(answered).toEqual({
-      ...base,
-      title: "어머니 회복",
-      content: "수술이 잘 끝나기를",
-      isAnswered: true,
-      answer: "회복되었습니다",
-      createdAt: "2026-10-02T01:02:03",
-    });
-    expect(answered.author).toBe(base.author);
-    expect(answered.roomId).toBe(base.roomId);
-    expect(answered.isAnonymous).toBe(base.isAnonymous);
-    expect(answered.prayerCount).toBe(base.prayerCount);
-    expect(answered.hasPrayed).toBe(base.hasPrayed);
-
-    const [open] = applyTopicsToTopics([base], [topic]);
-    expect(open.isAnswered).toBe(false);
-    expect(open.answer).toBeUndefined();
-    expect(open.author).toBe(base.author);
   });
 
   it("reads named application and category fields without narrowing their values", () => {

@@ -1,29 +1,34 @@
 import { ApiError } from "../../lib/apiClient";
-import { mockLifeStudyCourses } from "../../mocks/lifeStudy";
-import type { LifeStudyHistory } from "../../types/lifeStudy";
+import type { LifeStudyCourse } from "../../types/lifeStudy";
 import {
   applyClassListToOverviewCourse,
   applyCompletionRosterToCourse,
-  applyMyCompletionsToCourses,
-  applyMyCompletionsToHistories,
-  applyMyCompletionsToOverview,
+  buildLifeStudyCourses,
+  buildLifeStudyHistories,
+  buildLifeStudyOverview,
   readAttendanceRoster,
+  readMyCompletions,
 } from "../lifeStudyMapper";
 
-const course = {
-  ...mockLifeStudyCourses[2],
+const course: LifeStudyCourse = {
   id: "3",
-  isCompleted: false,
-};
-
-const history: LifeStudyHistory = {
-  id: "history-001",
-  courseId: "3",
   title: "경건의 삶",
-  enrolledAt: "2026-02-04T10:00:00.000Z",
-  completedSessions: 10,
-  completedAt: "2026-04-16T10:00:00.000Z",
-  certificateIssued: true,
+  description: "매일의 QT, 기도, 말씀 묵상 습관을 세우는 경건 훈련입니다.",
+  instructor: {
+    id: "member-006",
+    name: "정다윗",
+    role: "USER",
+  },
+  schedule: "매주 목요일 20:00",
+  location: "교육관 202호",
+  status: "completed",
+  sessions: 10,
+  currentSession: 10,
+  capacity: 15,
+  enrolledCount: 15,
+  isEnrolled: true,
+  isCompleted: false,
+  curriculum: [],
 };
 
 const myCompletion = {
@@ -57,107 +62,40 @@ const completionRoster = {
 };
 
 describe("lifeStudyMapper", () => {
-  it("maps a completion onto a course only when the course id matches", () => {
-    const [mapped] = applyMyCompletionsToCourses([course], [myCompletion]);
-
-    expect(mapped).toEqual({
-      ...course,
-      title: "경건의 삶 (서버)",
-      isCompleted: true,
-    });
-    expect(course.isCompleted).toBe(false);
-    expect(
-      applyMyCompletionsToCourses(
-        [{ ...course, id: "life-003", title: "경건의 삶" }],
-        [myCompletion],
-      )[0],
-    ).toMatchObject({
-      id: "life-003",
-      title: "경건의 삶",
-      isCompleted: false,
-      sessions: 10,
-      currentSession: 10,
-    });
-  });
-
-  it("leaves the learning path on mock values", () => {
-    const overview = {
-      path: {
-        completedRequired: 1,
-        totalRequired: 5,
-        nextRecommendation: "생명언어의 삶",
-        eligibility: "생명의 삶 이후 가능",
-      },
-      openCourses: [
-        {
-          id: "life-overview-open-1",
-          title: "생명의 삶",
-          kind: "required" as const,
-          weekCount: 13,
-          instructorName: "박귀원",
-          summary: "신앙의 근본을 바로 세우는 가장 기본 과정",
-        },
-      ],
-      courses: [
-        {
-          id: "3",
-          title: "경건의 삶",
-          kind: "required" as const,
-          weekCount: 13,
-          instructorName: "서상오",
-          status: "pending" as const,
-          summary: "경건 훈련",
-        },
-      ],
-    };
-
-    expect(applyMyCompletionsToOverview(overview, [myCompletion])).toEqual({
-      ...overview,
-      openCourses: overview.openCourses,
-      courses: [{ ...overview.courses[0], title: "경건의 삶 (서버)" }],
-    });
-    expect(applyMyCompletionsToOverview(overview, [myCompletion]).path).toEqual(
-      overview.path,
-    );
-    expect(
-      applyMyCompletionsToOverview(overview, [
-        myCompletion,
-        { ...myCompletion, cohortId: 4, cohortNumber: 1 },
-      ]).courses[0].title,
-    ).toBe("경건의 삶");
-  });
-
-  it("maps completion date and title onto history without inventing the rest", () => {
-    expect(applyMyCompletionsToHistories([history], [myCompletion])).toEqual([
+  it("builds overview, courses, and histories from myCompletions", () => {
+    const overview = buildLifeStudyOverview([myCompletion]);
+    expect(overview.courses).toEqual([
       {
-        ...history,
+        id: "3",
         title: "경건의 삶 (서버)",
-        completedAt: "2026-04-16",
+        kind: "optional",
+        weekCount: 0,
+        instructorName: "",
+        summary: "",
+        status: "completed",
       },
     ]);
 
-    const cleared = applyMyCompletionsToHistories(
-      [history],
-      [{ ...myCompletion, lifeStudyName: null, completedAt: null }],
-    )[0];
-    expect(cleared.title).toBe(history.title);
-    expect(cleared.completedAt).toBeUndefined();
-    expect(cleared.enrolledAt).toBe(history.enrolledAt);
-    expect(cleared.completedSessions).toBe(10);
-    expect(cleared.certificateIssued).toBe(true);
+    const courses = buildLifeStudyCourses([myCompletion]);
+    expect(courses[0]).toMatchObject({
+      id: "3",
+      title: "경건의 삶 (서버)",
+      status: "completed",
+      isCompleted: true,
+    });
 
-    expect(
-      applyMyCompletionsToHistories(
-        [history],
-        [myCompletion, { ...myCompletion, cohortId: 9 }],
-      ),
-    ).toEqual([history]);
-    expect(
-      applyMyCompletionsToHistories(
-        [history],
-        [{ ...myCompletion, lifeStudyId: 99, lifeStudyName: "새 과정" }],
-      ),
-    ).toEqual([history]);
+    const histories = buildLifeStudyHistories([myCompletion]);
+    expect(histories).toEqual([
+      {
+        id: "3-0",
+        courseId: "3",
+        title: "경건의 삶 (서버)",
+        enrolledAt: "",
+        completedSessions: 0,
+        completedAt: "2026-04-16",
+        certificateIssued: false,
+      },
+    ]);
   });
 
   it("copies class weekCount and ignores undocumented class fields", () => {
@@ -202,17 +140,14 @@ describe("lifeStudyMapper", () => {
 
   it("rejects shapes that are not the Notion data payload", () => {
     expect(() =>
-      applyMyCompletionsToCourses([course], {
+      readMyCompletions({
         code: "SUCCESS",
         message: "ok",
         data: [myCompletion],
       }),
     ).toThrow(ApiError);
     expect(() =>
-      applyMyCompletionsToCourses(
-        [course],
-        [{ ...myCompletion, lifeStudyId: "3" }],
-      ),
+      readMyCompletions([{ ...myCompletion, lifeStudyId: "3" }]),
     ).toThrow(ApiError);
     expect(() => readAttendanceRoster([])).toThrow(ApiError);
     expect(

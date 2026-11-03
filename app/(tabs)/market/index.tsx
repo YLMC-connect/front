@@ -260,13 +260,11 @@ function MarketEmptyState({
           };
 
   return (
-    <View style={styles.emptyWrap}>
-      <Empty
-        title={message.title}
-        description={message.description}
-        icon={isSearching ? "search" : "shopping-bag"}
-      />
-    </View>
+    <Empty
+      icon={isSearching ? "search" : "shopping-bag"}
+      title={message.title}
+      description={message.description}
+    />
   );
 }
 

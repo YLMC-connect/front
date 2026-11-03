@@ -30,7 +30,11 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTabBlurTarget } from "./TabBlurTargetContext";
-import { SCREEN_HEADER_HEIGHT, ScreenHeader } from "../ui/screen-header";
+import {
+  SCREEN_HEADER_COMPACT_HEIGHT,
+  SCREEN_HEADER_HEIGHT,
+  ScreenHeader,
+} from "../ui/screen-header";
 import { GlassBackdrop } from "../ui/glass-backdrop";
 import { theme } from "../../constants/theme";
 import { Screen } from "./Screen";
@@ -50,6 +54,7 @@ export function StickyHeaderScreen({
   title,
   subtitle,
   right,
+  compact = false,
   children,
   overlay,
   stickyControls,
@@ -75,6 +80,7 @@ export function StickyHeaderScreen({
   title: string;
   subtitle?: string;
   right?: ReactNode;
+  compact?: boolean;
   children: ReactNode;
   overlay?: ReactNode;
   stickyControls?: ReactNode;
@@ -109,11 +115,24 @@ export function StickyHeaderScreen({
   const [seenRevealKey, setSeenRevealKey] = useState(stickyControlsRevealKey);
   const [seenScrollResetKey, setSeenScrollResetKey] =
     useState(scrollStateResetKey);
+  const [isPullRefreshing, setIsPullRefreshing] = useState(false);
+  const [prevRefreshing, setPrevRefreshing] = useState(refreshing);
+  if (refreshing !== prevRefreshing) {
+    setPrevRefreshing(refreshing);
+    if (!refreshing) {
+      setIsPullRefreshing(false);
+    }
+  }
   const lastScrollY = useRef(0);
   const downwardDistance = useRef(0);
   const upwardDistance = useRef(0);
   const hasStickyControls = Boolean(stickyControls && stickyControlsHeight > 0);
   const hideThreshold = Math.max(stickyControlsInset, stickyControlsHeight, 1);
+
+  const handlePullRefresh = () => {
+    setIsPullRefreshing(true);
+    onRefresh?.();
+  };
 
   useEffect(() => {
     if (!resetScrollOnFocus) return;
@@ -229,10 +248,12 @@ export function StickyHeaderScreen({
     }
   };
 
+  const headerHeight = compact
+    ? SCREEN_HEADER_COMPACT_HEIGHT
+    : SCREEN_HEADER_HEIGHT;
+
   const totalTopPadding =
-    SCREEN_HEADER_HEIGHT +
-    topInset +
-    (hasStickyControls ? stickyControlsInset : 0);
+    headerHeight + topInset + (hasStickyControls ? stickyControlsInset : 0);
 
   return (
     <Screen applyTopInset={false} scroll={false} padded={false} testID={testID}>
@@ -245,8 +266,8 @@ export function StickyHeaderScreen({
             refreshControl={
               onRefresh ? (
                 <RefreshControl
-                  refreshing={Boolean(refreshing)}
-                  onRefresh={onRefresh}
+                  refreshing={Boolean(refreshing && isPullRefreshing)}
+                  onRefresh={handlePullRefresh}
                   tintColor={theme.colors.primary}
                   colors={[theme.colors.primary]}
                   progressViewOffset={totalTopPadding + 10}
@@ -290,13 +311,14 @@ export function StickyHeaderScreen({
             hidden={controlsHidden && !stickyControlsAlwaysVisible}
             resetKey={scrollStateResetKey}
             testID={`${testID}-sticky-controls`}
-            top={SCREEN_HEADER_HEIGHT + topInset}
+            top={headerHeight + topInset}
           >
             {stickyControls}
           </StickyControlsLayer>
         ) : null}
         <ScreenHeader
           blurTarget={blurTarget}
+          compact={compact}
           right={right}
           subtitle={subtitle}
           title={title}

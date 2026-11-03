@@ -1,8 +1,9 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { Platform, StyleSheet } from "react-native";
-import MyPageScreen from "../../(tabs)/mypage";
+import MyPageScreen from "../../mypage";
 import LoginScreenRoute from "../login";
 import SignupScreenRoute from "../signup";
 import SplashScreenRoute from "../splash";
@@ -10,10 +11,20 @@ import TermsSheetScreenRoute from "../terms-sheet";
 import TermsScreenRoute from "../terms";
 import { renderWithClient } from "../../../src/test/renderWithClient";
 import { theme } from "../../../src/constants/theme";
-import { MOCK_USER } from "../../../src/mocks/auth";
 import { useAuthStore } from "../../../src/store/authStore";
 import { ApiError } from "../../../src/lib/apiClient";
+import { authAdapter } from "../../../src/services/authAdapter";
 import * as authService from "../../../src/services/authService";
+import * as siteContentService from "../../../src/services/siteContentService";
+import type { Member } from "../../../src/types/common";
+
+const TEST_USER: Member = {
+  id: "member-001",
+  name: "김은혜",
+  role: "USER",
+  department: "소망목장",
+  phone: "010-2345-6789",
+};
 
 jest.mock("../../../src/services/authService", () => {
   const actual = jest.requireActual("../../../src/services/authService");
@@ -33,6 +44,55 @@ describe("auth smoke screens", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useAuthStore.getState().setAnonymous();
+    jest
+      .spyOn(authAdapter, "checkAvailability")
+      .mockImplementation(async ({ searchType, searchValue }) => {
+        const normalized = searchValue.trim().toLowerCase();
+        const taken =
+          (searchType === "id" && normalized === "admin") ||
+          (searchType === "phone" && normalized === "010-2345-6789") ||
+          (searchType === "email" && normalized === "admin@ylmc.local");
+        return { available: !taken };
+      });
+    jest.spyOn(authAdapter, "login").mockImplementation(async (input) => {
+      if (
+        input.id.trim().toLowerCase() === "admin" &&
+        input.password === "admin"
+      ) {
+        return {
+          accessToken: "mock-access-token",
+          refreshToken: "mock-refresh-token",
+          member: TEST_USER,
+        };
+      }
+      throw new ApiError({
+        code: "INVALID_CREDENTIALS",
+        message: "아이디 또는 비밀번호가 올바르지 않습니다.",
+        status: 401,
+      });
+    });
+    jest.spyOn(authAdapter, "signup").mockImplementation(async (input) => ({
+      accessToken: "mock-access-token",
+      refreshToken: "mock-refresh-token",
+      member: {
+        id: `member-${input.id.trim().toLowerCase()}`,
+        name: input.userName.trim(),
+        role: "USER",
+        phone: input.phone.trim(),
+      },
+    }));
+    jest
+      .spyOn(siteContentService, "getActiveSitePolicy")
+      .mockImplementation(async (type) => ({
+        id: type,
+        policyType: type,
+        title: type === 1 ? "서비스 이용약관" : "개인정보 처리방침",
+        content:
+          type === 1
+            ? "서비스 이용약관 전문입니다."
+            : "개인정보 처리방침 전문입니다.",
+        enforcedAt: "2026-01-01",
+      }));
   });
 
   it("renders the splash screen", () => {
@@ -54,13 +114,13 @@ describe("auth smoke screens", () => {
     expect(back).toHaveBeenCalledTimes(1);
   });
 
-  it("renders the terms sheet screen", () => {
+  it("renders the terms sheet screen", async () => {
     const back = jest.fn();
     jest.mocked(useRouter).mockReturnValue({ back } as never);
     renderWithClient(<TermsSheetScreenRoute />);
 
-    expect(screen.getAllByText("서비스 이용약관").length).toBeGreaterThan(0);
-    expect(screen.getByText("시행일자: 2026년 1월 1일")).toBeTruthy();
+    expect(await screen.findByText("서비스 이용약관")).toBeTruthy();
+    expect(await screen.findByText("시행일자: 2026년 1월 1일")).toBeTruthy();
     fireEvent.press(screen.getByLabelText("닫기"));
     expect(screen.queryByText("시행일자: 2026년 1월 1일")).toBeNull();
     expect(back).not.toHaveBeenCalled();
@@ -186,6 +246,43 @@ describe("auth smoke screens", () => {
     });
   });
 
+  it("saves the login id when remember id is checked", async () => {
+    renderWithClient(<LoginScreenRoute />);
+
+    fireEvent.changeText(screen.getByTestId("login-id-input"), "admin");
+    fireEvent.changeText(screen.getByTestId("login-password-input"), "admin");
+
+    const rememberCheckbox = screen.getByTestId("login-remember-id");
+    expect(rememberCheckbox.props.accessibilityState.checked).toBe(false);
+
+    fireEvent.press(rememberCheckbox);
+    expect(rememberCheckbox.props.accessibilityState.checked).toBe(true);
+
+    fireEvent.press(screen.getByText("로그인"));
+
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/"));
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+      "ylmc.saved_login_id",
+      "admin",
+    );
+  });
+
+  it("restores the saved login id and checks the box on mount", async () => {
+    (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("saveduser");
+
+    renderWithClient(<LoginScreenRoute />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("login-id-input").props.value).toBe(
+        "saveduser",
+      );
+      expect(
+        screen.getByTestId("login-remember-id").props.accessibilityState
+          .checked,
+      ).toBe(true);
+    });
+  });
+
   it("rejects the previous mock login credentials", async () => {
     renderWithClient(<LoginScreenRoute />);
 
@@ -197,7 +294,7 @@ describe("auth smoke screens", () => {
     fireEvent.press(screen.getByText("로그인"));
 
     expect(
-      await screen.findByText("아이디 또는 비밀번호가 올바르지 않습니다"),
+      await screen.findByText("아이디 또는 비밀번호를 확인해주세요."),
     ).toBeTruthy();
     expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
     expect(router.replace).not.toHaveBeenCalledWith("/");
@@ -419,7 +516,7 @@ describe("auth smoke screens", () => {
       .mocked(SecureStore.deleteItemAsync)
       .mockRejectedValueOnce(new Error("keystore delete failed"))
       .mockResolvedValueOnce(undefined);
-    useAuthStore.getState().setAuthenticated(MOCK_USER);
+    useAuthStore.getState().setAuthenticated(TEST_USER);
     renderWithClient(<MyPageScreen />);
 
     fireEvent.press(screen.getByTestId("mypage-logout"));
@@ -490,7 +587,9 @@ describe("auth smoke screens", () => {
     // Terms agreement checkboxes and sheet viewer
     const termsAll = screen.getByTestId("signup-terms-all");
     expect(termsAll.props.accessibilityState.checked).toBe(false);
-    expect(screen.getByTestId("signup-submit").props.accessibilityState.disabled).toBe(true);
+    expect(
+      screen.getByTestId("signup-submit").props.accessibilityState.disabled,
+    ).toBe(true);
     expect(screen.getByText("약관 전체 동의하기")).toBeTruthy();
     const viewButtons = screen.getAllByText("보기");
     expect(viewButtons.length).toBeGreaterThanOrEqual(2);

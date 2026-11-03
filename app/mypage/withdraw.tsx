@@ -2,11 +2,15 @@ import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
-import { Screen } from "../../../src/components/layout/Screen";
-import { Button, ConfirmDialog, TopBar } from "../../../src/components/ui";
-import { theme } from "../../../src/constants/theme";
-import { useWithdrawMember } from "../../../src/hooks/useMember";
-import { readDesignVariant } from "../../../src/lib/designVariant";
+import { Screen } from "../../src/components/layout/Screen";
+import {
+  ConfirmDialog,
+  FloatingBottomBar,
+  TopBar,
+} from "../../src/components/ui";
+import { theme } from "../../src/constants/theme";
+import { useWithdrawMember } from "../../src/hooks/useMember";
+import { readDesignVariant } from "../../src/lib/designVariant";
 
 const cautions = [
   "작성한 나눔 게시글·댓글은 익명으로 남습니다",
@@ -73,16 +77,14 @@ export default function WithdrawScreen() {
           </View>
         </ScrollView>
 
-        <View style={styles.bottomBar}>
-          <Button
-            variant="danger"
-            loading={withdrawMutation.isPending}
-            disabled={withdrawMutation.isPending}
-            onPress={() => setConfirmVisible(true)}
-          >
-            탈퇴하기
-          </Button>
-        </View>
+        <FloatingBottomBar
+          disabled={withdrawMutation.isPending}
+          label="탈퇴하기"
+          loading={withdrawMutation.isPending}
+          onPress={() => setConfirmVisible(true)}
+          testID="mypage-withdraw"
+          variant="danger"
+        />
 
         <ConfirmDialog
           visible={showConfirm || confirmVisible}
@@ -114,7 +116,7 @@ const styles = StyleSheet.create({
   },
   body: {
     paddingHorizontal: 18,
-    paddingBottom: 96,
+    paddingBottom: 130,
   },
   header: {
     paddingTop: 4,

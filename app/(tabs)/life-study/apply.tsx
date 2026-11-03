@@ -2,7 +2,6 @@ import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Keyboard,
   Pressable,
@@ -13,8 +12,11 @@ import {
   View,
 } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
-import { TopBar, VisualThumb } from "../../../src/components/ui";
-import { LinearGradient } from "expo-linear-gradient";
+import {
+  FloatingBottomBar,
+  TopBar,
+  VisualThumb,
+} from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import {
   useApplyLifeStudyCohort,
@@ -219,34 +221,13 @@ export default function LifeStudyApplyScreenRoute() {
           </Pressable>
         </ScrollView>
 
-        <View pointerEvents="box-none" style={styles.bottom}>
-          <LinearGradient
-            colors={[
-              "rgba(246,247,249,0)",
-              "rgba(246,247,249,0.78)",
-              "rgba(246,247,249,0.96)",
-            ]}
-            locations={[0, 0.38, 1]}
-            pointerEvents="none"
-            style={StyleSheet.absoluteFill}
-            testID="life-study-apply-bottom-bar"
-          />
-          <Pressable
-            accessibilityRole="button"
-            disabled={applyMutation.isPending}
-            onPress={handleSubmit}
-            style={[
-              styles.submitButton,
-              applyMutation.isPending ? styles.submitButtonDisabled : null,
-            ]}
-          >
-            {applyMutation.isPending ? (
-              <ActivityIndicator color={theme.colors.white} size="small" />
-            ) : (
-              <Text style={styles.submitText}>수강 신청하기</Text>
-            )}
-          </Pressable>
-        </View>
+        <FloatingBottomBar
+          disabled={applyMutation.isPending}
+          label="수강 신청하기"
+          loading={applyMutation.isPending}
+          onPress={handleSubmit}
+          testID="life-study-apply"
+        />
       </View>
     </Screen>
   );

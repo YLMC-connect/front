@@ -1,16 +1,16 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { Screen } from "../../../src/components/layout/Screen";
+import { Screen } from "../../src/components/layout/Screen";
 import {
   Avatar,
   ConfirmDialog,
   Empty,
   Toast,
   TopBar,
-} from "../../../src/components/ui";
-import { theme } from "../../../src/constants/theme";
-import { readDesignVariant } from "../../../src/lib/designVariant";
+} from "../../src/components/ui";
+import { theme } from "../../src/constants/theme";
+import { readDesignVariant } from "../../src/lib/designVariant";
 
 const blockedUsers = [
   { name: "이모씨", seed: 1, when: "2025.11.20" },
@@ -43,15 +43,13 @@ export default function BlockedScreen() {
 
           <View style={styles.list}>
             {users.length === 0 ? (
-              <View style={styles.emptyWrap}>
-                <Empty
-                  title="차단한 사용자가 없어요"
-                  description={
-                    "프로필 화면에서 언제든지\n상대를 차단할 수 있어요."
-                  }
-                  icon="block"
-                />
-              </View>
+              <Empty
+                icon="block"
+                title="차단한 사용자가 없어요"
+                description={
+                  "프로필 화면에서 언제든지\n상대를 차단할 수 있어요."
+                }
+              />
             ) : (
               users.map((user, index) => (
                 <View
@@ -101,6 +99,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   body: {
+    flexGrow: 1,
     paddingBottom: 24,
   },
   notice: {
@@ -115,6 +114,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   list: {
+    flex: 1,
     paddingHorizontal: 18,
   },
   row: {

@@ -63,13 +63,13 @@ describe("root tab bar", () => {
     }
   });
 
-  it("opens a different root tab and navigates via navigation.navigate without forced replace", () => {
-    const { navigate } = renderTabBar(1, "/market");
+  it("opens a different root tab and resets its stack via router.replace", () => {
+    const { unmount } = renderTabBar(1, "/market");
 
     fireEvent.press(screen.getByTestId("tab-prayer"));
 
-    expect(navigate).toHaveBeenCalledWith("prayer");
-    expect(router.replace).not.toHaveBeenCalled();
+    expect(router.replace).toHaveBeenCalledWith("/prayer");
+    unmount();
   });
 
   it("keeps the tab bar mounted while a root modal is presented over a root tab", () => {
@@ -95,11 +95,12 @@ describe("root tab bar", () => {
       navigation: { navigate: jest.fn() },
     } as unknown as BottomTabBarProps;
 
-    const { rerender } = renderWithClient(<AppTabBar {...props} />);
+    const view = renderWithClient(<AppTabBar {...props} />);
     expect(screen.getByTestId("tab-bar-shell")).toBeTruthy();
 
     jest.mocked(usePathname).mockReturnValue("/modal/group-new");
-    rerender(<AppTabBar {...props} />);
+    view.rerender(<AppTabBar {...props} />);
     expect(screen.getByTestId("tab-bar-shell")).toBeTruthy();
+    view.unmount();
   });
 });

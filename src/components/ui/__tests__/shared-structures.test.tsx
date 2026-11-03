@@ -183,6 +183,22 @@ describe("shared maintenance UI", () => {
     expect(onBack).toHaveBeenCalledTimes(1);
   });
 
+  it("renders compact screen header with reduced height and vertical padding", () => {
+    render(
+      <ScreenHeader title="열린문 커넥트" compact testID="compact-header" />,
+    );
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId("compact-header").props.style),
+    ).toMatchObject({
+      height: 60,
+      paddingHorizontal: theme.layout.screenX,
+      paddingTop: 15,
+      paddingBottom: 15,
+      justifyContent: "center",
+    });
+  });
+
   it("navigates back to returnUrl when returnUrl parameter is provided", () => {
     const mockReplace = jest.fn();
     jest.mocked(useRouter).mockReturnValue({

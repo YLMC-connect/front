@@ -1,6 +1,5 @@
 import { createApiClient, type ApiRequestOptions } from "../../lib/apiClient";
-import { MOCK_USER } from "../../mocks/auth";
-import { createHttpAuthAdapter, mockAuthAdapter } from "../authAdapter";
+import { createHttpAuthAdapter } from "../authAdapter";
 
 function jsonResponse(body: unknown, status = 200): Response {
   return {
@@ -9,94 +8,6 @@ function jsonResponse(body: unknown, status = 200): Response {
     text: jest.fn().mockResolvedValue(JSON.stringify(body)),
   } as unknown as Response;
 }
-
-describe("mockAuthAdapter", () => {
-  it.each([
-    ["id", "admin"],
-    ["phone", "010-2345-6789"],
-    ["email", "admin@ylmc.local"],
-  ] as const)(
-    "reports a known %s as unavailable",
-    async (searchType, searchValue) => {
-      await expect(
-        mockAuthAdapter.checkAvailability({ searchType, searchValue }),
-      ).resolves.toEqual({ available: false });
-    },
-  );
-
-  it("reports an unknown id as available", async () => {
-    await expect(
-      mockAuthAdapter.checkAvailability({
-        searchType: "id",
-        searchValue: "new-member",
-      }),
-    ).resolves.toEqual({ available: true });
-  });
-
-  it("checks duplicate values within the requested member field", async () => {
-    await expect(
-      mockAuthAdapter.checkAvailability({
-        searchType: "id",
-        searchValue: "010-2345-6789",
-      }),
-    ).resolves.toEqual({ available: true });
-  });
-
-  it("logs in with the configured mock credentials", async () => {
-    await expect(
-      mockAuthAdapter.login({ id: "admin", password: "admin" }),
-    ).resolves.toMatchObject({ member: MOCK_USER });
-  });
-
-  it("rejects the previous mock credentials", async () => {
-    await expect(
-      mockAuthAdapter.login({ id: "gracekim", password: "password" }),
-    ).rejects.toThrow("아이디 또는 비밀번호가 올바르지 않습니다");
-  });
-
-  it("returns mock user on getCurrentMember", async () => {
-    await expect(mockAuthAdapter.getCurrentMember()).resolves.toEqual(
-      MOCK_USER,
-    );
-  });
-
-  it("updates phone on mockAuthAdapter.updateCurrentMember", async () => {
-    await expect(
-      mockAuthAdapter.updateCurrentMember({ phone: "010-9999-9999" }),
-    ).resolves.toMatchObject({
-      ...MOCK_USER,
-      phone: "010-9999-9999",
-    });
-  });
-
-  it("verifies matching password and rejects incorrect password in mockAuthAdapter", async () => {
-    await expect(
-      mockAuthAdapter.verifyPassword({ password: "admin" }),
-    ).resolves.toBe(true);
-    await expect(
-      mockAuthAdapter.verifyPassword({ password: "wrong" }),
-    ).rejects.toThrow("비밀번호가 일치하지 않습니다");
-  });
-
-  it("changes password with correct current password in mockAuthAdapter", async () => {
-    await expect(
-      mockAuthAdapter.changePassword({
-        currentPassword: "admin",
-        newPassword: "newPassword123!",
-      }),
-    ).resolves.toBeUndefined();
-    await expect(
-      mockAuthAdapter.changePassword({
-        currentPassword: "wrong",
-        newPassword: "newPassword123!",
-      }),
-    ).rejects.toThrow("현재 비밀번호가 일치하지 않습니다");
-  });
-
-  it("withdraws in mockAuthAdapter", async () => {
-    await expect(mockAuthAdapter.withdraw()).resolves.toBeUndefined();
-  });
-});
 
 describe("httpAuthAdapter", () => {
   function setup() {

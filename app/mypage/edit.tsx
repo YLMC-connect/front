@@ -10,16 +10,16 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Screen } from "../../../src/components/layout/Screen";
-import { TopBar } from "../../../src/components/ui";
-import { theme } from "../../../src/constants/theme";
+import { Screen } from "../../src/components/layout/Screen";
+import { TopBar } from "../../src/components/ui";
+import { theme } from "../../src/constants/theme";
 import {
   useChangePassword,
   useMemberMe,
   useUpdateMemberMe,
-} from "../../../src/hooks/useMember";
-import { readDesignVariant } from "../../../src/lib/designVariant";
-import { getGivenName } from "../../../src/lib/koreanName";
+} from "../../src/hooks/useMember";
+import { readDesignVariant } from "../../src/lib/designVariant";
+import { getGivenName } from "../../src/lib/koreanName";
 
 type Variant =
   | "default"

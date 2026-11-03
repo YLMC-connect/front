@@ -366,36 +366,6 @@ describe("httpPrayerDataSource", () => {
     );
   });
 
-  it("keeps the screen create action off the topic endpoint", async () => {
-    const { request, dataSource } = setup();
-
-    await expect(
-      dataSource.createPrayerTopic({
-        roomId: "missing",
-        title: "제목",
-        content: "내용입니다",
-        isAnonymous: false,
-      }),
-    ).rejects.toThrow("존재하지 않는 기도방입니다.");
-    const created = await dataSource.createPrayerTopic({
-      roomId: "prayer-room-001",
-      title: "제목",
-      content: "내용입니다",
-      isAnonymous: true,
-    });
-
-    expect(created).toMatchObject({
-      roomId: "prayer-room-001",
-      title: "제목",
-      content: "내용입니다",
-      isAnonymous: true,
-      prayerCount: 0,
-      hasPrayed: false,
-      isAnswered: false,
-    });
-    expect(request).not.toHaveBeenCalled();
-  });
-
   it("does not call admin or mypage prayer paths", async () => {
     const { request, dataSource } = setup();
     request.mockResolvedValueOnce(status).mockResolvedValueOnce([]);

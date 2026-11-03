@@ -22,8 +22,6 @@ export type EmptyProps = {
   title: string;
   description?: string;
   icon?: IconName;
-  actionLabel?: string;
-  onAction?: () => void;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 };
@@ -32,8 +30,6 @@ export function Empty({
   title,
   description,
   icon = "inbox",
-  actionLabel,
-  onAction,
   style,
   testID,
 }: EmptyProps) {
@@ -49,17 +45,6 @@ export function Empty({
         <AppText variant="caption" tone="muted" style={styles.stateText}>
           {description}
         </AppText>
-      ) : null}
-      {actionLabel && onAction ? (
-        <Pressable
-          accessibilityRole="button"
-          onPress={onAction}
-          style={styles.stateAction}
-        >
-          <AppText variant="caption" tone="brand">
-            {actionLabel}
-          </AppText>
-        </Pressable>
       ) : null}
     </View>
   );
@@ -178,10 +163,12 @@ export function Toast({
 
 const styles = StyleSheet.create({
   state: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    padding: 32,
-    gap: 10,
+    paddingHorizontal: 24,
+    paddingBottom: 60,
+    gap: 12,
   },
   stateIcon: {
     width: 84,
@@ -196,6 +183,7 @@ const styles = StyleSheet.create({
   },
   stateText: {
     textAlign: "center",
+    lineHeight: 20,
   },
   stateAction: {
     minHeight: theme.layout.touchTarget,

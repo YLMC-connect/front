@@ -4,27 +4,20 @@ import {
   applyLifeStudyCohort,
   fetchLifeStudyCourses,
   fetchLifeStudyOverview,
-  resolveLifeStudyAdapterMode,
 } from "../services/lifeStudyService";
 import type { LifeStudyStatus } from "../types/lifeStudy";
 import type { LifeStudyAttendRequest } from "../types/lifeStudyApi";
 
 export function useLifeStudyCourses(filter: LifeStudyStatus = "all") {
   return useQuery({
-    queryKey: [
-      ...queryKeys.lifeStudy.list(filter),
-      resolveLifeStudyAdapterMode(),
-    ],
+    queryKey: queryKeys.lifeStudy.list(filter),
     queryFn: () => fetchLifeStudyCourses(filter),
   });
 }
 
 export function useLifeStudyOverview() {
   return useQuery({
-    queryKey: [
-      ...queryKeys.lifeStudy.overview(),
-      resolveLifeStudyAdapterMode(),
-    ],
+    queryKey: queryKeys.lifeStudy.overview(),
     queryFn: fetchLifeStudyOverview,
   });
 }

@@ -1,4 +1,3 @@
-import { MOCK_USER } from "../../mocks/auth";
 import type { AuthAdapter } from "../authAdapter";
 import {
   createAuthSessionManager,
@@ -6,11 +5,20 @@ import {
   type AuthTokenStore,
 } from "../authSessionService";
 import type { AuthSession } from "../../types/auth";
+import type { Member } from "../../types/common";
+
+const TEST_USER: Member = {
+  id: "member-001",
+  name: "김은혜",
+  role: "USER",
+  department: "소망목장",
+  phone: "010-2345-6789",
+};
 
 const session: AuthSession = {
   accessToken: "access-token",
   refreshToken: "refresh-token",
-  member: MOCK_USER,
+  member: TEST_USER,
 };
 
 function setup() {
@@ -23,8 +31,8 @@ function setup() {
       accessToken: "refreshed-access-token",
       refreshToken: "rotated-refresh-token",
     }),
-    getCurrentMember: jest.fn().mockResolvedValue(MOCK_USER),
-    updateCurrentMember: jest.fn().mockResolvedValue(MOCK_USER),
+    getCurrentMember: jest.fn().mockResolvedValue(TEST_USER),
+    updateCurrentMember: jest.fn().mockResolvedValue(TEST_USER),
     verifyPassword: jest.fn().mockResolvedValue(true),
     changePassword: jest.fn().mockResolvedValue(undefined),
     withdraw: jest.fn().mockResolvedValue(undefined),
@@ -66,7 +74,7 @@ describe("authSessionService", () => {
     expect(tokenStore.setTokens.mock.invocationCallOrder[0]).toBeLessThan(
       state.setAuthenticated.mock.invocationCallOrder[0],
     );
-    expect(state.setAuthenticated).toHaveBeenCalledWith(MOCK_USER);
+    expect(state.setAuthenticated).toHaveBeenCalledWith(TEST_USER);
   });
 
   it("cleans a partial session when token persistence fails", async () => {
@@ -85,11 +93,11 @@ describe("authSessionService", () => {
   it("restores a stored session through the current-member adapter", async () => {
     const { adapter, state, manager } = setup();
 
-    await expect(manager.restore()).resolves.toEqual(MOCK_USER);
+    await expect(manager.restore()).resolves.toEqual(TEST_USER);
 
     expect(state.setRestoring).toHaveBeenCalledTimes(1);
     expect(adapter.getCurrentMember).toHaveBeenCalledTimes(1);
-    expect(state.setAuthenticated).toHaveBeenCalledWith(MOCK_USER);
+    expect(state.setAuthenticated).toHaveBeenCalledWith(TEST_USER);
   });
 
   it("refreshes and rotates tokens when restore receives 401", async () => {
@@ -103,7 +111,7 @@ describe("authSessionService", () => {
       "refreshed-access-token",
       "rotated-refresh-token",
     );
-    expect(state.setAuthenticated).toHaveBeenCalledWith(MOCK_USER);
+    expect(state.setAuthenticated).toHaveBeenCalledWith(TEST_USER);
   });
 
   it("shares one refresh request between concurrent callers", async () => {

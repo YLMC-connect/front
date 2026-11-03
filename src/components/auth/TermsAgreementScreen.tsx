@@ -2,6 +2,7 @@ import { AppIcon } from "@/components/ui/app-icon";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Keyboard,
   Pressable,
   ScrollView,
@@ -16,8 +17,10 @@ import Animated, {
   useReducedMotion,
 } from "react-native-reanimated";
 import { Screen } from "../layout/Screen";
-import { TopBar } from "../ui";
+import { FLOATING_BOTTOM_BAR_INSET, FloatingBottomBar, TopBar } from "../ui";
 import { theme } from "../../constants/theme";
+import { useActiveSitePolicy } from "../../hooks/useSiteContent";
+import type { SitePolicyType } from "../../types/siteContentApi";
 
 export type TermKey = "tos" | "privacy" | "loc" | "mkt";
 
@@ -28,30 +31,9 @@ const terms = [
   { key: "mkt", label: "마케팅 정보 수신 동의", required: false },
 ] as const;
 
-const fullText: Record<TermKey, { title: string; body: string }> = {
-  tos: {
-    title: "서비스 이용약관",
-    body: `제1조 (목적)
-본 약관은 열린문커넥트(이하 "서비스")가 제공하는 모바일 애플리케이션 및 관련 제반 서비스의 이용과 관련하여 회사와 회원의 권리·의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
-
-제2조 (정의)
-1. "회원"이란 본 약관에 동의하고 회사가 제공하는 서비스를 이용하는 자를 말합니다.
-2. "콘텐츠"란 회원이 서비스에 게시한 글, 사진, 댓글 등을 의미합니다.
-3. "교회 커뮤니티"란 동일 교회 소속 회원으로 구성된 폐쇄형 그룹을 말합니다.
-
-제3조 (약관의 효력 및 변경)
-본 약관은 서비스 화면에 게시하거나 기타의 방법으로 회원에게 공지함으로써 효력이 발생합니다.`,
-  },
-  privacy: {
-    title: "개인정보 처리방침",
-    body: `제1조 (수집하는 개인정보 항목)
-회사는 회원가입, 서비스 제공 및 상담 등을 위해 아래와 같은 개인정보를 수집합니다.
-- 필수: 아이디, 비밀번호, 이름, 연락처
-- 선택: 목장/부서 정보
-
-제2조 (개인정보의 수집 및 이용 목적)
-회원 관리, 서비스 제공, 부정 이용 방지, 통계 분석을 위해 사용됩니다.`,
-  },
+const optionalTermsText: Partial<
+  Record<TermKey, { title: string; body: string }>
+> = {
   loc: {
     title: "위치 기반 서비스 이용약관",
     body: `제1조 (목적)
@@ -161,18 +143,12 @@ export function TermsAgreementScreen({
           </View>
         </ScrollView>
 
-        <View style={styles.bottomFlat}>
-          <Pressable
-            accessibilityRole="button"
-            disabled={!requiredOn}
-            style={[
-              styles.nextButton,
-              !requiredOn ? styles.nextDisabled : null,
-            ]}
-          >
-            <Text style={styles.nextText}>다음</Text>
-          </Pressable>
-        </View>
+        <FloatingBottomBar
+          label="다음"
+          disabled={!requiredOn}
+          onPress={() => router.back()}
+          testID="terms-submit"
+        />
 
         <TermsSheet termKey={sheet} onClose={() => setSheet(null)} />
       </View>
@@ -211,8 +187,37 @@ export function TermsSheet({
     }
   }, [termKey]);
 
+  const resolvedPolicyType: SitePolicyType | null =
+    termKey === "tos" ? 1 : termKey === "privacy" ? 2 : null;
+
+  const { data: policy, isLoading } = useActiveSitePolicy(resolvedPolicyType, {
+    enabled: resolvedPolicyType != null,
+  });
+
   if (!termKey) return null;
-  const term = fullText[termKey];
+
+  const formatEnforcedAt = (dateStr?: string) => {
+    if (!dateStr) return null;
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return null;
+      return `시행일자: ${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+    } catch {
+      return null;
+    }
+  };
+
+  const defaultTitle =
+    termKey === "tos"
+      ? "서비스 이용약관"
+      : termKey === "privacy"
+        ? "개인정보 처리방침"
+        : (optionalTermsText[termKey]?.title ?? "약관");
+
+  const sheetTitle = policy?.title || defaultTitle;
+  const effectiveDateText = formatEnforcedAt(policy?.enforcedAt);
+  const sheetContent =
+    policy?.content ?? optionalTermsText[termKey]?.body ?? "";
 
   return (
     <View style={styles.sheetLayer}>
@@ -239,7 +244,7 @@ export function TermsSheet({
           <View style={styles.handle} />
         </View>
         <View style={styles.sheetHeader}>
-          <Text style={styles.sheetTitle}>{term.title}</Text>
+          <Text style={styles.sheetTitle}>{sheetTitle}</Text>
           <Pressable
             accessibilityLabel="닫기"
             accessibilityRole="button"
@@ -250,10 +255,20 @@ export function TermsSheet({
             <Text style={styles.closeText}>닫기</Text>
           </Pressable>
         </View>
-        <ScrollView contentContainerStyle={styles.sheetBody}>
-          <Text style={styles.effectiveDate}>시행일자: 2026년 1월 1일</Text>
-          <Text style={styles.fullText}>{term.body}</Text>
-        </ScrollView>
+        {isLoading ? (
+          <View style={styles.sheetLoadingWrap}>
+            <ActivityIndicator color={theme.colors.primary} />
+          </View>
+        ) : (
+          <ScrollView contentContainerStyle={styles.sheetBody}>
+            {effectiveDateText ? (
+              <Text style={styles.effectiveDate}>{effectiveDateText}</Text>
+            ) : null}
+            <Text style={styles.fullText}>
+              {sheetContent || "등록된 약관 내용이 없습니다."}
+            </Text>
+          </ScrollView>
+        )}
       </Animated.View>
     </View>
   );
@@ -263,7 +278,7 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   body: {
     paddingHorizontal: 24,
-    paddingBottom: 18,
+    paddingBottom: FLOATING_BOTTOM_BAR_INSET,
   },
   display: {
     color: theme.colors.ink,
@@ -344,29 +359,6 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     backgroundColor: theme.colors.primary,
   },
-  bottomFlat: {
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.line,
-    backgroundColor: theme.colors.glass,
-    paddingHorizontal: 18,
-    paddingTop: 12,
-    paddingBottom: 18,
-  },
-  nextButton: {
-    minHeight: 52,
-    borderRadius: theme.radius.pill,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: theme.colors.primary,
-  },
-  nextDisabled: {
-    opacity: 0.4,
-  },
-  nextText: {
-    color: theme.colors.white,
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.bold,
-  },
   sheetLayer: {
     ...StyleSheet.absoluteFill,
     zIndex: 50,
@@ -437,5 +429,10 @@ const styles = StyleSheet.create({
     color: theme.colors.inkSoft,
     fontSize: 13.5,
     lineHeight: 24,
+  },
+  sheetLoadingWrap: {
+    paddingVertical: 48,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

@@ -12,9 +12,9 @@ import {
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   Avatar,
-  Button,
   ConfirmDialog,
   ErrorState,
+  FloatingBottomBar,
   Toast,
   TopBar,
 } from "../../../src/components/ui";
@@ -115,15 +115,12 @@ export default function GroupMembersScreenRoute() {
         </ScrollView>
 
         {isTransfer && membersQuery.data ? (
-          <View style={styles.bottomBar}>
-            <Button
-              testID="group-transfer-submit"
-              disabled={!transferTargetName}
-              onPress={() => setShowTransferConfirm(true)}
-            >
-              이관하기
-            </Button>
-          </View>
+          <FloatingBottomBar
+            disabled={!transferTargetName}
+            label="이관하기"
+            onPress={() => setShowTransferConfirm(true)}
+            testID="group-transfer-submit"
+          />
         ) : null}
 
         <ConfirmDialog

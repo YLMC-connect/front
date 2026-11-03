@@ -1,6 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
@@ -11,6 +12,7 @@ import {
   type TextInputProps,
   View,
 } from "react-native";
+import { AppIcon } from "@/components/ui/app-icon";
 import { AuthInput } from "../../src/components/auth/auth-input";
 import { Screen } from "../../src/components/layout/Screen";
 import {
@@ -27,7 +29,6 @@ import { useAuth } from "../../src/hooks/useAuth";
 import { getApiErrorMessage } from "../../src/lib/apiErrorMessage";
 import { isValidLoginId, sanitizeLoginId } from "../../src/lib/authValidation";
 import { readDesignVariant } from "../../src/lib/designVariant";
-import { MOCK_LOGIN_CREDENTIALS } from "../../src/mocks/auth";
 
 type FormValues = {
   id: string;
@@ -46,6 +47,8 @@ function validateLogin(values: FormValues) {
   return errors;
 }
 
+const SAVED_ID_KEY = "ylmc.saved_login_id";
+
 export default function LoginScreen() {
   const params = useLocalSearchParams<{ designVariant?: string }>();
   const variant = readDesignVariant(params.designVariant) ?? "default";
@@ -56,12 +59,29 @@ export default function LoginScreen() {
   const enterMotion = isDefault;
   const { login } = useAuth();
   const [values, setValues] = useState<FormValues>({
-    id: isDefault ? "" : MOCK_LOGIN_CREDENTIALS.id,
-    password: isDefault ? "" : MOCK_LOGIN_CREDENTIALS.password,
+    id: isDefault ? "" : "admin",
+    password: isDefault ? "" : "admin",
   });
+  const [rememberId, setRememberId] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [lockedHeight, setLockedHeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!isDefault) return;
+    AsyncStorage.getItem(SAVED_ID_KEY)
+      .then((savedId) => {
+        if (savedId) {
+          setValues((current) => ({
+            ...current,
+            id: current.id || savedId,
+          }));
+          setRememberId(true);
+        }
+      })
+      .catch(() => undefined);
+  }, [isDefault]);
+
   const isFilled = values.id.length > 0 && values.password.length > 0;
   const formErrorMessage = login.error
     ? getApiErrorMessage(
@@ -77,6 +97,14 @@ export default function LoginScreen() {
     const nextErrors = validateLogin(values);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
+
+    if (rememberId) {
+      AsyncStorage.setItem(SAVED_ID_KEY, values.id.trim()).catch(
+        () => undefined,
+      );
+    } else {
+      AsyncStorage.removeItem(SAVED_ID_KEY).catch(() => undefined);
+    }
 
     login.mutate(values, {
       onSuccess: () => router.replace("/"),
@@ -172,6 +200,36 @@ export default function LoginScreen() {
                   setPasswordVisible((visible) => !visible)
                 }
               />
+              <Pressable
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: rememberId }}
+                hitSlop={8}
+                onPress={() => setRememberId((prev) => !prev)}
+                style={styles.rememberRow}
+                testID="login-remember-id"
+              >
+                <View
+                  style={[
+                    styles.checkbox,
+                    rememberId ? styles.checkboxChecked : null,
+                  ]}
+                >
+                  {rememberId ? (
+                    <AppIcon
+                      name="check"
+                      size={12}
+                      color={theme.colors.white}
+                    />
+                  ) : null}
+                </View>
+                <AppText
+                  variant="caption"
+                  tone="secondary"
+                  style={styles.rememberText}
+                >
+                  아이디 저장
+                </AppText>
+              </Pressable>
               {formErrorMessage ? (
                 <MotionShake trigger={formErrorMessage}>
                   <MotionFadeIn>
@@ -213,10 +271,7 @@ export default function LoginScreen() {
                 onPress={() => router.push("/signup")}
                 style={styles.signupLink}
               >
-                <AppText
-                  tone="brand"
-                  style={styles.signupLinkText}
-                >
+                <AppText tone="brand" style={styles.signupLinkText}>
                   회원가입하기
                 </AppText>
               </MotionPressable>
@@ -358,6 +413,32 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   fieldError: { marginTop: 6 },
+  rememberRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 8,
+    marginTop: -theme.spacing[2],
+    paddingVertical: 4,
+  },
+  checkbox: {
+    width: 18,
+    height: 18,
+    borderRadius: 5,
+    borderWidth: 1.5,
+    borderColor: theme.colors.lineStrong,
+    backgroundColor: theme.colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxChecked: {
+    borderWidth: 0,
+    backgroundColor: theme.colors.primary,
+  },
+  rememberText: {
+    fontSize: 13,
+    color: theme.colors.inkSoft,
+  },
   loginButton: {
     minHeight: 52,
     marginTop: theme.spacing[2],

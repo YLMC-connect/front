@@ -1,7 +1,4 @@
 import { apiClient, type ApiRequestOptions } from "../lib/apiClient";
-import { MOCK_USER } from "../mocks/auth";
-import { mockPrayerRooms } from "../mocks/prayers";
-import type { PrayerTopicInput } from "../types/prayer";
 import type {
   PrayerAnswerRequest,
   PrayerApplicationCreateRequest,
@@ -48,23 +45,6 @@ export function createHttpPrayerDataSource({
           : [];
 
       return buildPrayerOverview(myCohorts, topics);
-    },
-
-    // 작성 화면은 categoryId가 없고 roomId·isAnonymous는 등록 요청 필드가 아니다.
-    async createPrayerTopic(input: PrayerTopicInput) {
-      const room = mockPrayerRooms.find(
-        (candidate) => candidate.id === input.roomId,
-      );
-      if (!room) throw new Error("존재하지 않는 기도방입니다.");
-      return {
-        id: `prayer-topic-${Date.now()}`,
-        ...input,
-        author: MOCK_USER,
-        prayerCount: 0,
-        hasPrayed: false,
-        isAnswered: false,
-        createdAt: new Date().toISOString(),
-      };
     },
 
     async getMyCohorts() {

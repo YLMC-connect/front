@@ -1,6 +1,6 @@
 # common (공통 인프라)
 
-> 마지막 갱신: 2026-10-09 (Expo SDK 57. 웹 라이브 API는 검증 대상 아님. login/refresh도 공통 envelope. 선택 중인 루트 탭은 다시 열지 않음) | 담당 Phase: P1/P6/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-10-28 (직접 제스처 시에만 새로고침 스피너 노출. 탭 클릭 시 첫 화면 스택 리셋. FloatingBottomBar 공통화. Expo SDK 57. 웹 라이브 API는 검증 대상 아님. login/refresh도 공통 envelope. 선택 중인 루트 탭은 다시 열지 않음) | 담당 Phase: P1/P6/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -16,9 +16,11 @@
 - Expo SDK 57 + Dev Client 기준. 서버 데이터는 TanStack Query, 인증·UI는 Zustand. mock-first 후 `services/` 만 교체. iOS는 `ios.enableSceneSupport`로 scene lifecycle을 켠다
 - Gluestack UI 및 NativeWind 퇴역 및 UI 모듈화 — 실제 미사용 중이던 Gluestack UI 및 NativeWind/Tailwind 관련 패키지 160개 및 설정 파일을 완전 제거하고, 1,775줄의 공통 UI index.tsx를 6개 서브모듈(buttons, display, inputs, navigation, dialog, feedback)로 분리 (Issue #119, ADR 0006)
 - 본문 글꼴 Pretendard. 아이콘은 공통 `AppIcon`(Lucide Icons `lucide-react-native`, `weight="bold"` 시 strokeWidth 2.75 강조)
-- 루트 5탭 홈/나눔/동행/기도/삶공부. MY는 홈에서 숨김 route. 상세는 탭 중첩 Stack. 탭 전환 시 강제 replace/새로고침 없이 `navigation.navigate`로 화면 상태와 스크롤 위치를 즉시 유지하며, 이미 보고 있는 루트 탭을 다시 누르면 같은 주소로 다시 열지 않는다
+- 루트 5탭 홈/나눔/동행/기도/삶공부. MY는 홈에서 숨김 route. 상세는 탭 중첩 Stack. 탭 클릭 시 언제나 해당 탭의 첫 화면(`tab.href`)으로 스택을 깨끗하게 리셋(`router.replace`)하며, 이미 보고 있는 첫 화면을 다시 누르면 불필요하게 다시 열지 않는다
+- 당겨서 새로고침(Pull-to-Refresh) 스피너는 사용자가 직접 화면을 손으로 끌어내렸을 때만 표시되며, 탭 전환·화면 진입·백그라운드 쿼리 갱신 시에는 새로고침 모션이 노출되지 않는다 (`StickyHeaderScreen`, `Screen`의 `isPullRefreshing` 제어)
 - 화면 상단은 `safe area + 20px`. 이미지 hero overlay는 예외이며, 등록 바텀 모달(presentation: "modal")은 safe area 대신 좌우 여백(screenX=20px)과 동일한 상단 여백 적용
 - 루트 탭은 glass sticky 헤더 + `StickyHeaderScreen`. 기본 숨김은 아래 12px / 위 4px(`direction`). 화면 오버레이(`overlay`)는 `ScreenHeader` 상위 레이어로 배치되어 플로팅 메뉴 backdrop이 헤더까지 온전히 덮는다
+- 화면 하단 고정 액션 바 공통화 — `FloatingBottomBar` 및 `FLOATING_BOTTOM_BAR_INSET = 130`. 배경 그라데이션(`LinearGradient` 0~1 투명도)과 Safe Area 바닥 인셋(`Math.max(insets.bottom, 24)`)을 자동 계산하며 회원가입/신청/모달/약관/탈퇴 등 하단 CTA 액션 바를 일원화
 - 작성 입력은 공통 `ModalFormTextInput`(primary 2px 포커스). 검색은 `SearchField`
 - 숨긴 웹 route의 `0×0` layout은 탭·필터 geometry로 쓰지 않음
 - API client는 기본 `{ code, message, data }` envelope. 비envelope 성공만 `format: "json"`
@@ -44,6 +46,7 @@
 | `src/constants/theme.ts` / `designTokens.json` | 디자인 토큰                                         |
 | `src/components/layout/Screen.tsx`             | 공통 화면 + 상단 inset                              |
 | `src/components/layout/StickyHeaderScreen.tsx` | 루트 탭 sticky 헤더·필터                            |
+| `src/components/ui/floating-bottom-bar.tsx`    | FloatingBottomBar 하단 플로팅 액션 바                 |
 | `src/components/ui/buttons.tsx`                | Button, FloatingActionButton 공통 컴포넌트          |
 | `src/components/ui/display.tsx`                | Card, Badge, Avatar, VisualThumb, VisualCover, Chip |
 | `src/components/ui/inputs.tsx`                 | TextField, Textarea, ImagePickerField, FormSection  |
@@ -64,8 +67,8 @@
 
 ## 결정 사항 (지금 유효한 것만)
 
-- **화면 전환 배경색 고정 및 하단 탭바 퇴장·등장 애니메이션** — 루트 `<Tabs>`와 각 하위 Stack(`market`, `group`, `prayer`, `life-study`, `mypage`)에 `sceneStyle` / `contentStyle: { backgroundColor: theme.colors.bg }`를 지정해 화면 전환 시 흰색 플래시를 방지하고 네이티브 기본 Stack 전환 곡선을 유지하며, 상세 진입 시 `AppTabBar`가 즉시 언마운트(`return null`)되지 않고 `180ms` 페이드·슬라이드(`translateY`)로 부드럽게 숨겨지도록 개선.
-- **공통 Empty 컴포넌트 표준화 (`src/components/ui`)** — 빈 목록/데이터 부재 상태를 위한 `Empty` 공통 컴포넌트(아이콘 + 타이틀 + 부제목 + 선택적 액션) 및 `EmptyProps`를 표준화하여 export하고, 기존 `EmptyState`를 alias로 하위 호환 유지. Issue #164.
+- **공통 Empty 컴포넌트 표준화 (FAQ 기준 통일 스펙)** — 빈 목록/데이터 부재 상태를 위한 `Empty` 공통 컴포넌트(`src/components/ui/feedback.tsx`)를 FAQ 화면 기준으로 통일. 84px 큰 원형 배경(`surface2`), 42px 큰 아이콘(`inkHint`), `cardTitle` 볼드 제목 및 `caption` 설명 문구로 구성하며 상하 정중앙 배치(`flex: 1`, `justifyContent: "center"`)를 유지하고 일체의 CTA 버튼을 배제. 약관, 개인정보처리방침, FAQ, 차단 목록, 내 활동, 나눔, 소모임, 기도, 삶공부 전반에 일관되게 적용.
+- **화면 전환 배경색 고정 및 전 하위 Stack 우측 슬라이드(`slide_from_right`) 모션 일원화** — 루트 `<Tabs>`와 각 하위 Stack(`market`, `group`, `prayer`, `life-study`, `mypage`)에 `sceneStyle` / `contentStyle: { backgroundColor: theme.colors.bg }` 및 `animation: "slide_from_right"`를 일괄 지정해 화면 전환 시 흰색 플래시를 방지하고, iOS 및 Android 전 기기에서 모든 상세 진입/퇴장이 일관된 우측 슬라이드로 동작하도록 통일. 상세 진입 시 `AppTabBar`는 `180ms` 페이드·슬라이드(`translateY`)로 부드럽게 숨겨지도록 개선.
 - **서버 역할은 공통 타입으로 보존** — `UserRole`은 `ADMIN`, `USER`, 도메인별 `MANAGER_*` 역할을 원본 값으로 유지한다. 프런트 판별은 메뉴/route 노출용이며 실제 API 인가는 서버가 담당한다.
 - **API origin은 로컬 env만** — `EXPO_PUBLIC_API_URL`. 실제 호스트를 코드·문서·`.env.example`에 두지 않음. HTTP adapter를 쓰는 동안 없으면 `app.config.ts`가 실패. mock만이면 URL 없이 실행 가능.
 - **웹 라이브 API는 검증 대상이 아님** — 브라우저 CORS. 서버 CORS를 열지 않는 한 `npm run web`으로 라이브 인증을 맞추지 않음. 검증 기준은 Expo Dev Client.

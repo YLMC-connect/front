@@ -5,16 +5,15 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   AnimatedProgressFill,
-  Button,
   Card,
   DetailBadge,
+  Empty,
+  FloatingBottomBar,
   TopBar,
 } from "../../../src/components/ui";
-import { LinearGradient } from "expo-linear-gradient";
 import { theme } from "../../../src/constants/theme";
 import { useLifeStudyOverview } from "../../../src/hooks/useLifeStudyCourses";
 import { readDesignVariant } from "../../../src/lib/designVariant";
-import { resolveLifeStudyAdapterMode } from "../../../src/services/lifeStudyService";
 import type { LifeStudyOverviewStatus } from "../../../src/types/lifeStudy";
 
 const course = {
@@ -98,7 +97,7 @@ function LiveLifeStudyDetail({ id }: { id: string }) {
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
         <TopBar
-          title={course?.title || "삶공부"}
+          title={course?.title || "삶공부 과정"}
           back
           onBack={() => router.back()}
         />
@@ -111,9 +110,11 @@ function LiveLifeStudyDetail({ id }: { id: string }) {
               <Text style={styles.desc}>과정을 다시 불러와주세요.</Text>
             ) : null}
             {overview.isSuccess && !course ? (
-              <Text style={styles.desc}>
-                서버 수료 목록에 이 과정이 없습니다.
-              </Text>
+              <Empty
+                icon="book-open-page-variant-outline"
+                title="등록된 삶공부 과정이 없어요"
+                description="과정 정보를 찾을 수 없습니다."
+              />
             ) : null}
             {course ? (
               <>
@@ -135,9 +136,14 @@ function LiveLifeStudyDetail({ id }: { id: string }) {
                     ) : null}
                   </Card>
                 ) : null}
-                <Text style={styles.desc}>
-                  팀장, 교재, 커리큘럼, 수업 일정은 수료 응답에 없습니다.
-                </Text>
+                <View style={styles.sectionMargin}>
+                  <Text style={styles.subSectionTitle}>커리큘럼</Text>
+                  <Empty
+                    icon="book-open-page-variant-outline"
+                    title="등록된 커리큘럼이 없어요"
+                    description="개강 시 주차별 강의 커리큘럼이 공개됩니다."
+                  />
+                </View>
               </>
             ) : null}
           </View>
@@ -155,7 +161,7 @@ export default function LifeStudyDetailScreen() {
   }>();
   const id = routeId(params.id);
   const variant = readDesignVariant(params.designVariant);
-  if (id && !params.designVariant && resolveLifeStudyAdapterMode() === "http") {
+  if (id && !params.designVariant) {
     return <LiveLifeStudyDetail id={id} />;
   }
   const enrolled = variant === "enrolled";
@@ -217,20 +223,10 @@ export default function LifeStudyDetailScreen() {
           </Section>
         </ScrollView>
 
-        <View pointerEvents="box-none" style={styles.bottomBar}>
-          <LinearGradient
-            colors={[
-              "rgba(246,247,249,0)",
-              "rgba(246,247,249,0.78)",
-              "rgba(246,247,249,0.96)",
-            ]}
-            locations={[0, 0.38, 1]}
-            pointerEvents="none"
-            style={StyleSheet.absoluteFill}
-            testID="life-study-detail-bottom-bar"
-          />
-          <Button>{enrolled ? "수강 내역 보기" : "수강 신청"}</Button>
-        </View>
+        <FloatingBottomBar
+          label={enrolled ? "수강 내역 보기" : "수강 신청"}
+          testID="life-study-detail-bottom-bar"
+        />
       </View>
     </Screen>
   );
@@ -465,9 +461,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   body: {
+    flexGrow: 1,
     paddingBottom: 100,
   },
   hero: {
+    flex: 1,
     paddingHorizontal: 18,
     paddingBottom: 18,
   },
@@ -708,5 +706,14 @@ const styles = StyleSheet.create({
   },
   doneText: {
     color: theme.colors.inkMute,
+  },
+  sectionMargin: {
+    marginTop: 24,
+  },
+  subSectionTitle: {
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.lg,
+    fontWeight: theme.fontWeight.extrabold,
+    marginBottom: 8,
   },
 });

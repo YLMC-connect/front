@@ -1,15 +1,7 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  forwardRef,
-  type ReactNode,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { forwardRef, type ReactNode, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
@@ -37,6 +29,7 @@ import {
 import { Screen } from "../../src/components/layout/Screen";
 import {
   AppText,
+  FloatingBottomBar,
   MotionEnter,
   MotionFadeIn,
   MotionPop,
@@ -67,7 +60,6 @@ type Availability = {
 };
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const softEasing = Easing.out(Easing.cubic);
 
 const AUTO_ADVANCE_DEBOUNCE = process.env.NODE_ENV === "test" ? 0 : 500;
 const FOCUS_HANDOFF_DELAY = process.env.NODE_ENV === "test" ? 0 : 350;
@@ -126,7 +118,6 @@ function validateSignup(values: FormValues) {
 }
 
 export default function SignupScreen() {
-  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ designVariant?: string }>();
   const { checkAvailability, signup } = useAuth();
   const variant = readDesignVariant(params.designVariant) ?? "default";
@@ -384,11 +375,11 @@ export default function SignupScreen() {
   // Progressive card unlock conditions
   const isCard1Complete = Boolean(
     values.id.trim().length >= 3 &&
-      isValidLoginId(values.id.trim()) &&
-      currentIdAvailability === true &&
-      hasMinLength &&
-      hasAlphaNumeric &&
-      !errors.password,
+    isValidLoginId(values.id.trim()) &&
+    currentIdAvailability === true &&
+    hasMinLength &&
+    hasAlphaNumeric &&
+    !errors.password,
   );
 
   // Realtime member info criteria
@@ -416,16 +407,16 @@ export default function SignupScreen() {
 
   const isCard2Complete = Boolean(
     isNameValid &&
-      !nameErrorMessage &&
-      isPhoneValid &&
-      !phoneErrorMessage &&
-      hasValidEmailFormat &&
-      currentEmailAvailability !== false &&
-      !errors.userName &&
-      !errors.phone &&
-      !errors.email &&
-      !isPhoneError &&
-      !isPhoneDup,
+    !nameErrorMessage &&
+    isPhoneValid &&
+    !phoneErrorMessage &&
+    hasValidEmailFormat &&
+    currentEmailAvailability !== false &&
+    !errors.userName &&
+    !errors.phone &&
+    !errors.email &&
+    !isPhoneError &&
+    !isPhoneDup,
   );
 
   const [unlockedStep, setUnlockedStep] = useState<number>(() => {
@@ -434,12 +425,18 @@ export default function SignupScreen() {
     return 1;
   });
 
+  if (AUTO_ADVANCE_DEBOUNCE === 0) {
+    if (isCard1Complete && unlockedStep < 2) {
+      setUnlockedStep(2);
+    } else if (unlockedStep >= 2 && isCard2Complete && unlockedStep < 3) {
+      setUnlockedStep(3);
+    }
+  }
+
   // Auto-advance to Step 2 when Card 1 is completed (settle debounce, then focus after card expansion)
   useEffect(() => {
     if (isCard1Complete && unlockedStep < 2) {
       if (AUTO_ADVANCE_DEBOUNCE === 0) {
-        animateLayout();
-        setUnlockedStep(2);
         nameInputRef.current?.focus();
         return;
       }
@@ -457,12 +454,12 @@ export default function SignupScreen() {
 
   // Auto-advance to Step 3 when Card 2 is completed (settle debounce)
   useEffect(() => {
-    if (unlockedStep >= 2 && isCard2Complete && unlockedStep < 3) {
-      if (AUTO_ADVANCE_DEBOUNCE === 0) {
-        animateLayout();
-        setUnlockedStep(3);
-        return;
-      }
+    if (
+      AUTO_ADVANCE_DEBOUNCE > 0 &&
+      unlockedStep >= 2 &&
+      isCard2Complete &&
+      unlockedStep < 3
+    ) {
       const timer = setTimeout(() => {
         animateLayout();
         setUnlockedStep(3);
@@ -558,8 +555,8 @@ export default function SignupScreen() {
                       >
                         <CheckBadge on={agreedTerms.tos} />
                         <Text style={styles.termsItemText}>
-                          <Text style={styles.termsRequired}>[필수]</Text> 서비스
-                          이용약관
+                          <Text style={styles.termsRequired}>[필수]</Text>{" "}
+                          서비스 이용약관
                         </Text>
                       </Pressable>
                       <Pressable
@@ -589,8 +586,8 @@ export default function SignupScreen() {
                       >
                         <CheckBadge on={agreedTerms.privacy} />
                         <Text style={styles.termsItemText}>
-                          <Text style={styles.termsRequired}>[필수]</Text> 개인정보
-                          처리방침
+                          <Text style={styles.termsRequired}>[필수]</Text>{" "}
+                          개인정보 처리방침
                         </Text>
                       </Pressable>
                       <Pressable
@@ -988,30 +985,13 @@ export default function SignupScreen() {
           </Pressable>
         </ScrollView>
 
-        <View
-          pointerEvents="box-none"
-          style={[
-            styles.bottom,
-            { paddingBottom: Math.max(insets.bottom, 24) },
-          ]}
-        >
-          <LinearGradient
-            colors={[
-              "rgba(246,247,249,0)",
-              "rgba(246,247,249,0.78)",
-              "rgba(246,247,249,0.96)",
-            ]}
-            locations={[0, 0.38, 1]}
-            pointerEvents="none"
-            style={StyleSheet.absoluteFill}
-            testID="signup-bottom-bar-gradient"
-          />
-          <SubmitButton
-            disabled={isSubmitDisabled || signup.isPending || isLoading}
-            loading={signup.isPending || isLoading}
-            onPress={onSubmit}
-          />
-        </View>
+        <FloatingBottomBar
+          disabled={isSubmitDisabled || signup.isPending || isLoading}
+          label="회원 가입"
+          loading={signup.isPending || isLoading}
+          onPress={onSubmit}
+          testID="signup-submit"
+        />
 
         <TermsSheet
           termKey={termsSheetKey}
@@ -1036,32 +1016,6 @@ function CheckBadge({ on, big = false }: { on: boolean; big?: boolean }) {
         <AppIcon name="check" size={size * 0.65} color={theme.colors.white} />
       ) : null}
     </View>
-  );
-}
-
-function SubmitButton({
-  disabled,
-  loading,
-  onPress,
-}: {
-  disabled: boolean;
-  loading: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <MotionPressable
-      testID="signup-submit"
-      accessibilityRole="button"
-      onPress={onPress}
-      disabled={disabled || loading}
-      style={styles.submitButton}
-    >
-      {loading ? (
-        <ActivityIndicator size="small" color={theme.colors.white} />
-      ) : (
-        <Text style={styles.submitText}>회원 가입</Text>
-      )}
-    </MotionPressable>
   );
 }
 
@@ -1116,9 +1070,7 @@ const SignupInput = forwardRef<
   const [passwordVisible, setPasswordVisible] = useState(false);
   const resolvedTrailing = secureTextEntry ? (
     <MotionPressable
-      accessibilityLabel={
-        passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"
-      }
+      accessibilityLabel={passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"}
       accessibilityRole="button"
       hitSlop={8}
       onPress={() => setPasswordVisible((visible) => !visible)}
@@ -1168,14 +1120,6 @@ function InlineError({ children }: { children?: ReactNode }) {
         <Text style={styles.inlineError}>{children}</Text>
       </View>
     </MotionFadeIn>
-  );
-}
-
-function FieldHint({ children }: { children: ReactNode }) {
-  return (
-    <AppText variant="caption" tone="muted" style={styles.hint}>
-      {children}
-    </AppText>
   );
 }
 

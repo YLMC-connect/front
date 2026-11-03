@@ -1,10 +1,10 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
-import { Screen } from "../../../../src/components/layout/Screen";
-import { TopBar } from "../../../../src/components/ui";
-import { theme } from "../../../../src/constants/theme";
-import { readDesignVariant } from "../../../../src/lib/designVariant";
+import { Screen } from "../../../src/components/layout/Screen";
+import { TopBar } from "../../../src/components/ui";
+import { theme } from "../../../src/constants/theme";
+import { readDesignVariant } from "../../../src/lib/designVariant";
 
 type Variant =
   | "default"

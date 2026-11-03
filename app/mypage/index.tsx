@@ -9,16 +9,11 @@ import {
   Text,
   View,
 } from "react-native";
-import { Screen, Section } from "../../../src/components/layout/Screen";
-import {
-  Avatar,
-  Card,
-  ConfirmDialog,
-  TopBar,
-} from "../../../src/components/ui";
-import { theme } from "../../../src/constants/theme";
-import { useAuth } from "../../../src/hooks/useAuth";
-import { useMemberMe } from "../../../src/hooks/useMember";
+import { Screen, Section } from "../../src/components/layout/Screen";
+import { Avatar, Card, ConfirmDialog, TopBar } from "../../src/components/ui";
+import { theme } from "../../src/constants/theme";
+import { useAuth } from "../../src/hooks/useAuth";
+import { useMemberMe } from "../../src/hooks/useMember";
 
 type IconName = ComponentProps<typeof AppIcon>["name"];
 
@@ -35,12 +30,12 @@ const activityItems: MenuItem[] = [
   {
     label: "중보기도 활동 이력",
     icon: "hands-pray",
-    href: "/prayer/request?returnUrl=/mypage",
+    href: "/mypage/prayer-history",
   },
   {
     label: "삶공부 수료",
     icon: "menu-book",
-    href: "/life-study/history?returnUrl=/mypage",
+    href: "/mypage/life-study-history",
   },
 ];
 

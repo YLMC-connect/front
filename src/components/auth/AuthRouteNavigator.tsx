@@ -18,12 +18,12 @@ export function AuthRouteNavigator() {
 
   return (
     <Stack
+      initialRouteName={isAuthenticated ? "(tabs)" : "(auth)"}
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: theme.colors.bg },
       }}
     >
-      <Stack.Screen name="+not-found" options={{ title: "Not Found" }} />
       <Stack.Protected guard={!isAuthenticated}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
@@ -47,6 +47,7 @@ export function AuthRouteNavigator() {
           options={{ presentation: "modal" }}
         />
       </Stack.Protected>
+      <Stack.Screen name="+not-found" options={{ title: "Not Found" }} />
     </Stack>
   );
 }

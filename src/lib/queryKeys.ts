@@ -19,7 +19,7 @@ export const queryKeys = {
   lifeStudy: {
     all: ["lifeStudy"] as const,
     overview: () =>
-      [...queryKeys.lifeStudy.all, "overview", "http-v2"] as const,
+      [...queryKeys.lifeStudy.all, "overview", "http-v3"] as const,
     cohortDetail: (cohortId: string) =>
       [...queryKeys.lifeStudy.all, "cohort", cohortId] as const,
     lists: () => [...queryKeys.lifeStudy.all, "list"] as const,

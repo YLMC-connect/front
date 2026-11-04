@@ -221,7 +221,27 @@ function LiveLifeStudyDetail({
                       ) : null}
                     </Card>
                   </View>
-                ) : null}
+                ) : (
+                  <View style={styles.sectionMargin}>
+                    <Text style={styles.subSectionTitle}>신청 안내</Text>
+                    <Card style={styles.noticeCard}>
+                      <View style={styles.noticeHeader}>
+                        <AppIcon
+                          name="info"
+                          size={16}
+                          color={theme.colors.primary}
+                        />
+                        <Text style={styles.noticeCardTitle}>
+                          현재 모집 중인 기수가 없습니다
+                        </Text>
+                      </View>
+                      <Text style={styles.noticeCardText}>
+                        다음 기수 개강 일정 및 모집 기간이 확정되면 안내해
+                        드릴게요.
+                      </Text>
+                    </Card>
+                  </View>
+                )}
 
                 <View
                   style={[
@@ -695,6 +715,21 @@ const styles = StyleSheet.create({
   noticeCard: {
     padding: 14,
     gap: 8,
+  },
+  noticeHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  noticeCardTitle: {
+    color: theme.colors.ink,
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.bold,
+  },
+  noticeCardText: {
+    color: theme.colors.inkMute,
+    fontSize: theme.fontSize.xs,
+    lineHeight: 18,
   },
   noticeTitle: {
     color: theme.colors.ink,

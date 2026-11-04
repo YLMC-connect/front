@@ -445,6 +445,11 @@ function CourseCard({
       ? (`/life-study/${course.id}?cohortId=${course.cohortId}` as const)
       : (`/life-study/${course.id}` as const);
 
+  const targetInfo =
+    course.target ||
+    course.eligibility ||
+    (course.kind === "required" ? "등록교인 누구나" : undefined);
+
   return (
     <MotionPressable
       accessibilityRole="button"
@@ -495,7 +500,7 @@ function CourseCard({
               tone="brand"
               style={styles.openCourseActionText}
             >
-              과정 확인 및 수강 신청
+              수강 신청
             </AppText>
             <AppIcon
               name="chevron-right"
@@ -505,7 +510,28 @@ function CourseCard({
           </View>
         </>
       ) : (
-        <Text style={styles.targetText}>신청대상: {course.target}</Text>
+        <>
+          {targetInfo ? (
+            <Text style={styles.targetText}>신청대상: {targetInfo}</Text>
+          ) : null}
+          <View style={styles.courseCardFooter}>
+            <Text style={styles.courseFooterHint}>개강 일정 및 상세 정보</Text>
+            <View style={styles.openCourseActionRow}>
+              <AppText
+                variant="caption"
+                tone="brand"
+                style={styles.openCourseActionText}
+              >
+                과정 확인
+              </AppText>
+              <AppIcon
+                name="chevron-right"
+                size={16}
+                color={theme.colors.primaryDeep}
+              />
+            </View>
+          </View>
+        </>
       )}
     </MotionPressable>
   );
@@ -989,5 +1015,17 @@ const styles = StyleSheet.create({
   },
   openCourseActionText: {
     fontWeight: theme.fontWeight.bold,
+  },
+  courseCardFooter: {
+    marginTop: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  courseFooterHint: {
+    flex: 1,
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.inkMute,
   },
 });

@@ -20,7 +20,7 @@ export function DetailAction({
   testID,
   accessibilityLabel,
 }: DetailActionProps) {
-  const color = danger ? theme.colors.danger : theme.colors.ink;
+  const color = danger ? theme.colors.dangerText : theme.colors.text;
 
   return (
     <MotionPressable
@@ -57,7 +57,7 @@ export function DetailMiniAction({
       <AppIcon
         name={icon}
         size={14}
-        color={danger ? theme.colors.danger : theme.colors.inkMute}
+        color={danger ? theme.colors.dangerText : theme.colors.textMuted}
       />
       <Text style={[styles.miniActionText, danger ? styles.dangerText : null]}>
         {label}
@@ -77,12 +77,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   actionText: {
-    color: theme.colors.ink,
+    color: theme.colors.text,
     fontSize: 13.5,
     fontWeight: theme.fontWeight.semibold,
   },
   dangerText: {
-    color: theme.colors.danger,
+    color: theme.colors.dangerText,
   },
   miniAction: {
     flexDirection: "row",
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   miniActionText: {
-    color: theme.colors.inkMute,
+    color: theme.colors.textMuted,
     fontSize: theme.fontSize.sm,
     fontWeight: theme.fontWeight.semibold,
   },

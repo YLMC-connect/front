@@ -24,14 +24,15 @@ export function Skeleton({
   testID?: string;
 }) {
   const reduceMotion = useReducedMotion();
-  const opacity = useSharedValue(0.48);
+  const opacity = useSharedValue(1);
 
   useEffect(() => {
     if (reduceMotion) {
-      opacity.value = 0.62;
+      opacity.value = 1;
       return;
     }
-    opacity.value = withRepeat(withTiming(0.82, { duration: 720 }), -1, true);
+    // 디자인 시스템: 1.2초 주기로 1 → 0.5 숨 쉬듯.
+    opacity.value = withRepeat(withTiming(0.5, { duration: 600 }), -1, true);
     return () => cancelAnimation(opacity);
   }, [opacity, reduceMotion]);
 
@@ -86,7 +87,7 @@ export function ListSkeleton({
 
 const styles = StyleSheet.create({
   skeleton: {
-    backgroundColor: theme.colors.lineStrong,
+    backgroundColor: theme.colors.surfaceSubtle,
   },
   list: { width: "100%" },
   row: {
@@ -97,7 +98,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: theme.layout.listGap,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
+    borderBottomColor: theme.colors.border,
   },
   lines: {
     flex: 1,

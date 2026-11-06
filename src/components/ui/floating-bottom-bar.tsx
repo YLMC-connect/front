@@ -78,7 +78,7 @@ export function FloatingBottomBar({
             testID={testID}
           >
             {loading ? (
-              <ActivityIndicator color={theme.colors.white} size="small" />
+              <ActivityIndicator color={theme.colors.onPrimary} size="small" />
             ) : (
               <Text
                 style={[
@@ -106,29 +106,26 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   button: {
-    height: 52,
+    height: theme.size.buttonHeight,
     borderRadius: theme.radius.full,
     alignItems: "center",
     justifyContent: "center",
   },
   buttonPrimary: {
     backgroundColor: theme.colors.primary,
-    ...theme.shadow.primary,
   },
   buttonDanger: {
-    backgroundColor: theme.colors.danger,
+    backgroundColor: theme.colors.dangerBold,
   },
   buttonDisabled: {
-    backgroundColor: theme.colors.surfaceMuted,
-    shadowOpacity: 0,
-    elevation: 0,
+    backgroundColor: theme.colors.surfaceSubtle,
   },
   buttonText: {
-    color: theme.colors.white,
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.bold,
+    ...theme.typography.body,
+    color: theme.colors.onPrimary,
+    fontWeight: theme.fontWeight.semibold,
   },
   buttonTextDisabled: {
-    color: theme.colors.inkHint,
+    color: theme.colors.textDisabled,
   },
 });

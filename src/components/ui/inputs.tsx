@@ -147,7 +147,7 @@ export function ImagePickerField({
         <AppIcon
           name="add-photo-alternate"
           size={28}
-          color={theme.colors.primaryDeep}
+          color={theme.colors.primaryStrong}
         />
         <Text style={styles.imagePickerText}>{label} 추가</Text>
         <Text style={styles.imagePickerHint}>
@@ -173,7 +173,11 @@ export function ImagePickerField({
                 onPress={() => removeImage(uri)}
                 style={styles.imageRemoveButton}
               >
-                <AppIcon name="close" size={16} color="#fff" />
+                <AppIcon
+                  name="close"
+                  size={16}
+                  color={theme.colors.onPrimary}
+                />
               </Pressable>
             </View>
           ))}
@@ -223,22 +227,29 @@ const styles = StyleSheet.create({
     minHeight: 104,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.lineStrong,
+    borderColor: theme.colors.borderStrong,
     borderStyle: "dashed",
     alignItems: "center",
     justifyContent: "center",
     gap: 5,
-    backgroundColor: theme.colors.surface2,
+    backgroundColor: theme.colors.surfaceSubtle,
   },
-  imagePickerText: { color: theme.colors.primaryDeep, fontWeight: "800" },
-  imagePickerHint: { color: theme.colors.inkMute, fontSize: 12 },
+  imagePickerText: {
+    ...theme.typography.label,
+    color: theme.colors.primaryStrong,
+    fontWeight: theme.fontWeight.bold,
+  },
+  imagePickerHint: {
+    ...theme.typography.caption,
+    color: theme.colors.textMuted,
+  },
   imagePreviewList: { gap: 10 },
   imagePreviewItem: {
     width: 86,
     height: 86,
     borderRadius: theme.radius.md,
     overflow: "hidden",
-    backgroundColor: theme.colors.surface2,
+    backgroundColor: theme.colors.surfaceSubtle,
   },
   imagePreview: { width: "100%", height: "100%" },
   imageRemoveButton: {
@@ -250,9 +261,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(30,41,32,0.72)",
+    backgroundColor: theme.colors.sheetOverlay,
   },
   formSection: { gap: 12 },
-  formTitle: { color: theme.colors.ink, fontSize: 17, fontWeight: "800" },
+  formTitle: { ...theme.typography.heading, color: theme.colors.text },
   disabled: { opacity: 0.45 },
 });

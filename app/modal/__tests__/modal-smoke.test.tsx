@@ -237,7 +237,7 @@ describe("modal smoke screens", () => {
     ).toMatchObject({ height: 60 });
   });
 
-  it("renders confirm dialog with horizontal padding matching bottom padding (16px)", () => {
+  it("renders confirm dialog with horizontal padding matching bottom padding (20px)", () => {
     renderWithClient(
       <ConfirmDialog
         visible
@@ -259,8 +259,8 @@ describe("modal smoke screens", () => {
         screen.getByTestId("confirm-dialog-panel").props.style,
       ),
     ).toMatchObject({
-      paddingHorizontal: 16,
-      paddingBottom: 16,
+      paddingHorizontal: 20,
+      paddingBottom: 20,
     });
   });
 });

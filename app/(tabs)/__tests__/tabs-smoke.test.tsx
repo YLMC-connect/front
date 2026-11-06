@@ -1312,6 +1312,20 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("기도 완료 현황이 없어요")).toBeTruthy();
   });
 
+  it("shows an error with retry instead of an empty list when the prayer topic board fails", async () => {
+    jest
+      .spyOn(prayerService, "fetchPrayerTopicBoard")
+      .mockRejectedValueOnce(new Error("INVALID_RESPONSE"));
+    renderWithClient(<PrayerDetailScreen />);
+
+    expect(
+      await screen.findByText(
+        "기도제목을 불러오지 못했어요. 다시 시도해주세요.",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText("기도할 제목이 없어요")).toBeNull();
+  });
+
   it("renders the prayer detail screen with topics and completion toggle", async () => {
     jest.mocked(useLocalSearchParams).mockReturnValue({ id: "1" });
     jest.spyOn(prayerService, "fetchPrayerCohortStatus").mockResolvedValueOnce({

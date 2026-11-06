@@ -36,7 +36,7 @@
 
 <!-- AUTO-GENERATED-END: domain-status -->
 
-> 본 표는 GitHub Issues 데이터로 자동 생성됩니다 (라벨 = 도메인). 손으로 편집하지 마세요. 갱신 스크립트: [`scripts/gen-index.sh`](../scripts/gen-index.sh), 자동 실행: [`.github/workflows/update-index.yml`](../.github/workflows/update-index.yml).
+> 본 표는 GitHub Issues 데이터로 자동 생성됩니다 (라벨 = 도메인). 손으로 편집하지 마세요. 갱신 스크립트: [`scripts/gen-index.sh`](../scripts/gen-index.sh) — Issue 가 바뀐 뒤 PR 을 열 때 실행해 함께 커밋합니다.
 > 도메인 페이지는 해당 도메인 작업에 처음 진입할 때 [features/\_template.md](features/_template.md) 를 복사해 생성합니다.
 
 ---

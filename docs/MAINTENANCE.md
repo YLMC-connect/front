@@ -130,13 +130,12 @@ done
 
 ### 4.1 INDEX 도메인 상태표 자동영역 stale
 
-- **증상**: [INDEX.md](INDEX.md) 의 `<!-- AUTO-GENERATED-* -->` 마커 사이가 현재 GitHub Issues 와 다름. 보통 워크플로 실패·로컬 push 미반영 등.
+- **증상**: [INDEX.md](INDEX.md) 의 `<!-- AUTO-GENERATED-* -->` 마커 사이가 현재 GitHub Issues 와 다름. 보통 Issue 를 열고 닫은 뒤 스크립트를 돌리지 않은 경우.
 - **진실**: GitHub Issues 의 라벨별 카운트 + features/<도메인>.md 존재 여부.
 - **복구**:
   1. `bash scripts/gen-index.sh` 실행 → INDEX.md 의 마커 사이 영역 재생성
-  2. `git diff` 로 변경 검토 → 브랜치 + PR 로 반영 (또는 `Auto-update INDEX` 워크플로를 직접 실행)
-  3. GitHub Actions 의 `Auto-update INDEX` 워크플로 최근 실행 로그 확인 → 실패 사유 있으면 워크플로 수정 (별도 작업)
-- **재발 방지**: 워크플로는 하루 1회 예약 + 직접 실행으로 돈다(최대 하루 지연은 허용). 스크립트 로컬 실행으로도 동일 결과 나오는지 분기 점검.
+  2. `git diff` 로 변경 검토 → 브랜치 + PR 로 반영
+- **재발 방지**: 자동 워크플로는 없다(main 보호 규칙과 충돌해 2026-11-06 제거). Issue 를 바꾼 뒤 여는 PR 에서 `bash scripts/gen-index.sh` 결과를 함께 커밋.
 
 ### 4.2 stale issue (진행 중인데 실제로는 멈춤)
 
@@ -178,7 +177,7 @@ done
   1. `cp docs/features/_template.md docs/features/<도메인>.md`
   2. 헤더의 `<도메인명>` 교체 + 마지막 갱신 / 담당 Phase / 기록 성격 채움
   3. 기존 머지 PR 들 (`gh pr list --state merged --label <도메인>`) 의 description 본문에서 결정·파일을 추출하여 features 의 “결정 사항” / “주요 파일” 채움
-  4. INDEX 자동영역은 다음 워크플로 실행에서 자동 반영 (또는 `bash scripts/gen-index.sh`)
+  4. `bash scripts/gen-index.sh` 로 INDEX 자동영역 갱신
 - **재발 방지**: 새 도메인 첫 진입 시 `_template.md` 복사를 작업 시작 의식으로. AGENTS.md “새 도메인 작업 첫 진입” 트리거 준수 (라벨 생성도 동시).
 
 ### 4.7 AGENTS.md 규칙과 실제 운영이 다름
@@ -209,7 +208,7 @@ done
 - features 에 진행 상태(🔵 진행 중) 기재 — Issues 와 충돌. 진행 상태는 GitHub Issues 단일 출처.
 - PR description 을 **요약 1줄로 줄이기** — 기록 손실. 변경 / 이유 / 확인 방법 3섹션은 작업이 작아도 1줄씩이라도 채움.
 - ADR 을 도메인 내부 결정에 사용 — 거버넌스 비용 과다. 도메인 내부 결정은 features “결정 사항” 으로.
-- INDEX 의 자동생성 영역(`<!-- AUTO-GENERATED-* -->` 마커 사이)을 손편집 — 다음 워크플로 실행에서 덮어써짐. Phase / ADR 영역만 손편집 가능.
+- INDEX 의 자동생성 영역(`<!-- AUTO-GENERATED-* -->` 마커 사이)을 손편집 — 다음 `gen-index.sh` 실행에서 덮어써짐. Phase / ADR 영역만 손편집 가능.
 - features 의 “데이터 타입” 본문에 PLAN.md 정의를 통째 복사 — 양쪽이 어긋남의 발화점. 가능하면 링크 + diff 만.
 - 지금 바로 끝낼 일을 Issue 로 만들기 — Issue 는 남은 일 목록. 바로 하는 일은 PR 본문이 기록.
 - main 에 직접 커밋 — 작은 수정도 브랜치 + PR (에이전트가 자동 처리, CI 통과 시 자동 병합).

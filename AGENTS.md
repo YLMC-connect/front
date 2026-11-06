@@ -82,7 +82,7 @@
 | 1   | PR description              | PR 을 열거나 갱신할 때. 위 3섹션                                                                                                              |
 | 2   | `docs/features/<도메인>.md` | **현재 동작·결정·타입·파일 지도가 바뀔 때만.** `✅ 완료` 는 지금 시스템이 어떻게 동작하는지. 날짜별 작업 이력을 쌓지 않는다. 이력은 머지된 PR |
 | 3   | GitHub Issue                | 지금 못 하는 후속 작업이 생겼을 때 등록. 해결했으면 `Closes #<N>`                                                                             |
-| 4   | `docs/INDEX.md`             | **손대지 않음.** 자동생성 영역은 Action/`scripts/gen-index.sh`. Phase / ADR 목록이 바뀔 때만 수동                                             |
+| 4   | `docs/INDEX.md`             | 자동생성 영역은 손편집하지 않는다. Issue 를 열거나 닫은 뒤 PR 을 열 때 `bash scripts/gen-index.sh` 결과를 함께 커밋. Phase / ADR 목록만 수동   |
 
 ## 작업 종료 시 — 조건부
 

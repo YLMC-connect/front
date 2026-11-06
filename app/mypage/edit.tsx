@@ -224,6 +224,7 @@ export default function EditProfileScreen() {
             <Pressable
               accessibilityRole="button"
               disabled={!hasChange || isSaving}
+              hitSlop={{ top: 7, bottom: 7 }}
               onPress={() => void handleSave()}
               style={styles.saveButton}
             >

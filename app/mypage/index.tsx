@@ -121,6 +121,7 @@ export default function MyPageScreen() {
             </View>
             <Pressable
               accessibilityRole="button"
+              hitSlop={{ top: 7, bottom: 7 }}
               onPress={() => router.push("/mypage/edit")}
               style={styles.editButton}
             >

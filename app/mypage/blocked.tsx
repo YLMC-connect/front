@@ -64,7 +64,11 @@ export default function BlockedScreen() {
                     <Text style={styles.name}>{user.name}</Text>
                     <Text style={styles.when}>{user.when} 차단</Text>
                   </View>
-                  <Pressable accessibilityRole="button" style={styles.release}>
+                  <Pressable
+                    accessibilityRole="button"
+                    hitSlop={{ top: 5, bottom: 5 }}
+                    style={styles.release}
+                  >
                     <AppIcon
                       name="check"
                       size={14}

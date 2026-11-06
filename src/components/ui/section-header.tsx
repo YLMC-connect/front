@@ -32,7 +32,7 @@ export function SectionHeader({
           <AppIcon
             name="chevron-right"
             size={18}
-            color={theme.colors.primaryDeep}
+            color={theme.colors.primaryStrong}
             testID={testID ? `${testID}-view-all-icon` : undefined}
           />
         </MotionPressable>

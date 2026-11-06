@@ -37,13 +37,13 @@ export function DetailBadge({
 const styles = StyleSheet.create({
   badge: {
     borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surface2,
+    backgroundColor: theme.colors.surfaceSubtle,
     paddingHorizontal: 10,
     paddingVertical: 5,
   },
   bordered: {
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     paddingHorizontal: 9,
     paddingVertical: 4,
   },
@@ -56,17 +56,17 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.amberSoft,
   },
   text: {
-    color: theme.colors.inkMute,
+    color: theme.colors.textMuted,
     fontSize: theme.fontSize.xs,
     fontWeight: theme.fontWeight.bold,
   },
   borderedText: {
-    color: theme.colors.inkSoft,
+    color: theme.colors.textMuted,
   },
   primaryText: {
-    color: theme.colors.white,
+    color: theme.colors.onPrimary,
   },
   warnText: {
-    color: theme.colors.warn,
+    color: theme.colors.warningText,
   },
 });

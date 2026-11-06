@@ -1,7 +1,6 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useState, type ComponentProps } from "react";
 import {
-  Pressable,
   StyleSheet,
   Text,
   View,
@@ -14,6 +13,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { theme } from "../../constants/theme";
 import { AppText } from "./app-text";
+import { Button } from "./buttons";
 import { useMotionPresence } from "./motion";
 
 type IconName = ComponentProps<typeof AppIcon>["name"];
@@ -36,18 +36,13 @@ export function Empty({
   return (
     <View style={[styles.state, style]} testID={testID}>
       <View style={styles.stateIcon}>
-        <AppIcon name={icon} size={42} color={theme.colors.inkHint} />
+        <AppIcon name={icon} size={36} color={theme.colors.primaryStrong} />
       </View>
-      <AppText
-        variant="body"
-        weight="semibold"
-        tone="secondary"
-        style={styles.stateTitle}
-      >
+      <AppText variant="heading" style={styles.stateTitle}>
         {title}
       </AppText>
       {description ? (
-        <AppText variant="caption" tone="muted" style={styles.stateText}>
+        <AppText variant="label" tone="muted" style={styles.stateText}>
           {description}
         </AppText>
       ) : null}
@@ -66,28 +61,25 @@ export function ErrorState({
 }) {
   return (
     <View style={styles.state}>
-      <View style={styles.stateIcon}>
-        <AppIcon name="error-outline" size={42} color={theme.colors.inkHint} />
+      <View style={[styles.stateIcon, styles.errorStateIcon]}>
+        <AppIcon
+          name="error-outline"
+          size={36}
+          color={theme.colors.dangerIcon}
+        />
       </View>
-      <AppText
-        variant="body"
-        weight="semibold"
-        tone="secondary"
-        style={styles.stateTitle}
-      >
+      <AppText variant="heading" style={styles.stateTitle}>
         불러오지 못했습니다
       </AppText>
-      <AppText variant="caption" tone="muted" style={styles.stateText}>
+      <AppText variant="label" tone="muted" style={styles.stateText}>
         {message}
       </AppText>
       {onRetry ? (
-        <Pressable
-          accessibilityRole="button"
-          onPress={onRetry}
-          style={styles.retryButton}
-        >
-          <Text style={styles.retryButtonText}>다시 시도</Text>
-        </Pressable>
+        <View style={styles.stateActionWrap}>
+          <Button variant="secondary" onPress={onRetry}>
+            다시 시도
+          </Button>
+        </View>
       ) : null}
     </View>
   );
@@ -107,26 +99,22 @@ export function SuccessState({
   return (
     <View style={styles.state}>
       <View style={[styles.stateIcon, styles.successStateIcon]}>
-        <AppIcon name="check" size={38} color={theme.colors.success} />
+        <AppIcon name="check" size={36} color={theme.colors.successIcon} />
       </View>
-      <AppText variant="body" weight="semibold">
+      <AppText variant="heading" style={styles.stateTitle}>
         {title}
       </AppText>
       {description ? (
-        <AppText variant="caption" tone="muted" style={styles.stateText}>
+        <AppText variant="label" tone="muted" style={styles.stateText}>
           {description}
         </AppText>
       ) : null}
       {actionLabel && onAction ? (
-        <Pressable
-          accessibilityRole="button"
-          onPress={onAction}
-          style={styles.stateAction}
-        >
-          <AppText variant="caption" tone="brand">
+        <View style={styles.stateActionWrap}>
+          <Button variant="secondary" onPress={onAction}>
             {actionLabel}
-          </AppText>
-        </Pressable>
+          </Button>
+        </View>
       ) : null}
     </View>
   );
@@ -167,7 +155,7 @@ export function Toast({
       testID="motion-toast"
       style={[styles.toast, { bottom: offset }, animatedStyle]}
     >
-      <AppIcon name={icon} size={18} color="#fff" />
+      <AppIcon name={icon} size={18} color={theme.colors.successIcon} />
       <Text style={styles.toastText}>{content}</Text>
     </Animated.View>
   );
@@ -189,64 +177,46 @@ const styles = StyleSheet.create({
     borderRadius: 42,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: theme.colors.surface2,
+    backgroundColor: theme.colors.primarySubtle,
   },
   stateTitle: {
     textAlign: "center",
   },
   stateText: {
     textAlign: "center",
-    lineHeight: 20,
+    fontWeight: theme.fontWeight.regular,
+    lineHeight: 22,
   },
-  stateAction: {
-    minHeight: theme.layout.touchTarget,
-    marginTop: theme.spacing[1],
-    borderRadius: theme.radius.full,
-    borderWidth: 1,
-    borderColor: theme.colors.lineStrong,
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: theme.spacing[5],
-    alignItems: "center",
-    justifyContent: "center",
+  stateActionWrap: {
+    marginTop: theme.spacing["1"],
+  },
+  errorStateIcon: {
+    backgroundColor: theme.colors.dangerSubtle,
   },
   successStateIcon: {
-    backgroundColor: "#EDF5EA",
-  },
-  retryButton: {
-    minHeight: 44,
-    marginTop: 4,
-    borderRadius: theme.radius.full,
-    borderWidth: 1,
-    borderColor: theme.colors.lineStrong,
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: 18,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  retryButtonText: {
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.bold,
+    backgroundColor: theme.colors.successSubtle,
   },
   toast: {
     position: "absolute",
     left: 16,
     right: 16,
-    zIndex: 40,
+    zIndex: theme.zIndex.toast,
+    minHeight: 52,
     flexDirection: "row",
     gap: 10,
     alignItems: "center",
-    backgroundColor: theme.colors.toast,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
     borderRadius: theme.radius.md,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    ...theme.shadow.toast,
+    paddingHorizontal: theme.spacing["4"],
+    paddingVertical: theme.spacing["3"],
+    ...theme.shadow.lg,
   },
   toastText: {
-    color: theme.colors.white,
-    fontWeight: theme.fontWeight.semibold,
-    fontSize: 13,
+    ...theme.typography.label,
+    color: theme.colors.text,
+    fontWeight: theme.fontWeight.medium,
     flex: 1,
-    lineHeight: 18,
   },
 });

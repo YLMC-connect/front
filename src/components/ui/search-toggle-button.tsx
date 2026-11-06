@@ -25,7 +25,7 @@ export function SearchToggleButton({
       <AppIcon
         name={open ? "close" : "search"}
         size={20}
-        color={theme.colors.inkSoft}
+        color={theme.colors.text}
       />
       <Text style={styles.label}>{open ? "닫기" : "검색"}</Text>
     </MotionPressable>
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.full,
   },
   label: {
-    color: theme.colors.inkSoft,
+    color: theme.colors.text,
     fontSize: theme.fontSize.md,
     fontWeight: theme.fontWeight.semibold,
   },

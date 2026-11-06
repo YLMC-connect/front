@@ -20,6 +20,7 @@ import {
   Card,
   DetailBadge,
   Empty,
+  ErrorState,
   FloatingBottomBar,
   TopBar,
 } from "../../../src/components/ui";
@@ -222,6 +223,11 @@ function LiveLifeStudyDetail({
                         </View>
                       ))}
                     </Card>
+                  ) : cohortDetailQuery.isError ? (
+                    <ErrorState
+                      message="커리큘럼을 불러오지 못했어요. 다시 시도해주세요."
+                      onRetry={() => void cohortDetailQuery.refetch()}
+                    />
                   ) : (
                     <Empty
                       icon="book-open-page-variant-outline"

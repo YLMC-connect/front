@@ -105,6 +105,7 @@ export default function PrayerDetailScreen() {
       onRetry={() => void boardQuery.refetch()}
     />
   ) : null;
+  const statusFailed = statusQuery.isError && !room;
 
   const roomTitle = room?.cohortName || "월요일 오전 기도방";
   const { day, period } = parseDayAndPeriod(id, roomTitle);
@@ -244,7 +245,12 @@ export default function PrayerDetailScreen() {
             activeTab === "pray" ? styles.bodyWithAction : null,
           ]}
         >
-          {activeTab === "status" ? (
+          {activeTab === "status" && statusFailed ? (
+            <ErrorState
+              message="기도 현황을 불러오지 못했어요. 다시 시도해주세요."
+              onRetry={() => void statusQuery.refetch()}
+            />
+          ) : activeTab === "status" ? (
             <StatusPanel
               empty={isStatusEmpty}
               completedCount={completedCount}

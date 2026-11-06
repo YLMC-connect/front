@@ -17,7 +17,12 @@ import Animated, {
   useReducedMotion,
 } from "react-native-reanimated";
 import { Screen } from "../layout/Screen";
-import { FLOATING_BOTTOM_BAR_INSET, FloatingBottomBar, TopBar } from "../ui";
+import {
+  ErrorState,
+  FLOATING_BOTTOM_BAR_INSET,
+  FloatingBottomBar,
+  TopBar,
+} from "../ui";
 import { theme } from "../../constants/theme";
 import { useActiveSitePolicy } from "../../hooks/useSiteContent";
 import type { SitePolicyType } from "../../types/siteContentApi";
@@ -191,7 +196,12 @@ export function TermsSheet({
   const resolvedPolicyType: SitePolicyType | null =
     termKey === "tos" ? 1 : termKey === "privacy" ? 2 : null;
 
-  const { data: policy, isLoading } = useActiveSitePolicy(resolvedPolicyType, {
+  const {
+    data: policy,
+    isLoading,
+    isError,
+    refetch,
+  } = useActiveSitePolicy(resolvedPolicyType, {
     enabled: resolvedPolicyType != null,
   });
 
@@ -261,6 +271,11 @@ export function TermsSheet({
           <View style={styles.sheetLoadingWrap}>
             <ActivityIndicator color={theme.colors.primary} />
           </View>
+        ) : isError && !policy ? (
+          <ErrorState
+            message="약관을 불러오지 못했어요. 다시 시도해주세요."
+            onRetry={() => void refetch()}
+          />
         ) : (
           <ScrollView contentContainerStyle={styles.sheetBody}>
             {effectiveDateText ? (

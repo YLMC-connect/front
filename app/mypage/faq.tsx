@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 import { Screen } from "../../src/components/layout/Screen";
-import { Empty, TopBar } from "../../src/components/ui";
+import { Empty, ErrorState, TopBar } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { useFaqs } from "../../src/hooks/useSiteContent";
 import { readDesignVariant } from "../../src/lib/designVariant";
@@ -19,7 +19,7 @@ export default function FaqScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ designVariant?: string }>();
   const empty = readDesignVariant(params.designVariant) === "empty";
-  const { data: faqCategories, isLoading } = useFaqs();
+  const { data: faqCategories, isLoading, isError, refetch } = useFaqs();
 
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [openMap, setOpenMap] = useState<Record<string, boolean>>({});
@@ -59,6 +59,11 @@ export default function FaqScreen() {
           <View style={styles.emptyWrap}>
             <ActivityIndicator color={theme.colors.primary} />
           </View>
+        ) : isError && !faqCategories ? (
+          <ErrorState
+            message="자주 묻는 질문을 불러오지 못했어요. 다시 시도해주세요."
+            onRetry={() => void refetch()}
+          />
         ) : isTotalEmpty ? (
           <Empty
             icon="help-outline"

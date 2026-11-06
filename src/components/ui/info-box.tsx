@@ -88,7 +88,7 @@ export function InfoBox({
       {action ? (
         <Pressable
           accessibilityRole="button"
-          hitSlop={theme.spacing["3"]}
+          hitSlop={actionHitSlop}
           onPress={action.onPress}
         >
           <AppText
@@ -103,6 +103,14 @@ export function InfoBox({
     </View>
   );
 }
+
+/** 12/18 글자 행동 버튼의 누르는 영역을 위아래 44 까지 넓힌다. */
+const actionHitSlop = {
+  top: (theme.layout.touchTarget - theme.typography.caption.lineHeight) / 2,
+  bottom: (theme.layout.touchTarget - theme.typography.caption.lineHeight) / 2,
+  left: theme.spacing["3"],
+  right: theme.spacing["3"],
+};
 
 const styles = StyleSheet.create({
   box: {

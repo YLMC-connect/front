@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import Animated, {
-  Easing,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -9,6 +8,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { theme } from "../../constants/theme";
 import { AppText } from "./app-text";
+import { motionEasing } from "./motion";
 
 export type ProgressBarTone = "primary" | "success" | "danger";
 
@@ -51,7 +51,7 @@ export function ProgressBar({
         ? clamped
         : withTiming(clamped, {
             duration: theme.motion.duration.slow,
-            easing: Easing.out(Easing.cubic),
+            easing: motionEasing.standard,
           }),
     );
   }, [clamped, reduceMotion, width]);

@@ -92,7 +92,7 @@ export default function GroupMembersScreenRoute() {
               <AppIcon
                 name="warning-amber"
                 size={16}
-                color={theme.colors.danger}
+                color={theme.colors.dangerText}
               />
               <Text style={styles.warningText}>
                 이관 후에는 일반 멤버로 변경되며 권한이 즉시 사라집니다.
@@ -269,7 +269,7 @@ function MemberRow({
           style={styles.kickButton}
           onPress={onKick}
         >
-          <AppIcon name="close" size={12} color={theme.colors.danger} />
+          <AppIcon name="close" size={12} color={theme.colors.dangerText} />
           <Text style={styles.kickText}>강퇴</Text>
         </Pressable>
       ) : null}
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: 14,
     borderRadius: theme.radius.md,
-    backgroundColor: "rgba(201,124,110,0.10)",
+    backgroundColor: theme.colors.warningSubtle,
     paddingHorizontal: 14,
     paddingVertical: 12,
     flexDirection: "row",
@@ -328,16 +328,16 @@ const styles = StyleSheet.create({
   },
   warningText: {
     flex: 1,
-    color: "#A8643F",
-    fontSize: theme.fontSize.sm,
-    lineHeight: 19,
+    color: theme.colors.warningText,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   total: {
     paddingHorizontal: 22,
     paddingTop: 8,
     paddingBottom: 6,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   row: {
@@ -350,20 +350,20 @@ const styles = StyleSheet.create({
   },
   rowBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
+    borderBottomColor: theme.colors.border,
   },
   rowDisabled: {
     opacity: 0.4,
   },
   rowSelected: {
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
   },
   radio: {
     width: 22,
     height: 22,
     borderRadius: 11,
     borderWidth: 1.5,
-    borderColor: theme.colors.lineStrong,
+    borderColor: theme.colors.border,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: theme.colors.white,
+    backgroundColor: theme.colors.surface,
   },
   memberText: {
     flex: 1,
@@ -389,13 +389,13 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   name: {
-    color: theme.colors.ink,
-    fontSize: 14.5,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   me: {
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   leaderBadge: {
@@ -405,27 +405,27 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   leaderText: {
-    color: theme.colors.white,
-    fontSize: 10.5,
+    color: theme.colors.onPrimary,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   joined: {
     marginTop: 2,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   kickButton: {
     height: 32,
     borderRadius: theme.radius.full,
-    backgroundColor: "rgba(201,124,110,0.10)",
+    backgroundColor: theme.colors.dangerSubtle,
     paddingHorizontal: 12,
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
   },
   kickText: {
-    color: theme.colors.danger,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.dangerText,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   bottomBar: {
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 18,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.line,
-    backgroundColor: theme.colors.glass,
+    borderTopColor: theme.colors.border,
+    backgroundColor: theme.colors.barGlass,
   },
 });

@@ -139,7 +139,11 @@ export default function GroupNoticesScreenRoute() {
             style={{ flexGrow: 1 }}
           >
             <View style={styles.noticeBox}>
-              <AppIcon name="info" size={16} color={theme.colors.primaryDeep} />
+              <AppIcon
+                name="info"
+                size={16}
+                color={theme.colors.primaryStrong}
+              />
               <Text style={styles.noticeText}>
                 소모임 멤버에게만 공개됩니다.
               </Text>
@@ -151,7 +155,7 @@ export default function GroupNoticesScreenRoute() {
                 value={title}
                 onChangeText={setTitle}
                 placeholder="공지 제목 (최대 30자)"
-                placeholderTextColor={theme.colors.inkMute}
+                placeholderTextColor={theme.colors.textMuted}
                 maxLength={30}
                 style={styles.input}
               />
@@ -166,7 +170,7 @@ export default function GroupNoticesScreenRoute() {
                 onChangeText={setBody}
                 multiline
                 placeholder="공지 내용을 입력해주세요"
-                placeholderTextColor={theme.colors.inkMute}
+                placeholderTextColor={theme.colors.textMuted}
                 maxLength={500}
                 textAlignVertical="top"
                 style={[styles.input, styles.textarea]}
@@ -240,19 +244,19 @@ const styles = StyleSheet.create({
   deleteAction: {
     paddingHorizontal: 8,
     paddingVertical: 6,
-    color: theme.colors.danger,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.dangerText,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   submitAction: {
     paddingHorizontal: 8,
     paddingVertical: 6,
     color: theme.colors.primary,
-    fontSize: theme.fontSize.md,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   submitOff: {
-    color: theme.colors.inkHint,
+    color: theme.colors.textMuted,
   },
   body: {
     paddingBottom: 28,
@@ -262,7 +266,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 14,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
     paddingHorizontal: 14,
     paddingVertical: 12,
     flexDirection: "row",
@@ -271,9 +275,9 @@ const styles = StyleSheet.create({
   },
   noticeText: {
     flex: 1,
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 19,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   field: {
     gap: 8,
@@ -286,16 +290,16 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   fieldLabel: {
-    color: theme.colors.ink,
+    color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   required: {
-    color: theme.colors.danger,
+    color: theme.colors.dangerText,
   },
   hint: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   input: {
@@ -303,24 +307,24 @@ const styles = StyleSheet.create({
     minHeight: 48,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface2,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.lg,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
   },
   textarea: {
     minHeight: 250,
-    lineHeight: 23,
+    lineHeight: theme.typography.body.lineHeight,
   },
   divider: {
     height: 8,
-    backgroundColor: "rgba(30,41,32,0.05)",
+    backgroundColor: theme.colors.bg,
   },
   error: {
-    color: theme.colors.danger,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.dangerText,
+    fontSize: theme.typography.caption.fontSize,
     paddingHorizontal: 22,
     paddingBottom: 12,
   },

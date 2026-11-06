@@ -69,7 +69,7 @@ export default function GroupDetailScreen() {
           <AppIcon
             name="error-outline"
             size={42}
-            color={theme.colors.inkHint}
+            color={theme.colors.textMuted}
           />
           <Text style={styles.exceptionTitle}>존재하지 않는 소모임입니다</Text>
           <Text style={styles.exceptionText}>
@@ -185,14 +185,14 @@ export default function GroupDetailScreen() {
             <AppText variant="title">{group.name}</AppText>
 
             <View style={styles.memberMeta}>
-              <AppIcon name="groups" size={15} color={theme.colors.inkSoft} />
+              <AppIcon name="groups" size={15} color={theme.colors.text} />
               <Text style={styles.memberMetaText}>
                 현재 <Text style={styles.memberCount}>{current}</Text> / 최대{" "}
                 {group.maxMembers}
               </Text>
             </View>
 
-            <AppText variant="body" tone="secondary" style={styles.description}>
+            <AppText variant="body" tone="primary" style={styles.description}>
               {group.description}
             </AppText>
 
@@ -297,7 +297,7 @@ export default function GroupDetailScreen() {
                       <AppIcon
                         name="star"
                         size={10}
-                        color={theme.colors.white}
+                        color={theme.colors.onPrimary}
                       />
                     </View>
                   ) : null}
@@ -448,8 +448,8 @@ const styles = StyleSheet.create({
   noticeError: {
     paddingHorizontal: 22,
     paddingBottom: 10,
-    color: theme.colors.danger,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.dangerText,
+    fontSize: theme.typography.caption.fontSize,
   },
   body: {
     paddingBottom: 24,
@@ -467,31 +467,31 @@ const styles = StyleSheet.create({
   },
   categoryChip: {
     borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primaryTint,
+    backgroundColor: theme.colors.primarySubtle,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
   categoryText: {
-    color: theme.colors.primaryDeep,
-    fontSize: 11.5,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   recruitChip: {
     borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primaryTint,
+    backgroundColor: theme.colors.primarySubtle,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
   recruitChipClosed: {
-    backgroundColor: theme.colors.surface2,
+    backgroundColor: theme.colors.surfaceSubtle,
   },
   recruitText: {
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   recruitTextClosed: {
-    color: theme.colors.inkMute,
+    color: theme.colors.textMuted,
   },
   memberMeta: {
     marginTop: 10,
@@ -500,12 +500,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   memberMetaText: {
-    color: theme.colors.inkSoft,
-    fontSize: 13.5,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   memberCount: {
-    color: theme.colors.primaryDeep,
+    color: theme.colors.primaryStrong,
   },
   description: {
     marginTop: 14,
@@ -513,7 +513,7 @@ const styles = StyleSheet.create({
   leaderCard: {
     marginTop: 16,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.surface2,
+    backgroundColor: theme.colors.surfaceSubtle,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
@@ -522,13 +522,13 @@ const styles = StyleSheet.create({
   },
   leaderText: { flex: 1 },
   leaderLabel: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   leaderName: {
     marginTop: 2,
-    color: theme.colors.ink,
-    fontSize: 14.5,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   leaderBadge: {
@@ -538,8 +538,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   leaderBadgeText: {
-    color: theme.colors.white,
-    fontSize: 10.5,
+    color: theme.colors.onPrimary,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   actionWrap: {
@@ -554,13 +554,13 @@ const styles = StyleSheet.create({
     minHeight: 52,
     borderRadius: theme.radius.full,
     borderWidth: 1,
-    borderColor: theme.colors.lineStrong,
+    borderColor: theme.colors.border,
     alignItems: "center",
     justifyContent: "center",
   },
   outlineButtonText: {
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.md,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   primaryButton: {
@@ -569,15 +569,14 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     alignItems: "center",
     justifyContent: "center",
-    ...theme.shadow.primary,
   },
   primaryButtonOff: {
-    backgroundColor: theme.colors.lineStrong,
+    backgroundColor: theme.colors.border,
     opacity: 0.6,
   },
   primaryButtonText: {
-    color: theme.colors.white,
-    fontSize: theme.fontSize.base,
+    color: theme.colors.onPrimary,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   sectionTitleWrap: {
@@ -586,8 +585,8 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   sectionTitle: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   memberRail: {
@@ -615,8 +614,8 @@ const styles = StyleSheet.create({
   },
   memberName: {
     maxWidth: 56,
-    color: theme.colors.inkSoft,
-    fontSize: 11.5,
+    color: theme.colors.text,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
     textAlign: "center",
   },
@@ -636,29 +635,29 @@ const styles = StyleSheet.create({
   },
   noticeTitle: {
     flex: 1,
-    color: theme.colors.ink,
-    fontSize: 14.5,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   editedText: {
-    color: theme.colors.inkHint,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   noticePreview: {
     marginTop: 6,
-    color: theme.colors.inkSoft,
-    fontSize: 13,
-    lineHeight: 20,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
   },
   noticeWhen: {
     marginTop: 8,
-    color: theme.colors.inkHint,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   noticeActions: {
     marginTop: 8,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.line,
+    borderTopColor: theme.colors.border,
     paddingTop: 10,
     flexDirection: "row",
     gap: 14,
@@ -671,14 +670,14 @@ const styles = StyleSheet.create({
     paddingVertical: 120,
   },
   exceptionTitle: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.lg,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   exceptionText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.md,
-    lineHeight: theme.lineHeight.md,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     textAlign: "center",
   },
 });

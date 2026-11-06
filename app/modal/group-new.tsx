@@ -193,7 +193,11 @@ export default function GroupNewModal() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View>
             <View style={styles.infoBox}>
-              <AppIcon name="info" size={16} color={theme.colors.primaryDeep} />
+              <AppIcon
+                name="info"
+                size={16}
+                color={theme.colors.primaryStrong}
+              />
               <Text style={styles.infoText}>
                 비슷한 목적의 소모임이 이미 있다면 기존 소모임 참여를 먼저
                 고려해주세요.
@@ -305,8 +309,8 @@ export default function GroupNewModal() {
                     size={18}
                     color={
                       Number(capacity) <= 2
-                        ? theme.colors.inkMute
-                        : theme.colors.ink
+                        ? theme.colors.textMuted
+                        : theme.colors.text
                     }
                   />
                 </Pressable>
@@ -341,8 +345,8 @@ export default function GroupNewModal() {
                     size={18}
                     color={
                       Number(capacity) >= 100
-                        ? theme.colors.inkMute
-                        : theme.colors.ink
+                        ? theme.colors.textMuted
+                        : theme.colors.text
                     }
                   />
                 </Pressable>
@@ -504,19 +508,22 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     paddingHorizontal: 12,
   },
   chipOn: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primarySubtle,
+    borderColor: theme.colors.primarySubtle,
   },
   chipText: {
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
-  chipTextOn: { color: theme.colors.white },
+  chipTextOn: {
+    color: theme.colors.primaryStrong,
+    fontWeight: theme.fontWeight.semibold,
+  },
   capacityRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -535,7 +542,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -561,19 +568,19 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
   },
   quickPresetChipActive: {
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
     borderColor: theme.colors.primary,
   },
   quickPresetText: {
-    fontSize: 12.5,
-    color: theme.colors.inkSoft,
+    fontSize: theme.typography.caption.fontSize,
+    color: theme.colors.text,
     fontWeight: theme.fontWeight.medium,
   },
   quickPresetTextActive: {
-    color: theme.colors.primaryDeep,
+    color: theme.colors.primaryStrong,
     fontWeight: theme.fontWeight.bold,
   },
   capacityInput: {
@@ -582,17 +589,20 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
     textAlign: "center",
   },
-  capacityUnit: { color: theme.colors.inkSoft, fontSize: theme.fontSize.md },
+  capacityUnit: {
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.label.fontSize,
+  },
   capacityHint: {
     marginLeft: "auto",
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   inlineError: {
     marginHorizontal: theme.layout.screenX,
     marginTop: 8,
-    color: theme.colors.danger,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.dangerText,
+    fontSize: theme.typography.caption.fontSize,
   },
   groupHeader: {
     paddingHorizontal: 22,
@@ -608,7 +618,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 8,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
     flexDirection: "row",
     gap: 10,
     paddingHorizontal: 16,
@@ -616,15 +626,15 @@ const styles = StyleSheet.create({
   },
   infoText: {
     flex: 1,
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 19,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   errorText: {
     marginHorizontal: theme.layout.screenX,
     marginTop: 12,
-    color: theme.colors.danger,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.dangerText,
+    fontSize: theme.typography.caption.fontSize,
   },
   footer: {
     position: "absolute",

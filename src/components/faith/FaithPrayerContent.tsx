@@ -1,18 +1,20 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { router } from "expo-router";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { theme } from "../../constants/theme";
 import { usePrayerOverview } from "../../hooks/usePrayers";
 import {
-  AnimatedProgressFill,
   AppText,
+  Badge,
   Empty,
   ErrorState,
   MotionEnter,
   MotionPressable,
+  motionStaggerDelay,
   SectionHeader,
 } from "../ui";
-import { OverviewLoading, PrayerDayBadge } from "./FaithParts";
+import { ProgressBar } from "../ui/progress-bar";
+import { OverviewLoading, PrayerDayBadge, STAGGER_LIMIT } from "./FaithParts";
 import {
   periodLabels,
   requestStatusLabels,
@@ -59,16 +61,13 @@ export function PrayerContent() {
               함께 기도한 성도 {todayCompleted}명
             </AppText>
           </View>
-          <AppText variant="title" tone="brand">
-            {todayPercent}%
-          </AppText>
         </View>
-        <View style={styles.todayTrack}>
-          <AnimatedProgressFill
-            percent={todayPercent}
-            style={styles.todayFill}
-          />
-        </View>
+        <ProgressBar
+          label="오늘 기도 참여율"
+          value={todayPercent}
+          style={styles.todayProgress}
+          testID="prayer-today-progress"
+        />
         <AppText variant="caption" tone="muted" style={styles.todayMeta}>
           참여 중인 기도방 {joinedRooms.length}개 · 전체 {todayMembers}명
         </AppText>
@@ -88,7 +87,7 @@ export function PrayerContent() {
               testID="prayer-rooms-empty"
             />
           ) : (
-            data.rooms.map((room) => {
+            data.rooms.map((room, index) => {
               const rate =
                 room.participationRate ??
                 (room.completedCount && room.memberCount
@@ -96,90 +95,74 @@ export function PrayerContent() {
                   : 0);
 
               return (
-                <MotionPressable
+                <MotionEnter
                   key={room.id}
-                  accessibilityRole="button"
-                  onPress={() => router.push(`/prayer/${room.id}`)}
-                  pressedScale={0.985}
-                  style={styles.roomCard}
+                  enabled={index < STAGGER_LIMIT}
+                  mode="fadeUp"
+                  delay={motionStaggerDelay(index)}
                 >
-                  <View style={styles.roomCardMain}>
-                    <PrayerDayBadge
-                      weekday={room.weekday}
-                      period={room.period}
-                    />
-                    <View style={styles.cardText}>
-                      <View style={styles.badgeRow}>
-                        <AppText variant="body" weight="semibold">
-                          {room.title ??
-                            `${weekdayLabels[room.weekday].long} ${periodLabels[room.period]}`}
-                        </AppText>
-                        <View
-                          style={[
-                            styles.statusBadge,
-                            room.status !== "joined" ? styles.warnBadge : null,
-                          ]}
-                        >
-                          <Text style={styles.statusBadgeText}>
-                            {roomStatusLabels[room.status]}
-                          </Text>
-                        </View>
-                      </View>
-                      <AppText
-                        variant="caption"
-                        tone="muted"
-                        style={styles.mutedText}
-                      >
-                        멤버 {room.memberCount}명 · 오늘 완료{" "}
-                        {room.completedCount == null
-                          ? "승인 대기"
-                          : `${room.completedCount}명`}
-                      </AppText>
-                    </View>
-                    <View
-                      testID={`prayer-room-${room.id}-action`}
-                      style={styles.roomAction}
-                    >
-                      <AppText
-                        variant="caption"
-                        tone="brand"
-                        style={styles.roomActionText}
-                      >
-                        기도방 보기
-                      </AppText>
-                      <AppIcon
-                        name="chevron-right"
-                        size={16}
-                        color={theme.colors.primaryStrong}
+                  <MotionPressable
+                    accessibilityRole="button"
+                    onPress={() => router.push(`/prayer/${room.id}`)}
+                    style={styles.roomCard}
+                  >
+                    <View style={styles.roomCardMain}>
+                      <PrayerDayBadge
+                        weekday={room.weekday}
+                        period={room.period}
                       />
-                    </View>
-                  </View>
-
-                  {room.status === "joined" ? (
-                    <View style={styles.roomProgressSection}>
-                      <View style={styles.roomProgressHeader}>
-                        <AppText variant="caption" tone="muted">
-                          오늘 기도 참여율
+                      <View style={styles.cardText}>
+                        <View style={styles.badgeRow}>
+                          <AppText variant="body" weight="semibold">
+                            {room.title ??
+                              `${weekdayLabels[room.weekday].long} ${periodLabels[room.period]}`}
+                          </AppText>
+                          <Badge
+                            tone={room.status === "joined" ? "info" : "warning"}
+                          >
+                            {roomStatusLabels[room.status]}
+                          </Badge>
+                        </View>
+                        <AppText
+                          variant="caption"
+                          tone="muted"
+                          style={styles.mutedText}
+                        >
+                          멤버 {room.memberCount}명 · 오늘 완료{" "}
+                          {room.completedCount == null
+                            ? "승인 대기"
+                            : `${room.completedCount}명`}
                         </AppText>
+                      </View>
+                      <View
+                        testID={`prayer-room-${room.id}-action`}
+                        style={styles.roomAction}
+                      >
                         <AppText
                           variant="caption"
                           tone="brand"
-                          style={styles.roomRateText}
+                          style={styles.roomActionText}
                         >
-                          {rate}%
+                          기도방 보기
                         </AppText>
-                      </View>
-                      <View style={styles.roomProgressTrack}>
-                        <View
-                          style={[
-                            styles.roomProgressFill,
-                            { width: `${Math.min(rate, 100)}%` },
-                          ]}
+                        <AppIcon
+                          name="chevron-right"
+                          size={16}
+                          color={theme.colors.primaryStrong}
                         />
                       </View>
                     </View>
-                  ) : null}
-                </MotionPressable>
+
+                    {room.status === "joined" ? (
+                      <ProgressBar
+                        label="오늘 기도 참여율"
+                        value={rate}
+                        style={styles.roomProgress}
+                        testID={`prayer-room-${room.id}-progress`}
+                      />
+                    ) : null}
+                  </MotionPressable>
+                </MotionEnter>
               );
             })
           )}
@@ -213,39 +196,41 @@ export function PrayerContent() {
               testID="prayer-requests-empty"
             />
           ) : (
-            data.requests.map((item) => (
-              <View
+            data.requests.map((item, index) => (
+              <MotionEnter
                 key={item.id}
-                testID={`prayer-request-card-${item.id}`}
-                style={styles.requestCard}
+                enabled={index < STAGGER_LIMIT}
+                mode="fadeUp"
+                delay={motionStaggerDelay(index)}
               >
-                <View style={styles.cardText}>
-                  <View style={styles.badgeRow}>
-                    <View style={styles.muteBadge}>
-                      <Text style={styles.muteBadgeText}>{item.category}</Text>
-                    </View>
-                    <View style={styles.statusBadge}>
-                      <Text style={styles.statusBadgeText}>
+                <View
+                  testID={`prayer-request-card-${item.id}`}
+                  style={styles.requestCard}
+                >
+                  <View style={styles.cardText}>
+                    <View style={styles.badgeRow}>
+                      <Badge tone="neutral">{item.category}</Badge>
+                      <Badge tone="info">
                         {requestStatusLabels[item.status]}
-                      </Text>
+                      </Badge>
                     </View>
+                    <AppText
+                      variant="body"
+                      weight="semibold"
+                      style={styles.requestTitle}
+                    >
+                      {item.title}
+                    </AppText>
+                    <AppText
+                      variant="caption"
+                      tone="muted"
+                      style={styles.mutedText}
+                    >
+                      {item.description}
+                    </AppText>
                   </View>
-                  <AppText
-                    variant="body"
-                    weight="semibold"
-                    style={styles.requestTitle}
-                  >
-                    {item.title}
-                  </AppText>
-                  <AppText
-                    variant="caption"
-                    tone="muted"
-                    style={styles.mutedText}
-                  >
-                    {item.description}
-                  </AppText>
                 </View>
-              </View>
+              </MotionEnter>
             ))
           )}
         </View>

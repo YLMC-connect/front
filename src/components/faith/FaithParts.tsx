@@ -7,6 +7,7 @@ import type { LifeStudyOverviewCourse } from "../../types/lifeStudy";
 import type { PrayerPeriod, PrayerWeekday } from "../../types/prayer";
 import {
   AppText,
+  Badge,
   FloatingActionButton,
   ListSkeleton,
   MotionEnter,
@@ -18,6 +19,9 @@ import {
   weekdayLabels,
 } from "./faithLabels";
 import { styles } from "./faithSectionsStyles";
+
+/** 목록 첫 진입 순차 등장: 처음 8개만 60ms 간격으로 떠오른다. */
+export const STAGGER_LIMIT = 8;
 
 export function OverviewLoading() {
   return (
@@ -63,22 +67,17 @@ export function CourseCard({
     <MotionPressable
       accessibilityRole="button"
       onPress={() => router.push(detailHref)}
-      pressedScale={0.985}
       style={styles.courseCard}
     >
       <View style={styles.badgeRow}>
-        <View style={open ? styles.warnBadge : styles.muteBadge}>
-          <Text style={open ? styles.statusBadgeText : styles.muteBadgeText}>
-            {open
-              ? "신청 기간"
-              : lifeStudyStatusLabels[course.status ?? "pending"]}
-          </Text>
-        </View>
-        <View style={styles.muteBadge}>
-          <Text style={styles.muteBadgeText}>
-            {course.kind === "required" ? "필수" : "선택"}
-          </Text>
-        </View>
+        <Badge tone={open ? "warning" : "neutral"}>
+          {open
+            ? "신청 기간"
+            : lifeStudyStatusLabels[course.status ?? "pending"]}
+        </Badge>
+        <Badge tone="neutral">
+          {course.kind === "required" ? "필수" : "선택"}
+        </Badge>
         <Text style={styles.mutedText}>
           {course.weekCount}주 · {course.instructorName}
         </Text>

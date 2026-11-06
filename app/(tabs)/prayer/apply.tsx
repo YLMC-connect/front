@@ -1,4 +1,6 @@
-import { AppIcon } from "@/components/ui/app-icon";
+import { RadioRow } from "@/components/ui/checkbox";
+import { InfoBox } from "@/components/ui/info-box";
+import { ModalFormTextInput } from "@/components/ui/modal-form-layout";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -8,7 +10,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
@@ -80,7 +81,7 @@ export default function PrayerApplyScreenRoute() {
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
-        <TopBar title="기도방 참여 신청" back onBack={() => router.back()} />
+        <TopBar title="기도방 참여 신청" close onBack={() => router.back()} />
         <ScrollView
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
@@ -91,17 +92,17 @@ export default function PrayerApplyScreenRoute() {
             onPress={Keyboard.dismiss}
             style={{ flexGrow: 1 }}
           >
-            <Text style={styles.notice}>
-              먼저 요일을 고르고, 그 다음 오전/오후 중 하나를 선택합니다. 승인
-              전에는 기도제목을 볼 수 없습니다.
-            </Text>
+            <InfoBox
+              description="먼저 요일을 고르고, 그 다음 오전/오후 중 하나를 선택합니다. 승인 전에는 기도제목을 볼 수 없습니다."
+              style={styles.notice}
+            />
 
             <View style={styles.stack}>
               <View>
                 <Text style={styles.sectionLabel}>1. 요일 선택</Text>
                 <View style={styles.optionStack}>
                   {days.map((day) => (
-                    <SelectRow
+                    <RadioRow
                       key={day}
                       label={dayNames[day]}
                       selected={day === selectedDay}
@@ -115,27 +116,14 @@ export default function PrayerApplyScreenRoute() {
                 <Text style={styles.sectionLabel}>2. 시간 선택</Text>
                 <View style={styles.timeGrid}>
                   {times.map((time) => (
-                    <Pressable
+                    <RadioRow
                       accessibilityLabel={`${time} 기도방`}
-                      accessibilityRole="radio"
-                      accessibilityState={{ checked: time === selectedTime }}
                       key={time}
+                      label={`${time} 기도방`}
                       onPress={() => setSelectedTime(time)}
-                      style={[
-                        styles.timeOption,
-                        time === selectedTime ? styles.optionOn : null,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.optionText,
-                          time === selectedTime ? styles.optionTextOn : null,
-                        ]}
-                      >
-                        {time === selectedTime ? "✓ " : ""}
-                        {time} 기도방
-                      </Text>
-                    </Pressable>
+                      selected={time === selectedTime}
+                      style={styles.timeOption}
+                    />
                   ))}
                 </View>
               </View>
@@ -146,13 +134,13 @@ export default function PrayerApplyScreenRoute() {
                 <Field label="연락처" value={memberPhone} />
                 <View>
                   <Text style={styles.fieldLabel}>신청 메모</Text>
-                  <TextInput
+                  <ModalFormTextInput
+                    accessibilityLabel="신청 메모"
                     editable={!createApplication.isPending}
                     multiline
                     onChangeText={setMemo}
                     placeholder="기도방 참여를 희망하는 이유를 적어주세요"
-                    placeholderTextColor={theme.colors.textMuted}
-                    style={[styles.input, styles.textarea]}
+                    style={styles.input}
                     value={memo}
                   />
                 </View>
@@ -160,7 +148,7 @@ export default function PrayerApplyScreenRoute() {
 
               <View style={styles.waitingCard}>
                 <View style={styles.waitingHead}>
-                  <Badge tone="warn">승인 대기</Badge>
+                  <Badge tone="warning">승인 대기</Badge>
                   <Text style={styles.waitingTitle}>
                     신청 후 중복 신청은 제한됩니다
                   </Text>
@@ -185,43 +173,16 @@ export default function PrayerApplyScreenRoute() {
   );
 }
 
-function SelectRow({
-  label,
-  selected,
-  onPress,
-}: {
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={[styles.dayOption, selected ? styles.optionOn : null]}
-    >
-      <Text style={[styles.optionText, selected ? styles.optionTextOn : null]}>
-        {label}
-      </Text>
-      <View style={styles.selectedTextWrap}>
-        {selected ? (
-          <AppIcon name="check" size={13} color={theme.colors.primaryStrong} />
-        ) : null}
-        <Text
-          style={[styles.selectedText, selected ? styles.selectedTextOn : null]}
-        >
-          {selected ? "선택됨" : "선택"}
-        </Text>
-      </View>
-    </Pressable>
-  );
-}
-
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <View>
       <Text style={styles.fieldLabel}>{label}</Text>
-      <TextInput editable={false} style={styles.input} value={value} />
+      <ModalFormTextInput
+        accessibilityLabel={label}
+        editable={false}
+        style={styles.input}
+        value={value}
+      />
     </View>
   );
 }
@@ -237,13 +198,6 @@ const styles = StyleSheet.create({
   },
   notice: {
     marginBottom: 18,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primarySubtle,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
   },
   stack: {
     gap: 18,
@@ -257,55 +211,12 @@ const styles = StyleSheet.create({
   optionStack: {
     gap: 8,
   },
-  dayOption: {
-    height: 54,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
   timeGrid: {
     flexDirection: "row",
     gap: 10,
   },
   timeOption: {
     flex: 1,
-    height: 58,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  optionOn: {
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primarySubtle,
-    ...theme.shadow.sm,
-  },
-  optionText: {
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  optionTextOn: {
-    color: theme.colors.primaryStrong,
-  },
-  selectedTextWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  selectedText: {
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-  },
-  selectedTextOn: {
-    color: theme.colors.primaryStrong,
   },
   card: {
     borderRadius: theme.radius.md,
@@ -327,19 +238,7 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.label.fontWeight,
   },
   input: {
-    height: 46,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.borderStrong,
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: 14,
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-  },
-  textarea: {
-    minHeight: 86,
-    paddingTop: 12,
-    textAlignVertical: "top",
+    marginHorizontal: 0,
   },
   waitingCard: {
     borderRadius: theme.radius.md,
@@ -364,26 +263,5 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
-  },
-  bottom: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: theme.layout.screenX,
-    paddingTop: 24,
-    paddingBottom: 24,
-  },
-  submitButton: {
-    height: 52,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  submitText: {
-    color: theme.colors.onPrimary,
-    fontSize: theme.typography.body.fontSize,
-    fontWeight: theme.fontWeight.bold,
   },
 });

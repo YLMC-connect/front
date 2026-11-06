@@ -1,4 +1,5 @@
 import { AppIcon } from "@/components/ui/app-icon";
+import { InfoBox } from "@/components/ui/info-box";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
@@ -14,6 +15,8 @@ import {
   Badge,
   Empty,
   FloatingBottomBar,
+  MotionEnter,
+  motionStaggerDelay,
   TopBar,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
@@ -24,18 +27,21 @@ import type {
   PrayerTopicStatus,
 } from "../../../src/types/prayerApi";
 
-type RequestStatusTone = "primary" | "mute" | "warn" | "danger";
+type RequestStatusTone = "info" | "neutral" | "warning" | "danger";
+
+/** 목록 첫 진입: 처음 8개만 60ms 간격으로 떠오른다. */
+const STAGGER_LIMIT = 8;
 
 const topicStatusLabel: Record<
   PrayerTopicStatus,
   { label: string; tone: RequestStatusTone }
 > = {
-  REVIEW: { label: "검토중", tone: "warn" },
-  OPEN: { label: "공개중", tone: "primary" },
+  REVIEW: { label: "검토중", tone: "warning" },
+  OPEN: { label: "공개중", tone: "info" },
   REJECTED: { label: "반려", tone: "danger" },
-  ANSWER_REQUESTED: { label: "응답 요청", tone: "mute" },
-  ANSWERED: { label: "응답됨", tone: "primary" },
-  HIDDEN: { label: "숨김", tone: "mute" },
+  ANSWER_REQUESTED: { label: "응답 요청", tone: "neutral" },
+  ANSWERED: { label: "응답됨", tone: "info" },
+  HIDDEN: { label: "숨김", tone: "neutral" },
 };
 
 export default function PrayerRequestScreenRoute() {
@@ -54,7 +60,7 @@ export default function PrayerRequestScreenRoute() {
     category: topic.categoryName,
     status: topicStatusLabel[topic.status]?.label ?? "검토중",
     desc: topic.content,
-    tone: topicStatusLabel[topic.status]?.tone ?? "mute",
+    tone: topicStatusLabel[topic.status]?.tone ?? "neutral",
     active: selectedId === String(topic.id),
     canRequestAnswer: topic.status === "OPEN",
   }));
@@ -124,15 +130,11 @@ export default function PrayerRequestScreenRoute() {
               : null,
           ]}
         >
-          <View style={styles.noticeCard}>
-            <Text style={styles.noticeTitle}>
-              기도제목은 승인 후 공개됩니다
-            </Text>
-            <Text style={styles.noticeText}>
-              이름, 개인정보, 민감 표현을 관리자가 검토한 뒤 중보기도요원에게
-              보여집니다.
-            </Text>
-          </View>
+          <InfoBox
+            title="기도제목은 승인 후 공개됩니다"
+            description="이름, 개인정보, 민감 표현을 관리자가 검토한 뒤 중보기도요원에게 보여집니다."
+            style={styles.notice}
+          />
 
           <View
             style={[
@@ -157,34 +159,45 @@ export default function PrayerRequestScreenRoute() {
                 description="기도제목을 작성하여 중보기도를 요청해보세요."
               />
             ) : null}
-            {rows.map((request) => (
-              <Pressable
-                accessibilityRole="button"
+            {rows.map((request, index) => (
+              <MotionEnter
                 key={request.id}
-                onPress={() =>
-                  setSelectedId((prev) =>
-                    prev === request.id ? null : request.id,
-                  )
-                }
-                style={[styles.card, request.active ? styles.cardActive : null]}
+                enabled={index < STAGGER_LIMIT}
+                mode="fadeUp"
+                delay={motionStaggerDelay(index)}
               >
-                <View style={styles.cardContent}>
-                  <View style={styles.requestText}>
-                    <View style={styles.badgeRow}>
-                      <Badge tone="mute">{request.category}</Badge>
-                      <Badge tone={request.tone}>{request.status}</Badge>
-                      {request.active ? <Badge>선택됨</Badge> : null}
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() =>
+                    setSelectedId((prev) =>
+                      prev === request.id ? null : request.id,
+                    )
+                  }
+                  style={[
+                    styles.card,
+                    request.active ? styles.cardActive : null,
+                  ]}
+                >
+                  <View style={styles.cardContent}>
+                    <View style={styles.requestText}>
+                      <View style={styles.badgeRow}>
+                        <Badge tone="neutral">{request.category}</Badge>
+                        <Badge tone={request.tone}>{request.status}</Badge>
+                        {request.active ? (
+                          <Badge tone="info">선택됨</Badge>
+                        ) : null}
+                      </View>
+                      <Text style={styles.title}>{request.title}</Text>
+                      <Text style={styles.desc}>{request.desc}</Text>
                     </View>
-                    <Text style={styles.title}>{request.title}</Text>
-                    <Text style={styles.desc}>{request.desc}</Text>
+                    <AppIcon
+                      name="chevron-right"
+                      size={18}
+                      color={theme.colors.textMuted}
+                    />
                   </View>
-                  <AppIcon
-                    name="chevron-right"
-                    size={18}
-                    color={theme.colors.textMuted}
-                  />
-                </View>
-              </Pressable>
+                </Pressable>
+              </MotionEnter>
             ))}
           </View>
         </ScrollView>
@@ -214,22 +227,8 @@ const styles = StyleSheet.create({
   bodyEmpty: {
     paddingBottom: 112,
   },
-  noticeCard: {
+  notice: {
     marginBottom: 14,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primarySubtle,
-    padding: 15,
-  },
-  noticeTitle: {
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  noticeText: {
-    marginTop: 7,
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
   },
   stack: {
     flex: 1,
@@ -242,7 +241,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.md,
     borderColor: "transparent",
     backgroundColor: theme.colors.surface,
-    padding: 15,
+    padding: 16,
     ...theme.shadow.sm,
   },
   cardActive: {
@@ -276,26 +275,5 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
-  },
-  bottom: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: theme.layout.screenX,
-    paddingTop: 24,
-    paddingBottom: 24,
-  },
-  submitButton: {
-    height: 52,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  submitText: {
-    color: theme.colors.onPrimary,
-    fontSize: theme.typography.body.fontSize,
-    fontWeight: theme.fontWeight.bold,
   },
 });

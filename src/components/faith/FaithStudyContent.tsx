@@ -1,13 +1,14 @@
 import { Text, View } from "react-native";
 import { useLifeStudyOverview } from "../../hooks/useLifeStudyCourses";
 import {
-  AnimatedProgressFill,
   AppText,
   Empty,
   ErrorState,
   MotionEnter,
+  motionStaggerDelay,
 } from "../ui";
-import { CourseCard, OverviewLoading } from "./FaithParts";
+import { ProgressBar } from "../ui/progress-bar";
+import { CourseCard, OverviewLoading, STAGGER_LIMIT } from "./FaithParts";
 import { styles } from "./faithSectionsStyles";
 
 export function StudyContent() {
@@ -45,16 +46,13 @@ export function StudyContent() {
                 {data.path.completedRequired} / {data.path.totalRequired} 완료
               </AppText>
             </View>
-            <AppText variant="title" tone="brand">
-              {progressPercent}%
-            </AppText>
           </View>
-          <View style={styles.progressTrack}>
-            <AnimatedProgressFill
-              percent={progressPercent}
-              style={styles.progressFill}
-            />
-          </View>
+          <ProgressBar
+            label="필수 과정"
+            value={progressPercent}
+            style={styles.pathProgress}
+            testID="life-study-path-progress"
+          />
           <View style={styles.pathGrid}>
             <View style={styles.pathMetric}>
               <Text style={styles.metricLabel}>다음 추천</Text>
@@ -84,12 +82,15 @@ export function StudyContent() {
               testID="life-study-open-courses-empty"
             />
           ) : (
-            openCourses.map((course) => (
-              <CourseCard
+            openCourses.map((course, index) => (
+              <MotionEnter
                 key={course.cohortId ?? course.id}
-                course={course}
-                open
-              />
+                enabled={index < STAGGER_LIMIT}
+                mode="fadeUp"
+                delay={motionStaggerDelay(index)}
+              >
+                <CourseCard course={course} open />
+              </MotionEnter>
             ))
           )}
         </View>
@@ -119,8 +120,15 @@ export function StudyContent() {
               testID="life-study-courses-empty"
             />
           ) : (
-            courses.map((course) => (
-              <CourseCard key={course.id} course={course} />
+            courses.map((course, index) => (
+              <MotionEnter
+                key={course.id}
+                enabled={index < STAGGER_LIMIT}
+                mode="fadeUp"
+                delay={motionStaggerDelay(index)}
+              >
+                <CourseCard course={course} />
+              </MotionEnter>
             ))
           )}
         </View>

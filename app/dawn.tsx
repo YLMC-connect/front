@@ -1,9 +1,9 @@
-import { AppIcon } from "@/components/ui/app-icon";
 import { router, useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Screen } from "../src/components/layout/Screen";
 import {
   AppText,
+  Badge,
   ErrorState,
   ListSkeleton,
   TopBar,
@@ -56,22 +56,11 @@ export default function DawnPrayerScreen() {
         >
           <View style={styles.heroCard}>
             <View style={styles.heroBadgeRow}>
-              <View style={styles.heroDateBadge}>
-                <AppIcon
-                  name="book-open-page-variant-outline"
-                  size={15}
-                  color={theme.colors.primaryStrong}
-                />
-                <AppText
-                  variant="label"
-                  tone="brand"
-                  style={styles.heroDateText}
-                >
-                  {detail.data.fullDateLabel ||
-                    detail.data.dateLabel ||
-                    detail.data.timeLabel}
-                </AppText>
-              </View>
+              <Badge tone="info">
+                {detail.data.fullDateLabel ||
+                  detail.data.dateLabel ||
+                  detail.data.timeLabel}
+              </Badge>
             </View>
             <AppText variant="title" style={styles.title}>
               {detail.data.title}
@@ -127,19 +116,6 @@ const styles = StyleSheet.create({
   heroBadgeRow: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  heroDateBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primarySubtle,
-  },
-  heroDateText: {
-    fontWeight: theme.fontWeight.bold,
-    color: theme.colors.primaryStrong,
   },
   title: {
     marginTop: 2,

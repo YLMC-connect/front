@@ -26,40 +26,40 @@
 - API client는 기본 `{ code, message, data }` envelope. 비envelope 성공만 `format: "json"`
 - 인증·나눔·동행 Swagger 계약 검사 스크립트 (`test:api:contract*`)
 - PR CI 게이트는 `npm run validate`. visual 비교와 Maestro는 요청 시
-- 오류 리포트는 Sentry(`@sentry/react-native`). `app/_layout.tsx`가 `initSentry()`를 부르고 루트를 `Sentry.wrap`으로 감싼다. 배포 빌드 + `EXPO_PUBLIC_SENTRY_DSN`이 있을 때만 전송
+- 오류 리포트는 Sentry(`@sentry/react-native`). `app/_layout.tsx`가 `initSentry()`를 부르고, 초기화했을 때만 루트를 `Sentry.wrap`으로 감싼다. 배포 빌드 + `EXPO_PUBLIC_SENTRY_DSN`이 있을 때만 전송. 화면이 처리하는 오류 중 서버 응답 형식 오류(`INVALID_RESPONSE`, 4xx 제외)는 `queryClient`의 Query/MutationCache `onError`가 `reportInvalidResponse`로 보고한다
 
 ---
 
 ## 주요 파일
 
-| 경로                                           | 역할                                                |
-| ---------------------------------------------- | --------------------------------------------------- |
-| `AGENTS.md` / `CLAUDE.md`                      | AI 작업 규칙                                        |
-| `.task-flow.conf`                              | 도메인 목록 단일 출처                               |
-| `docs/GETTING_STARTED.md`                      | 클론·Dev Client·라이브 API / mock 실행 안내         |
-| `.env.example`                                 | `EXPO_PUBLIC_API_URL`과 adapter 스위치              |
-| `docs/INDEX.md`                                | 진입점. 도메인 상태표는 Issues 기반 자동생성        |
-| `scripts/gen-index.sh`                         | INDEX 상태표 재생성                                 |
-| `docs/MAINTENANCE.md`                          | 문서 드리프트 복구                                  |
-| `src/lib/apiClient.ts`                         | envelope·오류·Authorization                         |
-| `src/lib/sentry.ts`                            | Sentry 초기화(배포 빌드 + DSN 있을 때만)            |
-| `src/types/common.ts`                          | 공통 회원·서버 역할 타입                            |
-| `src/lib/rolePermissions.ts`                   | 관리자 도메인별 역할 접근 판별                      |
-| `src/constants/theme.ts` / `designTokens.json` | 디자인 토큰                                         |
-| `src/components/layout/Screen.tsx`             | 공통 화면 + 상단 inset                              |
-| `src/components/layout/StickyHeaderScreen.tsx` | 루트 탭 sticky 헤더·필터                            |
-| `src/components/ui/floating-bottom-bar.tsx`    | FloatingBottomBar 하단 플로팅 액션 바                 |
-| `src/components/ui/buttons.tsx`                | Button, FloatingActionButton 공통 컴포넌트          |
-| `src/components/ui/display.tsx`                | Card, Badge, Avatar, VisualThumb, VisualCover, Chip |
-| `src/components/ui/inputs.tsx`                 | TextField, Textarea, ImagePickerField, FormSection  |
-| `src/components/ui/navigation.tsx`             | TopBar, SegmentedTabs, HorizontalChips              |
-| `src/components/ui/dialog.tsx`                 | ConfirmDialog, BottomSheet, RadioSheet              |
-| `src/components/ui/feedback.tsx`               | Empty, EmptyState, ErrorState, SuccessState, Toast  |
+| 경로                                           | 역할                                                          |
+| ---------------------------------------------- | ------------------------------------------------------------- |
+| `AGENTS.md` / `CLAUDE.md`                      | AI 작업 규칙                                                  |
+| `.task-flow.conf`                              | 도메인 목록 단일 출처                                         |
+| `docs/GETTING_STARTED.md`                      | 클론·Dev Client·라이브 API / mock 실행 안내                   |
+| `.env.example`                                 | `EXPO_PUBLIC_API_URL`과 adapter 스위치                        |
+| `docs/INDEX.md`                                | 진입점. 도메인 상태표는 Issues 기반 자동생성                  |
+| `scripts/gen-index.sh`                         | INDEX 상태표 재생성                                           |
+| `docs/MAINTENANCE.md`                          | 문서 드리프트 복구                                            |
+| `src/lib/apiClient.ts`                         | envelope·오류·Authorization                                   |
+| `src/lib/sentry.ts`                            | Sentry 초기화·wrap·응답 형식 오류 보고                        |
+| `src/types/common.ts`                          | 공통 회원·서버 역할 타입                                      |
+| `src/lib/rolePermissions.ts`                   | 관리자 도메인별 역할 접근 판별                                |
+| `src/constants/theme.ts` / `designTokens.json` | 디자인 토큰                                                   |
+| `src/components/layout/Screen.tsx`             | 공통 화면 + 상단 inset                                        |
+| `src/components/layout/StickyHeaderScreen.tsx` | 루트 탭 sticky 헤더·필터                                      |
+| `src/components/ui/floating-bottom-bar.tsx`    | FloatingBottomBar 하단 플로팅 액션 바                         |
+| `src/components/ui/buttons.tsx`                | Button, FloatingActionButton 공통 컴포넌트                    |
+| `src/components/ui/display.tsx`                | Card, Badge, Avatar, VisualThumb, VisualCover, Chip           |
+| `src/components/ui/inputs.tsx`                 | TextField, Textarea, ImagePickerField, FormSection            |
+| `src/components/ui/navigation.tsx`             | TopBar, SegmentedTabs, HorizontalChips                        |
+| `src/components/ui/dialog.tsx`                 | ConfirmDialog, BottomSheet, RadioSheet                        |
+| `src/components/ui/feedback.tsx`               | Empty, EmptyState, ErrorState, SuccessState, Toast            |
 | `src/components/ui/motion.tsx`                 | MotionPressable, MotionEnter, MotionPop, AnimatedProgressFill |
-| `src/components/ui/index.tsx`                  | 6개 서브모듈 barrel export                          |
-| `.github/workflows/ci.yml`                     | PR `npm run validate`                               |
-| `scripts/check-*-api-contract.mjs`             | Swagger 계약 검사                                   |
-| `scripts/prepare-design-artifacts.mjs` 등      | ZIP 시각 비교. **요청 시에만**                      |
+| `src/components/ui/index.tsx`                  | 6개 서브모듈 barrel export                                    |
+| `.github/workflows/ci.yml`                     | PR `npm run validate`                                         |
+| `scripts/check-*-api-contract.mjs`             | Swagger 계약 검사                                             |
+| `scripts/prepare-design-artifacts.mjs` 등      | ZIP 시각 비교. **요청 시에만**                                |
 
 홈 루트 화면 지도는 [home.md](home.md).
 
@@ -91,7 +91,7 @@
 - **Expo Dev Client 기준** — Expo Go 아님.
 - **런타임은 Expo SDK 57** — React Native 0.86. Node는 `package.json` `engines`(`^22.13.0 || ^24.3.0 || >=25.0.0`)이고 CI는 22.22.0. iOS는 `expo-build-properties`의 `ios.enableSceneSupport`로 UIKit scene lifecycle을 켠다. `userInterfaceStyle: light`는 `expo-system-ui`가 적용한다. `ios/`·`android/`는 gitignore이며 prebuild로 다시 만든다.
 - **Gluestack UI 및 NativeWind 퇴역 (ADR 0006)** — 순수 React Native StyleSheet + `src/constants/theme.ts` 단일 표준 확정. 1,775줄 ui/index.tsx를 6개 서브모듈로 모듈화하되 하위 호환성을 위해 barrel export 유지.
-- **Sentry는 배포 빌드에서만** — `__DEV__`이거나 `EXPO_PUBLIC_SENTRY_DSN`이 비면 초기화하지 않는다. DSN은 로컬 `.env`/EAS env에만 둔다. 소스맵·디버그 심볼 자동 업로드는 아직 끔(`SENTRY_DISABLE_AUTO_UPLOAD=true`: `eas.json`, `ios:dev-client`/`android:dev-client` 스크립트). 업로드를 켜려면 Sentry org/project와 `SENTRY_AUTH_TOKEN`이 필요하다.
+- **Sentry는 배포 빌드에서만** — `__DEV__`이거나 `EXPO_PUBLIC_SENTRY_DSN`이 비면 초기화하지 않는다. DSN은 로컬 `.env`/EAS env에만 둔다. 응답 형식 오류 보고에는 쿼리 키 앞 두 조각·HTTP status·code 태그만 싣고, 응답 본문·메시지·개인정보는 보내지 않는다. 네트워크 오류·4xx 는 보내지 않는다. 소스맵·디버그 심볼 자동 업로드는 아직 끔(`SENTRY_DISABLE_AUTO_UPLOAD=true`: `eas.json`, `ios:dev-client`/`android:dev-client` 스크립트). 업로드를 켜려면 Sentry org/project와 `SENTRY_AUTH_TOKEN`이 필요하다.
 - **Mock-first** — API 없는 도메인은 service/mock 후 adapter 교체.
 
 ## 미결 / 추적

@@ -68,7 +68,7 @@ const animateLayout = () => {
   try {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   } catch {
-    // Non-native fallback
+    // 의도된 무시: 레이아웃 애니메이션을 못 쓰는 환경이면 애니메이션 없이 바뀐다.
   }
 };
 

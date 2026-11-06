@@ -30,17 +30,21 @@ export class ApiError extends Error {
     message,
     status,
     data = null,
+    cause,
   }: {
     code: string;
     message: string;
     status: number;
     data?: unknown;
+    /** 원래 오류. 사용자 문구와 별개로 디버깅·보고에 쓴다 */
+    cause?: unknown;
   }) {
     super(message);
     this.name = "ApiError";
     this.code = code;
     this.status = status;
     this.data = data;
+    if (cause !== undefined) this.cause = cause;
   }
 }
 
@@ -117,7 +121,7 @@ export function createApiClient({
           try {
             await onAuthFailure?.();
           } catch {
-            // Preserve the original 401 response when cleanup also fails.
+            // 의도된 무시: 정리(로그아웃 처리)가 실패해도 원래 401 응답을 그대로 돌려준다.
           }
           return false;
         })
@@ -154,20 +158,29 @@ export function createApiClient({
     let response: Response;
     try {
       response = await fetchImpl(url, { ...requestInit, headers });
-    } catch {
+    } catch (error) {
+      if (__DEV__) {
+        console.warn(
+          `[apiClient] ${requestInit.method ?? "GET"} ${url} 요청 실패: ${String(error)}`,
+        );
+      }
       throw new ApiError({
         code: "NETWORK_ERROR",
         message: "네트워크 연결을 확인해주세요.",
         status: 0,
+        cause: error,
       });
     }
 
     const text = await response.text();
     let body: unknown;
+    let parseError: unknown;
     try {
       body = text ? JSON.parse(text) : null;
-    } catch {
+    } catch (error) {
+      // JSON 이 아닌 본문(HTML 오류 페이지 등). 아래에서 INVALID_RESPONSE 로 바뀌므로 원인만 남긴다.
       body = null;
+      parseError = error;
     }
 
     if (auth && canRefresh && response.status === 401) {
@@ -190,6 +203,7 @@ export function createApiClient({
           message: "서버 응답 형식을 확인할 수 없습니다.",
           status: response.status,
           data: body,
+          cause: parseError,
         });
       }
       return body as T;
@@ -201,6 +215,7 @@ export function createApiClient({
         message: "서버 응답 형식을 확인할 수 없습니다.",
         status: response.status,
         data: body,
+        cause: parseError,
       });
     }
 

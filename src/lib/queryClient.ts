@@ -2,6 +2,8 @@ import { AppState, type AppStateStatus } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 import {
+  MutationCache,
+  QueryCache,
   QueryClient,
   defaultShouldDehydrateQuery,
   focusManager,
@@ -11,6 +13,7 @@ import {
 import { persistQueryClient } from "@tanstack/react-query-persist-client";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import { ApiError } from "./apiClient";
+import { reportInvalidResponse } from "./sentry";
 
 export function shouldRetryQuery(
   failureCount: number,
@@ -23,6 +26,14 @@ export function shouldRetryQuery(
 }
 
 export const queryClient = new QueryClient({
+  // 화면이 오류를 처리해도 서버 응답 형식 오류는 Sentry 에 남긴다 (Sentry 를 켰을 때만).
+  queryCache: new QueryCache({
+    onError: (error, query) => reportInvalidResponse(error, query.queryKey),
+  }),
+  mutationCache: new MutationCache({
+    onError: (error, _variables, _onMutateResult, mutation) =>
+      reportInvalidResponse(error, mutation.options.mutationKey),
+  }),
   defaultOptions: {
     queries: {
       retry: shouldRetryQuery,

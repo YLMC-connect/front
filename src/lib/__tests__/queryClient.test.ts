@@ -1,7 +1,14 @@
 import { QueryClient } from "@tanstack/react-query";
 import { ApiError } from "../apiClient";
-import { shouldPersistQuery, shouldRetryQuery } from "../queryClient";
+import {
+  queryClient,
+  shouldPersistQuery,
+  shouldRetryQuery,
+} from "../queryClient";
 import { queryKeys } from "../queryKeys";
+import { reportInvalidResponse } from "../sentry";
+
+jest.mock("../sentry", () => ({ reportInvalidResponse: jest.fn() }));
 
 describe("shouldRetryQuery", () => {
   it("does not retry on 4xx client errors", () => {
@@ -100,5 +107,41 @@ describe("shouldPersistQuery", () => {
       .getQueryCache()
       .find({ queryKey: queryKeys.home.overview(), exact: true })!;
     expect(shouldPersistQuery(query)).toBe(false);
+  });
+});
+
+describe("queryClient error reporting", () => {
+  it("passes query and mutation errors to reportInvalidResponse", async () => {
+    const error = new ApiError({
+      code: "INVALID_RESPONSE",
+      message: "서버 응답 형식을 확인할 수 없습니다.",
+      status: 200,
+    });
+
+    await expect(
+      queryClient.fetchQuery({
+        queryKey: ["home", "overview"],
+        queryFn: () => Promise.reject(error),
+        retry: false,
+      }),
+    ).rejects.toBe(error);
+    expect(reportInvalidResponse).toHaveBeenCalledWith(error, [
+      "home",
+      "overview",
+    ]);
+
+    await expect(
+      queryClient
+        .getMutationCache()
+        .build(queryClient, {
+          mutationKey: ["group", "kick"],
+          mutationFn: () => Promise.reject(error),
+        })
+        .execute(undefined),
+    ).rejects.toBe(error);
+    expect(reportInvalidResponse).toHaveBeenLastCalledWith(error, [
+      "group",
+      "kick",
+    ]);
   });
 });

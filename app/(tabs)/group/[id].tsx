@@ -410,6 +410,7 @@ export default function GroupDetailScreen() {
               setShowDeleteConfirm(false);
               router.replace("/(tabs)/group");
             } catch {
+              // 실패 안내는 아래 deleteGroupMutation.isError 문구가 맡는다. 확인 창만 닫는다.
               setShowDeleteConfirm(false);
             }
           }}

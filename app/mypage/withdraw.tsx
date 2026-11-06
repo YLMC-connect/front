@@ -30,7 +30,8 @@ export default function WithdrawScreen() {
     try {
       await withdrawMutation.mutateAsync();
       router.replace("/login");
-    } catch {
+    } catch (error) {
+      if (__DEV__) console.warn("[withdraw] 회원 탈퇴 실패", error);
       Alert.alert(
         "오류",
         "탈퇴 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",

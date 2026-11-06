@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { theme } from "../../constants/theme";
+import { Badge } from "./display";
 
+/**
+ * 옛 상세 화면 배지. 공통 Badge 를 감싸는 호환 부품이라 새 코드는 Badge 를 바로 쓴다.
+ * primary = 진한 primary 바탕(Badge solid), mute = neutral, warn = warning.
+ */
 export function DetailBadge({
   children,
   tone = "mute",
@@ -12,61 +15,12 @@ export function DetailBadge({
   bordered?: boolean;
 }) {
   return (
-    <View
-      style={[
-        styles.badge,
-        bordered ? styles.bordered : null,
-        tone === "primary" ? styles.primary : null,
-        tone === "warn" ? styles.warn : null,
-      ]}
+    <Badge
+      tone={tone === "warn" ? "warning" : "neutral"}
+      solid={tone === "primary"}
+      bordered={bordered}
     >
-      <Text
-        style={[
-          styles.text,
-          bordered ? styles.borderedText : null,
-          tone === "primary" ? styles.primaryText : null,
-          tone === "warn" ? styles.warnText : null,
-        ]}
-      >
-        {children}
-      </Text>
-    </View>
+      {children}
+    </Badge>
   );
 }
-
-const styles = StyleSheet.create({
-  badge: {
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surfaceSubtle,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  bordered: {
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-  },
-  primary: {
-    borderColor: "transparent",
-    backgroundColor: theme.colors.primary,
-  },
-  warn: {
-    borderColor: "transparent",
-    backgroundColor: theme.colors.warningSubtle,
-  },
-  text: {
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  borderedText: {
-    color: theme.colors.textMuted,
-  },
-  primaryText: {
-    color: theme.colors.onPrimary,
-  },
-  warnText: {
-    color: theme.colors.warningText,
-  },
-});

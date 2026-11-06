@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   card: {
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,

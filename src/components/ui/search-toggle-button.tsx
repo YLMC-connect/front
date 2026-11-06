@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 4,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
   },
   label: {
     color: theme.colors.inkSoft,

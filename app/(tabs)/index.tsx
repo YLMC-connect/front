@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.layout.screenX,
     position: "relative",
     overflow: "hidden",
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     backgroundColor: theme.colors.primary,
     paddingHorizontal: theme.spacing[5],
     paddingVertical: theme.spacing[5] + 2,
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
   },
   dawnCard: {
     marginHorizontal: theme.layout.screenX,
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
   categoryBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primaryTint,
   },
   categoryBadgeText: {
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   dailyCategoryBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
   dailyCategoryBadgeText: {
@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: "rgba(25, 31, 40, 0.76)",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.16)",

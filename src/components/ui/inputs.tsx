@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   imagePickerWrap: { gap: 10 },
   imagePicker: {
     minHeight: 104,
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.lineStrong,
     borderStyle: "dashed",

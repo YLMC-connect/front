@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
   },
   blockButton: {
     height: 52,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     borderWidth: 1,
     borderColor: theme.colors.lineStrong,
     flexDirection: "row",

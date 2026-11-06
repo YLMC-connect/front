@@ -527,7 +527,7 @@ const styles = StyleSheet.create({
   },
   badge: {
     flexShrink: 0,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primaryTint,
     paddingHorizontal: 10,
     paddingVertical: 3,
@@ -545,7 +545,7 @@ const styles = StyleSheet.create({
   },
   categoryPill: {
     alignSelf: "flex-start",
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surface2,
     borderWidth: 1,
     borderColor: theme.colors.line,

@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
     color: theme.colors.primaryDeep,
   },
   card: {
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     height: 52,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primary,
     alignItems: "center",
     justifyContent: "center",

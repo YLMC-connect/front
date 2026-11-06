@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.bold,
   },
   leaderBadge: {
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primary,
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
   },
   kickButton: {
     height: 32,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: "rgba(201,124,110,0.10)",
     paddingHorizontal: 12,
     flexDirection: "row",

@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     lineHeight: theme.lineHeight.sm,
   },
   editButton: {
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     paddingHorizontal: 4,
     paddingVertical: 6,
   },

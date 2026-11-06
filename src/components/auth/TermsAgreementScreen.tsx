@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
   },
   allRow: {
     marginTop: 28,
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     backgroundColor: theme.colors.surface,
     paddingHorizontal: 18,
     paddingVertical: 18,
@@ -388,8 +388,8 @@ const styles = StyleSheet.create({
   sheet: {
     height: "90%",
     maxHeight: "90%",
-    borderTopLeftRadius: theme.radius.xl,
-    borderTopRightRadius: theme.radius.xl,
+    borderTopLeftRadius: theme.radius.lg,
+    borderTopRightRadius: theme.radius.lg,
     backgroundColor: theme.colors.bg,
     ...theme.shadow.sheet,
   },
@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
     minWidth: 64,
     height: theme.layout.touchTarget,
     paddingHorizontal: 8,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

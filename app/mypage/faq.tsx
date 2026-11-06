@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   },
   chip: {
     minHeight: 34,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     borderWidth: 1,
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,

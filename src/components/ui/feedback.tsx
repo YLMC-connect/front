@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   stateAction: {
     minHeight: theme.layout.touchTarget,
     marginTop: theme.spacing[1],
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     borderWidth: 1,
     borderColor: theme.colors.lineStrong,
     backgroundColor: theme.colors.surface,
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
   retryButton: {
     minHeight: 44,
     marginTop: 4,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     borderWidth: 1,
     borderColor: theme.colors.lineStrong,
     backgroundColor: theme.colors.surface,

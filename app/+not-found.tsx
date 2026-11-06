@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 12,
     paddingVertical: 5,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primaryTint,
     borderWidth: 1,
     borderColor: "rgba(62, 104, 200, 0.16)",

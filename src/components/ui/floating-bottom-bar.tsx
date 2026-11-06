@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   },
   button: {
     height: 52,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     alignItems: "center",
     justifyContent: "center",
   },

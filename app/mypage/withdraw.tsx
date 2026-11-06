@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     lineHeight: theme.lineHeight.body,
   },
   cautionBox: {
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: "rgba(201,124,110,0.20)",
     backgroundColor: "rgba(201,124,110,0.10)",

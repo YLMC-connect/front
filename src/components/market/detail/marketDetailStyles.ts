@@ -199,7 +199,7 @@ export const styles = StyleSheet.create({
     marginBottom: 10,
   },
   softChip: {
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primaryTint,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -210,7 +210,7 @@ export const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.semibold,
   },
   conditionChip: {
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surfaceMuted,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -235,7 +235,7 @@ export const styles = StyleSheet.create({
   actions: {
     marginHorizontal: 16,
     marginBottom: 22,
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     backgroundColor: theme.colors.surface,
     padding: 4,
     flexDirection: "row",
@@ -307,7 +307,7 @@ export const styles = StyleSheet.create({
   },
   composerField: {
     height: 52,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     borderWidth: 1,
     borderColor: theme.colors.lineStrong,
     backgroundColor: theme.colors.surface,
@@ -320,7 +320,7 @@ export const styles = StyleSheet.create({
     ...theme.shadow.card,
   },
   cancelEdit: {
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surfaceMuted,
     paddingHorizontal: 10,
     paddingVertical: 5,

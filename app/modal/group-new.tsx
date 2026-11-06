@@ -493,7 +493,7 @@ const styles = StyleSheet.create({
   chip: {
     minHeight: 44,
     justifyContent: "center",
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surface,
     borderWidth: 1,
     borderColor: theme.colors.line,
@@ -550,7 +550,7 @@ const styles = StyleSheet.create({
   quickPresetChip: {
     paddingHorizontal: 12,
     paddingVertical: 7,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surface,
     borderWidth: 1,
     borderColor: theme.colors.line,

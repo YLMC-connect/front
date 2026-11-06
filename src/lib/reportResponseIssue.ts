@@ -1,4 +1,5 @@
 import { ApiError } from "./apiClient";
+import { captureResponseIssue } from "./sentry";
 
 /** 서버 응답에서 버린 부분. 경로·필드 이름만 담고 값·개인정보는 담지 않는다. */
 export interface ResponseIssue {
@@ -8,9 +9,10 @@ export interface ResponseIssue {
   reason: string;
 }
 
-/** 지금은 개발 빌드에서 console.warn 만 한다. */
+/** 개발 빌드에서는 console.warn, 배포 빌드(Sentry 켜짐)에서는 Sentry 에 경로·필드 이름만 보고한다. */
 export function reportResponseIssue({ source, reason }: ResponseIssue) {
   if (__DEV__) console.warn(`[응답 형식] ${source}: ${reason}`);
+  captureResponseIssue({ source, reason });
 }
 
 /** 응답 형식 오류. field 는 목록에서 항목을 뺄 때 알릴 필드 이름이다. */

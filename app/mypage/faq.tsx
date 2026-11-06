@@ -87,6 +87,8 @@ export default function FaqScreen() {
                     <Pressable
                       key={category}
                       accessibilityRole="button"
+                      accessibilityState={{ selected: isSelected }}
+                      hitSlop={{ top: 5, bottom: 5 }}
                       onPress={() => setSelectedCategory(category)}
                       style={[styles.chip, isSelected ? styles.chipOn : null]}
                     >
@@ -117,6 +119,7 @@ export default function FaqScreen() {
                   <View key={`${faq.id}-${faq.question}`} style={styles.faqRow}>
                     <Pressable
                       accessibilityRole="button"
+                      accessibilityState={{ expanded: isOpen }}
                       onPress={() => toggleFaq(faq.question)}
                       style={styles.questionRow}
                     >
@@ -184,7 +187,7 @@ const styles = StyleSheet.create({
   },
   chipTextOn: {
     color: theme.colors.primaryStrong,
-    fontWeight: theme.fontWeight.semibold,
+    fontWeight: theme.fontWeight.bold,
   },
   faqRow: {
     borderBottomWidth: 1,

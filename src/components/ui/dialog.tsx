@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
   sheetAction: { flex: 1 },
   sheetFooterButton: {
     height: 48,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     alignItems: "center",
     justifyContent: "center",
   },

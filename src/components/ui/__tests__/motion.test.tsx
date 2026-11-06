@@ -18,10 +18,12 @@ import {
 describe("common motion", () => {
   it("keeps the shared motion values short and subtle", () => {
     expect(theme.motion.duration).toEqual({
-      fast: 140,
+      fast: 120,
       base: 200,
-      overlay: 220,
-      enter: 280,
+      slow: 300,
+      stagger: 60,
+      overlay: 200,
+      enter: 300,
     });
     expect(theme.motion.scale).toEqual({
       pressed: 0.97,
@@ -143,12 +145,12 @@ describe("common motion", () => {
     expect(screen.getByTestId("status-indicator")).toBeTruthy();
     expect(
       StyleSheet.flatten(screen.getByTestId("status-track").props.style),
-    ).toMatchObject({ height: 40, borderRadius: theme.radius.pill });
+    ).toMatchObject({ height: 40, borderRadius: theme.radius.full });
     expect(
       StyleSheet.flatten(screen.getByTestId("status-sharing").props.style),
     ).toMatchObject({
       height: 32,
-      borderRadius: theme.radius.pill,
+      borderRadius: theme.radius.full,
       alignItems: "center",
       justifyContent: "center",
     });
@@ -252,10 +254,10 @@ describe("common motion", () => {
     ).not.toHaveProperty("paddingHorizontal");
     expect(
       StyleSheet.flatten(screen.getByTestId("category-indicator").props.style),
-    ).toMatchObject({ height: 36, borderRadius: theme.radius.pill });
+    ).toMatchObject({ height: 36, borderRadius: theme.radius.full });
     expect(
       StyleSheet.flatten(screen.getByTestId("category-all").props.style),
-    ).toMatchObject({ height: 36, borderRadius: theme.radius.pill });
+    ).toMatchObject({ height: 36, borderRadius: theme.radius.full });
     expect(screen.getByTestId("category-all").props.hitSlop).toEqual({
       top: 4,
       bottom: 4,

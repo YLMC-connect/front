@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   },
   noticeCard: {
     marginBottom: 14,
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     backgroundColor: theme.colors.primarySoft,
     padding: 15,
   },
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   card: {
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: "transparent",
     backgroundColor: theme.colors.surface,
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     height: 52,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primary,
     alignItems: "center",
     justifyContent: "center",

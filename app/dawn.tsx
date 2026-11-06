@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     gap: theme.spacing[3],
   },
   heroCard: {
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primaryTint,
   },
   heroDateText: {
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     color: theme.colors.ink,
   },
   panel: {
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,

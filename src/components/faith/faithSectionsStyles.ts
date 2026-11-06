@@ -5,7 +5,7 @@ export const styles = StyleSheet.create({
   segmented: {
     marginHorizontal: theme.layout.screenX,
     marginBottom: 10,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.ring,
     padding: 4,
     flexDirection: "row",
@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
   segment: {
     flex: 1,
     minHeight: 38,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -43,7 +43,7 @@ export const styles = StyleSheet.create({
     marginHorizontal: theme.layout.screenX,
     marginTop: theme.spacing[2],
     marginBottom: theme.spacing[3],
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
@@ -59,13 +59,13 @@ export const styles = StyleSheet.create({
   todayTrack: {
     height: 8,
     marginTop: theme.spacing[4],
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     overflow: "hidden",
     backgroundColor: theme.colors.surfaceMuted,
   },
   todayFill: {
     height: "100%",
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primary,
   },
   todayMeta: { marginTop: theme.spacing[2] },
@@ -106,7 +106,7 @@ export const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   roomCard: {
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
@@ -127,7 +127,7 @@ export const styles = StyleSheet.create({
     backgroundColor: theme.colors.primarySoft,
     paddingHorizontal: 8,
     paddingVertical: 5,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
   },
   roomActionText: {
     fontSize: 11,
@@ -149,13 +149,13 @@ export const styles = StyleSheet.create({
   },
   roomProgressTrack: {
     height: 5,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surfaceMuted,
     overflow: "hidden",
   },
   roomProgressFill: {
     height: "100%",
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primary,
   },
   dayBadge: {
@@ -191,13 +191,13 @@ export const styles = StyleSheet.create({
     gap: 6,
   },
   statusBadge: {
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primarySoft,
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
   warnBadge: {
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.amberSoft,
     paddingHorizontal: 8,
     paddingVertical: 3,
@@ -208,7 +208,7 @@ export const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.bold,
   },
   muteBadge: {
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surface2,
     borderWidth: 1,
     borderColor: theme.colors.line,
@@ -266,7 +266,7 @@ export const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surface,
     borderWidth: 1,
     borderColor: theme.colors.line,
@@ -296,13 +296,13 @@ export const styles = StyleSheet.create({
   progressTrack: {
     marginTop: 12,
     height: 8,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surfaceMuted,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primary,
   },
   pathGrid: {

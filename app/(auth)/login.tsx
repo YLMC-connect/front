@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
   brandBadge: {
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primarySoft,
     marginBottom: theme.spacing[3],
   },
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
   loginButton: {
     minHeight: 52,
     marginTop: theme.spacing[2],
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     paddingHorizontal: 24,
     alignItems: "center",
     justifyContent: "center",

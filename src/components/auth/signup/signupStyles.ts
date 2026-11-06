@@ -29,7 +29,7 @@ export const styles = StyleSheet.create({
   },
   sectionCard: {
     backgroundColor: theme.colors.surface,
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,
     padding: 16,
@@ -162,7 +162,7 @@ export const styles = StyleSheet.create({
   },
   termsCard: {
     backgroundColor: theme.colors.surface,
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,
     padding: 14,
@@ -235,7 +235,7 @@ export const styles = StyleSheet.create({
   },
   submitButton: {
     height: 52,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primary,
     alignItems: "center",
     justifyContent: "center",

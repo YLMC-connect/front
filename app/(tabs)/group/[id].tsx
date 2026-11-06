@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   categoryChip: {
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primaryTint,
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.semibold,
   },
   recruitChip: {
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primaryTint,
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -532,7 +532,7 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.bold,
   },
   leaderBadge: {
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primary,
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -552,7 +552,7 @@ const styles = StyleSheet.create({
   },
   outlineButton: {
     minHeight: 52,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     borderWidth: 1,
     borderColor: theme.colors.lineStrong,
     alignItems: "center",
@@ -565,7 +565,7 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     minHeight: 52,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primary,
     alignItems: "center",
     justifyContent: "center",

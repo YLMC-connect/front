@@ -111,7 +111,7 @@ export function FloatingActionButton({
 const styles = StyleSheet.create({
   button: {
     minHeight: 52,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     paddingHorizontal: 24,
     alignItems: "center",
     justifyContent: "center",
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     zIndex: 20,
     minWidth: 46,
     height: 46,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     paddingLeft: 12,
     paddingRight: 14,
     flexDirection: "row",

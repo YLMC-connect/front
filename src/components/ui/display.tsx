@@ -278,14 +278,14 @@ export function Chip({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: theme.colors.surface,
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     padding: 16,
     borderWidth: 1,
     borderColor: theme.colors.line,
   },
   badge: {
     alignSelf: "flex-start",
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
     opacity: 0.22,
   },
   visualCover: {
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     overflow: "hidden",
     position: "relative",
   },
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
   chip: {
     minHeight: 34,
     paddingHorizontal: 12,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     borderWidth: 1,
     borderColor: theme.colors.line,
     alignItems: "center",

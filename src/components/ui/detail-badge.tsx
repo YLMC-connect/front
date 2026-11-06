@@ -36,7 +36,7 @@ export function DetailBadge({
 
 const styles = StyleSheet.create({
   badge: {
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surface2,
     paddingHorizontal: 10,
     paddingVertical: 5,

@@ -7,16 +7,17 @@ import { AppText, Card, ListSkeleton, Skeleton } from "../index";
 
 describe("design system foundations", () => {
   it("keeps semantic colors and radii on the shared token source", () => {
-    expect(theme.colors).toEqual(designTokens.colors);
+    expect(theme.colors).toMatchObject(designTokens.colors);
     expect(theme.radius).toEqual(designTokens.radius);
-    expect(Object.keys(theme.typography)).toEqual([
+    expect(theme.spacing).toEqual(designTokens.spacing);
+    expect(theme.typography).toMatchObject(designTokens.typography);
+    expect(Object.keys(designTokens.typography)).toEqual([
       "display",
-      "screenTitle",
-      "sectionTitle",
-      "cardTitle",
+      "title",
+      "heading",
       "body",
+      "label",
       "caption",
-      "formLabel",
     ]);
     expect(theme.font).toEqual(appFont);
   });
@@ -34,7 +35,7 @@ describe("design system foundations", () => {
     expect(style).toMatchObject({
       fontSize: theme.typography.sectionTitle.fontSize,
       lineHeight: theme.typography.sectionTitle.lineHeight,
-      fontFamily: appFont.semibold,
+      fontFamily: appFont.bold,
       color: theme.colors.primaryDeep,
     });
   });
@@ -56,7 +57,7 @@ describe("design system foundations", () => {
       backgroundColor: theme.colors.surface,
       borderWidth: 1,
       borderColor: theme.colors.line,
-      borderRadius: theme.radius.lg,
+      borderRadius: theme.radius.md,
     });
   });
 

@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   },
   release: {
     height: 34,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primarySoft,
     paddingHorizontal: 14,
     flexDirection: "row",

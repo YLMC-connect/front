@@ -1,29 +1,44 @@
 import designTokens from "./designTokens.json";
 import { appFont } from "./fonts";
 
-const { colors, spacing, radius } = designTokens;
+/**
+ * 디자인 시스템 v2 토큰(ADR 0007). designTokens.json 은
+ * scripts/sync-design-tokens.mjs 가 design-system/tokens.json 에서 만든다.
+ */
+const ds = designTokens;
+const c = ds.colors;
 
-const fontSize = {
-  xs: 11,
-  sm: 12,
-  md: 14,
-  base: 15,
-  lg: 16,
-  xl: 18,
-  "2xl": 22,
-  display: 28,
-};
+/**
+ * 옛 색 이름 → v2 값. 도메인 화면을 옮기는 동안만 두고 정리 PR(#236)에서 지운다.
+ * 새 코드는 v2 이름만 쓴다. 쓰임새로 갈리는 이름은 가장 가까운 v2 값으로 임시로 둔다(ADR 0007 2.2).
+ */
+const legacyColors = {
+  ink: c.text,
+  textPrimary: c.text,
+  inkSoft: c.neutral700, // 쓰임새로 text / textMuted 로 나눈다
+  textSecondary: c.neutral700,
+  inkMute: c.textMuted,
+  inkHint: c.neutral400, // placeholder → textMuted, 비활성 → textDisabled
+  primaryDeep: c.primaryStrong,
+  primarySoft: c.primarySubtle,
+  primaryTint: c.primary50, // primarySubtle 또는 infoSubtle
+  surface2: c.neutral50, // 입력창 → surface, 나머지 → surfaceSubtle
+  surfaceMuted: c.surfaceSubtle,
+  line: c.border,
+  lineStrong: c.border, // 컨트롤 → borderStrong, Outline 버튼 → borderButton
+  ring: c.border,
+  glass: c.barGlass,
+  overlay: c.sheetOverlay,
+  toast: c.neutral900, // 컴포넌트 PR 에서 흰 토스트로
+  warn: c.warningText,
+  danger: c.dangerText,
+  success: c.successText,
+  white: c.onPrimary,
+  amberSoft: c.warningSubtle,
+  sage: c.success400, // 아바타 → avatar1~6
+} as const;
 
-const lineHeight = {
-  xs: 14,
-  sm: 17,
-  md: 20,
-  body: 21,
-  lg: 22,
-  xl: 24,
-  "2xl": 28,
-  display: 34,
-};
+const colors = { ...c, ...legacyColors };
 
 const fontWeight = {
   regular: "400",
@@ -33,64 +48,66 @@ const fontWeight = {
   extrabold: "800",
 } as const;
 
+type FontWeight = (typeof fontWeight)[keyof typeof fontWeight];
+type TextRole = {
+  fontSize: number;
+  lineHeight: number;
+  fontWeight: FontWeight;
+};
+
+/** JSON 의 fontWeight 는 string 이라 RN 이 받는 값으로 좁힌다. */
+const t = ds.typography as Record<keyof typeof ds.typography, TextRole>;
+
 const typography = {
-  /** One strong page lead — bold, not extrabold (calmer product tone). */
-  display: {
-    fontSize: 28,
-    lineHeight: 36,
-    fontWeight: fontWeight.bold,
-  },
-  screenTitle: {
-    fontSize: 22,
-    lineHeight: 30,
-    fontWeight: fontWeight.bold,
-  },
-  sectionTitle: {
-    fontSize: 17,
-    lineHeight: 24,
-    fontWeight: fontWeight.semibold,
-  },
-  cardTitle: {
-    fontSize: 16,
-    lineHeight: 23,
-    fontWeight: fontWeight.semibold,
-  },
-  body: {
-    fontSize: 15,
-    lineHeight: 22,
-    fontWeight: fontWeight.regular,
-  },
-  caption: {
-    fontSize: 12,
-    lineHeight: 17,
-    fontWeight: fontWeight.medium,
-  },
-  formLabel: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: fontWeight.medium,
-  },
-} as const;
+  ...t,
+  /** 카드 제목: body 크기에 600. */
+  cardTitle: { ...t.body, fontWeight: fontWeight.semibold },
+  // 옛 이름 별칭 — AppText 변형 이름을 바꾸는 컴포넌트 PR(#228)에서 지운다.
+  screenTitle: t.title,
+  sectionTitle: t.heading,
+  formLabel: t.label,
+};
+
+/** 옛 글자 크기 이름 → v2 6단계. 도메인 PR 에서 typography 로 옮긴다. */
+const fontSize = {
+  xs: t.caption.fontSize,
+  sm: t.caption.fontSize,
+  md: t.label.fontSize,
+  base: t.body.fontSize,
+  lg: t.body.fontSize,
+  xl: t.heading.fontSize,
+  "2xl": t.title.fontSize,
+  display: t.display.fontSize,
+};
+
+const lineHeight = {
+  xs: t.caption.lineHeight,
+  sm: t.caption.lineHeight,
+  md: t.label.lineHeight,
+  body: t.body.lineHeight,
+  lg: t.body.lineHeight,
+  xl: t.heading.lineHeight,
+  "2xl": t.title.lineHeight,
+  display: t.display.lineHeight,
+};
 
 const layout = {
-  screenX: 20,
-  sectionGap: 32,
-  /** Inner padding for list cards (density pass: slightly tighter than 16). */
-  cardPadding: 12,
-  contentGap: 8,
-  listGap: 12,
+  screenX: ds.spacing["5"],
+  sectionGap: ds.spacing["8"],
+  cardPadding: ds.spacing["4"],
+  contentGap: ds.spacing["2"],
+  listGap: ds.spacing["3"],
   /** Square thumb on market/group list rows. */
   listThumb: 88,
-  touchTarget: 44,
+  touchTarget: ds.size.buttonHeightSm,
 } as const;
 
 const motion = {
   duration: {
-    fast: 140,
-    base: 200,
-    overlay: 220,
-    /** Soft screen enter — a bit longer than base so fade-up reads calmly. */
-    enter: 280,
+    ...ds.duration,
+    // 옛 이름 별칭
+    overlay: ds.duration.base,
+    enter: ds.duration.slow,
   },
   distance: {
     xs: 4,
@@ -104,7 +121,7 @@ const motion = {
     popFrom: 0.9,
   },
   /** Gap between staggered enter blocks (logo → title → form → cta). */
-  stagger: 60,
+  stagger: ds.duration.stagger,
   spring: {
     damping: 18,
     stiffness: 260,
@@ -112,8 +129,13 @@ const motion = {
   },
 } as const;
 
+/**
+ * v2 그림자는 sm·md·lg·sheet 네 가지. 아래 옛 이름은 컴포넌트 PR(#228)에서
+ * v2 이름으로 옮기거나 지운다(ADR 0007 2.4).
+ */
 const shadow = {
-  /** List cards use border only; keep a near-flat token for rare call sites. */
+  ...ds.shadow,
+  /** 목록 카드 — v2 는 shadow.sm 만 쓰지만 Card 의 테두리를 빼는 #228 까지 그대로 둔다. */
   card: {
     shadowColor: "rgba(25,31,40,0.12)",
     shadowOffset: { width: 0, height: 1 },
@@ -149,33 +171,14 @@ const shadow = {
     shadowRadius: 8,
     elevation: 2,
   },
-  dialog: {
-    shadowColor: "rgba(0,0,0,0.40)",
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.24,
-    shadowRadius: 24,
-    elevation: 12,
-  },
-  sheet: {
-    shadowColor: "rgba(0,0,0,0.18)",
-    shadowOffset: { width: 0, height: -14 },
-    shadowOpacity: 0.22,
-    shadowRadius: 20,
-    elevation: 12,
-  },
-  toast: {
-    shadowColor: "rgba(0,0,0,0.35)",
-    shadowOffset: { width: 0, height: 14 },
-    shadowOpacity: 0.24,
-    shadowRadius: 18,
-    elevation: 10,
-  },
+  dialog: ds.shadow.lg,
+  toast: ds.shadow.lg,
 };
 
 export const theme = {
   colors,
-  spacing,
-  radius,
+  spacing: ds.spacing,
+  radius: ds.radius,
   fontSize,
   lineHeight,
   fontWeight,
@@ -184,4 +187,7 @@ export const theme = {
   layout,
   motion,
   shadow,
+  size: ds.size,
+  zIndex: ds.zIndex,
+  opacity: ds.opacity,
 } as const;

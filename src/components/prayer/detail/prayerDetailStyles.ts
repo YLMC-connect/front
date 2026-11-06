@@ -49,13 +49,13 @@ export const styles = StyleSheet.create({
   },
   heroProgressBar: {
     height: 6,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surface2,
     overflow: "hidden",
   },
   heroProgressFill: {
     height: "100%",
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primary,
   },
   body: {
@@ -114,7 +114,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     gap: 3,
     backgroundColor: "rgba(184, 102, 88, 0.12)",
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     paddingHorizontal: 7,
     paddingVertical: 2,
   },
@@ -124,7 +124,7 @@ export const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.extrabold,
   },
   topicChip: {
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primaryTint,
     paddingHorizontal: 9,
     paddingVertical: 3,
@@ -186,7 +186,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surface2,
     paddingHorizontal: 11,
     paddingVertical: 6,
@@ -213,7 +213,7 @@ export const styles = StyleSheet.create({
   },
   prayButton: {
     height: 52,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primary,
     flexDirection: "row",
     alignItems: "center",
@@ -303,13 +303,13 @@ export const styles = StyleSheet.create({
   },
   progressBar: {
     height: 8,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: "rgba(30,41,32,0.08)",
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primary,
   },
   statusListHead: {
@@ -348,7 +348,7 @@ export const styles = StyleSheet.create({
     gap: 4,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
   },
   personBadgeDone: {
     backgroundColor: theme.colors.primarySoft,
@@ -369,7 +369,7 @@ export const styles = StyleSheet.create({
   empty: {
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     backgroundColor: theme.colors.surface,
     paddingHorizontal: 24,
     paddingVertical: 42,

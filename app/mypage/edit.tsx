@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     color: theme.colors.inkHint,
   },
   profileCard: {
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface2,

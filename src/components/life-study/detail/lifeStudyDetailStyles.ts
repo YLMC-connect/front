@@ -150,13 +150,13 @@ export const styles = StyleSheet.create({
   progressTrack: {
     marginTop: 10,
     height: 6,
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surfaceMuted,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    borderRadius: theme.radius.pill,
+    borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primary,
   },
   metricGrid: {

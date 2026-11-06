@@ -203,9 +203,9 @@ const styles = StyleSheet.create({
   field: { gap: 6 },
   fieldLabel: {
     color: theme.colors.inkSoft,
-    fontWeight: theme.typography.formLabel.fontWeight,
-    fontSize: theme.typography.formLabel.fontSize,
-    lineHeight: theme.typography.formLabel.lineHeight,
+    fontWeight: theme.typography.label.fontWeight,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
   },
   input: {
     minHeight: 48,

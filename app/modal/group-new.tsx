@@ -202,7 +202,11 @@ export default function GroupNewModal() {
 
             {/* 그룹 1: 기본 정보 */}
             <View style={styles.groupHeader}>
-              <AppText variant="cardTitle" style={styles.groupTitle}>
+              <AppText
+                variant="body"
+                weight="semibold"
+                style={styles.groupTitle}
+              >
                 기본 정보
               </AppText>
               <AppText variant="caption" tone="muted">
@@ -272,7 +276,11 @@ export default function GroupNewModal() {
 
             {/* 그룹 2: 모임 활동 안내 */}
             <View style={styles.groupHeader}>
-              <AppText variant="cardTitle" style={styles.groupTitle}>
+              <AppText
+                variant="body"
+                weight="semibold"
+                style={styles.groupTitle}
+              >
                 활동 및 운영 안내
               </AppText>
               <AppText variant="caption" tone="muted">

@@ -408,7 +408,8 @@ function CompanionCard(
         <View style={styles.cardTop}>
           <AppText
             numberOfLines={1}
-            variant="cardTitle"
+            variant="body"
+            weight="semibold"
             style={styles.cardTitle}
           >
             {props.item.name}

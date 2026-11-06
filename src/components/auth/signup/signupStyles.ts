@@ -56,16 +56,16 @@ export const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: theme.colors.ink,
-    fontSize: theme.typography.cardTitle.fontSize,
-    lineHeight: theme.typography.cardTitle.lineHeight,
-    fontWeight: theme.typography.cardTitle.fontWeight,
+    fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
+    fontWeight: theme.fontWeight.semibold,
   },
   label: {
     marginBottom: theme.spacing[2],
     color: theme.colors.inkSoft,
-    fontSize: theme.typography.formLabel.fontSize,
-    lineHeight: theme.typography.formLabel.lineHeight,
-    fontWeight: theme.typography.formLabel.fontWeight,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
+    fontWeight: theme.typography.label.fontWeight,
   },
   idRow: {
     flexDirection: "row",
@@ -181,7 +181,7 @@ export const styles = StyleSheet.create({
   },
   termsAllText: {
     color: theme.colors.ink,
-    fontSize: theme.typography.cardTitle.fontSize,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   termsList: {

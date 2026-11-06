@@ -224,7 +224,8 @@ function PostRow({
       <View style={[styles.rowText, done ? styles.rowTextDone : null]}>
         <AppText
           numberOfLines={2}
-          variant="cardTitle"
+          variant="body"
+          weight="semibold"
           tone={done ? "muted" : "primary"}
         >
           {post.title}

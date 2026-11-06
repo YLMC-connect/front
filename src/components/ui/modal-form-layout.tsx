@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     color: theme.colors.ink,
-    fontSize: theme.typography.formLabel.fontSize,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   required: {

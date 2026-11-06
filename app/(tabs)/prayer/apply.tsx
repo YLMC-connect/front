@@ -321,8 +321,8 @@ const styles = StyleSheet.create({
   fieldLabel: {
     marginBottom: 6,
     color: theme.colors.inkSoft,
-    fontSize: theme.typography.formLabel.fontSize,
-    fontWeight: theme.typography.formLabel.fontWeight,
+    fontSize: theme.typography.label.fontSize,
+    fontWeight: theme.typography.label.fontWeight,
   },
   input: {
     height: 46,

@@ -32,7 +32,7 @@ export function StudyContent() {
   return (
     <MotionEnter style={styles.contentFill}>
       <View style={styles.section}>
-        <AppText variant="sectionTitle" style={styles.sectionTitle}>
+        <AppText variant="heading" style={styles.sectionTitle}>
           내 학습경로
         </AppText>
         <View style={styles.pathCard}>
@@ -41,11 +41,11 @@ export function StudyContent() {
               <AppText variant="caption" tone="brand">
                 필수 과정 진행률
               </AppText>
-              <AppText variant="sectionTitle" style={styles.pathTitle}>
+              <AppText variant="heading" style={styles.pathTitle}>
                 {data.path.completedRequired} / {data.path.totalRequired} 완료
               </AppText>
             </View>
-            <AppText variant="screenTitle" tone="brand">
+            <AppText variant="title" tone="brand">
               {progressPercent}%
             </AppText>
           </View>
@@ -71,7 +71,7 @@ export function StudyContent() {
       </View>
 
       <View style={styles.section}>
-        <AppText variant="sectionTitle" style={styles.sectionTitle}>
+        <AppText variant="heading" style={styles.sectionTitle}>
           지금 신청 가능한 과정
         </AppText>
         <View style={styles.stack}>
@@ -97,7 +97,7 @@ export function StudyContent() {
           courses.length === 0 ? styles.lastSectionEmpty : null,
         ]}
       >
-        <AppText variant="sectionTitle" style={styles.sectionTitle}>
+        <AppText variant="heading" style={styles.sectionTitle}>
           전체 과정
         </AppText>
         <View

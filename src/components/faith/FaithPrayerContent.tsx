@@ -55,11 +55,11 @@ export function PrayerContent() {
             <AppText variant="caption" tone="brand">
               오늘의 기도 진행
             </AppText>
-            <AppText variant="sectionTitle" style={styles.todayTitle}>
+            <AppText variant="heading" style={styles.todayTitle}>
               함께 기도한 성도 {todayCompleted}명
             </AppText>
           </View>
-          <AppText variant="screenTitle" tone="brand">
+          <AppText variant="title" tone="brand">
             {todayPercent}%
           </AppText>
         </View>
@@ -75,7 +75,7 @@ export function PrayerContent() {
       </View>
 
       <View style={styles.section}>
-        <AppText variant="sectionTitle" style={styles.sectionTitle}>
+        <AppText variant="heading" style={styles.sectionTitle}>
           내 기도방
         </AppText>
         <View style={styles.stack}>
@@ -110,7 +110,7 @@ export function PrayerContent() {
                     />
                     <View style={styles.cardText}>
                       <View style={styles.badgeRow}>
-                        <AppText variant="cardTitle">
+                        <AppText variant="body" weight="semibold">
                           {room.title ??
                             `${weekdayLabels[room.weekday].long} ${periodLabels[room.period]}`}
                         </AppText>
@@ -230,7 +230,11 @@ export function PrayerContent() {
                       </Text>
                     </View>
                   </View>
-                  <AppText variant="cardTitle" style={styles.requestTitle}>
+                  <AppText
+                    variant="body"
+                    weight="semibold"
+                    style={styles.requestTitle}
+                  >
                     {item.title}
                   </AppText>
                   <AppText

@@ -24,7 +24,7 @@ describe("design system foundations", () => {
 
   it("renders role typography and semantic color through AppText", () => {
     render(
-      <AppText variant="sectionTitle" tone="brand">
+      <AppText variant="heading" tone="brand">
         내 활동 요약
       </AppText>,
     );
@@ -33,10 +33,10 @@ describe("design system foundations", () => {
       screen.getByText("내 활동 요약").props.style,
     );
     expect(style).toMatchObject({
-      fontSize: theme.typography.sectionTitle.fontSize,
-      lineHeight: theme.typography.sectionTitle.lineHeight,
+      fontSize: theme.typography.heading.fontSize,
+      lineHeight: theme.typography.heading.lineHeight,
       fontFamily: appFont.bold,
-      color: theme.colors.primaryDeep,
+      color: theme.colors.primaryStrong,
     });
   });
 
@@ -55,10 +55,10 @@ describe("design system foundations", () => {
     );
     expect(cardStyle).toMatchObject({
       backgroundColor: theme.colors.surface,
-      borderWidth: 1,
-      borderColor: theme.colors.line,
       borderRadius: theme.radius.md,
+      ...theme.shadow.sm,
     });
+    expect(cardStyle).not.toHaveProperty("borderWidth");
   });
 
   it("exposes list loading as one accessible progress state", () => {

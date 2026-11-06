@@ -52,7 +52,7 @@ export function ScreenHeader({
     >
       <GlassBackdrop blurTarget={blurTarget} testID={testID} />
       <View style={[styles.text, right ? styles.textWithAction : null]}>
-        <AppText variant="screenTitle">{title}</AppText>
+        <AppText variant="title">{title}</AppText>
         {subtitle ? (
           <AppText variant="caption" tone="secondary" style={styles.subtitle}>
             {subtitle}

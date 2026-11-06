@@ -84,15 +84,14 @@ describe("shared maintenance UI", () => {
     expect(
       StyleSheet.flatten(screen.getByLabelText("기도제목 작성").props.style),
     ).toMatchObject({
-      minWidth: 46,
-      height: 46,
-      paddingLeft: 12,
-      paddingRight: 14,
+      minWidth: theme.size.fabHeight,
+      height: theme.size.fabHeight,
+      paddingHorizontal: 16,
       gap: 6,
     });
     expect(
       StyleSheet.flatten(screen.getByText("기도제목 작성").props.style),
-    ).toMatchObject({ fontSize: 13 });
+    ).toMatchObject({ fontSize: 12 });
     expect(screen.getByText("기도제목 작성")).toBeTruthy();
     fireEvent.press(screen.getByLabelText("기도제목 작성"));
     expect(onPress).toHaveBeenCalledTimes(1);

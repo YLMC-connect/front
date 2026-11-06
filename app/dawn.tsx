@@ -63,7 +63,7 @@ export default function DawnPrayerScreen() {
                   color={theme.colors.primaryDeep}
                 />
                 <AppText
-                  variant="formLabel"
+                  variant="label"
                   tone="brand"
                   style={styles.heroDateText}
                 >
@@ -73,7 +73,7 @@ export default function DawnPrayerScreen() {
                 </AppText>
               </View>
             </View>
-            <AppText variant="screenTitle" style={styles.title}>
+            <AppText variant="title" style={styles.title}>
               {detail.data.title}
             </AppText>
           </View>

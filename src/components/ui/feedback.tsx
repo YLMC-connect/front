@@ -38,7 +38,12 @@ export function Empty({
       <View style={styles.stateIcon}>
         <AppIcon name={icon} size={42} color={theme.colors.inkHint} />
       </View>
-      <AppText variant="cardTitle" tone="secondary" style={styles.stateTitle}>
+      <AppText
+        variant="body"
+        weight="semibold"
+        tone="secondary"
+        style={styles.stateTitle}
+      >
         {title}
       </AppText>
       {description ? (
@@ -64,7 +69,12 @@ export function ErrorState({
       <View style={styles.stateIcon}>
         <AppIcon name="error-outline" size={42} color={theme.colors.inkHint} />
       </View>
-      <AppText variant="cardTitle" tone="secondary" style={styles.stateTitle}>
+      <AppText
+        variant="body"
+        weight="semibold"
+        tone="secondary"
+        style={styles.stateTitle}
+      >
         불러오지 못했습니다
       </AppText>
       <AppText variant="caption" tone="muted" style={styles.stateText}>
@@ -99,7 +109,9 @@ export function SuccessState({
       <View style={[styles.stateIcon, styles.successStateIcon]}>
         <AppIcon name="check" size={38} color={theme.colors.success} />
       </View>
-      <AppText variant="cardTitle">{title}</AppText>
+      <AppText variant="body" weight="semibold">
+        {title}
+      </AppText>
       {description ? (
         <AppText variant="caption" tone="muted" style={styles.stateText}>
           {description}

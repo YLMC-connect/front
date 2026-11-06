@@ -128,7 +128,7 @@ export function AppIcon({
   const IconComponent = iconMap[name];
   if (!IconComponent) return null;
 
-  const resolvedStrokeWidth = strokeWidth ?? (weight === "bold" ? 2.75 : 2);
+  const resolvedStrokeWidth = strokeWidth ?? (weight === "bold" ? 2.75 : 1.5);
 
   const resolvedStyle = mirrored
     ? [style, { transform: [{ scaleX: -1 }] }]

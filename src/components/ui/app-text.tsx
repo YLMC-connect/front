@@ -21,31 +21,37 @@ export type AppTextTone =
   | "success";
 
 const toneColors: Record<AppTextTone, string> = {
-  primary: theme.colors.textPrimary,
+  primary: theme.colors.text,
+  // 옛 inkSoft — 도메인 PR 에서 primary / muted 로 나눈다(ADR 0007 2.2).
   secondary: theme.colors.textSecondary,
   muted: theme.colors.textMuted,
   disabled: theme.colors.textDisabled,
-  brand: theme.colors.primaryDeep,
-  inverse: theme.colors.white,
-  danger: theme.colors.danger,
-  success: theme.colors.success,
+  brand: theme.colors.primaryStrong,
+  inverse: theme.colors.onPrimary,
+  danger: theme.colors.dangerText,
+  success: theme.colors.successText,
 };
 
 export function AppText({
   children,
   variant = "body",
   tone = "primary",
+  weight,
   style,
   ...textProps
 }: TextProps & {
   children?: ReactNode;
   variant?: AppTextVariant;
   tone?: AppTextTone;
+  /** 역할의 기본 굵기를 바꿀 때. 카드 제목은 `variant="body" weight="semibold"`. */
+  weight?: Exclude<keyof typeof theme.fontWeight, "extrabold">;
   style?: StyleProp<TextStyle>;
 }) {
   const role = theme.typography[variant];
   const flatStyle = StyleSheet.flatten(style);
-  const weight = flatStyle?.fontWeight ?? role.fontWeight;
+  const resolvedWeight =
+    flatStyle?.fontWeight ??
+    (weight ? theme.fontWeight[weight] : role.fontWeight);
 
   return (
     <Text
@@ -55,7 +61,7 @@ export function AppText({
         role,
         {
           color: toneColors[tone],
-          fontFamily: fontFamilyForWeight(weight),
+          fontFamily: fontFamilyForWeight(resolvedWeight),
           // Weight-specific Pretendard files already encode boldness.
           fontWeight: "normal",
         },

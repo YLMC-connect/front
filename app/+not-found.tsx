@@ -72,7 +72,7 @@ export default function NotFoundScreen() {
             <View style={styles.buttonRow}>
               <View style={styles.buttonFlex}>
                 <Button
-                  variant="soft"
+                  variant="secondary"
                   icon="chevron-left"
                   onPress={handleBack}
                   testID="not-found-back-button"

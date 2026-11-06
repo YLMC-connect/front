@@ -80,7 +80,7 @@ export function TopBar({
         pointerEvents={back ? "none" : "auto"}
         style={[styles.topTextWrap, back ? styles.topTextWrapCentered : null]}
       >
-        <AppText numberOfLines={1} variant="sectionTitle">
+        <AppText numberOfLines={1} variant="heading">
           {title}
         </AppText>
         {subtitle ? (

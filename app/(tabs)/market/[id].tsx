@@ -245,7 +245,7 @@ export default function MarketDetailScreen() {
                 insets.top > 0 ? { top: insets.top } : null,
               ]}
             >
-              <AppText numberOfLines={1} variant="sectionTitle">
+              <AppText numberOfLines={1} variant="heading">
                 나눔 상세
               </AppText>
             </View>

@@ -200,7 +200,7 @@ export function CurriculumRow({
         ]}
       >
         {done && !current ? (
-          <AppIcon name="check" size={14} color={theme.colors.primaryDeep} />
+          <AppIcon name="check" size={14} color={theme.colors.primaryStrong} />
         ) : (
           <Text
             style={[styles.weekNumber, current ? styles.weekNumberOn : null]}

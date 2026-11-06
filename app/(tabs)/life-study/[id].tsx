@@ -295,11 +295,7 @@ export default function LifeStudyDetailScreen() {
               accessibilityLabel="공유"
               style={styles.iconButton}
             >
-              <AppIcon
-                name="ios-share"
-                size={21}
-                color={theme.colors.inkSoft}
-              />
+              <AppIcon name="ios-share" size={21} color={theme.colors.text} />
             </Pressable>
           }
         />

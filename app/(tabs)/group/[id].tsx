@@ -146,6 +146,7 @@ export default function GroupDetailScreen() {
                   accessibilityRole="button"
                   accessibilityLabel={`모집 상태 변경: 현재 ${isClosed ? "모집완료" : "모집중"}`}
                   disabled={updateStatusMutation.isPending}
+                  hitSlop={{ top: 9, bottom: 9 }}
                   onPress={() => {
                     updateStatusMutation.mutate(isClosed ? "open" : "closed");
                   }}
@@ -275,7 +276,12 @@ export default function GroupDetailScreen() {
                   joinGroupMutation.mutate();
                 }}
               >
-                <Text style={styles.primaryButtonText}>
+                <Text
+                  style={[
+                    styles.primaryButtonText,
+                    isClosed ? styles.primaryButtonTextOff : null,
+                  ]}
+                >
                   {isClosed ? "모집이 마감됐어요" : "참여 신청하기"}
                 </Text>
               </Pressable>
@@ -329,6 +335,7 @@ export default function GroupDetailScreen() {
                       testID={`group-notice-edit-${notice.id}`}
                       icon="edit"
                       label="수정"
+                      accessibilityLabel={`${notice.title} 공지 수정`}
                       onPress={() =>
                         router.push(
                           `/group/notices?id=${id}&noticeId=${notice.id}`,
@@ -339,6 +346,7 @@ export default function GroupDetailScreen() {
                       testID={`group-notice-delete-${notice.id}`}
                       icon="delete-outline"
                       label="삭제"
+                      accessibilityLabel={`${notice.title} 공지 삭제`}
                       danger
                       onPress={() =>
                         setDeletingNotice({
@@ -571,13 +579,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   primaryButtonOff: {
-    backgroundColor: theme.colors.border,
-    opacity: 0.6,
+    backgroundColor: theme.colors.surfaceSubtle,
   },
   primaryButtonText: {
     color: theme.colors.onPrimary,
     fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
+  },
+  primaryButtonTextOff: {
+    color: theme.colors.textDisabled,
   },
   sectionTitleWrap: {
     paddingHorizontal: 22,

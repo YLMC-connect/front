@@ -266,6 +266,8 @@ function MemberRow({
       {!transfer && !member.isLeader ? (
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel={`${member.userName} 강퇴`}
+          hitSlop={{ top: 6, bottom: 6 }}
           style={styles.kickButton}
           onPress={onKick}
         >
@@ -363,7 +365,7 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 11,
     borderWidth: 1.5,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.borderStrong,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
@@ -415,7 +417,7 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.caption.fontSize,
   },
   kickButton: {
-    height: 32,
+    minHeight: 32,
     borderRadius: theme.radius.full,
     backgroundColor: theme.colors.dangerSubtle,
     paddingHorizontal: 12,

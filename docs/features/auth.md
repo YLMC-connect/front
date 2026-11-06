@@ -72,6 +72,9 @@
 | `app/(auth)/terms-sheet.tsx`                 | 약관 전문 bottom sheet 실제 화면                     |
 | `app/(auth)/login.tsx`                       | 로그인 입력·오류·세션 시작 화면                      |
 | `app/(auth)/signup.tsx`                      | 회원가입 화면                                        |
+| `src/components/auth/signup/signupForm.ts`   | 회원가입 입력 타입·검증·연락처 포맷                  |
+| `src/components/auth/signup/SignupParts.tsx` | 회원가입 입력칸·라벨·체크·오류 부품                  |
+| `src/components/auth/signup/signupStyles.ts` | 회원가입 화면 스타일                                 |
 | `src/components/auth/auth-input.tsx`         | 로그인·회원가입 공통 focus input surface             |
 | `src/store/authStore.ts`                     | Zustand 인증 상태                                    |
 | `src/services/authService.ts`                | 인증 서비스                                          |

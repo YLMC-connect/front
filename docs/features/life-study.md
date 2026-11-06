@@ -47,6 +47,8 @@
 | `app/(tabs)/life-study/_layout.tsx`            | 삶공부 목록·상세·신청·이력 중첩 Stack |
 | `app/(tabs)/life-study/index.tsx`              | Downloads 하단 `삶공부` 탭 루트       |
 | `src/components/faith/FaithSectionsScreen.tsx` | 삶공부 목록 공유 렌더러               |
+| `src/components/faith/FaithStudyContent.tsx`   | 삶공부 목록 본문 |
+| `src/components/faith/FaithParts.tsx`, `faithLabels.ts`, `faithSectionsStyles.ts` | 기도·삶공부 목록 공유 부품·라벨·스타일 |
 | `app/(tabs)/life-study/[id].tsx`               | 삶공부 상세, 신청/취소, 진도/커리큘럼 |
 | `app/(tabs)/life-study/apply.tsx`              | 삶공부 수강 신청 입력 화면            |
 | `app/(tabs)/life-study/history.tsx`            | 삶공부 신청/수강/지난 과정 내역 화면  |

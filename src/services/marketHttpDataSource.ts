@@ -150,9 +150,11 @@ export function createHttpMarketDataSource({
       form.append("categoryCode", toShareCategoryCode(input.category));
       form.append("itemStatus", itemStatus);
       // 업로드 직전에 긴 변 1600px·JPEG 0.8 로 줄인다 (실패하면 원본)
-      const uploadUris = await Promise.all(
-        input.images.map(resizeImageForUpload),
-      );
+      // 한 장씩 차례로 변환한다(동시에 돌리면 느려짐)
+      const uploadUris: string[] = [];
+      for (const uri of input.images) {
+        uploadUris.push(await resizeImageForUpload(uri));
+      }
       uploadUris.forEach((uri, index) => appendShareImage(form, uri, index));
 
       const createdId = await client.request<number>("/api/share", {

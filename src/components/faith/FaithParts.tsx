@@ -171,6 +171,7 @@ export function PrayerFloatingMenu() {
                   setOpen(false);
                   router.push("/prayer/apply");
                 }}
+                hitSlop={{ top: 3, bottom: 3 }}
                 style={styles.fabMenuItem}
                 testID="prayer-fab-apply-item"
               >
@@ -193,6 +194,7 @@ export function PrayerFloatingMenu() {
                   setOpen(false);
                   router.push("/modal/prayer-new");
                 }}
+                hitSlop={{ top: 3, bottom: 3 }}
                 style={styles.fabMenuItem}
                 testID="prayer-fab-write-item"
               >

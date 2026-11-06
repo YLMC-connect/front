@@ -264,6 +264,7 @@ export function PrayerItem({
       <View style={styles.prayerFooter}>
         <MotionPressable
           accessibilityRole="button"
+          hitSlop={{ top: 7, bottom: 7 }}
           onPress={() => setPrayed((prev) => !prev)}
           pressedScale={0.94}
           style={[styles.pillAction, prayed ? styles.pillActionActive : null]}

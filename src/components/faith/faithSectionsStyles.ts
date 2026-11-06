@@ -157,8 +157,10 @@ export const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
   },
   dayBadge: {
-    width: 48,
-    height: 48,
+    minWidth: 48,
+    minHeight: 48,
+    paddingVertical: 2,
+    paddingHorizontal: 4,
     borderRadius: 14,
     backgroundColor: theme.colors.primarySubtle,
     alignItems: "center",

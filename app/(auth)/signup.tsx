@@ -30,7 +30,6 @@ import {
   MotionEnter,
   MotionFadeIn,
   MotionPop,
-  MotionShake,
   TopBar,
 } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
@@ -589,120 +588,114 @@ export default function SignupScreen() {
                   </View>
 
                   <Field label="이름">
-                    <MotionShake trigger={nameErrorMessage}>
-                      <SignupInput
-                        ref={nameInputRef}
-                        testID="signup-name-input"
-                        value={values.userName}
-                        onChangeText={setField("userName")}
-                        onBlur={onNameBlur}
-                        placeholder="실명을 입력해주세요"
-                        autoComplete="name"
-                        textContentType="name"
-                        returnKeyType="next"
-                        onSubmitEditing={() => {
-                          onNameBlur();
-                          phoneInputRef.current?.focus();
-                        }}
-                        hasError={Boolean(nameErrorMessage)}
-                        trailing={
-                          isNameValid ? (
-                            <MotionPop>
-                              <AppIcon
-                                name="check-circle"
-                                size={18}
-                                color={theme.colors.successIcon}
-                              />
-                            </MotionPop>
-                          ) : null
-                        }
-                      />
-                    </MotionShake>
+                    <SignupInput
+                      ref={nameInputRef}
+                      testID="signup-name-input"
+                      value={values.userName}
+                      onChangeText={setField("userName")}
+                      onBlur={onNameBlur}
+                      placeholder="실명을 입력해주세요"
+                      autoComplete="name"
+                      textContentType="name"
+                      returnKeyType="next"
+                      onSubmitEditing={() => {
+                        onNameBlur();
+                        phoneInputRef.current?.focus();
+                      }}
+                      hasError={Boolean(nameErrorMessage)}
+                      trailing={
+                        isNameValid ? (
+                          <MotionPop>
+                            <AppIcon
+                              name="check-circle"
+                              size={18}
+                              color={theme.colors.successIcon}
+                            />
+                          </MotionPop>
+                        ) : null
+                      }
+                    />
 
                     <InlineError>{nameErrorMessage}</InlineError>
                   </Field>
 
                   <Field label="연락처">
-                    <MotionShake trigger={phoneErrorMessage}>
-                      <SignupInput
-                        ref={phoneInputRef}
-                        testID="signup-phone-input"
-                        value={values.phone}
-                        onChangeText={setField("phone")}
-                        onBlur={onPhoneBlur}
-                        placeholder="010-XXXX-XXXX"
-                        keyboardType="phone-pad"
-                        autoComplete="tel"
-                        textContentType="telephoneNumber"
-                        returnKeyType="next"
-                        onSubmitEditing={() => {
-                          onPhoneBlur();
-                          emailInputRef.current?.focus();
-                        }}
-                        hasError={Boolean(phoneErrorMessage)}
-                        trailing={
-                          isPhoneValid ? (
-                            <MotionPop>
-                              <AppIcon
-                                name="check-circle"
-                                size={18}
-                                color={theme.colors.successIcon}
-                              />
-                            </MotionPop>
-                          ) : null
-                        }
-                      />
-                    </MotionShake>
+                    <SignupInput
+                      ref={phoneInputRef}
+                      testID="signup-phone-input"
+                      value={values.phone}
+                      onChangeText={setField("phone")}
+                      onBlur={onPhoneBlur}
+                      placeholder="010-XXXX-XXXX"
+                      keyboardType="phone-pad"
+                      autoComplete="tel"
+                      textContentType="telephoneNumber"
+                      returnKeyType="next"
+                      onSubmitEditing={() => {
+                        onPhoneBlur();
+                        emailInputRef.current?.focus();
+                      }}
+                      hasError={Boolean(phoneErrorMessage)}
+                      trailing={
+                        isPhoneValid ? (
+                          <MotionPop>
+                            <AppIcon
+                              name="check-circle"
+                              size={18}
+                              color={theme.colors.successIcon}
+                            />
+                          </MotionPop>
+                        ) : null
+                      }
+                    />
 
                     <InlineError>{phoneErrorMessage}</InlineError>
                   </Field>
 
                   <Field label="이메일">
-                    <MotionShake trigger={emailErrorMessage}>
-                      <SignupInput
-                        ref={emailInputRef}
-                        testID="signup-email-input"
-                        value={values.email}
-                        onChangeText={setField("email")}
-                        placeholder="이메일 주소"
-                        keyboardType="email-address"
-                        autoComplete="email"
-                        textContentType="emailAddress"
-                        autoCapitalize="none"
-                        returnKeyType="done"
-                        onBlur={onEmailBlur}
-                        onSubmitEditing={() => {
-                          emailInputRef.current?.blur();
-                          onEmailBlur();
-                          if (isCard2Complete) {
-                            animateLayout(reduceMotion);
-                            setUnlockedStep((prev) => Math.max(prev, 3));
-                            scrollRef.current?.scrollTo({
-                              y: 0,
-                              animated: !reduceMotion,
-                            });
-                          }
-                        }}
-                        hasError={Boolean(emailErrorMessage)}
-                        trailing={
-                          checkAvailability.isPending &&
-                          lastAvailabilityTarget === "email" ? (
-                            <ActivityIndicator
-                              size="small"
-                              color={theme.colors.primaryStrong}
-                            />
-                          ) : currentEmailAvailability === true ? (
-                            <MotionPop>
-                              <AppIcon
-                                name="check-circle"
-                                size={18}
-                                color={theme.colors.successIcon}
-                              />
-                            </MotionPop>
-                          ) : null
+                    <SignupInput
+                      ref={emailInputRef}
+                      testID="signup-email-input"
+                      value={values.email}
+                      onChangeText={setField("email")}
+                      placeholder="이메일 주소"
+                      keyboardType="email-address"
+                      autoComplete="email"
+                      textContentType="emailAddress"
+                      autoCapitalize="none"
+                      returnKeyType="done"
+                      onBlur={onEmailBlur}
+                      onSubmitEditing={() => {
+                        emailInputRef.current?.blur();
+                        onEmailBlur();
+                        if (isCard2Complete) {
+                          animateLayout(reduceMotion);
+                          setUnlockedStep((prev) => Math.max(prev, 3));
+                          scrollRef.current?.scrollTo({
+                            y: 0,
+                            animated: !reduceMotion,
+                          });
                         }
-                      />
-                    </MotionShake>
+                      }}
+                      hasError={Boolean(emailErrorMessage)}
+                      trailing={
+                        checkAvailability.isPending &&
+                        lastAvailabilityTarget === "email" ? (
+                          <ActivityIndicator
+                            size="small"
+                            color={theme.colors.primaryStrong}
+                          />
+                        ) : currentEmailAvailability === true ? (
+                          <MotionPop>
+                            <AppIcon
+                              name="check-circle"
+                              size={18}
+                              color={theme.colors.successIcon}
+                            />
+                          </MotionPop>
+                        ) : null
+                      }
+                    />
 
                     {/* Realtime email criteria feedback */}
                     <View style={styles.passwordRulesRow}>
@@ -800,41 +793,39 @@ export default function SignupScreen() {
                 </View>
 
                 <Field label="아이디">
-                  <MotionShake trigger={idErrorMessage}>
-                    <SignupInput
-                      ref={idInputRef}
-                      testID="signup-id-input"
-                      value={values.id}
-                      keyboardType="ascii-capable"
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      autoComplete="username"
-                      textContentType="username"
-                      returnKeyType="next"
-                      onSubmitEditing={() => passwordInputRef.current?.focus()}
-                      onBlur={onIdBlur}
-                      onChangeText={setField("id")}
-                      placeholder="아이디"
-                      hasError={Boolean(idErrorMessage)}
-                      trailing={
-                        checkAvailability.isPending &&
-                        lastAvailabilityTarget === "id" ? (
-                          <ActivityIndicator
-                            size="small"
-                            color={theme.colors.primaryStrong}
+                  <SignupInput
+                    ref={idInputRef}
+                    testID="signup-id-input"
+                    value={values.id}
+                    keyboardType="ascii-capable"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    autoComplete="username"
+                    textContentType="username"
+                    returnKeyType="next"
+                    onSubmitEditing={() => passwordInputRef.current?.focus()}
+                    onBlur={onIdBlur}
+                    onChangeText={setField("id")}
+                    placeholder="아이디"
+                    hasError={Boolean(idErrorMessage)}
+                    trailing={
+                      checkAvailability.isPending &&
+                      lastAvailabilityTarget === "id" ? (
+                        <ActivityIndicator
+                          size="small"
+                          color={theme.colors.primaryStrong}
+                        />
+                      ) : currentIdAvailability === true ? (
+                        <MotionPop>
+                          <AppIcon
+                            name="check-circle"
+                            size={18}
+                            color={theme.colors.successIcon}
                           />
-                        ) : currentIdAvailability === true ? (
-                          <MotionPop>
-                            <AppIcon
-                              name="check-circle"
-                              size={18}
-                              color={theme.colors.successIcon}
-                            />
-                          </MotionPop>
-                        ) : null
-                      }
-                    />
-                  </MotionShake>
+                        </MotionPop>
+                      ) : null
+                    }
+                  />
                   {/* Invisible trigger for automated tests and scripts */}
                   <Pressable
                     testID="signup-check-id"
@@ -865,48 +856,41 @@ export default function SignupScreen() {
                 </Field>
 
                 <Field label="비밀번호">
-                  <MotionShake
-                    trigger={
-                      passwordErrorMessage ??
-                      (isPwError ? "pw-error" : undefined)
-                    }
-                  >
-                    <SignupInput
-                      ref={passwordInputRef}
-                      testID="signup-password-input"
-                      value={values.password}
-                      onChangeText={setField("password")}
-                      placeholder="비밀번호 입력"
-                      secureTextEntry
-                      autoComplete="new-password"
-                      textContentType="newPassword"
-                      returnKeyType="next"
-                      onBlur={() => {
-                        if (isCard1Complete && unlockedStep < 2) {
-                          animateLayout(reduceMotion);
-                          setUnlockedStep(2);
-                          scrollRef.current?.scrollTo({
-                            y: 0,
-                            animated: !reduceMotion,
-                          });
-                        }
-                      }}
-                      onSubmitEditing={() => {
-                        if (isCard1Complete) {
-                          animateLayout(reduceMotion);
-                          setUnlockedStep((prev) => Math.max(prev, 2));
-                          scrollRef.current?.scrollTo({
-                            y: 0,
-                            animated: !reduceMotion,
-                          });
-                          setTimeout(() => nameInputRef.current?.focus(), 250);
-                        } else if (nameInputRef.current) {
-                          nameInputRef.current.focus();
-                        }
-                      }}
-                      hasError={isPwError || Boolean(errors.password)}
-                    />
-                  </MotionShake>
+                  <SignupInput
+                    ref={passwordInputRef}
+                    testID="signup-password-input"
+                    value={values.password}
+                    onChangeText={setField("password")}
+                    placeholder="비밀번호 입력"
+                    secureTextEntry
+                    autoComplete="new-password"
+                    textContentType="newPassword"
+                    returnKeyType="next"
+                    onBlur={() => {
+                      if (isCard1Complete && unlockedStep < 2) {
+                        animateLayout(reduceMotion);
+                        setUnlockedStep(2);
+                        scrollRef.current?.scrollTo({
+                          y: 0,
+                          animated: !reduceMotion,
+                        });
+                      }
+                    }}
+                    onSubmitEditing={() => {
+                      if (isCard1Complete) {
+                        animateLayout(reduceMotion);
+                        setUnlockedStep((prev) => Math.max(prev, 2));
+                        scrollRef.current?.scrollTo({
+                          y: 0,
+                          animated: !reduceMotion,
+                        });
+                        setTimeout(() => nameInputRef.current?.focus(), 250);
+                      } else if (nameInputRef.current) {
+                        nameInputRef.current.focus();
+                      }
+                    }}
+                    hasError={isPwError || Boolean(errors.password)}
+                  />
 
                   {/* Realtime password criteria feedback */}
                   <View style={styles.passwordRulesRow}>

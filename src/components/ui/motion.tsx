@@ -26,12 +26,21 @@ import Animated, {
 import { theme } from "../../constants/theme";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-/** Gentle ease — less front-loaded than out(cubic), calmer for church-app tone. */
-const softEasing = Easing.bezier(0.22, 0.61, 0.36, 1);
-const softTiming = (duration: number) => ({
+/** motion.md 곡선: 빠름 ease-out · 보통/느림 standard · 퇴장 exit. */
+export const motionEasing = {
+  fast: Easing.bezier(...theme.motion.easing.fast),
+  standard: Easing.bezier(...theme.motion.easing.standard),
+  exit: Easing.bezier(...theme.motion.easing.exit),
+};
+const standardTiming = (duration: number) => ({
   duration,
-  easing: softEasing,
+  easing: motionEasing.standard,
 });
+
+/** 퇴장 시간 = 등장 시간의 60% (200 → 120, 300 → 180). */
+export function motionExitDuration(enterDuration: number) {
+  return Math.round(enterDuration * theme.motion.exitRatio);
+}
 
 export type MotionPressableProps = PressableProps & {
   pressedScale?: number;
@@ -55,7 +64,10 @@ export function MotionPressable({
     scale.set(
       reduceMotion
         ? 1
-        : withTiming(nextScale, { duration: theme.motion.duration.fast }),
+        : withTiming(nextScale, {
+            duration: theme.motion.duration.fast,
+            easing: motionEasing.fast,
+          }),
     );
   };
 
@@ -82,7 +94,10 @@ export function MotionPressable({
 }
 
 type MotionPresenceOptions = {
+  /** 등장 시간. 기본 보통(200ms). */
   duration?: number;
+  /** 퇴장 시간. 기본 등장의 60%. */
+  exitDuration?: number;
   enterReady?: boolean;
 };
 
@@ -90,6 +105,7 @@ export function useMotionPresence(
   visible: boolean,
   {
     duration = theme.motion.duration.base,
+    exitDuration = motionExitDuration(duration),
     enterReady = true,
   }: MotionPresenceOptions = {},
 ) {
@@ -116,7 +132,9 @@ export function useMotionPresence(
       }
 
       if (enterReady) {
-        progress.set(reduceMotion ? 1 : withTiming(1, { duration }));
+        progress.set(
+          reduceMotion ? 1 : withTiming(1, standardTiming(duration)),
+        );
       }
       return;
     }
@@ -130,13 +148,25 @@ export function useMotionPresence(
     }
 
     progress.set(
-      withTiming(0, { duration }, (finished) => {
-        if (finished) {
-          runOnJS(finishUnmount)();
-        }
-      }),
+      withTiming(
+        0,
+        { duration: exitDuration, easing: motionEasing.exit },
+        (finished) => {
+          if (finished) {
+            runOnJS(finishUnmount)();
+          }
+        },
+      ),
     );
-  }, [duration, enterReady, finishUnmount, progress, reduceMotion, visible]);
+  }, [
+    duration,
+    enterReady,
+    exitDuration,
+    finishUnmount,
+    progress,
+    reduceMotion,
+    visible,
+  ]);
 
   return { hideImmediately, mounted, progress, reduceMotion };
 }
@@ -155,7 +185,7 @@ type MotionEnterProps = {
 };
 
 /**
- * Soft enter for auth/list blocks.
+ * 화면 첫 진입: 느림(300ms), standard 곡선. fadeUp 은 8px 아래에서 떠오름.
  * Uses in-flow opacity/transform (not layout `entering`) so web keeps reserved space
  * and children do not float over later form fields.
  */
@@ -179,7 +209,7 @@ export function MotionEnter({
     progress.value = 0;
     progress.value = withDelay(
       delay,
-      withTiming(1, softTiming(theme.motion.duration.base)),
+      withTiming(1, standardTiming(theme.motion.duration.slow)),
     );
   }, [delay, progress, shouldAnimate]);
 
@@ -199,7 +229,7 @@ export function MotionEnter({
         opacity: progress.value,
         transform: [
           {
-            translateY: theme.motion.distance.md * (1 - progress.value),
+            translateY: theme.motion.distance.sm * (1 - progress.value),
           },
         ],
       };
@@ -225,7 +255,7 @@ type MotionShakeProps = {
   testID?: string;
 };
 
-/** One-shot horizontal shake for validation feedback. */
+/** 로그인 실패 전용 흔들기: 좌우 6px 두 번, 전체 느림(300ms). 입력 오류에는 쓰지 않는다. */
 export function MotionShake({
   children,
   trigger,
@@ -251,14 +281,14 @@ export function MotionShake({
       return;
     }
 
-    const distance = theme.motion.distance.xs + 1;
-    const step = Math.round(theme.motion.duration.base / 5);
+    const distance = theme.motion.distance.shake;
+    const step = standardTiming(Math.round(theme.motion.duration.slow / 5));
     offset.value = withSequence(
-      withTiming(-distance, { duration: step, easing: softEasing }),
-      withTiming(distance, { duration: step, easing: softEasing }),
-      withTiming(-distance, { duration: step, easing: softEasing }),
-      withTiming(distance, { duration: step, easing: softEasing }),
-      withTiming(0, { duration: step, easing: softEasing }),
+      withTiming(-distance, step),
+      withTiming(distance, step),
+      withTiming(-distance, step),
+      withTiming(distance, step),
+      withTiming(0, step),
     );
   }, [offset, reduceMotion, trigger]);
 
@@ -280,7 +310,7 @@ type MotionFadeInProps = {
   testID?: string;
 };
 
-/** Mount-time fade for inline error / success copy. Keeps layout in flow. */
+/** 오류·안내 문구 등장: 8px 아래에서 떠오름(보통 200ms). Keeps layout in flow. */
 export function MotionFadeIn({
   children,
   visible = true,
@@ -302,11 +332,14 @@ export function MotionFadeIn({
       return;
     }
     progress.value = 0;
-    progress.value = withTiming(1, softTiming(theme.motion.duration.fast));
+    progress.value = withTiming(1, standardTiming(theme.motion.duration.base));
   }, [progress, reduceMotion, visible]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: progress.value,
+    transform: [
+      { translateY: theme.motion.distance.sm * (1 - progress.value) },
+    ],
   }));
 
   if (!visible) return null;
@@ -335,7 +368,7 @@ export function MotionPop({ children, style, testID }: MotionPopProps) {
       return;
     }
     progress.value = 0;
-    progress.value = withTiming(1, softTiming(theme.motion.duration.base));
+    progress.value = withTiming(1, standardTiming(theme.motion.duration.base));
   }, [progress, reduceMotion]);
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -376,10 +409,10 @@ export function AnimatedProgressFill({
       widthPercent.value = clamped;
       return;
     }
-    widthPercent.value = withTiming(clamped, {
-      duration: 560,
-      easing: softEasing,
-    });
+    widthPercent.value = withTiming(
+      clamped,
+      standardTiming(theme.motion.duration.slow),
+    );
   }, [clamped, reduceMotion, widthPercent]);
 
   const animatedStyle = useAnimatedStyle(() => ({

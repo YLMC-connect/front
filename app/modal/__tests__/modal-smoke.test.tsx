@@ -212,6 +212,25 @@ describe("modal smoke screens", () => {
     expect(screen.getByLabelText("소모임 장소").props.value).toBe("교회");
   });
 
+  it("clears the preset chip highlight once capacity leaves the preset values", () => {
+    renderWithClient(<GroupNewModal />);
+
+    fireEvent.press(screen.getByText("8명"));
+    [4, 8, 12, 20].forEach((preset, index) => {
+      fireEvent(screen.getByTestId(`group-form-capacity-${preset}`), "layout", {
+        nativeEvent: { layout: { height: 32, width: 50, x: index * 58, y: 0 } },
+      });
+    });
+    expect(screen.getByTestId("group-form-capacity-surface-8")).toBeTruthy();
+
+    // 9명은 빠른 선택에 없다. FilterChips 를 새로 그려 8명 칩 강조가 남지 않게 한다.
+    fireEvent.press(screen.getByLabelText("정원 1명 증가"));
+    expect(screen.queryByTestId("group-form-capacity-surface-8")).toBeNull();
+    expect(
+      screen.getByTestId("group-form-capacity-8").props.accessibilityState,
+    ).toEqual({ selected: false });
+  });
+
   it("renders the prayer create modal with top padding matching horizontal screen inset", () => {
     renderWithClient(<PrayerNewModal />);
 

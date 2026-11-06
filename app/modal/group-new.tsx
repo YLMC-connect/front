@@ -60,6 +60,20 @@ const LOCATION_PRESET_ITEMS = LOCATION_PRESETS.map((location) => ({
   label: location,
 }));
 
+/**
+ * FilterChips 는 고른 값이 칩 목록에 없으면 표시 막대를 마지막 칩에 그대로 둔다.
+ * 직접 입력·증감으로 빠른 선택 밖 값이 되면 다시 그려 강조를 지운다.
+ */
+function presetChipsKey(
+  name: string,
+  items: readonly { key: string }[],
+  active: string,
+) {
+  return items.some((item) => item.key === active)
+    ? `${name}-preset`
+    : `${name}-custom`;
+}
+
 const filledValues: GroupInput = {
   category: "sport",
   name: "토요 산악회",
@@ -345,6 +359,11 @@ export default function GroupNewModal() {
               </View>
 
               <FilterChips
+                key={presetChipsKey(
+                  "capacity",
+                  CAPACITY_PRESET_ITEMS,
+                  String(values.maxMembers),
+                )}
                 items={CAPACITY_PRESET_ITEMS}
                 active={String(values.maxMembers)}
                 onChange={(preset) => setCapacityPreset(Number(preset))}
@@ -374,6 +393,11 @@ export default function GroupNewModal() {
                 placeholder="예: 매주 토요일 오전 10시"
               />
               <FilterChips
+                key={presetChipsKey(
+                  "schedule",
+                  SCHEDULE_PRESET_ITEMS,
+                  values.schedule,
+                )}
                 items={SCHEDULE_PRESET_ITEMS}
                 active={values.schedule}
                 onChange={(schedule) => update("schedule", schedule)}
@@ -390,6 +414,11 @@ export default function GroupNewModal() {
                 placeholder="예: 교육관 2층"
               />
               <FilterChips
+                key={presetChipsKey(
+                  "location",
+                  LOCATION_PRESET_ITEMS,
+                  values.location,
+                )}
                 items={LOCATION_PRESET_ITEMS}
                 active={values.location}
                 onChange={(location) => update("location", location)}

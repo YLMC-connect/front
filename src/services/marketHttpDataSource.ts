@@ -1,5 +1,6 @@
 import { File } from "expo-file-system";
 import { apiClient, type ApiRequestOptions } from "../lib/apiClient";
+import { resizeImageForUpload } from "../lib/resizeImage";
 import { useAuthStore } from "../store/authStore";
 import type { MarketDataSource } from "./marketService";
 import {
@@ -148,7 +149,11 @@ export function createHttpMarketDataSource({
       form.append("content", input.description);
       form.append("categoryCode", toShareCategoryCode(input.category));
       form.append("itemStatus", itemStatus);
-      input.images.forEach((uri, index) => appendShareImage(form, uri, index));
+      // 업로드 직전에 긴 변 1600px·JPEG 0.8 로 줄인다 (실패하면 원본)
+      const uploadUris = await Promise.all(
+        input.images.map(resizeImageForUpload),
+      );
+      uploadUris.forEach((uri, index) => appendShareImage(form, uri, index));
 
       const createdId = await client.request<number>("/api/share", {
         method: "POST",

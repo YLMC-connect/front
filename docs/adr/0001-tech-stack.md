@@ -61,7 +61,7 @@ YLMC Connect 는 iOS / Android 모두를 지원하는 교회 커뮤니티 앱이
 
 - **TypeScript 6 strict** — 협업·리팩터링 안전망.
 - **expo-image** — 캐싱 · placeholder · 메모리 최적화 내장. 표준 `Image` 대비 목록 스크롤에서 큰 차이.
-- **MaterialIcons (`@expo/vector-icons`)** — SDK 57부터 `expo`가 이 패키지를 포함하지 않으므로 직접 의존성으로 둔다. 화면 아이콘의 기본은 Solar `AppIcon`이고, MaterialIcons는 인증 화면에 남아 있다.
+- **아이콘은 lucide (`lucide-react-native`)** — 화면은 `AppIcon` 으로만 아이콘을 쓴다. `@expo/vector-icons`(MaterialIcons)는 쓰는 곳이 없어져 2026-11-07 제거했다(ADR 0007).
 
 ### 개발 도구
 
@@ -98,3 +98,4 @@ YLMC Connect 는 iOS / Android 모두를 지원하는 교회 커뮤니티 앱이
 - 2026-05-08 — 스타일 도구 결정 갱신: 보류했던 NativeWind v4 를 채택으로 전환. `theme.ts` 단일 출처 + `tailwind.config.js` import 패턴. 기각 대안에서 “NativeWind 미사용” 과 “tailwind.config 단일 출처(theme.ts 폐기)” 두 안을 모두 기록.
 - 2026-06-27 — 실제 사용처 기준으로 `react-hook-form`, `zod`, `@hookform/resolvers`, `date-fns`를 제거하고 화면별 local validation으로 축소.
 - 2026-10-09 — Expo SDK 57 (React Native 0.86 / React 19.2)로 올린다. iOS scene lifecycle을 켜고, Node 20을 제외한다. `@expo/vector-icons`와 테스트용 `@react-native/jest-preset`은 직접 의존성. 버전 숫자의 단일 출처는 PLAN.md 기술 스택 표.
+- 2026-11-07 — 디자인 시스템 v2(ADR 0007)로 아이콘을 lucide `AppIcon` 하나로 통일하고 `@expo/vector-icons` 를 제거한다.

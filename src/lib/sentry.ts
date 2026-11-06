@@ -54,3 +54,24 @@ export function reportInvalidResponse(
     fingerprint: ["invalid-response", keyPrefix || "unknown"],
   });
 }
+
+/**
+ * 목록에서 버린 응답 항목을 Sentry 에 남긴다. Sentry 를 켜지 않았으면 아무것도 안 한다.
+ * source(경로)·reason(필드 이름) 만 보내고 값·개인정보는 보내지 않는다. 같은 경로는 목록 위치와 관계없이 한 이슈로 묶는다.
+ */
+export function captureResponseIssue({
+  source,
+  reason,
+}: {
+  source: string;
+  reason: string;
+}): void {
+  if (!sentryEnabled) return;
+
+  const path = source.replace(/\[\d+\]/g, "[]");
+  Sentry.captureMessage("API 응답 항목 제외", {
+    level: "warning",
+    tags: { source: path, reason },
+    fingerprint: ["response-issue", path, reason],
+  });
+}

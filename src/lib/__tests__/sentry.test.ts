@@ -153,3 +153,43 @@ describe("reportInvalidResponse", () => {
     expect(Sentry.captureMessage).not.toHaveBeenCalled();
   });
 });
+
+describe("captureResponseIssue", () => {
+  const originalDev = __DEV__;
+
+  afterEach(() => {
+    setDev(originalDev);
+  });
+
+  it("reports only the path and field names, grouped without list index", () => {
+    setDev(false);
+    const { sentry, Sentry } = loadFresh();
+    sentry.initSentry(DSN);
+    sentry.captureResponseIssue({
+      source: "prayer.topicBoard.ongoing[2]",
+      reason: "createdAt 형식 오류",
+    });
+
+    expect(Sentry.captureMessage).toHaveBeenCalledWith("API 응답 항목 제외", {
+      level: "warning",
+      tags: {
+        source: "prayer.topicBoard.ongoing[]",
+        reason: "createdAt 형식 오류",
+      },
+      fingerprint: [
+        "response-issue",
+        "prayer.topicBoard.ongoing[]",
+        "createdAt 형식 오류",
+      ],
+    });
+  });
+
+  it("does nothing when Sentry is not initialized", () => {
+    setDev(true);
+    const { sentry, Sentry } = loadFresh();
+    sentry.initSentry(DSN);
+    sentry.captureResponseIssue({ source: "prayer.list[0]", reason: "x" });
+
+    expect(Sentry.captureMessage).not.toHaveBeenCalled();
+  });
+});

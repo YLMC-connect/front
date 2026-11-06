@@ -12,6 +12,12 @@ import * as groupService from "../../../src/services/groupService";
 import * as marketService from "../../../src/services/marketService";
 import * as prayerService from "../../../src/services/prayerService";
 
+// 사진 축소는 resizeImage 단위 테스트에서 검증한다. 화면 테스트에선 원본 그대로.
+jest.mock("../../../src/lib/resizeImage", () => ({
+  prepareImageForUpload: jest.fn(),
+  resizeImageForUpload: jest.fn(async (uri: string) => uri),
+}));
+
 describe("modal smoke screens", () => {
   const router = { back: jest.fn(), push: jest.fn(), replace: jest.fn() };
 

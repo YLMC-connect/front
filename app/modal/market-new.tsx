@@ -28,6 +28,7 @@ import {
   useUpdateMarketPost,
 } from "../../src/hooks/useMarket";
 import { readDesignVariant } from "../../src/lib/designVariant";
+import { prepareImageForUpload } from "../../src/lib/resizeImage";
 import type { MarketInput } from "../../src/types/market";
 
 const categories = MARKET_CATEGORIES.slice(1) as readonly {
@@ -150,7 +151,11 @@ export default function MarketNewModal() {
               <View style={styles.fieldInset}>
                 <ImagePickerField
                   value={values.images}
-                  onChange={(images) => update("images", images)}
+                  onChange={(images) => {
+                    // 고르자마자 업로드용 축소를 시작해 등록 시 기다리지 않게 한다
+                    images.forEach(prepareImageForUpload);
+                    update("images", images);
+                  }}
                   maxImages={5}
                 />
               </View>

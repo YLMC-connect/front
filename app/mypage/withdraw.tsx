@@ -1,4 +1,3 @@
-import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -8,6 +7,7 @@ import {
   FloatingBottomBar,
   TopBar,
 } from "../../src/components/ui";
+import { InfoBox } from "../../src/components/ui/info-box";
 import { theme } from "../../src/constants/theme";
 import { useWithdrawMember } from "../../src/hooks/useMember";
 import { readDesignVariant } from "../../src/lib/designVariant";
@@ -42,7 +42,7 @@ export default function WithdrawScreen() {
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
-        <TopBar title="회원 탈퇴" back onBack={() => router.back()} />
+        <TopBar title="회원 탈퇴" close onBack={() => router.back()} />
         <ScrollView contentContainerStyle={styles.body}>
           <View style={styles.header}>
             <Text style={styles.title}>정말 떠나시나요?</Text>
@@ -51,31 +51,15 @@ export default function WithdrawScreen() {
             </Text>
           </View>
 
-          <View style={styles.cautionBox}>
-            <View style={styles.cautionHead}>
-              <AppIcon
-                name="warning-amber"
-                size={16}
-                color={theme.colors.dangerIcon}
-              />
-              <Text style={styles.cautionTitle}>탈퇴 전 안내사항</Text>
-            </View>
-            <View style={styles.cautionList}>
-              {cautions.map((item) => (
-                <View key={item} style={styles.cautionRow}>
-                  <View style={styles.dot} />
-                  <Text style={styles.cautionText}>{item}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
+          <InfoBox
+            tone="danger"
+            title="탈퇴 전 안내사항"
+            description={cautions.map((item) => `· ${item}`).join("\n")}
+          />
 
-          <View style={styles.infoBox}>
-            <Text style={styles.infoText}>
-              계정과 모든 활동 내역이 영구적으로 삭제됩니다. 신중히
-              결정해주세요.
-            </Text>
-          </View>
+          <Text style={styles.infoText}>
+            계정과 모든 활동 내역이 영구적으로 삭제됩니다. 신중히 결정해주세요.
+          </Text>
         </ScrollView>
 
         <FloatingBottomBar
@@ -135,57 +119,9 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.body.fontSize,
     lineHeight: theme.typography.body.lineHeight,
   },
-  cautionBox: {
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.danger100,
-    backgroundColor: theme.colors.dangerSubtle,
-    padding: 16,
-  },
-  cautionHead: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 12,
-  },
-  cautionTitle: {
-    color: theme.colors.dangerText,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-  },
-  cautionList: {
-    gap: 10,
-  },
-  cautionRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 10,
-  },
-  dot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: theme.colors.dangerIcon,
-    marginTop: 8,
-    flexShrink: 0,
-  },
-  cautionText: {
-    flex: 1,
-    color: theme.colors.dangerText,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
-  },
-  infoBox: {
-    marginTop: 18,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surface,
-    padding: 14,
-  },
   infoText: {
-    color: theme.colors.text,
+    marginTop: 18,
+    color: theme.colors.textMuted,
     fontSize: theme.typography.label.fontSize,
     lineHeight: theme.typography.label.lineHeight,
   },

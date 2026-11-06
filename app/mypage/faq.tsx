@@ -1,16 +1,15 @@
-import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { Screen } from "../../src/components/layout/Screen";
-import { Empty, ErrorState, TopBar } from "../../src/components/ui";
+import { StaggerItem } from "../../src/components/mypage/StaggerItem";
+import {
+  Empty,
+  ErrorState,
+  FilterChips,
+  TopBar,
+} from "../../src/components/ui";
+import { Accordion } from "../../src/components/ui/accordion";
 import { theme } from "../../src/constants/theme";
 import { useFaqs } from "../../src/hooks/useSiteContent";
 import { readDesignVariant } from "../../src/lib/designVariant";
@@ -22,7 +21,6 @@ export default function FaqScreen() {
   const { data: faqCategories, isLoading, isError, refetch } = useFaqs();
 
   const [selectedCategory, setSelectedCategory] = useState("전체");
-  const [openMap, setOpenMap] = useState<Record<string, boolean>>({});
 
   const categories = useMemo(() => {
     if (faqCategories && faqCategories.length > 0) {
@@ -40,13 +38,6 @@ export default function FaqScreen() {
     }
     return faqCategories.find((c) => c.name === selectedCategory)?.faqs ?? [];
   }, [faqCategories, selectedCategory]);
-
-  const toggleFaq = (key: string) => {
-    setOpenMap((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
 
   const isTotalEmpty =
     empty || (!isLoading && (!faqCategories || faqCategories.length === 0));
@@ -75,35 +66,16 @@ export default function FaqScreen() {
         ) : (
           <ScrollView contentContainerStyle={styles.body}>
             {categories.length > 0 ? (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
+              <FilterChips
+                items={categories.map((category) => ({
+                  key: category,
+                  label: category,
+                }))}
+                active={selectedCategory}
+                onChange={setSelectedCategory}
                 style={styles.chipsScroll}
-                contentContainerStyle={styles.chips}
-              >
-                {categories.map((category) => {
-                  const isSelected = category === selectedCategory;
-                  return (
-                    <Pressable
-                      key={category}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: isSelected }}
-                      hitSlop={{ top: 5, bottom: 5 }}
-                      onPress={() => setSelectedCategory(category)}
-                      style={[styles.chip, isSelected ? styles.chipOn : null]}
-                    >
-                      <Text
-                        style={[
-                          styles.chipText,
-                          isSelected ? styles.chipTextOn : null,
-                        ]}
-                      >
-                        {category}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
+                testIDPrefix="faq-category"
+              />
             ) : null}
 
             {activeFaqs.length === 0 ? (
@@ -113,33 +85,13 @@ export default function FaqScreen() {
                 description="해당 카테고리에 등록된 질문이 없습니다."
               />
             ) : (
-              activeFaqs.map((faq) => {
-                const isOpen = Boolean(openMap[faq.question]);
-                return (
-                  <View key={`${faq.id}-${faq.question}`} style={styles.faqRow}>
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityState={{ expanded: isOpen }}
-                      onPress={() => toggleFaq(faq.question)}
-                      style={styles.questionRow}
-                    >
-                      <View style={styles.qMark}>
-                        <Text style={styles.qText}>Q</Text>
-                      </View>
-                      <Text style={styles.question}>{faq.question}</Text>
-                      <AppIcon
-                        name="chevron-right"
-                        size={18}
-                        color={theme.colors.textMuted}
-                        style={isOpen ? styles.chevronOpen : null}
-                      />
-                    </Pressable>
-                    {isOpen && faq.answer ? (
-                      <Text style={styles.answer}>{faq.answer}</Text>
-                    ) : null}
-                  </View>
-                );
-              })
+              activeFaqs.map((faq, index) => (
+                <StaggerItem key={`${faq.id}-${faq.question}`} index={index}>
+                  <Accordion title={faq.question} style={styles.faqRow}>
+                    {faq.answer}
+                  </Accordion>
+                </StaggerItem>
+              ))
             )}
           </ScrollView>
         )}
@@ -159,80 +111,10 @@ const styles = StyleSheet.create({
   chipsScroll: {
     flexGrow: 0,
     flexShrink: 0,
-  },
-  chips: {
-    gap: 8,
-    paddingHorizontal: 18,
-    paddingTop: 10,
-    paddingBottom: 6,
-  },
-  chip: {
-    minHeight: 34,
-    borderRadius: theme.radius.full,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: 13,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  chipOn: {
-    borderColor: theme.colors.primarySubtle,
-    backgroundColor: theme.colors.primarySubtle,
-  },
-  chipText: {
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  chipTextOn: {
-    color: theme.colors.primaryStrong,
-    fontWeight: theme.fontWeight.bold,
+    paddingTop: 4,
   },
   faqRow: {
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-  },
-  questionRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 10,
-  },
-  qMark: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: theme.colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  qText: {
-    color: theme.colors.onPrimary,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  question: {
-    flex: 1,
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  chevronOpen: {
-    transform: [{ rotate: "90deg" }],
-  },
-  answer: {
-    marginTop: 10,
-    marginLeft: 32,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.surface,
-    padding: 12,
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-    lineHeight: theme.typography.body.lineHeight,
+    marginHorizontal: theme.layout.screenX,
   },
   emptyWrap: {
     flex: 1,

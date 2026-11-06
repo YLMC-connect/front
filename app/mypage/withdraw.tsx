@@ -186,8 +186,8 @@ const styles = StyleSheet.create({
   },
   infoText: {
     color: theme.colors.text,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
   },
   bottomBar: {
     position: "absolute",

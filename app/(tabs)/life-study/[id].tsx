@@ -284,7 +284,11 @@ export default function LifeStudyDetailScreen() {
           back
           onBack={() => router.back()}
           right={
-            <Pressable accessibilityRole="button" style={styles.iconButton}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="공유"
+              style={styles.iconButton}
+            >
               <AppIcon
                 name="ios-share"
                 size={21}

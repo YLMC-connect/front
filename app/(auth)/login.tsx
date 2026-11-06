@@ -151,11 +151,7 @@ export default function LoginScreen() {
                 <AppText variant="display" style={styles.title}>
                   {"열린문 커넥트에\n오신 것을 환영합니다"}
                 </AppText>
-                <AppText
-                  variant="body"
-                  tone="secondary"
-                  style={styles.subtitle}
-                >
+                <AppText variant="body" tone="primary" style={styles.subtitle}>
                   교회 가족과 함께하는 따뜻한 일상
                 </AppText>
               </MotionEnter>
@@ -217,13 +213,13 @@ export default function LoginScreen() {
                     <AppIcon
                       name="check"
                       size={12}
-                      color={theme.colors.white}
+                      color={theme.colors.onPrimary}
                     />
                   ) : null}
                 </View>
                 <AppText
                   variant="caption"
-                  tone="secondary"
+                  tone="primary"
                   style={styles.rememberText}
                 >
                   아이디 저장
@@ -249,7 +245,7 @@ export default function LoginScreen() {
                 ]}
               >
                 {login.isPending || isLoading ? (
-                  <ActivityIndicator color={theme.colors.white} />
+                  <ActivityIndicator color={theme.colors.onPrimary} />
                 ) : (
                   <AppText variant="body" style={styles.loginButtonText}>
                     로그인
@@ -261,7 +257,7 @@ export default function LoginScreen() {
 
           <MotionEnter enabled={enterMotion} style={styles.footerBlock}>
             <View style={styles.signupCard}>
-              <AppText tone="secondary" style={styles.signupCardText}>
+              <AppText tone="primary" style={styles.signupCardText}>
                 열린문 커넥트가 처음이신가요?
               </AppText>
               <MotionPressable
@@ -321,7 +317,7 @@ function AuthField({
 
   return (
     <MotionShake trigger={shakeTrigger}>
-      <AppText variant="label" tone="secondary" style={styles.fieldLabel}>
+      <AppText variant="label" tone="primary" style={styles.fieldLabel}>
         {label}
       </AppText>
       <AuthInput
@@ -346,7 +342,7 @@ function AuthField({
               <AppIcon
                 name={trailingIcon}
                 size={20}
-                color={theme.colors.inkMute}
+                color={theme.colors.textMuted}
               />
             </MotionPressable>
           ) : null
@@ -386,7 +382,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
     marginBottom: theme.spacing[3],
   },
   eyebrow: {
@@ -394,7 +390,7 @@ const styles = StyleSheet.create({
   },
   title: {
     letterSpacing: -0.5,
-    lineHeight: 38,
+    lineHeight: theme.typography.display.lineHeight,
   },
   subtitle: { marginTop: theme.spacing[2] },
   form: { gap: theme.spacing[5] },
@@ -425,7 +421,7 @@ const styles = StyleSheet.create({
     height: 18,
     borderRadius: 5,
     borderWidth: 1.5,
-    borderColor: theme.colors.lineStrong,
+    borderColor: theme.colors.borderStrong,
     backgroundColor: theme.colors.surface,
     alignItems: "center",
     justifyContent: "center",
@@ -435,8 +431,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
   },
   rememberText: {
-    fontSize: 13,
-    color: theme.colors.inkSoft,
+    fontSize: theme.typography.label.fontSize,
+    color: theme.colors.text,
   },
   loginButton: {
     minHeight: 52,
@@ -446,16 +442,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: theme.colors.primary,
-    ...theme.shadow.primary,
   },
   loginButtonDisabled: {
     opacity: 0.45,
   },
   loginButtonText: {
-    color: theme.colors.white,
+    color: theme.colors.onPrimary,
     fontFamily: theme.font.semibold,
     fontWeight: "normal",
-    fontSize: theme.fontSize.base,
+    fontSize: theme.typography.body.fontSize,
   },
   signupCard: {
     flexDirection: "row",
@@ -465,19 +460,19 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
   },
   signupCardText: {
-    fontSize: 13.5,
+    fontSize: theme.typography.label.fontSize,
   },
   signupLink: {
     paddingVertical: 4,
     paddingHorizontal: 4,
   },
   signupLinkText: {
-    color: theme.colors.primaryDeep,
-    fontSize: 13.5,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
 });

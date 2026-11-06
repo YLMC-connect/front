@@ -141,7 +141,7 @@ export function TermsAgreementScreen({
                   <AppIcon
                     name="chevron-right"
                     size={16}
-                    color={theme.colors.inkSoft}
+                    color={theme.colors.text}
                   />
                 </Pressable>
               </View>
@@ -173,7 +173,13 @@ function CheckCircle({ on, big = false }: { on: boolean; big?: boolean }) {
         on ? styles.checkOn : null,
       ]}
     >
-      {on ? <AppIcon name="check" size={size * 0.66} color="#fff" /> : null}
+      {on ? (
+        <AppIcon
+          name="check"
+          size={size * 0.66}
+          color={theme.colors.onPrimary}
+        />
+      ) : null}
     </View>
   );
 }
@@ -263,7 +269,7 @@ export function TermsSheet({
             onPress={onClose}
             style={styles.closeButton}
           >
-            <AppIcon name="close" size={18} color={theme.colors.inkSoft} />
+            <AppIcon name="close" size={18} color={theme.colors.text} />
             <Text style={styles.closeText}>닫기</Text>
           </Pressable>
         </View>
@@ -298,16 +304,16 @@ const styles = StyleSheet.create({
     paddingBottom: FLOATING_BOTTOM_BAR_INSET,
   },
   display: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.display,
-    lineHeight: theme.lineHeight.display,
-    fontWeight: "900",
+    color: theme.colors.text,
+    fontSize: theme.typography.display.fontSize,
+    lineHeight: theme.typography.display.lineHeight,
+    fontWeight: theme.fontWeight.bold,
   },
   description: {
     marginTop: 10,
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.base,
-    lineHeight: theme.lineHeight.body,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
   },
   allRow: {
     marginTop: 28,
@@ -320,11 +326,11 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   allRowOn: {
-    backgroundColor: theme.colors.primaryTint,
+    backgroundColor: theme.colors.primarySubtle,
   },
   allText: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.lg,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   list: {
@@ -344,16 +350,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   rowLabel: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-    lineHeight: theme.lineHeight.md,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
   },
   required: {
-    color: theme.colors.primaryDeep,
+    color: theme.colors.primaryStrong,
     fontWeight: theme.fontWeight.semibold,
   },
   optional: {
-    color: theme.colors.inkMute,
+    color: theme.colors.textMuted,
     fontWeight: theme.fontWeight.semibold,
   },
   detailButton: {
@@ -362,15 +368,15 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   detailText: {
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
     textDecorationLine: "underline",
   },
   check: {
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1.5,
-    borderColor: theme.colors.lineStrong,
+    borderColor: theme.colors.borderStrong,
   },
   checkOn: {
     borderWidth: 0,
@@ -402,7 +408,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: theme.colors.lineStrong,
+    backgroundColor: theme.colors.border,
   },
   sheetHeader: {
     flexDirection: "row",
@@ -413,9 +419,9 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   sheetTitle: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.lg,
-    fontWeight: theme.fontWeight.extrabold,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
+    fontWeight: theme.fontWeight.bold,
   },
   closeButton: {
     minWidth: 64,
@@ -429,8 +435,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
   },
   closeText: {
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.md,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   sheetBody: {
@@ -440,13 +446,13 @@ const styles = StyleSheet.create({
   },
   effectiveDate: {
     marginBottom: 10,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   fullText: {
-    color: theme.colors.inkSoft,
-    fontSize: 13.5,
-    lineHeight: 24,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
   },
   sheetLoadingWrap: {
     paddingVertical: 48,

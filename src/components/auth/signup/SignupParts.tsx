@@ -23,7 +23,11 @@ export function CheckBadge({
       ]}
     >
       {on ? (
-        <AppIcon name="check" size={size * 0.65} color={theme.colors.white} />
+        <AppIcon
+          name="check"
+          size={size * 0.65}
+          color={theme.colors.onPrimary}
+        />
       ) : null}
     </View>
   );
@@ -95,7 +99,7 @@ export const SignupInput = forwardRef<
       <AppIcon
         name={passwordVisible ? "visibility" : "visibility-off"}
         size={20}
-        color={theme.colors.inkMute}
+        color={theme.colors.textMuted}
       />
     </MotionPressable>
   ) : (
@@ -132,7 +136,11 @@ export function InlineError({ children }: { children?: ReactNode }) {
   return (
     <MotionFadeIn>
       <View style={styles.errorRow}>
-        <AppIcon name="error-outline" size={14} color={theme.colors.danger} />
+        <AppIcon
+          name="error-outline"
+          size={14}
+          color={theme.colors.dangerIcon}
+        />
         <Text style={styles.inlineError}>{children}</Text>
       </View>
     </MotionFadeIn>

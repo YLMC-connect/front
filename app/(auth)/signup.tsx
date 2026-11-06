@@ -519,7 +519,7 @@ export default function SignupScreen() {
                         <AppIcon
                           name="chevron-right"
                           size={14}
-                          color={theme.colors.inkMute}
+                          color={theme.colors.textMuted}
                         />
                       </Pressable>
                     </View>
@@ -550,7 +550,7 @@ export default function SignupScreen() {
                         <AppIcon
                           name="chevron-right"
                           size={14}
-                          color={theme.colors.inkMute}
+                          color={theme.colors.textMuted}
                         />
                       </Pressable>
                     </View>
@@ -603,7 +603,7 @@ export default function SignupScreen() {
                               <AppIcon
                                 name="check-circle"
                                 size={18}
-                                color={theme.colors.success}
+                                color={theme.colors.successIcon}
                               />
                             </MotionPop>
                           ) : null
@@ -638,7 +638,7 @@ export default function SignupScreen() {
                               <AppIcon
                                 name="check-circle"
                                 size={18}
-                                color={theme.colors.success}
+                                color={theme.colors.successIcon}
                               />
                             </MotionPop>
                           ) : null
@@ -681,14 +681,14 @@ export default function SignupScreen() {
                           lastAvailabilityTarget === "email" ? (
                             <ActivityIndicator
                               size="small"
-                              color={theme.colors.primaryDeep}
+                              color={theme.colors.primaryStrong}
                             />
                           ) : currentEmailAvailability === true ? (
                             <MotionPop>
                               <AppIcon
                                 name="check-circle"
                                 size={18}
-                                color={theme.colors.success}
+                                color={theme.colors.successIcon}
                               />
                             </MotionPop>
                           ) : null
@@ -704,8 +704,8 @@ export default function SignupScreen() {
                           size={12}
                           color={
                             hasValidEmailFormat
-                              ? theme.colors.primaryDeep
-                              : theme.colors.inkMute
+                              ? theme.colors.primaryStrong
+                              : theme.colors.textMuted
                           }
                         />
                         <Text
@@ -723,8 +723,8 @@ export default function SignupScreen() {
                           size={12}
                           color={
                             isEmailChecked
-                              ? theme.colors.primaryDeep
-                              : theme.colors.inkMute
+                              ? theme.colors.primaryStrong
+                              : theme.colors.textMuted
                           }
                         />
                         <Text
@@ -753,7 +753,7 @@ export default function SignupScreen() {
                           <AppIcon
                             name="check-circle"
                             size={14}
-                            color={theme.colors.success}
+                            color={theme.colors.successIcon}
                           />
                           <AppText
                             variant="caption"
@@ -805,14 +805,14 @@ export default function SignupScreen() {
                         lastAvailabilityTarget === "id" ? (
                           <ActivityIndicator
                             size="small"
-                            color={theme.colors.primaryDeep}
+                            color={theme.colors.primaryStrong}
                           />
                         ) : currentIdAvailability === true ? (
                           <MotionPop>
                             <AppIcon
                               name="check-circle"
                               size={18}
-                              color={theme.colors.success}
+                              color={theme.colors.successIcon}
                             />
                           </MotionPop>
                         ) : null
@@ -834,7 +834,7 @@ export default function SignupScreen() {
                         <AppIcon
                           name="check-circle"
                           size={14}
-                          color={theme.colors.success}
+                          color={theme.colors.successIcon}
                         />
                         <AppText
                           variant="caption"
@@ -894,8 +894,8 @@ export default function SignupScreen() {
                         size={12}
                         color={
                           hasMinLength
-                            ? theme.colors.primaryDeep
-                            : theme.colors.inkMute
+                            ? theme.colors.primaryStrong
+                            : theme.colors.textMuted
                         }
                       />
                       <Text
@@ -913,8 +913,8 @@ export default function SignupScreen() {
                         size={12}
                         color={
                           hasAlphaNumeric
-                            ? theme.colors.primaryDeep
-                            : theme.colors.inkMute
+                            ? theme.colors.primaryStrong
+                            : theme.colors.textMuted
                         }
                       />
                       <Text

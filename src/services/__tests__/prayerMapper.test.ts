@@ -181,6 +181,16 @@ describe("prayerMapper", () => {
     });
   });
 
+  it("reads board topics whose createdAt is null (live board response)", () => {
+    const board = readPrayerTopicBoard({
+      emergency: [],
+      recentAnswers: [],
+      ongoing: [{ ...topic, createdAt: null }],
+    });
+
+    expect(board?.ongoing).toEqual([{ ...topic, createdAt: null }]);
+  });
+
   it("rejects shapes that are not the Notion data payload", () => {
     expect(() =>
       readPrayerCohorts({ code: "SUCCESS", message: "ok", data: [cohort] }),

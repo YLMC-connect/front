@@ -205,7 +205,8 @@ function readTopic(value: unknown, source: unknown): PrayerTopicDto {
     emergencyEndAt: requireNullableString(value, "emergencyEndAt", source),
     answerContent: requireNullableString(value, "answerContent", source),
     answeredAt: requireNullableString(value, "answeredAt", source),
-    createdAt: requireString(value, "createdAt", source),
+    // 게시판 응답에서 createdAt 이 null 로 오는 기도제목이 있다(화면에서 쓰지 않음)
+    createdAt: requireNullableString(value, "createdAt", source),
   };
 }
 

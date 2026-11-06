@@ -1,12 +1,14 @@
 import { forwardRef, useState, type ReactNode } from "react";
-import { StyleSheet, TextInput, type TextInputProps, View } from "react-native";
+import { StyleSheet, TextInput, type TextInputProps } from "react-native";
 import { theme } from "../../constants/theme";
+import { InputSurface, inputTextStyles } from "../ui/inputs";
 
 export type AuthInputProps = Omit<TextInputProps, "style"> & {
   hasError?: boolean;
   trailing?: ReactNode;
 };
 
+/** 로그인·가입 입력창. 겉모양은 공통 InputSurface(디자인 시스템 Input)를 쓴다. */
 export const AuthInput = forwardRef<TextInput, AuthInputProps>(
   function AuthInput(
     {
@@ -15,25 +17,27 @@ export const AuthInput = forwardRef<TextInput, AuthInputProps>(
       onFocus,
       testID,
       trailing,
+      editable,
       ...inputProps
     }: AuthInputProps,
     ref,
   ) {
     const [focused, setFocused] = useState(false);
+    const readOnly = editable === false;
 
     return (
-      <View
-        testID={testID ? `${testID}-container` : undefined}
-        style={[
-          styles.surface,
-          hasError ? styles.surfaceError : null,
-          trailing ? styles.surfaceWithTrailing : null,
-        ]}
+      <InputSurface
+        focused={focused}
+        error={hasError}
+        readOnly={readOnly}
+        testID={testID}
+        style={[styles.surface, trailing ? styles.surfaceWithTrailing : null]}
       >
         <TextInput
           {...inputProps}
           ref={ref}
           testID={testID}
+          editable={editable}
           onBlur={(event) => {
             setFocused(false);
             onBlur?.(event);
@@ -45,17 +49,14 @@ export const AuthInput = forwardRef<TextInput, AuthInputProps>(
           placeholderTextColor={
             inputProps.placeholderTextColor ?? theme.colors.textMuted
           }
-          style={styles.input}
+          style={[
+            inputTextStyles.input,
+            styles.input,
+            readOnly ? inputTextStyles.readOnly : null,
+          ]}
         />
         {trailing}
-        {focused ? (
-          <View
-            pointerEvents="none"
-            testID={testID ? `${testID}-focus-ring` : undefined}
-            style={[styles.focusRing, hasError ? styles.focusRingError : null]}
-          />
-        ) : null}
-      </View>
+      </InputSurface>
     );
   },
 );
@@ -63,38 +64,12 @@ export const AuthInput = forwardRef<TextInput, AuthInputProps>(
 const styles = StyleSheet.create({
   surface: {
     height: theme.size.inputHeight,
-    borderRadius: theme.radius.sm,
-    borderWidth: 1,
-    borderColor: theme.colors.borderStrong,
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    position: "relative",
-  },
-  focusRing: {
-    ...StyleSheet.absoluteFill,
-    borderRadius: theme.radius.sm,
-    borderColor: theme.colors.primary,
-    borderWidth: 2,
-  },
-  focusRingError: {
-    borderColor: theme.colors.dangerText,
-  },
-  surfaceError: {
-    borderColor: theme.colors.dangerText,
+    gap: theme.spacing["2"],
   },
   surfaceWithTrailing: {
     paddingRight: 10,
   },
   input: {
-    flex: 1,
     minHeight: 44,
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-    padding: 0,
-    outlineColor: "transparent",
-    outlineWidth: 0,
   },
 });

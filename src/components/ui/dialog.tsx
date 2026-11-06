@@ -1,12 +1,14 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
   interpolate,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
+  withTiming,
 } from "react-native-reanimated";
 import { theme } from "../../constants/theme";
-import { useMotionPresence } from "./motion";
+import { motionEasing, motionExitDuration, useMotionPresence } from "./motion";
 
 export function ConfirmDialog({
   visible,
@@ -27,22 +29,31 @@ export function ConfirmDialog({
   cancelText?: string;
   danger?: boolean;
 }) {
-  const { mounted, progress } = useMotionPresence(visible);
+  // 배경이 먼저 어두워지고(progress), 패널은 목록 간격(60ms) 뒤 4% 작은 크기에서 커진다.
+  const { mounted, progress, reduceMotion } = useMotionPresence(visible);
+  const panelProgress = useSharedValue(0);
+  useEffect(() => {
+    const duration = theme.motion.duration.base;
+    if (reduceMotion) {
+      panelProgress.value = visible ? 1 : 0;
+      return;
+    }
+    panelProgress.value = visible
+      ? withDelay(
+          theme.motion.stagger,
+          withTiming(1, { duration, easing: motionEasing.standard }),
+        )
+      : withTiming(0, {
+          duration: motionExitDuration(duration),
+          easing: motionEasing.exit,
+        });
+  }, [panelProgress, reduceMotion, visible]);
   const backdropStyle = useAnimatedStyle(() => ({
     opacity: progress.value,
   }));
   const panelStyle = useAnimatedStyle(() => ({
-    opacity: progress.value,
-    transform: [
-      {
-        translateY: interpolate(
-          progress.value,
-          [0, 1],
-          [theme.motion.distance.sm, 0],
-        ),
-      },
-      { scale: interpolate(progress.value, [0, 1], [0.96, 1]) },
-    ],
+    opacity: panelProgress.value,
+    transform: [{ scale: interpolate(panelProgress.value, [0, 1], [0.96, 1]) }],
   }));
 
   return (
@@ -116,7 +127,6 @@ export function BottomSheet({
     opacity: progress.value,
   }));
   const panelStyle = useAnimatedStyle(() => ({
-    opacity: progress.value,
     transform: [
       {
         translateY:

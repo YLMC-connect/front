@@ -133,8 +133,9 @@ export function Toast({
   if (message && message !== content) {
     setContent(message);
   }
+  // 16px 아래에서 느림(300ms)으로 올라오고, 사라질 때는 60%(180ms).
   const { mounted, progress } = useMotionPresence(Boolean(message), {
-    duration: theme.motion.duration.base,
+    duration: theme.motion.duration.slow,
   });
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: progress.value,
@@ -143,7 +144,7 @@ export function Toast({
         translateY: interpolate(
           progress.value,
           [0, 1],
-          [theme.motion.distance.sm, 0],
+          [theme.motion.distance.lg, 0],
         ),
       },
     ],

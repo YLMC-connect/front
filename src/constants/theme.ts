@@ -44,10 +44,26 @@ const layout = {
 
 const motion = {
   duration: ds.duration,
+  /**
+   * 디자인 시스템 motion.md 곡선(cubic-bezier 4값).
+   * fast: 빠름(120ms) ease-out · standard: 보통·느림 · exit: 닫힘·사라짐.
+   */
+  easing: {
+    fast: [0, 0, 0.58, 1],
+    standard: [0.2, 0, 0, 1],
+    exit: [0.4, 0, 1, 1],
+  },
+  /** 퇴장 시간 = 등장 시간 × 0.6 */
+  exitRatio: 0.6,
   distance: {
     xs: 4,
+    /** 기본 등장 거리(8px 아래에서 떠오름) */
     sm: 8,
     md: 12,
+    /** 토스트 등장 거리 */
+    lg: 16,
+    /** 로그인 실패 흔들기 좌우 거리 */
+    shake: 6,
   },
   scale: {
     pressed: 0.97,

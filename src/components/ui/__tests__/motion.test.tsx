@@ -29,7 +29,13 @@ describe("common motion", () => {
       enterFrom: 0.92,
       popFrom: 0.9,
     });
-    expect(theme.motion.distance).toEqual({ xs: 4, sm: 8, md: 12 });
+    expect(theme.motion.distance).toEqual({
+      xs: 4,
+      sm: 8,
+      md: 12,
+      lg: 16,
+      shake: 6,
+    });
     expect(theme.motion.stagger).toBe(60);
   });
 

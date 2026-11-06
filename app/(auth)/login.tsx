@@ -93,6 +93,12 @@ export default function LoginScreen() {
     : isError
       ? "아이디 또는 비밀번호가 올바르지 않습니다"
       : "";
+  // 로그인 실패 때만 입력창을 흔든다(입력 오류는 흔들지 않음). 실패마다 다시 흔들도록 제출 시각을 쓴다.
+  const loginFailureTrigger = login.isError
+    ? login.submittedAt
+    : isError
+      ? "error"
+      : null;
 
   const onSubmit = () => {
     const nextErrors = validateLogin(values);
@@ -160,45 +166,53 @@ export default function LoginScreen() {
             </View>
 
             <MotionEnter enabled={enterMotion} style={styles.form}>
-              <AuthField
-                testID="login-id-input"
-                label="아이디"
-                value={values.id}
-                keyboardType="ascii-capable"
-                autoCapitalize="none"
-                autoCorrect={false}
-                onChangeText={(id) => {
-                  const sanitized = sanitizeLoginId(id);
-                  setValues((current) => ({ ...current, id: sanitized }));
-                  if (errors.id) {
-                    setErrors((current) => ({ ...current, id: undefined }));
+              <MotionShake
+                testID="login-fields-shake"
+                trigger={loginFailureTrigger}
+                style={styles.fields}
+              >
+                <AuthField
+                  testID="login-id-input"
+                  label="아이디"
+                  value={values.id}
+                  keyboardType="ascii-capable"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  onChangeText={(id) => {
+                    const sanitized = sanitizeLoginId(id);
+                    setValues((current) => ({ ...current, id: sanitized }));
+                    if (errors.id) {
+                      setErrors((current) => ({ ...current, id: undefined }));
+                    }
+                  }}
+                  placeholder="아이디를 입력해주세요"
+                  error={errors.id}
+                  hasError={isError}
+                />
+                <AuthField
+                  testID="login-password-input"
+                  label="비밀번호"
+                  value={values.password}
+                  onChangeText={(password) =>
+                    setValues((current) => ({ ...current, password }))
                   }
-                }}
-                placeholder="아이디를 입력해주세요"
-                error={errors.id}
-                hasError={isError}
-              />
-              <AuthField
-                testID="login-password-input"
-                label="비밀번호"
-                value={values.password}
-                onChangeText={(password) =>
-                  setValues((current) => ({ ...current, password }))
-                }
-                placeholder="비밀번호를 입력해주세요"
-                secureTextEntry={!passwordVisible}
-                // 비밀번호 칸은 영문 자판으로 연다(iOS 비밀번호 칸은 한글 조합이 막혀 입력되지 않음)
-                keyboardType="ascii-capable"
-                error={errors.password}
-                hasError={isError}
-                trailingIcon={passwordVisible ? "visibility" : "visibility-off"}
-                trailingLabel={
-                  passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"
-                }
-                onTrailingPress={() =>
-                  setPasswordVisible((visible) => !visible)
-                }
-              />
+                  placeholder="비밀번호를 입력해주세요"
+                  secureTextEntry={!passwordVisible}
+                  // 비밀번호 칸은 영문 자판으로 연다(iOS 비밀번호 칸은 한글 조합이 막혀 입력되지 않음)
+                  keyboardType="ascii-capable"
+                  error={errors.password}
+                  hasError={isError}
+                  trailingIcon={
+                    passwordVisible ? "visibility" : "visibility-off"
+                  }
+                  trailingLabel={
+                    passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"
+                  }
+                  onTrailingPress={() =>
+                    setPasswordVisible((visible) => !visible)
+                  }
+                />
+              </MotionShake>
               <Pressable
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: rememberId }}
@@ -230,13 +244,11 @@ export default function LoginScreen() {
                 </AppText>
               </Pressable>
               {formErrorMessage ? (
-                <MotionShake trigger={formErrorMessage}>
-                  <MotionFadeIn>
-                    <AppText variant="caption" tone="danger">
-                      {formErrorMessage}
-                    </AppText>
-                  </MotionFadeIn>
-                </MotionShake>
+                <MotionFadeIn>
+                  <AppText variant="caption" tone="danger">
+                    {formErrorMessage}
+                  </AppText>
+                </MotionFadeIn>
               ) : null}
 
               <MotionPressable
@@ -328,10 +340,8 @@ function AuthField({
   autoCorrect?: boolean;
   keyboardType?: TextInputProps["keyboardType"];
 }) {
-  const shakeTrigger = error ?? (hasError ? "error" : undefined);
-
   return (
-    <MotionShake trigger={shakeTrigger}>
+    <View>
       <AppText variant="label" tone="primary" style={styles.fieldLabel}>
         {label}
       </AppText>
@@ -370,7 +380,7 @@ function AuthField({
           </AppText>
         </MotionFadeIn>
       ) : null}
-    </MotionShake>
+    </View>
   );
 }
 
@@ -409,6 +419,7 @@ const styles = StyleSheet.create({
   },
   subtitle: { marginTop: theme.spacing[2] },
   form: { gap: theme.spacing[5] },
+  fields: { gap: theme.spacing[5] },
   footerBlock: {
     marginTop: theme.spacing[8],
   },

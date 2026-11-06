@@ -225,7 +225,7 @@ export default function LifeStudyApplyScreenRoute() {
                   <Checkbox
                     checked={promiseAgreed}
                     onChange={setPromiseAgreed}
-                    accessibilityLabel="수강 약속에 동의합니다"
+                    accessibilityLabel={`수강 약속에 동의합니다. ${weekCount}주 과정 중 80% 이상 출석하며, 매주 묵상 과제를 성실히 수행하겠습니다.`}
                     style={styles.promise}
                     label={
                       <>

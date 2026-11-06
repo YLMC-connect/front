@@ -1,3 +1,4 @@
+import { File } from "expo-file-system";
 import { apiClient, type ApiRequestOptions } from "../lib/apiClient";
 import { useAuthStore } from "../store/authStore";
 import type { MarketDataSource } from "./marketService";
@@ -30,13 +31,11 @@ function defaultCurrentUser(): CurrentUser {
   return { id: user?.id ?? null, name: user?.name ?? null };
 }
 
+// expo 57.0.32 부터 전역 fetch 가 expo/fetch 라 RN 식 { uri, name, type } 파트를 지원하지 않는다.
+// Blob 을 구현한 expo-file-system File 로 넣어야 한다.
 function appendShareImage(form: FormData, uri: string, index: number) {
-  const filename = uri.split("/").pop() || `image-${index}.jpg`;
-  form.append("images", {
-    uri,
-    name: filename,
-    type: "image/jpeg",
-  } as unknown as Blob);
+  const file = new File(uri);
+  form.append("images", file, file.name || `image-${index}.jpg`);
 }
 
 export function createHttpMarketDataSource({

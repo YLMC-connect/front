@@ -1,5 +1,19 @@
 import { createHttpMarketDataSource } from "../marketHttpDataSource";
 
+jest.mock("expo-file-system", () => ({
+  // 실제 expo-file-system File 처럼 Blob 을 구현하는 파일 객체
+  File: class MockFile extends Blob {
+    uri: string;
+    constructor(uri: string) {
+      super(["x"], { type: "image/jpeg" });
+      this.uri = uri;
+    }
+    get name() {
+      return this.uri.split("/").pop() ?? "";
+    }
+  },
+}));
+
 describe("httpMarketDataSource", () => {
   function setup() {
     const request = jest.fn();
@@ -122,6 +136,10 @@ describe("httpMarketDataSource", () => {
     request.mockImplementation(async (path: string, options) => {
       if (path === "/api/share" && options?.method === "POST") {
         expect(options.body).toBeInstanceOf(FormData);
+        // expo/fetch 는 { uri } 파트를 못 보내므로 이미지는 Blob(파일) 이어야 한다
+        const image = (options.body as FormData).get("images");
+        expect(image).toBeInstanceOf(Blob);
+        expect((image as Blob & { name: string }).name).toBe("probe.jpg");
         return 3;
       }
       if (path === "/api/share/3") {

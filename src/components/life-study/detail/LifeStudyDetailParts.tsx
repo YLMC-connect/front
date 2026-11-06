@@ -1,7 +1,8 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
-import { AnimatedProgressFill, Card, DetailBadge } from "../../ui";
+import { Badge, Card } from "../../ui";
+import { ProgressBar } from "../../ui/progress-bar";
 import { theme } from "../../../constants/theme";
 import {
   assignments,
@@ -18,9 +19,7 @@ export function EnrolledContent() {
         {notices.map((notice) => (
           <Card key={notice.title} style={styles.noticeCard}>
             <View style={styles.badgeRow}>
-              <DetailBadge bordered tone="warn">
-                {notice.scope}
-              </DetailBadge>
+              <Badge tone="warning">{notice.scope}</Badge>
               <Text style={styles.caption}>{notice.read}</Text>
             </View>
             <Text style={styles.noticeTitle}>{notice.title}</Text>
@@ -32,13 +31,12 @@ export function EnrolledContent() {
 
       <Section title="내 진행 상태">
         <View style={styles.progressCard}>
-          <View style={styles.progressHead}>
-            <Text style={styles.progressLabel}>현재 주차</Text>
-            <Text style={styles.progressValue}>4 / 13</Text>
-          </View>
-          <View style={styles.progressTrack}>
-            <AnimatedProgressFill percent={33} style={styles.progressFill} />
-          </View>
+          <ProgressBar
+            label="현재 주차"
+            value={(4 / 13) * 100}
+            valueText="4 / 13"
+            testID="life-study-progress"
+          />
           <View style={styles.metricGrid}>
             <Metric label="출석" value="4 / 4" />
             <Metric label="숙제" value="3 / 4" />
@@ -74,12 +72,9 @@ export function EnrolledContent() {
               <Text style={styles.caption}>{item.week}</Text>
               <Text style={styles.assignmentTitle}>{item.title}</Text>
             </View>
-            <DetailBadge
-              bordered
-              tone={item.state === "제출 확인" ? "primary" : "warn"}
-            >
+            <Badge tone={item.state === "제출 확인" ? "info" : "warning"}>
               {item.state}
-            </DetailBadge>
+            </Badge>
           </Card>
         ))}
       </Section>
@@ -160,7 +155,7 @@ function ScheduleRow({
   item: (typeof schedule)[number];
   last: boolean;
 }) {
-  const tone = item.attendance === "출석" ? "primary" : "warn";
+  const tone = item.attendance === "출석" ? "info" : "warning";
   return (
     <View style={[styles.scheduleRow, !last ? styles.rowBorder : null]}>
       <Text style={styles.weekText}>{item.week}</Text>
@@ -168,12 +163,9 @@ function ScheduleRow({
         <Text style={styles.rowTitle}>{item.title}</Text>
         <Text style={styles.caption}>{item.date}</Text>
       </View>
-      <DetailBadge
-        bordered
-        tone={item.attendance === "출석 예정" ? "mute" : tone}
-      >
+      <Badge tone={item.attendance === "출석 예정" ? "neutral" : tone}>
         {item.attendance}
-      </DetailBadge>
+      </Badge>
     </View>
   );
 }
@@ -220,11 +212,7 @@ export function CurriculumRow({
           {item.title}
         </Text>
       </View>
-      {current ? (
-        <DetailBadge bordered tone="primary">
-          이번주
-        </DetailBadge>
-      ) : null}
+      {current ? <Badge tone="info">이번주</Badge> : null}
     </View>
   );
 }

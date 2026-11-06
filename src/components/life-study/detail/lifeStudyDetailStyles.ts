@@ -99,21 +99,6 @@ export const styles = StyleSheet.create({
     padding: 14,
     gap: 8,
   },
-  noticeHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  noticeCardTitle: {
-    color: theme.colors.text,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  noticeCardText: {
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
-  },
   noticeTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
@@ -130,33 +115,6 @@ export const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     padding: 16,
     ...theme.shadow.sm,
-  },
-  progressHead: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-  },
-  progressLabel: {
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  progressValue: {
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.title.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  progressTrack: {
-    marginTop: 10,
-    height: 6,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surfaceSubtle,
-    overflow: "hidden",
-  },
-  progressFill: {
-    height: "100%",
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primary,
   },
   metricGrid: {
     flexDirection: "row",

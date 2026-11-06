@@ -1,10 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
-import { Empty, TopBar } from "../../../src/components/ui";
+import {
+  Card,
+  Empty,
+  MotionEnter,
+  motionStaggerDelay,
+  TopBar,
+} from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import { queryKeys } from "../../../src/lib/queryKeys";
 import { fetchMyLifeStudyCompletions } from "../../../src/services/lifeStudyService";
+
+/** 목록 첫 진입 때 60ms 간격으로 떠오르는 카드 수(디자인 시스템 motion: 첫 8개). */
+const LIST_STAGGER_LIMIT = 8;
 
 export default function LifeStudyHistoryScreen() {
   const completions = useQuery({
@@ -40,19 +49,26 @@ export default function LifeStudyHistoryScreen() {
             ) : null}
             {rows.length > 0 ? (
               <View style={styles.stack}>
-                {rows.map((course) => (
-                  <View key={course.id} style={styles.card}>
-                    <View style={styles.cardText}>
-                      <Text style={styles.title}>
-                        {course.title || "이름 없음"}
-                      </Text>
-                      <Text style={styles.meta}>
-                        {course.completedAt
-                          ? `수료 ${course.completedAt}`
-                          : "수료일 없음"}
-                      </Text>
-                    </View>
-                  </View>
+                {rows.map((course, index) => (
+                  <MotionEnter
+                    key={course.id}
+                    mode="fadeUp"
+                    enabled={index < LIST_STAGGER_LIMIT}
+                    delay={motionStaggerDelay(index)}
+                  >
+                    <Card style={styles.card}>
+                      <View style={styles.cardText}>
+                        <Text style={styles.title}>
+                          {course.title || "이름 없음"}
+                        </Text>
+                        <Text style={styles.meta}>
+                          {course.completedAt
+                            ? `수료 ${course.completedAt}`
+                            : "수료일 없음"}
+                        </Text>
+                      </View>
+                    </Card>
+                  </MotionEnter>
                 ))}
               </View>
             ) : null}
@@ -114,16 +130,12 @@ const styles = StyleSheet.create({
   },
   stack: {
     paddingHorizontal: theme.layout.screenX,
-    gap: 12,
+    gap: 16,
   },
   card: {
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.surface,
-    padding: 16,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    ...theme.shadow.sm,
   },
   cardText: {
     flex: 1,

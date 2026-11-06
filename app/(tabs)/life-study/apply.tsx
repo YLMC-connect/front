@@ -1,4 +1,7 @@
-import { AppIcon } from "@/components/ui/app-icon";
+import { AppText } from "@/components/ui/app-text";
+import { Checkbox, RadioRow } from "@/components/ui/checkbox";
+import { InfoBox } from "@/components/ui/info-box";
+import { ModalFormTextInput } from "@/components/ui/modal-form-layout";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -8,7 +11,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
@@ -125,7 +127,7 @@ export default function LifeStudyApplyScreenRoute() {
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
-        <TopBar title="수강 신청" back onBack={() => router.back()} />
+        <TopBar title="수강 신청" close onBack={() => router.back()} />
         {hasNoOpenCourse ? (
           <View style={styles.emptyWrap}>
             <Empty
@@ -154,15 +156,18 @@ export default function LifeStudyApplyScreenRoute() {
                   </View>
                 </View>
 
-                <View style={styles.infoBox}>
-                  <InfoRow label="신청 기간" value={applicationPeriodLabel} />
-                  <InfoRow label="정원" value={capacityLabel} />
-                  {openCohort?.eligibility ? (
-                    <Text style={styles.infoHint}>
-                      신청 조건: {openCohort.eligibility}
-                    </Text>
-                  ) : null}
-                </View>
+                <InfoBox
+                  title={`신청 기간 ${applicationPeriodLabel}`}
+                  description={[
+                    `정원 ${capacityLabel}`,
+                    openCohort?.eligibility
+                      ? `신청 조건: ${openCohort.eligibility}`
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join("\n")}
+                  style={styles.infoBox}
+                />
 
                 <View style={styles.form}>
                   <Field label="이름" value={memberName} editable={false} />
@@ -191,81 +196,49 @@ export default function LifeStudyApplyScreenRoute() {
                   <View>
                     <Text style={styles.label}>신앙 연차</Text>
                     <View
-                      style={styles.chips}
+                      style={styles.options}
                       accessibilityRole="radiogroup"
                       accessibilityLabel="신앙 연차"
                     >
-                      {faithYears.map((item, index) => {
-                        const selected = index === faithYearIndex;
-                        return (
-                          <Pressable
-                            key={item}
-                            accessibilityRole="radio"
-                            accessibilityState={{ checked: selected }}
-                            hitSlop={{ top: 5, bottom: 5 }}
-                            onPress={() => setFaithYearIndex(index)}
-                            style={[
-                              styles.chip,
-                              selected ? styles.chipOn : null,
-                            ]}
-                          >
-                            <Text
-                              style={[
-                                styles.chipText,
-                                selected ? styles.chipTextOn : null,
-                              ]}
-                            >
-                              {item}
-                            </Text>
-                          </Pressable>
-                        );
-                      })}
+                      {faithYears.map((item, index) => (
+                        <RadioRow
+                          key={item}
+                          label={item}
+                          selected={index === faithYearIndex}
+                          onPress={() => setFaithYearIndex(index)}
+                        />
+                      ))}
                     </View>
                   </View>
 
                   <View>
                     <Text style={styles.label}>신청 동기</Text>
-                    <TextInput
+                    <ModalFormTextInput
                       multiline
                       placeholder="신청하시는 이유를 자유롭게 적어주세요"
-                      placeholderTextColor={theme.colors.textMuted}
-                      style={[styles.input, styles.textarea]}
+                      style={styles.textarea}
                       value={memo}
                       onChangeText={setMemo}
                     />
                   </View>
 
-                  <Pressable
-                    accessibilityRole="checkbox"
-                    accessibilityState={{ checked: promiseAgreed }}
-                    onPress={() => setPromiseAgreed(!promiseAgreed)}
-                    style={styles.promiseBox}
-                  >
-                    <View
-                      style={[
-                        styles.checkBox,
-                        !promiseAgreed ? styles.checkBoxOff : null,
-                      ]}
-                    >
-                      {promiseAgreed ? (
-                        <AppIcon
-                          name="check"
-                          size={14}
-                          color={theme.colors.onPrimary}
-                        />
-                      ) : null}
-                    </View>
-                    <Text style={styles.promiseText}>
-                      <Text style={styles.promiseStrong}>
-                        수강 약속에 동의합니다
-                      </Text>
-                      {"\n"}
-                      <Text style={styles.promiseMuted}>
-                        {weekCount}주 과정 중 80% 이상 출석하며, 매주 묵상
-                        과제를 성실히 수행하겠습니다.
-                      </Text>
-                    </Text>
-                  </Pressable>
+                  <Checkbox
+                    checked={promiseAgreed}
+                    onChange={setPromiseAgreed}
+                    accessibilityLabel="수강 약속에 동의합니다"
+                    style={styles.promise}
+                    label={
+                      <>
+                        <AppText variant="body" weight="semibold">
+                          수강 약속에 동의합니다
+                        </AppText>
+                        <AppText variant="label" tone="muted">
+                          {weekCount}주 과정 중 80% 이상 출석하며, 매주 묵상
+                          과제를 성실히 수행하겠습니다.
+                        </AppText>
+                      </>
+                    }
+                  />
 
                   {formError ? (
                     <Text style={styles.errorText}>{formError}</Text>
@@ -285,15 +258,6 @@ export default function LifeStudyApplyScreenRoute() {
         )}
       </View>
     </Screen>
-  );
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.infoRow}>
-      <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={styles.infoValue}>{value}</Text>
-    </View>
   );
 }
 
@@ -317,11 +281,10 @@ function Field({
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
-      <TextInput
+      <ModalFormTextInput
         editable={editable}
         placeholder={placeholder}
-        placeholderTextColor={theme.colors.textMuted}
-        style={[styles.input, !editable ? styles.inputDisabled : null]}
+        style={styles.input}
         value={value}
         onChangeText={onChangeText}
         keyboardType={keyboardType}
@@ -371,29 +334,7 @@ const styles = StyleSheet.create({
     lineHeight: theme.typography.caption.lineHeight,
   },
   infoBox: {
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.infoSubtle,
-    padding: 14,
     marginBottom: 20,
-  },
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 10,
-  },
-  infoLabel: {
-    color: theme.colors.text,
-    fontSize: theme.typography.caption.fontSize,
-  },
-  infoValue: {
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  infoHint: {
-    marginTop: 8,
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
   },
   form: {
     gap: 20,
@@ -406,98 +347,28 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   label: {
-    marginBottom: 7,
+    marginBottom: 8,
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   input: {
-    minHeight: 46,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.borderStrong,
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: 14,
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
+    marginHorizontal: 0,
   },
   textarea: {
-    minHeight: 98,
-    paddingTop: 12,
-    textAlignVertical: "top",
+    marginHorizontal: 0,
   },
-  chips: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
+  options: {
+    gap: 8,
   },
-  chip: {
-    borderRadius: theme.radius.full,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  chipOn: {
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primarySubtle,
-  },
-  chipText: {
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  chipTextOn: {
-    color: theme.colors.primaryStrong,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  promiseBox: {
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surface,
-    padding: 14,
-    flexDirection: "row",
+  promise: {
     alignItems: "flex-start",
-    gap: 10,
   },
-  checkBox: {
-    width: 20,
-    height: 20,
-    borderRadius: 6,
-    backgroundColor: theme.colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  checkBoxOff: {
-    backgroundColor: "transparent",
-    borderWidth: 1.5,
-    borderColor: theme.colors.borderStrong,
-  },
-  inputDisabled: {
-    backgroundColor: theme.colors.surfaceSubtle,
-    color: theme.colors.textMuted,
-  },
-
   errorText: {
     marginTop: 4,
     color: theme.colors.dangerText,
     fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
-  },
-  promiseText: {
-    flex: 1,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
-  },
-  promiseStrong: {
-    color: theme.colors.text,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  promiseMuted: {
-    color: theme.colors.textMuted,
   },
   bottom: {
     position: "absolute",

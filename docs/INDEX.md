@@ -25,7 +25,7 @@
 
 | 도메인 | 진행 중 | 완료 | 마지막 갱신 | 상세 |
 |---|---|---|---|---|
-| common (공통 인프라) | 1 | 63 | 2026-11-06 | [features/common.md](features/common.md) |
+| common (공통 인프라) | 1 | 64 | 2026-11-06 | [features/common.md](features/common.md) |
 | auth (인증) | 1 | 19 | 2026-11-03 | [features/auth.md](features/auth.md) |
 | home (홈) | 0 | 4 | 2026-11-03 | [features/home.md](features/home.md) |
 | market (나눔장터) | 0 | 27 | 2026-11-06 | [features/market.md](features/market.md) |

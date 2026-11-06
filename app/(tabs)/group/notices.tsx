@@ -104,6 +104,7 @@ export default function GroupNoticesScreenRoute() {
                 <Pressable
                   testID="group-notice-delete"
                   accessibilityRole="button"
+                  style={styles.headerAction}
                   onPress={() => setShowDelete(true)}
                 >
                   <Text style={styles.deleteAction}>삭제</Text>
@@ -112,6 +113,7 @@ export default function GroupNoticesScreenRoute() {
               <Pressable
                 testID="group-notice-submit"
                 accessibilityRole="button"
+                style={styles.headerAction}
                 onPress={onSubmit}
                 disabled={!isFilled || isPending}
               >
@@ -241,16 +243,17 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     gap: 4,
   },
-  deleteAction: {
+  headerAction: {
+    minHeight: theme.layout.touchTarget,
+    justifyContent: "center",
     paddingHorizontal: 8,
-    paddingVertical: 6,
+  },
+  deleteAction: {
     color: theme.colors.dangerText,
     fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   submitAction: {
-    paddingHorizontal: 8,
-    paddingVertical: 6,
     color: theme.colors.primary,
     fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.bold,
@@ -307,7 +310,7 @@ const styles = StyleSheet.create({
     minHeight: 48,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.borderStrong,
     backgroundColor: theme.colors.surface,
     paddingHorizontal: 14,
     paddingVertical: 12,

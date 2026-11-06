@@ -356,6 +356,11 @@ export default function GroupNewModal() {
                 {CAPACITY_PRESETS.map((preset) => (
                   <Pressable
                     key={preset}
+                    accessibilityRole="button"
+                    accessibilityState={{
+                      selected: values.maxMembers === preset,
+                    }}
+                    hitSlop={{ top: 6, bottom: 6 }}
                     onPress={() => setCapacityPreset(preset)}
                     style={[
                       styles.quickPresetChip,
@@ -402,6 +407,11 @@ export default function GroupNewModal() {
                 {SCHEDULE_PRESETS.map((schedule) => (
                   <Pressable
                     key={schedule}
+                    accessibilityRole="button"
+                    accessibilityState={{
+                      selected: values.schedule === schedule,
+                    }}
+                    hitSlop={{ top: 6, bottom: 6 }}
                     onPress={() => update("schedule", schedule)}
                     style={[
                       styles.quickPresetChip,
@@ -436,6 +446,11 @@ export default function GroupNewModal() {
                 {LOCATION_PRESETS.map((location) => (
                   <Pressable
                     key={location}
+                    accessibilityRole="button"
+                    accessibilityState={{
+                      selected: values.location === location,
+                    }}
+                    hitSlop={{ top: 6, bottom: 6 }}
                     onPress={() => update("location", location)}
                     style={[
                       styles.quickPresetChip,
@@ -513,7 +528,7 @@ const styles = StyleSheet.create({
   },
   chipOn: {
     backgroundColor: theme.colors.primarySubtle,
-    borderColor: theme.colors.primarySubtle,
+    borderColor: theme.colors.primary,
   },
   chipText: {
     color: theme.colors.textMuted,

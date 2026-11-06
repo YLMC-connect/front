@@ -165,9 +165,6 @@
 
 - 프런트 HTTP 목록/상세/작성/삭제/댓글은 라이브 관측으로 연결됨. 남은 문서 공백은 목록 `authorName`/`images`/`keyword`, 장소, 신고 enum, 상태 변경, 오류 코드. `isMine`은 `authorId === 현재 사용자`로 계산. 단일 출처는 Issue #19이며 `test:api:contract:market`은 38건 실패를 유지한다.
 - 신고 처리 후 블라인드/관리자 큐 정책은 API/운영 정책 확정 후 반영.
-- 나눔 작성 residual은 topbar/chip/control typography 정렬 후 `market-create-limit mean=14.62`, `market-create-fill mean=13.69`, `market-edit mean=13.70`, `market-create mean=12.22`, `market-create-back mean=7.72`입니다. 빈 작성/뒤로가기 화면은 status bar/time, RN font metrics, confirm overlay geometry 차이로 소폭 상승했지만 화면군 합계는 감소했습니다.
-- 나눔 목록 residual은 FAB root overlay 정렬 후 `market-list-all mean=13.75`, `market-list mean=10.64`, `market-list-reserved mean=6.79`, `market-list-done mean=6.31`입니다. 남은 차이는 native status bar/time, RN font metrics, tab bar geometry와 목록 row text metric 차이로 추적합니다.
-- 나눔 상세 residual은 신고 variant 재연결 후 `market-detail-report mean=10.73`, `report-other-input mean=10.29`, `report-dup-toast mean=13.78`이며, 게시글 삭제 확인 문구·공통 dialog 연결 후 `market-detail-delete-confirm mean=16.65`입니다. 부분 캡처 compare의 missing 수치는 선택 index만 출력 폴더에 둔 결과라 전체 회귀 수치로 사용하지 않으며, 대상 PNG 존재와 residual만 확인했습니다. 남은 차이는 RN font metrics, native shadow/blur 번역, sheet/input capture 조건으로 추적합니다.
 
 ## 의존성
 

@@ -74,7 +74,13 @@ describe("InputSurface (TextField · Textarea · ModalFormTextInput · AuthInput
     expect(flat("tf-border")).toMatchObject({
       borderColor: theme.colors.dangerText,
     });
-    expect(screen.getByText("이메일 형식을 확인해주세요.")).toBeTruthy();
+    const message = screen.getByText("이메일 형식을 확인해주세요.");
+    expect(message.props.accessibilityRole).toBe("alert");
+    expect(StyleSheet.flatten(message.props.style)).toMatchObject({
+      fontSize: 12,
+      fontFamily: "Pretendard-Medium",
+      color: theme.colors.dangerText,
+    });
 
     fireEvent(screen.getByTestId("tf"), "focus");
     expect(flat("tf-focus-ring")).toMatchObject({

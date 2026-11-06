@@ -3,7 +3,7 @@ import { render } from "@testing-library/react-native";
 import type { ReactElement, ReactNode } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-function createTestQueryClient() {
+export function createTestQueryClient() {
   return new QueryClient({
     defaultOptions: {
       mutations: {

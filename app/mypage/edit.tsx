@@ -74,7 +74,7 @@ function ProfileTextInput({
       editable={editable}
       keyboardType={keyboardType}
       placeholder={placeholder}
-      placeholderTextColor={theme.colors.inkHint}
+      placeholderTextColor={theme.colors.textMuted}
       secureTextEntry={secureTextEntry}
       style={[styles.input, error ? styles.inputError : null]}
       value={value}
@@ -355,17 +355,17 @@ const styles = StyleSheet.create({
   },
   saveText: {
     color: theme.colors.primary,
-    fontSize: theme.fontSize.md,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   saveMuted: {
-    color: theme.colors.inkHint,
+    color: theme.colors.textDisabled,
   },
   profileCard: {
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface2,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surfaceSubtle,
     padding: 16,
     flexDirection: "row",
     alignItems: "center",
@@ -376,28 +376,28 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   readonlyLabel: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
-    lineHeight: theme.lineHeight.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   name: {
     marginTop: 2,
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.lg,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   readonlyHint: {
     marginTop: 4,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
-    lineHeight: theme.lineHeight.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   section: {
     marginTop: 22,
   },
   label: {
     marginBottom: 6,
-    color: theme.colors.inkSoft,
+    color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
     fontWeight: theme.typography.label.fontWeight,
   },
@@ -405,39 +405,39 @@ const styles = StyleSheet.create({
     height: 46,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.lineStrong,
+    borderColor: theme.colors.borderStrong,
     backgroundColor: theme.colors.surface,
     paddingHorizontal: 14,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.lg,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
   },
   inputError: {
-    borderColor: theme.colors.danger,
-    backgroundColor: "rgba(201,124,110,0.08)",
+    borderColor: theme.colors.dangerText,
+    backgroundColor: theme.colors.dangerSubtle,
   },
   hint: {
     marginTop: 6,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
-    lineHeight: theme.lineHeight.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   error: {
     marginTop: 6,
-    color: theme.colors.danger,
-    fontSize: theme.fontSize.xs,
-    lineHeight: theme.lineHeight.xs,
+    color: theme.colors.dangerText,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   divider: {
     height: 1,
     marginTop: 28,
     marginBottom: 18,
-    backgroundColor: theme.colors.line,
+    backgroundColor: theme.colors.border,
   },
   sectionTitle: {
     marginBottom: 14,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   passwordFields: {

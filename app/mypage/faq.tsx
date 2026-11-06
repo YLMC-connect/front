@@ -127,7 +127,7 @@ export default function FaqScreen() {
                       <AppIcon
                         name="chevron-right"
                         size={18}
-                        color={theme.colors.inkMute}
+                        color={theme.colors.textMuted}
                         style={isOpen ? styles.chevronOpen : null}
                       />
                     </Pressable>
@@ -167,28 +167,28 @@ const styles = StyleSheet.create({
     minHeight: 34,
     borderRadius: theme.radius.full,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
     paddingHorizontal: 13,
     alignItems: "center",
     justifyContent: "center",
   },
   chipOn: {
-    borderColor: "transparent",
-    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primarySubtle,
+    backgroundColor: theme.colors.primarySubtle,
   },
   chipText: {
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   chipTextOn: {
-    color: theme.colors.white,
-    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.primaryStrong,
+    fontWeight: theme.fontWeight.semibold,
   },
   faqRow: {
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
+    borderBottomColor: theme.colors.border,
     paddingHorizontal: 18,
     paddingVertical: 16,
   },
@@ -207,15 +207,15 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   qText: {
-    color: theme.colors.white,
-    fontSize: theme.fontSize.xs,
-    fontWeight: theme.fontWeight.extrabold,
+    color: theme.colors.onPrimary,
+    fontSize: theme.typography.caption.fontSize,
+    fontWeight: theme.fontWeight.bold,
   },
   question: {
     flex: 1,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-    lineHeight: 20,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   chevronOpen: {
@@ -227,9 +227,9 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.md,
     backgroundColor: theme.colors.surface,
     padding: 12,
-    color: theme.colors.inkSoft,
-    fontSize: 13.5,
-    lineHeight: 22,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
   },
   emptyWrap: {
     flex: 1,

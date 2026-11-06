@@ -194,7 +194,7 @@ function MenuRow({
   last: boolean;
   onPress: () => void;
 }) {
-  const color = item.danger ? theme.colors.danger : theme.colors.inkSoft;
+  const color = item.danger ? theme.colors.dangerIcon : theme.colors.text;
 
   return (
     <Pressable
@@ -207,7 +207,7 @@ function MenuRow({
       <Text style={[styles.menuLabel, item.danger ? styles.dangerText : null]}>
         {item.label}
       </Text>
-      <AppIcon name="chevron-right" size={20} color={theme.colors.inkHint} />
+      <AppIcon name="chevron-right" size={20} color={theme.colors.textMuted} />
     </Pressable>
   );
 }
@@ -232,14 +232,14 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   name: {
-    color: theme.colors.ink,
-    fontSize: 17,
+    color: theme.colors.text,
+    fontSize: theme.typography.heading.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   church: {
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
-    lineHeight: theme.lineHeight.sm,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   editButton: {
     borderRadius: theme.radius.full,
@@ -247,8 +247,8 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   editText: {
-    color: theme.colors.primaryDeep,
-    fontSize: 13,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   menuCard: {
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 14,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
+    borderBottomColor: theme.colors.border,
     paddingHorizontal: 18,
     paddingVertical: 14,
   },
@@ -270,18 +270,18 @@ const styles = StyleSheet.create({
   },
   menuLabel: {
     flex: 1,
-    color: theme.colors.ink,
-    fontSize: 14.5,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.medium,
   },
   dangerText: {
-    color: theme.colors.danger,
+    color: theme.colors.dangerText,
   },
   version: {
     paddingTop: 8,
     paddingBottom: 8,
     textAlign: "center",
-    color: theme.colors.inkHint,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
 });

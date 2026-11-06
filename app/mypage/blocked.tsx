@@ -68,7 +68,7 @@ export default function BlockedScreen() {
                     <AppIcon
                       name="check"
                       size={14}
-                      color={theme.colors.primaryDeep}
+                      color={theme.colors.primaryStrong}
                     />
                     <Text style={styles.releaseText}>차단 해제</Text>
                   </Pressable>
@@ -107,11 +107,11 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 14,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.infoSubtle,
     padding: 14,
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 20,
+    color: theme.colors.infoText,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
   },
   list: {
     flex: 1,
@@ -125,34 +125,34 @@ const styles = StyleSheet.create({
   },
   rowBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
+    borderBottomColor: theme.colors.border,
   },
   userText: {
     flex: 1,
     minWidth: 0,
   },
   name: {
-    color: theme.colors.ink,
-    fontSize: 14.5,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   when: {
     marginTop: 2,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   release: {
     height: 34,
     borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
     paddingHorizontal: 14,
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
   },
   releaseText: {
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   emptyWrap: {

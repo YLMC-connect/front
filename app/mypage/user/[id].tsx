@@ -41,7 +41,7 @@ export default function UserProfileScreen() {
         <TopBar title="프로필" back onBack={() => router.back()} />
         <View style={styles.centerBody}>
           <View style={styles.blockedIcon}>
-            <AppIcon name="block" size={38} color={theme.colors.inkHint} />
+            <AppIcon name="block" size={38} color={theme.colors.textMuted} />
           </View>
           <Text style={styles.blockedTitle}>확인할 수 없는 프로필입니다</Text>
           <Text style={styles.blockedText}>
@@ -110,19 +110,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 22,
     borderWidth: 1.5,
-    borderColor: theme.colors.lineStrong,
-    backgroundColor: theme.colors.surface2,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surfaceSubtle,
   },
   blockedTitle: {
-    color: theme.colors.ink,
-    fontSize: 17,
+    color: theme.colors.text,
+    fontSize: theme.typography.heading.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   blockedText: {
     marginTop: 10,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 22,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     textAlign: "center",
   },
   profileBlock: {
@@ -137,50 +137,50 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: theme.colors.primary,
-    ...theme.shadow.raised,
+    ...theme.shadow.md,
   },
   avatarWithdrawn: {
     borderWidth: 1.5,
-    borderColor: theme.colors.lineStrong,
-    backgroundColor: theme.colors.surface2,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surfaceSubtle,
     shadowOpacity: 0,
     elevation: 0,
   },
   avatarText: {
-    color: theme.colors.white,
-    fontSize: 36,
-    fontWeight: theme.fontWeight.extrabold,
+    color: theme.colors.onPrimary,
+    fontSize: theme.typography.display.fontSize,
+    fontWeight: theme.fontWeight.bold,
   },
   avatarTextWithdrawn: {
-    color: theme.colors.inkHint,
+    color: theme.colors.textMuted,
   },
   name: {
     marginTop: 18,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize["2xl"],
-    fontWeight: theme.fontWeight.extrabold,
+    color: theme.colors.text,
+    fontSize: theme.typography.title.fontSize,
+    fontWeight: theme.fontWeight.bold,
   },
   nameWithdrawn: {
-    color: theme.colors.inkMute,
+    color: theme.colors.textMuted,
   },
   withdrawnText: {
     marginTop: 6,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   blockButton: {
     height: 52,
     borderRadius: theme.radius.full,
     borderWidth: 1,
-    borderColor: theme.colors.lineStrong,
+    borderColor: theme.colors.borderButton,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
   },
   blockButtonText: {
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.md,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
 });

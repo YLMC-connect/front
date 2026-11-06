@@ -70,6 +70,7 @@
 - **공통 Empty 컴포넌트 표준화 (FAQ 기준 통일 스펙)** — 빈 목록/데이터 부재 상태를 위한 `Empty` 공통 컴포넌트(`src/components/ui/feedback.tsx`)를 FAQ 화면 기준으로 통일. 84px 큰 원형 배경(`surface2`), 42px 큰 아이콘(`inkHint`), `cardTitle` 볼드 제목 및 `caption` 설명 문구로 구성하며 상하 정중앙 배치(`flex: 1`, `justifyContent: "center"`)를 유지하고 일체의 CTA 버튼을 배제. 약관, 개인정보처리방침, FAQ, 차단 목록, 내 활동, 나눔, 소모임, 기도, 삶공부 전반에 일관되게 적용.
 - **화면 전환 배경색 고정 및 전 하위 Stack 우측 슬라이드(`slide_from_right`) 모션 일원화** — 루트 `<Tabs>`와 각 하위 Stack(`market`, `group`, `prayer`, `life-study`, `mypage`)에 `sceneStyle` / `contentStyle: { backgroundColor: theme.colors.bg }` 및 `animation: "slide_from_right"`를 일괄 지정해 화면 전환 시 흰색 플래시를 방지하고, iOS 및 Android 전 기기에서 모든 상세 진입/퇴장이 일관된 우측 슬라이드로 동작하도록 통일. 상세 진입 시 `AppTabBar`는 `180ms` 페이드·슬라이드(`translateY`)로 부드럽게 숨겨지도록 개선.
 - **서버 역할은 공통 타입으로 보존** — `UserRole`은 `ADMIN`, `USER`, 도메인별 `MANAGER_*` 역할을 원본 값으로 유지한다. 프런트 판별은 메뉴/route 노출용이며 실제 API 인가는 서버가 담당한다.
+- **개인정보 쿼리는 기기에 저장하지 않음** — React Query 캐시는 AsyncStorage(암호화 없음)에 24시간 저장하되, `src/lib/queryClient.ts` 의 `NON_PERSISTED_QUERY_KEY_PREFIXES`(`member`, `market/mine`, `group/detail`, `prayer/overview`, `lifeStudy/overview`)로 시작하는 쿼리는 메모리에만 둔다. 개인정보 쿼리를 새로 만들면 이 목록에 넣는다.
 - **API origin은 로컬 env만** — `EXPO_PUBLIC_API_URL`. 실제 호스트를 코드·문서·`.env.example`에 두지 않음. HTTP adapter를 쓰는 동안 없으면 `app.config.ts`가 실패. mock만이면 URL 없이 실행 가능.
 - **웹 라이브 API는 검증 대상이 아님** — 브라우저 CORS. 서버 CORS를 열지 않는 한 `npm run web`으로 라이브 인증을 맞추지 않음. 검증 기준은 Expo Dev Client.
 - **development 기본 adapter는 HTTP** — 인증·나눔·동행. 홈·기도·삶공부는 사용자 API가 생길 때까지 mock. 테스트와 Maestro mock 계정은 `EXPO_PUBLIC_*_ADAPTER=mock`.

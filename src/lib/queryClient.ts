@@ -3,8 +3,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 import {
   QueryClient,
+  defaultShouldDehydrateQuery,
   focusManager,
   onlineManager,
+  type Query,
 } from "@tanstack/react-query";
 import { persistQueryClient } from "@tanstack/react-query-persist-client";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
@@ -43,9 +45,38 @@ const persister = createAsyncStoragePersister({
   storage: AsyncStorage,
 });
 
+/**
+ * 개인정보가 담긴 쿼리. queryKey 앞부분이 이 중 하나와 같으면 기기에 저장하지 않고 메모리에만 둔다.
+ */
+export const NON_PERSISTED_QUERY_KEY_PREFIXES: readonly (readonly string[])[] =
+  [
+    ["member"], // 내 정보: 이름·전화번호·이메일·포인트
+    ["market", "mine"], // 내 나눔 목록
+    ["group", "detail"], // 소모임 상세·회원 목록: 회원 실명, 내 가입 여부
+    ["prayer", "overview"], // 내 기도방·내 기도 신청 내용
+    ["lifeStudy", "overview"], // 내 수료 현황
+  ];
+
+function startsWithKey(
+  queryKey: readonly unknown[],
+  prefix: readonly string[],
+) {
+  return prefix.every((part, index) => queryKey[index] === part);
+}
+
+export function shouldPersistQuery(query: Query): boolean {
+  if (!defaultShouldDehydrateQuery(query)) return false;
+  return !NON_PERSISTED_QUERY_KEY_PREFIXES.some((prefix) =>
+    startsWithKey(query.queryKey, prefix),
+  );
+}
+
 persistQueryClient({
   queryClient,
   persister,
-  buster: "http-only-v1",
+  buster: "private-excluded-v2",
   maxAge: 1000 * 60 * 60 * 24,
+  dehydrateOptions: {
+    shouldDehydrateQuery: shouldPersistQuery,
+  },
 });

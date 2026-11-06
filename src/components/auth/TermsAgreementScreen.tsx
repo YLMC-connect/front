@@ -95,6 +95,7 @@ export function TermsAgreementScreen({
               <View key={term.key} style={styles.row}>
                 <Pressable
                   accessibilityRole="checkbox"
+                  accessibilityLabel={`${term.required ? "필수" : "선택"} ${term.label} 동의`}
                   accessibilityState={{ checked: agreed[term.key] }}
                   onPress={() =>
                     setAgreed((current) => ({

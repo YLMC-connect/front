@@ -97,7 +97,7 @@
 ## 미결 / 추적
 
 - #212 Sentry 소스맵·디버그 심볼 업로드 (auth token 필요)
-- mutation/hook 테스트는 API adapter 범위와 함께 확장
+- hook 테스트: mutation hook(나눔·동행·기도·삶공부·MY)은 `src/test/renderHookWithClient.tsx` 로 서비스 인자·캐시 갱신/무효화 key·실패 시 캐시 유지를 검증한다. 남은 것은 query hook(`useHome`, `useHomeTodayProgress`, 삶공부 조회, 목록 페이지네이션)
 - #25 Android TopBar 캡처 이상은 시각 파이프라인을 다시 돌릴 때
 - mock 웹의 실제 Vercel URL은 계정 연결 후
 

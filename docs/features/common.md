@@ -96,7 +96,7 @@
 
 ## 미결 / 추적
 
-- Sentry 소스맵·디버그 심볼 업로드 (auth token 필요)
+- #212 Sentry 소스맵·디버그 심볼 업로드 (auth token 필요)
 - mutation/hook 테스트는 API adapter 범위와 함께 확장
 - #25 Android TopBar 캡처 이상은 시각 파이프라인을 다시 돌릴 때
 - mock 웹의 실제 Vercel URL은 계정 연결 후

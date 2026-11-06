@@ -121,8 +121,8 @@ export function ImagePickerField({
 
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsMultipleSelection: maxImages > 1,
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.85,
+      mediaTypes: ["images"],
+      // quality 는 기본값(1)으로 둔다. 압축은 업로드 직전 resizeImageForUpload 가 한 번만 한다
       selectionLimit: Math.max(1, maxImages - value.length),
     });
 

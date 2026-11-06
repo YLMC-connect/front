@@ -14,6 +14,13 @@ jest.mock("expo-file-system", () => ({
   },
 }));
 
+// 업로드 직전 축소 결과 uri 가 올라가는지 확인하려고 이름만 바꾼 uri 를 돌려준다
+jest.mock("../../lib/resizeImage", () => ({
+  resizeImageForUpload: jest.fn(async (uri: string) =>
+    uri.replace("probe.jpg", "resized-probe.jpg"),
+  ),
+}));
+
 describe("httpMarketDataSource", () => {
   function setup() {
     const request = jest.fn();
@@ -139,7 +146,9 @@ describe("httpMarketDataSource", () => {
         // expo/fetch 는 { uri } 파트를 못 보내므로 이미지는 Blob(파일) 이어야 한다
         const image = (options.body as FormData).get("images");
         expect(image).toBeInstanceOf(Blob);
-        expect((image as Blob & { name: string }).name).toBe("probe.jpg");
+        expect((image as Blob & { name: string }).name).toBe(
+          "resized-probe.jpg",
+        );
         return 3;
       }
       if (path === "/api/share/3") {

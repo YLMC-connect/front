@@ -130,9 +130,6 @@ jest.mock("expo-linear-gradient", () => {
 });
 
 jest.mock("expo-image-picker", () => ({
-  MediaTypeOptions: {
-    Images: "Images",
-  },
   launchImageLibraryAsync: jest.fn(),
   requestMediaLibraryPermissionsAsync: jest.fn(),
 }));

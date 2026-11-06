@@ -36,36 +36,19 @@
 
 <!-- AUTO-GENERATED-END: domain-status -->
 
-> 본 표는 GitHub Issues 데이터로 자동 생성됩니다 (라벨 = 도메인). 손으로 편집하지 마세요. 갱신 스크립트: [`scripts/gen-index.sh`](../scripts/gen-index.sh), 자동 실행: [`.github/workflows/update-index.yml`](../.github/workflows/update-index.yml).
+> 본 표는 GitHub Issues 데이터로 자동 생성됩니다 (라벨 = 도메인). 손으로 편집하지 마세요. 갱신 스크립트: [`scripts/gen-index.sh`](../scripts/gen-index.sh) — Issue 가 바뀐 뒤 PR 을 열 때 실행해 함께 커밋합니다.
 > 도메인 페이지는 해당 도메인 작업에 처음 진입할 때 [features/\_template.md](features/_template.md) 를 복사해 생성합니다.
 
 ---
 
-## 작업 라우팅 (AI 의 3단계 읽기)
+## 작업 라우팅
 
-**Pass 0 — 목차 스캔 (짧게)**
+- 남은 일: GitHub Issues (`gh issue list --label <도메인>`)
+- 변경 이력: 머지된 PR (`gh pr list --state merged`)
+- 도메인 컨텍스트: `features/<도메인>.md` 의 **결정 사항 / 미결 / 데이터 타입 / 의존성 / 주요 파일**
+- PLAN.md 는 데이터 타입·Phase·보안·기술스택에 영향이 있거나 새 도메인에 처음 들어갈 때만
 
-- 작업 issue: `gh issue view <N>` _(제목·라벨·마일스톤)_
-- 작업 도메인 features 상단 메타 + 섹션 제목
-- 본 INDEX 의 현재 Phase (한눈)
-
-머지된 PR 목록은 관련 결정이 의심될 때만 Pass 2.
-
-**Pass 1 — 정독**
-
-- 작업 issue 본문 + 코멘트
-- 작업 도메인 features 의 **결정 사항 / 미결 / 데이터 타입 / 의존성 / 주요 파일**
-
-**Pass 2 — 트리거 시 심층**
-| 트리거 | 정독할 곳 |
-|---|---|
-| 신규 도메인 첫 진입 | [PLAN.md](../PLAN.md) 해당 섹션 + 라벨 + `.task-flow.conf` |
-| 데이터 타입·Phase·보안·기술스택 영향 작업 | PLAN.md 관련 섹션 |
-| 관련 결정 의심 | `gh pr view <N>` description |
-| 다른 도메인과 의존성 | 해당 도메인 features |
-| 완료된 결과물 재사용 | features `✅ 완료` |
-
-상세 규칙은 [../AGENTS.md](../AGENTS.md). 기본 검증은 `npm run validate`.
+상세 규칙은 [../AGENTS.md](../AGENTS.md). 모든 작업은 브랜치 + PR, CI 는 `npm run validate`.
 
 ---
 

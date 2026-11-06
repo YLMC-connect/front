@@ -14,6 +14,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import { theme } from "../../constants/theme";
+import { AppText } from "./app-text";
 import { MotionEnter } from "./motion";
 
 /** 여러 줄 입력 최소 높이(디자인 시스템 Input). */
@@ -61,11 +62,7 @@ const inputSurfaceStyles = StyleSheet.create({
     alignItems: "center",
     gap: theme.spacing["1"],
   },
-  errorText: {
-    ...theme.typography.caption,
-    color: theme.colors.dangerText,
-    flexShrink: 1,
-  },
+  errorText: { flexShrink: 1 },
 });
 
 /**
@@ -147,7 +144,15 @@ export function InputErrorText({
           size={16}
           color={theme.colors.dangerText}
         />
-        <Text style={inputSurfaceStyles.errorText}>{children}</Text>
+        <AppText
+          variant="caption"
+          tone="danger"
+          accessibilityRole="alert"
+          accessibilityLiveRegion="polite"
+          style={inputSurfaceStyles.errorText}
+        >
+          {children}
+        </AppText>
       </View>
     </MotionEnter>
   );

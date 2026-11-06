@@ -2,7 +2,6 @@ import { useEffect, type ReactNode } from "react";
 import {
   Pressable,
   StyleSheet,
-  Text,
   View,
   type StyleProp,
   type ViewStyle,
@@ -15,6 +14,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { theme } from "../../constants/theme";
 import { AppIcon } from "./app-icon";
+import { AppText } from "./app-text";
 
 /** 체크·라디오 표시 크기(디자인 시스템 Checkbox). */
 const MARK_SIZE = 22;
@@ -139,7 +139,9 @@ export function Checkbox({
       />
       {label != null ? (
         typeof label === "string" ? (
-          <Text style={styles.label}>{label}</Text>
+          <AppText variant="body" style={styles.label}>
+            {label}
+          </AppText>
         ) : (
           <View style={styles.labelSlot}>{label}</View>
         )
@@ -211,13 +213,17 @@ export function RadioRow({
         style={[optionStyles.selectedLayer, selectedLayerStyle]}
       />
       <View style={optionStyles.texts}>
-        <Text
-          style={[optionStyles.label, selected ? optionStyles.labelOn : null]}
+        <AppText
+          variant="body"
+          weight={selected ? "bold" : "medium"}
+          tone={selected ? "brand" : "primary"}
         >
           {label}
-        </Text>
+        </AppText>
         {description ? (
-          <Text style={optionStyles.description}>{description}</Text>
+          <AppText variant="label" weight="regular" tone="muted">
+            {description}
+          </AppText>
         ) : null}
       </View>
       <SelectionMark
@@ -239,11 +245,7 @@ const styles = StyleSheet.create({
     gap: theme.spacing["3"],
   },
   rowDisabled: { opacity: theme.opacity.disabled },
-  label: {
-    ...theme.typography.body,
-    color: theme.colors.text,
-    flexShrink: 1,
-  },
+  label: { flexShrink: 1 },
   labelSlot: { flexShrink: 1 },
   mark: {
     width: MARK_SIZE,
@@ -309,18 +311,4 @@ const optionStyles = StyleSheet.create({
     backgroundColor: theme.colors.infoSubtle,
   },
   texts: { flex: 1, gap: 2 },
-  label: {
-    ...theme.typography.body,
-    fontWeight: theme.fontWeight.medium,
-    color: theme.colors.text,
-  },
-  labelOn: {
-    fontWeight: theme.fontWeight.bold,
-    color: theme.colors.primaryStrong,
-  },
-  description: {
-    ...theme.typography.label,
-    fontWeight: theme.fontWeight.regular,
-    color: theme.colors.textMuted,
-  },
 });

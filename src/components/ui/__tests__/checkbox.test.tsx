@@ -30,7 +30,7 @@ describe("Checkbox", () => {
       StyleSheet.flatten(screen.getByText("아이디 저장").props.style),
     ).toMatchObject({
       fontSize: 16,
-      fontWeight: "400",
+      fontFamily: "Pretendard-Regular",
       color: theme.colors.text,
     });
   });
@@ -133,8 +133,14 @@ describe("RadioRow", () => {
     expect(flat("day-mon-selected-layer")).toMatchObject({ opacity: 0 });
     expect(
       StyleSheet.flatten(screen.getByText("월요일").props.style),
-    ).toMatchObject({ fontSize: 16, fontWeight: "500" });
-    expect(screen.getByText("저녁 7시")).toBeTruthy();
+    ).toMatchObject({ fontSize: 16, fontFamily: "Pretendard-Medium" });
+    expect(
+      StyleSheet.flatten(screen.getByText("저녁 7시").props.style),
+    ).toMatchObject({
+      fontSize: 14,
+      fontFamily: "Pretendard-Regular",
+      color: theme.colors.textMuted,
+    });
     expect(flat("day-mon-mark")).toMatchObject({ width: 22, height: 22 });
 
     fireEvent.press(row);
@@ -156,7 +162,7 @@ describe("RadioRow", () => {
     expect(
       StyleSheet.flatten(screen.getByText("화요일").props.style),
     ).toMatchObject({
-      fontWeight: "700",
+      fontFamily: "Pretendard-Bold",
       color: theme.colors.primaryStrong,
     });
     expect(flat("day-tue-mark-fill")).toMatchObject({ opacity: 1 });

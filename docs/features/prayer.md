@@ -143,7 +143,6 @@
 - 기도방 상세 성공 필드, 참여 신청 status 코드, 신청·카테고리 값 타입, 일·토 `PrayerWeekday`, 작성 화면 `categoryId`는 사용자 계약만으로는 화면과 연결하지 못했다. Issue #135.
 - 비성도 기도 요청, 기도방 참여 승인, 익명 작성자의 서버 응답 필드 정책 확인 필요.
 - 푸시 알림과 기도 통계는 후속 Phase입니다.
-- 2026-05-27 ZIP FAB root overlay 정렬 후 중보기도 residual은 `pray-list mean=12.28`, `pray-detail mean=11.84`, `pray-request mean=9.34`입니다. 남은 차이는 Android native status bar/time, RN 한글 font metrics, tab/FAB shadow 번역 차이로 분리 추적합니다.
 
 ## 의존성
 

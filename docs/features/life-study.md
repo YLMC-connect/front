@@ -116,8 +116,6 @@
 
 - 수업일 `classes[]` 원소, 출석부 하위 필드, 신청 승인, 수료증 표시는 Notion 사용자 계약에 없다.
 - 관리자 과정 개설/수정은 모바일 v1 범위가 아니며 후속 Phase입니다.
-- `study-list` residual은 ZIP 목록 구조 정렬 후 `mean=11.76`입니다. 남은 차이는 Android status bar/time, RN font metrics, SegmentedTabs/Badge antialiasing, native shadow 번역 차이 중심으로 추적합니다.
-- `study-detail` residual은 ZIP 구조 정렬 후 `20.90→9.39`까지 낮췄습니다. 남은 차이는 RN status bar/time, font metrics, blur/shadow, native bottom home indicator 번역 차이 중심으로 추적합니다.
 
 ## 의존성
 

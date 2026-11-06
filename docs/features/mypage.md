@@ -123,7 +123,6 @@
 
 - 휴대폰 중복 확인, 비밀번호 제약, 탈퇴 soft delete API 스키마 확인 필요.
 - 알림 권한, 문의 API, 고객지원 운영 정책은 후속 Phase에서 확정합니다. Downloads에 독립 원본 화면이 생기면 그때 실제 route로 추가합니다.
-- 알림 설정 residual은 ZIP section/card 구조 정렬 후 `notif-settings mean=12.32`입니다. ZIP 원본의 `거래 채팅` 행은 v2 제외 원칙으로 빠졌고, 남은 차이는 RN font metrics, switch antialiasing, status bar/time 차이로 추적합니다.
 
 ## 의존성
 

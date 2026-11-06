@@ -177,7 +177,6 @@
 - 참여는 즉시 가입으로 연결함. 승인 대기가 필요하면 서버 상태를 받은 뒤 화면 문구를 바꿀 것.
 - 공지 작성 권한과 소모임장/관리자 권한 모델 확인 필요.
 - 강제 내보내기 이의 제기/복구 플로우는 실제 API와 운영 정책 확정 후 반영.
-- 소모임 상세 residual은 설명문 wrap 정렬 후 47-57 전체가 10대 초반 이하로 내려갔습니다. 남은 차이는 Android native status bar/time, RN font metrics, Avatar gradient 미적용, Toast/check icon glyph 차이로 분리 추적합니다. 최신 주요 residual은 `leader-closed mean=10.81`, `leader mean=10.79`, `leader-leave-toast mean=10.71`, `full-toast mean=10.38`, `non-member mean=10.18`이며 전체 비교 리포트는 `/private/tmp/ylmc-golden-screens/2026-05-23/compare/visual-compare-report.tsv`입니다.
 
 ## 의존성
 

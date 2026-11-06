@@ -177,8 +177,6 @@
 
 - Swagger 성공 DTO·공개 endpoint security·`bearerAuth` scheme·로그인/재발급 오류 코드는 여전히 미기재. 프런트 HTTP 연결은 라이브 관측값으로 진행했고, `test:api:contract` 13건은 백엔드 문서 작업이다. 단일 출처는 Issue #9.
 - 약관/개인정보 동의 화면의 필수 여부와 문구 확정 필요.
-- auth bottom CTA/toast 정렬 후 `login-toast mean=10.18`, `code-toast mean=10.10`, `code-error mean=8.80`, `code-loading mean=8.32`, `code default mean=8.66`까지 낮췄습니다. 로그인 입력 식별자 추가 후 기본 화면 부분 재캡처는 `login mean=13.18`로 렌더 구조 변동이 없음을 확인했습니다. `terms-sheet mean=12.21`는 Android status bar/time, backdrop blur 미적용, RN/web font metric 차이가 남아 후속 공통 overlay 정렬에서 추적합니다.
-- signup variant residual은 `ScreenSignup` 구조 정렬 후 `signup-pw-error 21.74→10.14`, `signup-id-dup 20.65→9.18`, `signup default 12.50→7.76`까지 낮췄습니다. 입력 식별자 추가 후 기본 화면 부분 재캡처는 `signup mean=12.99`로 확인했으며 구조 변경은 없습니다. 남은 차이는 RN status bar/time, secure input glyph/font metrics, CSS gradient/shadow 번역 차이 중심으로 후속 공통 정렬에서 추적합니다.
 
 ## 의존성
 

@@ -1,11 +1,17 @@
 import { AppIcon } from "@/components/ui/app-icon";
-import { type ComponentProps, type ReactNode } from "react";
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  type PressableProps,
-} from "react-native";
+import { useEffect, type ComponentProps, type ReactNode } from "react";
+import { StyleSheet, Text, View, type PressableProps } from "react-native";
+import Animated, {
+  cancelAnimation,
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 import { theme } from "../../constants/theme";
 import { MotionPressable } from "./motion";
 
@@ -25,7 +31,8 @@ const variantColors: Record<
   ButtonVariant,
   {
     bg: string;
-    pressedBg: string;
+    /** 없으면 눌러도 바탕은 그대로(97% 작아짐만). */
+    pressedBg?: string;
     fg: string;
     border?: string;
     pressedBorder?: string;
@@ -38,7 +45,6 @@ const variantColors: Record<
   },
   secondary: {
     bg: colors.primarySubtle,
-    pressedBg: colors.primary200,
     fg: colors.primaryStrong,
   },
   outline: {
@@ -50,7 +56,6 @@ const variantColors: Record<
   },
   ghost: {
     bg: "transparent",
-    pressedBg: colors.surfaceSubtle,
     fg: colors.primaryStrong,
   },
   danger: {
@@ -88,6 +93,24 @@ export function Button({
 }) {
   const tone = variantColors[variant];
   const fg = disabled ? colors.textDisabled : tone.fg;
+  const reduceMotion = useReducedMotion();
+  // 비활성 바탕(surface-subtle)을 덮개로 얹고, 활성이 되면 200ms 동안 걷어 낸다.
+  const disabledCover = useSharedValue(disabled ? 1 : 0);
+  const disabledCoverStyle = useAnimatedStyle(() => ({
+    opacity: disabledCover.value,
+  }));
+
+  useEffect(() => {
+    const target = disabled ? 1 : 0;
+    disabledCover.set(
+      reduceMotion
+        ? target
+        : withTiming(target, {
+            duration: theme.motion.duration.base,
+            easing: Easing.out(Easing.cubic),
+          }),
+    );
+  }, [disabled, disabledCover, reduceMotion]);
 
   return (
     <MotionPressable
@@ -103,18 +126,27 @@ export function Button({
       style={({ pressed }) => [
         styles.button,
         size === "lg" ? styles.buttonLg : styles.buttonMd,
-        { backgroundColor: pressed ? tone.pressedBg : tone.bg },
-        tone.border
+        {
+          backgroundColor: pressed && tone.pressedBg ? tone.pressedBg : tone.bg,
+        },
+        tone.border && !disabled
           ? {
               borderWidth: 1,
               borderColor: pressed ? tone.pressedBorder : tone.border,
             }
           : null,
-        disabled ? styles.disabled : null,
       ]}
     >
+      <Animated.View
+        pointerEvents="none"
+        style={[styles.disabledCover, disabledCoverStyle]}
+        testID={testID ? `${testID}-disabled-cover` : undefined}
+      />
       {loading ? (
-        <ActivityIndicator color={fg} />
+        <LoadingDots
+          color={fg}
+          testID={testID ? `${testID}-loading` : undefined}
+        />
       ) : (
         <>
           {icon ? <AppIcon name={icon} size={18} color={fg} /> : null}
@@ -131,6 +163,86 @@ export function Button({
     </MotionPressable>
   );
 }
+
+const LOADING_DOT_COUNT = 3;
+/** 점 하나가 진해지는(또는 흐려지는) 시간. 다음 점은 그 절반만큼 늦게 시작한다. */
+const LOADING_DOT_STEP = 400;
+
+function LoadingDot({
+  color,
+  index,
+  reduceMotion,
+  testID,
+}: {
+  color: string;
+  index: number;
+  reduceMotion: boolean;
+  testID?: string;
+}) {
+  const opacity = useSharedValue(1);
+  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
+  useEffect(() => {
+    if (reduceMotion) {
+      cancelAnimation(opacity);
+      opacity.set(1);
+      return;
+    }
+    const dim = theme.opacity.disabled;
+    opacity.set(dim);
+    opacity.set(
+      withDelay(
+        index * (LOADING_DOT_STEP / 2),
+        withRepeat(
+          withSequence(
+            withTiming(1, { duration: LOADING_DOT_STEP }),
+            withTiming(dim, { duration: LOADING_DOT_STEP }),
+          ),
+          -1,
+        ),
+      ),
+    );
+    return () => cancelAnimation(opacity);
+  }, [index, opacity, reduceMotion]);
+
+  return (
+    <Animated.View
+      style={[styles.loadingDot, { backgroundColor: color }, style]}
+      testID={testID}
+    />
+  );
+}
+
+/**
+ * 처리 중 표시. 글자 대신 점 세 개가 차례로 진해진다.
+ * 동작 줄이기 설정이면 세 점이 모두 보이는 모습으로 멈춘다.
+ */
+export function LoadingDots({
+  color = colors.textMuted,
+  testID,
+}: {
+  color?: string;
+  testID?: string;
+}) {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <View style={styles.loadingDots} testID={testID}>
+      {Array.from({ length: LOADING_DOT_COUNT }, (_, index) => (
+        <LoadingDot
+          key={index}
+          color={color}
+          index={index}
+          reduceMotion={reduceMotion}
+          testID={testID ? `${testID}-${index}` : undefined}
+        />
+      ))}
+    </View>
+  );
+}
+
+/** 탭바(바닥에서 14 + 높이 64) 위 16. */
+export const FAB_BOTTOM = 14 + theme.size.tabbarHeight + theme.spacing["4"];
 
 export function FloatingActionButton({
   label,
@@ -188,26 +300,42 @@ const styles = StyleSheet.create({
     fontFamily: theme.font.semibold,
     fontWeight: "normal",
   },
-  disabled: { backgroundColor: theme.colors.surfaceSubtle, borderWidth: 0 },
+  disabledCover: {
+    ...StyleSheet.absoluteFill,
+    borderRadius: theme.radius.full,
+    backgroundColor: theme.colors.surfaceSubtle,
+  },
+  loadingDots: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing["1"],
+  },
+  loadingDot: {
+    width: 6,
+    height: 6,
+    borderRadius: theme.radius.full,
+  },
   fab: {
     position: "absolute",
     right: theme.spacing["5"],
-    bottom: 86,
-    zIndex: 20,
+    bottom: FAB_BOTTOM,
+    zIndex: theme.zIndex.tabbar,
     minWidth: theme.size.fabHeight,
     height: theme.size.fabHeight,
     borderRadius: theme.radius.full,
-    paddingHorizontal: theme.spacing["4"],
+    paddingLeft: theme.spacing["3"],
+    paddingRight: theme.spacing["4"],
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
+    gap: theme.spacing["2"],
     backgroundColor: theme.colors.primary,
     ...theme.shadow.fab,
   },
   fabCompact: {
     width: theme.size.fabHeight,
-    paddingHorizontal: 0,
+    paddingLeft: 0,
+    paddingRight: 0,
   },
   fabText: {
     ...theme.typography.caption,

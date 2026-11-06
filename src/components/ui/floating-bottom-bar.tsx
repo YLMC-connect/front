@@ -1,18 +1,20 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { type ReactNode } from "react";
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  View,
-  type StyleProp,
-  type ViewStyle,
-} from "react-native";
+import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { theme } from "../../constants/theme";
-import { MotionPressable } from "./motion";
+import { Button } from "./buttons";
+import { GlassBackdrop } from "./glass-backdrop";
 
 export const FLOATING_BOTTOM_BAR_INSET = 130;
+
+export interface FloatingBottomBarSecondaryAction {
+  /** 보조 버튼 문구 (왼쪽, Secondary) */
+  label: string;
+  onPress?: () => void;
+  disabled?: boolean;
+  testID?: string;
+}
 
 export interface FloatingBottomBarProps {
   /** 단일 기본 액션 버튼 문구 */
@@ -25,6 +27,8 @@ export interface FloatingBottomBarProps {
   disabled?: boolean;
   /** 버튼 스타일 변형 (기본 primary, 위험 danger) */
   variant?: "primary" | "danger";
+  /** 두 버튼일 때 왼쪽에 놓이는 보조 버튼. label 이 있을 때만 쓴다. */
+  secondary?: FloatingBottomBarSecondaryAction;
   /** 커스텀 버튼 또는 입력창 등 내부 콘텐츠 직접 전달 시 */
   children?: ReactNode;
   /** 외부 컨테이너 추가 스타일 */
@@ -33,18 +37,36 @@ export interface FloatingBottomBarProps {
   testID?: string;
 }
 
+/**
+ * 상세·작성 화면 아래에 고정되는 주 버튼 자리.
+ * 안쪽 24/20/32(안전 영역이 더 크면 안전 영역), 바탕은 bg 그라데이션 + 흐림.
+ */
 export function FloatingBottomBar({
   label,
   onPress,
   loading = false,
   disabled = false,
   variant = "primary",
+  secondary,
   children,
   style,
   testID,
 }: FloatingBottomBarProps) {
   const insets = useSafeAreaInsets();
-  const bottomInset = Math.max(insets.bottom, 24);
+  const bottomInset = Math.max(insets.bottom, theme.spacing["8"]);
+
+  const primary = label ? (
+    <Button
+      disabled={disabled}
+      loading={loading}
+      onPress={onPress}
+      size="lg"
+      testID={testID}
+      variant={variant}
+    >
+      {label}
+    </Button>
+  ) : null;
 
   return (
     <View
@@ -52,50 +74,41 @@ export function FloatingBottomBar({
       style={[styles.container, { paddingBottom: bottomInset }, style]}
       testID={testID ? `${testID}-container` : undefined}
     >
+      <GlassBackdrop
+        intensity={12}
+        testID={`${testID ?? "floating-bottom-bar"}-glass`}
+        tintOpacity={0}
+      />
       <LinearGradient
         colors={[
           "rgba(246,247,249,0)",
-          "rgba(246,247,249,0.78)",
-          "rgba(246,247,249,0.96)",
+          "rgba(246,247,249,0.88)",
+          "rgba(246,247,249,1)",
         ]}
-        locations={[0, 0.38, 1]}
+        locations={[0, 0.3, 0.45]}
         pointerEvents="none"
         style={StyleSheet.absoluteFill}
         testID={testID ? `${testID}-gradient` : undefined}
       />
       {children ??
-        (label ? (
-          <MotionPressable
-            accessibilityRole="button"
-            accessibilityLabel={label}
-            accessibilityState={{
-              disabled: !!(disabled || loading),
-              busy: !!loading,
-            }}
-            disabled={disabled || loading}
-            onPress={onPress}
-            pressedScale={0.98}
-            style={[
-              styles.button,
-              variant === "danger" ? styles.buttonDanger : styles.buttonPrimary,
-              (disabled || loading) && styles.buttonDisabled,
-            ]}
-            testID={testID}
-          >
-            {loading ? (
-              <ActivityIndicator color={theme.colors.textMuted} size="small" />
-            ) : (
-              <Text
-                style={[
-                  styles.buttonText,
-                  disabled && !loading ? styles.buttonTextDisabled : null,
-                ]}
+        (secondary && primary ? (
+          <View style={styles.row}>
+            <View style={styles.rowItem}>
+              <Button
+                disabled={secondary.disabled}
+                onPress={secondary.onPress}
+                size="lg"
+                testID={secondary.testID}
+                variant="secondary"
               >
-                {label}
-              </Text>
-            )}
-          </MotionPressable>
-        ) : null)}
+                {secondary.label}
+              </Button>
+            </View>
+            <View style={styles.rowItem}>{primary}</View>
+          </View>
+        ) : (
+          primary
+        ))}
     </View>
   );
 }
@@ -107,30 +120,14 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     paddingHorizontal: theme.layout.screenX,
-    paddingTop: 24,
-    zIndex: 10,
+    paddingTop: theme.spacing["6"],
+    zIndex: theme.zIndex.header,
   },
-  button: {
-    height: theme.size.buttonHeight,
-    borderRadius: theme.radius.full,
-    alignItems: "center",
-    justifyContent: "center",
+  row: {
+    flexDirection: "row",
+    gap: theme.spacing["2"],
   },
-  buttonPrimary: {
-    backgroundColor: theme.colors.primary,
-  },
-  buttonDanger: {
-    backgroundColor: theme.colors.dangerBold,
-  },
-  buttonDisabled: {
-    backgroundColor: theme.colors.surfaceSubtle,
-  },
-  buttonText: {
-    ...theme.typography.body,
-    color: theme.colors.onPrimary,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  buttonTextDisabled: {
-    color: theme.colors.textDisabled,
+  rowItem: {
+    flex: 1,
   },
 });

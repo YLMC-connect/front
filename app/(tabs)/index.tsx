@@ -81,7 +81,7 @@ export default function HomeScreen() {
             <AppIcon
               name="chevron-right"
               size={16}
-              color={theme.colors.primaryDeep}
+              color={theme.colors.primaryStrong}
             />
           </MotionPressable>
         </View>
@@ -124,7 +124,7 @@ export default function HomeScreen() {
                     </AppText>
                   </View>
                   {sermonMeta?.date ? (
-                    <AppText variant="label" style={styles.cardDateText}>
+                    <AppText variant="caption" tone="muted">
                       {sermonMeta.date}
                     </AppText>
                   ) : null}
@@ -158,7 +158,7 @@ export default function HomeScreen() {
                   <AppText variant="heading" style={styles.dawnTitle}>
                     {sundaySermon.title}
                   </AppText>
-                  <AppText variant="body" tone="secondary">
+                  <AppText variant="label" tone="muted">
                     {sundaySermon.summary}
                   </AppText>
                 </View>
@@ -177,7 +177,7 @@ export default function HomeScreen() {
                   </AppText>
                 </View>
                 <AppText
-                  variant="label"
+                  variant="caption"
                   tone="inverse"
                   style={styles.dailyDateText}
                 >
@@ -221,7 +221,7 @@ export default function HomeScreen() {
                       </AppText>
                     </View>
                     {dawnMeta?.date ? (
-                      <AppText variant="label" style={styles.cardDateText}>
+                      <AppText variant="caption" tone="muted">
                         {dawnMeta.date}
                       </AppText>
                     ) : null}
@@ -232,7 +232,6 @@ export default function HomeScreen() {
                   {dawnPrayer.summary ? (
                     <AppText
                       variant="body"
-                      tone="secondary"
                       numberOfLines={2}
                       style={styles.dawnSummary}
                     >
@@ -240,13 +239,13 @@ export default function HomeScreen() {
                     </AppText>
                   ) : null}
                   <View style={styles.dawnAction}>
-                    <AppText variant="caption" tone="brand">
+                    <AppText variant="label" weight="semibold" tone="brand">
                       말씀요약 더 보기
                     </AppText>
                     <AppIcon
                       name="chevron-right"
                       size={18}
-                      color={theme.colors.primaryDeep}
+                      color={theme.colors.primaryStrong}
                     />
                   </View>
                 </View>
@@ -310,33 +309,27 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.layout.screenX,
     position: "relative",
     overflow: "hidden",
-    borderRadius: theme.radius.md,
+    // 디자인 시스템: 홈의 큰 카드는 radius-xl + primary 바탕.
+    borderRadius: theme.radius.xl,
     backgroundColor: theme.colors.primary,
-    paddingHorizontal: theme.spacing[5],
-    paddingVertical: theme.spacing[5] + 2,
-    ...theme.shadow.primary,
+    padding: theme.spacing[5],
   },
   dailyEyebrow: {
     marginBottom: theme.spacing[1],
     opacity: 0.92,
   },
   dailyTitle: {
-    fontSize: theme.fontSize.xl,
-    lineHeight: 26,
     marginTop: theme.spacing[1],
-    marginBottom: theme.spacing[2] + 2,
+    marginBottom: theme.spacing[2],
   },
   dailySummary: {
-    lineHeight: 22,
     opacity: 0.92,
   },
   dawnCard: {
     marginHorizontal: theme.layout.screenX,
     borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
-    overflow: "hidden",
+    ...theme.shadow.sm,
   },
   sermonContent: {
     padding: theme.spacing[4],
@@ -346,36 +339,33 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: 8,
-    marginBottom: theme.spacing[2] + 2,
+    marginBottom: theme.spacing[3],
   },
   categoryBadge: {
+    minHeight: theme.size.badgeHeight,
+    justifyContent: "center",
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: theme.spacing[1],
     borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primaryTint,
+    backgroundColor: theme.colors.infoSubtle,
   },
   categoryBadgeText: {
-    fontWeight: theme.fontWeight.bold,
-    color: theme.colors.primaryDeep,
-  },
-  cardDateText: {
-    fontSize: theme.fontSize.md,
     fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.inkSoft,
+    color: theme.colors.infoText,
   },
   dailyCategoryBadge: {
+    minHeight: theme.size.badgeHeight,
+    justifyContent: "center",
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: theme.spacing[1],
     borderRadius: theme.radius.full,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
   dailyCategoryBadgeText: {
-    fontWeight: theme.fontWeight.bold,
+    fontWeight: theme.fontWeight.semibold,
   },
   dailyDateText: {
-    fontSize: theme.fontSize.md,
-    fontWeight: theme.fontWeight.semibold,
-    opacity: 0.96,
+    opacity: 0.92,
   },
   dawnTitle: {
     marginBottom: theme.spacing[2],
@@ -404,7 +394,7 @@ const styles = StyleSheet.create({
     aspectRatio: 16 / 9,
     borderRadius: theme.radius.md,
     overflow: "hidden",
-    backgroundColor: theme.colors.surfaceMuted,
+    backgroundColor: theme.colors.surfaceSubtle,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -430,10 +420,9 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#FF3B30",
+    backgroundColor: theme.colors.dangerIcon,
   },
   sermonYoutubeBadgeText: {
-    fontSize: 11,
     fontWeight: theme.fontWeight.semibold,
   },
 });

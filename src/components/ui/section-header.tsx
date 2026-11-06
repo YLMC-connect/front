@@ -26,7 +26,7 @@ export function SectionHeader({
           style={styles.viewAll}
           testID={testID ? `${testID}-view-all` : undefined}
         >
-          <AppText variant="caption" tone="brand">
+          <AppText variant="label" weight="semibold" tone="brand">
             전체보기
           </AppText>
           <AppIcon

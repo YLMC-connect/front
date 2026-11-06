@@ -23,20 +23,20 @@ describe("SearchField", () => {
       outlineWidth: 0,
     });
     expect(StyleSheet.flatten(container.props.style)).toMatchObject({
-      borderColor: theme.colors.lineStrong,
-      borderRadius: theme.radius.md,
+      borderColor: theme.colors.borderStrong,
+      borderRadius: theme.radius.sm,
     });
 
     fireEvent(input, "focus");
     expect(StyleSheet.flatten(container.props.style)).toMatchObject({
       borderColor: theme.colors.primary,
       borderWidth: 2,
-      paddingHorizontal: 13,
+      paddingHorizontal: theme.spacing["4"] - 1,
     });
 
     fireEvent(input, "blur");
     expect(StyleSheet.flatten(container.props.style)).toMatchObject({
-      borderColor: theme.colors.lineStrong,
+      borderColor: theme.colors.borderStrong,
     });
   });
 });

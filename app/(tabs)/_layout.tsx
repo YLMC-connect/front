@@ -277,8 +277,8 @@ function VisibleTabBar({
           <GlassBackdrop
             blurTarget={blurTarget ?? undefined}
             testID="tab-bar"
-            tintColor={theme.colors.white}
-            tintOpacity={0.56}
+            tintColor={theme.colors.bg}
+            tintOpacity={0.88}
           />
           <Animated.View
             pointerEvents="none"
@@ -345,7 +345,7 @@ function AppTabButton({
   const reduceMotion = useReducedMotion();
   const iconScale = useSharedValue(1);
   const didMount = useRef(false);
-  const color = focused ? theme.colors.white : theme.colors.inkMute;
+  const color = focused ? theme.colors.primaryStrong : theme.colors.textMuted;
 
   useEffect(() => {
     if (!didMount.current) {
@@ -397,6 +397,7 @@ function AppTabButton({
         style={[
           styles.tabLabel,
           { color },
+          focused ? styles.tabLabelFocused : null,
           label.length >= 3 ? styles.tabLabelCompact : null,
         ]}
       >
@@ -420,14 +421,14 @@ const styles = StyleSheet.create({
     left: 14,
     right: 14,
     bottom: 14,
-    borderRadius: 999,
-    ...theme.shadow.float,
+    borderRadius: theme.size.tabbarHeight / 2,
+    ...theme.shadow.md,
   },
   tabSurface: {
-    minHeight: 64,
-    borderRadius: 999,
+    minHeight: theme.size.tabbarHeight,
+    borderRadius: theme.size.tabbarHeight / 2,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.9)",
+    borderColor: theme.colors.border,
     paddingHorizontal: 6,
     paddingVertical: 7,
     flexDirection: "row",
@@ -449,17 +450,15 @@ const styles = StyleSheet.create({
     left: 0,
     top: 7,
     bottom: 7,
-    borderRadius: 999,
-    backgroundColor: theme.colors.primary,
-    shadowColor: "rgba(62, 104, 200, 0.74)",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.16,
-    shadowRadius: 12,
-    elevation: 3,
+    borderRadius: theme.radius.full,
+    backgroundColor: theme.colors.primarySubtle,
   },
   tabLabel: {
     fontSize: theme.typography.caption.fontSize,
-    fontWeight: "700",
+    fontWeight: theme.fontWeight.medium,
+  },
+  tabLabelFocused: {
+    fontWeight: theme.fontWeight.bold,
   },
   tabLabelCompact: {
     letterSpacing: -0.3,

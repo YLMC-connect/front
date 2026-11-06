@@ -44,7 +44,7 @@ export function TextField({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={theme.colors.inkMute}
+        placeholderTextColor={theme.colors.textMuted}
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         style={[
@@ -79,7 +79,7 @@ export function Textarea({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={theme.colors.inkMute}
+        placeholderTextColor={theme.colors.textMuted}
         style={[
           styles.input,
           styles.textarea,
@@ -202,24 +202,22 @@ export function FormSection({
 const styles = StyleSheet.create({
   field: { gap: 6 },
   fieldLabel: {
-    color: theme.colors.inkSoft,
-    fontWeight: theme.typography.label.fontWeight,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
+    ...theme.typography.label,
+    color: theme.colors.text,
   },
   input: {
-    minHeight: 48,
-    borderRadius: theme.radius.md,
+    minHeight: theme.size.inputHeight,
+    borderRadius: theme.radius.sm,
     borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface2,
-    paddingHorizontal: 16,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.lg,
+    borderColor: theme.colors.borderStrong,
+    backgroundColor: theme.colors.surface,
+    paddingHorizontal: theme.spacing["4"],
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
   },
-  textarea: { minHeight: 120, paddingTop: 14 },
-  inputError: { borderColor: theme.colors.danger, backgroundColor: "#FDF4F1" },
-  errorText: { color: theme.colors.danger, fontSize: 12 },
+  textarea: { minHeight: 132, paddingTop: theme.spacing["3"] },
+  inputError: { borderColor: theme.colors.dangerText },
+  errorText: { ...theme.typography.caption, color: theme.colors.dangerText },
   imagePickerWrap: { gap: 10 },
   imagePicker: {
     minHeight: 104,

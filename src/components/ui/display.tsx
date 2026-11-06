@@ -308,25 +308,27 @@ const styles = StyleSheet.create({
   },
   coverLabelText: { fontSize: 13, fontWeight: "800" },
   chip: {
-    minHeight: 34,
-    paddingHorizontal: 12,
+    minHeight: theme.size.chipHeight,
+    paddingHorizontal: 14,
     borderRadius: theme.radius.full,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: theme.colors.surface,
   },
   chipSelected: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primarySubtle,
+    borderColor: theme.colors.primarySubtle,
   },
   chipText: {
-    color: theme.colors.inkSoft,
-    fontWeight: theme.fontWeight.semibold,
-    fontSize: theme.fontSize.sm,
+    ...theme.typography.caption,
+    color: theme.colors.textMuted,
   },
-  chipTextSelected: { color: theme.colors.white },
+  chipTextSelected: {
+    color: theme.colors.primaryStrong,
+    fontWeight: theme.fontWeight.semibold,
+  },
 });
 
 /**

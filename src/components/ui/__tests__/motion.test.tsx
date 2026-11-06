@@ -161,7 +161,7 @@ describe("common motion", () => {
     expect(
       StyleSheet.flatten(screen.getByText("나눔중").props.style),
     ).toMatchObject({
-      lineHeight: 18,
+      lineHeight: theme.typography.label.lineHeight,
     });
     fireEvent.press(screen.getByTestId("status-sharing"));
     expect(onChange).not.toHaveBeenCalled();
@@ -254,13 +254,19 @@ describe("common motion", () => {
     ).not.toHaveProperty("paddingHorizontal");
     expect(
       StyleSheet.flatten(screen.getByTestId("category-indicator").props.style),
-    ).toMatchObject({ height: 36, borderRadius: theme.radius.full });
+    ).toMatchObject({
+      height: theme.size.chipHeight,
+      borderRadius: theme.radius.full,
+    });
     expect(
       StyleSheet.flatten(screen.getByTestId("category-all").props.style),
-    ).toMatchObject({ height: 36, borderRadius: theme.radius.full });
+    ).toMatchObject({
+      height: theme.size.chipHeight,
+      borderRadius: theme.radius.full,
+    });
     expect(screen.getByTestId("category-all").props.hitSlop).toEqual({
-      top: 4,
-      bottom: 4,
+      top: 6,
+      bottom: 6,
     });
     fireEvent.press(screen.getByTestId("category-all"));
     expect(onChange).not.toHaveBeenCalled();

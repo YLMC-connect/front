@@ -87,7 +87,8 @@ export function TermsAgreementScreen({
           </Text>
 
           <Pressable
-            accessibilityRole="button"
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: allOn }}
             onPress={toggleAll}
             style={[styles.allRow, allOn ? styles.allRowOn : null]}
           >
@@ -108,18 +109,10 @@ export function TermsAgreementScreen({
                       [term.key]: !current[term.key],
                     }))
                   }
+                  hitSlop={{ top: 12, bottom: 12 }}
+                  style={styles.rowCheck}
                 >
                   <CheckCircle on={agreed[term.key]} />
-                </Pressable>
-                <Pressable
-                  onPress={() =>
-                    setAgreed((current) => ({
-                      ...current,
-                      [term.key]: !current[term.key],
-                    }))
-                  }
-                  style={styles.rowLabelWrap}
-                >
                   <Text style={styles.rowLabel}>
                     <Text
                       style={term.required ? styles.required : styles.optional}
@@ -131,6 +124,8 @@ export function TermsAgreementScreen({
                 </Pressable>
                 <Pressable
                   accessibilityRole="button"
+                  accessibilityLabel={`${term.label} 전문 보기`}
+                  hitSlop={{ top: 14, bottom: 14 }}
                   onPress={() => {
                     Keyboard.dismiss();
                     setSheet(term.key);
@@ -346,10 +341,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
-  rowLabelWrap: {
+  rowCheck: {
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
   },
   rowLabel: {
+    flexShrink: 1,
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
     lineHeight: theme.typography.label.lineHeight,

@@ -17,6 +17,7 @@ import Animated, {
   Easing,
   FadeInDown,
   LinearTransition,
+  useReducedMotion,
 } from "react-native-reanimated";
 import {
   type TermKey,
@@ -64,7 +65,8 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const animateLayout = () => {
+const animateLayout = (reduceMotion: boolean) => {
+  if (reduceMotion) return;
   try {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   } catch {
@@ -82,6 +84,7 @@ export default function SignupScreen() {
   const isPhoneError = variant === "phone-error";
   const isPhoneDup = variant === "phone-dup";
   const isLoading = variant === "loading";
+  const reduceMotion = useReducedMotion();
 
   const scrollRef = useRef<ScrollView>(null);
   const idInputRef = useRef<TextInput>(null);
@@ -410,14 +413,14 @@ export default function SignupScreen() {
       unlockedStep < 3
     ) {
       const timer = setTimeout(() => {
-        animateLayout();
+        animateLayout(reduceMotion);
         setUnlockedStep(3);
         Keyboard.dismiss();
-        scrollRef.current?.scrollTo({ y: 0, animated: true });
+        scrollRef.current?.scrollTo({ y: 0, animated: !reduceMotion });
       }, 80);
       return () => clearTimeout(timer);
     }
-  }, [unlockedStep, isCard2Complete, currentEmailAvailability]);
+  }, [unlockedStep, isCard2Complete, currentEmailAvailability, reduceMotion]);
 
   return (
     <Screen scroll={false} padded={false}>
@@ -480,6 +483,7 @@ export default function SignupScreen() {
 
                   <Pressable
                     testID="signup-terms-all"
+                    hitSlop={{ top: 7, bottom: 7 }}
                     accessibilityRole="checkbox"
                     accessibilityState={{ checked: allTermsAgreed }}
                     onPress={toggleAllTerms}
@@ -512,6 +516,8 @@ export default function SignupScreen() {
                         </Text>
                       </Pressable>
                       <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel="서비스 이용약관 보기"
                         onPress={() => openTermsSheet("tos")}
                         style={styles.termsDetailButton}
                       >
@@ -543,6 +549,8 @@ export default function SignupScreen() {
                         </Text>
                       </Pressable>
                       <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel="개인정보 처리방침 보기"
                         onPress={() => openTermsSheet("privacy")}
                         style={styles.termsDetailButton}
                       >
@@ -667,11 +675,11 @@ export default function SignupScreen() {
                           emailInputRef.current?.blur();
                           onEmailBlur();
                           if (isCard2Complete) {
-                            animateLayout();
+                            animateLayout(reduceMotion);
                             setUnlockedStep((prev) => Math.max(prev, 3));
                             scrollRef.current?.scrollTo({
                               y: 0,
-                              animated: true,
+                              animated: !reduceMotion,
                             });
                           }
                         }}
@@ -698,7 +706,11 @@ export default function SignupScreen() {
 
                     {/* Realtime email criteria feedback */}
                     <View style={styles.passwordRulesRow}>
-                      <View style={styles.ruleItem}>
+                      <View
+                        accessible
+                        accessibilityLabel={`이메일 형식 ${hasValidEmailFormat ? "충족" : "미충족"}`}
+                        style={styles.ruleItem}
+                      >
                         <AppIcon
                           name={hasValidEmailFormat ? "check" : "circle"}
                           size={12}
@@ -717,7 +729,11 @@ export default function SignupScreen() {
                           이메일 형식
                         </Text>
                       </View>
-                      <View style={styles.ruleItem}>
+                      <View
+                        accessible
+                        accessibilityLabel={`중복 확인 ${isEmailChecked ? "완료" : "미완료"}`}
+                        style={styles.ruleItem}
+                      >
                         <AppIcon
                           name={isEmailChecked ? "check" : "circle"}
                           size={12}
@@ -867,16 +883,22 @@ export default function SignupScreen() {
                       returnKeyType="next"
                       onBlur={() => {
                         if (isCard1Complete && unlockedStep < 2) {
-                          animateLayout();
+                          animateLayout(reduceMotion);
                           setUnlockedStep(2);
-                          scrollRef.current?.scrollTo({ y: 0, animated: true });
+                          scrollRef.current?.scrollTo({
+                            y: 0,
+                            animated: !reduceMotion,
+                          });
                         }
                       }}
                       onSubmitEditing={() => {
                         if (isCard1Complete) {
-                          animateLayout();
+                          animateLayout(reduceMotion);
                           setUnlockedStep((prev) => Math.max(prev, 2));
-                          scrollRef.current?.scrollTo({ y: 0, animated: true });
+                          scrollRef.current?.scrollTo({
+                            y: 0,
+                            animated: !reduceMotion,
+                          });
                           setTimeout(() => nameInputRef.current?.focus(), 250);
                         } else if (nameInputRef.current) {
                           nameInputRef.current.focus();

@@ -8,7 +8,7 @@ import { join, relative } from "path";
  */
 const ALLOWED: Record<string, { count: number; reason: string }> = {
   "app/(auth)/splash.tsx": {
-    count: 5,
+    count: 4,
     reason: "primary 바탕 위 반투명 흰 장식",
   },
   "app/(tabs)/_layout.tsx": { count: 2, reason: "탭바 뒤 흰 그라데이션 띠" },

@@ -248,7 +248,7 @@ export default function EditProfileScreen() {
             style={{ flexGrow: 1 }}
           >
             <View style={styles.profileCard}>
-              <Avatar name={memberName} size={48} seed={memberName} />
+              <Avatar name={memberName} size={56} seed={memberName} />
               <View style={styles.profileText}>
                 <Text style={styles.readonlyLabel}>이름</Text>
                 <Text style={styles.name}>{memberName}</Text>

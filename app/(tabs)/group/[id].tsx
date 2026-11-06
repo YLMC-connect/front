@@ -13,6 +13,8 @@ import { Screen } from "../../../src/components/layout/Screen";
 import {
   Avatar,
   AppText,
+  Badge,
+  Button,
   Card,
   ConfirmDialog,
   DetailAction,
@@ -138,9 +140,7 @@ export default function GroupDetailScreen() {
         >
           <View style={styles.header}>
             <View style={styles.chips}>
-              <View style={styles.categoryChip}>
-                <Text style={styles.categoryText}>{group.categoryLabel}</Text>
-              </View>
+              <Badge tone="neutral">{group.categoryLabel}</Badge>
               {isLeader ? (
                 <Pressable
                   accessibilityRole="button"
@@ -150,36 +150,15 @@ export default function GroupDetailScreen() {
                   onPress={() => {
                     updateStatusMutation.mutate(isClosed ? "open" : "closed");
                   }}
-                  style={[
-                    styles.recruitChip,
-                    isClosed ? styles.recruitChipClosed : null,
-                  ]}
                 >
-                  <Text
-                    style={[
-                      styles.recruitText,
-                      isClosed ? styles.recruitTextClosed : null,
-                    ]}
-                  >
+                  <Badge tone={isClosed ? "neutral" : "info"}>
                     {isClosed ? "모집완료" : "모집중"}
-                  </Text>
+                  </Badge>
                 </Pressable>
               ) : (
-                <View
-                  style={[
-                    styles.recruitChip,
-                    isClosed ? styles.recruitChipClosed : null,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.recruitText,
-                      isClosed ? styles.recruitTextClosed : null,
-                    ]}
-                  >
-                    {isClosed ? "모집완료" : "모집중"}
-                  </Text>
-                </View>
+                <Badge tone={isClosed ? "neutral" : "info"}>
+                  {isClosed ? "모집완료" : "모집중"}
+                </Badge>
               )}
             </View>
 
@@ -203,9 +182,7 @@ export default function GroupDetailScreen() {
                 <Text style={styles.leaderLabel}>소모임장</Text>
                 <Text style={styles.leaderName}>{leaderName}</Text>
               </View>
-              <View style={styles.leaderBadge}>
-                <Text style={styles.leaderBadgeText}>소모임장</Text>
-              </View>
+              <Badge tone="info">소모임장</Badge>
             </View>
           </View>
 
@@ -246,45 +223,35 @@ export default function GroupDetailScreen() {
                 />
               </Card>
             ) : isMember ? (
-              <Pressable
+              <Button
                 testID="group-leave-button"
-                accessibilityRole="button"
+                variant="outline"
+                size="lg"
                 accessibilityLabel="탈퇴하기"
                 disabled={membershipBusy}
-                style={styles.outlineButton}
                 onPress={() => {
                   if (variant) return;
                   setShowLeaveConfirm(true);
                 }}
               >
-                <Text style={styles.outlineButtonText}>탈퇴하기</Text>
-              </Pressable>
+                탈퇴하기
+              </Button>
             ) : isNonMember ? (
-              <Pressable
+              <Button
                 testID="group-join-button"
-                accessibilityRole="button"
+                size="lg"
                 accessibilityLabel={
                   isClosed ? "모집이 마감됐어요" : "참여 신청하기"
                 }
-                disabled={isClosed || membershipBusy}
-                style={[
-                  styles.primaryButton,
-                  isClosed ? styles.primaryButtonOff : null,
-                ]}
+                disabled={isClosed}
+                loading={membershipBusy}
                 onPress={() => {
                   if (variant || isClosed) return;
                   joinGroupMutation.mutate();
                 }}
               >
-                <Text
-                  style={[
-                    styles.primaryButtonText,
-                    isClosed ? styles.primaryButtonTextOff : null,
-                  ]}
-                >
-                  {isClosed ? "모집이 마감됐어요" : "참여 신청하기"}
-                </Text>
-              </Pressable>
+                {isClosed ? "모집이 마감됐어요" : "참여 신청하기"}
+              </Button>
             ) : null}
           </View>
 
@@ -473,34 +440,6 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 12,
   },
-  categoryChip: {
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primarySubtle,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  categoryText: {
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  recruitChip: {
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primarySubtle,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  recruitChipClosed: {
-    backgroundColor: theme.colors.surfaceSubtle,
-  },
-  recruitText: {
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  recruitTextClosed: {
-    color: theme.colors.textMuted,
-  },
   memberMeta: {
     marginTop: 10,
     flexDirection: "row",
@@ -539,17 +478,6 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
-  leaderBadge: {
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  leaderBadgeText: {
-    color: theme.colors.onPrimary,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
   actionWrap: {
     paddingHorizontal: 16,
     paddingBottom: 22,
@@ -557,37 +485,6 @@ const styles = StyleSheet.create({
   actionCard: {
     flexDirection: "row",
     padding: 4,
-  },
-  outlineButton: {
-    minHeight: 52,
-    borderRadius: theme.radius.full,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  outlineButtonText: {
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  primaryButton: {
-    minHeight: 52,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  primaryButtonOff: {
-    backgroundColor: theme.colors.surfaceSubtle,
-  },
-  primaryButtonText: {
-    color: theme.colors.onPrimary,
-    fontSize: theme.typography.body.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  primaryButtonTextOff: {
-    color: theme.colors.textDisabled,
   },
   sectionTitleWrap: {
     paddingHorizontal: 22,

@@ -1,4 +1,6 @@
 import { AppIcon } from "@/components/ui/app-icon";
+import { InfoBox } from "@/components/ui/info-box";
+import { InputErrorText } from "@/components/ui/inputs";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
@@ -15,6 +17,7 @@ import {
 import {
   AppText,
   ConfirmDialog,
+  FilterChips,
   FloatingBottomBar,
   ModalFormSection as Section,
   ModalFormTextInput as FormInput,
@@ -37,6 +40,10 @@ const categories = GROUP_CATEGORIES.slice(1) as readonly {
 }[];
 
 const CAPACITY_PRESETS = [4, 8, 12, 20] as const;
+const CAPACITY_PRESET_ITEMS = CAPACITY_PRESETS.map((preset) => ({
+  key: String(preset),
+  label: `${preset}명`,
+}));
 const SCHEDULE_PRESETS = [
   "매주 토요일",
   "매주 주일",
@@ -44,6 +51,14 @@ const SCHEDULE_PRESETS = [
   "평일 저녁",
 ] as const;
 const LOCATION_PRESETS = ["교회", "온라인 (Zoom)", "외부 모임"] as const;
+const SCHEDULE_PRESET_ITEMS = SCHEDULE_PRESETS.map((schedule) => ({
+  key: schedule,
+  label: schedule,
+}));
+const LOCATION_PRESET_ITEMS = LOCATION_PRESETS.map((location) => ({
+  key: location,
+  label: location,
+}));
 
 const filledValues: GroupInput = {
   category: "sport",
@@ -180,7 +195,7 @@ export default function GroupNewModal() {
     >
       <TopBar
         title={isEdit ? "소모임 수정" : "소모임 개설"}
-        back
+        close
         onBack={close}
         testID="group-form-header"
       />
@@ -192,17 +207,10 @@ export default function GroupNewModal() {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View>
-            <View style={styles.infoBox}>
-              <AppIcon
-                name="info"
-                size={16}
-                color={theme.colors.primaryStrong}
-              />
-              <Text style={styles.infoText}>
-                비슷한 목적의 소모임이 이미 있다면 기존 소모임 참여를 먼저
-                고려해주세요.
-              </Text>
-            </View>
+            <InfoBox
+              description="비슷한 목적의 소모임이 이미 있다면 기존 소모임 참여를 먼저 고려해주세요."
+              style={styles.infoBox}
+            />
 
             {/* 그룹 1: 기본 정보 */}
             <View style={styles.groupHeader}>
@@ -219,29 +227,13 @@ export default function GroupNewModal() {
             </View>
 
             <Section label="카테고리" required>
-              <View style={styles.chips}>
-                {categories.map((category) => {
-                  const selected = values.category === category.key;
-                  return (
-                    <Pressable
-                      key={category.key}
-                      accessibilityRole="radio"
-                      accessibilityState={{ selected }}
-                      onPress={() => update("category", category.key)}
-                      style={[styles.chip, selected ? styles.chipOn : null]}
-                    >
-                      <Text
-                        style={[
-                          styles.chipText,
-                          selected ? styles.chipTextOn : null,
-                        ]}
-                      >
-                        {category.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
+              <FilterChips
+                items={categories}
+                active={values.category}
+                onChange={(category) => update("category", category)}
+                style={styles.chipScroll}
+                testIDPrefix="group-form-category"
+              />
             </Section>
 
             <Section
@@ -292,7 +284,7 @@ export default function GroupNewModal() {
               </AppText>
             </View>
 
-            <Section label="최대인원" required>
+            <Section label="최대인원" required hint="2~100명">
               <View style={styles.capacityStepperRow}>
                 <Pressable
                   accessibilityRole="button"
@@ -352,47 +344,25 @@ export default function GroupNewModal() {
                 </Pressable>
               </View>
 
-              <View style={styles.quickPresetRow}>
-                {CAPACITY_PRESETS.map((preset) => (
-                  <Pressable
-                    key={preset}
-                    accessibilityRole="button"
-                    accessibilityState={{
-                      selected: values.maxMembers === preset,
-                    }}
-                    hitSlop={{ top: 6, bottom: 6 }}
-                    onPress={() => setCapacityPreset(preset)}
-                    style={[
-                      styles.quickPresetChip,
-                      values.maxMembers === preset
-                        ? styles.quickPresetChipActive
-                        : null,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.quickPresetText,
-                        values.maxMembers === preset
-                          ? styles.quickPresetTextActive
-                          : null,
-                      ]}
-                    >
-                      {preset}명
-                    </Text>
-                  </Pressable>
-                ))}
-                <Text style={styles.capacityHint}>2~100명</Text>
-              </View>
+              <FilterChips
+                items={CAPACITY_PRESET_ITEMS}
+                active={String(values.maxMembers)}
+                onChange={(preset) => setCapacityPreset(Number(preset))}
+                style={styles.quickPresetScroll}
+                testIDPrefix="group-form-capacity"
+              />
 
               {variant === "range-error" ? (
-                <Text style={styles.inlineError}>
-                  2~100명 사이로 입력해주세요
-                </Text>
+                <View style={styles.inlineError}>
+                  <InputErrorText>2~100명 사이로 입력해주세요</InputErrorText>
+                </View>
               ) : null}
               {variant === "member-error" ? (
-                <Text style={styles.inlineError}>
-                  현재 멤버수(18명)보다 적게 설정할 수 없습니다
-                </Text>
+                <View style={styles.inlineError}>
+                  <InputErrorText>
+                    현재 멤버수(18명)보다 적게 설정할 수 없습니다
+                  </InputErrorText>
+                </View>
               ) : null}
             </Section>
 
@@ -403,36 +373,13 @@ export default function GroupNewModal() {
                 onChangeText={(schedule) => update("schedule", schedule)}
                 placeholder="예: 매주 토요일 오전 10시"
               />
-              <View style={styles.quickPresetRow}>
-                {SCHEDULE_PRESETS.map((schedule) => (
-                  <Pressable
-                    key={schedule}
-                    accessibilityRole="button"
-                    accessibilityState={{
-                      selected: values.schedule === schedule,
-                    }}
-                    hitSlop={{ top: 6, bottom: 6 }}
-                    onPress={() => update("schedule", schedule)}
-                    style={[
-                      styles.quickPresetChip,
-                      values.schedule === schedule
-                        ? styles.quickPresetChipActive
-                        : null,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.quickPresetText,
-                        values.schedule === schedule
-                          ? styles.quickPresetTextActive
-                          : null,
-                      ]}
-                    >
-                      {schedule}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
+              <FilterChips
+                items={SCHEDULE_PRESET_ITEMS}
+                active={values.schedule}
+                onChange={(schedule) => update("schedule", schedule)}
+                style={styles.quickPresetScroll}
+                testIDPrefix="group-form-schedule"
+              />
             </Section>
 
             <Section label="모임 장소" required>
@@ -442,36 +389,13 @@ export default function GroupNewModal() {
                 onChangeText={(location) => update("location", location)}
                 placeholder="예: 교육관 2층"
               />
-              <View style={styles.quickPresetRow}>
-                {LOCATION_PRESETS.map((location) => (
-                  <Pressable
-                    key={location}
-                    accessibilityRole="button"
-                    accessibilityState={{
-                      selected: values.location === location,
-                    }}
-                    hitSlop={{ top: 6, bottom: 6 }}
-                    onPress={() => update("location", location)}
-                    style={[
-                      styles.quickPresetChip,
-                      values.location === location
-                        ? styles.quickPresetChipActive
-                        : null,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.quickPresetText,
-                        values.location === location
-                          ? styles.quickPresetTextActive
-                          : null,
-                      ]}
-                    >
-                      {location}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
+              <FilterChips
+                items={LOCATION_PRESET_ITEMS}
+                active={values.location}
+                onChange={(location) => update("location", location)}
+                style={styles.quickPresetScroll}
+                testIDPrefix="group-form-location"
+              />
             </Section>
 
             {error ? (
@@ -511,34 +435,6 @@ const styles = StyleSheet.create({
     paddingTop: theme.layout.screenX,
   },
   body: { paddingBottom: 112 },
-  chips: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    paddingHorizontal: theme.layout.screenX,
-  },
-  chip: {
-    minHeight: 44,
-    justifyContent: "center",
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surface,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    paddingHorizontal: 12,
-  },
-  chipOn: {
-    backgroundColor: theme.colors.primarySubtle,
-    borderColor: theme.colors.primary,
-  },
-  chipText: {
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  chipTextOn: {
-    color: theme.colors.primaryStrong,
-    fontWeight: theme.fontWeight.semibold,
-  },
   capacityRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -569,35 +465,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
   },
-  quickPresetRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: theme.layout.screenX,
-    marginTop: 10,
-  },
-  quickPresetChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surface,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  quickPresetChipActive: {
-    backgroundColor: theme.colors.primarySubtle,
-    borderColor: theme.colors.primary,
-  },
-  quickPresetText: {
-    fontSize: theme.typography.caption.fontSize,
-    color: theme.colors.text,
-    fontWeight: theme.fontWeight.medium,
-  },
-  quickPresetTextActive: {
-    color: theme.colors.primaryStrong,
-    fontWeight: theme.fontWeight.bold,
-  },
   capacityInput: {
     width: 100,
     height: 48,
@@ -608,16 +475,9 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     fontSize: theme.typography.label.fontSize,
   },
-  capacityHint: {
-    marginLeft: "auto",
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-  },
   inlineError: {
     marginHorizontal: theme.layout.screenX,
     marginTop: 8,
-    color: theme.colors.dangerText,
-    fontSize: theme.typography.caption.fontSize,
   },
   groupHeader: {
     paddingHorizontal: 22,
@@ -632,18 +492,13 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.layout.screenX,
     marginTop: 10,
     marginBottom: 8,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primarySubtle,
-    flexDirection: "row",
-    gap: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
   },
-  infoText: {
-    flex: 1,
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
+  chipScroll: {
+    flexGrow: 0,
+  },
+  quickPresetScroll: {
+    flexGrow: 0,
+    marginTop: theme.spacing[1],
   },
   errorText: {
     marginHorizontal: theme.layout.screenX,

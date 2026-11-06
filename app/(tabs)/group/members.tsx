@@ -1,4 +1,7 @@
 import { AppIcon } from "@/components/ui/app-icon";
+import { Radio } from "@/components/ui/checkbox";
+import { InfoBox } from "@/components/ui/info-box";
+import { PersonRow } from "@/components/ui/list-row";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -11,7 +14,7 @@ import {
 } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
-  Avatar,
+  Badge,
   ConfirmDialog,
   ErrorState,
   FloatingBottomBar,
@@ -88,16 +91,11 @@ export default function GroupMembersScreenRoute() {
           ) : membersQuery.isError ? (
             <ErrorState message="멤버 정보를 다시 불러와주세요." />
           ) : isTransfer ? (
-            <View style={styles.warningBox}>
-              <AppIcon
-                name="warning-amber"
-                size={16}
-                color={theme.colors.dangerText}
-              />
-              <Text style={styles.warningText}>
-                이관 후에는 일반 멤버로 변경되며 권한이 즉시 사라집니다.
-              </Text>
-            </View>
+            <InfoBox
+              tone="warning"
+              description="이관 후에는 일반 멤버로 변경되며 권한이 즉시 사라집니다."
+              style={styles.warningBox}
+            />
           ) : (
             <Text style={styles.total}>전체 {members.length}명</Text>
           )}
@@ -239,30 +237,10 @@ function MemberRow({
   onSelect?: () => void;
 }) {
   const candidate = transfer && !member.isLeader;
-
-  const content = (
-    <View
-      style={[
-        styles.row,
-        !last ? styles.rowBorder : null,
-        transfer && member.isLeader ? styles.rowDisabled : null,
-        selected ? styles.rowSelected : null,
-      ]}
-    >
-      {candidate ? <RadioMark selected={selected} /> : null}
-      <Avatar name={member.userName} seed={member.userName} size={42} />
-      <View style={styles.memberText}>
-        <View style={styles.nameRow}>
-          <Text style={styles.name}>{member.userName}</Text>
-          {member.isMine ? <Text style={styles.me}>(나)</Text> : null}
-          {member.isLeader ? (
-            <View style={styles.leaderBadge}>
-              <Text style={styles.leaderText}>소모임장</Text>
-            </View>
-          ) : null}
-        </View>
-        <Text style={styles.joined}>{member.joinedLabel} 가입</Text>
-      </View>
+  const trailing = (
+    <View style={styles.trailing}>
+      {member.isMine ? <Badge tone="neutral">나</Badge> : null}
+      {member.isLeader ? <Badge tone="info">소모임장</Badge> : null}
       {!transfer && !member.isLeader ? (
         <Pressable
           accessibilityRole="button"
@@ -279,26 +257,38 @@ function MemberRow({
   );
 
   if (candidate && onSelect) {
+    // 소모임장 이관 후보: 줄 전체가 작은 라디오(디자인 시스템 Checkbox radio).
     return (
-      <Pressable
-        accessibilityRole="radio"
-        accessibilityState={{ selected }}
+      <Radio
+        checked={selected}
+        onChange={onSelect}
+        accessibilityLabel={member.userName}
         testID={`member-transfer-${member.userId}`}
-        onPress={onSelect}
-      >
-        {content}
-      </Pressable>
+        style={[styles.radioRow, !last ? styles.rowBorder : null]}
+        label={
+          <PersonRow
+            name={member.userName}
+            avatarSeed={member.userName}
+            subtitle={`${member.joinedLabel} 가입`}
+            trailing={trailing}
+            divider={false}
+            style={styles.radioPerson}
+          />
+        }
+      />
     );
   }
 
-  return content;
-}
-
-function RadioMark({ selected }: { selected: boolean }) {
   return (
-    <View style={[styles.radio, selected ? styles.radioSelected : null]}>
-      {selected ? <View style={styles.radioDot} /> : null}
-    </View>
+    <PersonRow
+      name={member.userName}
+      avatarSeed={member.userName}
+      subtitle={`${member.joinedLabel} 가입`}
+      trailing={trailing}
+      divider={!last}
+      // 이관 화면의 현재 소모임장은 고를 수 없어 흐리게 둔다(opacity-disabled).
+      style={transfer && member.isLeader ? styles.rowDisabled : null}
+    />
   );
 }
 
@@ -317,22 +307,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   warningBox: {
-    marginHorizontal: 18,
+    marginHorizontal: theme.layout.screenX,
     marginTop: 4,
     marginBottom: 14,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.warningSubtle,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 10,
-  },
-  warningText: {
-    flex: 1,
-    color: theme.colors.warningText,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
   },
   total: {
     paddingHorizontal: 22,
@@ -342,79 +319,23 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
-  row: {
-    minHeight: 70,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 22,
-    paddingVertical: 14,
-  },
   rowBorder: {
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
   },
   rowDisabled: {
-    opacity: 0.4,
+    opacity: theme.opacity.disabled,
   },
-  rowSelected: {
-    backgroundColor: theme.colors.primarySubtle,
+  radioRow: {
+    paddingHorizontal: theme.layout.screenX,
   },
-  radio: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1.5,
-    borderColor: theme.colors.borderStrong,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
+  radioPerson: {
+    paddingHorizontal: 0,
   },
-  radioSelected: {
-    borderWidth: 0,
-    backgroundColor: theme.colors.primary,
-  },
-  radioDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: theme.colors.surface,
-  },
-  memberText: {
-    flex: 1,
-    minWidth: 0,
-  },
-  nameRow: {
+  trailing: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    flexWrap: "wrap",
-  },
-  name: {
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  me: {
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  leaderBadge: {
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  leaderText: {
-    color: theme.colors.onPrimary,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  joined: {
-    marginTop: 2,
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
+    gap: theme.spacing[2],
   },
   kickButton: {
     minHeight: 32,

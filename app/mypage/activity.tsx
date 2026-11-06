@@ -178,7 +178,7 @@ function CommentRow({
     <View style={[styles.commentRow, last ? styles.rowLast : null]}>
       <Text style={styles.commentText}>{comment.content}</Text>
       <View style={styles.sourceBox}>
-        <AppIcon name="star" size={12} color={theme.colors.inkHint} />
+        <AppIcon name="star" size={12} color={theme.colors.textMuted} />
         <Text numberOfLines={1} style={styles.sourceText}>
           {comment.src}
         </Text>
@@ -217,8 +217,8 @@ const styles = StyleSheet.create({
   sourceCaption: {
     paddingHorizontal: 18,
     paddingBottom: 4,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   body: {
     flexGrow: 1,
@@ -232,12 +232,12 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
+    borderBottomColor: theme.colors.border,
   },
   commentRow: {
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
+    borderBottomColor: theme.colors.border,
   },
   rowLast: {
     borderBottomWidth: 0,
@@ -247,9 +247,9 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   postTitle: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-    lineHeight: 20,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   metaRow: {
@@ -260,18 +260,18 @@ const styles = StyleSheet.create({
   },
   date: {
     marginTop: 6,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   commentText: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-    lineHeight: 21,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
   },
   sourceBox: {
     marginTop: 8,
     borderRadius: theme.radius.sm,
-    backgroundColor: theme.colors.surface2,
+    backgroundColor: theme.colors.surfaceSubtle,
     paddingHorizontal: 10,
     paddingVertical: 8,
     flexDirection: "row",
@@ -280,8 +280,8 @@ const styles = StyleSheet.create({
   },
   sourceText: {
     flex: 1,
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   groupCover: {
     width: 64,
@@ -289,14 +289,14 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.md,
   },
   groupName: {
-    color: theme.colors.ink,
-    fontSize: 14.5,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   groupMeta: {
     marginTop: 4,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   emptyWrap: {
     paddingHorizontal: 14,

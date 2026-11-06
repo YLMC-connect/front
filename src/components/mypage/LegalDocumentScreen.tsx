@@ -105,22 +105,22 @@ const styles = StyleSheet.create({
   },
   effective: {
     marginBottom: 18,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   section: {
     marginBottom: 22,
   },
   heading: {
     marginBottom: 8,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   text: {
-    color: theme.colors.inkSoft,
-    fontSize: 13.5,
-    lineHeight: 23.5,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
   },
   emptyWrap: {
     flex: 1,

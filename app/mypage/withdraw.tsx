@@ -56,7 +56,7 @@ export default function WithdrawScreen() {
               <AppIcon
                 name="warning-amber"
                 size={16}
-                color={theme.colors.danger}
+                color={theme.colors.dangerIcon}
               />
               <Text style={styles.cautionTitle}>탈퇴 전 안내사항</Text>
             </View>
@@ -124,22 +124,22 @@ const styles = StyleSheet.create({
     paddingBottom: 18,
   },
   title: {
-    color: theme.colors.ink,
-    fontSize: 20,
-    lineHeight: 27,
+    color: theme.colors.text,
+    fontSize: theme.typography.title.fontSize,
+    lineHeight: theme.typography.title.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   desc: {
     marginTop: 10,
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.md,
-    lineHeight: theme.lineHeight.body,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
   },
   cautionBox: {
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: "rgba(201,124,110,0.20)",
-    backgroundColor: "rgba(201,124,110,0.10)",
+    borderColor: theme.colors.danger100,
+    backgroundColor: theme.colors.dangerSubtle,
     padding: 16,
   },
   cautionHead: {
@@ -149,8 +149,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   cautionTitle: {
-    color: theme.colors.danger,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.dangerText,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   cautionList: {
@@ -165,28 +166,28 @@ const styles = StyleSheet.create({
     width: 5,
     height: 5,
     borderRadius: 2.5,
-    backgroundColor: theme.colors.danger,
+    backgroundColor: theme.colors.dangerIcon,
     marginTop: 8,
     flexShrink: 0,
   },
   cautionText: {
     flex: 1,
-    color: "#7B3A2D",
-    fontSize: 13.5,
-    lineHeight: 21,
+    color: theme.colors.dangerText,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
   },
   infoBox: {
     marginTop: 18,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
     padding: 14,
   },
   infoText: {
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 19,
+    color: theme.colors.text,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   bottomBar: {
     position: "absolute",
@@ -196,8 +197,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingTop: 12,
     paddingBottom: 18,
-    backgroundColor: theme.colors.glass,
+    backgroundColor: theme.colors.barGlass,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.line,
+    borderTopColor: theme.colors.border,
   },
 });

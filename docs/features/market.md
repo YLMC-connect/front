@@ -68,22 +68,22 @@
 
 ## 주요 파일 (도메인 파일 지도)
 
-| 경로                                    | 역할                                                             |
-| --------------------------------------- | ---------------------------------------------------------------- |
-| `app/(tabs)/market/_layout.tsx`         | 나눔 목록·상세 중첩 Stack                                        |
-| `app/(tabs)/market/index.tsx`           | 나눔 목록, 상태/카테고리 필터                                    |
-| `app/(tabs)/market/[id].tsx`            | 나눔 상세, 게시글 삭제, 댓글, 신고                               |
-| `src/components/market/detail/MarketDetailParts.tsx` | 나눔 상세 사진·상태 배너·댓글 부품 |
-| `src/components/market/detail/marketDetailStyles.ts` | 나눔 상세 스타일 |
-| `app/modal/market-new.tsx`              | 나눔 작성 모달                                                   |
-| `src/services/marketService.ts`         | 나눔 조회·내 나눔·게시글 삭제·댓글 CUD·신고 HTTP 서비스          |
-| `src/services/marketHttpDataSource.ts`  | 라이브 나눔 HTTP data source                                     |
-| `src/services/marketMapper.ts`          | Share DTO → 화면 모델                                            |
-| `src/types/marketApi.ts`                | 관측된 나눔 서버 DTO                                             |
-| `src/hooks/useMarket.ts`                | 나눔 query와 게시글 삭제·댓글 CUD·신고 mutation hook             |
-| `src/constants/domainOptions.ts`        | 나눔 카테고리/상태/신고 사유 옵션                                |
-| `src/types/market.ts`                   | 나눔 타입                                                        |
-| `scripts/check-market-api-contract.mjs` | 나눔 Swagger endpoint·화면 요구 필드 검사                        |
+| 경로                                                 | 역할                                                                                    |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `app/(tabs)/market/_layout.tsx`                      | 나눔 목록·상세 중첩 Stack                                                               |
+| `app/(tabs)/market/index.tsx`                        | 나눔 목록, 상태/카테고리 필터                                                           |
+| `app/(tabs)/market/[id].tsx`                         | 나눔 상세, 게시글 삭제, 댓글, 신고                                                      |
+| `src/components/market/detail/MarketDetailParts.tsx` | 나눔 상세 사진·상태 배너·댓글 부품                                                      |
+| `src/components/market/detail/marketDetailStyles.ts` | 나눔 상세 스타일                                                                        |
+| `app/modal/market-new.tsx`                           | 나눔 작성 모달                                                                          |
+| `src/services/marketService.ts`                      | 나눔 조회·내 나눔·게시글 삭제·댓글 CUD·신고 HTTP 서비스                                 |
+| `src/services/marketHttpDataSource.ts`               | 라이브 나눔 HTTP data source                                                            |
+| `src/services/marketMapper.ts`                       | Share DTO → 화면 모델. 상대 이미지 경로는 `apiClient.readApiUrl()` origin 기준으로 해석 |
+| `src/types/marketApi.ts`                             | 관측된 나눔 서버 DTO                                                                    |
+| `src/hooks/useMarket.ts`                             | 나눔 query와 게시글 삭제·댓글 CUD·신고 mutation hook                                    |
+| `src/constants/domainOptions.ts`                     | 나눔 카테고리/상태/신고 사유 옵션                                                       |
+| `src/types/market.ts`                                | 나눔 타입                                                                               |
+| `scripts/check-market-api-contract.mjs`              | 나눔 Swagger endpoint·화면 요구 필드 검사                                               |
 
 ## 데이터 타입
 

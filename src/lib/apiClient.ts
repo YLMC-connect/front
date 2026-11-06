@@ -44,9 +44,18 @@ export class ApiError extends Error {
   }
 }
 
+/** 앱 설정의 API origin. extra.apiUrl → EXPO_PUBLIC_API_URL 순으로 읽고, http(s) 가 아니면 null */
+export function readApiUrl(): string | null {
+  const apiUrl =
+    Constants.expoConfig?.extra?.apiUrl ?? process.env.EXPO_PUBLIC_API_URL;
+  return typeof apiUrl === "string" && /^https?:\/\//.test(apiUrl)
+    ? apiUrl
+    : null;
+}
+
 function getApiBaseUrl() {
-  const apiUrl = Constants.expoConfig?.extra?.apiUrl;
-  if (typeof apiUrl !== "string" || !/^https?:\/\//.test(apiUrl)) {
+  const apiUrl = readApiUrl();
+  if (!apiUrl) {
     throw new Error(
       "유효한 API URL이 app.config.ts extra.apiUrl에 필요합니다.",
     );

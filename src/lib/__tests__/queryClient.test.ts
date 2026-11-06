@@ -1,5 +1,7 @@
+import { QueryClient } from "@tanstack/react-query";
 import { ApiError } from "../apiClient";
-import { shouldRetryQuery } from "../queryClient";
+import { shouldPersistQuery, shouldRetryQuery } from "../queryClient";
+import { queryKeys } from "../queryKeys";
 
 describe("shouldRetryQuery", () => {
   it("does not retry on 4xx client errors", () => {
@@ -54,5 +56,49 @@ describe("shouldRetryQuery", () => {
     expect(shouldRetryQuery(0, genericError)).toBe(true);
     expect(shouldRetryQuery(1, genericError)).toBe(true);
     expect(shouldRetryQuery(2, genericError)).toBe(false);
+  });
+});
+
+describe("shouldPersistQuery", () => {
+  const client = new QueryClient();
+
+  function successQuery(queryKey: readonly unknown[]) {
+    client.setQueryData(queryKey, { ok: true });
+    return client.getQueryCache().find({ queryKey, exact: true })!;
+  }
+
+  afterEach(() => client.clear());
+
+  it.each([
+    ["member.me", queryKeys.member.me()],
+    ["market.mine", queryKeys.market.mine("all")],
+    ["group.detail", queryKeys.group.detail("1")],
+    ["group.members", queryKeys.group.members("1")],
+    ["prayer.overview", queryKeys.prayer.overview()],
+    ["lifeStudy.overview", queryKeys.lifeStudy.overview()],
+  ])("does not persist personal query %s", (_, queryKey) => {
+    expect(shouldPersistQuery(successQuery(queryKey))).toBe(false);
+  });
+
+  it.each([
+    ["home.overview", queryKeys.home.overview()],
+    ["market.overview", queryKeys.market.overview()],
+    ["market.detail", queryKeys.market.detail("1")],
+    ["group.overview", queryKeys.group.overview()],
+    ["lifeStudy.list", queryKeys.lifeStudy.list()],
+    ["prayer.categories", ["prayer", "categories"]],
+    ["faqs", ["faqs", "all"]],
+  ])("persists public query %s", (_, queryKey) => {
+    expect(shouldPersistQuery(successQuery(queryKey))).toBe(true);
+  });
+
+  it("does not persist a query that has no data yet", () => {
+    client
+      .getQueryCache()
+      .build(client, { queryKey: queryKeys.home.overview() });
+    const query = client
+      .getQueryCache()
+      .find({ queryKey: queryKeys.home.overview(), exact: true })!;
+    expect(shouldPersistQuery(query)).toBe(false);
   });
 });

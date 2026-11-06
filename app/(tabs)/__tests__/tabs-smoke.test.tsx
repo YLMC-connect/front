@@ -1626,6 +1626,47 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getAllByText("과정 확인").length).toBeGreaterThan(0);
   });
 
+  it("shows two open cohorts of the same course without a duplicate key warning", async () => {
+    const openCohort = {
+      id: "4",
+      title: "생명의 삶",
+      kind: "required" as const,
+      weekCount: 13,
+      instructorName: "박귀원",
+      summary: "신앙의 근본을 바로 세우는 가장 기본 과정",
+      applicationPeriod: "6.24 ~ 7.05",
+      capacity: 24,
+      enrolledCount: 18,
+    };
+    jest
+      .spyOn(lifeStudyService, "fetchLifeStudyOverview")
+      .mockResolvedValueOnce({
+        path: {
+          completedRequired: 1,
+          totalRequired: 5,
+          nextRecommendation: "생명언어의 삶",
+          eligibility: "생명의 삶 이후 가능",
+        },
+        openCourses: [
+          { ...openCohort, cohortId: "1", cohortNumber: 1 },
+          { ...openCohort, cohortId: "2", cohortNumber: 2 },
+        ],
+        courses: [],
+      });
+    const consoleError = jest.spyOn(console, "error");
+
+    renderWithClient(<LifeStudyScreen />);
+    await screen.findByText("내 학습경로");
+
+    expect(screen.getAllByText("생명의 삶").length).toBeGreaterThanOrEqual(2);
+    expect(
+      consoleError.mock.calls.some((args) =>
+        String(args[0]).includes("same key"),
+      ),
+    ).toBe(false);
+    consoleError.mockRestore();
+  });
+
   it("opens a life study course", async () => {
     jest.mocked(router.push).mockClear();
     renderWithClient(<LifeStudyScreen />);

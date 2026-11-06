@@ -85,7 +85,11 @@ export function StudyContent() {
             />
           ) : (
             openCourses.map((course) => (
-              <CourseCard key={course.id} course={course} open />
+              <CourseCard
+                key={course.cohortId ?? course.id}
+                course={course}
+                open
+              />
             ))
           )}
         </View>

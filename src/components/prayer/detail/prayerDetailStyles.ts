@@ -113,7 +113,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
-    backgroundColor: "rgba(184, 102, 88, 0.12)",
+    backgroundColor: theme.colors.dangerSubtle,
     borderRadius: theme.radius.full,
     paddingHorizontal: 7,
     paddingVertical: 2,
@@ -222,7 +222,7 @@ export const styles = StyleSheet.create({
   },
   prayButtonDone: {
     borderWidth: 1,
-    borderColor: "rgba(62,104,200,0.22)",
+    borderColor: theme.colors.primarySubtle,
     backgroundColor: theme.colors.primarySubtle,
     shadowOpacity: 0,
     elevation: 0,
@@ -303,7 +303,7 @@ export const styles = StyleSheet.create({
   progressBar: {
     height: 8,
     borderRadius: theme.radius.full,
-    backgroundColor: "rgba(30,41,32,0.08)",
+    backgroundColor: theme.colors.surfaceSubtle,
     overflow: "hidden",
   },
   progressFill: {

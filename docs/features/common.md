@@ -46,7 +46,8 @@
 | `src/lib/reportResponseIssue.ts`               | 응답 일부를 버릴 때 알림·목록 항목 단위 해석                  |
 | `src/types/common.ts`                          | 공통 회원·서버 역할 타입                                      |
 | `src/lib/rolePermissions.ts`                   | 관리자 도메인별 역할 접근 판별                                |
-| `src/constants/theme.ts` / `designTokens.json` | 디자인 토큰 (v2 + 옛 이름 별칭)                               |
+| `src/constants/theme.ts` / `designTokens.json` | 디자인 토큰 (v2)                                              |
+| `src/constants/__tests__/no-raw-colors.test.ts` | 화면 코드에 직접 쓴 색 금지 (허용 목록만)                  |
 | `design-system/tokens.json`                    | 디자인 시스템 토큰 원본 (아티팩트 그대로)                     |
 | `scripts/sync-design-tokens.mjs`               | 원본 → `designTokens.json` 변환                               |
 | `src/components/layout/Screen.tsx`             | 공통 화면 + 상단 inset                                        |
@@ -93,7 +94,7 @@
 - **탭 IA는 홈/나눔/동행/기도/삶공부** — MY는 홈 진입. 보고 있는 루트 탭을 다시 누르면 이동하지 않고, 다른 탭은 탭 네비게이터로 전환해 이미 떠 있는 화면을 유지한다. Issue #136.
 - **Expo Dev Client 기준** — Expo Go 아님.
 - **런타임은 Expo SDK 57** — React Native 0.86. Node는 `package.json` `engines`(`^22.13.0 || ^24.3.0 || >=25.0.0`)이고 CI는 22.22.0. iOS는 `expo-build-properties`의 `ios.enableSceneSupport`로 UIKit scene lifecycle을 켠다. `userInterfaceStyle: light`는 `expo-system-ui`가 적용한다. `ios/`·`android/`는 gitignore이며 prebuild로 다시 만든다.
-- **디자인 토큰은 디자인 시스템 v2 기준 (ADR 0007)** — `design-system/tokens.json` 을 바꾸고 `node scripts/sync-design-tokens.mjs` 로 `designTokens.json` 을 만든다(`npm run test:scripts` 가 어긋남을 잡음). 이름은 kebab → camelCase. `theme.ts` 의 옛 이름(`ink`·`inkSoft`·`primaryDeep`·`line` 등, 글자 `fontSize.*`, 그림자 `card`·`raised` 등)은 v2 값을 가리키는 임시 별칭이고 #236 에서 지운다. 새 코드는 v2 이름만 쓴다. 모서리는 값 기준으로 옮겼다(`pill` → `full`).
+- **디자인 토큰은 디자인 시스템 v2 기준 (ADR 0007)** — `design-system/tokens.json` 을 바꾸고 `node scripts/sync-design-tokens.mjs` 로 `designTokens.json` 을 만든다(`npm run test:scripts` 가 어긋남을 잡음). 이름은 kebab → camelCase. 색은 `theme.colors` 의 v2 이름만, 글자는 `theme.typography` 6단계(display/title/heading/body/label/caption)만, 그림자는 `sm`·`md`·`lg`·`sheet`(+ Fab 전용 `fab`)만 쓴다. 옛 이름 별칭은 없다. 화면에 hex/rgba 를 직접 쓰면 `no-raw-colors` 테스트가 실패한다 — 토큰이 없는 반투명 오버레이만 사유와 개수를 적어 허용 목록에 둔다. 한국어 줄바꿈은 `AppText` 기본값 `lineBreakStrategyIOS="hangul-word"`.
 - **Gluestack UI 및 NativeWind 퇴역 (ADR 0006)** — 순수 React Native StyleSheet + `src/constants/theme.ts` 단일 표준 확정. 1,775줄 ui/index.tsx를 6개 서브모듈로 모듈화하되 하위 호환성을 위해 barrel export 유지.
 - **Sentry는 배포 빌드에서만** — `__DEV__`이거나 `EXPO_PUBLIC_SENTRY_DSN`이 비면 초기화하지 않는다. DSN은 로컬 `.env`/EAS env에만 둔다. 응답 형식 오류 보고에는 쿼리 키 앞 두 조각·HTTP status·code 태그만 싣고, 응답 본문·메시지·개인정보는 보내지 않는다. 네트워크 오류·4xx 는 보내지 않는다. 소스맵·디버그 심볼 자동 업로드는 아직 끔(`SENTRY_DISABLE_AUTO_UPLOAD=true`: `eas.json`, `ios:dev-client`/`android:dev-client` 스크립트). 업로드를 켜려면 Sentry org/project와 `SENTRY_AUTH_TOKEN`이 필요하다.
 - **응답 해석은 화면이 쓰는 필드만 엄격** — 기도·MY·삶공부 mapper 는 화면·상위 로직이 쓰는 필드(id, 제목, 상태, 날짜 등)만 형식을 확인하고, 쓰지 않는 필드는 없거나 형식이 달라도 `null` 로 읽는다. 목록은 형식이 틀린 항목만 빼고 나머지를 돌려주며, 뺀 항목은 `reportResponseIssue({ source, reason })` 로 경로·필드 이름만 알린다(값·개인정보 금지. `__DEV__` 면 `console.warn`, Sentry 를 켰으면 `captureResponseIssue` 가 경로(목록 위치 `[n]` 은 `[]` 로 묶음)·reason 만 태그로 보고). 응답 자체가 배열·객체가 아니면 여전히 `INVALID_RESPONSE`.

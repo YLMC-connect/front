@@ -153,7 +153,7 @@ describe("auth smoke screens", () => {
         screen.getByTestId("login-id-input-focus-ring").props.style,
       ),
     ).toMatchObject({
-      borderColor: theme.colors.danger,
+      borderColor: theme.colors.dangerText,
       borderWidth: 2,
     });
     expect(SecureStore.setItemAsync).not.toHaveBeenCalled();

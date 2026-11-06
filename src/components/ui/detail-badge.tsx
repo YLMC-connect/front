@@ -53,11 +53,11 @@ const styles = StyleSheet.create({
   },
   warn: {
     borderColor: "transparent",
-    backgroundColor: theme.colors.amberSoft,
+    backgroundColor: theme.colors.warningSubtle,
   },
   text: {
     color: theme.colors.textMuted,
-    fontSize: theme.fontSize.xs,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   borderedText: {

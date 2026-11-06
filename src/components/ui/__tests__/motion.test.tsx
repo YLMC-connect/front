@@ -22,8 +22,6 @@ describe("common motion", () => {
       base: 200,
       slow: 300,
       stagger: 60,
-      overlay: 200,
-      enter: 300,
     });
     expect(theme.motion.scale).toEqual({
       pressed: 0.97,

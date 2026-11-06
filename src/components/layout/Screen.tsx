@@ -159,8 +159,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sectionTitle: {
-    color: theme.colors.ink,
+    color: theme.colors.text,
     fontWeight: theme.fontWeight.bold,
-    fontSize: 15,
+    fontSize: theme.typography.body.fontSize,
   },
 });

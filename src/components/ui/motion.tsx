@@ -89,7 +89,7 @@ type MotionPresenceOptions = {
 export function useMotionPresence(
   visible: boolean,
   {
-    duration = theme.motion.duration.overlay,
+    duration = theme.motion.duration.base,
     enterReady = true,
   }: MotionPresenceOptions = {},
 ) {

@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   },
   miniActionText: {
     color: theme.colors.textMuted,
-    fontSize: theme.fontSize.sm,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
 });

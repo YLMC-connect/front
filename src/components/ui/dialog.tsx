@@ -61,8 +61,14 @@ export function ConfirmDialog({
           testID="confirm-dialog-panel"
           style={[styles.dialog, panelStyle]}
         >
-          <Text style={styles.dialogTitle}>{title}</Text>
-          {message ? <Text style={styles.dialogText}>{message}</Text> : null}
+          <Text lineBreakStrategyIOS="hangul-word" style={styles.dialogTitle}>
+            {title}
+          </Text>
+          {message ? (
+            <Text lineBreakStrategyIOS="hangul-word" style={styles.dialogText}>
+              {message}
+            </Text>
+          ) : null}
           <View style={styles.dialogActions}>
             <Pressable
               accessibilityRole="button"

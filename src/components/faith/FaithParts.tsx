@@ -86,7 +86,7 @@ export function CourseCard({
       <AppText variant="heading" style={styles.courseTitle}>
         {course.title}
       </AppText>
-      <AppText variant="body" tone="secondary" style={styles.courseSummary}>
+      <AppText variant="body" tone="primary" style={styles.courseSummary}>
         {course.summary}
       </AppText>
       {open ? (
@@ -114,7 +114,7 @@ export function CourseCard({
             <AppIcon
               name="chevron-right"
               size={16}
-              color={theme.colors.primaryDeep}
+              color={theme.colors.primaryStrong}
             />
           </View>
         </>
@@ -136,7 +136,7 @@ export function CourseCard({
               <AppIcon
                 name="chevron-right"
                 size={16}
-                color={theme.colors.primaryDeep}
+                color={theme.colors.primaryStrong}
               />
             </View>
           </View>
@@ -177,7 +177,7 @@ export function PrayerFloatingMenu() {
                 <AppIcon
                   name="prayer-apply"
                   size={18}
-                  color={theme.colors.primaryDeep}
+                  color={theme.colors.primaryStrong}
                 />
                 <AppText variant="caption" style={styles.fabMenuItemText}>
                   중보기도 신청
@@ -199,7 +199,7 @@ export function PrayerFloatingMenu() {
                 <AppIcon
                   name="edit"
                   size={18}
-                  color={theme.colors.primaryDeep}
+                  color={theme.colors.primaryStrong}
                 />
                 <AppText variant="caption" style={styles.fabMenuItemText}>
                   기도제목 작성

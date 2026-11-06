@@ -60,7 +60,7 @@ export default function DawnPrayerScreen() {
                 <AppIcon
                   name="book-open-page-variant-outline"
                   size={15}
-                  color={theme.colors.primaryDeep}
+                  color={theme.colors.primaryStrong}
                 />
                 <AppText
                   variant="label"
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   heroCard: {
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
     padding: theme.spacing[4],
     gap: theme.spacing[2],
@@ -135,27 +135,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primaryTint,
+    backgroundColor: theme.colors.primarySubtle,
   },
   heroDateText: {
     fontWeight: theme.fontWeight.bold,
-    color: theme.colors.primaryDeep,
+    color: theme.colors.primaryStrong,
   },
   title: {
     marginTop: 2,
-    color: theme.colors.ink,
+    color: theme.colors.text,
   },
   panel: {
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
     padding: theme.spacing[5],
     gap: theme.spacing[4],
   },
   bodyText: {
-    fontSize: theme.fontSize.lg,
-    lineHeight: 27,
-    color: theme.colors.ink,
+    fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
+    color: theme.colors.text,
   },
 });

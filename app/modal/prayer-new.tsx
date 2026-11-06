@@ -232,7 +232,11 @@ export default function PrayerNewModal() {
             </Section>
 
             <View style={styles.infoBox}>
-              <AppIcon name="info" size={16} color={theme.colors.primaryDeep} />
+              <AppIcon
+                name="info"
+                size={16}
+                color={theme.colors.primaryStrong}
+              />
               <Text style={styles.infoText}>
                 작성한 기도제목은 중보기도팀 검토 후 기도방에 게시됩니다.
               </Text>
@@ -286,23 +290,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
   },
   optionOn: {
     borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
   },
-  optionText: { color: theme.colors.inkSoft, fontSize: theme.fontSize.sm },
+  optionText: {
+    color: theme.colors.text,
+    fontSize: theme.typography.caption.fontSize,
+  },
   optionTextOn: {
-    color: theme.colors.primaryDeep,
+    color: theme.colors.primaryStrong,
     fontWeight: theme.fontWeight.bold,
   },
   infoBox: {
     marginHorizontal: theme.layout.screenX,
     marginTop: 22,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
     flexDirection: "row",
     gap: 10,
     paddingHorizontal: 16,
@@ -310,15 +317,15 @@ const styles = StyleSheet.create({
   },
   infoText: {
     flex: 1,
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 19,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   errorText: {
     marginHorizontal: theme.layout.screenX,
     marginTop: 12,
-    color: theme.colors.danger,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.dangerText,
+    fontSize: theme.typography.caption.fontSize,
   },
   footer: {
     position: "absolute",

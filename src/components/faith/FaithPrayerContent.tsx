@@ -150,7 +150,7 @@ export function PrayerContent() {
                       <AppIcon
                         name="chevron-right"
                         size={16}
-                        color={theme.colors.primaryDeep}
+                        color={theme.colors.primaryStrong}
                       />
                     </View>
                   </View>

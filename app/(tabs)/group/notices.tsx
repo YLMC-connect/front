@@ -1,6 +1,7 @@
-import { AppIcon } from "@/components/ui/app-icon";
+import { FLOATING_BOTTOM_BAR_INSET } from "@/components/ui/floating-bottom-bar";
+import { InfoBox } from "@/components/ui/info-box";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
@@ -8,11 +9,17 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
-import { ConfirmDialog, TopBar } from "../../../src/components/ui";
+import {
+  ConfirmDialog,
+  FloatingBottomBar,
+  ModalFormSection as Section,
+  ModalFormTextInput as FormInput,
+  SectionDivider,
+  TopBar,
+} from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import {
   useCreateGroupNotice,
@@ -95,38 +102,20 @@ export default function GroupNoticesScreenRoute() {
       <View style={styles.root}>
         <TopBar
           title={isEdit ? "공지 수정" : "공지 작성"}
-          back
+          close
           onBack={() => router.back()}
           testID="group-notice-header"
           right={
-            <View style={styles.actions}>
-              {isEdit ? (
-                <Pressable
-                  testID="group-notice-delete"
-                  accessibilityRole="button"
-                  style={styles.headerAction}
-                  onPress={() => setShowDelete(true)}
-                >
-                  <Text style={styles.deleteAction}>삭제</Text>
-                </Pressable>
-              ) : null}
+            isEdit ? (
               <Pressable
-                testID="group-notice-submit"
+                testID="group-notice-delete"
                 accessibilityRole="button"
                 style={styles.headerAction}
-                onPress={onSubmit}
-                disabled={!isFilled || isPending}
+                onPress={() => setShowDelete(true)}
               >
-                <Text
-                  style={[
-                    styles.submitAction,
-                    !isFilled ? styles.submitOff : null,
-                  ]}
-                >
-                  {isPending ? "저장 중" : isEdit ? "저장" : "등록"}
-                </Text>
+                <Text style={styles.deleteAction}>삭제</Text>
               </Pressable>
-            </View>
+            ) : null
           }
         />
 
@@ -140,52 +129,52 @@ export default function GroupNoticesScreenRoute() {
             onPress={Keyboard.dismiss}
             style={{ flexGrow: 1 }}
           >
-            <View style={styles.noticeBox}>
-              <AppIcon
-                name="info"
-                size={16}
-                color={theme.colors.primaryStrong}
-              />
-              <Text style={styles.noticeText}>
-                소모임 멤버에게만 공개됩니다.
-              </Text>
-            </View>
+            <InfoBox
+              description="소모임 멤버에게만 공개됩니다."
+              style={styles.noticeBox}
+            />
 
-            <Field label="제목" required hint={`${title.length}/30`}>
-              <TextInput
+            <Section label="제목" required hint={`${title.length}/30`}>
+              <FormInput
                 testID="group-notice-title-input"
                 value={title}
                 onChangeText={setTitle}
                 placeholder="공지 제목 (최대 30자)"
-                placeholderTextColor={theme.colors.textMuted}
                 maxLength={30}
-                style={styles.input}
               />
-            </Field>
+            </Section>
 
-            <View style={styles.divider} />
+            <SectionDivider />
 
-            <Field label="내용" required hint={`${body.length}/500`}>
-              <TextInput
+            <Section label="내용" required hint={`${body.length}/500`}>
+              <FormInput
                 testID="group-notice-content-input"
                 value={body}
                 onChangeText={setBody}
                 multiline
                 placeholder="공지 내용을 입력해주세요"
-                placeholderTextColor={theme.colors.textMuted}
                 maxLength={500}
                 textAlignVertical="top"
-                style={[styles.input, styles.textarea]}
+                style={styles.textarea}
               />
-            </Field>
+            </Section>
+
+            {createNotice.isError ||
+            updateNotice.isError ||
+            deleteNotice.isError ? (
+              <Text style={styles.error}>공지 처리에 실패했습니다.</Text>
+            ) : null}
           </Pressable>
         </ScrollView>
 
-        {createNotice.isError ||
-        updateNotice.isError ||
-        deleteNotice.isError ? (
-          <Text style={styles.error}>공지 처리에 실패했습니다.</Text>
-        ) : null}
+        <FloatingBottomBar
+          label={isEdit ? "저장" : "등록"}
+          disabled={!isFilled}
+          loading={isPending}
+          onPress={onSubmit}
+          testID="group-notice-submit"
+        />
+
         {isEdit && detail.isPending ? (
           <ActivityIndicator
             color={theme.colors.primary}
@@ -207,41 +196,9 @@ export default function GroupNoticesScreenRoute() {
   );
 }
 
-function Field({
-  label,
-  hint,
-  required = false,
-  children,
-}: {
-  label: string;
-  hint: string;
-  required?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <View style={styles.field}>
-      <View style={styles.fieldHead}>
-        <Text style={styles.fieldLabel}>
-          {label}
-          {required ? <Text style={styles.required}> *</Text> : null}
-        </Text>
-        <Text style={styles.hint}>{hint}</Text>
-      </View>
-      {children}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-  },
-  actions: {
-    minWidth: 60,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    gap: 4,
   },
   headerAction: {
     minHeight: theme.layout.touchTarget,
@@ -253,77 +210,17 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
-  submitAction: {
-    color: theme.colors.primary,
-    fontSize: theme.typography.label.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  submitOff: {
-    color: theme.colors.textMuted,
-  },
   body: {
-    paddingBottom: 28,
+    paddingBottom: FLOATING_BOTTOM_BAR_INSET,
   },
   noticeBox: {
-    marginHorizontal: 22,
+    marginHorizontal: theme.layout.screenX,
     marginTop: 8,
-    marginBottom: 14,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primarySubtle,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 10,
   },
-  noticeText: {
-    flex: 1,
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
-  },
-  field: {
-    gap: 8,
-    paddingVertical: 14,
-  },
-  fieldHead: {
-    paddingHorizontal: 22,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  fieldLabel: {
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  required: {
-    color: theme.colors.dangerText,
-  },
-  hint: {
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  input: {
-    marginHorizontal: 22,
-    minHeight: 48,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.borderStrong,
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-  },
+  // 공지 본문은 길게 쓰므로 기본 여러 줄 높이(132)보다 넉넉히 둔다.
   textarea: {
     minHeight: 250,
     lineHeight: theme.typography.body.lineHeight,
-  },
-  divider: {
-    height: 8,
-    backgroundColor: theme.colors.bg,
   },
   error: {
     color: theme.colors.dangerText,

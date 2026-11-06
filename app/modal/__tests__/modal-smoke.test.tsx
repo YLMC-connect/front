@@ -73,7 +73,7 @@ describe("modal smoke screens", () => {
     renderWithClient(<GroupNewModal />);
 
     expect(screen.getAllByText("소모임 개설")).toHaveLength(2);
-    expect(screen.getByLabelText("뒤로")).toBeTruthy();
+    expect(screen.getByLabelText("닫기")).toBeTruthy();
     expect(screen.queryByText("닫기")).toBeNull();
     expect(
       StyleSheet.flatten(screen.getByTestId("group-form-screen").props.style),

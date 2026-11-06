@@ -5,7 +5,15 @@ import {
   useRouter,
   type NativeStackNavigationProp,
 } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ListRow } from "@/components/ui/list-row";
+import { motionStaggerDelay } from "@/components/ui/motion";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -18,15 +26,14 @@ import {
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   AppText,
+  Badge,
   Empty,
   ErrorState,
   FilterChips,
   FloatingActionButton,
   ListSkeleton,
   MotionEnter,
-  MotionPressable,
   SegmentedTabs,
-  VisualThumb,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import { GROUP_CATEGORIES } from "../../../src/constants/domainOptions";
@@ -48,6 +55,8 @@ const sections: readonly { key: GroupSection; label: string }[] = [
 ];
 
 const GROUP_SEGMENT_STICKY_HEIGHT = 60;
+/** 첫 진입 때 순서대로 떠오르는 행 수(디자인 시스템 ListRow: 처음 8개, 60ms 간격). */
+const STAGGER_LIMIT = 8;
 const GROUP_STICKY_CONTROLS_HEIGHT = 116;
 
 type GroupStackParamList = {
@@ -217,13 +226,14 @@ export default function GroupScreen() {
             description="관심 있는 소모임에 참여해보세요."
           />
         ) : (
-          myGroups.map((group) => (
-            <CompanionCard
-              key={group.id}
-              kind="group"
-              item={group}
-              onPress={() => openGroupDetail(group.id)}
-            />
+          myGroups.map((group, index) => (
+            <StaggerItem key={group.id} index={index}>
+              <CompanionCard
+                kind="group"
+                item={group}
+                onPress={() => openGroupDetail(group.id)}
+              />
+            </StaggerItem>
           ))
         )}
       </StickyHeaderScreen>
@@ -308,19 +318,20 @@ export default function GroupScreen() {
               description="새로운 봉사활동이 등록되면 안내해 드릴게요."
             />
           ) : (
-            <MotionEnter style={styles.myListWrap}>
-              {serviceItems.map((item) => (
-                <CompanionCard
-                  key={item.id}
-                  kind="service"
-                  item={item}
-                  onPress={() => openGroupDetail(item.linkedGroupId)}
-                />
+            <View style={styles.myListWrap}>
+              {serviceItems.map((item, index) => (
+                <StaggerItem key={item.id} index={index}>
+                  <CompanionCard
+                    kind="service"
+                    item={item}
+                    onPress={() => openGroupDetail(item.linkedGroupId)}
+                  />
+                </StaggerItem>
               ))}
-            </MotionEnter>
+            </View>
           )
         ) : section === "mine" ? (
-          <MotionEnter style={styles.myListWrap} testID="group-my-list">
+          <View style={styles.myListWrap} testID="group-my-list">
             {myGroups.length === 0 ? (
               <Empty
                 icon="groups"
@@ -328,16 +339,17 @@ export default function GroupScreen() {
                 description="관심 있는 소모임에 참여해보세요."
               />
             ) : (
-              myGroups.map((group) => (
-                <CompanionCard
-                  key={group.id}
-                  kind="group"
-                  item={group}
-                  onPress={() => openGroupDetail(group.id)}
-                />
+              myGroups.map((group, index) => (
+                <StaggerItem key={group.id} index={index}>
+                  <CompanionCard
+                    kind="group"
+                    item={group}
+                    onPress={() => openGroupDetail(group.id)}
+                  />
+                </StaggerItem>
               ))
             )}
-          </MotionEnter>
+          </View>
         ) : groups.length === 0 ? (
           <Empty
             icon="groups"
@@ -345,16 +357,17 @@ export default function GroupScreen() {
             description="소모임을 개설하거나 관심 있는 모임에 참여해보세요."
           />
         ) : (
-          <MotionEnter style={styles.myListWrap}>
-            {groups.map((group) => (
-              <CompanionCard
-                key={group.id}
-                kind="group"
-                item={group}
-                onPress={() => openGroupDetail(group.id)}
-              />
+          <View style={styles.myListWrap}>
+            {groups.map((group, index) => (
+              <StaggerItem key={group.id} index={index}>
+                <CompanionCard
+                  kind="group"
+                  item={group}
+                  onPress={() => openGroupDetail(group.id)}
+                />
+              </StaggerItem>
             ))}
-          </MotionEnter>
+          </View>
         )}
         {section === "groups" && overview.isFetchingNextPage ? (
           <View style={styles.footerLoader}>
@@ -389,73 +402,53 @@ function CompanionCard(
     : closed
       ? "모집완료"
       : "모집중";
+  const statusMuted = isService ? props.item.statusLabel !== "모집중" : closed;
   const metaLabel = isService
     ? props.item.schedule
     : categoryOf(props.item.category);
 
   return (
-    <MotionPressable
+    <ListRow
       testID={testID}
-      accessibilityRole="button"
       onPress={props.onPress}
-      pressedScale={0.985}
+      title={props.item.name}
+      meta={props.item.description}
+      thumbnailSeed={props.item.coverSeed}
+      thumbnailIcon={isService ? "groups" : undefined}
       style={[styles.groupCard, closed ? styles.closedCard : null]}
     >
-      <VisualThumb
-        size={theme.layout.listThumb}
-        seed={props.item.coverSeed}
-        icon={isService ? "groups" : undefined}
-      />
-      <View style={styles.groupCardBody}>
-        <View style={styles.cardTop}>
-          <AppText
-            numberOfLines={1}
-            variant="body"
-            weight="semibold"
-            style={styles.cardTitle}
-          >
-            {props.item.name}
+      <View style={styles.cardMetaRow}>
+        <Badge tone={statusMuted ? "neutral" : "info"}>{statusLabel}</Badge>
+        <Badge tone="neutral">{metaLabel}</Badge>
+        <View testID={`${testID}-member-count`} style={styles.memberRow}>
+          <AppIcon name="groups" size={14} color={theme.colors.textMuted} />
+          <AppText variant="caption" tone="muted">
+            {isService ? "참여 " : null}
+            <Text style={styles.memberCount}>
+              {props.item.currentMembers}
+            </Text>{" "}
+            /{props.item.maxMembers}명
           </AppText>
-          <StatusBadge
-            label={statusLabel}
-            muted={isService ? props.item.statusLabel !== "모집중" : closed}
-          />
-        </View>
-        <AppText
-          numberOfLines={2}
-          variant="label"
-          tone="muted"
-          style={styles.desc}
-        >
-          {props.item.description}
-        </AppText>
-        <View style={styles.cardMetaRow}>
-          <View style={styles.categoryPill}>
-            <Text style={styles.categoryPillText}>{metaLabel}</Text>
-          </View>
-          <View testID={`${testID}-member-count`} style={styles.memberRow}>
-            <AppIcon name="groups" size={14} color={theme.colors.textMuted} />
-            <AppText variant="caption" tone="muted">
-              {isService ? "참여 " : null}
-              <Text style={styles.memberCount}>
-                {props.item.currentMembers}
-              </Text>{" "}
-              /{props.item.maxMembers}명
-            </AppText>
-          </View>
         </View>
       </View>
-    </MotionPressable>
+    </ListRow>
   );
 }
 
-function StatusBadge({ label, muted }: { label: string; muted: boolean }) {
+/** 목록 첫 진입: 처음 8개 행이 60ms 간격으로 8px 아래에서 떠오른다. */
+function StaggerItem({
+  index,
+  children,
+}: {
+  index: number;
+  children: ReactNode;
+}) {
+  if (index >= STAGGER_LIMIT) return children;
+
   return (
-    <View style={[styles.badge, muted ? styles.badgeClosed : null]}>
-      <Text style={[styles.badgeText, muted ? styles.badgeTextClosed : null]}>
-        {label}
-      </Text>
-    </View>
+    <MotionEnter mode="fadeUp" delay={motionStaggerDelay(index)}>
+      {children}
+    </MotionEnter>
   );
 }
 
@@ -501,74 +494,20 @@ const styles = StyleSheet.create({
   loading: {
     paddingTop: theme.spacing[2],
   },
+  // 썸네일 88 + 위아래 16 과 같은 높이. 소모임·봉사 행 높이를 맞춘다.
   groupCard: {
-    flexDirection: "row",
-    gap: theme.layout.listGap,
-    marginHorizontal: theme.layout.screenX,
     minHeight: 120,
-    paddingVertical: theme.spacing[4],
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  groupCardBody: {
-    flex: 1,
-    minWidth: 0,
-    justifyContent: "space-between",
   },
   // 끝난 항목은 일부러 덜 보이게 카드 전체를 흐린다(디자인 시스템 opacity-disabled).
   closedCard: {
     opacity: theme.opacity.disabled,
   },
-  cardTop: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  cardTitle: {
-    flex: 1,
-    minWidth: 0,
-  },
-  badge: {
-    flexShrink: 0,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primarySubtle,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-  },
-  badgeClosed: {
-    backgroundColor: theme.colors.surfaceSubtle,
-  },
-  badgeText: {
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  badgeTextClosed: {
-    color: theme.colors.textMuted,
-  },
-  categoryPill: {
-    alignSelf: "flex-start",
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surfaceSubtle,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  categoryPillText: {
-    color: theme.colors.text,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  desc: {
-    marginVertical: 4,
-  },
   cardMetaRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     alignItems: "center",
-    justifyContent: "space-between",
-    gap: 8,
+    gap: theme.spacing[2],
+    marginTop: theme.spacing[1],
   },
   memberRow: {
     flexDirection: "row",

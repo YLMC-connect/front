@@ -214,9 +214,9 @@ describe("modal smoke screens", () => {
     renderWithClient(<PrayerNewModal />);
 
     expect(screen.getAllByText("기도제목 등록")).toHaveLength(2);
-    expect(screen.getByLabelText("뒤로")).toBeTruthy();
+    expect(screen.getByLabelText("닫기")).toBeTruthy();
     expect(
-      StyleSheet.flatten(screen.getByLabelText("뒤로").props.style).marginLeft,
+      StyleSheet.flatten(screen.getByLabelText("닫기").props.style).marginLeft,
     ).toBeUndefined();
     expect(
       StyleSheet.flatten(screen.getByTestId("prayer-form-screen").props.style),

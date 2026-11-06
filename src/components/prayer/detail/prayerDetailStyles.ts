@@ -21,42 +21,15 @@ export const styles = StyleSheet.create({
     minWidth: 0,
     justifyContent: "center",
   },
+  heroProgress: {
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+  },
   badges: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 6,
-  },
-  heroProgressSection: {
-    gap: 6,
-    paddingTop: 4,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-  },
-  heroProgressHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  heroProgressLabel: {
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  heroProgressRate: {
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  heroProgressBar: {
-    height: 6,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surfaceSubtle,
-    overflow: "hidden",
-  },
-  heroProgressFill: {
-    height: "100%",
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primary,
   },
   body: {
     flexGrow: 1,
@@ -108,37 +81,6 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-  },
-  urgentBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    backgroundColor: theme.colors.dangerSubtle,
-    borderRadius: theme.radius.full,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-  },
-  urgentBadgeText: {
-    color: theme.colors.dangerText,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  topicChip: {
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primarySubtle,
-    paddingHorizontal: 9,
-    paddingVertical: 3,
-  },
-  topicChipWarn: {
-    backgroundColor: theme.colors.warningSubtle,
-  },
-  topicChipText: {
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  topicChipTextWarn: {
-    color: theme.colors.warningText,
   },
   prayerTitle: {
     color: theme.colors.text,
@@ -200,39 +142,6 @@ export const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.bold,
   },
   pillActionTextActive: {
-    color: theme.colors.primaryStrong,
-  },
-  bottomAction: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: theme.layout.screenX,
-    paddingTop: 24,
-    paddingBottom: 24,
-  },
-  prayButton: {
-    height: 52,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primary,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 7,
-  },
-  prayButtonDone: {
-    borderWidth: 1,
-    borderColor: theme.colors.primarySubtle,
-    backgroundColor: theme.colors.primarySubtle,
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-  prayButtonText: {
-    color: theme.colors.onPrimary,
-    fontSize: theme.typography.body.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  prayButtonTextDone: {
     color: theme.colors.primaryStrong,
   },
   statusCard: {
@@ -301,17 +210,6 @@ export const styles = StyleSheet.create({
     fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
-  progressBar: {
-    height: 8,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surfaceSubtle,
-    overflow: "hidden",
-  },
-  progressFill: {
-    height: "100%",
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primary,
-  },
   statusListHead: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -341,30 +239,6 @@ export const styles = StyleSheet.create({
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.semibold,
-  },
-  personBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: theme.radius.full,
-  },
-  personBadgeDone: {
-    backgroundColor: theme.colors.primarySubtle,
-  },
-  personBadgePending: {
-    backgroundColor: theme.colors.surfaceSubtle,
-  },
-  personBadgeText: {
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  personBadgeTextDone: {
-    color: theme.colors.primaryStrong,
-  },
-  personBadgeTextPending: {
-    color: theme.colors.textMuted,
   },
   empty: {
     alignItems: "center",

@@ -57,18 +57,7 @@ export const styles = StyleSheet.create({
     gap: theme.spacing[3],
   },
   todayTitle: { marginTop: theme.spacing[1] },
-  todayTrack: {
-    height: 8,
-    marginTop: theme.spacing[4],
-    borderRadius: theme.radius.full,
-    overflow: "hidden",
-    backgroundColor: theme.colors.surfaceSubtle,
-  },
-  todayFill: {
-    height: "100%",
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primary,
-  },
+  todayProgress: { marginTop: theme.spacing[4] },
   todayMeta: { marginTop: theme.spacing[2] },
   overviewState: {
     paddingVertical: theme.spacing[2],
@@ -113,6 +102,11 @@ export const styles = StyleSheet.create({
     gap: 12,
     ...theme.shadow.sm,
   },
+  roomProgress: {
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+  },
   roomCardMain: {
     flexDirection: "row",
     alignItems: "center",
@@ -131,31 +125,6 @@ export const styles = StyleSheet.create({
   roomActionText: {
     fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
-  },
-  roomProgressSection: {
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-    gap: 6,
-  },
-  roomProgressHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  roomRateText: {
-    fontWeight: theme.fontWeight.bold,
-  },
-  roomProgressTrack: {
-    height: 5,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surfaceSubtle,
-    overflow: "hidden",
-  },
-  roomProgressFill: {
-    height: "100%",
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primary,
   },
   dayBadge: {
     minWidth: 48,
@@ -190,36 +159,6 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     flexWrap: "wrap",
     gap: 6,
-  },
-  statusBadge: {
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primarySubtle,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  warnBadge: {
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.warningSubtle,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  statusBadgeText: {
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  muteBadge: {
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surfaceSubtle,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  muteBadgeText: {
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.bold,
   },
   mutedText: {
     marginTop: 5,
@@ -290,17 +229,8 @@ export const styles = StyleSheet.create({
   pathTitle: {
     marginTop: 5,
   },
-  progressTrack: {
+  pathProgress: {
     marginTop: 12,
-    height: 8,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surfaceSubtle,
-    overflow: "hidden",
-  },
-  progressFill: {
-    height: "100%",
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primary,
   },
   pathGrid: {
     marginTop: 14,

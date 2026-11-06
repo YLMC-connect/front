@@ -2,14 +2,35 @@ import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
 import { useState, type ReactNode } from "react";
 import { Text, View } from "react-native";
 import {
-  AnimatedProgressFill,
   Avatar,
+  Badge,
   Card,
   Empty,
+  MotionEnter,
   MotionPressable,
+  motionStaggerDelay,
 } from "../../ui";
+import { ProgressBar } from "../../ui/progress-bar";
 import { theme } from "../../../constants/theme";
 import { styles } from "./prayerDetailStyles";
+
+/** 목록 첫 진입: 처음 8개만 60ms 간격으로 떠오른다. */
+const STAGGER_LIMIT = 8;
+
+function StaggerItem({
+  index,
+  children,
+}: {
+  index: number;
+  children: ReactNode;
+}) {
+  if (index >= STAGGER_LIMIT) return <>{children}</>;
+  return (
+    <MotionEnter mode="fadeUp" delay={motionStaggerDelay(index)}>
+      {children}
+    </MotionEnter>
+  );
+}
 
 export type TabKey = "pray" | "answers" | "status";
 
@@ -48,8 +69,10 @@ export function PrayerPanel({
     <View style={styles.stack}>
       {urgent.length > 0 ? (
         <Section title="긴급 기도제목">
-          {urgent.map((item) => (
-            <PrayerItem key={item.title} item={item} />
+          {urgent.map((item, index) => (
+            <StaggerItem key={item.title} index={index}>
+              <PrayerItem item={item} />
+            </StaggerItem>
           ))}
         </Section>
       ) : null}
@@ -62,8 +85,10 @@ export function PrayerPanel({
       ) : null}
       {progress.length > 0 ? (
         <Section title="진행 중 기도제목">
-          {progress.map((item) => (
-            <PrayerItem key={item.title} item={item} />
+          {progress.map((item, index) => (
+            <StaggerItem key={item.title} index={index}>
+              <PrayerItem item={item} />
+            </StaggerItem>
           ))}
         </Section>
       ) : null}
@@ -90,8 +115,10 @@ export function AnswersPanel({
 
   return (
     <View style={styles.stack}>
-      {items.map((item) => (
-        <PrayerItem key={item.title} item={item} answer />
+      {items.map((item, index) => (
+        <StaggerItem key={item.title} index={index}>
+          <PrayerItem item={item} answer />
+        </StaggerItem>
       ))}
     </View>
   );
@@ -138,12 +165,12 @@ export function StatusPanel({
           <Stat label="미완료" value={pendingText} />
           <Stat label="참여율" value={rateText} />
         </View>
-        <View style={styles.progressBar}>
-          <AnimatedProgressFill
-            percent={empty ? 0 : completionRate}
-            style={styles.progressFill}
-          />
-        </View>
+        <ProgressBar
+          label="오늘 참여율"
+          value={empty ? 0 : completionRate}
+          valueText={rateText}
+          testID="prayer-status-progress"
+        />
       </Card>
 
       <Card style={styles.statusCard}>
@@ -216,31 +243,8 @@ export function PrayerItem({
         </View>
 
         <View style={styles.chipRow}>
-          {item.urgent ? (
-            <View style={styles.urgentBadge}>
-              <AppIcon
-                name="warning-amber"
-                size={10}
-                color={theme.colors.dangerText}
-              />
-              <Text style={styles.urgentBadgeText}>긴급</Text>
-            </View>
-          ) : null}
-          <View
-            style={[
-              styles.topicChip,
-              item.urgent ? styles.topicChipWarn : null,
-            ]}
-          >
-            <Text
-              style={[
-                styles.topicChipText,
-                item.urgent ? styles.topicChipTextWarn : null,
-              ]}
-            >
-              {item.category}
-            </Text>
-          </View>
+          {item.urgent ? <Badge tone="danger">긴급</Badge> : null}
+          <Badge tone={item.urgent ? "warning" : "info"}>{item.category}</Badge>
         </View>
       </View>
 
@@ -303,26 +307,7 @@ export function PersonRow({
     <View style={styles.personRow}>
       <Avatar name={name} size={30} />
       <Text style={styles.personName}>{name}</Text>
-      <View
-        style={[
-          styles.personBadge,
-          done ? styles.personBadgeDone : styles.personBadgePending,
-        ]}
-      >
-        <AppIcon
-          name={done ? "check" : "schedule"}
-          size={11}
-          color={done ? theme.colors.primaryStrong : theme.colors.textMuted}
-        />
-        <Text
-          style={[
-            styles.personBadgeText,
-            done ? styles.personBadgeTextDone : styles.personBadgeTextPending,
-          ]}
-        >
-          {done ? "완료" : "대기"}
-        </Text>
-      </View>
+      <Badge tone={done ? "info" : "neutral"}>{done ? "완료" : "대기"}</Badge>
     </View>
   );
 }

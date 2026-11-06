@@ -1,21 +1,18 @@
-import { AppIcon } from "@/components/ui/app-icon";
+import { ProgressBar } from "@/components/ui/progress-bar";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
-  AnimatedProgressFill,
+  Badge,
+  Button,
   Card,
-  DetailBadge,
   ErrorState,
   FloatingBottomBar,
-  MotionPop,
-  MotionPressable,
   TopBar,
   UnderlineTabs,
 } from "../../../src/components/ui";
-import { theme } from "../../../src/constants/theme";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 import { useTogglePrayerCompletion } from "../../../src/hooks/usePrayers";
 import {
@@ -204,32 +201,22 @@ export default function PrayerDetailScreen() {
               </View>
               <View style={styles.heroMetaCol}>
                 <View style={styles.badges}>
-                  <DetailBadge tone="primary">참여중</DetailBadge>
-                  <DetailBadge>{`멤버 ${totalMembers}명`}</DetailBadge>
+                  <Badge tone="info">참여중</Badge>
+                  <Badge tone="neutral">{`멤버 ${totalMembers}명`}</Badge>
                   {urgentItems.length > 0 ? (
-                    <DetailBadge tone="warn">{`오늘 긴급 ${urgentItems.length}건`}</DetailBadge>
+                    <Badge tone="warning">{`오늘 긴급 ${urgentItems.length}건`}</Badge>
                   ) : null}
-                  {isCompleted ? (
-                    <DetailBadge tone="primary">오늘 완료</DetailBadge>
-                  ) : null}
+                  {isCompleted ? <Badge tone="success">오늘 완료</Badge> : null}
                 </View>
               </View>
             </View>
 
-            <View style={styles.heroProgressSection}>
-              <View style={styles.heroProgressHeader}>
-                <Text style={styles.heroProgressLabel}>
-                  오늘 완료 {completedCount}명 / 전체 {totalMembers}명
-                </Text>
-                <Text style={styles.heroProgressRate}>{completionRate}%</Text>
-              </View>
-              <View style={styles.heroProgressBar}>
-                <AnimatedProgressFill
-                  percent={completionRate}
-                  style={styles.heroProgressFill}
-                />
-              </View>
-            </View>
+            <ProgressBar
+              label={`오늘 완료 ${completedCount}명 / 전체 ${totalMembers}명`}
+              value={completionRate}
+              style={styles.heroProgress}
+              testID="prayer-detail-progress"
+            />
           </Card>
         </View>
 
@@ -277,37 +264,17 @@ export default function PrayerDetailScreen() {
 
         {activeTab === "pray" && !isPrayEmpty ? (
           <FloatingBottomBar testID="prayer-detail-bottom-bar">
-            <MotionPressable
-              accessibilityRole="button"
+            <Button
               disabled={toggleCompletion.isPending}
+              icon="check"
+              loading={toggleCompletion.isPending}
               onPress={handleToggleCompletion}
-              pressedScale={0.96}
-              style={[
-                styles.prayButton,
-                isCompleted ? styles.prayButtonDone : null,
-                toggleCompletion.isPending ? { opacity: 0.7 } : null,
-              ]}
+              size="lg"
+              testID="prayer-detail-complete"
+              variant={isCompleted ? "secondary" : "primary"}
             >
-              <MotionPop key={isCompleted ? "done" : "todo"}>
-                <AppIcon
-                  name="check"
-                  size={18}
-                  color={
-                    isCompleted
-                      ? theme.colors.primaryStrong
-                      : theme.colors.onPrimary
-                  }
-                />
-              </MotionPop>
-              <Text
-                style={[
-                  styles.prayButtonText,
-                  isCompleted ? styles.prayButtonTextDone : null,
-                ]}
-              >
-                {isCompleted ? "오늘 기도 완료됨" : "오늘 기도 완료"}
-              </Text>
-            </MotionPressable>
+              {isCompleted ? "오늘 기도 완료됨" : "오늘 기도 완료"}
+            </Button>
           </FloatingBottomBar>
         ) : null}
       </View>

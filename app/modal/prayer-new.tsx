@@ -1,11 +1,11 @@
-import { AppIcon } from "@/components/ui/app-icon";
+import { RadioRow } from "@/components/ui/checkbox";
+import { InfoBox } from "@/components/ui/info-box";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -124,7 +124,7 @@ export default function PrayerNewModal() {
     >
       <TopBar
         title="기도제목 등록"
-        back
+        close
         onBack={close}
         testID="prayer-form-header"
       />
@@ -138,64 +138,36 @@ export default function PrayerNewModal() {
           <View>
             {categories.length > 0 ? (
               <Section label="카테고리" required>
-                <View style={styles.optionRow}>
-                  {categories.map((category) => {
-                    const selected = selectedCategoryId === category.id;
-                    return (
-                      <Pressable
-                        key={category.id}
-                        accessibilityRole="radio"
-                        accessibilityState={{ selected }}
-                        onPress={() => setSelectedCategoryId(category.id)}
-                        style={[
-                          styles.option,
-                          selected ? styles.optionOn : null,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.optionText,
-                            selected ? styles.optionTextOn : null,
-                          ]}
-                        >
-                          {category.categoryName}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
+                <View style={styles.optionStack}>
+                  {categories.map((category) => (
+                    <RadioRow
+                      key={category.id}
+                      label={category.categoryName}
+                      onPress={() => setSelectedCategoryId(category.id)}
+                      selected={selectedCategoryId === category.id}
+                    />
+                  ))}
                 </View>
               </Section>
             ) : null}
 
             <Section label="작성자 표시" required>
               <View style={styles.optionRow}>
-                {visibilityTabs.map((option) => {
-                  const selected = values.visibility === option.key;
-                  return (
-                    <Pressable
-                      key={option.key}
-                      accessibilityRole="radio"
-                      accessibilityState={{ selected }}
-                      onPress={() => {
-                        setError(undefined);
-                        setValues((current) => ({
-                          ...current,
-                          visibility: option.key,
-                        }));
-                      }}
-                      style={[styles.option, selected ? styles.optionOn : null]}
-                    >
-                      <Text
-                        style={[
-                          styles.optionText,
-                          selected ? styles.optionTextOn : null,
-                        ]}
-                      >
-                        {option.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
+                {visibilityTabs.map((option) => (
+                  <RadioRow
+                    key={option.key}
+                    label={option.label}
+                    onPress={() => {
+                      setError(undefined);
+                      setValues((current) => ({
+                        ...current,
+                        visibility: option.key,
+                      }));
+                    }}
+                    selected={values.visibility === option.key}
+                    style={styles.option}
+                  />
+                ))}
               </View>
             </Section>
 
@@ -231,16 +203,10 @@ export default function PrayerNewModal() {
               />
             </Section>
 
-            <View style={styles.infoBox}>
-              <AppIcon
-                name="info"
-                size={16}
-                color={theme.colors.primaryStrong}
-              />
-              <Text style={styles.infoText}>
-                작성한 기도제목은 중보기도팀 검토 후 기도방에 게시됩니다.
-              </Text>
-            </View>
+            <InfoBox
+              description="작성한 기도제목은 중보기도팀 검토 후 기도방에 게시됩니다."
+              style={styles.infoBox}
+            />
             {error ? (
               <Text accessibilityRole="alert" style={styles.errorText}>
                 {error}
@@ -283,57 +249,21 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: theme.layout.screenX,
   },
+  optionStack: {
+    gap: 8,
+    paddingHorizontal: theme.layout.screenX,
+  },
   option: {
-    minHeight: 44,
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surface,
-  },
-  optionOn: {
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primarySubtle,
-  },
-  optionText: {
-    color: theme.colors.text,
-    fontSize: theme.typography.caption.fontSize,
-  },
-  optionTextOn: {
-    color: theme.colors.primaryStrong,
-    fontWeight: theme.fontWeight.bold,
   },
   infoBox: {
     marginHorizontal: theme.layout.screenX,
     marginTop: 22,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primarySubtle,
-    flexDirection: "row",
-    gap: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  infoText: {
-    flex: 1,
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
   },
   errorText: {
     marginHorizontal: theme.layout.screenX,
     marginTop: 12,
     color: theme.colors.dangerText,
     fontSize: theme.typography.caption.fontSize,
-  },
-  footer: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: theme.layout.screenX,
-    paddingTop: 24,
-    paddingBottom: Platform.OS === "ios" ? 28 : 16,
   },
 });

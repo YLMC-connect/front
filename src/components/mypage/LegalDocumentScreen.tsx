@@ -7,7 +7,7 @@ import {
   View,
 } from "react-native";
 import { Screen } from "../layout/Screen";
-import { Empty, TopBar } from "../ui";
+import { Empty, ErrorState, TopBar } from "../ui";
 import { theme } from "../../constants/theme";
 import { useActiveSitePolicy } from "../../hooks/useSiteContent";
 import type { SitePolicyType } from "../../types/siteContentApi";
@@ -23,7 +23,12 @@ export function LegalDocumentScreen({
   const router = useRouter();
   const resolvedType: SitePolicyType =
     policyType ?? (title.includes("개인정보") ? 2 : 1);
-  const { data: policy, isLoading } = useActiveSitePolicy(resolvedType);
+  const {
+    data: policy,
+    isLoading,
+    isError,
+    refetch,
+  } = useActiveSitePolicy(resolvedType);
 
   const formatEnforcedAt = (dateStr?: string) => {
     if (!dateStr) return null;
@@ -50,6 +55,15 @@ export function LegalDocumentScreen({
           <View style={styles.emptyWrap}>
             <ActivityIndicator color={theme.colors.primary} />
           </View>
+        ) : isError && !policy ? (
+          <ErrorState
+            message={
+              resolvedType === 2
+                ? "개인정보 처리방침을 불러오지 못했어요. 다시 시도해주세요."
+                : "약관을 불러오지 못했어요. 다시 시도해주세요."
+            }
+            onRetry={() => void refetch()}
+          />
         ) : !policy?.content ? (
           <Empty
             icon="help-outline"

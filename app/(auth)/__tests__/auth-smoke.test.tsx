@@ -126,6 +126,18 @@ describe("auth smoke screens", () => {
     expect(back).not.toHaveBeenCalled();
   });
 
+  it("shows an error instead of empty terms text when the policy fetch fails", async () => {
+    jest
+      .spyOn(siteContentService, "getActiveSitePolicy")
+      .mockRejectedValue(new Error("INVALID_RESPONSE"));
+    renderWithClient(<TermsSheetScreenRoute />);
+
+    expect(
+      await screen.findByText("약관을 불러오지 못했어요. 다시 시도해주세요."),
+    ).toBeTruthy();
+    expect(screen.queryByText("등록된 약관 내용이 없습니다.")).toBeNull();
+  });
+
   it("validates login inputs before calling the session service", () => {
     renderWithClient(<LoginScreenRoute />);
 

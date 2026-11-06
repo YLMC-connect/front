@@ -1326,6 +1326,22 @@ describe("v1 tab smoke screens", () => {
     expect(screen.queryByText("기도할 제목이 없어요")).toBeNull();
   });
 
+  it("shows an error with retry instead of an empty status when the prayer status fails", async () => {
+    jest.mocked(useLocalSearchParams).mockReturnValue({ id: "1" });
+    jest
+      .spyOn(prayerService, "fetchPrayerCohortStatus")
+      .mockRejectedValue(new Error("INVALID_RESPONSE"));
+    renderWithClient(<PrayerDetailScreen />);
+
+    fireEvent.press(screen.getByRole("tab", { name: "현황" }));
+    expect(
+      await screen.findByText(
+        "기도 현황을 불러오지 못했어요. 다시 시도해주세요.",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText("기도 완료 현황이 없어요")).toBeNull();
+  });
+
   it("renders the prayer detail screen with topics and completion toggle", async () => {
     jest.mocked(useLocalSearchParams).mockReturnValue({ id: "1" });
     jest.spyOn(prayerService, "fetchPrayerCohortStatus").mockResolvedValueOnce({
@@ -1580,6 +1596,24 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("커리큘럼")).toBeTruthy();
   });
 
+  it("shows an error instead of an empty curriculum when the cohort detail fails", async () => {
+    jest.mocked(useLocalSearchParams).mockReturnValue({
+      id: "life-overview-open-1",
+      cohortId: "cohort-1",
+    });
+    jest
+      .spyOn(lifeStudyService, "fetchLifeStudyCohortDetail")
+      .mockRejectedValue(new Error("INVALID_RESPONSE"));
+    renderWithClient(<LifeStudyDetailScreen />);
+
+    expect(
+      await screen.findByText(
+        "커리큘럼을 불러오지 못했어요. 다시 시도해주세요.",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText("등록된 커리큘럼이 없어요")).toBeNull();
+  });
+
   it("renders the direct life study screen", async () => {
     jest.mocked(router.push).mockClear();
     renderWithClient(<LifeStudyScreen />);
@@ -1708,6 +1742,20 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("계정")).toBeTruthy();
   });
 
+  it("shows an error instead of an empty FAQ list when the FAQ fetch fails", async () => {
+    jest
+      .spyOn(siteContentService, "getFaqs")
+      .mockRejectedValue(new Error("INVALID_RESPONSE"));
+    renderWithClient(<FaqScreen />);
+
+    expect(
+      await screen.findByText(
+        "자주 묻는 질문을 불러오지 못했어요. 다시 시도해주세요.",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText("등록된 FAQ가 없어요")).toBeNull();
+  });
+
   it("renders the blocked users screen", () => {
     renderWithClient(<BlockedScreen />);
 
@@ -1740,5 +1788,17 @@ describe("v1 tab smoke screens", () => {
     expect(await screen.findByText("서비스 이용약관")).toBeTruthy();
     expect(screen.getByText("시행일자: 2026년 1월 1일")).toBeTruthy();
     expect(screen.getByText(/제1조 \(목적\)/)).toBeTruthy();
+  });
+
+  it("shows an error instead of an empty document when the policy fetch fails", async () => {
+    jest
+      .spyOn(siteContentService, "getActiveSitePolicy")
+      .mockRejectedValue(new Error("INVALID_RESPONSE"));
+    renderWithClient(<MyPageTermsScreen />);
+
+    expect(
+      await screen.findByText("약관을 불러오지 못했어요. 다시 시도해주세요."),
+    ).toBeTruthy();
+    expect(screen.queryByText("등록된 약관이 없어요")).toBeNull();
   });
 });

@@ -247,7 +247,11 @@ function categoryOf(key: string) {
 function StatusBadge() {
   return (
     <View style={styles.statusBadge}>
-      <AppText variant="caption" tone="inverse">
+      <AppText
+        variant="caption"
+        weight="semibold"
+        style={styles.statusBadgeText}
+      >
         예약중
       </AppText>
     </View>
@@ -323,7 +327,7 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.layout.screenX,
     paddingVertical: theme.spacing[4],
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
+    borderBottomColor: theme.colors.border,
   },
   thumbWrap: {
     width: theme.layout.listThumb,
@@ -338,7 +342,7 @@ const styles = StyleSheet.create({
   },
   doneOverlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(20,30,18,0.55)",
+    backgroundColor: "rgba(25,31,40,0.55)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -346,10 +350,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 6,
     top: 6,
-    borderRadius: theme.radius.xs,
-    backgroundColor: theme.colors.warn,
+    borderRadius: theme.radius.full,
+    backgroundColor: theme.colors.warningSubtle,
     paddingHorizontal: 8,
     paddingVertical: 3,
+  },
+  statusBadgeText: {
+    color: theme.colors.warningText,
   },
   rowText: {
     flex: 1,

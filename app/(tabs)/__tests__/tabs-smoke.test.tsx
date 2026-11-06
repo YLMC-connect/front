@@ -827,9 +827,9 @@ describe("v1 tab smoke screens", () => {
 
     const scrim = screen.getByTestId("market-hero-scrim");
     expect(scrim.props.colors).toEqual([
-      "rgba(20,30,18,0.22)",
-      "rgba(20,30,18,0.10)",
-      "rgba(20,30,18,0)",
+      "rgba(25,31,40,0.22)",
+      "rgba(25,31,40,0.10)",
+      "rgba(25,31,40,0)",
     ]);
     expect(scrim.props.locations).toEqual([0, 0.52, 1]);
     expect(StyleSheet.flatten(scrim.props.style)).toMatchObject({ height: 88 });

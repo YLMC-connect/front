@@ -16,12 +16,15 @@ import {
   routeId,
 } from "../../../src/components/life-study/detail/lifeStudyDetailData";
 import { styles } from "../../../src/components/life-study/detail/lifeStudyDetailStyles";
+import { InfoBox } from "@/components/ui/info-box";
 import {
+  Badge,
   Card,
-  DetailBadge,
   Empty,
   ErrorState,
   FloatingBottomBar,
+  MotionEnter,
+  motionStaggerDelay,
   TopBar,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
@@ -30,6 +33,9 @@ import {
   useLifeStudyOverview,
 } from "../../../src/hooks/useLifeStudyCourses";
 import { readDesignVariant } from "../../../src/lib/designVariant";
+
+/** 목록 첫 진입 때 60ms 간격으로 떠오르는 줄 수(디자인 시스템 motion: 첫 8개). */
+const LIST_STAGGER_LIMIT = 8;
 
 function LiveLifeStudyDetail({
   id,
@@ -84,14 +90,14 @@ function LiveLifeStudyDetail({
             {course ? (
               <>
                 <View style={styles.badgeRow}>
-                  <DetailBadge bordered tone={openCohort ? "warn" : "mute"}>
+                  <Badge tone={openCohort ? "warning" : "neutral"}>
                     {openCohort
                       ? "신청 가능"
                       : lifeStudyStatusLabel[course.status ?? "pending"]}
-                  </DetailBadge>
-                  <DetailBadge bordered>
+                  </Badge>
+                  <Badge tone="neutral">
                     {course.kind === "required" ? "필수" : "선택"}
-                  </DetailBadge>
+                  </Badge>
                   {course.weekCount > 0 ? (
                     <Text style={styles.caption}>
                       {course.weekCount}주 과정
@@ -167,22 +173,10 @@ function LiveLifeStudyDetail({
                 ) : (
                   <View style={styles.sectionMargin}>
                     <Text style={styles.subSectionTitle}>신청 안내</Text>
-                    <Card style={styles.noticeCard}>
-                      <View style={styles.noticeHeader}>
-                        <AppIcon
-                          name="info"
-                          size={16}
-                          color={theme.colors.primary}
-                        />
-                        <Text style={styles.noticeCardTitle}>
-                          현재 모집 중인 기수가 없습니다
-                        </Text>
-                      </View>
-                      <Text style={styles.noticeCardText}>
-                        다음 기수 개강 일정 및 모집 기간이 확정되면 안내해
-                        드릴게요.
-                      </Text>
-                    </Card>
+                    <InfoBox
+                      title="현재 모집 중인 기수가 없습니다"
+                      description="다음 기수 개강 일정 및 모집 기간이 확정되면 안내해 드릴게요."
+                    />
                   </View>
                 )}
 
@@ -198,8 +192,11 @@ function LiveLifeStudyDetail({
                   {cohortDetail?.lessons && cohortDetail.lessons.length > 0 ? (
                     <Card style={styles.infoCard}>
                       {cohortDetail.lessons.map((lesson, index) => (
-                        <View
+                        <MotionEnter
                           key={lesson.id}
+                          mode="fadeUp"
+                          enabled={index < LIST_STAGGER_LIMIT}
+                          delay={motionStaggerDelay(index)}
                           style={[
                             styles.curriculumRow,
                             index < cohortDetail.lessons.length - 1
@@ -220,7 +217,7 @@ function LiveLifeStudyDetail({
                               {lesson.lessonName}
                             </Text>
                           </View>
-                        </View>
+                        </MotionEnter>
                       ))}
                     </Card>
                   ) : cohortDetailQuery.isError ? (
@@ -304,12 +301,10 @@ export default function LifeStudyDetailScreen() {
         <ScrollView contentContainerStyle={styles.body}>
           <View style={styles.hero}>
             <View style={styles.badgeRow}>
-              <DetailBadge bordered tone={enrolled ? "primary" : "warn"}>
+              <Badge tone={enrolled ? "info" : "warning"}>
                 {enrolled ? "진행중" : "신청 가능"}
-              </DetailBadge>
-              <DetailBadge bordered>
-                {enrolled ? "4주차" : "개설 예정"}
-              </DetailBadge>
+              </Badge>
+              <Badge tone="neutral">{enrolled ? "4주차" : "개설 예정"}</Badge>
               <Text style={styles.caption}>13주 · 매주 수요일 19:30</Text>
             </View>
 

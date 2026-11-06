@@ -39,10 +39,7 @@ requireConcreteSuccess(
 requireConcreteRequest("소모임장 이관", "/api/communion/{id}/leader", "put");
 requireConcreteSuccess("소모임장 이관", "/api/communion/{id}/leader", "put");
 requireProperties("CommunionLeaderTransferRequestDto", ["newLeaderUserId"]);
-requireRequiredProperty(
-  "CommunionLeaderTransferRequestDto",
-  "newLeaderUserId",
-);
+requireRequiredProperty("CommunionLeaderTransferRequestDto", "newLeaderUserId");
 requireConcreteSuccess("공지 목록", "/api/communion/{id}/notices", "get");
 requireConcreteRequest("공지 생성", "/api/communion/{id}/notices", "post");
 requireConcreteSuccess("공지 생성", "/api/communion/{id}/notices", "post");

@@ -20,10 +20,12 @@ import {
   useMarketOverview,
   useMyMarketOverview,
 } from "../../../src/hooks/useMarket";
-import type { MarketCategory } from "../../../src/types/market";
+import type {
+  MarketCategory,
+  MarketOverviewItem,
+} from "../../../src/types/market";
 import { useMotionRouteParam } from "../../../src/hooks/useMotionRouteParam";
 import { readDesignVariant } from "../../../src/lib/designVariant";
-import type { MarketOverviewItem } from "../../../src/types/market";
 
 type MarketSegment = "all" | "sharing" | "mine";
 

@@ -202,6 +202,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     flex: 1,
+    minHeight: theme.layout.touchTarget,
   },
   termsItemText: {
     color: theme.colors.text,
@@ -217,6 +218,7 @@ export const styles = StyleSheet.create({
     gap: 2,
     paddingHorizontal: 6,
     paddingVertical: 4,
+    minHeight: theme.layout.touchTarget,
   },
   termsDetailText: {
     color: theme.colors.textMuted,

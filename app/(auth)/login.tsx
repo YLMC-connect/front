@@ -82,6 +82,8 @@ export default function LoginScreen() {
   }, [isDefault]);
 
   const isFilled = values.id.length > 0 && values.password.length > 0;
+  const isSubmitting = login.isPending || isLoading;
+  const isLoginDimmed = !isFilled && isDefault;
   const formErrorMessage = login.error
     ? getApiErrorMessage(
         login.error,
@@ -198,7 +200,7 @@ export default function LoginScreen() {
               <Pressable
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: rememberId }}
-                hitSlop={8}
+                hitSlop={{ top: 9, bottom: 9, left: 8, right: 8 }}
                 onPress={() => setRememberId((prev) => !prev)}
                 style={styles.rememberRow}
                 testID="login-remember-id"
@@ -237,17 +239,28 @@ export default function LoginScreen() {
 
               <MotionPressable
                 accessibilityRole="button"
-                disabled={login.isPending || isLoading}
+                accessibilityLabel="로그인"
+                accessibilityState={{
+                  busy: isSubmitting,
+                  disabled: isSubmitting || isLoginDimmed,
+                }}
+                disabled={isSubmitting || isLoginDimmed}
                 onPress={onSubmit}
                 style={[
                   styles.loginButton,
-                  !isFilled && isDefault ? styles.loginButtonDisabled : null,
+                  isLoginDimmed ? styles.loginButtonDisabled : null,
                 ]}
               >
-                {login.isPending || isLoading ? (
+                {isSubmitting ? (
                   <ActivityIndicator color={theme.colors.onPrimary} />
                 ) : (
-                  <AppText variant="body" style={styles.loginButtonText}>
+                  <AppText
+                    variant="body"
+                    style={[
+                      styles.loginButtonText,
+                      isLoginDimmed ? styles.loginButtonTextDisabled : null,
+                    ]}
+                  >
                     로그인
                   </AppText>
                 )}
@@ -444,13 +457,16 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
   },
   loginButtonDisabled: {
-    opacity: 0.45,
+    backgroundColor: theme.colors.surfaceSubtle,
   },
   loginButtonText: {
     color: theme.colors.onPrimary,
     fontFamily: theme.font.semibold,
     fontWeight: "normal",
     fontSize: theme.typography.body.fontSize,
+  },
+  loginButtonTextDisabled: {
+    color: theme.colors.textDisabled,
   },
   signupCard: {
     flexDirection: "row",

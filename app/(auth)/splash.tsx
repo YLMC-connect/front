@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     marginTop: 8,
-    color: "rgba(255,255,255,0.82)",
+    color: theme.colors.onPrimary,
     fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.medium,
   },

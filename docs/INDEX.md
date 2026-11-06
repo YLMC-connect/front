@@ -25,14 +25,14 @@
 
 | 도메인 | 진행 중 | 완료 | 마지막 갱신 | 상세 |
 |---|---|---|---|---|
-| common (공통 인프라) | 1 | 64 | 2026-11-06 | [features/common.md](features/common.md) |
-| auth (인증) | 1 | 19 | 2026-11-03 | [features/auth.md](features/auth.md) |
-| home (홈) | 0 | 4 | 2026-11-03 | [features/home.md](features/home.md) |
-| market (나눔장터) | 0 | 27 | 2026-11-06 | [features/market.md](features/market.md) |
-| group (소모임) | 0 | 37 | 2026-11-06 | [features/group.md](features/group.md) |
-| mypage (MY) | 0 | 12 | 2026-10-27 | [features/mypage.md](features/mypage.md) |
-| life-study (삶공부) | 1 | 15 | 2026-10-28 | [features/life-study.md](features/life-study.md) |
-| prayer (중보기도) | 1 | 21 | 2026-10-28 | [features/prayer.md](features/prayer.md) |
+| common (공통 인프라) | 5 | 64 | 2026-11-06 | [features/common.md](features/common.md) |
+| auth (인증) | 2 | 19 | 2026-11-06 | [features/auth.md](features/auth.md) |
+| home (홈) | 1 | 4 | 2026-11-06 | [features/home.md](features/home.md) |
+| market (나눔장터) | 2 | 27 | 2026-11-06 | [features/market.md](features/market.md) |
+| group (소모임) | 1 | 37 | 2026-11-06 | [features/group.md](features/group.md) |
+| mypage (MY) | 1 | 12 | 2026-11-06 | [features/mypage.md](features/mypage.md) |
+| life-study (삶공부) | 2 | 15 | 2026-11-06 | [features/life-study.md](features/life-study.md) |
+| prayer (중보기도) | 3 | 21 | 2026-11-06 | [features/prayer.md](features/prayer.md) |
 
 <!-- AUTO-GENERATED-END: domain-status -->
 
@@ -60,10 +60,12 @@
 - [0004 — Notion v1 범위와 Expo Dev Client 기준](adr/0004-notion-v1-dev-client-scope.md) — 삶공부·중보기도를 v1 mock-first로 구현하고 Expo Go가 아닌 Dev Client를 검증 기준으로 확정. (수락, 2026-05-22)
 - [0005 — 모바일 E2E는 Maestro 우선](adr/0005-mobile-e2e-maestro-first.md) — Expo Dev Client development build 기준 v1 탭 진입 smoke를 Maestro로 관리. (수락, 2026-05-23; 탭 smoke 대상 갱신 2026-06-27)
 - [0006 — Gluestack UI 및 NativeWind 퇴역](adr/0006-retire-nativewind-gluestack.md) — 실제 미사용 도구 정리 및 순수 React Native StyleSheet + theme.ts 체제 확정. (수락, 2026-09-03)
+- [0007 — 디자인 시스템 v2 반영](adr/0007-design-system-v2.md) — 디자인 시스템 아티팩트를 기준으로 토큰 이름·값, 글자 6단계, 카드 그림자를 바꾸고 별칭을 거쳐 도메인별로 옮긴다. (수락, 2026-11-06)
 
 ---
 
 ## 외부 자료
 
 - Notion “열린문커넥트” 기획 문서 — MVP 범위와 IA의 최신 기준
+- claude.ai 아티팩트 “YLMC Connect 디자인 시스템” — 토큰 v2·화면 규칙·컴포넌트 규격의 기준 ([ADR 0007](adr/0007-design-system-v2.md))
 - `/Users/mingulee/Downloads/열린문커넥트.zip` — 앱 디자인 토큰과 110개 JSX 화면 기준

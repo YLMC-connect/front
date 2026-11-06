@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   segmented: {
     position: "relative",
     flexDirection: "row",
-    height: theme.size.segmentHeight,
+    minHeight: theme.size.segmentHeight,
     gap: SEGMENT_GAP,
     padding: SEGMENT_PADDING,
     backgroundColor: theme.colors.surfaceSubtle,
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   },
   segment: {
     flex: 1,
-    height: theme.size.segmentItemHeight,
+    minHeight: theme.size.segmentItemHeight,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: theme.radius.full,

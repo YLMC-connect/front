@@ -143,11 +143,11 @@ describe("common motion", () => {
     expect(screen.getByTestId("status-indicator")).toBeTruthy();
     expect(
       StyleSheet.flatten(screen.getByTestId("status-track").props.style),
-    ).toMatchObject({ height: 40, borderRadius: theme.radius.full });
+    ).toMatchObject({ minHeight: 40, borderRadius: theme.radius.full });
     expect(
       StyleSheet.flatten(screen.getByTestId("status-sharing").props.style),
     ).toMatchObject({
-      height: 32,
+      minHeight: 32,
       borderRadius: theme.radius.full,
       alignItems: "center",
       justifyContent: "center",
@@ -253,13 +253,14 @@ describe("common motion", () => {
     expect(
       StyleSheet.flatten(screen.getByTestId("category-indicator").props.style),
     ).toMatchObject({
-      height: theme.size.chipHeight,
+      top: 6,
+      bottom: 6,
       borderRadius: theme.radius.full,
     });
     expect(
       StyleSheet.flatten(screen.getByTestId("category-all").props.style),
     ).toMatchObject({
-      height: theme.size.chipHeight,
+      minHeight: theme.size.chipHeight,
       borderRadius: theme.radius.full,
     });
     expect(screen.getByTestId("category-all").props.hitSlop).toEqual({

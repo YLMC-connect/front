@@ -3,6 +3,12 @@ import { StyleSheet, Text } from "react-native";
 import { theme } from "../../constants/theme";
 import { MotionPressable } from "./motion";
 
+/**
+ * 작은 글자 버튼(높이 약 18)의 누르는 곳을 세로 44 로 맞춘다.
+ * 옆 버튼과는 6 씩만 넓혀, 쓰는 곳의 간격(12·14)에서 서로 겹치지 않게 한다.
+ */
+const MINI_ACTION_HIT_SLOP = { top: 13, bottom: 13, left: 6, right: 6 };
+
 type DetailActionProps = {
   icon: AppIconName;
   label: string;
@@ -51,6 +57,7 @@ export function DetailMiniAction({
       testID={testID}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole={onPress ? "button" : undefined}
+      hitSlop={onPress ? MINI_ACTION_HIT_SLOP : undefined}
       onPress={onPress}
       style={styles.miniAction}
     >

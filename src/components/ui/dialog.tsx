@@ -138,7 +138,12 @@ export function BottomSheet({
           pointerEvents="none"
           style={[StyleSheet.absoluteFill, styles.sheetBackdrop, backdropStyle]}
         />
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="닫기"
+          style={StyleSheet.absoluteFill}
+          onPress={onClose}
+        />
         <Animated.View
           testID="bottom-sheet-panel"
           onLayout={(event) => {
@@ -218,7 +223,14 @@ export function RadioSheet({
                 confirmDisabled ? styles.sheetFooterButtonDisabled : null,
               ]}
             >
-              <Text style={styles.sheetConfirmText}>{confirmText}</Text>
+              <Text
+                style={[
+                  styles.sheetConfirmText,
+                  confirmDisabled ? styles.sheetConfirmTextDisabled : null,
+                ]}
+              >
+                {confirmText}
+              </Text>
             </Pressable>
           </View>
         </>
@@ -440,6 +452,7 @@ const styles = StyleSheet.create({
     color: theme.colors.onPrimary,
     fontWeight: theme.fontWeight.semibold,
   },
+  sheetConfirmTextDisabled: { color: theme.colors.textDisabled },
   radioList: {},
   radioOption: {
     minHeight: 48,

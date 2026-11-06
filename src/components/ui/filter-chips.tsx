@@ -176,8 +176,9 @@ const styles = StyleSheet.create({
   },
   surface: {
     position: "absolute",
+    // 칩 높이가 글자 확대로 커져도 따라가도록 위아래로 묶는다.
     top: FILTER_CHIP_HIT_SLOP,
-    height: FILTER_CHIP_HEIGHT,
+    bottom: FILTER_CHIP_HIT_SLOP,
     borderRadius: theme.radius.full,
     borderWidth: 1,
     borderColor: theme.colors.border,
@@ -185,14 +186,15 @@ const styles = StyleSheet.create({
   },
   indicator: {
     position: "absolute",
+    // 칩 높이가 글자 확대로 커져도 따라가도록 위아래로 묶는다.
     top: FILTER_CHIP_HIT_SLOP,
-    height: FILTER_CHIP_HEIGHT,
+    bottom: FILTER_CHIP_HIT_SLOP,
     zIndex: 1,
     borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primarySubtle,
   },
   chip: {
-    height: FILTER_CHIP_HEIGHT,
+    minHeight: FILTER_CHIP_HEIGHT,
     marginVertical: FILTER_CHIP_HIT_SLOP,
     zIndex: 2,
     paddingHorizontal: 14,

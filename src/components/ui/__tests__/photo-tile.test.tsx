@@ -65,7 +65,13 @@ describe("PhotoTile", () => {
     );
 
     expect(screen.getByText("60%")).toBeTruthy();
-    expect(screen.getByLabelText("사진 3 올리는 중 60%")).toBeTruthy();
+    const progressBar = screen.getByRole("progressbar");
+    expect(progressBar.props.accessibilityLabel).toBe("사진 3 올리는 중");
+    expect(progressBar.props.accessibilityValue).toMatchObject({
+      min: 0,
+      max: 100,
+      now: 60,
+    });
   });
 
   it("shows a retry tile on failure", () => {

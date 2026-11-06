@@ -104,7 +104,10 @@ export function PhotoTile(props: PhotoTileProps) {
       ) : null}
       {variant === "uploading" ? (
         <View
-          accessibilityLabel={`사진 ${number} 올리는 중 ${Math.round(progress)}%`}
+          accessible
+          accessibilityLabel={`사진 ${number} 올리는 중`}
+          accessibilityRole="progressbar"
+          accessibilityValue={{ min: 0, max: 100, now: Math.round(progress) }}
           style={styles.uploading}
           testID={testID ? `${testID}-uploading` : undefined}
         >

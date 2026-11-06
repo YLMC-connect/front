@@ -51,7 +51,11 @@
 | `app/(tabs)/prayer/_layout.tsx`                | 기도 목록·상세·신청·요청 중첩 Stack             |
 | `app/(tabs)/prayer/index.tsx`                  | Downloads 하단 `기도` 탭 루트                   |
 | `src/components/faith/FaithSectionsScreen.tsx` | 기도 목록 공유 렌더러                           |
+| `src/components/faith/FaithPrayerContent.tsx`  | 기도 목록 본문 |
+| `src/components/faith/FaithParts.tsx`, `faithLabels.ts`, `faithSectionsStyles.ts` | 기도·삶공부 목록 공유 부품·라벨·스타일 |
 | `app/(tabs)/prayer/[id].tsx`                   | 기도방 상세, 기도제목, 응답 기록                |
+| `src/components/prayer/detail/PrayerDetailParts.tsx` | 기도방 상세 탭 패널(기도·응답·현황)·항목 부품 |
+| `src/components/prayer/detail/prayerDetailStyles.ts` | 기도방 상세 스타일 |
 | `app/(tabs)/prayer/apply.tsx`                  | 기도방 참여 신청 요일/시간 선택 화면            |
 | `app/(tabs)/prayer/request.tsx`                | 내 기도제목 요청 상태 목록                      |
 | `app/modal/prayer-new.tsx`                     | 기도제목 등록 모달                              |

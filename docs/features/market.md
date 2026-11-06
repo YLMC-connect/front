@@ -73,6 +73,8 @@
 | `app/(tabs)/market/_layout.tsx`         | 나눔 목록·상세 중첩 Stack                                        |
 | `app/(tabs)/market/index.tsx`           | 나눔 목록, 상태/카테고리 필터                                    |
 | `app/(tabs)/market/[id].tsx`            | 나눔 상세, 게시글 삭제, 댓글, 신고                               |
+| `src/components/market/detail/MarketDetailParts.tsx` | 나눔 상세 사진·상태 배너·댓글 부품 |
+| `src/components/market/detail/marketDetailStyles.ts` | 나눔 상세 스타일 |
 | `app/modal/market-new.tsx`              | 나눔 작성 모달                                                   |
 | `src/services/marketService.ts`         | 나눔 조회·내 나눔·게시글 삭제·댓글 CUD·신고 HTTP 서비스          |
 | `src/services/marketHttpDataSource.ts`  | 라이브 나눔 HTTP data source                                     |

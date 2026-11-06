@@ -1,6 +1,6 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { router, useLocalSearchParams } from "expo-router";
-import { forwardRef, type ReactNode, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
@@ -8,10 +8,8 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
-  type TextInputProps,
   UIManager,
   View,
 } from "react-native";
@@ -20,7 +18,6 @@ import Animated, {
   FadeInDown,
   LinearTransition,
 } from "react-native-reanimated";
-import { AuthInput } from "../../src/components/auth/auth-input";
 import {
   type TermKey,
   TermsSheet,
@@ -32,7 +29,6 @@ import {
   MotionEnter,
   MotionFadeIn,
   MotionPop,
-  MotionPressable,
   MotionShake,
   TopBar,
 } from "../../src/components/ui";
@@ -42,23 +38,22 @@ import { useAuth } from "../../src/hooks/useAuth";
 import { getApiErrorMessage } from "../../src/lib/apiErrorMessage";
 import { isValidLoginId, sanitizeLoginId } from "../../src/lib/authValidation";
 import { readDesignVariant } from "../../src/lib/designVariant";
-
-type FormValues = {
-  id: string;
-  password: string;
-  passwordConfirm: string;
-  userName: string;
-  phone: string;
-  email: string;
-};
-
-type FormErrors = Partial<Record<keyof FormValues, string>>;
-type Availability = {
-  value: string;
-  available: boolean;
-};
-
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import {
+  emailPattern,
+  formatPhoneNumber,
+  phoneDigits,
+  type Availability,
+  type FormErrors,
+  type FormValues,
+  validateSignup,
+} from "../../src/components/auth/signup/signupForm";
+import {
+  CheckBadge,
+  Field,
+  InlineError,
+  SignupInput,
+} from "../../src/components/auth/signup/SignupParts";
+import { styles } from "../../src/components/auth/signup/signupStyles";
 
 const AUTO_ADVANCE_DEBOUNCE = process.env.NODE_ENV === "test" ? 0 : 500;
 
@@ -76,44 +71,6 @@ const animateLayout = () => {
     // Non-native fallback
   }
 };
-
-/** Korean mobile display: digits only → 010-XXXX-XXXX (max 11 digits). */
-function formatPhoneNumber(input: string): string {
-  const digits = input.replace(/\D/g, "").slice(0, 11);
-  if (digits.length <= 3) return digits;
-  if (digits.length <= 7) {
-    return `${digits.slice(0, 3)}-${digits.slice(3)}`;
-  }
-  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
-}
-
-function phoneDigits(phone: string): string {
-  return phone.replace(/\D/g, "");
-}
-
-function validateSignup(values: FormValues) {
-  const errors: FormErrors = {};
-  if (values.id.trim().length < 3) {
-    errors.id = "아이디는 3자 이상 입력해주세요.";
-  } else if (!isValidLoginId(values.id.trim())) {
-    errors.id = "영문 소문자와 숫자만 입력할 수 있어요.";
-  }
-  if (values.password.length < 8) {
-    errors.password = "비밀번호는 8자 이상 입력해주세요.";
-  }
-  if (values.userName.trim().length < 2) {
-    errors.userName = "이름을 2자 이상 입력해주세요.";
-  } else if (!/^[가-힣]+$/.test(values.userName.trim())) {
-    errors.userName = "이름은 한글만 입력할 수 있어요.";
-  }
-  if (phoneDigits(values.phone).length < 10) {
-    errors.phone = "연락처를 입력해주세요.";
-  }
-  if (!emailPattern.test(values.email)) {
-    errors.email = "이메일을 입력해주세요.";
-  }
-  return errors;
-}
 
 export default function SignupScreen() {
   const params = useLocalSearchParams<{ designVariant?: string }>();
@@ -1008,372 +965,3 @@ export default function SignupScreen() {
     </Screen>
   );
 }
-
-function CheckBadge({ on, big = false }: { on: boolean; big?: boolean }) {
-  const size = big ? 22 : 18;
-  return (
-    <View
-      style={[
-        styles.checkBadge,
-        { width: size, height: size, borderRadius: size / 2 },
-        on ? styles.checkBadgeOn : null,
-      ]}
-    >
-      {on ? (
-        <AppIcon name="check" size={size * 0.65} color={theme.colors.white} />
-      ) : null}
-    </View>
-  );
-}
-
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <View>
-      <Text style={styles.label}>{label}</Text>
-      {children}
-    </View>
-  );
-}
-
-const SignupInput = forwardRef<
-  TextInput,
-  {
-    testID?: string;
-    value?: string;
-    onChangeText: (value: string) => void;
-    placeholder: string;
-    hasError?: boolean;
-    secureTextEntry?: boolean;
-    keyboardType?: TextInputProps["keyboardType"];
-    autoCapitalize?: "none" | "sentences" | "words" | "characters";
-    autoCorrect?: boolean;
-    autoComplete?: TextInputProps["autoComplete"];
-    textContentType?: TextInputProps["textContentType"];
-    returnKeyType?: TextInputProps["returnKeyType"];
-    onSubmitEditing?: TextInputProps["onSubmitEditing"];
-    onBlur?: TextInputProps["onBlur"];
-    trailing?: ReactNode;
-  }
->(function SignupInput(
-  {
-    testID,
-    value,
-    onChangeText,
-    placeholder,
-    hasError,
-    secureTextEntry,
-    keyboardType = "default",
-    autoCapitalize,
-    autoCorrect,
-    autoComplete,
-    textContentType,
-    returnKeyType,
-    onSubmitEditing,
-    onBlur,
-    trailing,
-  },
-  ref,
-) {
-  const [passwordVisible, setPasswordVisible] = useState(false);
-  const resolvedTrailing = secureTextEntry ? (
-    <MotionPressable
-      accessibilityLabel={passwordVisible ? "비밀번호 숨기기" : "비밀번호 보기"}
-      accessibilityRole="button"
-      hitSlop={8}
-      onPress={() => setPasswordVisible((visible) => !visible)}
-      style={styles.visibilityButton}
-    >
-      <AppIcon
-        name={passwordVisible ? "visibility" : "visibility-off"}
-        size={20}
-        color={theme.colors.inkMute}
-      />
-    </MotionPressable>
-  ) : (
-    trailing
-  );
-
-  return (
-    <AuthInput
-      ref={ref}
-      testID={testID}
-      value={value}
-      onChangeText={onChangeText}
-      placeholder={placeholder}
-      secureTextEntry={secureTextEntry && !passwordVisible}
-      keyboardType={keyboardType}
-      autoCapitalize={autoCapitalize}
-      autoCorrect={autoCorrect}
-      autoComplete={autoComplete}
-      textContentType={textContentType}
-      returnKeyType={returnKeyType}
-      onSubmitEditing={onSubmitEditing}
-      onBlur={onBlur}
-      hasError={hasError}
-      trailing={resolvedTrailing}
-    />
-  );
-});
-
-function InlineError({ children }: { children?: ReactNode }) {
-  if (!children) {
-    return null;
-  }
-
-  return (
-    <MotionFadeIn>
-      <View style={styles.errorRow}>
-        <AppIcon name="error-outline" size={14} color={theme.colors.danger} />
-        <Text style={styles.inlineError}>{children}</Text>
-      </View>
-    </MotionFadeIn>
-  );
-}
-
-const styles = StyleSheet.create({
-  root: { flex: 1 },
-  scroll: { flex: 1 },
-  body: {
-    paddingHorizontal: theme.layout.screenX,
-    paddingTop: theme.spacing[5],
-    paddingBottom: 130,
-  },
-  headerSubtitle: {
-    marginTop: 6,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.md,
-  },
-  bottom: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: theme.layout.screenX,
-    paddingTop: 24,
-    paddingBottom: 24,
-  },
-  form: {
-    marginTop: theme.spacing[5],
-    gap: theme.spacing[4],
-  },
-  sectionCard: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.radius.lg,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    padding: 16,
-    gap: theme.spacing[4],
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingBottom: 2,
-  },
-  sectionBadge: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: theme.colors.primaryTint,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  sectionBadgeText: {
-    color: theme.colors.primaryDeep,
-    fontSize: 13,
-    fontWeight: theme.fontWeight.extrabold,
-  },
-  sectionTitle: {
-    color: theme.colors.ink,
-    fontSize: theme.typography.cardTitle.fontSize,
-    lineHeight: theme.typography.cardTitle.lineHeight,
-    fontWeight: theme.typography.cardTitle.fontWeight,
-  },
-  label: {
-    marginBottom: theme.spacing[2],
-    color: theme.colors.inkSoft,
-    fontSize: theme.typography.formLabel.fontSize,
-    lineHeight: theme.typography.formLabel.lineHeight,
-    fontWeight: theme.typography.formLabel.fontWeight,
-  },
-  idRow: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  idInputWrap: { flex: 1, minWidth: 0 },
-  visibilityButton: {
-    width: theme.layout.touchTarget,
-    height: theme.layout.touchTarget,
-    marginRight: -8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkButton: {
-    height: 48,
-    paddingHorizontal: 14,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.lineStrong,
-    backgroundColor: theme.colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkButtonVerified: {
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primarySoft,
-  },
-  checkButtonVerifiedContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  checkButtonText: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.sm + 1,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  checkButtonTextVerified: {
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.sm + 1,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  passwordRulesRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 14,
-    marginTop: 8,
-    paddingHorizontal: 2,
-  },
-  ruleItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  ruleText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.medium,
-  },
-  ruleTextPass: {
-    color: theme.colors.primaryDeep,
-    fontWeight: theme.fontWeight.bold,
-  },
-  hiddenTrigger: {
-    position: "absolute",
-    width: 0,
-    height: 0,
-    opacity: 0,
-  },
-  errorRow: {
-    marginTop: 6,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  inlineError: {
-    flex: 1,
-    color: theme.colors.danger,
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: theme.fontWeight.medium,
-  },
-  successRow: {
-    marginTop: 6,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  successHint: {
-    flex: 1,
-  },
-  hint: {
-    marginTop: 6,
-  },
-  termsCard: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.radius.lg,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
-    padding: 14,
-    gap: 10,
-  },
-  termsAllRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingVertical: 4,
-    paddingHorizontal: 4,
-    borderRadius: theme.radius.md,
-  },
-  termsAllRowOn: {
-    backgroundColor: theme.colors.primaryTint,
-  },
-  termsAllText: {
-    color: theme.colors.ink,
-    fontSize: theme.typography.cardTitle.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  termsList: {
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.line,
-    paddingTop: 8,
-    gap: 8,
-  },
-  termsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 4,
-    minHeight: 36,
-  },
-  termsCheckWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    flex: 1,
-  },
-  termsItemText: {
-    color: theme.colors.inkSoft,
-    fontSize: 13,
-  },
-  termsRequired: {
-    color: theme.colors.primaryDeep,
-    fontWeight: theme.fontWeight.bold,
-  },
-  termsDetailButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 2,
-    paddingHorizontal: 6,
-    paddingVertical: 4,
-  },
-  termsDetailText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-  },
-  checkBadge: {
-    borderWidth: 1.5,
-    borderColor: theme.colors.lineStrong,
-    backgroundColor: theme.colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkBadgeOn: {
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primary,
-  },
-  submitButton: {
-    height: 52,
-    borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    ...theme.shadow.primary,
-  },
-  submitText: {
-    color: theme.colors.white,
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.bold,
-  },
-  error: { color: theme.colors.danger, fontSize: 13 },
-});

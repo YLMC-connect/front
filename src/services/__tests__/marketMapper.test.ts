@@ -7,6 +7,11 @@ import {
   toShareItemStatus,
 } from "../marketMapper";
 
+jest.mock("expo-constants", () => ({
+  __esModule: true,
+  default: { expoConfig: { extra: { apiUrl: "https://api.example.com/" } } },
+}));
+
 const listItem = {
   id: 1,
   title: "안쓰는 아기띠 나눔합니다",
@@ -68,6 +73,27 @@ describe("marketMapper", () => {
       authorName: "찬양팀",
       isMine: true,
     });
+  });
+
+  it("resolves relative image paths against the configured API origin", () => {
+    expect(
+      mapShareDetail(
+        {
+          ...detail,
+          images: [
+            "/files/a.jpg",
+            { imageUrl: "files/b.jpg" },
+            "https://cdn.example.com/c.jpg",
+          ],
+        },
+        [],
+        "selah",
+      )?.images,
+    ).toEqual([
+      "https://api.example.com/files/a.jpg",
+      "https://api.example.com/files/b.jpg",
+      "https://cdn.example.com/c.jpg",
+    ]);
   });
 
   it("marks a comment edited only when updatedAt differs", () => {

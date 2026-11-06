@@ -42,24 +42,27 @@
 
 ## 주요 파일 (도메인 파일 지도)
 
-| 경로                                           | 역할                                  |
-| ---------------------------------------------- | ------------------------------------- |
-| `app/(tabs)/life-study/_layout.tsx`            | 삶공부 목록·상세·신청·이력 중첩 Stack |
-| `app/(tabs)/life-study/index.tsx`              | Downloads 하단 `삶공부` 탭 루트       |
-| `src/components/faith/FaithSectionsScreen.tsx` | 삶공부 목록 공유 렌더러               |
-| `src/components/faith/FaithStudyContent.tsx`   | 삶공부 목록 본문 |
-| `src/components/faith/FaithParts.tsx`, `faithLabels.ts`, `faithSectionsStyles.ts` | 기도·삶공부 목록 공유 부품·라벨·스타일 |
-| `app/(tabs)/life-study/[id].tsx`               | 삶공부 상세, 신청/취소, 진도/커리큘럼 |
-| `app/(tabs)/life-study/apply.tsx`              | 삶공부 수강 신청 입력 화면            |
-| `app/(tabs)/life-study/history.tsx`            | 삶공부 신청/수강/지난 과정 내역 화면  |
-| `src/services/lifeStudyService.ts`             | 삶공부 HTTP 서비스                    |
-| `src/services/lifeStudyHttpDataSource.ts`      | 수업·출석·수료 HTTP data source       |
-| `src/services/lifeStudyMapper.ts`              | Notion DTO → 기존 view model          |
-| `src/hooks/useLifeStudyCourses.ts`             | 삶공부 목록·overview query hook       |
-| `src/constants/domainOptions.ts`               | 삶공부 상태 필터 옵션                 |
-| `src/types/lifeStudy.ts`                       | 삶공부 화면 모델                      |
-| `src/types/lifeStudyApi.ts`                    | Notion 필드만 담은 수업·출석·수료 DTO |
-| `scripts/check-life-study-api-contract.mjs`    | 수업·출석·수료 OpenAPI 계약 검사      |
+| 경로                                                                              | 역할                                                     |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `app/(tabs)/life-study/_layout.tsx`                                               | 삶공부 목록·상세·신청·이력 중첩 Stack                    |
+| `app/(tabs)/life-study/index.tsx`                                                 | Downloads 하단 `삶공부` 탭 루트                          |
+| `src/components/faith/FaithSectionsScreen.tsx`                                    | 삶공부 목록 공유 렌더러                                  |
+| `src/components/faith/FaithStudyContent.tsx`                                      | 삶공부 목록 본문                                         |
+| `src/components/faith/FaithParts.tsx`, `faithLabels.ts`, `faithSectionsStyles.ts` | 기도·삶공부 목록 공유 부품·라벨·스타일                   |
+| `app/(tabs)/life-study/[id].tsx`                                                  | 삶공부 상세, 신청/취소, 진도/커리큘럼                    |
+| `src/components/life-study/detail/LifeStudyDetailParts.tsx`                       | 삶공부 상세 섹션·정보 행·커리큘럼 행 부품                |
+| `src/components/life-study/detail/lifeStudyDetailData.ts`                         | 삶공부 상세 디자인 시안 데이터·상태 라벨·route id 정규화 |
+| `src/components/life-study/detail/lifeStudyDetailStyles.ts`                       | 삶공부 상세 스타일                                       |
+| `app/(tabs)/life-study/apply.tsx`                                                 | 삶공부 수강 신청 입력 화면                               |
+| `app/(tabs)/life-study/history.tsx`                                               | 삶공부 신청/수강/지난 과정 내역 화면                     |
+| `src/services/lifeStudyService.ts`                                                | 삶공부 HTTP 서비스                                       |
+| `src/services/lifeStudyHttpDataSource.ts`                                         | 수업·출석·수료 HTTP data source                          |
+| `src/services/lifeStudyMapper.ts`                                                 | Notion DTO → 기존 view model                             |
+| `src/hooks/useLifeStudyCourses.ts`                                                | 삶공부 목록·overview query hook                          |
+| `src/constants/domainOptions.ts`                                                  | 삶공부 상태 필터 옵션                                    |
+| `src/types/lifeStudy.ts`                                                          | 삶공부 화면 모델                                         |
+| `src/types/lifeStudyApi.ts`                                                       | Notion 필드만 담은 수업·출석·수료 DTO                    |
+| `scripts/check-life-study-api-contract.mjs`                                       | 수업·출석·수료 OpenAPI 계약 검사                         |
 
 ## 데이터 타입
 

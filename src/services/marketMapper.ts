@@ -1,5 +1,4 @@
-import Constants from "expo-constants";
-import { ApiError } from "../lib/apiClient";
+import { ApiError, readApiUrl } from "../lib/apiClient";
 import type {
   MarketCategory,
   MarketDetail,
@@ -81,9 +80,8 @@ function readId(value: unknown) {
 
 function resolveImageUrl(raw: string): string {
   if (/^(https?:|file:|content:|data:)/.test(raw)) return raw;
-  const apiUrl =
-    Constants.expoConfig?.extra?.apiUrl ?? process.env.EXPO_PUBLIC_API_URL;
-  if (typeof apiUrl === "string" && /^https?:\/\//.test(apiUrl)) {
+  const apiUrl = readApiUrl();
+  if (apiUrl) {
     const base = apiUrl.replace(/\/+$/, "");
     return raw.startsWith("/") ? `${base}${raw}` : `${base}/${raw}`;
   }

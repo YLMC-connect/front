@@ -190,13 +190,19 @@ export default function LifeStudyApplyScreenRoute() {
 
                   <View>
                     <Text style={styles.label}>신앙 연차</Text>
-                    <View style={styles.chips}>
+                    <View
+                      style={styles.chips}
+                      accessibilityRole="radiogroup"
+                      accessibilityLabel="신앙 연차"
+                    >
                       {faithYears.map((item, index) => {
                         const selected = index === faithYearIndex;
                         return (
                           <Pressable
                             key={item}
-                            accessibilityRole="button"
+                            accessibilityRole="radio"
+                            accessibilityState={{ checked: selected }}
+                            hitSlop={{ top: 5, bottom: 5 }}
                             onPress={() => setFaithYearIndex(index)}
                             style={[
                               styles.chip,
@@ -434,7 +440,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   chipOn: {
-    borderColor: theme.colors.primarySubtle,
+    borderColor: theme.colors.primary,
     backgroundColor: theme.colors.primarySubtle,
   },
   chipText: {
@@ -468,7 +474,7 @@ const styles = StyleSheet.create({
   checkBoxOff: {
     backgroundColor: "transparent",
     borderWidth: 1.5,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.borderStrong,
   },
   inputDisabled: {
     backgroundColor: theme.colors.surfaceSubtle,

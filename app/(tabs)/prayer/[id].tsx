@@ -8,6 +8,7 @@ import {
   AnimatedProgressFill,
   Card,
   DetailBadge,
+  ErrorState,
   FloatingBottomBar,
   MotionPop,
   MotionPressable,
@@ -96,6 +97,14 @@ export default function PrayerDetailScreen() {
 
   const room = statusQuery.data;
   const board = boardQuery.data;
+  // 게시판 조회가 실패하면 빈 목록이 아니라 오류로 보여준다(기도제목·응답 탭 공통)
+  const boardFailed = boardQuery.isError && !board;
+  const boardError = boardFailed ? (
+    <ErrorState
+      message="기도제목을 불러오지 못했어요. 다시 시도해주세요."
+      onRetry={() => void boardQuery.refetch()}
+    />
+  ) : null;
 
   const roomTitle = room?.cohortName || "월요일 오전 기도방";
   const { day, period } = parseDayAndPeriod(id, roomTitle);
@@ -246,6 +255,8 @@ export default function PrayerDetailScreen() {
               day={day}
               period={period}
             />
+          ) : boardError ? (
+            boardError
           ) : activeTab === "answers" ? (
             <AnswersPanel empty={isAnswersEmpty} items={answerItems} />
           ) : (

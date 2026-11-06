@@ -11,49 +11,50 @@ export type PrayerTopicStatus =
   | "REJECTED"
   | "HIDDEN";
 
+/** 화면에서 쓰지 않는 필드는 없거나 형식이 다르면 null 로 읽는다. */
 export interface PrayerCohortDto {
   id: number;
-  cohortYear: number;
+  cohortYear: number | null;
   yoil: number;
   timeSlot: PrayerTimeSlot;
   cohortName: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  status: PrayerCohortStatus;
+  description: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  status: PrayerCohortStatus | null;
   memberCount: number;
   weekCompletedCount: number;
   completionRate: number;
-  myCompleted: boolean;
+  myCompleted: boolean | null;
   /** 멤버가 아니면 null. */
   myRole: PrayerMemberRole | null;
-  emergencyCount: number;
+  emergencyCount: number | null;
 }
 
 export interface PrayerCompletionMemberDto {
   userId: string;
   userName: string;
-  userPhone: string;
-  memberRole: PrayerMemberRole;
+  userPhone: string | null;
+  memberRole: PrayerMemberRole | null;
   /** 미완료면 null. */
   completionId: number | null;
   /** 미완료면 null. */
   completedAt: string | null;
-  likeCount: number;
-  liked: boolean;
+  likeCount: number | null;
+  liked: boolean | null;
 }
 
 export interface PrayerCohortStatusDto {
   cohortId: number;
   cohortName: string;
-  weekStartDate: string;
-  scheduledDate: string;
+  weekStartDate: string | null;
+  scheduledDate: string | null;
   totalMembers: number;
   completedCount: number;
   notCompletedCount: number;
   completionRate: number;
   myCompleted: boolean;
-  canComplete: boolean;
+  canComplete: boolean | null;
   completed: PrayerCompletionMemberDto[];
   notCompleted: PrayerCompletionMemberDto[];
 }
@@ -63,15 +64,16 @@ export type PrayerCohortDetail = Record<string, never>;
 
 export interface PrayerTopicDto {
   id: number;
-  categoryId: number;
+  categoryId: number | null;
   categoryName: string;
   title: string;
   content: string;
   status: PrayerTopicStatus;
   rejectReason: string | null;
-  writerName: string;
-  mine: boolean;
-  emergency: boolean;
+  /** 없으면 화면에서 "성도". */
+  writerName: string | null;
+  mine: boolean | null;
+  emergency: boolean | null;
   emergencyEndAt: string | null;
   answerContent: string | null;
   answeredAt: string | null;
@@ -108,23 +110,23 @@ export interface PrayerApplicationCreateRequest {
  */
 export interface PrayerHistoryItem {
   cohortId: number;
-  cohortName: string;
-  cohortYear: number;
-  yoil: number;
-  timeSlot: PrayerTimeSlot;
-  memberRole: PrayerMemberRole;
-  joinedAt: string;
+  cohortName: string | null;
+  cohortYear: number | null;
+  yoil: number | null;
+  timeSlot: PrayerTimeSlot | null;
+  memberRole: PrayerMemberRole | null;
+  joinedAt: string | null;
   /** 활동중이면 null. */
   leftAt: string | null;
-  leaveReason: string;
-  active: boolean;
+  leaveReason: string | null;
+  active: boolean | null;
 }
 
 export interface PrayerCategoryDto {
   id: number;
-  categoryCode: string;
+  categoryCode: string | null;
   categoryName: string;
-  orderNum: number;
+  orderNum: number | null;
 }
 
 /** 래퍼 이름 없이 세 배열만 있다. */

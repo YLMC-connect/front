@@ -8,6 +8,9 @@ import {
   buildLifeStudyOverview,
   readAttendanceRoster,
   readMyCompletions,
+  requireCompletionRoster,
+  tryReadLifeStudyCohortList,
+  tryReadLifeStudyList,
 } from "../lifeStudyMapper";
 
 const course: LifeStudyCourse = {
@@ -62,6 +65,16 @@ const completionRoster = {
 };
 
 describe("lifeStudyMapper", () => {
+  let warn: jest.SpyInstance;
+
+  beforeEach(() => {
+    warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warn.mockRestore();
+  });
+
   it("builds overview, courses, and histories from myCompletions", () => {
     const overview = buildLifeStudyOverview([myCompletion]);
     expect(overview.courses).toEqual([
@@ -146,10 +159,13 @@ describe("lifeStudyMapper", () => {
         data: [myCompletion],
       }),
     ).toThrow(ApiError);
-    expect(() =>
-      readMyCompletions([{ ...myCompletion, lifeStudyId: "3" }]),
-    ).toThrow(ApiError);
     expect(() => readAttendanceRoster([])).toThrow(ApiError);
+    expect(() =>
+      requireCompletionRoster({ ...completionRoster, students: null }),
+    ).toThrow(ApiError);
+    expect(() =>
+      requireCompletionRoster({ ...completionRoster, lifeStudyId: "3" }),
+    ).toThrow(ApiError);
     expect(
       readAttendanceRoster({
         attended: true,
@@ -157,5 +173,72 @@ describe("lifeStudyMapper", () => {
       }),
     ).toEqual({});
     expect(readAttendanceRoster(null)).toBeNull();
+  });
+
+  it("reads null or missing fields that no screen uses", () => {
+    const {
+      cohortNumber: _cohortNumber,
+      attendCount: _attendCount,
+      ...completionWithout
+    } = myCompletion;
+    expect(readMyCompletions([completionWithout])).toEqual([myCompletion]);
+    expect(
+      requireCompletionRoster({
+        ...completionRoster,
+        totalClassCount: null,
+        students: [{ userId: "user-1", completed: true }],
+      }),
+    ).toMatchObject({
+      totalClassCount: null,
+      students: [
+        {
+          userId: "user-1",
+          userName: null,
+          userPhone: null,
+          attendCount: null,
+          absentCount: null,
+          completed: true,
+          completedAt: null,
+        },
+      ],
+    });
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("drops only the list items whose screen fields are wrong", () => {
+    expect(
+      readMyCompletions([{ ...myCompletion, lifeStudyId: "3" }, myCompletion]),
+    ).toEqual([myCompletion]);
+    expect(
+      requireCompletionRoster({
+        ...completionRoster,
+        students: [{ userId: "user-2" }, ...completionRoster.students],
+      }).students.map((student) => student.userId),
+    ).toEqual(["user-1"]);
+    expect(
+      tryReadLifeStudyList([
+        { id: "1", name: "생명의 삶" },
+        { id: 2, name: "경건의 삶" },
+      ]).map((study) => study.id),
+    ).toEqual([2]);
+    expect(
+      tryReadLifeStudyCohortList([
+        null,
+        { id: 9, lifeStudyId: 2, lifeStudyName: "경건의 삶" },
+      ]).map((cohort) => cohort.id),
+    ).toEqual([9]);
+
+    expect(warn).toHaveBeenCalledWith(
+      "[응답 형식] lifeStudy.myCompletions[0]: lifeStudyId 형식 오류",
+    );
+    expect(warn).toHaveBeenCalledWith(
+      "[응답 형식] lifeStudy.completionRoster.students[0]: completed 형식 오류",
+    );
+    expect(warn).toHaveBeenCalledWith(
+      "[응답 형식] lifeStudy.list[0]: id·name 형식 오류",
+    );
+    expect(warn).toHaveBeenCalledWith(
+      "[응답 형식] lifeStudy.cohorts[0]: id·lifeStudyId·lifeStudyName 형식 오류",
+    );
   });
 });

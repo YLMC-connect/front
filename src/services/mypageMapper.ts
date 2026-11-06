@@ -1,4 +1,7 @@
-import { ApiError } from "../lib/apiClient";
+import {
+  invalidResponse as invalid,
+  keepValidItems,
+} from "../lib/reportResponseIssue";
 import type {
   MyPageActivityComment,
   MyPageActivityGroup,
@@ -86,15 +89,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function invalid(data: unknown): never {
-  throw new ApiError({
-    code: "INVALID_RESPONSE",
-    message: "서버 응답 형식을 확인할 수 없습니다.",
-    status: 200,
-    data,
-  });
-}
-
 function readInteger(value: unknown) {
   return typeof value === "number" && Number.isInteger(value) ? value : null;
 }
@@ -104,7 +98,7 @@ function requireKey(
   key: string,
   source: unknown,
 ) {
-  if (!(key in data)) invalid(source);
+  if (!(key in data)) invalid(source, key);
 }
 
 function requireInteger(
@@ -114,7 +108,7 @@ function requireInteger(
 ) {
   requireKey(data, key, source);
   const value = readInteger(data[key]);
-  if (value == null) invalid(source);
+  if (value == null) invalid(source, key);
   return value;
 }
 
@@ -124,18 +118,7 @@ function requireString(
   source: unknown,
 ) {
   requireKey(data, key, source);
-  if (typeof data[key] !== "string") invalid(source);
-  return data[key];
-}
-
-function requireNullableString(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  requireKey(data, key, source);
-  if (data[key] === null) return null;
-  if (typeof data[key] !== "string") invalid(source);
+  if (typeof data[key] !== "string") invalid(source, key);
   return data[key];
 }
 
@@ -145,7 +128,7 @@ function requireBoolean(
   source: unknown,
 ) {
   requireKey(data, key, source);
-  if (typeof data[key] !== "boolean") invalid(source);
+  if (typeof data[key] !== "boolean") invalid(source, key);
   return data[key];
 }
 
@@ -156,18 +139,49 @@ function requireOneOf<T extends string>(
   allowed: readonly T[],
 ): T {
   const value = requireString(data, key, source);
-  if (!allowed.includes(value as T)) invalid(source);
+  if (!allowed.includes(value as T)) invalid(source, key);
   return value as T;
 }
 
-function requireYoil(
+/** 화면에서 쓰지 않는 필드. 없거나 형식이 다르면 null. */
+function optionalInteger(data: Record<string, unknown>, key: string) {
+  return readInteger(data[key]);
+}
+
+function optionalString(data: Record<string, unknown>, key: string) {
+  return typeof data[key] === "string" ? data[key] : null;
+}
+
+function optionalBoolean(data: Record<string, unknown>, key: string) {
+  return typeof data[key] === "boolean" ? data[key] : null;
+}
+
+function optionalOneOf<T extends string>(
   data: Record<string, unknown>,
   key: string,
-  source: unknown,
-) {
-  const value = requireInteger(data, key, source);
-  if (value < 0 || value > 6) invalid(source);
-  return value;
+  allowed: readonly T[],
+): T | null {
+  return allowed.includes(data[key] as T) ? (data[key] as T) : null;
+}
+
+/** 0=일 … 6=토. 범위 밖이면 null. */
+function optionalYoil(data: Record<string, unknown>, key: string) {
+  const value = optionalInteger(data, key);
+  return value != null && value >= 0 && value <= 6 ? value : null;
+}
+
+/** 배열이 아니면 응답 오류. 형식이 틀린 항목만 빼고 돌려준다. */
+function readArrayField<T>(
+  data: Record<string, unknown>,
+  key: string,
+  source: string,
+  readItem: (item: unknown, source: unknown) => T,
+): T[] {
+  const items = data[key];
+  if (!Array.isArray(items)) invalid(data, key);
+  return keepValidItems(items, `${source}.${key}`, (item) =>
+    readItem(item, data),
+  );
 }
 
 export function formatMyPageActivityDate(value: string) {
@@ -204,13 +218,14 @@ export function normalizeMyPageGroupQuery(query?: MyPageGroupPageQuery) {
 
 function readPage<T>(
   data: unknown,
+  source: string,
   readItem: (item: unknown, source: unknown) => T,
 ): MyPageActivityPage<T> {
   if (!isRecord(data) || !Array.isArray(data.content)) invalid(data);
   const currentPage = requireInteger(data, "currentPage", data);
-  if (currentPage < 1) invalid(data);
+  if (currentPage < 1) invalid(data, "currentPage");
   return {
-    content: data.content.map((item) => readItem(item, data)),
+    content: readArrayField(data, "content", source, readItem),
     totalElements: requireInteger(data, "totalElements", data),
     totalPages: requireInteger(data, "totalPages", data),
     currentPage,
@@ -239,7 +254,7 @@ function readPost(value: unknown, source: unknown): MyPagePostDto {
   return {
     id: requireInteger(value, "id", source),
     title: requireString(value, "title", source),
-    content: requireString(value, "content", source),
+    content: optionalString(value, "content"),
     status: requireOneOf<MyPagePostStatus>(
       value,
       "status",
@@ -252,10 +267,10 @@ function readPost(value: unknown, source: unknown): MyPagePostDto {
       source,
       POST_STATUS_NAMES,
     ),
-    categoryCode: requireString(value, "categoryCode", source),
-    itemStatus: requireString(value, "itemStatus", source),
-    viewCount: requireInteger(value, "viewCount", source),
-    thumbnailUrl: requireString(value, "thumbnailUrl", source),
+    categoryCode: optionalString(value, "categoryCode"),
+    itemStatus: optionalString(value, "itemStatus"),
+    viewCount: optionalInteger(value, "viewCount"),
+    thumbnailUrl: optionalString(value, "thumbnailUrl"),
     createdAt: requireString(value, "createdAt", source),
   };
 }
@@ -264,7 +279,7 @@ function readComment(value: unknown, source: unknown): MyPageCommentDto {
   if (!isRecord(value)) invalid(source);
   return {
     id: requireInteger(value, "id", source),
-    shareId: requireInteger(value, "shareId", source),
+    shareId: optionalInteger(value, "shareId"),
     shareTitle: requireString(value, "shareTitle", source),
     content: requireString(value, "content", source),
     createdAt: requireString(value, "createdAt", source),
@@ -276,13 +291,13 @@ function readGroup(value: unknown, source: unknown): MyPageGroupDto {
   return {
     id: requireInteger(value, "id", source),
     title: requireString(value, "title", source),
-    type: requireOneOf<MyPageGroupType>(value, "type", source, GROUP_TYPES),
-    categoryCode: requireString(value, "categoryCode", source),
-    maxParticipants: requireInteger(value, "maxParticipants", source),
+    type: optionalOneOf<MyPageGroupType>(value, "type", GROUP_TYPES),
+    categoryCode: optionalString(value, "categoryCode"),
+    maxParticipants: optionalInteger(value, "maxParticipants"),
     currentParticipants: requireInteger(value, "currentParticipants", source),
-    status: requireString(value, "status", source),
-    leaderId: requireString(value, "leaderId", source),
-    leaderName: requireString(value, "leaderName", source),
+    status: optionalString(value, "status"),
+    leaderId: optionalString(value, "leaderId"),
+    leaderName: optionalString(value, "leaderName"),
     joinedAt: requireString(value, "joinedAt", source),
   };
 }
@@ -322,64 +337,66 @@ export function mapMyPageGroupRow(group: MyPageGroupDto): MyPageActivityGroup {
 export function readMyPagePostList(
   data: unknown,
 ): MyPageActivityList<MyPageActivityPost> {
-  return toActivityList(readPage(data, readPost), mapMyPagePostRow);
+  return toActivityList(
+    readPage(data, "mypage.posts", readPost),
+    mapMyPagePostRow,
+  );
 }
 
 export function readMyPageCommentList(
   data: unknown,
 ): MyPageActivityList<MyPageActivityComment> {
-  return toActivityList(readPage(data, readComment), mapMyPageCommentRow);
+  return toActivityList(
+    readPage(data, "mypage.comments", readComment),
+    mapMyPageCommentRow,
+  );
 }
 
 export function readMyPageGroupList(
   data: unknown,
 ): MyPageActivityList<MyPageActivityGroup> {
-  return toActivityList(readPage(data, readGroup), mapMyPageGroupRow);
+  return toActivityList(
+    readPage(data, "mypage.groups", readGroup),
+    mapMyPageGroupRow,
+  );
 }
 
-function readNamedItem<T extends string>(
-  value: unknown,
-  source: unknown,
-  keys: readonly T[],
-): { [K in T]: unknown } {
-  if (!isRecord(value)) invalid(source);
-  const row = {} as { [K in T]: unknown };
-  for (const key of keys) {
-    requireKey(value, key, source);
-    row[key] = value[key];
-  }
-  return row;
-}
-
-function readNamedList<T extends string>(
-  data: unknown,
-  source: unknown,
-  keys: readonly T[],
-): { [K in T]: unknown }[] {
-  if (!Array.isArray(data)) invalid(source);
-  return data.map((item) => readNamedItem(item, source, keys));
+/** 값 타입이 정해지지 않은 행. 없는 이름은 null 로 채운다. */
+function namedItemReader<T extends string>(keys: readonly T[]) {
+  return (value: unknown, source: unknown): { [K in T]: unknown } => {
+    if (!isRecord(value)) invalid(source);
+    const row = {} as { [K in T]: unknown };
+    for (const key of keys) {
+      row[key] = key in value ? value[key] : null;
+    }
+    return row;
+  };
 }
 
 export function readMyPageLifeStudyHistory(
   data: unknown,
 ): MyPageLifeStudyHistoryDto {
   if (!isRecord(data)) invalid(data);
+  const source = "mypage.lifeStudies";
   return {
-    completionCount: requireInteger(data, "completionCount", data),
-    applications: readNamedList(
-      data.applications,
+    completionCount: optionalInteger(data, "completionCount"),
+    applications: readArrayField(
       data,
-      APPLICATION_KEYS,
+      "applications",
+      source,
+      namedItemReader(APPLICATION_KEYS),
     ) as MyPageLifeStudyApplication[],
-    ongoing: readNamedList(
-      data.ongoing,
+    ongoing: readArrayField(
       data,
-      ONGOING_KEYS,
+      "ongoing",
+      source,
+      namedItemReader(ONGOING_KEYS),
     ) as MyPageLifeStudyOngoing[],
-    completed: readNamedList(
-      data.completed,
+    completed: readArrayField(
       data,
-      COMPLETED_KEYS,
+      "completed",
+      source,
+      namedItemReader(COMPLETED_KEYS),
     ) as MyPageLifeStudyCompleted[],
   };
 }
@@ -391,60 +408,57 @@ function readPrayerActivity(
   if (!isRecord(value)) invalid(source);
   return {
     cohortId: requireInteger(value, "cohortId", source),
-    cohortName: requireString(value, "cohortName", source),
-    cohortYear: requireInteger(value, "cohortYear", source),
-    yoil: requireYoil(value, "yoil", source),
-    yoilName: requireString(value, "yoilName", source),
-    timeSlot: requireOneOf<MyPagePrayerTimeSlot>(
+    cohortName: optionalString(value, "cohortName"),
+    cohortYear: optionalInteger(value, "cohortYear"),
+    yoil: optionalYoil(value, "yoil"),
+    yoilName: optionalString(value, "yoilName"),
+    timeSlot: optionalOneOf<MyPagePrayerTimeSlot>(
       value,
       "timeSlot",
-      source,
       TIME_SLOTS,
     ),
-    timeSlotName: requireOneOf<MyPagePrayerTimeSlotName>(
+    timeSlotName: optionalOneOf<MyPagePrayerTimeSlotName>(
       value,
       "timeSlotName",
-      source,
       TIME_SLOT_NAMES,
     ),
-    memberRole: requireOneOf<MyPagePrayerMemberRole>(
+    memberRole: optionalOneOf<MyPagePrayerMemberRole>(
       value,
       "memberRole",
-      source,
       MEMBER_ROLES,
     ),
-    memberRoleName: requireOneOf<MyPagePrayerMemberRoleName>(
+    memberRoleName: optionalOneOf<MyPagePrayerMemberRoleName>(
       value,
       "memberRoleName",
-      source,
       MEMBER_ROLE_NAMES,
     ),
-    joinedAt: requireString(value, "joinedAt", source),
-    leftAt: requireNullableString(value, "leftAt", source),
-    period: requireString(value, "period", source),
-    leaveReason: requireNullableString(value, "leaveReason", source),
-    active: requireBoolean(value, "active", source),
+    joinedAt: optionalString(value, "joinedAt"),
+    leftAt: optionalString(value, "leftAt"),
+    period: optionalString(value, "period"),
+    leaveReason: optionalString(value, "leaveReason"),
+    active: optionalBoolean(value, "active"),
   };
 }
 
 export function readMyPagePrayerHistory(data: unknown): MyPagePrayerHistoryDto {
   if (!isRecord(data)) invalid(data);
-  if (
-    !Array.isArray(data.currentActivities) ||
-    !Array.isArray(data.pastActivities)
-  ) {
-    invalid(data);
-  }
+  const source = "mypage.prayers";
   return {
-    activeCount: requireInteger(data, "activeCount", data),
-    totalPeriod: requireString(data, "totalPeriod", data),
-    totalPeriodDays: requireInteger(data, "totalPeriodDays", data),
-    totalRoomCount: requireInteger(data, "totalRoomCount", data),
-    currentActivities: data.currentActivities.map((item) =>
-      readPrayerActivity(item, data),
+    activeCount: optionalInteger(data, "activeCount"),
+    totalPeriod: optionalString(data, "totalPeriod"),
+    totalPeriodDays: optionalInteger(data, "totalPeriodDays"),
+    totalRoomCount: optionalInteger(data, "totalRoomCount"),
+    currentActivities: readArrayField(
+      data,
+      "currentActivities",
+      source,
+      readPrayerActivity,
     ),
-    pastActivities: data.pastActivities.map((item) =>
-      readPrayerActivity(item, data),
+    pastActivities: readArrayField(
+      data,
+      "pastActivities",
+      source,
+      readPrayerActivity,
     ),
   };
 }

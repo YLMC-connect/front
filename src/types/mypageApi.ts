@@ -23,20 +23,20 @@ export type MyPagePostStatusName = "나눔중" | "예약완료" | "나눔완료"
 export interface MyPagePostDto {
   id: number;
   title: string;
-  content: string;
+  content: string | null;
   status: MyPagePostStatus;
   statusName: MyPagePostStatusName;
-  categoryCode: string;
+  categoryCode: string | null;
   /** 값 목록은 Notion에 없다. */
-  itemStatus: string;
-  viewCount: number;
-  thumbnailUrl: string;
+  itemStatus: string | null;
+  viewCount: number | null;
+  thumbnailUrl: string | null;
   createdAt: string;
 }
 
 export interface MyPageCommentDto {
   id: number;
-  shareId: number;
+  shareId: number | null;
   shareTitle: string;
   content: string;
   createdAt: string;
@@ -52,14 +52,14 @@ export interface MyPageGroupPageQuery extends MyPageActivityPageQuery {
 export interface MyPageGroupDto {
   id: number;
   title: string;
-  type: MyPageGroupType;
-  categoryCode: string;
-  maxParticipants: number;
+  type: MyPageGroupType | null;
+  categoryCode: string | null;
+  maxParticipants: number | null;
   currentParticipants: number;
   /** RECRUITING, CLOSED 등. 닫힌 목록이 아니다. */
-  status: string;
-  leaderId: string;
-  leaderName: string;
+  status: string | null;
+  leaderId: string | null;
+  leaderName: string | null;
   joinedAt: string;
 }
 
@@ -103,7 +103,7 @@ export interface MyPageLifeStudyCompleted {
 }
 
 export interface MyPageLifeStudyHistoryDto {
-  completionCount: number;
+  completionCount: number | null;
   applications: MyPageLifeStudyApplication[];
   ongoing: MyPageLifeStudyOngoing[];
   completed: MyPageLifeStudyCompleted[];
@@ -116,29 +116,30 @@ export type MyPagePrayerMemberRoleName = "팀장" | "중보기도요원";
 
 export interface MyPagePrayerActivityItem {
   cohortId: number;
-  cohortName: string;
-  cohortYear: number;
-  /** 0=일 … 6=토. */
-  yoil: number;
-  yoilName: string;
-  timeSlot: MyPagePrayerTimeSlot;
-  timeSlotName: MyPagePrayerTimeSlotName;
-  memberRole: MyPagePrayerMemberRole;
-  memberRoleName: MyPagePrayerMemberRoleName;
-  joinedAt: string;
+  cohortName: string | null;
+  cohortYear: number | null;
+  /** 0=일 … 6=토. 범위 밖이면 null. */
+  yoil: number | null;
+  yoilName: string | null;
+  timeSlot: MyPagePrayerTimeSlot | null;
+  timeSlotName: MyPagePrayerTimeSlotName | null;
+  memberRole: MyPagePrayerMemberRole | null;
+  memberRoleName: MyPagePrayerMemberRoleName | null;
+  joinedAt: string | null;
   /** 활동중이면 null. */
   leftAt: string | null;
-  period: string;
+  period: string | null;
   /** 활동중이면 null. */
   leaveReason: string | null;
-  active: boolean;
+  active: boolean | null;
 }
 
+/** 화면에서 쓰지 않는 필드는 없거나 형식이 다르면 null 로 읽는다. */
 export interface MyPagePrayerHistoryDto {
-  activeCount: number;
-  totalPeriod: string;
-  totalPeriodDays: number;
-  totalRoomCount: number;
+  activeCount: number | null;
+  totalPeriod: string | null;
+  totalPeriodDays: number | null;
+  totalRoomCount: number | null;
   currentActivities: MyPagePrayerActivityItem[];
   pastActivities: MyPagePrayerActivityItem[];
 }

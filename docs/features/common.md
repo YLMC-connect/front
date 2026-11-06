@@ -43,6 +43,7 @@
 | `docs/MAINTENANCE.md`                          | 문서 드리프트 복구                                            |
 | `src/lib/apiClient.ts`                         | envelope·오류·Authorization                                   |
 | `src/lib/sentry.ts`                            | Sentry 초기화·wrap·응답 형식 오류 보고                        |
+| `src/lib/reportResponseIssue.ts`               | 응답 일부를 버릴 때 알림·목록 항목 단위 해석                  |
 | `src/types/common.ts`                          | 공통 회원·서버 역할 타입                                      |
 | `src/lib/rolePermissions.ts`                   | 관리자 도메인별 역할 접근 판별                                |
 | `src/constants/theme.ts` / `designTokens.json` | 디자인 토큰                                                   |
@@ -92,6 +93,7 @@
 - **런타임은 Expo SDK 57** — React Native 0.86. Node는 `package.json` `engines`(`^22.13.0 || ^24.3.0 || >=25.0.0`)이고 CI는 22.22.0. iOS는 `expo-build-properties`의 `ios.enableSceneSupport`로 UIKit scene lifecycle을 켠다. `userInterfaceStyle: light`는 `expo-system-ui`가 적용한다. `ios/`·`android/`는 gitignore이며 prebuild로 다시 만든다.
 - **Gluestack UI 및 NativeWind 퇴역 (ADR 0006)** — 순수 React Native StyleSheet + `src/constants/theme.ts` 단일 표준 확정. 1,775줄 ui/index.tsx를 6개 서브모듈로 모듈화하되 하위 호환성을 위해 barrel export 유지.
 - **Sentry는 배포 빌드에서만** — `__DEV__`이거나 `EXPO_PUBLIC_SENTRY_DSN`이 비면 초기화하지 않는다. DSN은 로컬 `.env`/EAS env에만 둔다. 응답 형식 오류 보고에는 쿼리 키 앞 두 조각·HTTP status·code 태그만 싣고, 응답 본문·메시지·개인정보는 보내지 않는다. 네트워크 오류·4xx 는 보내지 않는다. 소스맵·디버그 심볼 자동 업로드는 아직 끔(`SENTRY_DISABLE_AUTO_UPLOAD=true`: `eas.json`, `ios:dev-client`/`android:dev-client` 스크립트). 업로드를 켜려면 Sentry org/project와 `SENTRY_AUTH_TOKEN`이 필요하다.
+- **응답 해석은 화면이 쓰는 필드만 엄격** — 기도·MY·삶공부 mapper 는 화면·상위 로직이 쓰는 필드(id, 제목, 상태, 날짜 등)만 형식을 확인하고, 쓰지 않는 필드는 없거나 형식이 달라도 `null` 로 읽는다. 목록은 형식이 틀린 항목만 빼고 나머지를 돌려주며, 뺀 항목은 `reportResponseIssue({ source, reason })` 로 경로·필드 이름만 알린다(값·개인정보 금지, 지금은 `__DEV__` 의 `console.warn`). 응답 자체가 배열·객체가 아니면 여전히 `INVALID_RESPONSE`.
 - **Mock-first** — API 없는 도메인은 service/mock 후 adapter 교체.
 
 ## 미결 / 추적

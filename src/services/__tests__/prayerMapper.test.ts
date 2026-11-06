@@ -6,6 +6,7 @@ import {
   readPrayerCategories,
   readPrayerCohortDetail,
   readPrayerCohorts,
+  readPrayerCohortStatus,
   readPrayerHistory,
   readPrayerTopicBoard,
   readPrayerTopics,
@@ -47,7 +48,32 @@ const topic: PrayerTopicDto = {
   createdAt: "2026-10-02T01:02:03",
 };
 
+const cohortStatus = {
+  cohortId: 15,
+  cohortName: "월요일 오전 기도방",
+  weekStartDate: "2026-11-02",
+  scheduledDate: "2026-11-02",
+  totalMembers: 2,
+  completedCount: 1,
+  notCompletedCount: 1,
+  completionRate: 50,
+  myCompleted: true,
+  canComplete: true,
+  completed: [],
+  notCompleted: [],
+};
+
 describe("prayerMapper", () => {
+  let warn: jest.SpyInstance;
+
+  beforeEach(() => {
+    warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warn.mockRestore();
+  });
+
   it("builds prayer overview from cohorts and topics", () => {
     const mapped = buildPrayerOverview([cohort], [topic]);
 
@@ -195,19 +221,14 @@ describe("prayerMapper", () => {
     expect(() =>
       readPrayerCohorts({ code: "SUCCESS", message: "ok", data: [cohort] }),
     ).toThrow(ApiError);
-    expect(() => readPrayerCohorts([{ ...cohort, yoil: "1" }])).toThrow(
-      ApiError,
-    );
+    expect(() => readPrayerTopics({ data: [topic] })).toThrow(ApiError);
+    expect(() => readPrayerCohortStatus([])).toThrow(ApiError);
     expect(() =>
-      readPrayerCohorts([{ ...cohort, timeSlot: "MORNING" }]),
+      readPrayerCohortStatus({ ...cohortStatus, completed: null }),
     ).toThrow(ApiError);
-    expect(() => readPrayerCohorts([{ ...cohort, myRole: "ADMIN" }])).toThrow(
-      ApiError,
-    );
-    expect(() => readPrayerTopics([{ ...topic, status: "DRAFT" }])).toThrow(
-      ApiError,
-    );
-    expect(() => readPrayerApplications([{ id: 1 }])).toThrow(ApiError);
+    expect(() =>
+      readPrayerCohortStatus({ ...cohortStatus, totalMembers: "3" }),
+    ).toThrow(ApiError);
     expect(() => readPrayerCohortDetail([])).toThrow(ApiError);
     expect(() => readPrayerTopicBoard({ emergency: [] })).toThrow(ApiError);
     expect(() => requireCreatedId("15")).toThrow(ApiError);
@@ -250,10 +271,112 @@ describe("prayerMapper", () => {
       description: null,
     };
     expect(readPrayerCohorts([raw])).toEqual([
+      { ...cohort, description: null },
+    ]);
+  });
+
+  it("reads null or missing fields that no screen uses", () => {
+    const {
+      categoryId: _categoryId,
+      mine: _mine,
+      createdAt: _createdAt,
+      ...topicWithout
+    } = topic;
+    expect(
+      readPrayerTopics([
+        { ...topicWithout, writerName: null, emergency: null, answeredAt: 1 },
+      ]),
+    ).toEqual([
       {
-        ...cohort,
-        description: "",
+        ...topic,
+        categoryId: null,
+        writerName: null,
+        mine: null,
+        emergency: null,
+        answeredAt: null,
+        createdAt: null,
       },
     ]);
+    expect(
+      readPrayerCohorts([
+        { ...cohort, startDate: null, status: "UNKNOWN", myCompleted: null },
+      ]),
+    ).toEqual([
+      { ...cohort, startDate: null, status: null, myCompleted: null },
+    ]);
+    expect(
+      readPrayerCohortStatus({
+        ...cohortStatus,
+        weekStartDate: null,
+        canComplete: null,
+        completed: [{ userId: "u-1", userName: "김성도" }],
+      }),
+    ).toMatchObject({
+      weekStartDate: null,
+      canComplete: null,
+      completed: [
+        {
+          userId: "u-1",
+          userName: "김성도",
+          userPhone: null,
+          memberRole: null,
+          completionId: null,
+          completedAt: null,
+          likeCount: null,
+          liked: null,
+        },
+      ],
+    });
+    expect(readPrayerApplications([{ id: 1 }])).toEqual([
+      expect.objectContaining({ id: 1, cohortId: null, processedAt: null }),
+    ]);
+    expect(readPrayerCategories([{ id: 1, categoryName: "치유" }])).toEqual([
+      { id: 1, categoryCode: null, categoryName: "치유", orderNum: null },
+    ]);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("drops only the list items whose screen fields are wrong", () => {
+    expect(
+      readPrayerCohorts([
+        cohort,
+        { ...cohort, id: 16, yoil: "1" },
+        { ...cohort, id: 17, timeSlot: "MORNING" },
+        { ...cohort, id: 18, myRole: "ADMIN" },
+        "행이 아님",
+      ]),
+    ).toEqual([cohort]);
+    expect(
+      readPrayerTopicBoard({
+        emergency: [{ ...topic, title: null }],
+        recentAnswers: [],
+        ongoing: [topic, { ...topic, id: 8, status: "DRAFT" }],
+      }),
+    ).toEqual({ emergency: [], recentAnswers: [], ongoing: [topic] });
+    expect(
+      readPrayerCohortStatus({
+        ...cohortStatus,
+        notCompleted: [{ userId: "u-2" }],
+      })?.notCompleted,
+    ).toEqual([]);
+    expect(readPrayerCategories([{ id: "1", categoryName: "치유" }])).toEqual(
+      [],
+    );
+
+    expect(warn).toHaveBeenCalledWith(
+      "[응답 형식] prayer.cohorts[1]: yoil 형식 오류",
+    );
+    expect(warn).toHaveBeenCalledWith(
+      "[응답 형식] prayer.cohorts[4]: 항목 형식 오류",
+    );
+    expect(warn).toHaveBeenCalledWith(
+      "[응답 형식] prayer.topicBoard.emergency[0]: title 형식 오류",
+    );
+    expect(warn).toHaveBeenCalledWith(
+      "[응답 형식] prayer.topicBoard.ongoing[1]: status 형식 오류",
+    );
+    expect(warn).toHaveBeenCalledWith(
+      "[응답 형식] prayer.cohortStatus.notCompleted[0]: userName 형식 오류",
+    );
   });
 });

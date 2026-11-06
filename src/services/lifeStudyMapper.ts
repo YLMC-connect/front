@@ -1,4 +1,8 @@
-import { ApiError } from "../lib/apiClient";
+import {
+  invalidResponse as invalid,
+  keepValidItems,
+  reportResponseIssue,
+} from "../lib/reportResponseIssue";
 import type { Member } from "../types/common";
 import type {
   LifeStudyCourse,
@@ -23,15 +27,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function invalid(data: unknown): never {
-  throw new ApiError({
-    code: "INVALID_RESPONSE",
-    message: "서버 응답 형식을 확인할 수 없습니다.",
-    status: 200,
-    data,
-  });
-}
-
 function readInteger(value: unknown) {
   return typeof value === "number" && Number.isInteger(value) ? value : null;
 }
@@ -45,7 +40,7 @@ function requireKey(
   key: string,
   source: unknown,
 ) {
-  if (!(key in data)) invalid(source);
+  if (!(key in data)) invalid(source, key);
 }
 
 function requireInteger(
@@ -55,7 +50,7 @@ function requireInteger(
 ) {
   requireKey(data, key, source);
   const value = readInteger(data[key]);
-  if (value == null) invalid(source);
+  if (value == null) invalid(source, key);
   return value;
 }
 
@@ -67,7 +62,7 @@ function requireNullableInteger(
   requireKey(data, key, source);
   if (data[key] === null) return null;
   const value = readInteger(data[key]);
-  if (value == null) invalid(source);
+  if (value == null) invalid(source, key);
   return value;
 }
 
@@ -78,7 +73,7 @@ function requireFiniteNumber(
 ) {
   requireKey(data, key, source);
   const value = readFiniteNumber(data[key]);
-  if (value == null) invalid(source);
+  if (value == null) invalid(source, key);
   return value;
 }
 
@@ -88,7 +83,7 @@ function requireString(
   source: unknown,
 ) {
   requireKey(data, key, source);
-  if (typeof data[key] !== "string") invalid(source);
+  if (typeof data[key] !== "string") invalid(source, key);
   return data[key];
 }
 
@@ -99,7 +94,7 @@ function requireNullableString(
 ) {
   requireKey(data, key, source);
   if (data[key] === null) return null;
-  if (typeof data[key] !== "string") invalid(source);
+  if (typeof data[key] !== "string") invalid(source, key);
   return data[key];
 }
 
@@ -109,8 +104,17 @@ function requireBoolean(
   source: unknown,
 ) {
   requireKey(data, key, source);
-  if (typeof data[key] !== "boolean") invalid(source);
+  if (typeof data[key] !== "boolean") invalid(source, key);
   return data[key];
+}
+
+/** 화면에서 쓰지 않는 필드. 없거나 형식이 다르면 null. */
+function optionalInteger(data: Record<string, unknown>, key: string) {
+  return readInteger(data[key]);
+}
+
+function optionalString(data: Record<string, unknown>, key: string) {
+  return typeof data[key] === "string" ? data[key] : null;
 }
 
 function readStudent(
@@ -120,26 +124,26 @@ function readStudent(
   if (!isRecord(value)) invalid(source);
   return {
     userId: requireString(value, "userId", source),
-    userName: requireNullableString(value, "userName", source),
-    userPhone: requireNullableString(value, "userPhone", source),
-    attendCount: requireInteger(value, "attendCount", source),
-    absentCount: requireInteger(value, "absentCount", source),
+    userName: optionalString(value, "userName"),
+    userPhone: optionalString(value, "userPhone"),
+    attendCount: optionalInteger(value, "attendCount"),
+    absentCount: optionalInteger(value, "absentCount"),
     completed: requireBoolean(value, "completed", source),
-    completedAt: requireNullableString(value, "completedAt", source),
+    completedAt: optionalString(value, "completedAt"),
   };
 }
 
 export function readMyCompletions(data: unknown): LifeStudyMyCompletion[] {
   if (data == null) return [];
   if (!Array.isArray(data)) invalid(data);
-  return data.map((item) => {
+  return keepValidItems(data, "lifeStudy.myCompletions", (item) => {
     if (!isRecord(item)) invalid(data);
     return {
       lifeStudyId: requireInteger(item, "lifeStudyId", data),
       lifeStudyName: requireNullableString(item, "lifeStudyName", data),
       cohortId: requireInteger(item, "cohortId", data),
-      cohortNumber: requireNullableInteger(item, "cohortNumber", data),
-      attendCount: requireNullableInteger(item, "attendCount", data),
+      cohortNumber: optionalInteger(item, "cohortNumber"),
+      attendCount: optionalInteger(item, "attendCount"),
       totalClassCount: requireNullableInteger(item, "totalClassCount", data),
       completedAt: requireNullableString(item, "completedAt", data),
     };
@@ -173,9 +177,13 @@ export function readCompletionRoster(
     cohortId: requireInteger(data, "cohortId", data),
     lifeStudyId: requireInteger(data, "lifeStudyId", data),
     lifeStudyName: requireNullableString(data, "lifeStudyName", data),
-    cohortNumber: requireNullableInteger(data, "cohortNumber", data),
-    totalClassCount: requireInteger(data, "totalClassCount", data),
-    students: data.students.map((student) => readStudent(student, data)),
+    cohortNumber: optionalInteger(data, "cohortNumber"),
+    totalClassCount: optionalInteger(data, "totalClassCount"),
+    students: keepValidItems(
+      data.students,
+      "lifeStudy.completionRoster.students",
+      (student) => readStudent(student, data),
+    ),
   };
 }
 
@@ -260,9 +268,18 @@ const emptyPath = {
 export function tryReadLifeStudyList(data: unknown): LifeStudyDto[] {
   if (data == null || !Array.isArray(data)) return [];
   const result: LifeStudyDto[] = [];
-  for (const item of data) {
-    if (!isRecord(item)) return [];
-    if (typeof item.id !== "number" || typeof item.name !== "string") return [];
+  for (const [index, item] of data.entries()) {
+    if (
+      !isRecord(item) ||
+      typeof item.id !== "number" ||
+      typeof item.name !== "string"
+    ) {
+      reportResponseIssue({
+        source: `lifeStudy.list[${index}]`,
+        reason: "id·name 형식 오류",
+      });
+      continue;
+    }
     result.push({
       id: item.id,
       name: item.name,
@@ -288,14 +305,18 @@ export function tryReadLifeStudyCohortList(
 ): LifeStudyCohortDto[] {
   if (data == null || !Array.isArray(data)) return [];
   const result: LifeStudyCohortDto[] = [];
-  for (const item of data) {
-    if (!isRecord(item)) return [];
+  for (const [index, item] of data.entries()) {
     if (
+      !isRecord(item) ||
       typeof item.id !== "number" ||
       typeof item.lifeStudyId !== "number" ||
       typeof item.lifeStudyName !== "string"
     ) {
-      return [];
+      reportResponseIssue({
+        source: `lifeStudy.cohorts[${index}]`,
+        reason: "id·lifeStudyId·lifeStudyName 형식 오류",
+      });
+      continue;
     }
     result.push({
       id: item.id,

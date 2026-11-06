@@ -8,7 +8,6 @@ import {
   type ViewStyle,
 } from "react-native";
 import Animated, {
-  Easing,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -17,6 +16,7 @@ import Animated, {
 import { theme } from "../../constants/theme";
 import { AppIcon } from "./app-icon";
 import { AppText } from "./app-text";
+import { motionEasing, motionExitDuration } from "./motion";
 
 /**
  * 접는 목록 한 줄(디자인 시스템 Accordion). 제목 줄을 누르면 답이 펼쳐지고
@@ -47,12 +47,18 @@ export function Accordion({
     progress.set(
       reduceMotion
         ? target
-        : withTiming(target, {
-            duration: expanded
-              ? theme.motion.duration.base
-              : theme.motion.duration.fast,
-            easing: Easing.out(Easing.cubic),
-          }),
+        : withTiming(
+            target,
+            expanded
+              ? {
+                  duration: theme.motion.duration.base,
+                  easing: motionEasing.standard,
+                }
+              : {
+                  duration: motionExitDuration(theme.motion.duration.base),
+                  easing: motionEasing.exit,
+                },
+          ),
     );
   }, [expanded, progress, reduceMotion]);
 

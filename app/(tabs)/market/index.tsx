@@ -26,6 +26,7 @@ import type {
 } from "../../../src/types/market";
 import { useMotionRouteParam } from "../../../src/hooks/useMotionRouteParam";
 import { readDesignVariant } from "../../../src/lib/designVariant";
+import { useScaleHeightForFont } from "../../../src/lib/fontScale";
 
 type MarketSegment = "all" | "sharing" | "mine";
 
@@ -38,6 +39,8 @@ const statusTabs: readonly { key: MarketSegment; label: string }[] = [
 const MARKET_STICKY_CONTROLS_HEIGHT = 116;
 
 export default function MarketScreen() {
+  // 글자 크기 설정이 크면 상단 고정 영역 높이도 함께 키운다 (Issue 258)
+  const scaleForFont = useScaleHeightForFont();
   const router = useRouter();
   const params = useLocalSearchParams<{
     category?: string;
@@ -115,7 +118,7 @@ export default function MarketScreen() {
             items={statusTabs}
             active={activeStatus}
             onChange={setActiveStatus}
-            style={styles.statusTabs}
+            style={[styles.statusTabs, { height: scaleForFont(40) }]}
             testIDPrefix="market-status"
           />
 
@@ -123,12 +126,12 @@ export default function MarketScreen() {
             items={MARKET_CATEGORIES}
             active={category}
             onChange={setCategory}
-            style={styles.categoryScroll}
+            style={[styles.categoryScroll, { height: scaleForFont(44) }]}
             testIDPrefix="market-category"
           />
         </View>
       }
-      stickyControlsHeight={MARKET_STICKY_CONTROLS_HEIGHT}
+      stickyControlsHeight={scaleForFont(MARKET_STICKY_CONTROLS_HEIGHT)}
       // 동행과 동일: 내릴 때 숨김 · 위로 살짝 올리면 세그먼트·필터 다시 표시.
       stickyControlsHideMode="direction"
       overlay={

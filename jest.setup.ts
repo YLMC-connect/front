@@ -133,3 +133,17 @@ jest.mock("expo-image-picker", () => ({
   launchImageLibraryAsync: jest.fn(),
   requestMediaLibraryPermissionsAsync: jest.fn(),
 }));
+
+// RN jest 프리셋은 글자 크기 설정(fontScale)을 2 로 두지만, 실제 기본값은 1 이다.
+// 글자 크기에 따라 높이를 키우는 화면(Issue 258)이 기본 크기로 그려지도록 1 로 맞춘다.
+// 큰 글자 테스트는 파일 안에서 이 모듈을 다시 mock 한다.
+jest.mock("react-native/Libraries/Utilities/useWindowDimensions", () => {
+  const actual = jest.requireActual(
+    "react-native/Libraries/Utilities/useWindowDimensions",
+  );
+  const useWindowDimensions = actual.default ?? actual;
+  return {
+    __esModule: true,
+    default: () => ({ ...useWindowDimensions(), fontScale: 1 }),
+  };
+});

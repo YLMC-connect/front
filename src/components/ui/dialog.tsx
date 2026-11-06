@@ -126,7 +126,9 @@ export function BottomSheet({
   const backdropStyle = useAnimatedStyle(() => ({
     opacity: progress.value,
   }));
+  // 패널은 투명도 없이 바닥에서 올라온다. 높이를 재기 전 첫 화면에만 숨겨 제자리 깜빡임을 막는다.
   const panelStyle = useAnimatedStyle(() => ({
+    opacity: sheetHeight.value > 0 ? 1 : 0,
     transform: [
       {
         translateY:

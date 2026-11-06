@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import { StyleSheet, Text } from "react-native";
 import { theme } from "../../../constants/theme";
-import { ConfirmDialog } from "../dialog";
+import { BottomSheet, ConfirmDialog } from "../dialog";
 import { Toast } from "../feedback";
 import { MotionFadeIn, motionEasing, motionExitDuration } from "../motion";
 import { UnderlineTabs } from "../underline-tabs";
@@ -59,6 +59,20 @@ describe("motion.md 규격", () => {
     );
     expect(style.transform).toHaveLength(1);
     expect(style.transform[0]).toHaveProperty("scale");
+  });
+
+  it("시트 패널은 투명도 없이 올라오고, 높이를 재기 전에는 숨긴다", () => {
+    render(
+      <BottomSheet visible title="고르기" onClose={jest.fn()}>
+        <Text>내용</Text>
+      </BottomSheet>,
+    );
+    const style = StyleSheet.flatten(
+      screen.getByTestId("bottom-sheet-panel").props.style,
+    );
+    expect(style.opacity).toBe(0);
+    expect(style.transform).toHaveLength(1);
+    expect(style.transform[0]).toHaveProperty("translateY");
   });
 
   it("밑줄은 하나로 그려지고 고른 탭 위치에 놓인다", () => {

@@ -420,7 +420,8 @@ const styles = StyleSheet.create({
   },
   sheetTitle: {
     color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
+    fontSize: theme.typography.heading.fontSize,
+    lineHeight: theme.typography.heading.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   closeButton: {

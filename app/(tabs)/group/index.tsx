@@ -278,7 +278,6 @@ export default function GroupScreen() {
         <FloatingActionButton
           label="소모임 개설"
           icon="add"
-          style={styles.fab}
           onPress={() => router.push("/modal/group-new")}
         />
       }
@@ -578,11 +577,6 @@ const styles = StyleSheet.create({
   },
   memberCount: {
     color: theme.colors.primaryStrong,
-  },
-  fab: {
-    position: "absolute",
-    right: theme.layout.screenX,
-    bottom: 86,
   },
   emptyWrap: {
     flex: 1,

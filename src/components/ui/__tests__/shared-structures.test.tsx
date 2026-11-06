@@ -86,8 +86,9 @@ describe("shared maintenance UI", () => {
     ).toMatchObject({
       minWidth: theme.size.fabHeight,
       height: theme.size.fabHeight,
-      paddingHorizontal: 16,
-      gap: 6,
+      paddingLeft: 12,
+      paddingRight: 16,
+      gap: 8,
     });
     expect(
       StyleSheet.flatten(screen.getByText("기도제목 작성").props.style),

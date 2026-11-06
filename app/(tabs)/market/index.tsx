@@ -138,7 +138,6 @@ export default function MarketScreen() {
         <FloatingActionButton
           label="나눔하기"
           icon="add"
-          style={styles.fab}
           onPress={() => router.push("/modal/market-new")}
         />
       }
@@ -384,10 +383,5 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: "center",
     justifyContent: "center",
-  },
-  fab: {
-    position: "absolute",
-    right: theme.layout.screenX,
-    bottom: 86,
   },
 });

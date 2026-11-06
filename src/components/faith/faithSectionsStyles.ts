@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { theme } from "../../constants/theme";
+import { FAB_BOTTOM } from "../ui/buttons";
 
 export const styles = StyleSheet.create({
   segmented: {
@@ -244,7 +245,7 @@ export const styles = StyleSheet.create({
   fabContainer: {
     position: "absolute",
     right: theme.layout.screenX,
-    bottom: 86,
+    bottom: FAB_BOTTOM,
     zIndex: 20,
     alignItems: "flex-end",
   },

@@ -53,7 +53,16 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       "expo-image",
       "expo-status-bar",
       ["expo-dev-client", { toolsButton: false }],
-      "@sentry/react-native/expo",
+      [
+        "@sentry/react-native/expo",
+        {
+          // 배포 빌드에서 소스맵·디버그 심볼을 이 Sentry 프로젝트로 올린다.
+          // 업로드 토큰(SENTRY_AUTH_TOKEN)은 EAS secret 으로만 넣는다.
+          url: "https://sentry.io/",
+          organization: "ylmc",
+          project: "ylmc-connect",
+        },
+      ],
       [
         "expo-build-properties",
         {

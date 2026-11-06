@@ -8,6 +8,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { theme } from "../../constants/theme";
+import { Button } from "./buttons";
+import { Radio } from "./checkbox";
 import { motionEasing, motionExitDuration, useMotionPresence } from "./motion";
 
 export function ConfirmDialog({
@@ -81,23 +83,19 @@ export function ConfirmDialog({
             </Text>
           ) : null}
           <View style={styles.dialogActions}>
-            <Pressable
-              accessibilityRole="button"
-              onPress={onCancel}
-              style={[styles.dialogButton, styles.dialogCancelButton]}
-            >
-              <Text style={styles.dialogCancelText}>{cancelText}</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              onPress={onConfirm}
-              style={[
-                styles.dialogButton,
-                danger ? styles.dialogDangerButton : styles.dialogConfirmButton,
-              ]}
-            >
-              <Text style={styles.dialogConfirmText}>{confirmText}</Text>
-            </Pressable>
+            <View style={styles.dialogAction}>
+              <Button variant="outline" onPress={onCancel}>
+                {cancelText}
+              </Button>
+            </View>
+            <View style={styles.dialogAction}>
+              <Button
+                variant={danger ? "danger" : "primary"}
+                onPress={onConfirm}
+              >
+                {confirmText}
+              </Button>
+            </View>
           </View>
         </Animated.View>
       </View>
@@ -216,34 +214,18 @@ export function RadioSheet({
       footer={
         <>
           <View style={styles.sheetAction}>
-            <Pressable
-              accessibilityRole="button"
-              onPress={onClose}
-              style={[styles.sheetFooterButton, styles.sheetCancelButton]}
-            >
-              <Text style={styles.sheetCancelText}>취소</Text>
-            </Pressable>
+            <Button variant="outline" onPress={onClose}>
+              취소
+            </Button>
           </View>
           <View style={styles.sheetAction}>
-            <Pressable
-              accessibilityRole="button"
+            <Button
+              variant={danger ? "danger" : "primary"}
               onPress={onConfirm}
               disabled={confirmDisabled}
-              style={[
-                styles.sheetFooterButton,
-                danger ? styles.sheetDangerButton : styles.sheetConfirmButton,
-                confirmDisabled ? styles.sheetFooterButtonDisabled : null,
-              ]}
             >
-              <Text
-                style={[
-                  styles.sheetConfirmText,
-                  confirmDisabled ? styles.sheetConfirmTextDisabled : null,
-                ]}
-              >
-                {confirmText}
-              </Text>
-            </Pressable>
+              {confirmText}
+            </Button>
           </View>
         </>
       }
@@ -271,21 +253,13 @@ export function RadioSheet({
                 option.disabled ? styles.radioOptionDisabled : null,
               ]}
             >
+              {/* 표시만 공통 Radio 로 그린다. 누름·낭독은 바깥 행이 맡는다. */}
               <View
-                style={[
-                  styles.radioMark,
-                  compact ? styles.radioMarkCompact : null,
-                  selected ? styles.radioMarkSelected : null,
-                ]}
+                pointerEvents="none"
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
               >
-                {selected ? (
-                  <View
-                    style={[
-                      styles.radioDot,
-                      compact ? styles.radioDotCompact : null,
-                    ]}
-                  />
-                ) : null}
+                <Radio checked={selected} style={styles.radioMark} />
               </View>
               <View style={styles.radioTextWrap}>
                 <Text
@@ -368,30 +342,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: theme.spacing["2"],
   },
-  dialogButton: {
-    flex: 1,
-    height: theme.size.inputHeight,
-    borderRadius: theme.radius.full,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  dialogCancelButton: {
-    backgroundColor: theme.colors.surface,
-    borderWidth: 1,
-    borderColor: theme.colors.borderButton,
-  },
-  dialogConfirmButton: { backgroundColor: theme.colors.primary },
-  dialogDangerButton: { backgroundColor: theme.colors.dangerBold },
-  dialogCancelText: {
-    ...theme.typography.label,
-    color: theme.colors.text,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  dialogConfirmText: {
-    ...theme.typography.label,
-    color: theme.colors.onPrimary,
-    fontWeight: theme.fontWeight.semibold,
-  },
+  dialogAction: { flex: 1 },
   sheetOverlay: {
     flex: 1,
     justifyContent: "flex-end",
@@ -436,35 +387,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   sheetAction: { flex: 1 },
-  sheetFooterButton: {
-    height: theme.size.inputHeight,
-    borderRadius: theme.radius.full,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  sheetCancelButton: {
-    backgroundColor: theme.colors.surface,
-    borderWidth: 1,
-    borderColor: theme.colors.borderButton,
-  },
-  sheetConfirmButton: {
-    backgroundColor: theme.colors.primary,
-  },
-  sheetDangerButton: {
-    backgroundColor: theme.colors.dangerBold,
-  },
-  sheetFooterButtonDisabled: { backgroundColor: theme.colors.surfaceSubtle },
-  sheetCancelText: {
-    ...theme.typography.label,
-    color: theme.colors.text,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  sheetConfirmText: {
-    ...theme.typography.label,
-    color: theme.colors.onPrimary,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  sheetConfirmTextDisabled: { color: theme.colors.textDisabled },
   radioList: {},
   radioOption: {
     minHeight: 48,
@@ -482,35 +404,8 @@ const styles = StyleSheet.create({
   },
   radioOptionLast: { borderBottomWidth: 0 },
   radioOptionDisabled: { opacity: 0.45 },
-  radioMark: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1.5,
-    borderColor: theme.colors.borderStrong,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  radioMarkCompact: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-  },
-  radioMarkSelected: {
-    borderWidth: 0,
-    backgroundColor: theme.colors.primary,
-  },
-  radioDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: theme.colors.onPrimary,
-  },
-  radioDotCompact: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-  },
+  // 공통 Radio 줄 높이(44)를 빼고 표시(22)만 남긴다.
+  radioMark: { minHeight: 0 },
   radioTextWrap: { flex: 1, minWidth: 0 },
   radioLabel: {
     ...theme.typography.body,

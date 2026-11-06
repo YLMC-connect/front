@@ -24,17 +24,57 @@ export {
   MotionPop,
   MotionPressable,
   MotionShake,
+  motionEasing,
+  motionExitDuration,
   motionStaggerDelay,
 } from "./motion";
 
-export { Button, FloatingActionButton } from "./buttons";
+export {
+  Button,
+  type ButtonVariant,
+  FAB_BOTTOM,
+  FloatingActionButton,
+  LoadingDots,
+} from "./buttons";
 export {
   FloatingBottomBar,
   FLOATING_BOTTOM_BAR_INSET,
   type FloatingBottomBarProps,
+  type FloatingBottomBarSecondaryAction,
 } from "./floating-bottom-bar";
-export { Avatar, Badge, Card, Chip, VisualCover, VisualThumb } from "./display";
-export { FormSection, ImagePickerField, TextField, Textarea } from "./inputs";
+export {
+  Avatar,
+  Badge,
+  type BadgeTone,
+  Card,
+  Chip,
+  VisualCover,
+  VisualThumb,
+} from "./display";
+export {
+  FormSection,
+  ImagePickerField,
+  INPUT_MULTILINE_MIN_HEIGHT,
+  InputErrorText,
+  InputSurface,
+  inputTextStyles,
+  TextField,
+  Textarea,
+} from "./inputs";
+export {
+  Checkbox,
+  type CheckboxProps,
+  Radio,
+  RadioRow,
+  type RadioRowProps,
+} from "./checkbox";
+export { ProgressBar, type ProgressBarTone } from "./progress-bar";
+export { Accordion } from "./accordion";
+export { InfoBox, type InfoBoxTone } from "./info-box";
+export { ListRow, PersonRow } from "./list-row";
+export { ShareCard, type ShareCardState, ShareList } from "./share-card";
+export { CommentBubble } from "./comment-bubble";
+export { PHOTO_TILE_SIZE, PhotoTile, type PhotoTileProps } from "./photo-tile";
 export { HorizontalChips, SegmentedTabs, TopBar } from "./navigation";
 export { BottomSheet, ConfirmDialog, RadioSheet } from "./dialog";
 export {

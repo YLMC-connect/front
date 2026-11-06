@@ -1574,7 +1574,8 @@ describe("v1 tab smoke screens", () => {
     expect(await screen.findByText("내 학습경로")).toBeTruthy();
     expect(screen.queryByText("중보기도")).toBeNull();
     expect(screen.queryByLabelText("삶공부 신청")).toBeNull();
-    expect(screen.getByText("과정 확인 및 수강 신청")).toBeTruthy();
+    expect(screen.getAllByText("수강 신청").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("과정 확인").length).toBeGreaterThan(0);
   });
 
   it("opens a life study course", async () => {

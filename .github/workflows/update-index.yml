@@ -1,14 +1,8 @@
 name: Auto-update INDEX
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "docs/features/**"
-      - "scripts/gen-index.sh"
-      - ".github/workflows/update-index.yml"
-  issues:
-    types: [opened, closed, edited, reopened, labeled, unlabeled, deleted]
+  schedule:
+    - cron: "0 15 * * *" # 매일 00:00 KST
   workflow_dispatch:
 
 permissions:
@@ -40,4 +34,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/INDEX.md
           git commit -m "chore: auto-update INDEX 도메인 상태표"
+          git pull --rebase origin main
           git push

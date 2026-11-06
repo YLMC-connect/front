@@ -286,7 +286,7 @@ export default function MarketDetailScreen() {
               testID="market-hero-carousel"
             >
               {market.images && market.images.length > 0
-                ? market.images.map((uri, index) => (
+                ? market.images.map((uri, index, images) => (
                     <CarouselSlide
                       key={`${uri}-${index}`}
                       index={index}
@@ -294,6 +294,9 @@ export default function MarketDetailScreen() {
                       width={width}
                     >
                       <Image
+                        accessible
+                        accessibilityRole="image"
+                        accessibilityLabel={`${market.title} 사진 ${index + 1}/${images.length}`}
                         resizeMode="cover"
                         source={{ uri }}
                         style={[styles.heroThumb, { width, height: width }]}
@@ -464,6 +467,7 @@ export default function MarketDetailScreen() {
                 <Pressable
                   accessibilityRole="button"
                   onPress={resetCommentComposer}
+                  hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
                   style={styles.cancelEdit}
                 >
                   <Text style={styles.cancelEditText}>수정 취소</Text>
@@ -490,6 +494,7 @@ export default function MarketDetailScreen() {
                 }
                 onPress={onSubmitComment}
                 disabled={!comment.trim() || isCommentPending}
+                hitSlop={3}
                 style={[
                   styles.sendButton,
                   !comment.trim() && !isCommentPending

@@ -101,7 +101,7 @@ export default function MarketDetailScreen() {
           <AppIcon
             name={variant === "deleted" ? "inventory-2" : "block"}
             size={42}
-            color={theme.colors.inkHint}
+            color={theme.colors.textMuted}
           />
           <Text style={styles.exceptionTitle}>
             {variant === "deleted"
@@ -234,7 +234,7 @@ export default function MarketDetailScreen() {
             onPress={() => router.back()}
             style={styles.backButton}
           >
-            <AppIcon name="chevron-left" size={22} color={theme.colors.ink} />
+            <AppIcon name="chevron-left" size={22} color={theme.colors.text} />
             <Text style={styles.backText}>뒤로</Text>
           </MotionPressable>
           {isPastHero ? (
@@ -317,9 +317,9 @@ export default function MarketDetailScreen() {
             </Animated.ScrollView>
             <LinearGradient
               colors={[
-                "rgba(20,30,18,0.22)",
-                "rgba(20,30,18,0.10)",
-                "rgba(20,30,18,0)",
+                "rgba(25,31,40,0.22)",
+                "rgba(25,31,40,0.10)",
+                "rgba(25,31,40,0)",
               ]}
               end={{ x: 0.5, y: 1 }}
               locations={[0, 0.52, 1]}
@@ -479,7 +479,7 @@ export default function MarketDetailScreen() {
                     ? "댓글을 수정해주세요"
                     : "댓글을 입력해주세요"
                 }
-                placeholderTextColor={theme.colors.inkMute}
+                placeholderTextColor={theme.colors.textMuted}
                 style={styles.commentInput}
               />
               <Pressable
@@ -498,15 +498,18 @@ export default function MarketDetailScreen() {
                 ]}
               >
                 {isCommentPending ? (
-                  <ActivityIndicator size="small" color={theme.colors.white} />
+                  <ActivityIndicator
+                    size="small"
+                    color={theme.colors.onPrimary}
+                  />
                 ) : (
                   <AppIcon
                     name="send"
                     size={17}
                     color={
                       !comment.trim()
-                        ? theme.colors.inkMute
-                        : theme.colors.white
+                        ? theme.colors.textMuted
+                        : theme.colors.onPrimary
                     }
                   />
                 )}

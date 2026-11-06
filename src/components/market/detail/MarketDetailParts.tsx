@@ -105,7 +105,7 @@ export function StatusBanner({
   return (
     <View style={[styles.banner, warn ? styles.bannerWarn : null]}>
       <View style={[styles.bannerIcon, warn ? styles.bannerIconWarn : null]}>
-        <AppIcon name={icon} size={16} color={theme.colors.white} />
+        <AppIcon name={icon} size={16} color={theme.colors.onPrimary} />
       </View>
       <View style={styles.bannerTextWrap}>
         <Text

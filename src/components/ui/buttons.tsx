@@ -3,7 +3,6 @@ import { useEffect, type ComponentProps, type ReactNode } from "react";
 import { StyleSheet, Text, View, type PressableProps } from "react-native";
 import Animated, {
   cancelAnimation,
-  Easing,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -13,7 +12,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { theme } from "../../constants/theme";
-import { MotionPressable } from "./motion";
+import { MotionPressable, motionEasing } from "./motion";
 
 type IconName = ComponentProps<typeof AppIcon>["name"];
 
@@ -107,7 +106,7 @@ export function Button({
         ? target
         : withTiming(target, {
             duration: theme.motion.duration.base,
-            easing: Easing.out(Easing.cubic),
+            easing: motionEasing.standard,
           }),
     );
   }, [disabled, disabledCover, reduceMotion]);

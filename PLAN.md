@@ -28,7 +28,7 @@
 | 스타일          | React Native StyleSheet            | 플랫폼 내장   | `src/constants/theme.ts` 단일 출처 토큰 기반 스타일링 (ADR 0006)                             |
 | UI 컴포넌트     | 자체 구축 공통 UI 계층             | `src/components/ui` | buttons, display, inputs, navigation, dialog, feedback 등 역할별 모듈화 (ADR 0006)            |
 | 언어            | TypeScript                         | `~6.0.x`       | strict 모드                                                                                 |
-| 아이콘          | @expo/vector-icons / MaterialIcons | `^15.0.2`      | 직접 의존성. Google Material Icons                                                          |
+| 아이콘          | lucide-react-native                | `^1.54.0`      | `AppIcon` 으로만 사용, 선 굵기 1.5 (ADR 0007)                                               |
 | 이미지          | expo-image                         | Expo 내장      | 성능 최적화 이미지                                                                          |
 
 > **백엔드 없이 시작** — Mock 데이터 + TanStack Query로 개발 후, API 연결 시 `services/` 레이어만 교체  
@@ -770,3 +770,4 @@ queryClient.setDefaultOptions({
 | 2026-06-29 | 문서 정리 — GitHub Issues/PR로 이관된 archive 본문을 안내문으로 축소하고, PLAN.md의 폐기된 홈/나눔/소모임/동행/MY 탭 설명을 최신 Downloads preview IA로 갱신                                                                                                                                                            |
 | 2026-09-03 | 기술 스택 정돈 — Gluestack UI 및 NativeWind 퇴역. 순수 React Native StyleSheet + theme.ts 단일 표준 확정 및 1,775줄 공통 UI index.tsx를 6개 모듈로 분리 (ADR 0006) |
 | 2026-10-09 | 기술 스택 갱신 — Expo SDK 57 (React Native 0.86 / React 19.2). Xcode 27 대응으로 iOS scene lifecycle(`ios.enableSceneSupport`)을 켜고, Node 기준은 `^22.13.0 \|\| ^24.3.0 \|\| >=25.0.0`(CI 22.22.0). `@expo/vector-icons`와 테스트용 `@react-native/jest-preset`은 직접 의존성 |
+| 2026-11-07 | 기술 스택 정돈 — 디자인 시스템 v2 반영(ADR 0007)으로 아이콘을 lucide `AppIcon` 하나로 통일하고, 쓰지 않는 `@expo/vector-icons` 직접 의존성 제거 |

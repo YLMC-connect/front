@@ -6,6 +6,7 @@ import type {
   MarketDetail,
   MarketDetailComment,
   MarketInput,
+  MarketOverviewItem,
 } from "../../types/market";
 import {
   useCreateMarketComment,
@@ -165,6 +166,35 @@ describe("useDeleteMarketPost", () => {
     await act(() => result.current.mutateAsync());
 
     expect(service.deleteMarketPost).toHaveBeenCalledWith({ marketId: "10" });
+    expect(
+      queryClient.getQueryState(queryKeys.market.detail("10")),
+    ).toBeUndefined();
+    expect(invalidatedKeys()).toEqual([queryKeys.market.mine()]);
+  });
+
+  it("무한 스크롤 목록 캐시의 모든 페이지에서 삭제한 글을 뺀다", async () => {
+    service.deleteMarketPost.mockResolvedValue(undefined);
+    const { result, queryClient, invalidatedKeys } = renderHookWithClient(() =>
+      useDeleteMarketPost("10"),
+    );
+    const item = (id: string) => ({ id }) as MarketOverviewItem;
+    queryClient.setQueryData(queryKeys.market.overview(), {
+      pages: [
+        { items: [item("9"), item("10")], hasNext: true, nextCursor: 10 },
+        { items: [item("10"), item("11")], hasNext: false },
+      ],
+      pageParams: [undefined, 10],
+    });
+    queryClient.setQueryData(queryKeys.market.detail("10"), detail());
+
+    await act(() => result.current.mutateAsync());
+
+    const overview = queryClient.getQueryData<{
+      pages: { items: MarketOverviewItem[] }[];
+    }>(queryKeys.market.overview());
+    expect(
+      overview?.pages.map((page) => page.items.map(({ id }) => id)),
+    ).toEqual([["9"], ["11"]]);
     expect(
       queryClient.getQueryState(queryKeys.market.detail("10")),
     ).toBeUndefined();

@@ -1,4 +1,5 @@
 import {
+  type InfiniteData,
   useInfiniteQuery,
   useMutation,
   useQuery,
@@ -14,6 +15,7 @@ import {
   fetchMarketDetail,
   fetchMarketOverviewPage,
   fetchMyMarketOverviewPage,
+  type MarketOverviewPage,
   reportMarketContent,
   updateMarketComment,
   updateMarketPost,
@@ -22,7 +24,6 @@ import type {
   MarketCategory,
   MarketDetail,
   MarketInput,
-  MarketOverview,
   MarketReportInput,
   MarketUpdateInput,
 } from "../types/market";
@@ -181,13 +182,16 @@ export function useDeleteMarketPost(marketId: string) {
   return useMutation({
     mutationFn: () => deleteMarketPost({ marketId }),
     onSuccess: () => {
-      queryClient.setQueryData<MarketOverview>(
+      queryClient.setQueryData<InfiniteData<MarketOverviewPage>>(
         queryKeys.market.overview(),
         (overview) =>
           overview
             ? {
                 ...overview,
-                items: overview.items.filter(({ id }) => id !== marketId),
+                pages: overview.pages.map((page) => ({
+                  ...page,
+                  items: page.items.filter(({ id }) => id !== marketId),
+                })),
               }
             : overview,
       );

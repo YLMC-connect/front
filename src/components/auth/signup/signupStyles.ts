@@ -11,8 +11,8 @@ export const styles = StyleSheet.create({
   },
   headerSubtitle: {
     marginTop: 6,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.md,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.label.fontSize,
   },
   bottom: {
     position: "absolute",
@@ -31,7 +31,7 @@ export const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     padding: 16,
     gap: theme.spacing[4],
   },
@@ -45,24 +45,24 @@ export const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: theme.colors.primaryTint,
+    backgroundColor: theme.colors.primarySubtle,
     alignItems: "center",
     justifyContent: "center",
   },
   sectionBadgeText: {
-    color: theme.colors.primaryDeep,
-    fontSize: 13,
-    fontWeight: theme.fontWeight.extrabold,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.caption.fontSize,
+    fontWeight: theme.fontWeight.bold,
   },
   sectionTitle: {
-    color: theme.colors.ink,
+    color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
     lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   label: {
     marginBottom: theme.spacing[2],
-    color: theme.colors.inkSoft,
+    color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
     lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.typography.label.fontWeight,
@@ -84,14 +84,14 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.lineStrong,
+    borderColor: theme.colors.borderButton,
     backgroundColor: theme.colors.surface,
     alignItems: "center",
     justifyContent: "center",
   },
   checkButtonVerified: {
     borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
   },
   checkButtonVerifiedContent: {
     flexDirection: "row",
@@ -99,13 +99,13 @@ export const styles = StyleSheet.create({
     gap: 4,
   },
   checkButtonText: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.sm + 1,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   checkButtonTextVerified: {
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.sm + 1,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   passwordRulesRow: {
@@ -121,12 +121,12 @@ export const styles = StyleSheet.create({
     gap: 4,
   },
   ruleText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.medium,
   },
   ruleTextPass: {
-    color: theme.colors.primaryDeep,
+    color: theme.colors.primaryStrong,
     fontWeight: theme.fontWeight.bold,
   },
   hiddenTrigger: {
@@ -143,9 +143,9 @@ export const styles = StyleSheet.create({
   },
   inlineError: {
     flex: 1,
-    color: theme.colors.danger,
-    fontSize: 13,
-    lineHeight: 18,
+    color: theme.colors.dangerText,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.medium,
   },
   successRow: {
@@ -164,7 +164,7 @@ export const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     padding: 14,
     gap: 10,
   },
@@ -177,16 +177,16 @@ export const styles = StyleSheet.create({
     borderRadius: theme.radius.md,
   },
   termsAllRowOn: {
-    backgroundColor: theme.colors.primaryTint,
+    backgroundColor: theme.colors.primarySubtle,
   },
   termsAllText: {
-    color: theme.colors.ink,
+    color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   termsList: {
     borderTopWidth: 1,
-    borderTopColor: theme.colors.line,
+    borderTopColor: theme.colors.border,
     paddingTop: 8,
     gap: 8,
   },
@@ -204,11 +204,11 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   termsItemText: {
-    color: theme.colors.inkSoft,
-    fontSize: 13,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
   },
   termsRequired: {
-    color: theme.colors.primaryDeep,
+    color: theme.colors.primaryStrong,
     fontWeight: theme.fontWeight.bold,
   },
   termsDetailButton: {
@@ -219,12 +219,12 @@ export const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   termsDetailText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   checkBadge: {
     borderWidth: 1.5,
-    borderColor: theme.colors.lineStrong,
+    borderColor: theme.colors.borderStrong,
     backgroundColor: theme.colors.surface,
     alignItems: "center",
     justifyContent: "center",
@@ -239,12 +239,14 @@ export const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     alignItems: "center",
     justifyContent: "center",
-    ...theme.shadow.primary,
   },
   submitText: {
-    color: theme.colors.white,
-    fontSize: theme.fontSize.base,
+    color: theme.colors.onPrimary,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
-  error: { color: theme.colors.danger, fontSize: 13 },
+  error: {
+    color: theme.colors.dangerText,
+    fontSize: theme.typography.label.fontSize,
+  },
 });

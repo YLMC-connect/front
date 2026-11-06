@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(255,255,255,0.16)",
-    ...theme.shadow.float,
+    ...theme.shadow.md,
   },
   doorLeft: {
     position: "absolute",
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 56,
     borderRadius: 2,
-    backgroundColor: theme.colors.white,
+    backgroundColor: theme.colors.onPrimary,
     transform: [{ skewY: "-6deg" }],
   },
   doorRight: {
@@ -85,18 +85,18 @@ const styles = StyleSheet.create({
     width: 5,
     height: 5,
     borderRadius: 3,
-    backgroundColor: theme.colors.primaryDeep,
+    backgroundColor: theme.colors.primaryStrong,
   },
   title: {
     marginTop: 22,
-    color: theme.colors.white,
-    fontSize: 24,
-    fontWeight: theme.fontWeight.extrabold,
+    color: theme.colors.onPrimary,
+    fontSize: theme.typography.title.fontSize,
+    fontWeight: theme.fontWeight.bold,
   },
   subtitle: {
     marginTop: 8,
     color: "rgba(255,255,255,0.82)",
-    fontSize: 13,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.medium,
   },
   dots: {
@@ -109,6 +109,6 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: theme.colors.white,
+    backgroundColor: theme.colors.onPrimary,
   },
 });

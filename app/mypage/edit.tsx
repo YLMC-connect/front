@@ -7,11 +7,11 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { Screen } from "../../src/components/layout/Screen";
 import { Avatar, TopBar } from "../../src/components/ui";
+import { ModalFormTextInput } from "../../src/components/ui/modal-form-layout";
 import { theme } from "../../src/constants/theme";
 import {
   useChangePassword,
@@ -48,10 +48,6 @@ function FieldHint({ children }: { children: string }) {
   return <Text style={styles.hint}>{children}</Text>;
 }
 
-function InlineError({ children }: { children: string }) {
-  return <Text style={styles.error}>{children}</Text>;
-}
-
 function ProfileTextInput({
   value,
   onChangeText,
@@ -64,20 +60,21 @@ function ProfileTextInput({
   value: string;
   onChangeText?: (text: string) => void;
   placeholder: string;
-  error?: boolean;
+  /** 입력 아래에 아이콘과 함께 띄울 오류 문구. */
+  error?: string;
   secureTextEntry?: boolean;
   keyboardType?: "default" | "phone-pad";
   editable?: boolean;
 }) {
   return (
-    <TextInput
+    <ModalFormTextInput
       editable={editable}
+      error={error}
       // 비밀번호 칸은 영문 자판으로 연다(iOS 비밀번호 칸은 한글 조합이 막혀 입력되지 않음)
       keyboardType={secureTextEntry ? "ascii-capable" : keyboardType}
       placeholder={placeholder}
-      placeholderTextColor={theme.colors.textMuted}
       secureTextEntry={secureTextEntry}
-      style={[styles.input, error ? styles.inputError : null]}
+      style={styles.input}
       value={value}
       onChangeText={onChangeText}
     />
@@ -219,7 +216,7 @@ export default function EditProfileScreen() {
       <View style={styles.root}>
         <TopBar
           title="프로필 수정"
-          back
+          close
           onBack={() => router.back()}
           right={
             <Pressable
@@ -272,11 +269,9 @@ export default function EditProfileScreen() {
                 }}
                 placeholder="010-XXXX-XXXX"
                 keyboardType="phone-pad"
-                error={isPhoneDup}
+                error={isPhoneDup ? "이미 사용 중인 연락처입니다" : undefined}
               />
-              {isPhoneDup ? (
-                <InlineError>이미 사용 중인 연락처입니다</InlineError>
-              ) : (
+              {isPhoneDup ? null : (
                 <FieldHint>
                   숫자만 입력하면 자동으로 하이픈이 추가돼요
                 </FieldHint>
@@ -299,11 +294,12 @@ export default function EditProfileScreen() {
                   }}
                   placeholder="현재 비밀번호"
                   secureTextEntry
-                  error={isCurrentPwError}
+                  error={
+                    isCurrentPwError
+                      ? "현재 비밀번호가 올바르지 않습니다"
+                      : undefined
+                  }
                 />
-                {isCurrentPwError ? (
-                  <InlineError>현재 비밀번호가 올바르지 않습니다</InlineError>
-                ) : null}
               </View>
 
               <View>
@@ -329,11 +325,10 @@ export default function EditProfileScreen() {
                   }}
                   placeholder="새 비밀번호 확인"
                   secureTextEntry
-                  error={isPwMismatch}
+                  error={
+                    isPwMismatch ? "비밀번호가 일치하지 않습니다" : undefined
+                  }
                 />
-                {isPwMismatch ? (
-                  <InlineError>비밀번호가 일치하지 않습니다</InlineError>
-                ) : null}
               </View>
             </View>
           </Pressable>
@@ -398,37 +393,20 @@ const styles = StyleSheet.create({
     marginTop: 22,
   },
   label: {
-    marginBottom: 6,
+    marginBottom: 8,
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
     fontWeight: theme.typography.label.fontWeight,
   },
   input: {
-    height: 46,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.borderStrong,
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: 14,
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-  },
-  inputError: {
-    borderColor: theme.colors.dangerText,
-    backgroundColor: theme.colors.dangerSubtle,
+    // 화면 body 가 좌우 여백을 주므로 입력 기본 좌우 여백(screenX)은 뺀다.
+    marginHorizontal: 0,
   },
   hint: {
     marginTop: 6,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
-  },
-  error: {
-    marginTop: 6,
-    color: theme.colors.dangerText,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
-    fontWeight: theme.fontWeight.semibold,
   },
   divider: {
     height: 1,

@@ -1,14 +1,16 @@
-import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { Screen } from "../../src/components/layout/Screen";
+import { StaggerItem } from "../../src/components/mypage/StaggerItem";
 import {
-  Avatar,
+  Button,
   ConfirmDialog,
   Empty,
   Toast,
   TopBar,
 } from "../../src/components/ui";
+import { InfoBox } from "../../src/components/ui/info-box";
+import { PersonRow } from "../../src/components/ui/list-row";
 import { theme } from "../../src/constants/theme";
 import { readDesignVariant } from "../../src/lib/designVariant";
 
@@ -35,10 +37,10 @@ export default function BlockedScreen() {
         <TopBar title="차단 사용자" back onBack={() => router.back()} />
         <ScrollView contentContainerStyle={styles.body}>
           {users.length > 0 ? (
-            <Text style={styles.notice}>
-              차단된 사용자의 게시글과 댓글은 보이지 않으며, 상대도 회원님의
-              활동을 볼 수 없습니다.
-            </Text>
+            <InfoBox
+              description="차단된 사용자의 게시글과 댓글은 보이지 않으며, 상대도 회원님의 활동을 볼 수 없습니다."
+              style={styles.notice}
+            />
           ) : null}
 
           <View style={styles.list}>
@@ -52,31 +54,19 @@ export default function BlockedScreen() {
               />
             ) : (
               users.map((user, index) => (
-                <View
-                  key={user.name}
-                  style={[
-                    styles.row,
-                    index < users.length - 1 ? styles.rowBorder : null,
-                  ]}
-                >
-                  <Avatar name={user.name} seed={user.seed} size={42} />
-                  <View style={styles.userText}>
-                    <Text style={styles.name}>{user.name}</Text>
-                    <Text style={styles.when}>{user.when} 차단</Text>
-                  </View>
-                  <Pressable
-                    accessibilityRole="button"
-                    hitSlop={{ top: 5, bottom: 5 }}
-                    style={styles.release}
-                  >
-                    <AppIcon
-                      name="check"
-                      size={14}
-                      color={theme.colors.primaryStrong}
-                    />
-                    <Text style={styles.releaseText}>차단 해제</Text>
-                  </Pressable>
-                </View>
+                <StaggerItem key={user.name} index={index}>
+                  <PersonRow
+                    name={user.name}
+                    subtitle={`${user.when} 차단`}
+                    avatarSeed={user.seed}
+                    divider={index < users.length - 1}
+                    trailing={
+                      <Button variant="secondary" icon="check">
+                        차단 해제
+                      </Button>
+                    }
+                  />
+                </StaggerItem>
               ))
             )}
           </View>
@@ -107,57 +97,12 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   notice: {
-    marginHorizontal: 18,
+    marginHorizontal: theme.layout.screenX,
     marginTop: 8,
     marginBottom: 14,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.infoSubtle,
-    padding: 14,
-    color: theme.colors.infoText,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
   },
   list: {
     flex: 1,
-    paddingHorizontal: 18,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingVertical: 14,
-  },
-  rowBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  userText: {
-    flex: 1,
-    minWidth: 0,
-  },
-  name: {
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  when: {
-    marginTop: 2,
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-  },
-  release: {
-    height: 34,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primarySubtle,
-    paddingHorizontal: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  releaseText: {
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.bold,
   },
   emptyWrap: {
     paddingHorizontal: 14,

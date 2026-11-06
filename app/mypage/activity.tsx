@@ -3,13 +3,9 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../src/components/layout/Screen";
-import {
-  Badge,
-  Empty,
-  TopBar,
-  UnderlineTabs,
-  VisualThumb,
-} from "../../src/components/ui";
+import { StaggerItem } from "../../src/components/mypage/StaggerItem";
+import { Badge, Empty, TopBar, UnderlineTabs } from "../../src/components/ui";
+import { ListRow } from "../../src/components/ui/list-row";
 import { theme } from "../../src/constants/theme";
 import { readDesignVariant } from "../../src/lib/designVariant";
 import type {
@@ -106,11 +102,9 @@ export default function ActivityScreen() {
               />
             ) : (
               posts.map((post, index) => (
-                <PostRow
-                  key={post.id}
-                  post={post}
-                  last={index === posts.length - 1}
-                />
+                <StaggerItem key={post.id} index={index}>
+                  <PostRow post={post} last={index === posts.length - 1} />
+                </StaggerItem>
               ))
             )
           ) : activeTab === "comments" ? (
@@ -122,11 +116,12 @@ export default function ActivityScreen() {
               />
             ) : (
               comments.map((comment, index) => (
-                <CommentRow
-                  key={comment.id}
-                  comment={comment}
-                  last={index === comments.length - 1}
-                />
+                <StaggerItem key={comment.id} index={index}>
+                  <CommentRow
+                    comment={comment}
+                    last={index === comments.length - 1}
+                  />
+                </StaggerItem>
               ))
             )
           ) : groups.length === 0 ? (
@@ -137,11 +132,9 @@ export default function ActivityScreen() {
             />
           ) : (
             groups.map((group, index) => (
-              <GroupRow
-                key={group.id}
-                group={group}
-                last={index === groups.length - 1}
-              />
+              <StaggerItem key={group.id} index={index}>
+                <GroupRow group={group} last={index === groups.length - 1} />
+              </StaggerItem>
             ))
           )}
         </ScrollView>
@@ -152,18 +145,14 @@ export default function ActivityScreen() {
 
 function PostRow({ post, last }: { post: MyPageActivityPost; last: boolean }) {
   return (
-    <View style={[styles.row, last ? styles.rowLast : null]}>
-      <VisualThumb size={56} seed={post.thumb} />
-      <View style={styles.rowText}>
-        <Text numberOfLines={2} style={styles.postTitle}>
-          {post.title}
-        </Text>
-        <View style={styles.metaRow}>
-          <Badge tone={post.tone}>{post.status}</Badge>
-          <Text style={styles.date}>{post.date}</Text>
-        </View>
-      </View>
-    </View>
+    <ListRow
+      title={post.title}
+      meta={post.date}
+      thumbnailSeed={post.thumb}
+      divider={!last}
+    >
+      <Badge tone={post.tone}>{post.status}</Badge>
+    </ListRow>
   );
 }
 
@@ -196,17 +185,12 @@ function GroupRow({
   last: boolean;
 }) {
   return (
-    <View style={[styles.row, last ? styles.rowLast : null]}>
-      <VisualThumb size={64} seed={group.seed} style={styles.groupCover} />
-      <View style={styles.rowText}>
-        <Text numberOfLines={1} style={styles.groupName}>
-          {group.name}
-        </Text>
-        <Text style={styles.groupMeta}>
-          멤버 {group.members}명 · {group.joined} 가입
-        </Text>
-      </View>
-    </View>
+    <ListRow
+      title={group.name}
+      meta={`멤버 ${group.members}명 · ${group.joined} 가입`}
+      thumbnailSeed={group.seed}
+      divider={!last}
+    />
   );
 }
 
@@ -222,41 +206,17 @@ const styles = StyleSheet.create({
   },
   body: {
     flexGrow: 1,
-    paddingHorizontal: 18,
     paddingTop: 12,
     paddingBottom: 16,
   },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
   commentRow: {
+    paddingHorizontal: theme.layout.screenX,
     paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
   },
   rowLast: {
     borderBottomWidth: 0,
-  },
-  rowText: {
-    flex: 1,
-    minWidth: 0,
-  },
-  postTitle: {
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  metaRow: {
-    marginTop: 6,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
   },
   date: {
     marginTop: 6,
@@ -280,21 +240,6 @@ const styles = StyleSheet.create({
   },
   sourceText: {
     flex: 1,
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-  },
-  groupCover: {
-    width: 64,
-    height: 56,
-    borderRadius: theme.radius.md,
-  },
-  groupName: {
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  groupMeta: {
-    marginTop: 4,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
   },

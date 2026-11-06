@@ -172,6 +172,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+    minHeight: theme.layout.touchTarget,
     paddingVertical: 4,
     paddingHorizontal: 4,
     borderRadius: theme.radius.md,

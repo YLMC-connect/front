@@ -450,14 +450,18 @@ export default function SignupScreen() {
             onPress={Keyboard.dismiss}
             style={{ flexGrow: 1 }}
           >
-            <MotionEnter enabled={enterMotion}>
+            <MotionEnter enabled={enterMotion} mode="fadeUp">
               <AppText variant="display">정보를 입력해주세요</AppText>
               <Text style={styles.headerSubtitle}>
                 열린문 커넥트의 성도로 함께 소통해요
               </Text>
             </MotionEnter>
 
-            <MotionEnter enabled={enterMotion} style={styles.form}>
+            <MotionEnter
+              enabled={enterMotion}
+              mode="fadeUp"
+              style={styles.form}
+            >
               {/* 섹션 3: 약관 동의 (새로 작성할 카드가 위쪽에 추가) */}
               {unlockedStep >= 3 ? (
                 <Animated.View

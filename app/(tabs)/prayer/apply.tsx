@@ -116,7 +116,9 @@ export default function PrayerApplyScreenRoute() {
                 <View style={styles.timeGrid}>
                   {times.map((time) => (
                     <Pressable
-                      accessibilityRole="button"
+                      accessibilityLabel={`${time} 기도방`}
+                      accessibilityRole="radio"
+                      accessibilityState={{ checked: time === selectedTime }}
                       key={time}
                       onPress={() => setSelectedTime(time)}
                       style={[
@@ -328,7 +330,7 @@ const styles = StyleSheet.create({
     height: 46,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.borderStrong,
     backgroundColor: theme.colors.surface,
     paddingHorizontal: 14,
     color: theme.colors.text,

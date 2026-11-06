@@ -249,8 +249,9 @@ export const styles = StyleSheet.create({
     gap: 2,
   },
   dayBadge: {
-    width: 44,
-    height: 44,
+    minWidth: 44,
+    minHeight: 44,
+    paddingHorizontal: 4,
     borderRadius: 14,
     backgroundColor: theme.colors.primarySubtle,
     alignItems: "center",

@@ -32,6 +32,7 @@ export function LegalDocumentScreen({
       if (isNaN(d.getTime())) return null;
       return `시행일자: ${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
     } catch {
+      // 의도된 무시: 시행일자는 보조 정보라 형식이 이상하면 표시만 생략한다.
       return null;
     }
   };

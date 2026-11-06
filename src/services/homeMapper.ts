@@ -234,7 +234,7 @@ export function formatSermonDate(dateStr?: string): string {
       }
     }
   } catch {
-    // fallback
+    // 의도된 무시: 형식을 알 수 없으면 아래에서 원래 문자열을 그대로 보여준다.
   }
   return dateStr;
 }

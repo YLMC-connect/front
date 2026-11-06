@@ -171,6 +171,24 @@ describe("apiClient", () => {
     );
   });
 
+  it("keeps the JSON parse error as the cause of INVALID_RESPONSE", async () => {
+    const fetchImpl = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 502,
+      text: jest.fn().mockResolvedValue("<html>Bad Gateway</html>"),
+    });
+    const client = createApiClient({
+      baseUrl: "https://api.example.com",
+      fetchImpl,
+    });
+
+    await expect(client.request("/api/member/me")).rejects.toMatchObject({
+      code: "INVALID_RESPONSE",
+      status: 502,
+      cause: expect.any(SyntaxError),
+    });
+  });
+
   it("rejects a common response without the data field", async () => {
     const fetchImpl = jest
       .fn()
@@ -187,17 +205,29 @@ describe("apiClient", () => {
   });
 
   it("normalizes transport failures as a network ApiError", async () => {
-    const fetchImpl = jest.fn().mockRejectedValue(new Error("offline"));
+    const cause = new Error("Unsupported FormDataPart implementation");
+    const fetchImpl = jest.fn().mockRejectedValue(cause);
     const client = createApiClient({
       baseUrl: "https://api.example.com",
       fetchImpl,
     });
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
 
     await expect(client.request("/api/member/me")).rejects.toMatchObject({
       name: "ApiError",
       code: "NETWORK_ERROR",
+      message: "네트워크 연결을 확인해주세요.",
       status: 0,
+      cause,
     });
+    if (__DEV__) {
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "GET https://api.example.com/api/member/me 요청 실패: Error: Unsupported FormDataPart implementation",
+        ),
+      );
+    }
+    warn.mockRestore();
   });
 
   it("shares one refresh and retries concurrent 401 requests once", async () => {

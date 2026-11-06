@@ -86,8 +86,9 @@ export default function MyPageScreen() {
     setShowLogoutConfirm(false);
     try {
       await logout();
-    } catch {
-      // The in-memory session is cleared even if native token deletion fails.
+    } catch (error) {
+      // 기기 토큰 삭제가 실패해도 메모리 세션은 비워지므로 로그인 화면으로 보낸다.
+      if (__DEV__) console.warn("[mypage] 로그아웃 정리 실패", error);
     } finally {
       router.replace("/login");
     }

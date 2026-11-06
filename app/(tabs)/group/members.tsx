@@ -151,8 +151,15 @@ export default function GroupMembersScreenRoute() {
               await kickMemberMutation.mutateAsync(kickingMember.userId);
               setKickingMember(null);
               setToastMessage(`${name}님이 강퇴되었습니다`);
-            } catch {
+            } catch (error) {
               setKickingMember(null);
+              setToastMessage(
+                getApiErrorMessage(
+                  error,
+                  communionApiErrorMessages,
+                  "멤버를 강퇴하지 못했습니다.",
+                ),
+              );
             }
           }}
         />
@@ -188,7 +195,7 @@ export default function GroupMembersScreenRoute() {
                   try {
                     router.back?.();
                   } catch {
-                    // ignore
+                    // 의도된 무시: 이관 안내 뒤 자동 뒤로가기. 이미 화면을 벗어났으면 할 일이 없다.
                   }
                 }, 700);
               })

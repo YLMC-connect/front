@@ -19,6 +19,7 @@ async function readDoneIds(date = new Date()): Promise<HomeTodoId[]> {
       (id): id is HomeTodoId => id === "dawn-word" || id === "daily-prayer",
     );
   } catch {
+    // 의도된 무시: 기기에 저장된 오늘 진행 기록이 깨졌으면 미완료로 시작한다.
     return [];
   }
 }
@@ -50,7 +51,7 @@ export async function cleanupOldProgressKeys(
       await AsyncStorage.multiRemove(keysToRemove);
     }
   } catch {
-    // Ignore cleanup failures silently
+    // 의도된 무시: 지난 진행 기록 정리는 다음 실행 때 다시 시도하면 된다.
   }
 }
 

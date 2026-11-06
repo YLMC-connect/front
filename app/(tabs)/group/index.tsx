@@ -513,8 +513,9 @@ const styles = StyleSheet.create({
     minWidth: 0,
     justifyContent: "space-between",
   },
+  // 끝난 항목은 일부러 덜 보이게 카드 전체를 흐린다(디자인 시스템 opacity-disabled).
   closedCard: {
-    opacity: 0.5,
+    opacity: theme.opacity.disabled,
   },
   cardTop: {
     flexDirection: "row",

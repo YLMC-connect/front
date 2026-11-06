@@ -163,8 +163,9 @@ export const styles = StyleSheet.create({
   bannerTextWarn: {
     color: theme.colors.warningText,
   },
+  // 나눔완료는 일부러 덜 보이게 흐린다(디자인 시스템 opacity-soft).
   doneContent: {
-    opacity: 0.6,
+    opacity: theme.opacity.soft,
   },
   authorRow: {
     paddingTop: 16,

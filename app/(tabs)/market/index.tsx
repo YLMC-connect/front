@@ -365,8 +365,9 @@ const styles = StyleSheet.create({
     gap: theme.spacing[2],
     paddingVertical: 2,
   },
+  // 나눔완료는 일부러 덜 보이게 흐린다(디자인 시스템 opacity-soft).
   rowTextDone: {
-    opacity: 0.55,
+    opacity: theme.opacity.soft,
   },
   postMeta: {
     marginTop: 0,

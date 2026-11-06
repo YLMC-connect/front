@@ -53,6 +53,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       "expo-image",
       "expo-status-bar",
       ["expo-dev-client", { toolsButton: false }],
+      "@sentry/react-native/expo",
       [
         "expo-build-properties",
         {

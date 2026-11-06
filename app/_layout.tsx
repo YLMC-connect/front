@@ -9,11 +9,14 @@ import { AuthRouteNavigator } from "../src/components/auth/AuthRouteNavigator";
 import { appFontAssets } from "../src/constants/fonts";
 import { theme } from "../src/constants/theme";
 import { queryClient } from "../src/lib/queryClient";
+import { initSentry, wrapWithSentry } from "../src/lib/sentry";
 import { restoreAuthSession } from "../src/services/authService";
+
+initSentry();
 
 export { ErrorBoundary } from "expo-router";
 
-export default function RootLayout() {
+function RootLayout() {
   const [fontsLoaded] = useFonts(appFontAssets);
 
   if (!fontsLoaded) {
@@ -36,6 +39,8 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default wrapWithSentry(RootLayout);
 
 const styles = StyleSheet.create({
   boot: {

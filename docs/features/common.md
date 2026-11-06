@@ -26,6 +26,7 @@
 - API client는 기본 `{ code, message, data }` envelope. 비envelope 성공만 `format: "json"`
 - 인증·나눔·동행 Swagger 계약 검사 스크립트 (`test:api:contract*`)
 - PR CI 게이트는 `npm run validate`. visual 비교와 Maestro는 요청 시
+- 오류 리포트는 Sentry(`@sentry/react-native`). `app/_layout.tsx`가 `initSentry()`를 부르고 루트를 `Sentry.wrap`으로 감싼다. 배포 빌드 + `EXPO_PUBLIC_SENTRY_DSN`이 있을 때만 전송
 
 ---
 
@@ -41,6 +42,7 @@
 | `scripts/gen-index.sh`                         | INDEX 상태표 재생성                                 |
 | `docs/MAINTENANCE.md`                          | 문서 드리프트 복구                                  |
 | `src/lib/apiClient.ts`                         | envelope·오류·Authorization                         |
+| `src/lib/sentry.ts`                            | Sentry 초기화(배포 빌드 + DSN 있을 때만)            |
 | `src/types/common.ts`                          | 공통 회원·서버 역할 타입                            |
 | `src/lib/rolePermissions.ts`                   | 관리자 도메인별 역할 접근 판별                      |
 | `src/constants/theme.ts` / `designTokens.json` | 디자인 토큰                                         |
@@ -89,11 +91,12 @@
 - **Expo Dev Client 기준** — Expo Go 아님.
 - **런타임은 Expo SDK 57** — React Native 0.86. Node는 `package.json` `engines`(`^22.13.0 || ^24.3.0 || >=25.0.0`)이고 CI는 22.22.0. iOS는 `expo-build-properties`의 `ios.enableSceneSupport`로 UIKit scene lifecycle을 켠다. `userInterfaceStyle: light`는 `expo-system-ui`가 적용한다. `ios/`·`android/`는 gitignore이며 prebuild로 다시 만든다.
 - **Gluestack UI 및 NativeWind 퇴역 (ADR 0006)** — 순수 React Native StyleSheet + `src/constants/theme.ts` 단일 표준 확정. 1,775줄 ui/index.tsx를 6개 서브모듈로 모듈화하되 하위 호환성을 위해 barrel export 유지.
+- **Sentry는 배포 빌드에서만** — `__DEV__`이거나 `EXPO_PUBLIC_SENTRY_DSN`이 비면 초기화하지 않는다. DSN은 로컬 `.env`/EAS env에만 둔다. 소스맵·디버그 심볼 자동 업로드는 아직 끔(`SENTRY_DISABLE_AUTO_UPLOAD=true`: `eas.json`, `ios:dev-client`/`android:dev-client` 스크립트). 업로드를 켜려면 Sentry org/project와 `SENTRY_AUTH_TOKEN`이 필요하다.
 - **Mock-first** — API 없는 도메인은 service/mock 후 adapter 교체.
 
 ## 미결 / 추적
 
-- Sentry
+- Sentry 소스맵·디버그 심볼 업로드 (auth token 필요)
 - mutation/hook 테스트는 API adapter 범위와 함께 확장
 - #25 Android TopBar 캡처 이상은 시각 파이프라인을 다시 돌릴 때
 - mock 웹의 실제 Vercel URL은 계정 연결 후

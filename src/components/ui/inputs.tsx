@@ -169,6 +169,7 @@ export function ImagePickerField({
               />
               <Pressable
                 accessibilityRole="button"
+                accessibilityLabel="사진 삭제"
                 onPress={() => removeImage(uri)}
                 style={styles.imageRemoveButton}
               >

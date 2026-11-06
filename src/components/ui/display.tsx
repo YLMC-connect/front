@@ -1,4 +1,5 @@
 import { AppIcon } from "@/components/ui/app-icon";
+import { Image } from "expo-image";
 import { type ComponentProps, type ReactNode } from "react";
 import {
   Pressable,
@@ -11,6 +12,7 @@ import {
 import Animated, { FadeInUp, useReducedMotion } from "react-native-reanimated";
 import { theme } from "../../constants/theme";
 import { getGivenName } from "../../lib/koreanName";
+import { MotionPressable } from "./motion";
 
 type IconName = ComponentProps<typeof AppIcon>["name"];
 
@@ -42,17 +44,37 @@ export function Card({
   style,
   animated = false,
   animationDelay = 0,
+  onPress,
+  accessibilityLabel,
+  testID,
 }: {
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
   animated?: boolean;
   animationDelay?: number;
+  /** 주면 누를 수 있는 카드가 되고, 누르는 동안 0.97 로 작아진다(120ms). */
+  onPress?: () => void;
+  accessibilityLabel?: string;
+  testID?: string;
 }) {
   const reduceMotion = useReducedMotion();
+
+  const body = onPress ? (
+    <MotionPressable
+      testID={testID}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      onPress={onPress}
+      style={animated ? styles.card : [styles.card, style]}
+    >
+      {children}
+    </MotionPressable>
+  ) : null;
 
   if (animated) {
     return (
       <Animated.View
+        testID={onPress ? undefined : testID}
         entering={
           reduceMotion
             ? undefined
@@ -60,28 +82,56 @@ export function Card({
                 animationDelay,
               )
         }
-        style={[styles.card, style]}
+        style={onPress ? style : [styles.card, style]}
       >
-        {children}
+        {body ?? children}
       </Animated.View>
     );
   }
 
-  return <View style={[styles.card, style]}>{children}</View>;
+  return (
+    body ?? (
+      <View testID={testID} style={[styles.card, style]}>
+        {children}
+      </View>
+    )
+  );
 }
 
+export type BadgeTone = keyof typeof badgeTones;
+
+/**
+ * 상태 배지(디자인 시스템 Badge): 높이 26, 12/600, 안쪽 4×10, radius-full.
+ * 톤은 info·success·warning·danger·neutral. 옛 이름 primary·mute·warn 도 같은 색으로 받는다.
+ */
 export function Badge({
   children,
   tone = "primary",
+  bordered = false,
+  solid = false,
 }: {
   children: ReactNode;
-  tone?: "primary" | "mute" | "warn" | "danger" | "success";
+  tone?: BadgeTone;
+  /** 1px border 테두리(neutral 톤에서만 보인다). DetailBadge 호환용. */
+  bordered?: boolean;
+  /** 진한 primary 바탕 + 흰 글자(소모임장·참여중 강조). 규격 톤 밖이라 호환용으로만 둔다. */
+  solid?: boolean;
 }) {
+  const palette = solid
+    ? { bg: theme.colors.primary, fg: theme.colors.onPrimary }
+    : badgeTones[tone];
+  const showBorder = bordered && !solid && badgeTones[tone] === neutral;
+
   return (
-    <View style={[styles.badge, { backgroundColor: badgeTones[tone].bg }]}>
-      <Text style={[styles.badgeText, { color: badgeTones[tone].fg }]}>
-        {children}
-      </Text>
+    <View
+      style={[
+        styles.badge,
+        { backgroundColor: palette.bg },
+        bordered ? styles.badgeBordered : null,
+        showBorder ? styles.badgeBorderVisible : null,
+      ]}
+    >
+      <Text style={[styles.badgeText, { color: palette.fg }]}>{children}</Text>
     </View>
   );
 }
@@ -90,11 +140,15 @@ export function Avatar({
   name,
   size = 40,
   seed,
+  uri,
 }: {
   name: string;
   size?: number;
   seed?: string | number;
+  /** 사진 주소. 불러와지면 이름 글자 위로 200ms 크로스페이드한다. */
+  uri?: string | null;
 }) {
+  const reduceMotion = useReducedMotion();
   const givenName = getGivenName(name) || name.trim() || "?";
   const backgroundColor = avatarColorFor(seed ?? name);
   const fontSize =
@@ -116,6 +170,16 @@ export function Avatar({
       >
         {givenName}
       </Text>
+      {uri ? (
+        <Image
+          testID="avatar-image"
+          source={{ uri }}
+          contentFit="cover"
+          transition={reduceMotion ? 0 : theme.motion.duration.base}
+          accessibilityIgnoresInvertColors
+          style={StyleSheet.absoluteFill}
+        />
+      ) : null}
     </View>
   );
 }
@@ -254,11 +318,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: theme.spacing["1"],
   },
+  badgeBordered: {
+    borderWidth: 1,
+    borderColor: "transparent",
+    paddingHorizontal: 9,
+    paddingVertical: theme.spacing["1"] - 1,
+  },
+  badgeBorderVisible: {
+    borderColor: theme.colors.border,
+  },
   badgeText: {
     ...theme.typography.caption,
     fontWeight: theme.fontWeight.semibold,
   },
   avatar: {
+    overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -335,10 +409,19 @@ const styles = StyleSheet.create({
  * 디자인 시스템 Badge 톤. 옛 이름은 그대로 두고 색만 맞춘다:
  * primary = info, mute = neutral, warn = warning.
  */
+const info = { bg: theme.colors.infoSubtle, fg: theme.colors.infoText };
+const neutral = { bg: theme.colors.surfaceSubtle, fg: theme.colors.neutral700 };
+const warning = {
+  bg: theme.colors.warningSubtle,
+  fg: theme.colors.warningText,
+};
 const badgeTones = {
-  primary: { bg: theme.colors.infoSubtle, fg: theme.colors.infoText },
-  mute: { bg: theme.colors.surfaceSubtle, fg: theme.colors.neutral700 },
-  warn: { bg: theme.colors.warningSubtle, fg: theme.colors.warningText },
+  info,
+  neutral,
+  warning,
+  primary: info,
+  mute: neutral,
+  warn: warning,
   danger: { bg: theme.colors.dangerSubtle, fg: theme.colors.dangerText },
   success: { bg: theme.colors.successSubtle, fg: theme.colors.successText },
 };

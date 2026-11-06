@@ -61,8 +61,8 @@ export interface LifeStudyCompletionStudent {
   userId: string;
   userName: string | null;
   userPhone: string | null;
-  attendCount: number;
-  absentCount: number;
+  attendCount: number | null;
+  absentCount: number | null;
   completed: boolean;
   completedAt: string | null;
 }
@@ -72,7 +72,7 @@ export interface LifeStudyCompletionRoster {
   lifeStudyId: number;
   lifeStudyName: string | null;
   cohortNumber: number | null;
-  totalClassCount: number;
+  totalClassCount: number | null;
   students: LifeStudyCompletionStudent[];
 }
 

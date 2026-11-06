@@ -70,7 +70,7 @@
 
 ## 데이터 타입
 
-`PrayerRoom`은 `weekday`, `leader`, `memberCount`, `isJoined`를 포함합니다. `PrayerTopic`은 `isAnonymous`, `prayerCount`, `hasPrayed`, `isAnswered`, `answer`를 포함합니다. 루트 화면 전용 `PrayerOverview`는 요일방 요약과 내 기도제목 상태 요약을 가지며 API DTO mapper의 출력 모델로 사용합니다. `PrayerCohortDto`, `PrayerCohortStatusDto`, `PrayerCompletionMemberDto`, `PrayerTopicDto`, `PrayerHistoryItem`은 Notion에 적힌 필드만 가집니다. `PrayerApplicationDto`와 `PrayerCategoryDto`는 이름만 있고 값 타입은 페이지에 없어 `unknown`입니다. 기도방 상세 성공 필드는 없어 빈 객체로만 읽습니다. `a / b`로 한 칸에 적힌 이름은 두 필드입니다.
+`PrayerRoom`은 `weekday`, `leader`, `memberCount`, `isJoined`를 포함합니다. `PrayerTopic`은 `isAnonymous`, `prayerCount`, `hasPrayed`, `isAnswered`, `answer`를 포함합니다. 루트 화면 전용 `PrayerOverview`는 요일방 요약과 내 기도제목 상태 요약을 가지며 API DTO mapper의 출력 모델로 사용합니다. `PrayerCohortDto`, `PrayerCohortStatusDto`, `PrayerCompletionMemberDto`, `PrayerTopicDto`, `PrayerHistoryItem`은 Notion에 적힌 필드만 가집니다. `PrayerApplicationDto`는 이름만 있고 값 타입은 페이지에 없어 `unknown`입니다(없는 이름은 `null`). `PrayerCategoryDto`는 화면이 쓰는 `id`·`categoryName`만 확인합니다. 화면에서 쓰지 않는 DTO 필드는 `null` 을 허용합니다. 기도방 상세 성공 필드는 없어 빈 객체로만 읽습니다. `a / b`로 한 칸에 적힌 이름은 두 필드입니다.
 
 ## 결정 사항 (최신 위)
 

@@ -33,6 +33,16 @@ const post = {
 };
 
 describe("mypageMapper", () => {
+  let warn: jest.SpyInstance;
+
+  beforeEach(() => {
+    warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warn.mockRestore();
+  });
+
   it("maps a 1-based post page onto the activity row and the next 0-based page", () => {
     expect(readMyPagePostList({ ...pageMeta, content: [post] })).toEqual({
       items: [
@@ -133,12 +143,12 @@ describe("mypageMapper", () => {
         },
       ],
     });
-    expect(() =>
+    expect(
       readMyPageGroupList({
         ...pageMeta,
-        content: [{ ...group, type: "OTHER" }],
-      }),
-    ).toThrow(ApiError);
+        content: [{ ...group, type: "OTHER", leaderName: null }],
+      }).items,
+    ).toHaveLength(1);
     expect(normalizeMyPageGroupQuery({ type: "VOLUNTEER" })).toMatchObject({
       page: 0,
       size: 10,
@@ -208,7 +218,7 @@ describe("mypageMapper", () => {
     expect(() => readMyPageLifeStudyHistory(null)).toThrow(ApiError);
   });
 
-  it("reads prayer history and rejects a weekday outside 0 through 6", () => {
+  it("reads prayer history and nulls a weekday outside 0 through 6", () => {
     const item = {
       cohortId: 15,
       cohortName: "2026년 화요일 오전 기도방",
@@ -238,15 +248,100 @@ describe("mypageMapper", () => {
         ],
       }).currentActivities[0],
     ).toMatchObject({ yoil: 2, leftAt: null, leaveReason: null });
-    expect(() =>
+    expect(
       readMyPagePrayerHistory({
-        activeCount: 1,
-        totalPeriod: "3개월",
-        totalPeriodDays: 90,
-        totalRoomCount: 1,
-        currentActivities: [{ ...item, yoil: 7 }],
-        pastActivities: [],
+        currentActivities: [{ ...item, yoil: 7, period: null }],
+        pastActivities: [{ ...item, cohortId: null }],
       }),
+    ).toMatchObject({
+      activeCount: null,
+      totalPeriod: null,
+      currentActivities: [{ cohortId: 15, yoil: null, period: null }],
+      pastActivities: [],
+    });
+    expect(warn).toHaveBeenCalledWith(
+      "[응답 형식] mypage.prayers.pastActivities[0]: cohortId 형식 오류",
+    );
+    expect(() =>
+      readMyPagePrayerHistory({ currentActivities: [], pastActivities: {} }),
+    ).toThrow(ApiError);
+  });
+
+  it("reads null or missing fields that no screen uses", () => {
+    const { content: _content, viewCount: _viewCount, ...postWithout } = post;
+    expect(
+      readMyPagePostList({
+        ...pageMeta,
+        content: [{ ...postWithout, thumbnailUrl: null, categoryCode: null }],
+      }).items,
+    ).toHaveLength(1);
+    expect(
+      readMyPageCommentList({
+        ...pageMeta,
+        content: [
+          {
+            id: 8,
+            shareTitle: "나눔",
+            content: "댓글",
+            createdAt: "2026-05-13T01:02:03",
+          },
+        ],
+      }).items,
+    ).toHaveLength(1);
+    expect(
+      readMyPageLifeStudyHistory({
+        applications: [{ cohortId: 9 }],
+        ongoing: [],
+        completed: [],
+      }),
+    ).toMatchObject({
+      completionCount: null,
+      applications: [{ cohortId: 9, name: null, appliedAt: null }],
+    });
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("drops only the page items whose screen fields are wrong", () => {
+    const list = readMyPagePostList({
+      ...pageMeta,
+      content: [
+        { ...post, title: null },
+        post,
+        { ...post, id: 5, statusName: "모름" },
+        { ...post, id: 6, createdAt: undefined },
+      ],
+    });
+
+    expect(list.items.map((item) => item.id)).toEqual(["4"]);
+    expect(list.totalElements).toBe(11);
+    expect(warn).toHaveBeenCalledWith(
+      "[응답 형식] mypage.posts.content[0]: title 형식 오류",
+    );
+    expect(warn).toHaveBeenCalledWith(
+      "[응답 형식] mypage.posts.content[2]: statusName 형식 오류",
+    );
+    expect(warn).toHaveBeenCalledWith(
+      "[응답 형식] mypage.posts.content[3]: createdAt 형식 오류",
+    );
+    expect(
+      readMyPageLifeStudyHistory({
+        applications: ["행이 아님"],
+        ongoing: [],
+        completed: [],
+      }).applications,
+    ).toEqual([]);
+  });
+
+  it("still rejects a page that is not a page", () => {
+    expect(() => readMyPagePostList([post])).toThrow(ApiError);
+    expect(() => readMyPagePostList({ ...pageMeta, content: null })).toThrow(
+      ApiError,
+    );
+    expect(() =>
+      readMyPagePostList({ ...pageMeta, hasNext: "yes", content: [] }),
+    ).toThrow(ApiError);
+    expect(() =>
+      readMyPageLifeStudyHistory({ applications: [], ongoing: [] }),
     ).toThrow(ApiError);
   });
 });

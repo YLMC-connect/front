@@ -7,6 +7,8 @@ import { StickyHeaderScreen } from "../../src/components/layout/StickyHeaderScre
 import {
   AppText,
   Avatar,
+  Badge,
+  Card,
   ErrorState,
   ListSkeleton,
   MotionEnter,
@@ -109,20 +111,13 @@ export default function HomeScreen() {
                     void Linking.openURL(sundaySermon.videoUrl);
                   }
                 }}
-                pressedScale={0.985}
                 style={styles.dawnCard}
                 testID="home-sunday-sermon"
               >
                 <View style={styles.sermonHeader}>
-                  <View style={styles.categoryBadge}>
-                    <AppText
-                      variant="caption"
-                      tone="brand"
-                      style={styles.categoryBadgeText}
-                    >
-                      {sermonMeta?.category ?? sundaySermon.timeLabel}
-                    </AppText>
-                  </View>
+                  <Badge tone="info">
+                    {sermonMeta?.category ?? sundaySermon.timeLabel}
+                  </Badge>
                   {sermonMeta?.date ? (
                     <AppText variant="caption" tone="muted">
                       {sermonMeta.date}
@@ -202,54 +197,44 @@ export default function HomeScreen() {
             </View>
 
             {dawnPrayer ? (
-              <MotionPressable
-                accessibilityRole="button"
+              <Card
                 onPress={() => router.push(dawnPrayer.href as Href)}
-                pressedScale={0.985}
-                style={styles.dawnCard}
+                style={styles.cardInset}
                 testID="home-dawn-prayer"
               >
-                <View style={styles.sermonContent}>
-                  <View style={styles.cardHeaderRow}>
-                    <View style={styles.categoryBadge}>
-                      <AppText
-                        variant="caption"
-                        tone="brand"
-                        style={styles.categoryBadgeText}
-                      >
-                        {dawnMeta?.category ?? dawnPrayer.timeLabel}
-                      </AppText>
-                    </View>
-                    {dawnMeta?.date ? (
-                      <AppText variant="caption" tone="muted">
-                        {dawnMeta.date}
-                      </AppText>
-                    ) : null}
-                  </View>
-                  <AppText variant="heading" style={styles.dawnTitle}>
-                    {dawnPrayer.title}
-                  </AppText>
-                  {dawnPrayer.summary ? (
-                    <AppText
-                      variant="body"
-                      numberOfLines={2}
-                      style={styles.dawnSummary}
-                    >
-                      {dawnPrayer.summary}
+                <View style={styles.cardHeaderRow}>
+                  <Badge tone="info">
+                    {dawnMeta?.category ?? dawnPrayer.timeLabel}
+                  </Badge>
+                  {dawnMeta?.date ? (
+                    <AppText variant="caption" tone="muted">
+                      {dawnMeta.date}
                     </AppText>
                   ) : null}
-                  <View style={styles.dawnAction}>
-                    <AppText variant="label" weight="semibold" tone="brand">
-                      말씀요약 더 보기
-                    </AppText>
-                    <AppIcon
-                      name="chevron-right"
-                      size={18}
-                      color={theme.colors.primaryStrong}
-                    />
-                  </View>
                 </View>
-              </MotionPressable>
+                <AppText variant="heading" style={styles.dawnTitle}>
+                  {dawnPrayer.title}
+                </AppText>
+                {dawnPrayer.summary ? (
+                  <AppText
+                    variant="body"
+                    numberOfLines={2}
+                    style={styles.dawnSummary}
+                  >
+                    {dawnPrayer.summary}
+                  </AppText>
+                ) : null}
+                <View style={styles.dawnAction}>
+                  <AppText variant="label" weight="semibold" tone="brand">
+                    말씀요약 더 보기
+                  </AppText>
+                  <AppIcon
+                    name="chevron-right"
+                    size={18}
+                    color={theme.colors.primaryStrong}
+                  />
+                </View>
+              </Card>
             ) : null}
           </MotionEnter>
         )}
@@ -331,6 +316,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     ...theme.shadow.sm,
   },
+  cardInset: {
+    marginHorizontal: theme.layout.screenX,
+  },
   sermonContent: {
     padding: theme.spacing[4],
   },
@@ -340,18 +328,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 8,
     marginBottom: theme.spacing[3],
-  },
-  categoryBadge: {
-    minHeight: theme.size.badgeHeight,
-    justifyContent: "center",
-    paddingHorizontal: 10,
-    paddingVertical: theme.spacing[1],
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.infoSubtle,
-  },
-  categoryBadgeText: {
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.infoText,
   },
   dailyCategoryBadge: {
     minHeight: theme.size.badgeHeight,

@@ -17,10 +17,6 @@ const ALLOWED: Record<string, { count: number; reason: string }> = {
     count: 6,
     reason: "사진 위 어두운 그라데이션",
   },
-  "app/(tabs)/market/index.tsx": {
-    count: 1,
-    reason: "나눔완료 사진 어두운 덮개",
-  },
   "src/components/faith/faithSectionsStyles.ts": {
     count: 1,
     reason: "사진 위 어두운 덮개",

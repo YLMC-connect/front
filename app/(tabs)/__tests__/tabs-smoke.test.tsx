@@ -689,7 +689,8 @@ describe("v1 tab smoke screens", () => {
       "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
     );
 
-    fireEvent.press(screen.getByText("도서·문구"));
+    // 카드 맨 위 카테고리 줄에도 같은 이름이 있어 필터 칩은 testID 로 고른다.
+    fireEvent.press(screen.getByTestId("market-category-book"));
     await waitFor(() =>
       expect(setParams).toHaveBeenCalledWith({ category: "book" }),
     );

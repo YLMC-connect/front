@@ -28,6 +28,7 @@ import { Screen } from "../../../src/components/layout/Screen";
 import {
   AppText,
   Avatar,
+  Badge,
   ConfirmDialog,
   DetailAction,
   ErrorState,
@@ -386,16 +387,8 @@ export default function MarketDetailScreen() {
 
             <View style={styles.article}>
               <View style={styles.chips}>
-                <View style={styles.softChip}>
-                  <Text style={styles.softChipText}>
-                    {market.categoryLabel}
-                  </Text>
-                </View>
-                <View style={styles.conditionChip}>
-                  <Text style={styles.conditionText}>
-                    {market.conditionLabel}
-                  </Text>
-                </View>
+                <Badge tone="info">{market.categoryLabel}</Badge>
+                <Badge tone="neutral">{market.conditionLabel}</Badge>
               </View>
               <Text style={styles.title}>{market.title}</Text>
               <Text style={styles.body}>{market.content}</Text>

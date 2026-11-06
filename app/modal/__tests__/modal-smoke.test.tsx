@@ -18,6 +18,16 @@ jest.mock("../../../src/lib/resizeImage", () => ({
   resizeImageForUpload: jest.fn(async (uri: string) => uri),
 }));
 
+function countFocusRings() {
+  return screen.root.findAll(
+    (node) =>
+      typeof node.type === "string" &&
+      StyleSheet.flatten(node.props.style)?.borderColor ===
+        theme.colors.primary &&
+      StyleSheet.flatten(node.props.style)?.borderWidth === 2,
+  ).length;
+}
+
 describe("modal smoke screens", () => {
   const router = { back: jest.fn(), push: jest.fn(), replace: jest.fn() };
 
@@ -52,11 +62,11 @@ describe("modal smoke screens", () => {
     });
     fireEvent(titleInput, "focus");
     expect(StyleSheet.flatten(titleInput.props.style)).toMatchObject({
-      borderColor: theme.colors.primary,
-      borderWidth: 2,
       outlineColor: "transparent",
       outlineWidth: 0,
     });
+    // 포커스 테두리는 입력창 위에 겹쳐 그리는 공통 InputSurface 고리(2px primary)
+    expect(countFocusRings()).toBe(1);
   });
 
   it("renders the group create modal", () => {
@@ -95,11 +105,11 @@ describe("modal smoke screens", () => {
 
     fireEvent(nameInput, "focus");
     expect(StyleSheet.flatten(nameInput.props.style)).toMatchObject({
-      borderColor: theme.colors.primary,
-      borderWidth: 2,
       outlineColor: "transparent",
       outlineWidth: 0,
     });
+    // 포커스 테두리는 입력창 위에 겹쳐 그리는 공통 InputSurface 고리(2px primary)
+    expect(countFocusRings()).toBe(1);
   });
 
   it("submits a valid market form and opens the created detail", async () => {

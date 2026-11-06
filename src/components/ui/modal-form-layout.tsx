@@ -4,9 +4,12 @@ import {
   Text,
   TextInput,
   type TextInputProps,
+  type TextStyle,
   View,
+  type ViewStyle,
 } from "react-native";
 import { theme } from "../../constants/theme";
+import { InputErrorText, InputSurface, inputTextStyles } from "./inputs";
 
 export function ModalFormSection({
   label,
@@ -50,7 +53,40 @@ export type ModalFormTextInputSize = keyof typeof MODAL_FORM_INPUT_HEIGHTS;
 export type ModalFormTextInputProps = TextInputProps & {
   size?: ModalFormTextInputSize;
   height?: number;
+  /** 입력 아래에 아이콘과 함께 띄울 오류 문구. 주면 테두리도 dangerText 가 된다. */
+  error?: string;
 };
+
+/** 자리·크기 값은 바깥 입력창으로, 나머지(글자 정렬 등)는 TextInput 으로 나눈다. */
+const OUTER_STYLE_KEYS = new Set<string>([
+  "width",
+  "minWidth",
+  "maxWidth",
+  "flex",
+  "flexGrow",
+  "flexShrink",
+  "flexBasis",
+  "alignSelf",
+  "margin",
+  "marginHorizontal",
+  "marginVertical",
+  "marginTop",
+  "marginBottom",
+  "marginLeft",
+  "marginRight",
+  "marginStart",
+  "marginEnd",
+]);
+
+function splitInputStyle(style: TextInputProps["style"]) {
+  const flat = (StyleSheet.flatten(style) ?? {}) as Record<string, unknown>;
+  const outer: Record<string, unknown> = {};
+  const inner: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(flat)) {
+    (OUTER_STYLE_KEYS.has(key) ? outer : inner)[key] = value;
+  }
+  return { outer: outer as ViewStyle, inner: inner as TextStyle };
+}
 
 export function ModalFormTextInput({
   multiline,
@@ -60,31 +96,51 @@ export function ModalFormTextInput({
   style,
   size = "md",
   height,
+  error,
+  editable,
+  testID,
   ...props
 }: ModalFormTextInputProps) {
   const [focused, setFocused] = useState(false);
   const resolvedHeight = height ?? MODAL_FORM_INPUT_HEIGHTS[size];
+  const readOnly = editable === false;
+  const { outer, inner } = splitInputStyle(style);
 
   return (
-    <TextInput
-      {...props}
-      multiline={multiline}
-      onBlur={(event) => {
-        setFocused(false);
-        onBlur?.(event);
-      }}
-      onFocus={(event) => {
-        setFocused(true);
-        onFocus?.(event);
-      }}
-      placeholderTextColor={placeholderTextColor}
-      style={[
-        styles.input,
-        multiline ? styles.textarea : { height: resolvedHeight },
-        style,
-        focused ? styles.inputFocused : null,
-      ]}
-    />
+    <View
+      testID={testID ? `${testID}-field` : undefined}
+      style={[styles.field, outer]}
+    >
+      <InputSurface
+        focused={focused}
+        error={Boolean(error)}
+        readOnly={readOnly}
+        testID={testID}
+      >
+        <TextInput
+          {...props}
+          testID={testID}
+          editable={editable}
+          multiline={multiline}
+          onBlur={(event) => {
+            setFocused(false);
+            onBlur?.(event);
+          }}
+          onFocus={(event) => {
+            setFocused(true);
+            onFocus?.(event);
+          }}
+          placeholderTextColor={placeholderTextColor}
+          style={[
+            inputTextStyles.input,
+            multiline ? inputTextStyles.multiline : { height: resolvedHeight },
+            readOnly ? inputTextStyles.readOnly : null,
+            inner,
+          ]}
+        />
+      </InputSurface>
+      {error ? <InputErrorText>{error}</InputErrorText> : null}
+    </View>
   );
 }
 
@@ -98,7 +154,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 22,
-    marginBottom: 10,
+    marginBottom: theme.spacing["2"],
   },
   sectionLabel: {
     ...theme.typography.label,
@@ -115,27 +171,8 @@ const styles = StyleSheet.create({
     height: 8,
     backgroundColor: theme.colors.bg,
   },
-  input: {
-    minHeight: theme.size.inputHeight,
+  field: {
     marginHorizontal: theme.layout.screenX,
-    borderRadius: theme.radius.sm,
-    borderWidth: 1,
-    borderColor: theme.colors.borderStrong,
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: theme.spacing["4"],
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-    outlineColor: "transparent",
-    outlineWidth: 0,
-  },
-  inputFocused: {
-    borderColor: theme.colors.primary,
-    borderWidth: 2,
-    paddingHorizontal: theme.spacing["4"] - 1,
-  },
-  textarea: {
-    minHeight: 132,
-    paddingTop: theme.spacing["3"],
-    lineHeight: theme.typography.body.lineHeight,
+    gap: theme.spacing["2"],
   },
 });

@@ -55,6 +55,8 @@ export function AppText({
 
   return (
     <Text
+      // 한국어는 낱글자가 아니라 어절 단위로 줄을 바꾼다(iOS 기본은 글자 단위).
+      lineBreakStrategyIOS="hangul-word"
       {...textProps}
       style={[
         styles.base,

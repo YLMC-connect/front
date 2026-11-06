@@ -293,7 +293,9 @@ export default function PrayerDetailScreen() {
                   name="check"
                   size={18}
                   color={
-                    isCompleted ? theme.colors.primaryDeep : theme.colors.white
+                    isCompleted
+                      ? theme.colors.primaryStrong
+                      : theme.colors.onPrimary
                   }
                 />
               </MotionPop>

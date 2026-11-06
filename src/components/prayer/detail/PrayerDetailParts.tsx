@@ -221,7 +221,7 @@ export function PrayerItem({
               <AppIcon
                 name="warning-amber"
                 size={10}
-                color={theme.colors.danger}
+                color={theme.colors.dangerText}
               />
               <Text style={styles.urgentBadgeText}>긴급</Text>
             </View>
@@ -253,7 +253,7 @@ export function PrayerItem({
             <AppIcon
               name="check-circle"
               size={14}
-              color={theme.colors.primaryDeep}
+              color={theme.colors.primaryStrong}
             />
             <Text style={styles.answerLabel}>응답</Text>
           </View>
@@ -272,7 +272,9 @@ export function PrayerItem({
             name={answer ? "check" : "favorite"}
             size={14}
             color={
-              answer || prayed ? theme.colors.primaryDeep : theme.colors.inkMute
+              answer || prayed
+                ? theme.colors.primaryStrong
+                : theme.colors.textMuted
             }
           />
           <Text
@@ -309,7 +311,7 @@ export function PersonRow({
         <AppIcon
           name={done ? "check" : "schedule"}
           size={11}
-          color={done ? theme.colors.primaryDeep : theme.colors.inkMute}
+          color={done ? theme.colors.primaryStrong : theme.colors.textMuted}
         />
         <Text
           style={[

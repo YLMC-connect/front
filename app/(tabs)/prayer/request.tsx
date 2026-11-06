@@ -181,7 +181,7 @@ export default function PrayerRequestScreenRoute() {
                   <AppIcon
                     name="chevron-right"
                     size={18}
-                    color={theme.colors.inkHint}
+                    color={theme.colors.textMuted}
                   />
                 </View>
               </Pressable>
@@ -217,19 +217,19 @@ const styles = StyleSheet.create({
   noticeCard: {
     marginBottom: 14,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
     padding: 15,
   },
   noticeTitle: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.extrabold,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
+    fontWeight: theme.fontWeight.bold,
   },
   noticeText: {
     marginTop: 7,
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 20,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   stack: {
     flex: 1,
@@ -240,11 +240,10 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: theme.radius.md,
-    borderWidth: 1,
     borderColor: "transparent",
     backgroundColor: theme.colors.surface,
     padding: 15,
-    ...theme.shadow.card,
+    ...theme.shadow.sm,
   },
   cardActive: {
     borderWidth: 1.5,
@@ -268,15 +267,15 @@ const styles = StyleSheet.create({
   },
   title: {
     marginTop: 9,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.extrabold,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
+    fontWeight: theme.fontWeight.bold,
   },
   desc: {
     marginTop: 5,
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 20,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   bottom: {
     position: "absolute",
@@ -293,11 +292,10 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     alignItems: "center",
     justifyContent: "center",
-    ...theme.shadow.primary,
   },
   submitText: {
-    color: theme.colors.white,
-    fontSize: theme.fontSize.base,
+    color: theme.colors.onPrimary,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
 });

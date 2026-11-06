@@ -30,7 +30,7 @@ export const styles = StyleSheet.create({
     gap: 6,
     paddingTop: 4,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.line,
+    borderTopColor: theme.colors.border,
   },
   heroProgressHeader: {
     flexDirection: "row",
@@ -38,19 +38,19 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   heroProgressLabel: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   heroProgressRate: {
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.extrabold,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.caption.fontSize,
+    fontWeight: theme.fontWeight.bold,
   },
   heroProgressBar: {
     height: 6,
     borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surface2,
+    backgroundColor: theme.colors.surfaceSubtle,
     overflow: "hidden",
   },
   heroProgressFill: {
@@ -77,8 +77,8 @@ export const styles = StyleSheet.create({
     gap: 10,
   },
   sectionTitle: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   prayerCard: {
@@ -96,13 +96,13 @@ export const styles = StyleSheet.create({
     gap: 6,
   },
   authorName: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.text,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   dot: {
-    color: theme.colors.inkHint,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   chipRow: {
     flexDirection: "row",
@@ -119,40 +119,40 @@ export const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   urgentBadgeText: {
-    color: theme.colors.danger,
-    fontSize: 10,
-    fontWeight: theme.fontWeight.extrabold,
+    color: theme.colors.dangerText,
+    fontSize: theme.typography.caption.fontSize,
+    fontWeight: theme.fontWeight.bold,
   },
   topicChip: {
     borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primaryTint,
+    backgroundColor: theme.colors.primarySubtle,
     paddingHorizontal: 9,
     paddingVertical: 3,
   },
   topicChipWarn: {
-    backgroundColor: theme.colors.amberSoft,
+    backgroundColor: theme.colors.warningSubtle,
   },
   topicChipText: {
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   topicChipTextWarn: {
-    color: theme.colors.warn,
+    color: theme.colors.warningText,
   },
   prayerTitle: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   prayerText: {
-    color: theme.colors.inkSoft,
-    fontSize: 13.5,
-    lineHeight: 20,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
   },
   answerBox: {
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
     paddingHorizontal: 12,
     paddingVertical: 10,
     gap: 4,
@@ -163,14 +163,14 @@ export const styles = StyleSheet.create({
     gap: 5,
   },
   answerLabel: {
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   answerText: {
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 18,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   prayerFooter: {
     flexDirection: "row",
@@ -178,8 +178,8 @@ export const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   smallMuted: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   pillAction: {
@@ -187,20 +187,20 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     gap: 4,
     borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surface2,
+    backgroundColor: theme.colors.surfaceSubtle,
     paddingHorizontal: 11,
     paddingVertical: 6,
   },
   pillActionActive: {
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
   },
   pillActionText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   pillActionTextActive: {
-    color: theme.colors.primaryDeep,
+    color: theme.colors.primaryStrong,
   },
   bottomAction: {
     position: "absolute",
@@ -219,22 +219,21 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 7,
-    ...theme.shadow.primary,
   },
   prayButtonDone: {
     borderWidth: 1,
     borderColor: "rgba(62,104,200,0.22)",
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
     shadowOpacity: 0,
     elevation: 0,
   },
   prayButtonText: {
-    color: theme.colors.white,
-    fontSize: theme.fontSize.base,
+    color: theme.colors.onPrimary,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   prayButtonTextDone: {
-    color: theme.colors.primaryDeep,
+    color: theme.colors.primaryStrong,
   },
   statusCard: {
     padding: 15,
@@ -253,27 +252,27 @@ export const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: theme.colors.primaryTint,
+    backgroundColor: theme.colors.primarySubtle,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
   },
   dayText: {
-    color: theme.colors.primaryDeep,
-    fontSize: 15,
-    lineHeight: 16,
-    fontWeight: "800",
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
+    fontWeight: theme.fontWeight.bold,
   },
   timeText: {
     marginTop: 2,
-    color: theme.colors.primaryDeep,
-    fontSize: 9,
-    lineHeight: 10,
-    fontWeight: "800",
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
+    fontWeight: theme.fontWeight.bold,
   },
   statusTitle: {
-    color: theme.colors.ink,
-    fontSize: 17,
+    color: theme.colors.text,
+    fontSize: theme.typography.heading.fontSize,
     fontWeight: "900",
   },
   stats: {
@@ -283,22 +282,22 @@ export const styles = StyleSheet.create({
   stat: {
     flex: 1,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.surface2,
+    backgroundColor: theme.colors.surfaceSubtle,
     paddingVertical: 12,
     alignItems: "center",
     gap: 4,
   },
   statActive: {
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
   },
   statLabel: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   statValue: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   progressBar: {
@@ -318,8 +317,8 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   statusListTitle: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: "900",
   },
   pendingHead: {
@@ -334,12 +333,12 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.line,
+    borderTopColor: theme.colors.border,
   },
   personName: {
     flex: 1,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   personBadge: {
@@ -351,20 +350,20 @@ export const styles = StyleSheet.create({
     borderRadius: theme.radius.full,
   },
   personBadgeDone: {
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
   },
   personBadgePending: {
-    backgroundColor: theme.colors.surface2,
+    backgroundColor: theme.colors.surfaceSubtle,
   },
   personBadgeText: {
-    fontSize: theme.fontSize.xs,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   personBadgeTextDone: {
-    color: theme.colors.primaryDeep,
+    color: theme.colors.primaryStrong,
   },
   personBadgeTextPending: {
-    color: theme.colors.inkMute,
+    color: theme.colors.textMuted,
   },
   empty: {
     alignItems: "center",
@@ -380,14 +379,14 @@ export const styles = StyleSheet.create({
     paddingVertical: 28,
   },
   emptyTitle: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   emptyDesc: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 18,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     textAlign: "center",
   },
 });

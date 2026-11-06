@@ -149,7 +149,7 @@ export default function PrayerApplyScreenRoute() {
                     multiline
                     onChangeText={setMemo}
                     placeholder="기도방 참여를 희망하는 이유를 적어주세요"
-                    placeholderTextColor={theme.colors.inkHint}
+                    placeholderTextColor={theme.colors.textMuted}
                     style={[styles.input, styles.textarea]}
                     value={memo}
                   />
@@ -203,7 +203,7 @@ function SelectRow({
       </Text>
       <View style={styles.selectedTextWrap}>
         {selected ? (
-          <AppIcon name="check" size={13} color={theme.colors.primaryDeep} />
+          <AppIcon name="check" size={13} color={theme.colors.primaryStrong} />
         ) : null}
         <Text
           style={[styles.selectedText, selected ? styles.selectedTextOn : null]}
@@ -236,20 +236,20 @@ const styles = StyleSheet.create({
   notice: {
     marginBottom: 18,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    color: theme.colors.primaryDeep,
-    fontSize: 13,
-    lineHeight: 20,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
   },
   stack: {
     gap: 18,
   },
   sectionLabel: {
     marginBottom: 8,
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.text,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   optionStack: {
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     height: 54,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
     paddingHorizontal: 16,
     flexDirection: "row",
@@ -275,23 +275,23 @@ const styles = StyleSheet.create({
     height: 58,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
     alignItems: "center",
     justifyContent: "center",
   },
   optionOn: {
     borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primarySoft,
-    ...theme.shadow.card,
+    backgroundColor: theme.colors.primarySubtle,
+    ...theme.shadow.sm,
   },
   optionText: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   optionTextOn: {
-    color: theme.colors.primaryDeep,
+    color: theme.colors.primaryStrong,
   },
   selectedTextWrap: {
     flexDirection: "row",
@@ -299,28 +299,28 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   selectedText: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   selectedTextOn: {
-    color: theme.colors.primaryDeep,
+    color: theme.colors.primaryStrong,
   },
   card: {
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
     padding: 15,
     gap: 12,
   },
   cardTitle: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.extrabold,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
+    fontWeight: theme.fontWeight.bold,
   },
   fieldLabel: {
     marginBottom: 6,
-    color: theme.colors.inkSoft,
+    color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
     fontWeight: theme.typography.label.fontWeight,
   },
@@ -328,11 +328,11 @@ const styles = StyleSheet.create({
     height: 46,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.line,
-    backgroundColor: theme.colors.surface2,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
     paddingHorizontal: 14,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.lg,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
   },
   textarea: {
     minHeight: 86,
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
   waitingCard: {
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
     padding: 14,
   },
@@ -353,15 +353,15 @@ const styles = StyleSheet.create({
   },
   waitingTitle: {
     flex: 1,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.md,
-    fontWeight: theme.fontWeight.extrabold,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
+    fontWeight: theme.fontWeight.bold,
   },
   waitingText: {
     marginTop: 8,
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 20,
+    color: theme.colors.text,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   bottom: {
     position: "absolute",
@@ -378,11 +378,10 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     alignItems: "center",
     justifyContent: "center",
-    ...theme.shadow.primary,
   },
   submitText: {
-    color: theme.colors.white,
-    fontSize: theme.fontSize.base,
+    color: theme.colors.onPrimary,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
 });

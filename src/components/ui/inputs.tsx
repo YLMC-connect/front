@@ -160,7 +160,7 @@ export function ImagePickerField({
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.imagePreviewList}
         >
-          {value.map((uri) => (
+          {value.map((uri, index) => (
             <View key={uri} style={styles.imagePreviewItem}>
               <Image
                 source={{ uri }}
@@ -169,15 +169,17 @@ export function ImagePickerField({
               />
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="사진 삭제"
+                accessibilityLabel={`사진 ${index + 1} 삭제`}
                 onPress={() => removeImage(uri)}
                 style={styles.imageRemoveButton}
               >
-                <AppIcon
-                  name="close"
-                  size={16}
-                  color={theme.colors.onPrimary}
-                />
+                <View style={styles.imageRemoveIcon}>
+                  <AppIcon
+                    name="close"
+                    size={16}
+                    color={theme.colors.onPrimary}
+                  />
+                </View>
               </Pressable>
             </View>
           ))}
@@ -252,10 +254,18 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surfaceSubtle,
   },
   imagePreview: { width: "100%", height: "100%" },
+  // 터치 영역은 44×44, 보이는 원은 그 안 오른쪽 위 24.
   imageRemoveButton: {
     position: "absolute",
-    top: 6,
-    right: 6,
+    top: 0,
+    right: 0,
+    width: 44,
+    height: 44,
+    padding: 6,
+    alignItems: "flex-end",
+    justifyContent: "flex-start",
+  },
+  imageRemoveIcon: {
     width: 24,
     height: 24,
     borderRadius: 12,

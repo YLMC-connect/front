@@ -67,6 +67,11 @@ export function FloatingBottomBar({
         (label ? (
           <MotionPressable
             accessibilityRole="button"
+            accessibilityLabel={label}
+            accessibilityState={{
+              disabled: !!(disabled || loading),
+              busy: !!loading,
+            }}
             disabled={disabled || loading}
             onPress={onPress}
             pressedScale={0.98}
@@ -78,7 +83,7 @@ export function FloatingBottomBar({
             testID={testID}
           >
             {loading ? (
-              <ActivityIndicator color={theme.colors.onPrimary} size="small" />
+              <ActivityIndicator color={theme.colors.textMuted} size="small" />
             ) : (
               <Text
                 style={[

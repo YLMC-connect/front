@@ -73,6 +73,7 @@ export function Button({
   loading,
   icon,
   testID,
+  accessibilityLabel,
 }: {
   children: ReactNode;
   onPress?: () => void;
@@ -82,6 +83,8 @@ export function Button({
   loading?: boolean;
   icon?: IconName;
   testID?: string;
+  /** 처리 중(loading)에도 남는 낭독 이름. 없으면 children 이 문자열일 때 그 문자열. */
+  accessibilityLabel?: string;
 }) {
   const tone = variantColors[variant];
   const fg = disabled ? colors.textDisabled : tone.fg;
@@ -90,6 +93,10 @@ export function Button({
     <MotionPressable
       testID={testID}
       accessibilityRole="button"
+      accessibilityLabel={
+        accessibilityLabel ??
+        (typeof children === "string" ? children : undefined)
+      }
       accessibilityState={{ disabled: !!disabled, busy: !!loading }}
       disabled={disabled || loading}
       onPress={onPress}

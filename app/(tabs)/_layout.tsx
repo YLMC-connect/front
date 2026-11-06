@@ -245,7 +245,7 @@ function VisibleTabBar({
           blurTarget={blurTarget ?? undefined}
           intensity={12}
           testID="tab-bar-bottom"
-          tintColor={theme.colors.white}
+          tintColor={theme.colors.onPrimary}
           tintOpacity={0}
         />
         <LinearGradient

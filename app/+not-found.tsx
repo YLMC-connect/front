@@ -55,7 +55,7 @@ export default function NotFoundScreen() {
 
             {/* Quick Hint Card */}
             <View style={styles.tipCard}>
-              <AppIcon name="info" size={16} color={theme.colors.inkMute} />
+              <AppIcon name="info" size={16} color={theme.colors.textMuted} />
               <Text style={styles.tipText}>
                 입력하신 주소를 다시 확인하시거나 홈으로 이동해주세요.
               </Text>
@@ -121,9 +121,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primaryTint,
+    backgroundColor: theme.colors.primarySubtle,
     borderWidth: 1,
-    borderColor: "rgba(62, 104, 200, 0.16)",
+    borderColor: theme.colors.primarySubtle,
     marginBottom: theme.spacing[5],
   },
   codeBadgeDot: {
@@ -133,9 +133,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
   },
   codeBadgeText: {
-    fontSize: 12,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.bold,
-    color: theme.colors.primaryDeep,
+    color: theme.colors.primaryStrong,
     letterSpacing: 0.6,
   },
   iconGraphicWrapper: {
@@ -150,15 +150,15 @@ const styles = StyleSheet.create({
     width: 112,
     height: 112,
     borderRadius: 56,
-    backgroundColor: "rgba(62, 104, 200, 0.05)",
+    backgroundColor: theme.colors.infoSubtle,
   },
   middleCircle: {
     width: 86,
     height: 86,
     borderRadius: 43,
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
     borderWidth: 1,
-    borderColor: "rgba(62, 104, 200, 0.14)",
+    borderColor: theme.colors.primarySubtle,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+    shadowColor: theme.colors.text,
     shadowOpacity: 0.06,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },
@@ -180,18 +180,18 @@ const styles = StyleSheet.create({
     gap: theme.spacing[2],
   },
   title: {
-    fontSize: 22,
-    lineHeight: 30,
+    fontSize: theme.typography.title.fontSize,
+    lineHeight: theme.typography.title.lineHeight,
     fontWeight: theme.fontWeight.bold,
-    color: theme.colors.ink,
+    color: theme.colors.text,
     textAlign: "center",
     letterSpacing: -0.4,
   },
   description: {
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.regular,
-    color: theme.colors.inkMute,
+    color: theme.colors.textMuted,
     textAlign: "center",
   },
   tipCard: {
@@ -204,13 +204,13 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
   },
   tipText: {
     flexShrink: 1,
-    fontSize: 13,
-    lineHeight: 18,
-    color: theme.colors.inkMute,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
+    color: theme.colors.textMuted,
   },
   actionContainer: {
     paddingHorizontal: theme.layout.screenX,

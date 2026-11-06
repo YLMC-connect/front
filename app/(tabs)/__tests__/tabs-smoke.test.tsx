@@ -864,7 +864,7 @@ describe("v1 tab smoke screens", () => {
 
     expect(StyleSheet.flatten(header.props.style)).toMatchObject({
       backgroundColor: theme.colors.bg,
-      borderBottomColor: theme.colors.line,
+      borderBottomColor: theme.colors.border,
     });
     expect(screen.getByText("나눔 상세")).toBeTruthy();
 

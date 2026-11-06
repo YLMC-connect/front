@@ -44,7 +44,7 @@ describe("shared maintenance UI", () => {
     render(
       <GlassBackdrop
         testID="bottom-glass"
-        tintColor={theme.colors.white}
+        tintColor={theme.colors.onPrimary}
         tintOpacity={0.56}
       />,
     );
@@ -56,7 +56,7 @@ describe("shared maintenance UI", () => {
     expect(
       StyleSheet.flatten(screen.getByTestId("bottom-glass-tint").props.style),
     ).toMatchObject({
-      backgroundColor: theme.colors.white,
+      backgroundColor: theme.colors.surface,
       opacity: 0.56,
     });
   });

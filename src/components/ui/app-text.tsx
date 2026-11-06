@@ -12,7 +12,6 @@ import { theme } from "../../constants/theme";
 export type AppTextVariant = keyof typeof theme.typography;
 export type AppTextTone =
   | "primary"
-  | "secondary"
   | "muted"
   | "disabled"
   | "brand"
@@ -22,8 +21,6 @@ export type AppTextTone =
 
 const toneColors: Record<AppTextTone, string> = {
   primary: theme.colors.text,
-  // 옛 inkSoft — 도메인 PR 에서 primary / muted 로 나눈다(ADR 0007 2.2).
-  secondary: theme.colors.textSecondary,
   muted: theme.colors.textMuted,
   disabled: theme.colors.textDisabled,
   brand: theme.colors.primaryStrong,

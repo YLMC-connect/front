@@ -1,6 +1,7 @@
 import type { ReactNode, RefObject } from "react";
 import { StyleSheet, View } from "react-native";
 import { theme } from "../../constants/theme";
+import { useScaleHeightForFont } from "../../lib/fontScale";
 import { AppText } from "./app-text";
 import { GlassBackdrop } from "./glass-backdrop";
 
@@ -8,8 +9,11 @@ export const SCREEN_HEADER_HEIGHT = 89;
 export const SCREEN_HEADER_COMPACT_HEIGHT = 60;
 export const SCREEN_HEADER_VERTICAL_PADDING = 20;
 export const SCREEN_HEADER_COMPACT_VERTICAL_PADDING = 15;
-const SCREEN_HEADER_ACTION_TOP =
-  (SCREEN_HEADER_HEIGHT - theme.layout.touchTarget) / 2;
+/** 머리글 높이. 글자 크기 설정이 크면 함께 커진다(StickyHeaderScreen 계산도 이 값을 쓴다). */
+export function useScreenHeaderHeight(compact = false) {
+  const scale = useScaleHeightForFont();
+  return scale(compact ? SCREEN_HEADER_COMPACT_HEIGHT : SCREEN_HEADER_HEIGHT);
+}
 
 export function ScreenHeader({
   title,
@@ -28,15 +32,11 @@ export function ScreenHeader({
   compact?: boolean;
   testID?: string;
 }) {
-  const headerHeight = compact
-    ? SCREEN_HEADER_COMPACT_HEIGHT
-    : SCREEN_HEADER_HEIGHT;
+  const headerHeight = useScreenHeaderHeight(compact);
   const verticalPadding = compact
     ? SCREEN_HEADER_COMPACT_VERTICAL_PADDING
     : SCREEN_HEADER_VERTICAL_PADDING;
-  const actionTop = compact
-    ? (SCREEN_HEADER_COMPACT_HEIGHT - theme.layout.touchTarget) / 2
-    : SCREEN_HEADER_ACTION_TOP;
+  const actionTop = (headerHeight - theme.layout.touchTarget) / 2;
 
   return (
     <View

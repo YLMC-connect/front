@@ -31,9 +31,9 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTabBlurTarget } from "./TabBlurTargetContext";
 import {
-  SCREEN_HEADER_COMPACT_HEIGHT,
   SCREEN_HEADER_HEIGHT,
   ScreenHeader,
+  useScreenHeaderHeight,
 } from "../ui/screen-header";
 import { GlassBackdrop } from "../ui/glass-backdrop";
 import { theme } from "../../constants/theme";
@@ -248,9 +248,7 @@ export function StickyHeaderScreen({
     }
   };
 
-  const headerHeight = compact
-    ? SCREEN_HEADER_COMPACT_HEIGHT
-    : SCREEN_HEADER_HEIGHT;
+  const headerHeight = useScreenHeaderHeight(compact);
 
   const totalTopPadding =
     headerHeight + topInset + (hasStickyControls ? stickyControlsInset : 0);

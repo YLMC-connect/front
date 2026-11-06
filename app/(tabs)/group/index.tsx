@@ -37,6 +37,7 @@ import type {
   GroupOverviewItem,
   GroupServiceOverviewItem,
 } from "../../../src/types/group";
+import { useScaleHeightForFont } from "../../../src/lib/fontScale";
 
 type GroupSection = "groups" | "service" | "mine";
 
@@ -54,6 +55,8 @@ type GroupStackParamList = {
 };
 
 export default function GroupScreen() {
+  // 글자 크기 설정이 크면 상단 고정 영역 높이도 함께 키운다 (Issue 258)
+  const scaleForFont = useScaleHeightForFont();
   const router = useRouter();
   const navigation =
     useNavigation<NativeStackNavigationProp<GroupStackParamList>>();
@@ -251,7 +254,7 @@ export default function GroupScreen() {
             items={sections}
             active={section}
             onChange={setSection}
-            style={styles.segmented}
+            style={[styles.segmented, { height: scaleForFont(40) }]}
             testIDPrefix="group-section"
           />
           {hasCategoryFilter ? (
@@ -259,17 +262,17 @@ export default function GroupScreen() {
               items={GROUP_CATEGORIES}
               active={category}
               onChange={setCategory}
-              style={styles.categoryScroll}
+              style={[styles.categoryScroll, { height: scaleForFont(44) }]}
               testIDPrefix="group-category"
             />
           ) : null}
         </View>
       }
-      stickyControlsHeight={
+      stickyControlsHeight={scaleForFont(
         hasCategoryFilter
           ? GROUP_STICKY_CONTROLS_HEIGHT
-          : GROUP_SEGMENT_STICKY_HEIGHT
-      }
+          : GROUP_SEGMENT_STICKY_HEIGHT,
+      )}
       stickyControlsHideMode="direction"
       overlay={
         <FloatingActionButton

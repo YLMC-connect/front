@@ -30,7 +30,8 @@
     "test:visual:prepare": "node scripts/prepare-design-artifacts.mjs",
     "test:visual:capture": "node scripts/capture-design-screens.mjs",
     "test:visual:compare": "node scripts/compare-design-screens.mjs",
-    "validate:full": "npm run validate && npm run test:dev-client:smoke && npm run test:e2e:smoke"
+    "validate:full": "npm run validate && npm run test:dev-client:smoke && npm run test:e2e:smoke",
+    "prepare": "husky"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
@@ -75,8 +76,10 @@
     "@types/react": "~19.2.0",
     "eslint": "^9.39.1",
     "eslint-config-expo": "~57.0.2",
+    "husky": "^9.1.7",
     "jest": "^29.7.0",
     "jest-expo": "~57.0.5",
+    "lint-staged": "^17.6.0",
     "prettier": "^3.6.2",
     "react-test-renderer": "19.2.3",
     "typescript": "~6.0.3"
@@ -99,6 +102,21 @@
       "!**/*.d.ts",
       "!**/_layout.tsx",
       "!src/test/**"
+    ]
+  },
+  "lint-staged": {
+    "{app,src}/**/*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{js,ts}": [
+      "prettier --write"
+    ],
+    "scripts/**/*.{js,mjs}": [
+      "prettier --write"
+    ],
+    "{package.json,.github/**/*.yml,.maestro/**/*.yml}": [
+      "prettier --write"
     ]
   }
 }

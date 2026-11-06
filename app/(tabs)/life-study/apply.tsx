@@ -222,7 +222,7 @@ export default function LifeStudyApplyScreenRoute() {
                     <TextInput
                       multiline
                       placeholder="신청하시는 이유를 자유롭게 적어주세요"
-                      placeholderTextColor={theme.colors.inkHint}
+                      placeholderTextColor={theme.colors.textMuted}
                       style={[styles.input, styles.textarea]}
                       value={memo}
                       onChangeText={setMemo}
@@ -245,7 +245,7 @@ export default function LifeStudyApplyScreenRoute() {
                         <AppIcon
                           name="check"
                           size={14}
-                          color={theme.colors.white}
+                          color={theme.colors.onPrimary}
                         />
                       ) : null}
                     </View>
@@ -314,7 +314,7 @@ function Field({
       <TextInput
         editable={editable}
         placeholder={placeholder}
-        placeholderTextColor={theme.colors.inkHint}
+        placeholderTextColor={theme.colors.textMuted}
         style={[styles.input, !editable ? styles.inputDisabled : null]}
         value={value}
         onChangeText={onChangeText}
@@ -341,34 +341,32 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
     padding: 16,
     marginBottom: 20,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    ...theme.shadow.card,
+    ...theme.shadow.sm,
   },
   summaryText: {
     flex: 1,
     minWidth: 0,
   },
   courseTitle: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   courseMeta: {
     marginTop: 4,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 20,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   infoBox: {
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.primarySubtle,
     padding: 14,
     marginBottom: 20,
   },
@@ -378,18 +376,18 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   infoLabel: {
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.text,
+    fontSize: theme.typography.caption.fontSize,
   },
   infoValue: {
-    color: theme.colors.ink,
-    fontSize: 13,
-    fontWeight: theme.fontWeight.extrabold,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
+    fontWeight: theme.fontWeight.bold,
   },
   infoHint: {
     marginTop: 8,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   form: {
     gap: 20,
@@ -403,7 +401,7 @@ const styles = StyleSheet.create({
   },
   label: {
     marginBottom: 7,
-    color: theme.colors.inkSoft,
+    color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
@@ -411,11 +409,11 @@ const styles = StyleSheet.create({
     minHeight: 46,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.borderStrong,
     backgroundColor: theme.colors.surface,
     paddingHorizontal: 14,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.lg,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
   },
   textarea: {
     minHeight: 98,
@@ -430,28 +428,28 @@ const styles = StyleSheet.create({
   chip: {
     borderRadius: theme.radius.full,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
   chipOn: {
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primarySoft,
+    borderColor: theme.colors.primarySubtle,
+    backgroundColor: theme.colors.primarySubtle,
   },
   chipText: {
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   chipTextOn: {
-    color: theme.colors.primaryDeep,
-    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.primaryStrong,
+    fontWeight: theme.fontWeight.semibold,
   },
   promiseBox: {
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
     padding: 14,
     flexDirection: "row",
@@ -470,30 +468,30 @@ const styles = StyleSheet.create({
   checkBoxOff: {
     backgroundColor: "transparent",
     borderWidth: 1.5,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
   },
   inputDisabled: {
-    backgroundColor: theme.colors.surfaceMuted,
-    color: theme.colors.inkSoft,
+    backgroundColor: theme.colors.surfaceSubtle,
+    color: theme.colors.textMuted,
   },
 
   errorText: {
     marginTop: 4,
-    color: theme.colors.danger,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.dangerText,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   promiseText: {
     flex: 1,
-    fontSize: theme.fontSize.sm,
-    lineHeight: 21,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
   },
   promiseStrong: {
-    color: theme.colors.ink,
+    color: theme.colors.text,
     fontWeight: theme.fontWeight.semibold,
   },
   promiseMuted: {
-    color: theme.colors.inkMute,
+    color: theme.colors.textMuted,
   },
   bottom: {
     position: "absolute",
@@ -510,14 +508,13 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     alignItems: "center",
     justifyContent: "center",
-    ...theme.shadow.primary,
   },
   submitButtonDisabled: {
     opacity: 0.6,
   },
   submitText: {
-    color: theme.colors.white,
-    fontSize: theme.fontSize.base,
+    color: theme.colors.onPrimary,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
 });

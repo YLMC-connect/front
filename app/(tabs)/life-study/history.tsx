@@ -103,14 +103,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   sectionTitle: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   sectionMeta: {
     paddingHorizontal: theme.layout.screenX,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
   stack: {
     paddingHorizontal: theme.layout.screenX,
@@ -118,27 +118,25 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
     backgroundColor: theme.colors.surface,
     padding: 16,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    ...theme.shadow.card,
+    ...theme.shadow.sm,
   },
   cardText: {
     flex: 1,
     minWidth: 0,
   },
   title: {
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.base,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   meta: {
     marginTop: 4,
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.sm,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
   },
 });

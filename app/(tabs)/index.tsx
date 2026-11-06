@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: theme.spacing[1],
     borderRadius: theme.radius.full,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: theme.colors.primaryStrong,
   },
   dailyCategoryBadgeText: {
     fontWeight: theme.fontWeight.semibold,

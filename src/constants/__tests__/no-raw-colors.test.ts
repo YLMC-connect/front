@@ -41,6 +41,22 @@ const ALLOWED: Record<string, { count: number; reason: string }> = {
     count: 3,
     reason: "bg 반투명 그라데이션",
   },
+  "src/components/ui/navigation.tsx": {
+    count: 2,
+    reason: "TopBar 사진 위 헤더 어두운 그라데이션",
+  },
+  "src/components/ui/photo-tile.tsx": {
+    count: 1,
+    reason: "사진 타일 지우기 원·대표 띠·업로드 덮개 60% 어두움",
+  },
+  "src/components/ui/screen-header.tsx": {
+    count: 1,
+    reason: "머리글 아래 가장자리 그라데이션 끝(bg 투명)",
+  },
+  "src/components/ui/share-card.tsx": {
+    count: 2,
+    reason: "나눔 사진 안쪽 1px 선·1/N 알약 반투명 바탕",
+  },
 };
 
 const ROOT = join(__dirname, "../../..");

@@ -1,4 +1,5 @@
 import { AppIcon } from "@/components/ui/app-icon";
+import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter, type Href } from "expo-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
@@ -22,11 +23,15 @@ import { MotionPressable } from "./motion";
 
 const SEGMENT_GAP = 4;
 const SEGMENT_PADDING = 4;
+/** 사진 위 헤더: 위쪽을 60% 어둡게 해 흰 글자가 보이게 한다. 디자인 시스템에 토큰이 없는 그라데이션. */
+const OVER_PHOTO_GRADIENT = ["rgba(25,31,40,0.6)", "rgba(25,31,40,0)"] as const;
 
 export function TopBar({
   title,
   subtitle,
   back,
+  close,
+  overPhoto,
   right,
   onBack,
   returnUrl: returnUrlProp,
@@ -35,6 +40,10 @@ export function TopBar({
   title: string;
   subtitle?: string;
   back?: boolean;
+  /** 입력하는 집중 화면: 뒤로 대신 같은 자리에 닫기 ×. onBack·returnUrl 을 똑같이 따른다. */
+  close?: boolean;
+  /** 사진 위 헤더: 흰 글자·아이콘 + 위쪽 어두운 그라데이션. */
+  overPhoto?: boolean;
   right?: ReactNode;
   onBack?: () => void;
   returnUrl?: string;
@@ -59,9 +68,29 @@ export function TopBar({
     router.back();
   };
 
+  const leading = close ? "close" : back ? "back" : null;
+  const tint = overPhoto ? theme.colors.onPrimary : null;
+
   return (
     <View testID={testID} style={styles.topBar}>
-      {back ? (
+      {overPhoto ? (
+        <LinearGradient
+          colors={OVER_PHOTO_GRADIENT}
+          pointerEvents="none"
+          style={StyleSheet.absoluteFill}
+          testID={testID ? `${testID}-gradient` : undefined}
+        />
+      ) : null}
+      {leading === "close" ? (
+        <MotionPressable
+          accessibilityLabel="닫기"
+          accessibilityRole="button"
+          onPress={handleBack}
+          style={styles.closeButton}
+        >
+          <AppIcon name="close" size={24} color={tint ?? theme.colors.text} />
+        </MotionPressable>
+      ) : leading === "back" ? (
         <MotionPressable
           accessibilityLabel="뒤로"
           accessibilityRole="button"
@@ -72,23 +101,35 @@ export function TopBar({
           <AppIcon
             name="chevron-left"
             size={22}
-            color={theme.colors.textMuted}
+            color={tint ?? theme.colors.textMuted}
           />
-          <AppText variant="caption" tone="muted">
+          <AppText variant="caption" tone={overPhoto ? "inverse" : "muted"}>
             뒤로
           </AppText>
         </MotionPressable>
       ) : null}
       <View
         testID={testID ? `${testID}-title` : undefined}
-        pointerEvents={back ? "none" : "auto"}
-        style={[styles.topTextWrap, back ? styles.topTextWrapCentered : null]}
+        pointerEvents={leading ? "none" : "auto"}
+        style={[
+          styles.topTextWrap,
+          leading ? styles.topTextWrapCentered : null,
+        ]}
       >
-        <AppText numberOfLines={1} variant="heading" weight="semibold">
+        <AppText
+          numberOfLines={1}
+          variant="heading"
+          weight="semibold"
+          tone={overPhoto ? "inverse" : "primary"}
+        >
           {title}
         </AppText>
         {subtitle ? (
-          <AppText variant="caption" tone="muted" style={styles.topSubtitle}>
+          <AppText
+            variant="caption"
+            tone={overPhoto ? "inverse" : "muted"}
+            style={styles.topSubtitle}
+          >
             {subtitle}
           </AppText>
         ) : null}
@@ -244,6 +285,13 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     flexDirection: "row",
     gap: 2,
+  },
+  closeButton: {
+    width: theme.layout.touchTarget,
+    height: theme.layout.touchTarget,
+    marginRight: 4,
+    alignItems: "flex-start",
+    justifyContent: "center",
   },
   segmented: {
     position: "relative",

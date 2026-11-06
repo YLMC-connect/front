@@ -1,5 +1,6 @@
 import { httpMarketDataSource } from "./marketHttpDataSource";
 import type {
+  MarketCategory,
   MarketCommentInput,
   MarketCommentTarget,
   MarketCommentUpdateInput,
@@ -31,6 +32,11 @@ export interface MarketDataSource {
     lastId?: number | null;
     size?: number;
   }): Promise<MarketOverviewPage>;
+  getMyOverviewPage?(params?: {
+    lastId?: number | null;
+    size?: number;
+    category?: Exclude<MarketCategory, "all">;
+  }): Promise<MarketOverviewPage>;
   getDetail(id: string): Promise<MarketDetail>;
   createPost(input: MarketInput): Promise<MarketDetail>;
   updatePost(input: MarketUpdateInput): Promise<MarketDetail>;
@@ -50,6 +56,20 @@ export function createMarketService(dataSource: MarketDataSource) {
       }
       return dataSource.getOverview().then((res) => ({
         items: res.items,
+        hasNext: false,
+        nextCursor: null,
+      }));
+    },
+    fetchMyOverviewPage: (params?: {
+      lastId?: number | null;
+      size?: number;
+      category?: Exclude<MarketCategory, "all">;
+    }) => {
+      if (dataSource.getMyOverviewPage) {
+        return dataSource.getMyOverviewPage(params);
+      }
+      return dataSource.getOverview().then((res) => ({
+        items: res.items.filter((item) => item.isMine),
         hasNext: false,
         nextCursor: null,
       }));
@@ -124,6 +144,7 @@ const marketService = createMarketService(httpMarketDataSource);
 
 export const fetchMarketOverview = marketService.fetchOverview;
 export const fetchMarketOverviewPage = marketService.fetchOverviewPage;
+export const fetchMyMarketOverviewPage = marketService.fetchMyOverviewPage;
 export const fetchMarketDetail = marketService.fetchDetail;
 export const createMarketPost = marketService.createPost;
 export const updateMarketPost = marketService.updatePost;

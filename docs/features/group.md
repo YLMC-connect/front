@@ -80,7 +80,7 @@
 | `app/(tabs)/group/notices.tsx`                 | 소모임 공지 작성/수정/삭제                    |
 | `app/(tabs)/group/members.tsx`                 | 소모임 멤버 관리와 소모임장 이관              |
 | `app/modal/group-new.tsx`                      | 소모임 개설 모달                              |
-| `src/services/groupService.ts`                 | 동행 조회·참여/탈퇴·공지 CUD HTTP 서비스      |
+| `src/services/groupService.ts`                 | 동행 조회·참여/탈퇴·이관·공지 CUD HTTP 서비스 |
 | `src/services/groupHttpDataSource.ts`          | 라이브 동행 HTTP data source                  |
 | `src/services/groupMapper.ts`                  | Communion DTO → 화면 모델                     |
 | `src/types/groupApi.ts`                        | 관측된 동행 서버 DTO                          |
@@ -93,9 +93,11 @@
 
 ## 데이터 타입
 
-`Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 화면 조회 모델 `GroupOverview`/`GroupDetail`/`GroupMemberDetail`은 목록·봉사·권한·멤버·공지 표시값을 포함하며 API DTO mapper의 출력 경계입니다. `GroupDetailNotice`는 수정 폼 재사용을 위한 전체 `content`를 포함하고, 공지 쓰기 경계는 `GroupNoticeInput`/`GroupNoticeUpdateInput`/`GroupNoticeTarget`으로 분리합니다. 모임 관리 경계는 `GroupUpdateInput`, `GroupStatusUpdateInput`, `GroupKickMemberInput`을 사용합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
+`Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 화면 조회 모델 `GroupOverview`/`GroupDetail`/`GroupMemberDetail`은 목록·봉사·권한·멤버·공지 표시값을 포함하며 API DTO mapper의 출력 경계입니다. `GroupDetailNotice`는 수정 폼 재사용을 위한 전체 `content`를 포함하고, 공지 쓰기 경계는 `GroupNoticeInput`/`GroupNoticeUpdateInput`/`GroupNoticeTarget`으로 분리합니다. 모임 관리 경계는 `GroupUpdateInput`, `GroupStatusUpdateInput`, `GroupKickMemberInput`, `GroupTransferLeaderInput`(`newLeaderUserId`)을 사용합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-11-05) **소모임장 이관은 `PUT /api/communion/{id}/leader`로 보낸다** — 요청 본문은 `newLeaderUserId` 하나다. 성공하면 기존 방장은 일반 멤버로 남고, 멤버 화면은 상세·멤버·목록 쿼리를 다시 읽는다. `COM003`, `COM011`, `COM012`는 이관 화면 토스트 문구로 둔다. Issue #197.
 
 - (2026-11-03) **동행 목록 페이지네이션(`getOverviewPage`) 시 첫 페이지 봉사(`type=VOLUNTEER`) API 연동 복구** — `useGroupOverview`가 `getOverviewPage`를 호출할 때 `services: []`로 고정되어 봉사 탭 목록이 비어 있던 문제를 수정하여, 첫 페이지(`lastId == null`) 로드 시 `/api/communion?type=VOLUNTEER` 및 `/api/communion/my?type=VOLUNTEER`를 함께 조회해 `mapCommunionServiceItem`으로 매핑하도록 연결.
 
@@ -172,7 +174,7 @@
 ## 미결 / 추적
 
 - 봉사 목록의 `linkedGroupId`는 현재 모두 `5`를 가리키지만 `mockGroupDetails["5"]`가 없어 카드 클릭 후 기존 상세 오류 화면이 표시됩니다. 실제 봉사 상세 정책 또는 연결 소모임 fixture를 별도 확정해야 합니다.
-- 프런트 HTTP 목록/상세/개설/멤버/공지/참여/탈퇴는 라이브로 연결됨. 남은 공백은 목록 본문·일정·장소, 서버에 없는 카테고리 4개, 소모임장 이관, 강퇴, 삭제 500, 오류 코드. 단일 출처는 Issue #21이며 `test:api:contract:group`은 문서 공백이 있으면 실패한다.
+- 프런트 HTTP 목록/상세/개설/멤버/공지/참여/탈퇴/소모임장 이관은 라이브로 연결됨. 남은 공백은 목록 본문·일정·장소, 서버에 없는 카테고리 4개, 삭제 500, 오류 코드. 단일 출처는 Issue #21이며 `test:api:contract:group`은 문서 공백이 있으면 실패한다.
 - 참여는 즉시 가입으로 연결함. 승인 대기가 필요하면 서버 상태를 받은 뒤 화면 문구를 바꿀 것.
 - 공지 작성 권한과 소모임장/관리자 권한 모델 확인 필요.
 - 강제 내보내기 이의 제기/복구 플로우는 실제 API와 운영 정책 확정 후 반영.

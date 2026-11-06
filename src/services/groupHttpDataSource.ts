@@ -220,6 +220,13 @@ export function createHttpGroupDataSource({
       );
     },
 
+    async transferLeader(input) {
+      await client.request(`/api/communion/${input.groupId}/leader`, {
+        method: "PUT",
+        body: JSON.stringify({ newLeaderUserId: input.newLeaderUserId }),
+      });
+    },
+
     async updateGroupStatus(input) {
       await client.request(`/api/communion/${input.groupId}/status`, {
         method: "PUT",

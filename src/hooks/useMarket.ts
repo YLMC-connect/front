@@ -13,11 +13,13 @@ import {
   deleteMarketPost,
   fetchMarketDetail,
   fetchMarketOverviewPage,
+  fetchMyMarketOverviewPage,
   reportMarketContent,
   updateMarketComment,
   updateMarketPost,
 } from "../services/marketService";
 import type {
+  MarketCategory,
   MarketDetail,
   MarketInput,
   MarketOverview,
@@ -47,6 +49,33 @@ export function useMarketOverview() {
   };
 }
 
+export function useMyMarketOverview(
+  category?: Exclude<MarketCategory, "all">,
+  enabled = true,
+) {
+  const query = useInfiniteQuery({
+    queryKey: queryKeys.market.mine(category ?? "all"),
+    queryFn: ({ pageParam }) =>
+      fetchMyMarketOverviewPage({ lastId: pageParam, category }),
+    initialPageParam: undefined as number | undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasNext && lastPage.nextCursor != null
+        ? lastPage.nextCursor
+        : undefined,
+    enabled,
+  });
+
+  const allItems = useMemo(
+    () => query.data?.pages.flatMap((page) => page.items) ?? [],
+    [query.data],
+  );
+
+  return {
+    ...query,
+    data: query.data ? { items: allItems } : undefined,
+  };
+}
+
 export function useCreateMarketPost() {
   const queryClient = useQueryClient();
 
@@ -58,6 +87,7 @@ export function useCreateMarketPost() {
         detail,
       );
       queryClient.invalidateQueries({ queryKey: queryKeys.market.overview() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.market.mine() });
     },
   });
 }
@@ -74,6 +104,7 @@ export function useUpdateMarketPost(marketId: string) {
         detail,
       );
       queryClient.invalidateQueries({ queryKey: queryKeys.market.overview() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.market.mine() });
     },
   });
 }
@@ -163,6 +194,7 @@ export function useDeleteMarketPost(marketId: string) {
       queryClient.removeQueries({
         queryKey: queryKeys.market.detail(marketId),
       });
+      queryClient.invalidateQueries({ queryKey: queryKeys.market.mine() });
     },
   });
 }

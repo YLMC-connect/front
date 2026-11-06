@@ -93,7 +93,7 @@ Jest + React Native Testing Library로 공통 UI, 도메인 옵션, 홈/나눔/�
 
 `test:api:contract:mypage`는 2026-10-06 마이페이지 활동 `GET /api/mypage/activities` 5종을 확인합니다. posts·comments·groups는 0-based `page` 요청과 `PageResponse`의 `content`, `totalElements`, `totalPages`, 1-based `currentPage`, `size`, `hasNext`를 확인하고, life-studies·prayers는 페이징 없는 단일 객체를 확인합니다. `npm run validate`에는 넣지 않습니다.
 
-API 오류는 `getApiErrorMessage`가 `ApiError.code`를 도메인 메시지 표로 변환합니다. 문서화되지 않은 API 코드는 서버 `message`를 그대로 노출하지 않고 화면별 안전한 fallback을 사용하며, 현재 Swagger에 정의된 인증 `MEM001~MEM006`은 `authApiErrorMessages`로 관리합니다.
+API 오류는 `getApiErrorMessage`가 `ApiError.code`를 도메인 메시지 표로 변환합니다. 문서화되지 않은 API 코드는 서버 `message`를 그대로 노출하지 않고 화면별 안전한 fallback을 사용하며, 현재 Swagger에 정의된 인증 `MEM001~MEM007`은 `authApiErrorMessages`로 관리합니다. `MEM007`은 비밀번호 8자·영문+숫자 조합 위반입니다.
 
 인증 세션은 `authSessionService`가 SecureStore 토큰 저장·앱 시작 복원·동시 401 단일 재발급·재발급 실패 로그아웃을 관리합니다. Swagger 성공 DTO가 확정되기 전에는 mock adapter를 사용하며, HTTP adapter만 교체해 같은 세션 흐름을 유지합니다.
 

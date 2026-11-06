@@ -16,6 +16,7 @@ import {
   fetchGroupOverviewPage,
   joinGroup,
   kickGroupMember,
+  transferGroupLeader,
   leaveGroup,
   updateGroup,
   updateGroupNotice,
@@ -207,6 +208,23 @@ export function useKickGroupMember(groupId: string) {
   return useMutation({
     mutationFn: (targetUserId: string) =>
       kickGroupMember({ groupId, targetUserId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.group.detail(groupId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.group.members(groupId),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.group.overview() });
+    },
+  });
+}
+
+export function useTransferGroupLeader(groupId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (newLeaderUserId: string) =>
+      transferGroupLeader({ groupId, newLeaderUserId }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.group.detail(groupId),

@@ -186,6 +186,13 @@ describe("v1 tab smoke screens", () => {
       nextCursor: null,
     });
     jest
+      .spyOn(marketService, "fetchMyMarketOverviewPage")
+      .mockImplementation(async () => ({
+        items: marketItems.filter((item) => item.isMine),
+        hasNext: false,
+        nextCursor: null,
+      }));
+    jest
       .spyOn(marketService, "fetchMarketDetail")
       .mockImplementation(async (id) => {
         if (id === "missing") throw new Error("존재하지 않는 나눔입니다.");
@@ -1260,6 +1267,9 @@ describe("v1 tab smoke screens", () => {
     const transferButton = screen.getByTestId("group-transfer-submit");
     expect(transferButton).toBeTruthy();
 
+    const transferLeader = jest
+      .spyOn(groupService, "transferGroupLeader")
+      .mockResolvedValue(undefined);
     const memberCandidate = await screen.findByTestId(
       "member-transfer-member-002",
     );
@@ -1272,6 +1282,12 @@ describe("v1 tab smoke screens", () => {
       ),
     ).toBeTruthy();
     fireEvent.press(screen.getByText("이관"));
+    await waitFor(() =>
+      expect(transferLeader).toHaveBeenCalledWith({
+        groupId: "1",
+        newLeaderUserId: "member-002",
+      }),
+    );
 
     jest.mocked(useLocalSearchParams).mockReturnValue({});
   });

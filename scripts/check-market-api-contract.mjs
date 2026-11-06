@@ -19,6 +19,7 @@ const {
 } = contract;
 
 requireConcreteSuccess("나눔 목록", "/api/share", "get");
+requireConcreteSuccess("내 나눔 목록", "/api/share/my", "get");
 requireConcreteSuccess("나눔 상세", "/api/share/{id}", "get");
 requireConcreteRequest("나눔 등록", "/api/share", "post");
 requireConcreteSuccess("나눔 등록", "/api/share", "post");

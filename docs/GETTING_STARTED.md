@@ -79,7 +79,7 @@ EXPO_PUBLIC_API_URL=https://example.test npm run start:dev-client
 ### 아직 mock인 것
 
 홈 오늘 기도/새벽 말씀, 기도 탭, 삶공부 탭은 사용자 API가 없어 mock service를 씁니다.
-나눔 신고 사유 코드·나눔 상태 변경·동행 강퇴/이관은 계약이 비어 있어 HTTP로 보내지 않습니다.
+나눔 신고 사유 코드와 나눔 상태 변경은 계약이 비어 있어 HTTP로 보내지 않습니다. 동행 강퇴와 소모임장 이관은 HTTP로 보냅니다.
 
 ## 4. Mock으로 돌리기
 

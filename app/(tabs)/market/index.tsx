@@ -16,7 +16,11 @@ import {
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import { MARKET_CATEGORIES } from "../../../src/constants/domainOptions";
-import { useMarketOverview } from "../../../src/hooks/useMarket";
+import {
+  useMarketOverview,
+  useMyMarketOverview,
+} from "../../../src/hooks/useMarket";
+import type { MarketCategory } from "../../../src/types/market";
 import { useMotionRouteParam } from "../../../src/hooks/useMotionRouteParam";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 import type { MarketOverviewItem } from "../../../src/types/market";
@@ -40,7 +44,6 @@ export default function MarketScreen() {
   }>();
   const variant = readDesignVariant(params.designVariant);
   const overview = useMarketOverview();
-  const isError = variant === "network-error" || overview.isError;
   const isEmpty = variant === "empty";
   const routeStatus =
     params.status === "all" ||
@@ -67,31 +70,41 @@ export default function MarketScreen() {
       });
     },
   );
+  const mine = useMyMarketOverview(
+    category === "all"
+      ? undefined
+      : (category as Exclude<MarketCategory, "all">),
+    activeStatus === "mine",
+  );
+  const list = activeStatus === "mine" ? mine : overview;
+  const isError = variant === "network-error" || list.isError;
+  const sourceItems = list.data?.items ?? [];
   const statusPosts =
     isError || isEmpty
       ? []
-      : activeStatus === "all"
-        ? (overview.data?.items ?? [])
-        : activeStatus === "mine"
-          ? (overview.data?.items ?? []).filter((post) => post.isMine)
-          : (overview.data?.items ?? []).filter(
-              (post) => post.status === "sharing" || post.status === "reserved",
-            );
-  const visiblePosts = statusPosts.filter(
-    (post) => category === "all" || post.category === category,
-  );
-  const isLoading = overview.isPending && !isError && !isEmpty;
+      : activeStatus === "sharing"
+        ? sourceItems.filter(
+            (post) => post.status === "sharing" || post.status === "reserved",
+          )
+        : sourceItems;
+  const visiblePosts =
+    activeStatus === "mine"
+      ? statusPosts
+      : statusPosts.filter(
+          (post) => category === "all" || post.category === category,
+        );
+  const isLoading = list.isPending && !isError && !isEmpty;
 
   return (
     <StickyHeaderScreen
       testID="screen-market"
       title="나눔"
       subtitle="이웃과 물건을 나누며 따뜻함을 전해요"
-      refreshing={overview.isRefetching}
-      onRefresh={() => void overview.refetch()}
+      refreshing={list.isRefetching}
+      onRefresh={() => void list.refetch()}
       onEndReached={() => {
-        if (overview.hasNextPage && !overview.isFetchingNextPage) {
-          void overview.fetchNextPage();
+        if (list.hasNextPage && !list.isFetchingNextPage) {
+          void list.fetchNextPage();
         }
       }}
       stickyControls={
@@ -140,7 +153,7 @@ export default function MarketScreen() {
         ) : isError ? (
           <ErrorState
             message="네트워크 연결을 확인하고 다시 시도해주세요."
-            onRetry={() => overview.refetch()}
+            onRetry={() => list.refetch()}
           />
         ) : visiblePosts.length === 0 ? (
           <MarketEmptyState
@@ -158,7 +171,7 @@ export default function MarketScreen() {
             ))}
           </MotionEnter>
         )}
-        {overview.isFetchingNextPage ? (
+        {list.isFetchingNextPage ? (
           <View style={styles.footerLoader}>
             <ActivityIndicator color={theme.colors.primary} />
           </View>

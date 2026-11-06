@@ -66,6 +66,11 @@ export interface GroupKickMemberInput {
   targetUserId: string;
 }
 
+export interface GroupTransferLeaderInput {
+  groupId: string;
+  newLeaderUserId: string;
+}
+
 export interface GroupOverviewItem {
   id: string;
   name: string;

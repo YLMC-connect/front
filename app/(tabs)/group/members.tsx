@@ -19,10 +19,13 @@ import {
   TopBar,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import { communionApiErrorMessages } from "../../../src/constants/apiErrorMessages";
 import {
   useGroupMembers,
   useKickGroupMember,
+  useTransferGroupLeader,
 } from "../../../src/hooks/useGroups";
+import { getApiErrorMessage } from "../../../src/lib/apiErrorMessage";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 import type { GroupMemberDetail } from "../../../src/types/group";
 
@@ -38,6 +41,7 @@ export default function GroupMembersScreenRoute() {
   const variant = readDesignVariant(params.designVariant) ?? "default";
   const membersQuery = useGroupMembers(groupId);
   const kickMemberMutation = useKickGroupMember(groupId);
+  const transferLeaderMutation = useTransferGroupLeader(groupId);
   const [kickingMember, setKickingMember] = useState<GroupMemberDetail | null>(
     null,
   );
@@ -169,17 +173,34 @@ export default function GroupMembersScreenRoute() {
               router.back();
               return;
             }
+            if (!selectedTransferMember || transferLeaderMutation.isPending) {
+              return;
+            }
+            const target = selectedTransferMember;
             setShowTransferConfirm(false);
-            setToastMessage(
-              `${transferTargetName}님께 소모임장이 이관되었습니다`,
-            );
-            transferTimerRef.current = setTimeout(() => {
-              try {
-                router.back?.();
-              } catch {
-                // ignore
-              }
-            }, 700);
+            void transferLeaderMutation
+              .mutateAsync(target.userId)
+              .then(() => {
+                setToastMessage(
+                  `${target.userName}님께 소모임장이 이관되었습니다`,
+                );
+                transferTimerRef.current = setTimeout(() => {
+                  try {
+                    router.back?.();
+                  } catch {
+                    // ignore
+                  }
+                }, 700);
+              })
+              .catch((error: unknown) => {
+                setToastMessage(
+                  getApiErrorMessage(
+                    error,
+                    communionApiErrorMessages,
+                    "소모임장을 이관하지 못했습니다.",
+                  ),
+                );
+              });
           }}
         />
         <Toast

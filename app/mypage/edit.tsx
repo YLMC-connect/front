@@ -197,6 +197,11 @@ export default function EditProfileScreen() {
       const err = error as { code?: string; message?: string };
       if (err.code === "MEM006") {
         setCurrentPwError("현재 비밀번호가 올바르지 않습니다");
+      } else if (err.code === "MEM007") {
+        Alert.alert(
+          "알림",
+          "새 비밀번호는 8자 이상, 영문·숫자 조합이어야 합니다.",
+        );
       } else if (err.code === "MEM002") {
         setPhoneError("이미 사용 중인 연락처입니다");
       } else {

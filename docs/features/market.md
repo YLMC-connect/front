@@ -74,7 +74,7 @@
 | `app/(tabs)/market/index.tsx`           | 나눔 목록, 상태/카테고리 필터                                    |
 | `app/(tabs)/market/[id].tsx`            | 나눔 상세, 게시글 삭제, 댓글, 신고                               |
 | `app/modal/market-new.tsx`              | 나눔 작성 모달                                                   |
-| `src/services/marketService.ts`         | 나눔 조회·게시글 삭제·댓글 CUD·신고 HTTP 서비스                  |
+| `src/services/marketService.ts`         | 나눔 조회·내 나눔·게시글 삭제·댓글 CUD·신고 HTTP 서비스          |
 | `src/services/marketHttpDataSource.ts`  | 라이브 나눔 HTTP data source                                     |
 | `src/services/marketMapper.ts`          | Share DTO → 화면 모델                                            |
 | `src/types/marketApi.ts`                | 관측된 나눔 서버 DTO                                             |
@@ -85,9 +85,11 @@
 
 ## 데이터 타입
 
-`MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. 화면 조회 모델 `MarketOverview`/`MarketDetail`은 목록 표시값, 작성자 소유 여부, 댓글 상태를 포함하며 API DTO mapper의 출력 경계입니다. `MarketOverviewItem.isMine`은 `내 나눔` 목록 필터의 기준이며 새 mock 작성 결과에도 `true`로 저장됩니다. 게시글 삭제 대상은 `MarketPostTarget`, 댓글 CUD는 `MarketCommentInput`, `MarketCommentUpdateInput`, `MarketCommentTarget`으로 게시글 ID와 댓글 ID를 구분하고 결과는 목록/상세 제거 또는 `MarketDetailComment` 삭제 tombstone으로 정규화합니다. 신고는 `MarketReportInput`에서 게시글/댓글 대상, 프런트 사유, 선택 상세를 분리하며 서버 enum이 확정되면 HTTP mapper가 코드 변환을 소유합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
+`MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. 화면 조회 모델 `MarketOverview`/`MarketDetail`은 목록 표시값, 작성자 소유 여부, 댓글 상태를 포함하며 API DTO mapper의 출력 경계입니다. `MarketOverviewItem.isMine`은 공개 목록에서 내 글 표시의 기준입니다. `내 나눔` 탭은 `GET /api/share/my` 결과를 `isMine: true`로 둡니다. 게시글 삭제 대상은 `MarketPostTarget`, 댓글 CUD는 `MarketCommentInput`, `MarketCommentUpdateInput`, `MarketCommentTarget`으로 게시글 ID와 댓글 ID를 구분하고 결과는 목록/상세 제거 또는 `MarketDetailComment` 삭제 tombstone으로 정규화합니다. 신고는 `MarketReportInput`에서 게시글/댓글 대상, 프런트 사유, 선택 상세를 분리하며 서버 enum이 확정되면 HTTP mapper가 코드 변환을 소유합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-11-05) **내 나눔은 `GET /api/share/my`로 조회한다** — 나눔 탭 `내 나눔`은 전체 목록의 `isMine` 필터 대신 커서(`lastId`, `size`)와 선택 카테고리(`categoryCode`)를 이 엔드포인트로 보낸다. 상태 필터는 보내지 않아 나눔중·예약중·나눔완료를 함께 본다. 응답은 본인 글만 오므로 화면 모델 `isMine`은 true다. Issue #195.
 
 - (2026-11-03) **런타임 목 어댑터(`resolveMarketAdapterMode`, `mockMarketDataSource`) 및 `src/mocks/market.ts` 제거** — 전 도메인 HTTP 단일화에 따라 환경변수 어댑터 분기(`EXPO_PUBLIC_MARKET_ADAPTER`)와 런타임 목데이터를 제거하고 `httpMarketDataSource`만 사용하도록 정리.
 

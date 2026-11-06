@@ -41,6 +41,46 @@ describe("httpMarketDataSource", () => {
     expect(request).toHaveBeenCalledWith("/api/share?size=50");
   });
 
+  it("loads my shares from /api/share/my and marks them as mine", async () => {
+    const { request, dataSource } = setup();
+    request.mockResolvedValue({
+      content: [
+        {
+          id: 8,
+          title: "내 나눔",
+          status: "COMPLETED",
+          categoryCode: "BOOK_STATIONERY",
+          authorId: "someone-else",
+          createdAt: "2026-11-04T01:00:00",
+        },
+      ],
+      hasNext: true,
+      nextCursor: 8,
+    });
+
+    await expect(
+      dataSource.getMyOverviewPage?.({
+        category: "book",
+        lastId: 12,
+        size: 10,
+      }),
+    ).resolves.toMatchObject({
+      items: [
+        expect.objectContaining({
+          id: "8",
+          category: "book",
+          status: "done",
+          isMine: true,
+        }),
+      ],
+      hasNext: true,
+      nextCursor: 8,
+    });
+    expect(request).toHaveBeenCalledWith(
+      "/api/share/my?size=10&lastId=12&categoryCode=BOOK_STATIONERY",
+    );
+  });
+
   it("loads detail and comments together", async () => {
     const { request, dataSource } = setup();
     request.mockImplementation(async (path: string) => {

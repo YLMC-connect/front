@@ -10,6 +10,7 @@ import type {
   GroupUpdateInput,
   GroupStatusUpdateInput,
   GroupKickMemberInput,
+  GroupTransferLeaderInput,
 } from "../types/group";
 
 export interface GroupOverviewPage {
@@ -31,6 +32,7 @@ export interface GroupDataSource {
   updateGroup(input: GroupUpdateInput): Promise<GroupDetail>;
   deleteGroup(id: string): Promise<void>;
   kickMember(input: GroupKickMemberInput): Promise<void>;
+  transferLeader(input: GroupTransferLeaderInput): Promise<void>;
   updateGroupStatus(input: GroupStatusUpdateInput): Promise<GroupDetail>;
   joinGroup(id: string): Promise<GroupDetail>;
   leaveGroup(id: string): Promise<GroupDetail>;
@@ -115,6 +117,8 @@ export function createGroupService(dataSource: GroupDataSource) {
     },
     deleteGroup: (id: string) => dataSource.deleteGroup(id),
     kickMember: (input: GroupKickMemberInput) => dataSource.kickMember(input),
+    transferLeader: (input: GroupTransferLeaderInput) =>
+      dataSource.transferLeader(input),
     updateGroupStatus: (input: GroupStatusUpdateInput) =>
       dataSource.updateGroupStatus(input),
     joinGroup: async (id: string) => {
@@ -154,6 +158,7 @@ export const createGroup = groupService.createGroup;
 export const updateGroup = groupService.updateGroup;
 export const deleteGroup = groupService.deleteGroup;
 export const kickGroupMember = groupService.kickMember;
+export const transferGroupLeader = groupService.transferLeader;
 export const updateGroupStatus = groupService.updateGroupStatus;
 export const joinGroup = groupService.joinGroup;
 export const leaveGroup = groupService.leaveGroup;

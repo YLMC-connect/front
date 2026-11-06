@@ -323,6 +323,20 @@ describe("httpGroupDataSource", () => {
     });
   });
 
+  it("transfers the leader with PUT /api/communion/{id}/leader", async () => {
+    const { request, dataSource } = setup();
+    request.mockResolvedValue(null);
+
+    await dataSource.transferLeader({
+      groupId: "1",
+      newLeaderUserId: "user-2",
+    });
+    expect(request).toHaveBeenCalledWith("/api/communion/1/leader", {
+      method: "PUT",
+      body: JSON.stringify({ newLeaderUserId: "user-2" }),
+    });
+  });
+
   it("updates communion status with PUT /api/communion/{id}/status", async () => {
     const { request, dataSource } = setup();
     request.mockImplementation(async (path: string, options) => {

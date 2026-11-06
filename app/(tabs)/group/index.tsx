@@ -199,7 +199,7 @@ export default function GroupScreen() {
             style={styles.closeButton}
             testID="group-my-list-close"
           >
-            <AppIcon name="close" size={22} color={theme.colors.ink} />
+            <AppIcon name="close" size={22} color={theme.colors.text} />
           </Pressable>
         }
       >
@@ -421,8 +421,8 @@ function CompanionCard(
         </View>
         <AppText
           numberOfLines={2}
-          variant="body"
-          tone="secondary"
+          variant="label"
+          tone="muted"
           style={styles.desc}
         >
           {props.item.description}
@@ -432,7 +432,7 @@ function CompanionCard(
             <Text style={styles.categoryPillText}>{metaLabel}</Text>
           </View>
           <View testID={`${testID}-member-count`} style={styles.memberRow}>
-            <AppIcon name="groups" size={14} color={theme.colors.inkMute} />
+            <AppIcon name="groups" size={14} color={theme.colors.textMuted} />
             <AppText variant="caption" tone="muted">
               {isService ? "참여 " : null}
               <Text style={styles.memberCount}>
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
     minHeight: 120,
     paddingVertical: theme.spacing[4],
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
+    borderBottomColor: theme.colors.border,
   },
   groupCardBody: {
     flex: 1,
@@ -529,33 +529,33 @@ const styles = StyleSheet.create({
   badge: {
     flexShrink: 0,
     borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primaryTint,
+    backgroundColor: theme.colors.primarySubtle,
     paddingHorizontal: 10,
     paddingVertical: 3,
   },
   badgeClosed: {
-    backgroundColor: theme.colors.surfaceMuted,
+    backgroundColor: theme.colors.surfaceSubtle,
   },
   badgeText: {
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.primaryStrong,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   badgeTextClosed: {
-    color: theme.colors.inkMute,
+    color: theme.colors.textMuted,
   },
   categoryPill: {
     alignSelf: "flex-start",
     borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surface2,
+    backgroundColor: theme.colors.surfaceSubtle,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
   categoryPillText: {
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.xs,
+    color: theme.colors.text,
+    fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
   desc: {
@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   memberCount: {
-    color: theme.colors.primaryDeep,
+    color: theme.colors.primaryStrong,
   },
   fab: {
     position: "absolute",

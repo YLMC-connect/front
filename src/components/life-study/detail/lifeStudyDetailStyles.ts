@@ -127,10 +127,9 @@ export const styles = StyleSheet.create({
   },
   progressCard: {
     borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
     padding: 16,
+    ...theme.shadow.sm,
   },
   progressHead: {
     flexDirection: "row",

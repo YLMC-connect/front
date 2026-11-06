@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   },
   infoBox: {
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primarySubtle,
+    backgroundColor: theme.colors.infoSubtle,
     padding: 14,
     marginBottom: 20,
   },

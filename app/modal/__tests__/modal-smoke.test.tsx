@@ -42,11 +42,10 @@ describe("modal smoke screens", () => {
     renderWithClient(<MarketNewModal />);
 
     expect(screen.getAllByText("나눔 등록")).toHaveLength(2);
-    expect(screen.getByLabelText("뒤로")).toBeTruthy();
-    expect(
-      StyleSheet.flatten(screen.getByLabelText("뒤로").props.style).marginLeft,
-    ).toBeUndefined();
-    expect(screen.queryByText("닫기")).toBeNull();
+    // 입력 집중 화면이라 TopBar 는 뒤로 대신 닫기(×).
+    expect(screen.getByLabelText("닫기")).toBeTruthy();
+    expect(screen.queryByLabelText("뒤로")).toBeNull();
+    expect(screen.getByLabelText("사진 추가")).toBeTruthy();
     expect(
       StyleSheet.flatten(screen.getByTestId("market-form-screen").props.style),
     ).toMatchObject({ paddingTop: theme.layout.screenX });
@@ -60,13 +59,15 @@ describe("modal smoke screens", () => {
     expect(StyleSheet.flatten(titleInput.props.style)).toMatchObject({
       height: 48,
     });
+    // 물품 상태 RadioRow 의 선택 층·라디오도 2px primary 라 포커스 전 개수를 기준으로 센다.
+    const ringsBeforeFocus = countFocusRings();
     fireEvent(titleInput, "focus");
     expect(StyleSheet.flatten(titleInput.props.style)).toMatchObject({
       outlineColor: "transparent",
       outlineWidth: 0,
     });
     // 포커스 테두리는 입력창 위에 겹쳐 그리는 공통 InputSurface 고리(2px primary)
-    expect(countFocusRings()).toBe(1);
+    expect(countFocusRings()).toBe(ringsBeforeFocus + 1);
   });
 
   it("renders the group create modal", () => {
@@ -136,8 +137,9 @@ describe("modal smoke screens", () => {
     } as never);
     renderWithClient(<MarketNewModal />);
 
-    fireEvent.press(screen.getByText("사진 추가"));
+    fireEvent.press(screen.getByLabelText("사진 추가"));
     await waitFor(() => expect(screen.getByText("사진 1/5")).toBeTruthy());
+    expect(screen.getByLabelText("사진 1 삭제")).toBeTruthy();
     fireEvent.changeText(screen.getByLabelText("나눔 제목"), "새 나눔");
     fireEvent.changeText(
       screen.getByLabelText("나눔 상세 설명"),

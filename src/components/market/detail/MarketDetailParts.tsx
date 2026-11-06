@@ -6,7 +6,8 @@ import Animated, {
   type SharedValue,
   useAnimatedStyle,
 } from "react-native-reanimated";
-import { Avatar, DetailMiniAction } from "../../ui";
+import { AppText, DetailMiniAction } from "../../ui";
+import { CommentBubble } from "../../ui/comment-bubble";
 import { theme } from "../../../constants/theme";
 import type { MarketDetailComment } from "../../../types/market";
 import { styles } from "./marketDetailStyles";
@@ -135,51 +136,47 @@ export function CommentsSection({
   return (
     <View style={styles.comments}>
       <Text style={styles.commentCount}>댓글 {activeCount}개</Text>
-      {comments.map((comment, index) => (
-        <View
+      {/* 서버에 답글·좋아요가 없어 CommentBubble 의 답글 달기·하트는 넘기지 않는다(숨김). */}
+      {comments.map((comment) => (
+        <CommentBubble
           key={comment.id}
-          style={[
-            styles.commentRow,
-            index === comments.length - 1 ? styles.commentRowLast : null,
-          ]}
+          name={comment.authorName}
+          time={
+            comment.isEdited
+              ? `${comment.createdLabel} · 수정됨`
+              : comment.createdLabel
+          }
+          testID={`market-comment-${comment.id}`}
         >
-          <Avatar name={comment.authorName} size={32} />
-          <View style={styles.commentBody}>
-            <View style={styles.commentMeta}>
-              <Text style={styles.commentAuthor}>{comment.authorName}</Text>
-              <Text style={styles.commentWhen}>{comment.createdLabel}</Text>
-              {comment.isEdited ? (
-                <Text style={styles.commentWhen}>· 수정됨</Text>
+          {comment.isDeleted ? (
+            <Text style={styles.deletedComment}>삭제된 댓글입니다</Text>
+          ) : (
+            <>
+              <AppText variant="label" weight="regular">
+                {comment.content}
+              </AppText>
+              {comment.isMine ? (
+                <View style={styles.commentActions}>
+                  <DetailMiniAction
+                    testID={`market-comment-edit-${comment.id}`}
+                    accessibilityLabel={`댓글 수정 ${comment.content}`}
+                    icon="edit"
+                    label="수정"
+                    onPress={() => onEdit(comment)}
+                  />
+                  <DetailMiniAction
+                    testID={`market-comment-delete-${comment.id}`}
+                    accessibilityLabel={`댓글 삭제 ${comment.content}`}
+                    icon="delete-outline"
+                    label="삭제"
+                    danger
+                    onPress={() => onDelete(comment)}
+                  />
+                </View>
               ) : null}
-            </View>
-            {comment.isDeleted ? (
-              <Text style={styles.deletedComment}>삭제된 댓글입니다</Text>
-            ) : (
-              <>
-                <Text style={styles.commentText}>{comment.content}</Text>
-                {comment.isMine ? (
-                  <View style={styles.commentActions}>
-                    <DetailMiniAction
-                      testID={`market-comment-edit-${comment.id}`}
-                      accessibilityLabel={`댓글 수정 ${comment.content}`}
-                      icon="edit"
-                      label="수정"
-                      onPress={() => onEdit(comment)}
-                    />
-                    <DetailMiniAction
-                      testID={`market-comment-delete-${comment.id}`}
-                      accessibilityLabel={`댓글 삭제 ${comment.content}`}
-                      icon="delete-outline"
-                      label="삭제"
-                      danger
-                      onPress={() => onDelete(comment)}
-                    />
-                  </View>
-                ) : null}
-              </>
-            )}
-          </View>
-        </View>
+            </>
+          )}
+        </CommentBubble>
       ))}
     </View>
   );

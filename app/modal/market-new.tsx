@@ -1,11 +1,11 @@
-import { AppIcon } from "@/components/ui/app-icon";
+import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
+  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,12 +15,15 @@ import {
 import {
   ConfirmDialog,
   FloatingBottomBar,
-  ImagePickerField,
   ModalFormSection as Section,
   ModalFormTextInput as FormInput,
+  MotionPressable,
   Toast,
   TopBar,
 } from "../../src/components/ui";
+import { RadioRow } from "../../src/components/ui/checkbox";
+import { InfoBox } from "../../src/components/ui/info-box";
+import { PhotoTile } from "../../src/components/ui/photo-tile";
 import { MARKET_CATEGORIES } from "../../src/constants/domainOptions";
 import { theme } from "../../src/constants/theme";
 import {
@@ -36,6 +39,9 @@ const categories = MARKET_CATEGORIES.slice(1) as readonly {
   label: string;
 }[];
 const conditions = ["새것", "사용감 있음", "파손 있음"] as const;
+const MAX_IMAGES = 5;
+/** 32 칩 + 위아래 6 → 누르는 곳 44. */
+const CHIP_HIT_SLOP = { top: 6, bottom: 6 };
 
 const filledValues = {
   images: ["https://picsum.photos/seed/market-new/240/240"],
@@ -89,6 +95,39 @@ export default function MarketNewModal() {
     setValues((current) => ({ ...current, [key]: value }));
   };
 
+  const setImages = (images: string[]) => {
+    // 고르자마자 업로드용 축소를 시작해 등록 시 기다리지 않게 한다
+    images.forEach(prepareImageForUpload);
+    update("images", images);
+  };
+
+  const canAddImage = values.images.length < MAX_IMAGES;
+
+  const pickImages = async () => {
+    if (!canAddImage) return;
+
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert(
+        "사진 접근 권한이 필요합니다",
+        "사진을 첨부하려면 갤러리 접근을 허용해주세요.",
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsMultipleSelection: true,
+      mediaTypes: ["images"],
+      // quality 는 기본값(1)으로 둔다. 압축은 업로드 직전 resizeImageForUpload 가 한 번만 한다
+      selectionLimit: Math.max(1, MAX_IMAGES - values.images.length),
+    });
+
+    if (result.canceled) return;
+
+    const selected = result.assets.map((asset) => asset.uri).filter(Boolean);
+    setImages([...values.images, ...selected].slice(0, MAX_IMAGES));
+  };
+
   const close = () => {
     if (isDirty) {
       setShowCloseConfirm(true);
@@ -131,7 +170,7 @@ export default function MarketNewModal() {
     >
       <TopBar
         title={isEdit ? "나눔 수정" : "나눔 등록"}
-        back
+        close
         onBack={close}
         testID="market-form-header"
       />
@@ -146,19 +185,35 @@ export default function MarketNewModal() {
             <Section
               label="사진"
               required
-              hint={`사진 ${values.images.length}/5`}
+              hint={`사진 ${values.images.length}/${MAX_IMAGES}`}
             >
-              <View style={styles.fieldInset}>
-                <ImagePickerField
-                  value={values.images}
-                  onChange={(images) => {
-                    // 고르자마자 업로드용 축소를 시작해 등록 시 기다리지 않게 한다
-                    images.forEach(prepareImageForUpload);
-                    update("images", images);
-                  }}
-                  maxImages={5}
-                />
-              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.photoRow}
+                testID="market-photo-row"
+              >
+                {canAddImage ? (
+                  <PhotoTile
+                    variant="add"
+                    onPress={pickImages}
+                    testID="market-photo-add"
+                  />
+                ) : null}
+                {values.images.map((uri, index) => (
+                  <PhotoTile
+                    key={uri}
+                    variant="photo"
+                    uri={uri}
+                    index={index}
+                    cover={index === 0}
+                    onRemove={() =>
+                      setImages(values.images.filter((item) => item !== uri))
+                    }
+                    testID={`market-photo-${index}`}
+                  />
+                ))}
+              </ScrollView>
             </Section>
 
             <Section label="카테고리" required>
@@ -166,10 +221,11 @@ export default function MarketNewModal() {
                 {categories.map((category) => {
                   const selected = values.category === category.key;
                   return (
-                    <Pressable
+                    <MotionPressable
                       key={category.key}
                       accessibilityRole="radio"
                       accessibilityState={{ selected }}
+                      hitSlop={CHIP_HIT_SLOP}
                       onPress={() => update("category", category.key)}
                       style={[styles.chip, selected ? styles.chipOn : null]}
                     >
@@ -181,7 +237,7 @@ export default function MarketNewModal() {
                       >
                         {category.label}
                       </Text>
-                    </Pressable>
+                    </MotionPressable>
                   );
                 })}
               </View>
@@ -198,31 +254,15 @@ export default function MarketNewModal() {
             </Section>
 
             <Section label="물품 상태" required>
-              <View style={styles.conditionRow}>
-                {conditions.map((condition) => {
-                  const selected = values.condition === condition;
-                  return (
-                    <Pressable
-                      key={condition}
-                      accessibilityRole="radio"
-                      accessibilityState={{ selected }}
-                      onPress={() => update("condition", condition)}
-                      style={[
-                        styles.condition,
-                        selected ? styles.conditionOn : null,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.conditionText,
-                          selected ? styles.conditionTextOn : null,
-                        ]}
-                      >
-                        {condition}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
+              <View style={styles.conditionList}>
+                {conditions.map((condition) => (
+                  <RadioRow
+                    key={condition}
+                    label={condition}
+                    selected={values.condition === condition}
+                    onPress={() => update("condition", condition)}
+                  />
+                ))}
               </View>
             </Section>
 
@@ -253,16 +293,11 @@ export default function MarketNewModal() {
               />
             </Section>
 
-            <View style={styles.infoBox}>
-              <AppIcon
-                name="info"
-                size={16}
-                color={theme.colors.primaryStrong}
-              />
-              <Text style={styles.infoText}>
-                직거래 시 안전한 장소(교회 로비 등)에서 만나주세요.
-              </Text>
-            </View>
+            <InfoBox
+              tone="info"
+              description="직거래 시 안전한 장소(교회 로비 등)에서 만나주세요."
+              style={styles.infoBox}
+            />
             {error ? (
               <Text accessibilityRole="alert" style={styles.errorText}>
                 {error}
@@ -308,21 +343,27 @@ const styles = StyleSheet.create({
     paddingTop: theme.layout.screenX,
   },
   body: { paddingBottom: 112 },
-  fieldInset: { paddingHorizontal: theme.layout.screenX },
+  photoRow: {
+    gap: theme.spacing[2],
+    paddingHorizontal: theme.layout.screenX,
+  },
   chips: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    columnGap: theme.spacing[2],
+    // 위아래로 늘린 누르는 곳(6)이 윗줄과 겹치지 않게 줄 간격을 12로 둔다.
+    rowGap: theme.spacing[3],
     paddingHorizontal: theme.layout.screenX,
   },
+  // 디자인 시스템 칩: 높이 32, 안쪽 0×14, 12/500, radius-full.
   chip: {
-    minHeight: 44,
+    minHeight: theme.size.chipHeight,
     justifyContent: "center",
     borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surface,
     borderWidth: 1,
     borderColor: theme.colors.border,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
   },
   chipOn: {
     backgroundColor: theme.colors.primarySubtle,
@@ -337,48 +378,13 @@ const styles = StyleSheet.create({
     color: theme.colors.primaryStrong,
     fontWeight: theme.fontWeight.semibold,
   },
-  conditionRow: {
-    flexDirection: "row",
-    gap: 8,
+  conditionList: {
+    gap: theme.spacing[2],
     paddingHorizontal: theme.layout.screenX,
-  },
-  condition: {
-    minHeight: 44,
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surface,
-  },
-  conditionOn: {
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primarySubtle,
-  },
-  conditionText: {
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-  },
-  conditionTextOn: {
-    color: theme.colors.primaryStrong,
-    fontWeight: theme.fontWeight.bold,
   },
   infoBox: {
     marginHorizontal: theme.layout.screenX,
     marginTop: 22,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.infoSubtle,
-    flexDirection: "row",
-    gap: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  infoText: {
-    flex: 1,
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
   },
   errorText: {
     marginHorizontal: theme.layout.screenX,

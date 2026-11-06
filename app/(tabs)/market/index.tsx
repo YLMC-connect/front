@@ -1,19 +1,19 @@
-import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
-  AppText,
   Empty,
   ErrorState,
   FilterChips,
   FloatingActionButton,
   ListSkeleton,
-  MotionEnter,
-  MotionPressable,
   SegmentedTabs,
-  VisualThumb,
 } from "../../../src/components/ui";
+import {
+  ShareCard,
+  ShareList,
+  type ShareCardState,
+} from "../../../src/components/ui/share-card";
 import { theme } from "../../../src/constants/theme";
 import { MARKET_CATEGORIES } from "../../../src/constants/domainOptions";
 import {
@@ -165,15 +165,24 @@ export default function MarketScreen() {
             isSearching={false}
           />
         ) : (
-          <MotionEnter>
-            {visiblePosts.map((post) => (
-              <PostRow
+          <ShareList style={styles.shareList} testID="market-list">
+            {visiblePosts.map((post, index) => (
+              <ShareCard
                 key={post.id}
-                post={post}
+                title={post.title}
+                state={shareStateOf(post.status)}
+                category={categoryOf(post.category)}
+                meta={`${post.authorName} · ${post.createdLabel}`}
+                photo={post.thumbnailUrl}
+                thumbSeed={post.thumbSeed}
+                enterIndex={index}
                 onPress={() => router.push(`/market/${post.id}`)}
+                // 나눔완료는 일부러 덜 보이게 흐린다(디자인 시스템 opacity-soft).
+                style={post.status === "done" ? styles.rowDone : null}
+                testID={`market-post-${post.id}`}
               />
             ))}
-          </MotionEnter>
+          </ShareList>
         )}
         {list.isFetchingNextPage ? (
           <View style={styles.footerLoader}>
@@ -185,78 +194,15 @@ export default function MarketScreen() {
   );
 }
 
-function PostRow({
-  post,
-  onPress,
-}: {
-  post: MarketOverviewItem;
-  onPress: () => void;
-}) {
-  const done = post.status === "done";
-  const reserved = post.status === "reserved";
-
-  return (
-    <MotionPressable
-      accessibilityRole="button"
-      onPress={onPress}
-      pressedScale={0.985}
-      style={styles.row}
-    >
-      <View style={styles.thumbWrap}>
-        {post.thumbnailUrl ? (
-          <Image
-            contentFit="cover"
-            source={{ uri: post.thumbnailUrl }}
-            style={styles.thumbImage}
-            transition={150}
-          />
-        ) : (
-          <VisualThumb size={theme.layout.listThumb} seed={post.thumbSeed} />
-        )}
-        {done ? (
-          <View style={styles.doneOverlay}>
-            <AppText variant="caption" tone="inverse">
-              나눔완료
-            </AppText>
-          </View>
-        ) : null}
-        {reserved ? <StatusBadge /> : null}
-      </View>
-
-      <View style={[styles.rowText, done ? styles.rowTextDone : null]}>
-        <AppText
-          numberOfLines={2}
-          variant="body"
-          weight="semibold"
-          tone={done ? "muted" : "primary"}
-        >
-          {post.title}
-        </AppText>
-        <AppText variant="caption" tone="muted" style={styles.postMeta}>
-          {categoryOf(post.category)} · {post.authorName} · {post.createdLabel}
-        </AppText>
-      </View>
-    </MotionPressable>
-  );
+function shareStateOf(status: MarketOverviewItem["status"]): ShareCardState {
+  if (status === "done") return "done";
+  if (status === "reserved") return "reserved";
+  return "open";
 }
 
 function categoryOf(key: string) {
   return (
     MARKET_CATEGORIES.find((category) => category.key === key)?.label ?? "기타"
-  );
-}
-
-function StatusBadge() {
-  return (
-    <View style={styles.statusBadge}>
-      <AppText
-        variant="caption"
-        weight="semibold"
-        style={styles.statusBadgeText}
-      >
-        예약중
-      </AppText>
-    </View>
   );
 }
 
@@ -323,56 +269,11 @@ const styles = StyleSheet.create({
   loading: {
     paddingTop: theme.spacing[2],
   },
-  row: {
-    flexDirection: "row",
-    gap: theme.layout.listGap,
+  shareList: {
     marginHorizontal: theme.layout.screenX,
-    paddingVertical: theme.spacing[4],
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
   },
-  thumbWrap: {
-    width: theme.layout.listThumb,
-    height: theme.layout.listThumb,
-    borderRadius: theme.radius.md,
-    overflow: "hidden",
-    flexShrink: 0,
-  },
-  thumbImage: {
-    width: "100%",
-    height: "100%",
-  },
-  doneOverlay: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(25,31,40,0.65)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  statusBadge: {
-    position: "absolute",
-    left: 6,
-    top: 6,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.warningSubtle,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  statusBadgeText: {
-    color: theme.colors.warningText,
-  },
-  rowText: {
-    flex: 1,
-    minWidth: 0,
-    justifyContent: "center",
-    gap: theme.spacing[2],
-    paddingVertical: 2,
-  },
-  // 나눔완료는 일부러 덜 보이게 흐린다(디자인 시스템 opacity-soft).
-  rowTextDone: {
+  rowDone: {
     opacity: theme.opacity.soft,
-  },
-  postMeta: {
-    marginTop: 0,
   },
   emptyWrap: {
     paddingHorizontal: 32,

@@ -197,28 +197,6 @@ export const styles = StyleSheet.create({
     gap: 6,
     marginBottom: 10,
   },
-  softChip: {
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primarySubtle,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  softChipText: {
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  conditionChip: {
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surfaceSubtle,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  conditionText: {
-    color: theme.colors.text,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.fontWeight.semibold,
-  },
   title: {
     color: theme.colors.text,
     fontSize: theme.typography.title.fontSize,
@@ -241,7 +219,7 @@ export const styles = StyleSheet.create({
     ...theme.shadow.sm,
   },
   comments: {
-    paddingHorizontal: 22,
+    paddingHorizontal: theme.layout.screenX,
     paddingTop: 4,
     paddingBottom: 12,
   },
@@ -251,42 +229,10 @@ export const styles = StyleSheet.create({
     fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
-  commentRow: {
-    flexDirection: "row",
-    gap: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-    paddingVertical: 12,
-  },
-  commentRowLast: {
-    borderBottomWidth: 0,
-  },
-  commentBody: { flex: 1, minWidth: 0 },
-  commentMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  commentAuthor: {
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    fontWeight: theme.fontWeight.bold,
-  },
-  commentWhen: {
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-  },
   deletedComment: {
-    marginTop: 4,
     color: theme.colors.textMuted,
     fontSize: theme.typography.label.fontSize,
     fontStyle: "italic",
-  },
-  commentText: {
-    marginTop: 4,
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
   },
   commentActions: {
     marginTop: 6,

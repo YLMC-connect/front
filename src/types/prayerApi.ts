@@ -75,7 +75,7 @@ export interface PrayerTopicDto {
   emergencyEndAt: string | null;
   answerContent: string | null;
   answeredAt: string | null;
-  createdAt: string;
+  createdAt: string | null;
 }
 
 /** 이름만 있고 값 타입은 페이지에 없다. */

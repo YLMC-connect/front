@@ -224,6 +224,8 @@ describe("auth smoke screens", () => {
     const password = screen.getByTestId("login-password-input");
 
     expect(password.props.secureTextEntry).toBe(true);
+    // 비밀번호 칸은 영문 자판으로 연다(한글 자판으로는 iOS 비밀번호 칸에 입력되지 않음)
+    expect(password.props.keyboardType).toBe("ascii-capable");
     fireEvent.press(screen.getByLabelText("비밀번호 보기"));
     expect(
       screen.getByTestId("login-password-input").props.secureTextEntry,
@@ -385,6 +387,9 @@ describe("auth smoke screens", () => {
     expect(
       screen.getByTestId("signup-password-input").props.secureTextEntry,
     ).toBe(true);
+    expect(screen.getByTestId("signup-password-input").props.keyboardType).toBe(
+      "ascii-capable",
+    );
     fireEvent.press(visibilityButtons[0]);
     expect(
       screen.getByTestId("signup-password-input").props.secureTextEntry,

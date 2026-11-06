@@ -72,7 +72,8 @@ function ProfileTextInput({
   return (
     <TextInput
       editable={editable}
-      keyboardType={keyboardType}
+      // 비밀번호 칸은 영문 자판으로 연다(iOS 비밀번호 칸은 한글 조합이 막혀 입력되지 않음)
+      keyboardType={secureTextEntry ? "ascii-capable" : keyboardType}
       placeholder={placeholder}
       placeholderTextColor={theme.colors.textMuted}
       secureTextEntry={secureTextEntry}

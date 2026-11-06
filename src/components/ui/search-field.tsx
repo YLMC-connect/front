@@ -23,12 +23,12 @@ export function SearchField({ testID, ...inputProps }: SearchFieldProps) {
       style={[styles.container, focused ? styles.containerFocused : null]}
       testID={testID ? `${testID}-container` : undefined}
     >
-      <AppIcon name="search" size={19} color={theme.colors.inkMute} />
+      <AppIcon name="search" size={20} color={theme.colors.textMuted} />
       <TextInput
         {...inputProps}
         onBlur={() => setFocused(false)}
         onFocus={() => setFocused(true)}
-        placeholderTextColor={theme.colors.inkMute}
+        placeholderTextColor={theme.colors.textMuted}
         style={styles.input}
         testID={testID}
       />
@@ -38,27 +38,27 @@ export function SearchField({ testID, ...inputProps }: SearchFieldProps) {
 
 const styles = StyleSheet.create({
   container: {
-    minHeight: 46,
+    minHeight: theme.size.inputHeight,
     marginHorizontal: theme.layout.screenX,
     marginBottom: 10,
-    paddingHorizontal: 14,
+    paddingHorizontal: theme.spacing["4"],
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    borderRadius: theme.radius.md,
+    gap: theme.spacing["2"],
+    borderRadius: theme.radius.sm,
     borderWidth: 1,
-    borderColor: theme.colors.lineStrong,
+    borderColor: theme.colors.borderStrong,
     backgroundColor: theme.colors.surface,
   },
   containerFocused: {
     borderColor: theme.colors.primary,
     borderWidth: 2,
-    paddingHorizontal: 13,
+    paddingHorizontal: theme.spacing["4"] - 1,
   },
   input: {
     flex: 1,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.lg,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
     outlineColor: "transparent",
     outlineWidth: 0,
   },

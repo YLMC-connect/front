@@ -69,8 +69,12 @@ export function TopBar({
           onPress={handleBack}
           style={styles.backButton}
         >
-          <AppIcon name="chevron-left" size={22} color={theme.colors.inkSoft} />
-          <AppText variant="caption" tone="secondary">
+          <AppIcon
+            name="chevron-left"
+            size={22}
+            color={theme.colors.textMuted}
+          />
+          <AppText variant="caption" tone="muted">
             뒤로
           </AppText>
         </MotionPressable>
@@ -80,7 +84,7 @@ export function TopBar({
         pointerEvents={back ? "none" : "auto"}
         style={[styles.topTextWrap, back ? styles.topTextWrapCentered : null]}
       >
-        <AppText numberOfLines={1} variant="heading">
+        <AppText numberOfLines={1} variant="heading" weight="semibold">
           {title}
         </AppText>
         {subtitle ? (
@@ -214,7 +218,7 @@ export function HorizontalChips<T extends string>({
 
 const styles = StyleSheet.create({
   topBar: {
-    height: 56,
+    height: theme.size.topbarHeight,
     paddingHorizontal: theme.layout.screenX,
     flexDirection: "row",
     alignItems: "center",
@@ -244,15 +248,15 @@ const styles = StyleSheet.create({
   segmented: {
     position: "relative",
     flexDirection: "row",
-    height: 40,
+    height: theme.size.segmentHeight,
     gap: SEGMENT_GAP,
     padding: SEGMENT_PADDING,
-    backgroundColor: "rgba(30,41,32,0.05)",
+    backgroundColor: theme.colors.surfaceSubtle,
     borderRadius: theme.radius.full,
   },
   segment: {
     flex: 1,
-    height: 32,
+    height: theme.size.segmentItemHeight,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: theme.radius.full,
@@ -265,17 +269,15 @@ const styles = StyleSheet.create({
     bottom: 4,
     borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surface,
-    ...theme.shadow.card,
+    ...theme.shadow.sm,
   },
   segmentText: {
-    color: theme.colors.inkMute,
+    ...theme.typography.label,
+    color: theme.colors.textMuted,
     fontWeight: theme.fontWeight.semibold,
-    fontSize: 13,
-    lineHeight: 18,
   },
   segmentTextSelected: {
-    color: theme.colors.ink,
-    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.text,
   },
   horizontalChipsScroll: { flexGrow: 0 },
   horizontalChips: { gap: 8, paddingHorizontal: 18, paddingVertical: 6 },

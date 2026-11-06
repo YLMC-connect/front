@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   tabs: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.line,
+    borderBottomColor: theme.colors.border,
     paddingHorizontal: 18,
   },
   borderTabs: {
@@ -73,12 +73,12 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.primary,
   },
   text: {
-    color: theme.colors.inkMute,
-    fontSize: theme.fontSize.md,
-    fontWeight: theme.fontWeight.semibold,
+    ...theme.typography.body,
+    color: theme.colors.textMuted,
+    fontWeight: theme.fontWeight.medium,
   },
   textOn: {
-    color: theme.colors.primaryDeep,
+    color: theme.colors.primaryStrong,
     fontWeight: theme.fontWeight.bold,
   },
   indicator: {

@@ -54,7 +54,7 @@ export function ScreenHeader({
       <View style={[styles.text, right ? styles.textWithAction : null]}>
         <AppText variant="title">{title}</AppText>
         {subtitle ? (
-          <AppText variant="caption" tone="secondary" style={styles.subtitle}>
+          <AppText variant="caption" tone="muted" style={styles.subtitle}>
             {subtitle}
           </AppText>
         ) : null}

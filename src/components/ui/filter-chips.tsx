@@ -21,8 +21,9 @@ type FilterChipLayout = {
   x: number;
 };
 
-const FILTER_CHIP_HEIGHT = 36;
-const FILTER_CHIP_HIT_SLOP = 4;
+const FILTER_CHIP_HEIGHT = theme.size.chipHeight;
+/** 32 칩 + 위아래 6 → 누르는 곳 44. */
+const FILTER_CHIP_HIT_SLOP = 6;
 
 export function FilterChips<T extends string>({
   items,
@@ -179,7 +180,7 @@ const styles = StyleSheet.create({
     height: FILTER_CHIP_HEIGHT,
     borderRadius: theme.radius.full,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
   },
   indicator: {
@@ -188,18 +189,18 @@ const styles = StyleSheet.create({
     height: FILTER_CHIP_HEIGHT,
     zIndex: 1,
     borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.ink,
+    backgroundColor: theme.colors.primarySubtle,
   },
   chip: {
     height: FILTER_CHIP_HEIGHT,
     marginVertical: FILTER_CHIP_HIT_SLOP,
     zIndex: 2,
-    paddingHorizontal: 13,
+    paddingHorizontal: 14,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: theme.radius.full,
     borderWidth: 1,
-    borderColor: theme.colors.line,
+    borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
   },
   chipReady: {
@@ -207,15 +208,15 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   chipSelected: {
-    borderColor: theme.colors.ink,
-    backgroundColor: theme.colors.ink,
+    borderColor: theme.colors.primarySubtle,
+    backgroundColor: theme.colors.primarySubtle,
   },
   text: {
-    color: theme.colors.inkSoft,
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.semibold,
+    ...theme.typography.caption,
+    color: theme.colors.textMuted,
   },
   textSelected: {
-    color: theme.colors.white,
+    color: theme.colors.primaryStrong,
+    fontWeight: theme.fontWeight.semibold,
   },
 });

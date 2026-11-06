@@ -43,7 +43,7 @@ export const AuthInput = forwardRef<TextInput, AuthInputProps>(
             onFocus?.(event);
           }}
           placeholderTextColor={
-            inputProps.placeholderTextColor ?? theme.colors.inkMute
+            inputProps.placeholderTextColor ?? theme.colors.textMuted
           }
           style={styles.input}
         />
@@ -62,10 +62,10 @@ export const AuthInput = forwardRef<TextInput, AuthInputProps>(
 
 const styles = StyleSheet.create({
   surface: {
-    height: 48,
-    borderRadius: theme.radius.md,
+    height: theme.size.inputHeight,
+    borderRadius: theme.radius.sm,
     borderWidth: 1,
-    borderColor: theme.colors.lineStrong,
+    borderColor: theme.colors.borderStrong,
     backgroundColor: theme.colors.surface,
     paddingHorizontal: 16,
     flexDirection: "row",
@@ -75,16 +75,15 @@ const styles = StyleSheet.create({
   },
   focusRing: {
     ...StyleSheet.absoluteFill,
-    borderRadius: theme.radius.md,
+    borderRadius: theme.radius.sm,
     borderColor: theme.colors.primary,
     borderWidth: 2,
   },
   focusRingError: {
-    borderColor: theme.colors.danger,
+    borderColor: theme.colors.dangerText,
   },
   surfaceError: {
-    borderColor: theme.colors.danger,
-    backgroundColor: "rgba(184, 102, 88, 0.08)",
+    borderColor: theme.colors.dangerText,
   },
   surfaceWithTrailing: {
     paddingRight: 10,
@@ -92,8 +91,8 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     minHeight: 44,
-    color: theme.colors.ink,
-    fontSize: theme.fontSize.lg,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
     padding: 0,
     outlineColor: "transparent",
     outlineWidth: 0,

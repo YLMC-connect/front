@@ -187,6 +187,8 @@ export default function LoginScreen() {
                 }
                 placeholder="비밀번호를 입력해주세요"
                 secureTextEntry={!passwordVisible}
+                // 비밀번호 칸은 영문 자판으로 연다(iOS 비밀번호 칸은 한글 조합이 막혀 입력되지 않음)
+                keyboardType="ascii-capable"
                 error={errors.password}
                 hasError={isError}
                 trailingIcon={passwordVisible ? "visibility" : "visibility-off"}

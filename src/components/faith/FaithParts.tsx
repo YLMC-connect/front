@@ -83,7 +83,7 @@ export function CourseCard({
           {course.weekCount}주 · {course.instructorName}
         </Text>
       </View>
-      <AppText variant="sectionTitle" style={styles.courseTitle}>
+      <AppText variant="heading" style={styles.courseTitle}>
         {course.title}
       </AppText>
       <AppText variant="body" tone="secondary" style={styles.courseSummary}>

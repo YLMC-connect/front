@@ -182,7 +182,7 @@ export default function GroupDetailScreen() {
               )}
             </View>
 
-            <AppText variant="screenTitle">{group.name}</AppText>
+            <AppText variant="title">{group.name}</AppText>
 
             <View style={styles.memberMeta}>
               <AppIcon name="groups" size={15} color={theme.colors.inkSoft} />

@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: 7,
     color: theme.colors.inkSoft,
-    fontSize: theme.typography.formLabel.fontSize,
+    fontSize: theme.typography.label.fontSize,
     fontWeight: theme.fontWeight.bold,
   },
   input: {

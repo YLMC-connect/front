@@ -17,7 +17,7 @@ export function SectionHeader({
 }) {
   return (
     <View testID={testID} style={[styles.root, style]}>
-      <AppText variant="sectionTitle">{title}</AppText>
+      <AppText variant="heading">{title}</AppText>
       {onViewAll ? (
         <MotionPressable
           accessibilityLabel={`${title} 전체보기`}

@@ -11,10 +11,64 @@ import { MotionPressable } from "./motion";
 
 type IconName = ComponentProps<typeof AppIcon>["name"];
 
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "danger";
+
+const { colors } = theme;
+
+/** 디자인 시스템 Button: 변형별 바탕·눌림·글자 색. */
+const variantColors: Record<
+  ButtonVariant,
+  {
+    bg: string;
+    pressedBg: string;
+    fg: string;
+    border?: string;
+    pressedBorder?: string;
+  }
+> = {
+  primary: {
+    bg: colors.primary,
+    pressedBg: colors.primaryStrong,
+    fg: colors.onPrimary,
+  },
+  secondary: {
+    bg: colors.primarySubtle,
+    pressedBg: colors.primary200,
+    fg: colors.primaryStrong,
+  },
+  outline: {
+    bg: colors.surface,
+    pressedBg: colors.surfaceSubtle,
+    fg: colors.text,
+    border: colors.borderButton,
+    pressedBorder: colors.neutral400,
+  },
+  ghost: {
+    bg: "transparent",
+    pressedBg: colors.surfaceSubtle,
+    fg: colors.primaryStrong,
+  },
+  danger: {
+    bg: colors.dangerBold,
+    pressedBg: colors.dangerPressed,
+    fg: colors.onPrimary,
+  },
+};
+
+/**
+ * 알약 버튼. `md` 44(카드 안·보조), `lg` 52(화면 하단 주 버튼).
+ * 한 화면에 primary 는 하나만 둔다.
+ */
 export function Button({
   children,
   onPress,
   variant = "primary",
+  size = "md",
   disabled,
   loading,
   icon,
@@ -22,56 +76,49 @@ export function Button({
 }: {
   children: ReactNode;
   onPress?: () => void;
-  variant?: "primary" | "soft" | "ghost" | "danger";
+  variant?: ButtonVariant;
+  size?: "md" | "lg";
   disabled?: boolean;
   loading?: boolean;
   icon?: IconName;
   testID?: string;
 }) {
-  const buttonStyle = StyleSheet.flatten([
-    styles.button,
-    variant === "primary" && styles.buttonPrimary,
-    variant === "soft" && styles.buttonSoft,
-    variant === "ghost" && styles.buttonGhost,
-    variant === "danger" && styles.buttonDanger,
-    disabled && styles.disabled,
-  ]);
-  const textStyle = [
-    styles.buttonText,
-    (variant === "soft" || variant === "ghost") && styles.buttonTextSoft,
-    variant === "danger" && styles.buttonTextInverse,
-  ];
+  const tone = variantColors[variant];
+  const fg = disabled ? colors.textDisabled : tone.fg;
 
   return (
     <MotionPressable
       testID={testID}
       accessibilityRole="button"
+      accessibilityState={{ disabled: !!disabled, busy: !!loading }}
       disabled={disabled || loading}
       onPress={onPress}
-      style={buttonStyle}
+      style={({ pressed }) => [
+        styles.button,
+        size === "lg" ? styles.buttonLg : styles.buttonMd,
+        { backgroundColor: pressed ? tone.pressedBg : tone.bg },
+        tone.border
+          ? {
+              borderWidth: 1,
+              borderColor: pressed ? tone.pressedBorder : tone.border,
+            }
+          : null,
+        disabled ? styles.disabled : null,
+      ]}
     >
       {loading ? (
-        <ActivityIndicator
-          color={
-            variant === "primary" || variant === "danger"
-              ? theme.colors.white
-              : theme.colors.primaryDeep
-          }
-        />
+        <ActivityIndicator color={fg} />
       ) : (
         <>
-          {icon ? (
-            <AppIcon
-              name={icon}
-              size={20}
-              color={
-                variant === "primary" || variant === "danger"
-                  ? theme.colors.white
-                  : theme.colors.primaryDeep
-              }
-            />
-          ) : null}
-          <Text style={textStyle}>{children}</Text>
+          {icon ? <AppIcon name={icon} size={18} color={fg} /> : null}
+          <Text
+            style={[
+              size === "lg" ? styles.textLg : styles.textMd,
+              { color: fg },
+            ]}
+          >
+            {children}
+          </Text>
         </>
       )}
     </MotionPressable>
@@ -102,7 +149,7 @@ export function FloatingActionButton({
       {...pressableProps}
       style={fabStyle}
     >
-      <AppIcon name={icon} size={18} color={theme.colors.white} />
+      <AppIcon name={icon} size={18} color={colors.onPrimary} />
       <Text style={styles.fabText}>{label}</Text>
     </MotionPressable>
   );
@@ -110,40 +157,40 @@ export function FloatingActionButton({
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: 52,
     borderRadius: theme.radius.full,
-    paddingHorizontal: 24,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
-    gap: 8,
+    gap: theme.spacing["2"],
   },
-  buttonPrimary: {
-    backgroundColor: theme.colors.primary,
-    ...theme.shadow.primary,
+  buttonMd: {
+    minHeight: theme.size.buttonHeightSm,
+    paddingHorizontal: theme.spacing["5"],
   },
-  buttonSoft: { backgroundColor: theme.colors.primarySoft },
-  buttonGhost: { backgroundColor: "transparent" },
-  buttonDanger: { backgroundColor: theme.colors.danger },
-  buttonText: {
-    color: theme.colors.white,
+  buttonLg: {
+    minHeight: theme.size.buttonHeight,
+    paddingHorizontal: theme.spacing["6"],
+  },
+  textMd: {
+    ...theme.typography.label,
     fontFamily: theme.font.semibold,
     fontWeight: "normal",
-    fontSize: theme.fontSize.base,
   },
-  buttonTextSoft: { color: theme.colors.primaryDeep },
-  buttonTextInverse: { color: theme.colors.white },
-  disabled: { opacity: 0.45 },
+  textLg: {
+    ...theme.typography.body,
+    fontFamily: theme.font.semibold,
+    fontWeight: "normal",
+  },
+  disabled: { backgroundColor: theme.colors.surfaceSubtle, borderWidth: 0 },
   fab: {
     position: "absolute",
-    right: 18,
+    right: theme.spacing["5"],
     bottom: 86,
     zIndex: 20,
-    minWidth: 46,
-    height: 46,
+    minWidth: theme.size.fabHeight,
+    height: theme.size.fabHeight,
     borderRadius: theme.radius.full,
-    paddingLeft: 12,
-    paddingRight: 14,
+    paddingHorizontal: theme.spacing["4"],
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -152,13 +199,13 @@ const styles = StyleSheet.create({
     ...theme.shadow.fab,
   },
   fabCompact: {
-    width: 46,
-    paddingLeft: 0,
-    paddingRight: 0,
+    width: theme.size.fabHeight,
+    paddingHorizontal: 0,
   },
   fabText: {
-    color: theme.colors.white,
-    fontSize: 13,
-    fontWeight: theme.fontWeight.bold,
+    ...theme.typography.caption,
+    color: theme.colors.onPrimary,
+    fontFamily: theme.font.bold,
+    fontWeight: "normal",
   },
 });

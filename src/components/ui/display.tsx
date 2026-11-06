@@ -14,14 +14,14 @@ import { getGivenName } from "../../lib/koreanName";
 
 type IconName = ComponentProps<typeof AppIcon>["name"];
 
+/** 사진 없는 아바타 바탕(avatar-1~6). 이름으로 골라 같은 사람은 늘 같은 색. */
 const avatarPalettes = [
-  "#8FA882",
-  "#C7B89D",
-  "#9FBFA0",
-  "#C97C6E",
-  "#A6B79A",
-  "#B79F8C",
-  "#7E9C8E",
+  theme.colors.avatar1,
+  theme.colors.avatar2,
+  theme.colors.avatar3,
+  theme.colors.avatar4,
+  theme.colors.avatar5,
+  theme.colors.avatar6,
 ] as const;
 
 function avatarColorFor(seed: string | number) {
@@ -78,13 +78,8 @@ export function Badge({
   tone?: "primary" | "mute" | "warn" | "danger" | "success";
 }) {
   return (
-    <View style={[styles.badge, badgeToneStyles[tone]]}>
-      <Text
-        style={[
-          styles.badgeText,
-          tone === "mute" ? styles.badgeTextMute : null,
-        ]}
-      >
+    <View style={[styles.badge, { backgroundColor: badgeTones[tone].bg }]}>
+      <Text style={[styles.badgeText, { color: badgeTones[tone].fg }]}>
         {children}
       </Text>
     </View>
@@ -125,13 +120,14 @@ export function Avatar({
   );
 }
 
+/** 사진이 없을 때 사진 자리 바탕(thumb-1~6). 장식용이라 무늬 없이 단색. */
 const thumbPalettes = [
-  { bg: "#E6EBDB", fg: "#C9D6B2" },
-  { bg: "#F3E8D7", fg: "#DBC9A5" },
-  { bg: "#E0E9DE", fg: "#B7CCB3" },
-  { bg: "#F3DED7", fg: "#DCB1A6" },
-  { bg: "#E8E4D3", fg: "#C9C2A4" },
-  { bg: "#DDE8E4", fg: "#B0C9C0" },
+  theme.colors.thumb1,
+  theme.colors.thumb2,
+  theme.colors.thumb3,
+  theme.colors.thumb4,
+  theme.colors.thumb5,
+  theme.colors.thumb6,
 ];
 
 export function VisualThumb({
@@ -145,54 +141,22 @@ export function VisualThumb({
   icon?: IconName;
   style?: object;
 }) {
-  const palette = thumbPalettes[seed % thumbPalettes.length];
-  const largeSize = size * 0.64;
-  const largeCenterX = 20 + ((seed * 17) % 60);
-  const largeCenterY = 20 + ((seed * 11) % 60);
-  const smallSize = size * 0.44;
-  const smallCenterX = 60 + ((seed * 7) % 30);
-  const smallCenterY = 70 - ((seed * 13) % 30);
+  const backgroundColor = thumbPalettes[seed % thumbPalettes.length];
 
   return (
     <View
       style={[
         styles.visualThumb,
-        {
-          width: size,
-          height: size,
-          backgroundColor: palette.bg,
-        },
+        { width: size, height: size, backgroundColor },
         style,
       ]}
     >
-      <View
-        style={[
-          styles.visualOrbLarge,
-          {
-            width: largeSize,
-            height: largeSize,
-            borderRadius: largeSize / 2,
-            backgroundColor: palette.fg,
-            left: size * ((largeCenterX - 32) / 100),
-            top: size * ((largeCenterY - 32) / 100),
-          },
-        ]}
-      />
-      <View
-        style={[
-          styles.visualOrbSmall,
-          {
-            width: smallSize,
-            height: smallSize,
-            borderRadius: smallSize / 2,
-            backgroundColor: palette.fg,
-            left: size * ((smallCenterX - 22) / 100),
-            top: size * ((smallCenterY - 22) / 100),
-          },
-        ]}
-      />
       {icon ? (
-        <AppIcon name={icon} size={Math.max(22, size * 0.34)} color="#fff" />
+        <AppIcon
+          name={icon}
+          size={Math.max(20, size * 0.34)}
+          color={theme.colors.textMuted}
+        />
       ) : null}
     </View>
   );
@@ -279,41 +243,28 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.md,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: theme.colors.line,
+    padding: theme.layout.cardPadding,
+    ...theme.shadow.sm,
   },
   badge: {
     alignSelf: "flex-start",
+    minHeight: theme.size.badgeHeight,
+    justifyContent: "center",
     borderRadius: theme.radius.full,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 10,
+    paddingVertical: theme.spacing["1"],
   },
-  badge_primary: { backgroundColor: theme.colors.primarySoft },
-  badge_mute: { backgroundColor: theme.colors.surface2 },
-  badge_warn: { backgroundColor: theme.colors.amberSoft },
-  badge_danger: { backgroundColor: "#FDF4F1" },
-  badge_success: { backgroundColor: "#EFF7EC" },
   badgeText: {
-    color: theme.colors.primaryDeep,
-    fontSize: theme.fontSize.xs,
+    ...theme.typography.caption,
     fontWeight: theme.fontWeight.semibold,
-    lineHeight: theme.lineHeight.xs,
   },
-  badgeTextMute: { color: theme.colors.inkMute },
   avatar: {
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: theme.colors.sage,
-    shadowColor: "rgba(20,30,18,0.10)",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.16,
-    shadowRadius: 2,
-    elevation: 1,
   },
   avatarText: {
-    color: theme.colors.white,
-    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.text,
+    fontWeight: theme.fontWeight.semibold,
     textAlign: "center",
   },
   visualThumb: {
@@ -322,14 +273,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     overflow: "hidden",
     position: "relative",
-  },
-  visualOrbLarge: {
-    position: "absolute",
-    opacity: 0.35,
-  },
-  visualOrbSmall: {
-    position: "absolute",
-    opacity: 0.22,
   },
   visualCover: {
     borderRadius: theme.radius.md,
@@ -386,10 +329,14 @@ const styles = StyleSheet.create({
   chipTextSelected: { color: theme.colors.white },
 });
 
-const badgeToneStyles = {
-  primary: styles.badge_primary,
-  mute: styles.badge_mute,
-  warn: styles.badge_warn,
-  danger: styles.badge_danger,
-  success: styles.badge_success,
+/**
+ * 디자인 시스템 Badge 톤. 옛 이름은 그대로 두고 색만 맞춘다:
+ * primary = info, mute = neutral, warn = warning.
+ */
+const badgeTones = {
+  primary: { bg: theme.colors.infoSubtle, fg: theme.colors.infoText },
+  mute: { bg: theme.colors.surfaceSubtle, fg: theme.colors.neutral700 },
+  warn: { bg: theme.colors.warningSubtle, fg: theme.colors.warningText },
+  danger: { bg: theme.colors.dangerSubtle, fg: theme.colors.dangerText },
+  success: { bg: theme.colors.successSubtle, fg: theme.colors.successText },
 };

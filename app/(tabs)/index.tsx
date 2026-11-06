@@ -62,7 +62,7 @@ export default function HomeScreen() {
         <View style={styles.greetingCard} testID="home-greeting">
           <View style={styles.userRow}>
             <Avatar name={fullName} size={36} seed={fullName} />
-            <AppText variant="sectionTitle" style={styles.userName}>
+            <AppText variant="heading" style={styles.userName}>
               {fullName}
             </AppText>
           </View>
@@ -124,7 +124,7 @@ export default function HomeScreen() {
                     </AppText>
                   </View>
                   {sermonMeta?.date ? (
-                    <AppText variant="formLabel" style={styles.cardDateText}>
+                    <AppText variant="label" style={styles.cardDateText}>
                       {sermonMeta.date}
                     </AppText>
                   ) : null}
@@ -155,7 +155,7 @@ export default function HomeScreen() {
                   </View>
                 </View>
                 <View style={styles.sermonContent}>
-                  <AppText variant="sectionTitle" style={styles.dawnTitle}>
+                  <AppText variant="heading" style={styles.dawnTitle}>
                     {sundaySermon.title}
                   </AppText>
                   <AppText variant="body" tone="secondary">
@@ -177,7 +177,7 @@ export default function HomeScreen() {
                   </AppText>
                 </View>
                 <AppText
-                  variant="formLabel"
+                  variant="label"
                   tone="inverse"
                   style={styles.dailyDateText}
                 >
@@ -186,7 +186,7 @@ export default function HomeScreen() {
                 </AppText>
               </View>
               <AppText
-                variant="sectionTitle"
+                variant="heading"
                 tone="inverse"
                 style={styles.dailyTitle}
               >
@@ -221,12 +221,12 @@ export default function HomeScreen() {
                       </AppText>
                     </View>
                     {dawnMeta?.date ? (
-                      <AppText variant="formLabel" style={styles.cardDateText}>
+                      <AppText variant="label" style={styles.cardDateText}>
                         {dawnMeta.date}
                       </AppText>
                     ) : null}
                   </View>
-                  <AppText variant="sectionTitle" style={styles.dawnTitle}>
+                  <AppText variant="heading" style={styles.dawnTitle}>
                     {dawnPrayer.title}
                   </AppText>
                   {dawnPrayer.summary ? (

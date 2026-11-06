@@ -58,15 +58,8 @@ type TextRole = {
 /** JSON 의 fontWeight 는 string 이라 RN 이 받는 값으로 좁힌다. */
 const t = ds.typography as Record<keyof typeof ds.typography, TextRole>;
 
-const typography = {
-  ...t,
-  /** 카드 제목: body 크기에 600. */
-  cardTitle: { ...t.body, fontWeight: fontWeight.semibold },
-  // 옛 이름 별칭 — AppText 변형 이름을 바꾸는 컴포넌트 PR(#228)에서 지운다.
-  screenTitle: t.title,
-  sectionTitle: t.heading,
-  formLabel: t.label,
-};
+/** 디자인 시스템 글자 6단계. 카드 제목은 body 에 fontWeight 600. */
+const typography = t;
 
 /** 옛 글자 크기 이름 → v2 6단계. 도메인 PR 에서 typography 로 옮긴다. */
 const fontSize = {
@@ -157,11 +150,12 @@ const shadow = {
     shadowRadius: 14,
     elevation: 5,
   },
+  /** 디자인 시스템 Fab 규격 그림자(0 8 12 rgba(25,31,40,.16)) — 토큰 목록 밖의 부품 전용 값. */
   fab: {
-    shadowColor: "rgba(25,31,40,0.28)",
+    shadowColor: "rgb(25,31,40)",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.16,
-    shadowRadius: 12,
+    shadowRadius: 6,
     elevation: 5,
   },
   primary: {

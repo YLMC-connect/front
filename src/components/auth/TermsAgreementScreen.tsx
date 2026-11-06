@@ -21,6 +21,7 @@ import {
   ErrorState,
   FLOATING_BOTTOM_BAR_INSET,
   FloatingBottomBar,
+  MotionEnter,
   TopBar,
 } from "../ui";
 import { theme } from "../../constants/theme";
@@ -81,67 +82,71 @@ export function TermsAgreementScreen({
       <View style={styles.root}>
         <TopBar title="서비스 이용 동의" back onBack={() => router.back()} />
         <ScrollView contentContainerStyle={styles.body}>
-          <Text style={styles.display}>약관에 동의해주세요</Text>
-          <Text style={styles.description}>
-            서비스 이용을 위해 약관 동의가 필요해요.
-          </Text>
+          <MotionEnter mode="fadeUp">
+            <Text style={styles.display}>약관에 동의해주세요</Text>
+            <Text style={styles.description}>
+              서비스 이용을 위해 약관 동의가 필요해요.
+            </Text>
 
-          <Pressable
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: allOn }}
-            onPress={toggleAll}
-            style={[styles.allRow, allOn ? styles.allRowOn : null]}
-          >
-            <CheckCircle on={allOn} big />
-            <Text style={styles.allText}>전체 동의하기</Text>
-          </Pressable>
+            <Pressable
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: allOn }}
+              onPress={toggleAll}
+              style={[styles.allRow, allOn ? styles.allRowOn : null]}
+            >
+              <CheckCircle on={allOn} big />
+              <Text style={styles.allText}>전체 동의하기</Text>
+            </Pressable>
 
-          <View style={styles.list}>
-            {terms.map((term) => (
-              <View key={term.key} style={styles.row}>
-                <Pressable
-                  accessibilityRole="checkbox"
-                  accessibilityLabel={`${term.required ? "필수" : "선택"} ${term.label} 동의`}
-                  accessibilityState={{ checked: agreed[term.key] }}
-                  onPress={() =>
-                    setAgreed((current) => ({
-                      ...current,
-                      [term.key]: !current[term.key],
-                    }))
-                  }
-                  hitSlop={{ top: 12, bottom: 12 }}
-                  style={styles.rowCheck}
-                >
-                  <CheckCircle on={agreed[term.key]} />
-                  <Text style={styles.rowLabel}>
-                    <Text
-                      style={term.required ? styles.required : styles.optional}
-                    >
-                      [{term.required ? "필수" : "선택"}]
-                    </Text>{" "}
-                    {term.label}
-                  </Text>
-                </Pressable>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={`${term.label} 전문 보기`}
-                  hitSlop={{ top: 14, bottom: 14 }}
-                  onPress={() => {
-                    Keyboard.dismiss();
-                    setSheet(term.key);
-                  }}
-                  style={styles.detailButton}
-                >
-                  <Text style={styles.detailText}>전문 보기</Text>
-                  <AppIcon
-                    name="chevron-right"
-                    size={16}
-                    color={theme.colors.text}
-                  />
-                </Pressable>
-              </View>
-            ))}
-          </View>
+            <View style={styles.list}>
+              {terms.map((term) => (
+                <View key={term.key} style={styles.row}>
+                  <Pressable
+                    accessibilityRole="checkbox"
+                    accessibilityLabel={`${term.required ? "필수" : "선택"} ${term.label} 동의`}
+                    accessibilityState={{ checked: agreed[term.key] }}
+                    onPress={() =>
+                      setAgreed((current) => ({
+                        ...current,
+                        [term.key]: !current[term.key],
+                      }))
+                    }
+                    hitSlop={{ top: 12, bottom: 12 }}
+                    style={styles.rowCheck}
+                  >
+                    <CheckCircle on={agreed[term.key]} />
+                    <Text style={styles.rowLabel}>
+                      <Text
+                        style={
+                          term.required ? styles.required : styles.optional
+                        }
+                      >
+                        [{term.required ? "필수" : "선택"}]
+                      </Text>{" "}
+                      {term.label}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`${term.label} 전문 보기`}
+                    hitSlop={{ top: 14, bottom: 14 }}
+                    onPress={() => {
+                      Keyboard.dismiss();
+                      setSheet(term.key);
+                    }}
+                    style={styles.detailButton}
+                  >
+                    <Text style={styles.detailText}>전문 보기</Text>
+                    <AppIcon
+                      name="chevron-right"
+                      size={16}
+                      color={theme.colors.text}
+                    />
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+          </MotionEnter>
         </ScrollView>
 
         <FloatingBottomBar

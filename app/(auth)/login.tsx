@@ -2,7 +2,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Keyboard,
   Platform,
   Pressable,
@@ -13,6 +12,8 @@ import {
 } from "react-native";
 import { AppIcon } from "@/components/ui/app-icon";
 import { AuthInput } from "../../src/components/auth/auth-input";
+import { Button } from "../../src/components/ui/buttons";
+import { Checkbox } from "../../src/components/ui/checkbox";
 import { Screen } from "../../src/components/layout/Screen";
 import {
   AppText,
@@ -146,7 +147,11 @@ export default function LoginScreen() {
         >
           <View style={styles.mainSection}>
             <View style={styles.hero}>
-              <MotionEnter enabled={enterMotion} style={styles.heroCopy}>
+              <MotionEnter
+                enabled={enterMotion}
+                mode="fadeUp"
+                style={styles.heroCopy}
+              >
                 <View style={styles.brandBadge}>
                   <AppText
                     variant="caption"
@@ -165,7 +170,11 @@ export default function LoginScreen() {
               </MotionEnter>
             </View>
 
-            <MotionEnter enabled={enterMotion} style={styles.form}>
+            <MotionEnter
+              enabled={enterMotion}
+              mode="fadeUp"
+              style={styles.form}
+            >
               <MotionShake
                 testID="login-fields-shake"
                 trigger={loginFailureTrigger}
@@ -213,36 +222,13 @@ export default function LoginScreen() {
                   }
                 />
               </MotionShake>
-              <Pressable
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: rememberId }}
-                hitSlop={{ top: 9, bottom: 9, left: 8, right: 8 }}
-                onPress={() => setRememberId((prev) => !prev)}
+              <Checkbox
+                checked={rememberId}
+                onChange={setRememberId}
+                label="아이디 저장"
                 style={styles.rememberRow}
                 testID="login-remember-id"
-              >
-                <View
-                  style={[
-                    styles.checkbox,
-                    rememberId ? styles.checkboxChecked : null,
-                  ]}
-                >
-                  {rememberId ? (
-                    <AppIcon
-                      name="check"
-                      size={12}
-                      color={theme.colors.onPrimary}
-                    />
-                  ) : null}
-                </View>
-                <AppText
-                  variant="caption"
-                  tone="primary"
-                  style={styles.rememberText}
-                >
-                  아이디 저장
-                </AppText>
-              </Pressable>
+              />
               {formErrorMessage ? (
                 <MotionFadeIn>
                   <AppText variant="caption" tone="danger">
@@ -251,38 +237,25 @@ export default function LoginScreen() {
                 </MotionFadeIn>
               ) : null}
 
-              <MotionPressable
-                accessibilityRole="button"
-                accessibilityLabel="로그인"
-                accessibilityState={{
-                  busy: isSubmitting,
-                  disabled: isSubmitting || isLoginDimmed,
-                }}
-                disabled={isSubmitting || isLoginDimmed}
-                onPress={onSubmit}
-                style={[
-                  styles.loginButton,
-                  isLoginDimmed ? styles.loginButtonDisabled : null,
-                ]}
-              >
-                {isSubmitting ? (
-                  <ActivityIndicator color={theme.colors.onPrimary} />
-                ) : (
-                  <AppText
-                    variant="body"
-                    style={[
-                      styles.loginButtonText,
-                      isLoginDimmed ? styles.loginButtonTextDisabled : null,
-                    ]}
-                  >
-                    로그인
-                  </AppText>
-                )}
-              </MotionPressable>
+              <View style={styles.loginButton}>
+                <Button
+                  size="lg"
+                  disabled={isLoginDimmed}
+                  loading={isSubmitting}
+                  onPress={onSubmit}
+                  testID="login-submit"
+                >
+                  로그인
+                </Button>
+              </View>
             </MotionEnter>
           </View>
 
-          <MotionEnter enabled={enterMotion} style={styles.footerBlock}>
+          <MotionEnter
+            enabled={enterMotion}
+            mode="fadeUp"
+            style={styles.footerBlock}
+          >
             <View style={styles.signupCard}>
               <AppText tone="primary" style={styles.signupCardText}>
                 열린문 커넥트가 처음이신가요?
@@ -435,51 +408,11 @@ const styles = StyleSheet.create({
   },
   fieldError: { marginTop: 6 },
   rememberRow: {
-    flexDirection: "row",
-    alignItems: "center",
     alignSelf: "flex-start",
-    gap: 8,
     marginTop: -theme.spacing[2],
-    paddingVertical: 4,
-  },
-  checkbox: {
-    width: 18,
-    height: 18,
-    borderRadius: 5,
-    borderWidth: 1.5,
-    borderColor: theme.colors.borderStrong,
-    backgroundColor: theme.colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkboxChecked: {
-    borderWidth: 0,
-    backgroundColor: theme.colors.primary,
-  },
-  rememberText: {
-    fontSize: theme.typography.label.fontSize,
-    color: theme.colors.text,
   },
   loginButton: {
-    minHeight: 52,
     marginTop: theme.spacing[2],
-    borderRadius: theme.radius.full,
-    paddingHorizontal: 24,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: theme.colors.primary,
-  },
-  loginButtonDisabled: {
-    backgroundColor: theme.colors.surfaceSubtle,
-  },
-  loginButtonText: {
-    color: theme.colors.onPrimary,
-    fontFamily: theme.font.semibold,
-    fontWeight: "normal",
-    fontSize: theme.typography.body.fontSize,
-  },
-  loginButtonTextDisabled: {
-    color: theme.colors.textDisabled,
   },
   signupCard: {
     flexDirection: "row",

@@ -16,7 +16,7 @@ describe("PhotoTile", () => {
       height: 80,
       borderRadius: theme.radius.sm,
       borderStyle: "dashed",
-      borderColor: theme.colors.borderStrong,
+      borderColor: theme.colors.borderButton,
       backgroundColor: theme.colors.surfaceSubtle,
     });
 

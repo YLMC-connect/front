@@ -9,7 +9,7 @@ const flat = (testID: string) =>
   StyleSheet.flatten(screen.getByTestId(testID).props.style);
 
 describe("InputSurface (TextField · Textarea · ModalFormTextInput · AuthInput)", () => {
-  it("draws the same 48 high, radius.sm, 1px borderStrong surface with 16 inset", () => {
+  it("draws the same 48 high, radius.sm, 1px borderButton surface with 16 inset", () => {
     render(
       <>
         <TextField testID="tf" label="이름" />
@@ -26,7 +26,7 @@ describe("InputSurface (TextField · Textarea · ModalFormTextInput · AuthInput
       });
       expect(flat(`${id}-border`)).toMatchObject({
         borderWidth: 1,
-        borderColor: theme.colors.borderStrong,
+        borderColor: theme.colors.borderButton,
         borderRadius: theme.radius.sm,
       });
       expect(flat(id)).toMatchObject({

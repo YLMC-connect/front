@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
     height: MARK_SIZE,
     borderRadius: 6,
     borderWidth: MARK_BORDER,
-    borderColor: theme.colors.borderStrong,
+    borderColor: theme.colors.borderButton,
     backgroundColor: theme.colors.surface,
   },
   markRadio: { borderRadius: MARK_SIZE / 2 },
@@ -313,7 +313,7 @@ const optionStyles = StyleSheet.create({
     paddingVertical: theme.spacing["3"],
     borderRadius: theme.radius.sm,
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.borderButton,
     backgroundColor: theme.colors.surface,
   },
   // 바깥 1px 테두리까지 덮어 선택 테두리 2px 를 그린다(글자 자리는 움직이지 않음).

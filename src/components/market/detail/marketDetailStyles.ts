@@ -254,7 +254,7 @@ export const styles = StyleSheet.create({
     height: 52,
     borderRadius: theme.radius.full,
     borderWidth: 1,
-    borderColor: theme.colors.borderStrong,
+    borderColor: theme.colors.borderButton,
     backgroundColor: theme.colors.surface,
     paddingLeft: 18,
     paddingRight: 6,

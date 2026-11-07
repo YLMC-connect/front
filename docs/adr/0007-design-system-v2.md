@@ -51,6 +51,8 @@ theme 토큰은 73개 파일에서 쓰이고, 화면에 직접 쓴 색이 96곳 
 | `canvas`, `surfaceMuted`, `overlay` | `bg`, `surfaceSubtle`, `sheetOverlay` |
 | `glassBorder`, `sageSoft`, `taupe`, `taupeSoft` | 지운다(쓰는 곳이 없거나 위로 흡수) |
 
+> 2026-11-07 디자인 시스템 변경: 컨트롤 테두리(입력창·검색창·댓글 입력·옵션 행·체크박스·라디오·사진 추가 칸)는 모두 `borderButton` 으로 통일했다. 위 표의 `borderStrong` 은 아이콘 선·시트 손잡이용으로만 남는다.
+
 ### 2.3 글자
 
 - 6단계를 그대로 쓴다: `display` 28/36, `title` 22/30, `heading` 18/26, `body` 16/24, `label` 14/20, `caption` 12/18.

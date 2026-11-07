@@ -89,6 +89,24 @@ function SelectionMark({
   );
 }
 
+/** 행을 직접 그리는 곳(약관 동의처럼 줄 안에 링크가 있는 곳)에서 쓰는 22px 네모 체크 표시만. */
+export function CheckboxMark({
+  checked,
+  testID,
+}: {
+  checked: boolean;
+  testID?: string;
+}) {
+  return (
+    <SelectionMark
+      variant="checkbox"
+      checked={checked}
+      duration={theme.motion.duration.fast}
+      testID={testID}
+    />
+  );
+}
+
 export type CheckboxProps = {
   checked: boolean;
   /** 눌리면 바뀔 값을 받는다. radio 는 항상 true 를 받는다. */

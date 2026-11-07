@@ -65,7 +65,7 @@ const variantColors: Record<
 };
 
 /**
- * 알약 버튼. `md` 44(카드 안·보조), `lg` 52(화면 하단 주 버튼).
+ * 알약 버튼. `md` 44(카드 안·보조), `dialog` 48(다이얼로그 버튼), `lg` 52(화면 하단 주 버튼).
  * 한 화면에 primary 는 하나만 둔다.
  */
 export function Button({
@@ -82,7 +82,7 @@ export function Button({
   children: ReactNode;
   onPress?: () => void;
   variant?: ButtonVariant;
-  size?: "md" | "lg";
+  size?: "md" | "dialog" | "lg";
   disabled?: boolean;
   loading?: boolean;
   icon?: IconName;
@@ -124,7 +124,11 @@ export function Button({
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        size === "lg" ? styles.buttonLg : styles.buttonMd,
+        size === "lg"
+          ? styles.buttonLg
+          : size === "dialog"
+            ? styles.buttonDialog
+            : styles.buttonMd,
         {
           backgroundColor: pressed && tone.pressedBg ? tone.pressedBg : tone.bg,
         },
@@ -283,6 +287,10 @@ const styles = StyleSheet.create({
   },
   buttonMd: {
     minHeight: theme.size.buttonHeightSm,
+    paddingHorizontal: theme.spacing["5"],
+  },
+  buttonDialog: {
+    minHeight: theme.size.inputHeight,
     paddingHorizontal: theme.spacing["5"],
   },
   buttonLg: {

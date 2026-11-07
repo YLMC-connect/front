@@ -204,9 +204,16 @@ export default function PrayerDetailScreen() {
                   <Badge tone="info">참여중</Badge>
                   <Badge tone="neutral">{`멤버 ${totalMembers}명`}</Badge>
                   {urgentItems.length > 0 ? (
-                    <Badge tone="warning">{`오늘 긴급 ${urgentItems.length}건`}</Badge>
+                    <Badge
+                      tone="warning"
+                      icon="warning-amber"
+                    >{`오늘 긴급 ${urgentItems.length}건`}</Badge>
                   ) : null}
-                  {isCompleted ? <Badge tone="success">오늘 완료</Badge> : null}
+                  {isCompleted ? (
+                    <Badge tone="success" icon="check">
+                      오늘 완료
+                    </Badge>
+                  ) : null}
                 </View>
               </View>
             </View>

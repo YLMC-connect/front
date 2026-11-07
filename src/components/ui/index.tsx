@@ -63,6 +63,7 @@ export {
 } from "./inputs";
 export {
   Checkbox,
+  CheckboxMark,
   type CheckboxProps,
   Radio,
   RadioRow,

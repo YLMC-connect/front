@@ -109,9 +109,12 @@ export function Badge({
   tone = "primary",
   bordered = false,
   solid = false,
+  icon,
 }: {
   children: ReactNode;
   tone?: BadgeTone;
+  /** 글자 앞 아이콘(12, 글자색). 긴급 ⚠·완료 ✓ 처럼 뜻을 더할 때만. */
+  icon?: IconName;
   /** 1px border 테두리(neutral 톤에서만 보인다). DetailBadge 호환용. */
   bordered?: boolean;
   /** 진한 primary 바탕 + 흰 글자(소모임장·참여중 강조). 규격 톤 밖이라 호환용으로만 둔다. */
@@ -131,6 +134,7 @@ export function Badge({
         showBorder ? styles.badgeBorderVisible : null,
       ]}
     >
+      {icon ? <AppIcon name={icon} size={12} color={palette.fg} /> : null}
       <Text style={[styles.badgeText, { color: palette.fg }]}>{children}</Text>
     </View>
   );
@@ -313,7 +317,10 @@ const styles = StyleSheet.create({
   badge: {
     alignSelf: "flex-start",
     minHeight: theme.size.badgeHeight,
+    flexDirection: "row",
+    alignItems: "center",
     justifyContent: "center",
+    gap: theme.spacing["1"],
     borderRadius: theme.radius.full,
     paddingHorizontal: 10,
     paddingVertical: theme.spacing["1"],

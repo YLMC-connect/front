@@ -84,13 +84,14 @@ export function ConfirmDialog({
           ) : null}
           <View style={styles.dialogActions}>
             <View style={styles.dialogAction}>
-              <Button variant="outline" onPress={onCancel}>
+              <Button variant="outline" size="dialog" onPress={onCancel}>
                 {cancelText}
               </Button>
             </View>
             <View style={styles.dialogAction}>
               <Button
                 variant={danger ? "danger" : "primary"}
+                size="dialog"
                 onPress={onConfirm}
               >
                 {confirmText}

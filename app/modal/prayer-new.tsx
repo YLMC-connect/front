@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import {
   ConfirmDialog,
+  FilterChips,
   FloatingBottomBar,
   ModalFormSection as Section,
   ModalFormTextInput as FormInput,
@@ -138,16 +139,16 @@ export default function PrayerNewModal() {
           <View>
             {categories.length > 0 ? (
               <Section label="카테고리" required>
-                <View style={styles.optionStack}>
-                  {categories.map((category) => (
-                    <RadioRow
-                      key={category.id}
-                      label={category.categoryName}
-                      onPress={() => setSelectedCategoryId(category.id)}
-                      selected={selectedCategoryId === category.id}
-                    />
-                  ))}
-                </View>
+                <FilterChips
+                  items={categories.map((category) => ({
+                    key: String(category.id),
+                    label: category.categoryName,
+                  }))}
+                  active={String(selectedCategoryId)}
+                  onChange={(key) => setSelectedCategoryId(Number(key))}
+                  testIDPrefix="prayer-form-category"
+                  wrap
+                />
               </Section>
             ) : null}
 
@@ -246,10 +247,6 @@ const styles = StyleSheet.create({
   body: { paddingBottom: 112 },
   optionRow: {
     flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: theme.layout.screenX,
-  },
-  optionStack: {
     gap: 8,
     paddingHorizontal: theme.layout.screenX,
   },

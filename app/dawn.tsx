@@ -56,7 +56,7 @@ export default function DawnPrayerScreen() {
         >
           <View style={styles.heroCard}>
             <View style={styles.heroBadgeRow}>
-              <Badge tone="info">
+              <Badge tone="info" icon="book-open-page-variant-outline">
                 {detail.data.fullDateLabel ||
                   detail.data.dateLabel ||
                   detail.data.timeLabel}

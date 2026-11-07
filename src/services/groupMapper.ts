@@ -235,7 +235,10 @@ export function mapCommunionDetail(
         currentUserId &&
         members.some((member) => member.userId === currentUserId),
       ),
-    members: members.map((member) => member.userName),
+    // 화면은 첫 멤버에 소모임장 왕관을 그리므로 소모임장을 맨 앞에 둔다.
+    members: [...members]
+      .sort((a, b) => Number(b.isLeader) - Number(a.isLeader))
+      .map((member) => member.userName),
     notices,
   };
 }

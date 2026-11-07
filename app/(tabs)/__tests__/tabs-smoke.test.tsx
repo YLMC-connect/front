@@ -362,6 +362,7 @@ describe("v1 tab smoke screens", () => {
       .mockResolvedValue(groupOverviewData);
     jest.spyOn(groupService, "fetchGroupOverviewPage").mockResolvedValue({
       ...groupOverviewData,
+      myGroups: groupOverviewData.groups.filter((group) => group.isJoined),
       hasNext: false,
       nextCursor: null,
     });

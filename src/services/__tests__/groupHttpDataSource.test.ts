@@ -56,7 +56,19 @@ describe("httpGroupDataSource", () => {
       }
       if (path.startsWith("/api/communion/my?type=SMALL_GROUP")) {
         return {
-          content: [{ id: 1 }],
+          content: [
+            {
+              id: 1,
+              type: "SMALL_GROUP",
+              title: "프론트 점검 소모임",
+              categoryCode: "HOBBY_CULTURE",
+              maxParticipants: 5,
+              currentParticipants: 1,
+              status: "RECRUITING",
+              leaderName: "프론트점검",
+              createdAt: "2026-08-13T11:26:07",
+            },
+          ],
           hasNext: false,
           nextCursor: null,
         };
@@ -80,6 +92,7 @@ describe("httpGroupDataSource", () => {
       services: [
         expect.objectContaining({ id: "2", linkedGroupId: "2", schedule: "" }),
       ],
+      myGroups: [expect.objectContaining({ id: "1", isJoined: true })],
       hasNext: false,
       nextCursor: null,
     });
@@ -131,8 +144,6 @@ describe("httpGroupDataSource", () => {
         description: "라이브 계약 확인용 소모임입니다.",
         category: "hobby",
         maxMembers: 5,
-        schedule: "매주 토 오후 2시",
-        location: "본당 카페",
       }),
     ).resolves.toMatchObject({
       id: "1",
@@ -247,8 +258,6 @@ describe("httpGroupDataSource", () => {
         description: "주일 카풀 모임입니다.",
         category: "carpool",
         maxMembers: 4,
-        schedule: "주일",
-        location: "주차장",
       }),
     ).rejects.toThrow("이 카테고리는 아직 서버에 없습니다.");
   });

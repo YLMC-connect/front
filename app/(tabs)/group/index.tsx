@@ -122,9 +122,7 @@ export default function GroupScreen() {
     (group) => category === "all" || group.category === category,
   );
   const serviceItems = overview.data?.services ?? [];
-  const myGroups = isError
-    ? []
-    : (overview.data?.groups ?? []).filter((group) => group.isJoined);
+  const myGroups = isError ? [] : (overview.data?.myGroups ?? []);
   const isLoading = overview.isPending && !isError;
 
   useEffect(() => {

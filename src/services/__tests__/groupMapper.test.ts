@@ -97,6 +97,24 @@ describe("groupMapper", () => {
     });
   });
 
+  it("puts the leader first in detail members", () => {
+    const member = (userId: string, isLeader: boolean) => ({
+      userId,
+      userName: userId,
+      joinedLabel: "방금 전",
+      isLeader,
+      isMine: false,
+    });
+    expect(
+      mapCommunionDetail(
+        { ...listItem, content: "", leaderId: "leader" },
+        [],
+        [member("first", false), member("leader", true), member("last", false)],
+        null,
+      ).members,
+    ).toEqual(["leader", "first", "last"]);
+  });
+
   it("marks a notice edited only when updatedAt differs", () => {
     expect(
       mapCommunionNotice({

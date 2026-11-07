@@ -1,6 +1,7 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import type { ReactNode } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Badge, Card } from "../../ui";
 import { ProgressBar } from "../../ui/progress-bar";
 import { theme } from "../../../constants/theme";

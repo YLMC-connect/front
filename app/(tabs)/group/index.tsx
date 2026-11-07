@@ -20,9 +20,9 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
+import { Text } from "@/components/ui/text";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   AppText,
@@ -122,9 +122,7 @@ export default function GroupScreen() {
     (group) => category === "all" || group.category === category,
   );
   const serviceItems = overview.data?.services ?? [];
-  const myGroups = isError
-    ? []
-    : (overview.data?.groups ?? []).filter((group) => group.isJoined);
+  const myGroups = isError ? [] : (overview.data?.myGroups ?? []);
   const isLoading = overview.isPending && !isError;
 
   useEffect(() => {

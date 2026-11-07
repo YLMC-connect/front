@@ -82,6 +82,12 @@ export function shouldPersistQuery(query: Query): boolean {
   );
 }
 
+/** 메모리 캐시와 기기에 저장된 캐시를 모두 지운다. 로그아웃·세션 만료·새 로그인 때 쓴다. */
+export async function clearQueryCache() {
+  queryClient.clear();
+  await persister.removeClient();
+}
+
 persistQueryClient({
   queryClient,
   persister,

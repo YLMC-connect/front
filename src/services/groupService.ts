@@ -16,6 +16,8 @@ import type {
 export interface GroupOverviewPage {
   groups: GroupOverview["groups"];
   services: GroupOverview["services"];
+  /** 내 모임 탭은 페이지에 실린 목록이 아니라 `/my` 전체 결과를 쓴다. */
+  myGroups: GroupOverview["groups"];
   hasNext: boolean;
   nextCursor?: number | null;
 }
@@ -65,6 +67,7 @@ export function createGroupService(dataSource: GroupDataSource) {
       return dataSource.getOverview().then((res) => ({
         groups: res.groups,
         services: res.services,
+        myGroups: res.groups.filter((group) => group.isJoined),
         hasNext: false,
         nextCursor: null,
       }));
@@ -76,8 +79,6 @@ export function createGroupService(dataSource: GroupDataSource) {
         ...input,
         name: input.name.trim(),
         description: input.description.trim(),
-        schedule: input.schedule.trim(),
-        location: input.location.trim(),
       };
       if (normalized.name.length < 2 || normalized.name.length > 20) {
         throw new Error("소모임명은 2~20자로 입력해주세요.");
@@ -91,8 +92,6 @@ export function createGroupService(dataSource: GroupDataSource) {
       if (normalized.maxMembers < 2 || normalized.maxMembers > 100) {
         throw new Error("최대 인원은 2~100명으로 입력해주세요.");
       }
-      if (!normalized.schedule) throw new Error("모임 일정을 입력해주세요.");
-      if (!normalized.location) throw new Error("모임 장소를 입력해주세요.");
       return dataSource.createGroup(normalized);
     },
     updateGroup: (input: GroupUpdateInput) => {

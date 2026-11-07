@@ -156,9 +156,14 @@ export function createHttpGroupDataSource({
         const mapped = mapCommunionServiceItem(item);
         return mapped ? [mapped] : [];
       });
+      const mappedMyGroups = myGroups.flatMap((item) => {
+        const mapped = mapCommunionOverviewItem(item, joinedIds);
+        return mapped ? [mapped] : [];
+      });
       return {
         groups,
         services: mappedServices,
+        myGroups: mappedMyGroups,
         hasNext: Boolean(groupsData?.hasNext),
         nextCursor: groupsData?.nextCursor ?? null,
       };

@@ -88,8 +88,6 @@ describe("useCreateGroup", () => {
     description: "설명",
     category: "bible",
     maxMembers: 10,
-    schedule: "매주",
-    location: "본당",
   };
 
   it("성공하면 상세 캐시를 채우고 목록을 무효화한다", async () => {

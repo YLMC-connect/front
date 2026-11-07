@@ -3,7 +3,8 @@ import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, Tabs, usePathname } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { type LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
+import { type LayoutChangeEvent, StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/text";
 import Animated, {
   useAnimatedStyle,
   useReducedMotion,

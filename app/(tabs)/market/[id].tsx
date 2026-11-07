@@ -12,13 +12,12 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
   useWindowDimensions,
   View,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native";
+import { Text, TextInput } from "@/components/ui/text";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
@@ -405,7 +404,7 @@ export default function MarketDetailScreen() {
                       onPress={() =>
                         router.push({
                           pathname: "/modal/market-new",
-                          params: { id: market.id, designVariant: "edit" },
+                          params: { id: market.id },
                         })
                       }
                     />

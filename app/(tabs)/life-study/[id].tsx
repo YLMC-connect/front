@@ -1,6 +1,7 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   ApplyInfo,

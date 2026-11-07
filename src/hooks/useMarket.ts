@@ -28,10 +28,12 @@ import type {
   MarketUpdateInput,
 } from "../types/market";
 
-export function useMarketOverview() {
+export function useMarketOverview(category?: Exclude<MarketCategory, "all">) {
   const query = useInfiniteQuery({
-    queryKey: queryKeys.market.overview(),
-    queryFn: ({ pageParam }) => fetchMarketOverviewPage({ lastId: pageParam }),
+    // 카테고리는 서버에서 거른다(categoryCode). 카테고리마다 목록 캐시를 따로 둔다
+    queryKey: [...queryKeys.market.overview(), category ?? "all"],
+    queryFn: ({ pageParam }) =>
+      fetchMarketOverviewPage({ lastId: pageParam, category }),
     initialPageParam: undefined as number | undefined,
     getNextPageParam: (lastPage) =>
       lastPage.hasNext && lastPage.nextCursor != null
@@ -183,8 +185,8 @@ export function useDeleteMarketPost(marketId: string) {
   return useMutation({
     mutationFn: () => deleteMarketPost({ marketId }),
     onSuccess: () => {
-      queryClient.setQueryData<InfiniteData<MarketOverviewPage>>(
-        queryKeys.market.overview(),
+      queryClient.setQueriesData<InfiniteData<MarketOverviewPage>>(
+        { queryKey: queryKeys.market.overview() },
         (overview) =>
           overview
             ? {

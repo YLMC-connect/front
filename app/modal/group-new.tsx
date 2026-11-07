@@ -2,21 +2,23 @@ import { AppIcon } from "@/components/ui/app-icon";
 import { InfoBox } from "@/components/ui/info-box";
 import { InputErrorText } from "@/components/ui/inputs";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
+  ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { Text } from "@/components/ui/text";
 import {
   AppText,
   ConfirmDialog,
+  ErrorState,
   FilterChips,
   FloatingBottomBar,
   ModalFormSection as Section,
@@ -32,9 +34,14 @@ import {
   useUpdateGroup,
 } from "../../src/hooks/useGroups";
 import { readDesignVariant } from "../../src/lib/designVariant";
-import type { GroupInput } from "../../src/types/group";
+import { toCommunionCategoryCode } from "../../src/services/groupMapper";
+import type { GroupDetail, GroupInput } from "../../src/types/group";
 
-const categories = GROUP_CATEGORIES.slice(1) as readonly {
+// 서버 카테고리 코드가 있는 것만 고르게 한다. 없는 카테고리는 개설 요청이 거절된다.
+const categories = GROUP_CATEGORIES.filter(
+  (category) =>
+    category.key !== "all" && Boolean(toCommunionCategoryCode(category.key)),
+) as readonly {
   key: GroupInput["category"];
   label: string;
 }[];
@@ -43,21 +50,6 @@ const CAPACITY_PRESETS = [4, 8, 12, 20] as const;
 const CAPACITY_PRESET_ITEMS = CAPACITY_PRESETS.map((preset) => ({
   key: String(preset),
   label: `${preset}명`,
-}));
-const SCHEDULE_PRESETS = [
-  "매주 토요일",
-  "매주 주일",
-  "격주 토요일",
-  "평일 저녁",
-] as const;
-const LOCATION_PRESETS = ["교회", "온라인 (Zoom)", "외부 모임"] as const;
-const SCHEDULE_PRESET_ITEMS = SCHEDULE_PRESETS.map((schedule) => ({
-  key: schedule,
-  label: schedule,
-}));
-const LOCATION_PRESET_ITEMS = LOCATION_PRESETS.map((location) => ({
-  key: location,
-  label: location,
 }));
 
 /**
@@ -80,8 +72,6 @@ const filledValues: GroupInput = {
   description:
     "매주 토요일 함께 산을 오르며 자연을 느끼고 신앙을 나누는 모임입니다.",
   maxMembers: 25,
-  schedule: "매주 토요일 오전 8시",
-  location: "교회 1층 로비 집결",
 };
 
 const emptyValues: GroupInput = {
@@ -89,9 +79,41 @@ const emptyValues: GroupInput = {
   name: "",
   description: "",
   maxMembers: 10,
-  schedule: "",
-  location: "",
 };
+
+const DESIGN_EDIT_VARIANTS = ["edit", "range-error", "member-error"];
+
+function toGroupInput(detail: GroupDetail): GroupInput {
+  const matchedCategory = GROUP_CATEGORIES.find(
+    (c) => c.label === detail.categoryLabel,
+  )?.key;
+  const category = (
+    matchedCategory && matchedCategory !== "all" ? matchedCategory : "etc"
+  ) as GroupInput["category"];
+  return {
+    category,
+    name: detail.name,
+    description: detail.description,
+    maxMembers: detail.maxMembers,
+  };
+}
+
+/** 디자인 미리보기(id 없음)에서만 예시 값을 쓴다. */
+function designInitialValues(variant: string): GroupInput {
+  const useFilledValues =
+    DESIGN_EDIT_VARIANTS.includes(variant) || variant === "create-filled";
+  return {
+    ...(useFilledValues ? filledValues : emptyValues),
+    maxMembers:
+      variant === "range-error"
+        ? 150
+        : variant === "member-error"
+          ? 15
+          : useFilledValues
+            ? filledValues.maxMembers
+            : emptyValues.maxMembers,
+  };
+}
 
 export default function GroupNewModal() {
   const router = useRouter();
@@ -100,45 +122,70 @@ export default function GroupNewModal() {
     designVariant?: string;
   }>();
   const variant = readDesignVariant(params.designVariant) ?? "create";
-  const isEdit =
-    Boolean(params.id) ||
-    ["edit", "range-error", "member-error"].includes(variant);
-  const useFilledValues = isEdit || variant === "create-filled";
-  const createGroup = useCreateGroup();
-  const updateGroupMutation = useUpdateGroup(params.id ?? "");
-  const isPending = createGroup.isPending || updateGroupMutation.isPending;
   const existingDetail = useGroupDetail(params.id ?? "");
-  const detailData = existingDetail.data;
 
-  const initialValues = useMemo<GroupInput>(() => {
-    if (params.id && detailData) {
-      const matchedCategory = GROUP_CATEGORIES.find(
-        (c) => c.label === detailData.categoryLabel,
-      )?.key;
-      const category = (
-        matchedCategory && matchedCategory !== "all" ? matchedCategory : "etc"
-      ) as GroupInput["category"];
-      return {
-        category,
-        name: detailData.name,
-        description: detailData.description,
-        maxMembers: detailData.maxMembers,
-        schedule: "",
-        location: "",
-      };
-    }
-    return {
-      ...(useFilledValues ? filledValues : emptyValues),
-      maxMembers:
-        variant === "range-error"
-          ? 150
-          : variant === "member-error"
-            ? 15
-            : useFilledValues
-              ? filledValues.maxMembers
-              : emptyValues.maxMembers,
-    };
-  }, [detailData, params.id, useFilledValues, variant]);
+  if (!params.id) {
+    return (
+      <GroupForm
+        variant={variant}
+        isEdit={DESIGN_EDIT_VARIANTS.includes(variant)}
+        initialValues={designInitialValues(variant)}
+      />
+    );
+  }
+
+  // 실제 수정은 소모임 정보가 도착한 뒤에 폼을 채워 그린다.
+  if (!existingDetail.data) {
+    return (
+      <View style={styles.root} testID="group-form-screen">
+        <TopBar
+          title="소모임 수정"
+          close
+          onBack={() => router.back()}
+          testID="group-form-header"
+        />
+        {existingDetail.isError ? (
+          <ErrorState
+            message="소모임 정보를 다시 불러와주세요."
+            onRetry={() => void existingDetail.refetch()}
+          />
+        ) : (
+          <ActivityIndicator
+            accessibilityLabel="소모임 정보를 불러오는 중"
+            color={theme.colors.primary}
+            style={styles.loading}
+          />
+        )}
+      </View>
+    );
+  }
+
+  return (
+    <GroupForm
+      key={params.id}
+      groupId={params.id}
+      variant={variant}
+      isEdit
+      initialValues={toGroupInput(existingDetail.data)}
+    />
+  );
+}
+
+function GroupForm({
+  groupId,
+  variant,
+  isEdit,
+  initialValues,
+}: {
+  groupId?: string;
+  variant: string;
+  isEdit: boolean;
+  initialValues: GroupInput;
+}) {
+  const router = useRouter();
+  const createGroup = useCreateGroup();
+  const updateGroupMutation = useUpdateGroup(groupId ?? "");
+  const isPending = createGroup.isPending || updateGroupMutation.isPending;
 
   const [values, setValues] = useState(initialValues);
   const [capacity, setCapacity] = useState(String(initialValues.maxMembers));
@@ -178,14 +225,14 @@ export default function GroupNewModal() {
   const submit = async () => {
     setError(undefined);
     try {
-      if (params.id) {
+      if (groupId) {
         await updateGroupMutation.mutateAsync({
           name: values.name,
           description: values.description,
           category: values.category,
           maxMembers: values.maxMembers,
         });
-        router.replace(`/group/${params.id}`);
+        router.replace(`/group/${groupId}`);
       } else {
         const created = await createGroup.mutateAsync(values);
         router.replace(`/group/${created.id}`);
@@ -294,7 +341,7 @@ export default function GroupNewModal() {
                 활동 및 운영 안내
               </AppText>
               <AppText variant="caption" tone="muted">
-                언제, 어디서, 몇 명이 함께 모이나요?
+                몇 명이 함께 모이나요?
               </AppText>
             </View>
 
@@ -385,48 +432,6 @@ export default function GroupNewModal() {
               ) : null}
             </Section>
 
-            <Section label="모임 일정" required>
-              <FormInput
-                accessibilityLabel="소모임 일정"
-                value={values.schedule}
-                onChangeText={(schedule) => update("schedule", schedule)}
-                placeholder="예: 매주 토요일 오전 10시"
-              />
-              <FilterChips
-                key={presetChipsKey(
-                  "schedule",
-                  SCHEDULE_PRESET_ITEMS,
-                  values.schedule,
-                )}
-                items={SCHEDULE_PRESET_ITEMS}
-                active={values.schedule}
-                onChange={(schedule) => update("schedule", schedule)}
-                style={styles.quickPresetScroll}
-                testIDPrefix="group-form-schedule"
-              />
-            </Section>
-
-            <Section label="모임 장소" required>
-              <FormInput
-                accessibilityLabel="소모임 장소"
-                value={values.location}
-                onChangeText={(location) => update("location", location)}
-                placeholder="예: 교육관 2층"
-              />
-              <FilterChips
-                key={presetChipsKey(
-                  "location",
-                  LOCATION_PRESET_ITEMS,
-                  values.location,
-                )}
-                items={LOCATION_PRESET_ITEMS}
-                active={values.location}
-                onChange={(location) => update("location", location)}
-                style={styles.quickPresetScroll}
-                testIDPrefix="group-form-location"
-              />
-            </Section>
-
             {error ? (
               <Text accessibilityRole="alert" style={styles.errorText}>
                 {error}
@@ -464,6 +469,7 @@ const styles = StyleSheet.create({
     paddingTop: theme.layout.screenX,
   },
   body: { paddingBottom: 112 },
+  loading: { marginTop: 48 },
   capacityRow: {
     flexDirection: "row",
     alignItems: "center",

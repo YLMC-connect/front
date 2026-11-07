@@ -10,9 +10,9 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   Empty,
@@ -72,7 +72,7 @@ export default function LifeStudyApplyScreenRoute() {
     !isPending && overview != null && !openCohort && !params.cohortId;
 
   const memberName = member?.name || "사용자";
-  const memberPhone = member?.phone || "010-1234-5678";
+  const memberPhone = member?.phone || "등록된 전화번호 없음";
 
   const [userYear, setUserYear] = useState("1988");
   const [userPart, setUserPart] = useState("");

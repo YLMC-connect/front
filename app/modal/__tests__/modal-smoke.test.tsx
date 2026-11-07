@@ -90,19 +90,14 @@ describe("modal smoke screens", () => {
       height: 48,
     });
     const capacityInput = screen.getByLabelText("소모임 최대인원");
-    const scheduleInput = screen.getByLabelText("소모임 일정");
-    const locationInput = screen.getByLabelText("소모임 장소");
     expect(StyleSheet.flatten(capacityInput.props.style)).toMatchObject({
       height: 48,
     });
-    expect(StyleSheet.flatten(scheduleInput.props.style)).toMatchObject({
-      height: 48,
-    });
-    expect(StyleSheet.flatten(locationInput.props.style)).toMatchObject({
-      height: 48,
-    });
-    expect(StyleSheet.flatten(capacityInput.props.style).height).toBe(
-      StyleSheet.flatten(scheduleInput.props.style).height,
+    // 서버가 받지 않는 일정·장소와 서버 코드가 없는 카테고리는 보이지 않는다.
+    expect(screen.queryByLabelText("소모임 일정")).toBeNull();
+    expect(screen.queryByLabelText("소모임 장소")).toBeNull();
+    ["봉사", "목장", "선교", "카풀"].forEach((label) =>
+      expect(screen.queryByText(label)).toBeNull(),
     );
 
     fireEvent(nameInput, "focus");
@@ -157,9 +152,8 @@ describe("modal smoke screens", () => {
   });
 
   it("fills the market edit modal with the real post, not sample values", async () => {
-    jest
-      .mocked(useLocalSearchParams)
-      .mockReturnValue({ id: "42", designVariant: "edit" } as never);
+    // 릴리스 빌드처럼 designVariant 없이 id 만 넘어와도 수정 화면이어야 한다
+    jest.mocked(useLocalSearchParams).mockReturnValue({ id: "42" } as never);
     jest.spyOn(marketService, "fetchMarketDetail").mockResolvedValue({
       id: "42",
       thumbSeed: 1,
@@ -188,7 +182,12 @@ describe("modal smoke screens", () => {
     expect(screen.getByLabelText("나눔 상세 설명").props.value).toBe(
       "한 번 입은 패딩입니다.",
     );
-    expect(screen.getByText("사진 1/5")).toBeTruthy();
+    expect(screen.getByText("나눔 수정")).toBeTruthy();
+    // 수정 API 가 사진을 받지 않아 사진은 보기만 한다
+    expect(screen.getByText("사진은 수정할 수 없어요")).toBeTruthy();
+    expect(screen.getByTestId("market-photo-0")).toBeTruthy();
+    expect(screen.queryByTestId("market-photo-add")).toBeNull();
+    expect(screen.queryByLabelText("사진 1 삭제")).toBeNull();
     expect(
       screen.queryByDisplayValue("아이 장난감 정리하면서 나눔합니다"),
     ).toBeNull();
@@ -227,8 +226,6 @@ describe("modal smoke screens", () => {
       screen.getByLabelText("소모임 설명"),
       "함께 말씀을 나누는 모임입니다.",
     );
-    fireEvent.changeText(screen.getByLabelText("소모임 일정"), "매주 토요일");
-    fireEvent.changeText(screen.getByLabelText("소모임 장소"), "교육관 2층");
     fireEvent.press(screen.getAllByText("소모임 개설")[1]);
 
     await waitFor(() =>
@@ -252,14 +249,51 @@ describe("modal smoke screens", () => {
 
     fireEvent.press(screen.getByText("20명"));
     expect(capacityInput.props.value).toBe("20");
+  });
 
-    fireEvent.press(screen.getByText("매주 토요일"));
-    expect(screen.getByLabelText("소모임 일정").props.value).toBe(
-      "매주 토요일",
+  it("fills the group edit modal with the real group, not sample values", async () => {
+    jest.mocked(useLocalSearchParams).mockReturnValue({ id: "7" } as never);
+    jest.spyOn(groupService, "fetchGroupDetail").mockResolvedValue({
+      id: "7",
+      name: "수요 기도회",
+      description: "수요일 저녁에 함께 기도합니다.",
+      categoryLabel: "기도모임",
+      currentMembers: 3,
+      maxMembers: 12,
+      status: "open",
+      leaderName: "김은혜",
+      isLeader: true,
+      isJoined: true,
+      members: ["김은혜"],
+      notices: [],
+    });
+    const update = jest
+      .spyOn(groupService, "updateGroup")
+      .mockResolvedValue({} as never);
+
+    renderWithClient(<GroupNewModal />);
+
+    await waitFor(() =>
+      expect(screen.getByLabelText("소모임 이름").props.value).toBe(
+        "수요 기도회",
+      ),
     );
+    expect(screen.getByLabelText("소모임 설명").props.value).toBe(
+      "수요일 저녁에 함께 기도합니다.",
+    );
+    expect(screen.getByLabelText("소모임 최대인원").props.value).toBe("12");
+    expect(screen.queryByDisplayValue("토요 산악회")).toBeNull();
 
-    fireEvent.press(screen.getByText("교회"));
-    expect(screen.getByLabelText("소모임 장소").props.value).toBe("교회");
+    fireEvent.press(screen.getByText("변경사항 저장"));
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledWith({
+        groupId: "7",
+        name: "수요 기도회",
+        description: "수요일 저녁에 함께 기도합니다.",
+        category: "pray",
+        maxMembers: 12,
+      }),
+    );
   });
 
   it("clears the preset chip highlight once capacity leaves the preset values", () => {

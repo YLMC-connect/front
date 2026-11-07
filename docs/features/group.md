@@ -1,6 +1,6 @@
 # group (소모임)
 
-> 마지막 갱신: 2026-11-03 (런타임 목 어댑터 및 `src/mocks/groups.ts` 제거) | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-11-07 (수정 폼 실제 값 채움, 일정·장소 입력 제거, 내 모임 `/my` 사용) | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
@@ -10,12 +10,12 @@
 
 ## ✅ 완료
 
-- 소모임 개설 폼 2단계 정보 구조화 및 모바일 친화적 입력 컨트롤 개선 — 소모임 개설/수정 화면(`modal/group-new`)을 '기본 정보(소개)'와 '활동 및 운영 안내' 2대 섹션 카드로 명확히 그룹화. 상단 유의사항 배너 재배치, 정원 설정용 `[-] / [+]` 스텝 버튼 및 빠른 정원 칩(`4명`, `8명`, `12명`, `20명`), 일정 및 장소 빠른 추천 칩을 적용하여 모바일 입력 편의성을 대폭 개선.
+- 소모임 개설 폼 2단계 정보 구조화 및 모바일 친화적 입력 컨트롤 개선 — 소모임 개설/수정 화면(`modal/group-new`)을 '기본 정보(소개)'와 '활동 및 운영 안내' 2대 섹션 카드로 명확히 그룹화. 상단 유의사항 배너 재배치, 정원 설정용 `[-] / [+]` 스텝 버튼 및 빠른 정원 칩(`4명`, `8명`, `12명`, `20명`). 서버가 받지 않는 일정·장소 입력은 두지 않고(Issue #301), 카테고리는 서버 코드가 있는 5개(성경공부·예배/기도모임/취미·문화/운동·건강/기타)만 고른다. 실제 수정(`id`)은 상세를 받아온 뒤 그 값으로 폼을 채우고, 예시 값은 `id` 없는 디자인 미리보기에서만 쓴다.
 - 소모임장 이관 플로우 및 동행 목록 무한스크롤 / 당겨서 새로고침 — 소모임 상세 관리 메뉴에 `이관` 액션을 추가하고 멤버 관리 화면에서 후보 멤버 라디오 선택 및 이관 확인 모달 플로우를 구현. 동행 목록은 `useInfiniteQuery` 기반 `getOverviewPage` 커서 페이징과 하단 로딩 스피너를 연동하고 `StickyHeaderScreen` 및 소모임 상세 스크롤에 `RefreshControl`을 연결하여 상단 당김 새로고침 지원.
 - 동행/소모임 관리(수정/삭제/강퇴/상태변경) API 연동 — `PUT /api/communion/{id}`(소모임 수정), `DELETE /api/communion/{id}`(소모임 삭제), `DELETE /api/communion/{id}/kick/{targetUserId}`(멤버 강퇴), `PUT /api/communion/{id}/status`(모집 상태 변경)를 `httpGroupDataSource`, `groupService`, `useGroups` 훅과 UI 화면(`group/[id]`, `group-new`, `group/members`)에 완전 연동.
 - 동행과 나눔 탭 간 필터-카드 간격 및 리스트 레이아웃 구조 완전 일치 — 동행 화면의 contentContainerStyle과 불필요한 래퍼 뷰(group-scroll-content)를 제거하고, 나눔과 동일하게 ScrollView 직하위 styles.list(gap: 12, paddingBottom: 164) 컨테이너 및 CompanionCard marginHorizontal: 20 구조로 통일. 탭 상호 전환 시 필터-카드 간격(16px) 및 첫 번째 카드 상단 Y 위치를 완벽히 일치시켜 시각적 흔들림 제거
 - 동행 카테고리 필터 stickyControls 통합 및 도킹 구조 제거 — 내 소모임이 독립 세그먼트 탭으로 분리됨에 따라, 소모임 탭 상단의 복잡한 인라인 필터 앵커와 도킹 애니메이션을 제거하고 나눔과 동일하게 상단 stickyControls에 FilterChips를 직접 배치. 필터와 첫 번째 카드 사이 간격을 나눔 기준(16px)으로 일치시킴
-- 동행 HTTP data source — 라이브 목록(`type=SMALL_GROUP|VOLUNTEER`), `/my`, 상세, 멤버, 개설, 공지 CUD, `POST /api/communion/{id}/join`·`DELETE /api/communion/{id}/leave`를 `httpGroupDataSource`로 연결. 상세의 참여/탈퇴 버튼이 같은 경계를 사용. 상태/카테고리/타입은 common-codes 관측값만 매핑. 목록 `content`·일정·장소가 없어 설명/일정은 빈 문자열, 생성 요청에서 일정·장소 제외. 서버에 없는 카테고리(목장·선교·카풀·봉사)는 개설을 거절. development 기본값은 HTTP
+- 동행 HTTP data source — 라이브 목록(`type=SMALL_GROUP|VOLUNTEER`), `/my`, 상세, 멤버, 개설, 공지 CUD, `POST /api/communion/{id}/join`·`DELETE /api/communion/{id}/leave`를 `httpGroupDataSource`로 연결. 상세의 참여/탈퇴 버튼이 같은 경계를 사용. 상태/카테고리/타입은 common-codes 관측값만 매핑. 목록 `content`·일정·장소가 없어 설명/일정은 빈 문자열. 서버에 없는 카테고리(목장·선교·카풀·봉사)는 개설을 거절. `내 모임` 탭은 `/api/communion/my?type=SMALL_GROUP` 전체 결과(`myGroups`)를 쓴다. 상세 멤버 목록은 소모임장을 맨 앞에 두고 왕관을 그 사람에게만 그리며, 인원은 모집완료여도 실제 `currentParticipants`를 보인다. development 기본값은 HTTP
 - 동행 상세 복귀 세그먼트·필터 깜빡임 제거 — 숨은 목록에서 들어오는 세그먼트·필터의 `0×0` layout과 카테고리 anchor의 0 크기 측정을 버려 마지막 정상 위치를 유지하고, 430×932 웹에서 상세 뒤로가기 직후부터 250ms까지 세그먼트 189px·필터 49px geometry와 opacity 1이 한 프레임도 무너지지 않음을 확인
 - 동행 상세 복귀 미세 잔상 제거 — 목록·세그먼트·필터를 재생성하지 않고 유지한 채 웹은 카드 입력 이벤트 안에서 기존 ScrollView를 `y=0`으로 맞춘 직후 같은 Stack에 직접 push하고, 네이티브는 push 전환이 끝난 뒤 숨은 목록을 초기화해 복귀 첫 프레임부터 본문 필터만 원래 위치에 표시하면서 일반 200ms Cross Fade·Translate는 유지
 - 소모임 상세·개설 상단 패딩 통일 — 상세는 공통 `Screen`의 `safe area + 20px` 기준을 상속하고 별도 `KeyboardAvoidingView`를 쓰는 개설 modal도 같은 계산식을 적용해 루트 동행 헤더와 시작점을 맞춤
@@ -97,6 +97,8 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-11-07) **서버가 저장하지 않는 입력은 폼에 두지 않는다** — 모임 일정·장소는 communion 요청·응답에 없어 개설/수정 폼에서 뺐다. 서버 필드가 생기면 복원한다. Issue #301.
+
 - (2026-11-05) **소모임장 이관은 `PUT /api/communion/{id}/leader`로 보낸다** — 요청 본문은 `newLeaderUserId` 하나다. 성공하면 기존 방장은 일반 멤버로 남고, 멤버 화면은 상세·멤버·목록 쿼리를 다시 읽는다. `COM003`, `COM011`, `COM012`는 이관 화면 토스트 문구로 둔다. Issue #197.
 
 - (2026-11-03) **동행 목록 페이지네이션(`getOverviewPage`) 시 첫 페이지 봉사(`type=VOLUNTEER`) API 연동 복구** — `useGroupOverview`가 `getOverviewPage`를 호출할 때 `services: []`로 고정되어 봉사 탭 목록이 비어 있던 문제를 수정하여, 첫 페이지(`lastId == null`) 로드 시 `/api/communion?type=VOLUNTEER` 및 `/api/communion/my?type=VOLUNTEER`를 함께 조회해 `mapCommunionServiceItem`으로 매핑하도록 연결.
@@ -173,7 +175,7 @@
 
 ## 미결 / 추적
 
-- 프런트 HTTP 목록/상세/개설/멤버/공지/참여/탈퇴/소모임장 이관은 라이브로 연결됨. 남은 공백은 목록 본문·일정·장소, 서버에 없는 카테고리 4개, 삭제 500, 오류 코드. 단일 출처는 Issue #21이며 `test:api:contract:group`은 문서 공백이 있으면 실패한다.
+- 프런트 HTTP 목록/상세/개설/멤버/공지/참여/탈퇴/소모임장 이관은 라이브로 연결됨. 남은 공백은 목록 본문·일정·장소(Issue #301), 서버에 없는 카테고리 4개, 삭제 500, 오류 코드. 단일 출처는 Issue #21이며 `test:api:contract:group`은 문서 공백이 있으면 실패한다.
 - 참여는 즉시 가입으로 연결함. 승인 대기가 필요하면 서버 상태를 받은 뒤 화면 문구를 바꿀 것.
 - 공지 작성 권한과 소모임장/관리자 권한 모델 확인 필요.
 - 강제 내보내기 이의 제기/복구 플로우는 실제 API와 운영 정책 확정 후 반영.

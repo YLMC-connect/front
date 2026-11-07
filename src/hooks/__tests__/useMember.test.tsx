@@ -1,9 +1,11 @@
-import { act } from "@testing-library/react-native";
+import { act, waitFor } from "@testing-library/react-native";
 import { queryKeys } from "../../lib/queryKeys";
 import * as authService from "../../services/authService";
+import { useAuthStore } from "../../store/authStore";
 import { renderHookWithClient } from "../../test/renderHookWithClient";
 import {
   useChangePassword,
+  useMemberMe,
   useUpdateMemberMe,
   useVerifyPassword,
   useWithdrawMember,
@@ -22,6 +24,24 @@ const me = { id: "u1", name: "홍길동", phone: "010-0000-0000" };
 
 beforeEach(() => {
   jest.clearAllMocks();
+});
+
+describe("useMemberMe", () => {
+  afterEach(() => {
+    useAuthStore.getState().setAnonymous();
+  });
+
+  it("로그인 직후 세션 정보가 있어도 /me 를 받아와 전화번호를 채운다", async () => {
+    useAuthStore
+      .getState()
+      .setAuthenticated({ id: "u1", name: "홍길동", role: "USER" });
+    service.getCurrentMember.mockResolvedValue(me as never);
+
+    const { result } = renderHookWithClient(() => useMemberMe());
+
+    await waitFor(() => expect(result.current.data).toEqual(me));
+    expect(service.getCurrentMember).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("useUpdateMemberMe", () => {

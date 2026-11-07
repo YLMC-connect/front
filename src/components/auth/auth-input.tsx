@@ -1,5 +1,6 @@
 import { forwardRef, useState, type ReactNode } from "react";
-import { StyleSheet, TextInput, type TextInputProps } from "react-native";
+import { StyleSheet, type TextInputProps } from "react-native";
+import { TextInput } from "@/components/ui/text";
 import { theme } from "../../constants/theme";
 import { InputSurface, inputTextStyles } from "../ui/inputs";
 

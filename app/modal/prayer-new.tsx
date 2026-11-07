@@ -7,10 +7,10 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { Text } from "@/components/ui/text";
 import {
   ConfirmDialog,
   FilterChips,

@@ -8,11 +8,10 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Text,
-  TextInput,
   UIManager,
   View,
 } from "react-native";
+import { Text, TextInput } from "@/components/ui/text";
 import Animated, {
   Easing,
   FadeInDown,

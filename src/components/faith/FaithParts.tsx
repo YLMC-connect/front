@@ -1,7 +1,8 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Text } from "@/components/ui/text";
 import { theme } from "../../constants/theme";
 import type { LifeStudyOverviewCourse } from "../../types/lifeStudy";
 import type { PrayerPeriod, PrayerWeekday } from "../../types/prayer";

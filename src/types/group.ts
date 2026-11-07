@@ -43,8 +43,6 @@ export interface GroupInput {
   description: string;
   category: Exclude<GroupCategory, "all">;
   maxMembers: number;
-  schedule: string;
-  location: string;
   coverImage?: string;
 }
 

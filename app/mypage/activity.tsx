@@ -1,7 +1,8 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Screen } from "../../src/components/layout/Screen";
 import { StaggerItem } from "../../src/components/mypage/StaggerItem";
 import { Badge, Empty, TopBar, UnderlineTabs } from "../../src/components/ui";

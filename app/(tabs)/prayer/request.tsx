@@ -2,14 +2,8 @@ import { AppIcon } from "@/components/ui/app-icon";
 import { InfoBox } from "@/components/ui/info-box";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   Badge,

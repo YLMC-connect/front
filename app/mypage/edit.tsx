@@ -8,6 +8,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { formatPhoneNumber } from "../../src/components/auth/signup/signupForm";
 import { Text } from "@/components/ui/text";
 import { Screen } from "../../src/components/layout/Screen";
 import { Avatar, TopBar } from "../../src/components/ui";
@@ -264,7 +265,7 @@ export default function EditProfileScreen() {
                 editable={!isMockVariant}
                 value={displayPhone}
                 onChangeText={(text) => {
-                  setPhoneInput(text);
+                  setPhoneInput(formatPhoneNumber(text));
                   setPhoneError(null);
                 }}
                 placeholder="010-XXXX-XXXX"

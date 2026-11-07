@@ -12,7 +12,7 @@
 
 - 삶공부 도메인 전반 공통 Empty FAQ 기준 통일 — 개설/전체 과정 섹션, 삶공부 상세(/life-study/[id])의 과정 부재 및 커리큘럼 빈 상태, 수강 내역(/life-study/history) 수료 기록 빈 상태에 FAQ 화면 기준(84px 원형 배경, 42px 아이콘, 상하 정중앙 배치, CTA 버튼 배제)의 공통 `<Empty />` 컴포넌트를 일관되게 적용
 - 삶공부 상세(/life-study/[id]) 미존재 과정 및 커리큘럼 빈 상태에 공통 Empty 연동 — ID에 해당하는 삶공부 과정이 존재하지 않거나 커리큘럼 정보가 아직 등록되지 않은 경우, 화면이 비정상 렌더링되거나 빈 박스로 방치되지 않도록 공통 `<Empty />` 상태 뷰 표시
-- 삶공부 수강신청 HTTP adapter — `POST /api/life-study/cohorts/{id}/attend` 연동. userYear, userFaithYears, userPart 필드를 전달하며 폼 유효성 검증 및 useApplyLifeStudyCohort mutation을 연결
+- 삶공부 수강신청 HTTP adapter — `POST /api/life-study/cohorts/{id}/attend` 연동. userYear, userFaithYears, userPart 필드를 전달하며 폼 유효성 검증 및 useApplyLifeStudyCohort mutation을 연결. 생년·신앙 연차·수강 약속은 빈 값/미동의로 시작해 사용자가 직접 고르게 하고, API 에 신청 동기 필드가 없어 입력란을 두지 않는다. 요청한 기수가 신청 가능 목록에 없으면 다른 기수로 대신 신청하지 않고 "신청할 수 없는 과정이에요" 를 보여준다
 - 삶공부 수강 신청 FAB 추가 — 기도 탭과의 일관성 및 접근성을 높이기 위해 삶공부 루트 화면 우측 하단에 수강 신청 화면(/life-study/apply)으로 이동하는 플로팅 액션 버튼(FAB)을 추가
 
 - 삶공부 수업·출석·수료 HTTP adapter — development 기본값은 나눔과 같이 http다. 수료 목록은 mock 과정 위에 덮지 않고 `GET /api/life-study/completions` 행으로 만든다. 테스트와 `EXPO_PUBLIC_LIFE_STUDY_ADAPTER=mock`은 기존 mock service를 쓴다

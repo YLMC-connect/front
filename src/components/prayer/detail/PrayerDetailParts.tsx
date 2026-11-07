@@ -41,7 +41,8 @@ export interface PrayerItemData {
   author: string;
   text: string;
   answer?: string;
-  when: string;
+  /** 서버 날짜가 없으면 비운다. */
+  when?: string;
   urgent?: boolean;
 }
 
@@ -158,7 +159,7 @@ export function StatusPanel({
           </View>
           <View style={styles.statusHeadInfo}>
             <Text style={styles.statusTitle}>기도 현황</Text>
-            <Text style={styles.smallMuted}>오늘의 기도 참여 현황이에요</Text>
+            <Text style={styles.smallMuted}>이번 주 기도 참여 현황이에요</Text>
           </View>
         </View>
         <View style={styles.stats}>
@@ -167,7 +168,7 @@ export function StatusPanel({
           <Stat label="참여율" value={rateText} />
         </View>
         <ProgressBar
-          label="오늘 참여율"
+          label="이번 주 참여율"
           value={empty ? 0 : completionRate}
           valueText={rateText}
           testID="prayer-status-progress"
@@ -239,8 +240,12 @@ export function PrayerItem({
         <View style={styles.authorRow}>
           <Avatar name={item.author} size={22} />
           <Text style={styles.authorName}>{item.author}</Text>
-          <Text style={styles.dot}>·</Text>
-          <Text style={styles.smallMuted}>{item.when}</Text>
+          {item.when ? (
+            <>
+              <Text style={styles.dot}>·</Text>
+              <Text style={styles.smallMuted}>{item.when}</Text>
+            </>
+          ) : null}
         </View>
 
         <View style={styles.chipRow}>

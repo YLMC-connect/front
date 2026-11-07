@@ -59,6 +59,7 @@
 | `app/(tabs)/prayer/apply.tsx`                  | 기도방 참여 신청 요일/시간 선택 화면            |
 | `app/(tabs)/prayer/request.tsx`                | 내 기도제목 요청 상태 목록                      |
 | `app/modal/prayer-new.tsx`                     | 기도제목 등록 모달                              |
+| `app/mypage/prayer-history.tsx`                | 마이페이지 중보기도 활동 이력 (`GET /api/prayer/me/history`) |
 | `src/services/prayerService.ts`                | 중보기도 HTTP 서비스                            |
 | `src/services/prayerHttpDataSource.ts`         | 사용자 `/api/prayer` HTTP data source           |
 | `src/services/prayerMapper.ts`                 | Notion DTO → 기존 view model                    |
@@ -73,6 +74,15 @@
 `PrayerRoom`은 `weekday`, `leader`, `memberCount`, `isJoined`를 포함합니다. `PrayerTopic`은 `isAnonymous`, `prayerCount`, `hasPrayed`, `isAnswered`, `answer`를 포함합니다. 루트 화면 전용 `PrayerOverview`는 요일방 요약과 내 기도제목 상태 요약을 가지며 API DTO mapper의 출력 모델로 사용합니다. `PrayerCohortDto`, `PrayerCohortStatusDto`, `PrayerCompletionMemberDto`, `PrayerTopicDto`, `PrayerHistoryItem`은 Notion에 적힌 필드만 가집니다. `PrayerApplicationDto`는 이름만 있고 값 타입은 페이지에 없어 `unknown`입니다(없는 이름은 `null`). `PrayerCategoryDto`는 화면이 쓰는 `id`·`categoryName`만 확인합니다. 화면에서 쓰지 않는 DTO 필드는 `null` 을 허용합니다. 기도방 상세 성공 필드는 없어 빈 객체로만 읽습니다. `a / b`로 한 칸에 적힌 이름은 두 필드입니다.
 
 ## 결정 사항 (최신 위)
+
+- (2026-11-07) **기도 화면은 서버가 준 값만 그리고, 없는 값은 지어내지 않는다**
+  - 완료 인원·참여율은 서버 계약상 이번 주 기준(`weekCompletedCount`, 현황 DTO "이번 주 현황")이라 목록·상세 문구를 `이번 주`로 쓴다. 오늘 기준 필드는 없다.
+  - 상세 요일·시간대는 `cohortName` 의 `월요일`~`일요일`·`오전/오후`에서만 읽고, 못 읽으면 비운다. 불러오기 전·실패 시 제목은 `기도방`. `참여중` 배지는 현황 DTO에 참여 여부가 없어 두지 않는다. 기도제목 시각은 `createdAt`(응답은 `answeredAt` 우선)을 "M월 D일"로, 없으면 생략한다(#219). 응답 본문이 없으면 응답 상자를 그리지 않는다. 긴급 배지는 `긴급 N건`.
+  - 현황 `canComplete === false` 이면 완료 버튼을 막고 안내 문구를 보인다(null 은 막지 않는다).
+  - 등록 모달은 익명 선택지를 두지 않는다. 등록 API에 익명 필드가 없다(#304). 카테고리는 고르기 전 불러온 첫 항목이 선택돼 보이고 그대로 전송되며, 목록이 없으면 등록하지 않는다.
+  - 응답완료 요청은 사용자가 쓴 `answerContent`(필수)를 보낸다.
+  - overview 는 `GET /api/prayer/applications/my` 도 읽어 `status === "PENDING"` 이고 참여 중이 아닌 신청을 `pending` 기도방(`applicationId` 포함)으로 붙인다. 승인 대기 카드는 상세로 가지 않고, 누르면 확인 후 `DELETE /api/prayer/applications/{id}` 로 취소한다.
+  - 마이페이지 `중보기도 활동 이력` 은 `GET /api/prayer/me/history` 를 활동중/종료·역할·기간·종료 사유로 그린다.
 
 - (2026-11-03) **런타임 목 어댑터(`resolvePrayerAdapterMode`, `mockPrayerDataSource`), 목 오버레이 매퍼 및 `src/mocks/prayers.ts` 제거** — 전 도메인 HTTP 단일화에 따라 `httpPrayerDataSource`로 일원화하고, 미사용 목 오버레이 헬퍼(`applyPrayerApiToOverview`, `applyCohortsToRooms`, `applyTopicsToTopics`) 및 `"목업 데이터"` 문구를 제거.
 
@@ -98,14 +108,12 @@
   - `PrayerRoom`은 `cohortName`→`title`, `description`, `memberCount`를 쓴다. `myRole`이 역할이면 `isJoined` true, null이면 false. `leader`는 회원 객체가 아니라 mock을 유지한다.
   - `PrayerTopic`은 `title`, `content`, `createdAt`을 쓴다. `status === ANSWERED`일 때만 `isAnswered`와 `answer`←`answerContent`다. 그 외에는 `isAnswered` false이고 `answer`는 비운다. `roomId`, `author`, `isAnonymous`, `prayerCount`, `hasPrayed`는 대응 필드가 없어 mock을 유지한다.
   - 아래는 대응을 단정할 수 없거나 화면이 view model을 읽지 않아 mock·화면 fixture를 유지한다.
-    - 오늘 진행 카드의 합산 퍼센트. 방 `completionRate`로 바꾸지 않고 참여 중 방의 `completedCount/memberCount` 합으로 계산한다.
+    - 이번 주 진행 카드의 합산 퍼센트. 방 `completionRate`로 바꾸지 않고 참여 중 방의 `completedCount/memberCount` 합으로 계산한다.
     - overview에 없는 `cohortYear`, `cohortName`, `startDate`, `endDate`, `myCompleted`, `emergencyCount`.
-    - 참여 신청 `status` 코드 목록이 없어 신청을 `pending`으로 연결하지 않는다.
     - mock이거나 route id·`designVariant`가 있을 때의 기도방 상세 디자인 문구. http이고 id만 있으면 현황 DTO와 전체 게시판을 직접 그린다. 상대 시각·좋아요 버튼은 그 화면에 없다.
     - 신청 화면의 요일·시간 선택과 안내 문구. `POST /api/prayer/applications`의 `yoil`·`timeSlot`은 data source에만 있고 화면은 호출하지 않는다. 이름·연락처·메모는 화면 입력이 아니다.
     - mock일 때의 내 기도제목 디자인 문구와, http에서도 유지하는 승인 안내·응답완료 요청 버튼. 버튼은 API를 호출하지 않는다.
-    - 작성 모달의 `roomId`·`isAnonymous`. 등록 API 필수값은 `categoryId`·`title`·`content`이고 응답은 기도제목 ID다. 기존 `createPrayerTopic`은 API를 호출하지 않고 mock `PrayerTopic`을 만든다. `POST /api/prayer/topics`는 `createPrayerTopicRequest`만 호출한다.
-    - `GET /api/prayer/me/history`의 활동 기간·종료 사유와 카테고리 목록. 화면 모델이 없다. 신청·카테고리 하위 타입은 Notion에 없어 값 타입을 단정하지 않는다.
+    - 작성 모달의 `roomId`. 등록 API 필수값은 `categoryId`·`title`·`content`이고 응답은 기도제목 ID다. `POST /api/prayer/topics`는 `createPrayerTopicRequest`만 호출한다.
     - 좋아요·완료 취소·제목 수정·삭제·응답완료 요청의 성공 본문 필드가 없다.
 - (2026-07-15) **기도 작성 세그먼트와 루트 FAB는 공통의 낮은 비율을 사용한다** — 작성 화면 세그먼트는 full pill을 유지하면서 40px track·32px 선택 영역과 상하 6px hitSlop으로 44px 터치 범위를 보장하고, `기도제목 작성` FAB는 46px 높이·18px 아이콘·13px label을 사용합니다. 기존 작성 경로·모션·접근성은 유지합니다.
 - (2026-07-15) **기도 루트는 이동 가능한 카드에만 행동 문구와 화살표를 표시한다** — 내 기도제목 개별 요약에는 별도 상세가 없으므로 정적 카드로 두고 섹션 `전체보기`만 `/prayer/request`로 이동합니다. 상세가 있는 내 기도방 카드는 `기도방 보기 + chevron-right`를 표시하고 기존 `/prayer/[id]` 이동을 유지합니다.
@@ -140,8 +148,8 @@
 
 ## 미결 / 추적
 
-- 기도방 상세 성공 필드, 참여 신청 status 코드, 신청·카테고리 값 타입, 일·토 `PrayerWeekday`, 작성 화면 `categoryId`는 사용자 계약만으로는 화면과 연결하지 못했다. Issue #135.
-- 비성도 기도 요청, 기도방 참여 승인, 익명 작성자의 서버 응답 필드 정책 확인 필요.
+- 기도방 상세 성공 필드, 신청·카테고리 값 타입, 일·토 `PrayerWeekday`, 작성 화면 `categoryId`는 사용자 계약만으로는 화면과 연결하지 못했다. Issue #135.
+- 비성도 기도 요청, 기도방 참여 승인 정책 확인 필요. 익명 작성은 등록 API 필드 대기(#304).
 - 푸시 알림과 기도 통계는 후속 Phase입니다.
 
 ## 의존성

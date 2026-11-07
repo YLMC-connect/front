@@ -32,7 +32,7 @@
 | group (소모임) | 1 | 38 | 2026-11-07 | [features/group.md](features/group.md) |
 | mypage (MY) | 0 | 13 | 2026-11-07 | [features/mypage.md](features/mypage.md) |
 | life-study (삶공부) | 1 | 17 | 2026-11-07 | [features/life-study.md](features/life-study.md) |
-| prayer (중보기도) | 2 | 22 | 2026-11-07 | [features/prayer.md](features/prayer.md) |
+| prayer (중보기도) | 3 | 22 | 2026-11-07 | [features/prayer.md](features/prayer.md) |
 
 <!-- AUTO-GENERATED-END: domain-status -->
 

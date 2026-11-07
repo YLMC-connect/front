@@ -1,11 +1,17 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { router } from "expo-router";
-import { View } from "react-native";
+import { useState } from "react";
+import { Alert, View } from "react-native";
 import { theme } from "../../constants/theme";
-import { usePrayerOverview } from "../../hooks/usePrayers";
+import type { PrayerOverviewRoom } from "../../types/prayer";
+import {
+  useCancelPrayerApplication,
+  usePrayerOverview,
+} from "../../hooks/usePrayers";
 import {
   AppText,
   Badge,
+  ConfirmDialog,
   Empty,
   ErrorState,
   MotionEnter,
@@ -25,6 +31,26 @@ import { styles } from "./faithSectionsStyles";
 
 export function PrayerContent() {
   const { data, isError, isPending, refetch } = usePrayerOverview();
+  const cancelApplication = useCancelPrayerApplication();
+  const [cancelTarget, setCancelTarget] = useState<PrayerOverviewRoom | null>(
+    null,
+  );
+
+  const confirmCancel = () => {
+    const applicationId = cancelTarget?.applicationId;
+    setCancelTarget(null);
+    if (!applicationId) return;
+    cancelApplication.mutate(applicationId, {
+      onError: (err) => {
+        Alert.alert(
+          "신청 취소 실패",
+          err instanceof Error
+            ? err.message
+            : "참여 신청을 취소하지 못했습니다. 다시 시도해주세요.",
+        );
+      },
+    });
+  };
 
   if (isPending) return <OverviewLoading />;
   if (isError || !data) {
@@ -37,16 +63,17 @@ export function PrayerContent() {
   }
 
   const joinedRooms = data.rooms.filter((room) => room.status === "joined");
-  const todayCompleted = joinedRooms.reduce(
+  // 서버 완료 인원·참여율은 이번 주 기준이다(GET /api/prayer/cohorts/my).
+  const weekCompleted = joinedRooms.reduce(
     (total, room) => total + (room.completedCount ?? 0),
     0,
   );
-  const todayMembers = joinedRooms.reduce(
+  const weekMembers = joinedRooms.reduce(
     (total, room) => total + room.memberCount,
     0,
   );
-  const todayPercent = todayMembers
-    ? Math.round((todayCompleted / todayMembers) * 100)
+  const weekPercent = weekMembers
+    ? Math.round((weekCompleted / weekMembers) * 100)
     : 0;
 
   return (
@@ -55,21 +82,21 @@ export function PrayerContent() {
         <View style={styles.todayTop}>
           <View>
             <AppText variant="caption" tone="brand">
-              오늘의 기도 진행
+              이번 주 기도 진행
             </AppText>
             <AppText variant="heading" style={styles.todayTitle}>
-              함께 기도한 성도 {todayCompleted}명
+              함께 기도한 성도 {weekCompleted}명
             </AppText>
           </View>
         </View>
         <ProgressBar
-          label="오늘 기도 참여율"
-          value={todayPercent}
+          label="이번 주 기도 참여율"
+          value={weekPercent}
           style={styles.todayProgress}
           testID="prayer-today-progress"
         />
         <AppText variant="caption" tone="muted" style={styles.todayMeta}>
-          참여 중인 기도방 {joinedRooms.length}개 · 전체 {todayMembers}명
+          참여 중인 기도방 {joinedRooms.length}개 · 전체 {weekMembers}명
         </AppText>
       </View>
 
@@ -88,6 +115,7 @@ export function PrayerContent() {
             />
           ) : (
             data.rooms.map((room, index) => {
+              const pending = room.status === "pending";
               const rate =
                 room.participationRate ??
                 (room.completedCount && room.memberCount
@@ -103,7 +131,13 @@ export function PrayerContent() {
                 >
                   <MotionPressable
                     accessibilityRole="button"
-                    onPress={() => router.push(`/prayer/${room.id}`)}
+                    accessibilityLabel={pending ? "참여 신청 취소" : undefined}
+                    disabled={pending && cancelApplication.isPending}
+                    onPress={() =>
+                      pending
+                        ? setCancelTarget(room)
+                        : router.push(`/prayer/${room.id}`)
+                    }
                     style={styles.roomCard}
                   >
                     <View style={styles.roomCardMain}>
@@ -128,10 +162,9 @@ export function PrayerContent() {
                           tone="muted"
                           style={styles.mutedText}
                         >
-                          멤버 {room.memberCount}명 · 오늘 완료{" "}
-                          {room.completedCount == null
-                            ? "승인 대기"
-                            : `${room.completedCount}명`}
+                          {pending
+                            ? "관리자 승인 후 기도방에 참여해요"
+                            : `멤버 ${room.memberCount}명 · 이번 주 완료 ${room.completedCount ?? 0}명`}
                         </AppText>
                       </View>
                       <View
@@ -143,19 +176,21 @@ export function PrayerContent() {
                           tone="brand"
                           style={styles.roomActionText}
                         >
-                          기도방 보기
+                          {pending ? "신청 취소" : "기도방 보기"}
                         </AppText>
-                        <AppIcon
-                          name="chevron-right"
-                          size={16}
-                          color={theme.colors.primaryStrong}
-                        />
+                        {pending ? null : (
+                          <AppIcon
+                            name="chevron-right"
+                            size={16}
+                            color={theme.colors.primaryStrong}
+                          />
+                        )}
                       </View>
                     </View>
 
                     {room.status === "joined" ? (
                       <ProgressBar
-                        label="오늘 기도 참여율"
+                        label="이번 주 기도 참여율"
                         value={rate}
                         style={styles.roomProgress}
                         testID={`prayer-room-${room.id}-progress`}
@@ -235,6 +270,17 @@ export function PrayerContent() {
           )}
         </View>
       </View>
+
+      <ConfirmDialog
+        visible={cancelTarget != null}
+        title="참여 신청을 취소할까요?"
+        message="승인 대기 중인 신청이 취소됩니다."
+        confirmText="취소하기"
+        cancelText="닫기"
+        danger
+        onCancel={() => setCancelTarget(null)}
+        onConfirm={confirmCancel}
+      />
     </MotionEnter>
   );
 }

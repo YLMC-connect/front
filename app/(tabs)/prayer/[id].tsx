@@ -21,6 +21,10 @@ import {
   fetchPrayerTopicBoard,
 } from "../../../src/services/prayerService";
 import {
+  formatPrayerDate,
+  parsePrayerRoomDayPeriod,
+} from "../../../src/services/prayerMapper";
+import {
   AnswersPanel,
   PrayerPanel,
   StatusPanel,
@@ -37,26 +41,6 @@ const tabs: readonly { key: TabKey; label: string }[] = [
 
 function routeId(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
-}
-
-function parseDayAndPeriod(
-  id?: string,
-  name?: string,
-): { day: string; period: string } {
-  const text = (name ?? id ?? "").toLowerCase();
-  let day = "월";
-  if (text.includes("화") || text.includes("tue")) day = "화";
-  else if (text.includes("수") || text.includes("wed")) day = "수";
-  else if (text.includes("목") || text.includes("thu")) day = "목";
-  else if (text.includes("금") || text.includes("fri")) day = "금";
-  else if (text.includes("토") || text.includes("sat")) day = "토";
-  else if (text.includes("일") || text.includes("sun")) day = "일";
-
-  let period = "오전";
-  if (text.includes("오후") || text.includes("pm") || text.includes("저녁")) {
-    period = "오후";
-  }
-  return { day, period };
 }
 
 export default function PrayerDetailScreen() {
@@ -105,8 +89,10 @@ export default function PrayerDetailScreen() {
   ) : null;
   const statusFailed = statusQuery.isError && !room;
 
-  const roomTitle = room?.cohortName || "월요일 오전 기도방";
-  const { day, period } = parseDayAndPeriod(id, roomTitle);
+  const roomTitle = room?.cohortName || "기도방";
+  const { day, period } = parsePrayerRoomDayPeriod(room?.cohortName);
+  // 서버가 이번 주에 완료할 수 없다고 하면 버튼을 막는다(null 은 막지 않는다).
+  const completionBlocked = isHttp && room?.canComplete === false;
 
   const isCompleted =
     completedOverride ??
@@ -124,7 +110,7 @@ export default function PrayerDetailScreen() {
           title: t.title,
           author: t.writerName || "성도",
           text: t.content,
-          when: "오늘",
+          when: formatPrayerDate(t.createdAt),
           urgent: true,
         }))
       : [];
@@ -136,7 +122,7 @@ export default function PrayerDetailScreen() {
           title: t.title,
           author: t.writerName || "성도",
           text: t.content,
-          when: "진행 중",
+          when: formatPrayerDate(t.createdAt),
         }))
       : [];
 
@@ -147,8 +133,8 @@ export default function PrayerDetailScreen() {
           title: t.title,
           author: t.writerName || "성도",
           text: t.content,
-          answer: t.answerContent ?? "기도에 응답해 주셨습니다.",
-          when: "최근",
+          answer: t.answerContent || undefined,
+          when: formatPrayerDate(t.answeredAt ?? t.createdAt),
         }))
       : [];
 
@@ -202,17 +188,16 @@ export default function PrayerDetailScreen() {
               </View>
               <View style={styles.heroMetaCol}>
                 <View style={styles.badges}>
-                  <Badge tone="info">참여중</Badge>
                   <Badge tone="neutral">{`멤버 ${totalMembers}명`}</Badge>
                   {urgentItems.length > 0 ? (
                     <Badge
                       tone="warning"
                       icon="warning-amber"
-                    >{`오늘 긴급 ${urgentItems.length}건`}</Badge>
+                    >{`긴급 ${urgentItems.length}건`}</Badge>
                   ) : null}
                   {isCompleted ? (
                     <Badge tone="success" icon="check">
-                      오늘 완료
+                      이번 주 완료
                     </Badge>
                   ) : null}
                 </View>
@@ -220,7 +205,7 @@ export default function PrayerDetailScreen() {
             </View>
 
             <ProgressBar
-              label={`오늘 완료 ${completedCount}명 / 전체 ${totalMembers}명`}
+              label={`이번 주 완료 ${completedCount}명 / 전체 ${totalMembers}명`}
               value={completionRate}
               style={styles.heroProgress}
               testID="prayer-detail-progress"
@@ -272,8 +257,16 @@ export default function PrayerDetailScreen() {
 
         {activeTab === "pray" && !isPrayEmpty ? (
           <FloatingBottomBar testID="prayer-detail-bottom-bar">
+            {completionBlocked ? (
+              <Text
+                style={styles.completeHint}
+                testID="prayer-detail-complete-hint"
+              >
+                지금은 기도 완료를 처리할 수 없는 주예요.
+              </Text>
+            ) : null}
             <Button
-              disabled={toggleCompletion.isPending}
+              disabled={toggleCompletion.isPending || completionBlocked}
               icon="check"
               loading={toggleCompletion.isPending}
               onPress={handleToggleCompletion}
@@ -281,7 +274,7 @@ export default function PrayerDetailScreen() {
               testID="prayer-detail-complete"
               variant={isCompleted ? "secondary" : "primary"}
             >
-              {isCompleted ? "오늘 기도 완료됨" : "오늘 기도 완료"}
+              {isCompleted ? "이번 주 기도 완료됨" : "이번 주 기도 완료"}
             </Button>
           </FloatingBottomBar>
         ) : null}

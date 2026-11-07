@@ -30,10 +30,13 @@ export function createHttpPrayerDataSource({
 } = {}): PrayerDataSource {
   return {
     async getOverview() {
-      const [cohortsRes, topicsRes] = await Promise.allSettled([
-        client.request("/api/prayer/cohorts/my"),
-        client.request("/api/prayer/topics/my"),
-      ]);
+      const [cohortsRes, topicsRes, applicationsRes] = await Promise.allSettled(
+        [
+          client.request("/api/prayer/cohorts/my"),
+          client.request("/api/prayer/topics/my"),
+          client.request("/api/prayer/applications/my"),
+        ],
+      );
 
       const myCohorts =
         cohortsRes.status === "fulfilled" && cohortsRes.value != null
@@ -44,7 +47,12 @@ export function createHttpPrayerDataSource({
           ? readPrayerTopics(topicsRes.value)
           : [];
 
-      return buildPrayerOverview(myCohorts, topics);
+      const applications =
+        applicationsRes.status === "fulfilled" && applicationsRes.value != null
+          ? readPrayerApplications(applicationsRes.value)
+          : [];
+
+      return buildPrayerOverview(myCohorts, topics, applications);
     },
 
     async getMyCohorts() {

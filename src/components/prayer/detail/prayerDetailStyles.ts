@@ -124,6 +124,12 @@ export const styles = StyleSheet.create({
     fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.fontWeight.semibold,
   },
+  completeHint: {
+    marginBottom: 8,
+    textAlign: "center",
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+  },
   pillAction: {
     flexDirection: "row",
     alignItems: "center",

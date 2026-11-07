@@ -161,7 +161,7 @@ describe("display parts (design system v2)", () => {
     const primary = flat(screen.getByText("진행중"));
     expect(primary).toMatchObject({
       color: theme.colors.onPrimary,
-      fontWeight: theme.fontWeight.semibold,
+      fontFamily: theme.font.semibold,
     });
     expect(flat(screen.getByText("신청 가능")).color).toBe(
       theme.colors.warningText,

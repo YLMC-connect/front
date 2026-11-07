@@ -4,11 +4,11 @@ import { type ComponentProps, type ReactNode } from "react";
 import {
   Pressable,
   StyleSheet,
-  Text,
   View,
   type StyleProp,
   type ViewStyle,
 } from "react-native";
+import { Text } from "@/components/ui/text";
 import Animated, { FadeInUp, useReducedMotion } from "react-native-reanimated";
 import { theme } from "../../constants/theme";
 import { getGivenName } from "../../lib/koreanName";

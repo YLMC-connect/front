@@ -1,12 +1,7 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useState, type ComponentProps } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  type StyleProp,
-  type ViewStyle,
-} from "react-native";
+import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { Text } from "@/components/ui/text";
 import Animated, {
   interpolate,
   useAnimatedStyle,

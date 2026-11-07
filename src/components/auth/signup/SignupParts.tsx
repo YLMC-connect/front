@@ -1,6 +1,7 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { forwardRef, type ReactNode, useState } from "react";
-import { Text, TextInput, type TextInputProps, View } from "react-native";
+import { type TextInputProps, View } from "react-native";
+import { Text, TextInput } from "@/components/ui/text";
 import { AuthInput } from "../auth-input";
 import { MotionFadeIn, MotionPressable } from "../../ui";
 import { theme } from "../../../constants/theme";

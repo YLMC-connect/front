@@ -1,6 +1,7 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useEffect, type ComponentProps, type ReactNode } from "react";
-import { StyleSheet, Text, View, type PressableProps } from "react-native";
+import { StyleSheet, View, type PressableProps } from "react-native";
+import { Text } from "@/components/ui/text";
 import Animated, {
   cancelAnimation,
   useAnimatedStyle,

@@ -353,16 +353,4 @@ const styles = StyleSheet.create({
     lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
-  bottomBar: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: 18,
-    paddingTop: 12,
-    paddingBottom: 18,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-    backgroundColor: theme.colors.barGlass,
-  },
 });

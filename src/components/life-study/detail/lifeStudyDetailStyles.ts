@@ -197,15 +197,6 @@ export const styles = StyleSheet.create({
     lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
-  bottomBar: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: theme.layout.screenX,
-    paddingTop: 24,
-    paddingBottom: 24,
-  },
   curriculumRow: {
     flexDirection: "row",
     alignItems: "center",

@@ -90,19 +90,14 @@ describe("modal smoke screens", () => {
       height: 48,
     });
     const capacityInput = screen.getByLabelText("소모임 최대인원");
-    const scheduleInput = screen.getByLabelText("소모임 일정");
-    const locationInput = screen.getByLabelText("소모임 장소");
     expect(StyleSheet.flatten(capacityInput.props.style)).toMatchObject({
       height: 48,
     });
-    expect(StyleSheet.flatten(scheduleInput.props.style)).toMatchObject({
-      height: 48,
-    });
-    expect(StyleSheet.flatten(locationInput.props.style)).toMatchObject({
-      height: 48,
-    });
-    expect(StyleSheet.flatten(capacityInput.props.style).height).toBe(
-      StyleSheet.flatten(scheduleInput.props.style).height,
+    // 서버가 받지 않는 일정·장소와 서버 코드가 없는 카테고리는 보이지 않는다.
+    expect(screen.queryByLabelText("소모임 일정")).toBeNull();
+    expect(screen.queryByLabelText("소모임 장소")).toBeNull();
+    ["봉사", "목장", "선교", "카풀"].forEach((label) =>
+      expect(screen.queryByText(label)).toBeNull(),
     );
 
     fireEvent(nameInput, "focus");
@@ -231,8 +226,6 @@ describe("modal smoke screens", () => {
       screen.getByLabelText("소모임 설명"),
       "함께 말씀을 나누는 모임입니다.",
     );
-    fireEvent.changeText(screen.getByLabelText("소모임 일정"), "매주 토요일");
-    fireEvent.changeText(screen.getByLabelText("소모임 장소"), "교육관 2층");
     fireEvent.press(screen.getAllByText("소모임 개설")[1]);
 
     await waitFor(() =>
@@ -256,14 +249,51 @@ describe("modal smoke screens", () => {
 
     fireEvent.press(screen.getByText("20명"));
     expect(capacityInput.props.value).toBe("20");
+  });
 
-    fireEvent.press(screen.getByText("매주 토요일"));
-    expect(screen.getByLabelText("소모임 일정").props.value).toBe(
-      "매주 토요일",
+  it("fills the group edit modal with the real group, not sample values", async () => {
+    jest.mocked(useLocalSearchParams).mockReturnValue({ id: "7" } as never);
+    jest.spyOn(groupService, "fetchGroupDetail").mockResolvedValue({
+      id: "7",
+      name: "수요 기도회",
+      description: "수요일 저녁에 함께 기도합니다.",
+      categoryLabel: "기도모임",
+      currentMembers: 3,
+      maxMembers: 12,
+      status: "open",
+      leaderName: "김은혜",
+      isLeader: true,
+      isJoined: true,
+      members: ["김은혜"],
+      notices: [],
+    });
+    const update = jest
+      .spyOn(groupService, "updateGroup")
+      .mockResolvedValue({} as never);
+
+    renderWithClient(<GroupNewModal />);
+
+    await waitFor(() =>
+      expect(screen.getByLabelText("소모임 이름").props.value).toBe(
+        "수요 기도회",
+      ),
     );
+    expect(screen.getByLabelText("소모임 설명").props.value).toBe(
+      "수요일 저녁에 함께 기도합니다.",
+    );
+    expect(screen.getByLabelText("소모임 최대인원").props.value).toBe("12");
+    expect(screen.queryByDisplayValue("토요 산악회")).toBeNull();
 
-    fireEvent.press(screen.getByText("교회"));
-    expect(screen.getByLabelText("소모임 장소").props.value).toBe("교회");
+    fireEvent.press(screen.getByText("변경사항 저장"));
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledWith({
+        groupId: "7",
+        name: "수요 기도회",
+        description: "수요일 저녁에 함께 기도합니다.",
+        category: "pray",
+        maxMembers: 12,
+      }),
+    );
   });
 
   it("clears the preset chip highlight once capacity leaves the preset values", () => {

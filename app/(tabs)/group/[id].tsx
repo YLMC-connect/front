@@ -120,7 +120,7 @@ export default function GroupDetailScreen() {
   const isClosed = variant
     ? variant === "leader-closed" || variant === "non-closed"
     : group.status === "closed";
-  const current = isClosed ? group.maxMembers : group.currentMembers;
+  const current = group.currentMembers;
   const leaderName = variant && !isLeader ? "한지수" : group.leaderName;
 
   return (
@@ -192,9 +192,7 @@ export default function GroupDetailScreen() {
                 <DetailAction
                   icon="edit"
                   label="수정"
-                  onPress={() =>
-                    router.push(`/modal/group-new?id=${id}&designVariant=edit`)
-                  }
+                  onPress={() => router.push(`/modal/group-new?id=${id}`)}
                 />
                 <DetailAction
                   testID="group-notice-open-create"
@@ -265,7 +263,7 @@ export default function GroupDetailScreen() {
               <View key={name} style={styles.memberItem}>
                 <View>
                   <Avatar name={name} size={48} />
-                  {index === 0 ? (
+                  {index === 0 && name === group.leaderName ? (
                     <View style={styles.crown}>
                       <AppIcon
                         name="star"

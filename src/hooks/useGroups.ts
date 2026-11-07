@@ -52,12 +52,18 @@ export function useGroupOverview() {
     [query.data],
   );
 
+  const myGroups = useMemo(
+    () => query.data?.pages[0]?.myGroups ?? [],
+    [query.data],
+  );
+
   return {
     ...query,
     data: query.data
       ? {
           groups: allGroups,
           services,
+          myGroups,
         }
       : undefined,
   };
@@ -81,6 +87,7 @@ export function useGroupDetail(id: string) {
   return useQuery({
     queryKey: queryKeys.group.detail(id),
     queryFn: () => fetchGroupDetail(id),
+    enabled: Boolean(id),
   });
 }
 

@@ -1,11 +1,6 @@
 import { useRouter } from "expo-router";
-import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Screen } from "../layout/Screen";
 import { Empty, ErrorState, TopBar } from "../ui";
 import { theme } from "../../constants/theme";

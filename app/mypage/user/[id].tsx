@@ -1,6 +1,7 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Screen } from "../../../src/components/layout/Screen";
 import { TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";

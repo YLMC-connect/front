@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
   Card,

@@ -1,5 +1,6 @@
 import { AppIcon } from "@/components/ui/app-icon";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "@/components/ui/text";
 import Animated, {
   Extrapolation,
   interpolate,

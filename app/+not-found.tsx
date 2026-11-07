@@ -1,5 +1,6 @@
 import { router } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Screen } from "../src/components/layout/Screen";
 import { AppIcon } from "../src/components/ui/app-icon";

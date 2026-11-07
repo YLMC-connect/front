@@ -12,13 +12,12 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
   useWindowDimensions,
   View,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native";
+import { Text, TextInput } from "@/components/ui/text";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,

@@ -1,5 +1,6 @@
 import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet } from "react-native";
+import { Text } from "@/components/ui/text";
 import { theme } from "../../constants/theme";
 import { MotionPressable } from "./motion";
 

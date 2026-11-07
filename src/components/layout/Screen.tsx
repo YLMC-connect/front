@@ -6,11 +6,11 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Text,
   View,
   type StyleProp,
   type ViewStyle,
 } from "react-native";
+import { Text } from "@/components/ui/text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { theme } from "../../constants/theme";
 import { SCREEN_HEADER_VERTICAL_PADDING } from "../ui/screen-header";

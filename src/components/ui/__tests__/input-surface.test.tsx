@@ -115,7 +115,8 @@ describe("InputSurface (TextField · Textarea · ModalFormTextInput · AuthInput
   it("puts 8 between a TextField label and its input", () => {
     render(<TextField testID="tf" label="이름" />);
 
-    const field = screen.getByText("이름").parent?.parent;
+    // 글자 → RN Text → 공통 Text(Pretendard) → 라벨과 입력을 묶은 칸
+    const field = screen.getByText("이름").parent?.parent?.parent;
     expect(field).toBeTruthy();
     expect(StyleSheet.flatten(field!.props.style)).toMatchObject({ gap: 8 });
   });

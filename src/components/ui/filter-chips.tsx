@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
-  Text,
   type StyleProp,
   View,
   type ViewStyle,
 } from "react-native";
+import { Text } from "@/components/ui/text";
 import Animated, {
   useAnimatedStyle,
   useReducedMotion,

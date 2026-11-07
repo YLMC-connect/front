@@ -317,6 +317,7 @@ const styles = StyleSheet.create({
     paddingBottom: 6,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   rowBorder: {
@@ -349,6 +350,7 @@ const styles = StyleSheet.create({
   kickText: {
     color: theme.colors.dangerText,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   bottomBar: {

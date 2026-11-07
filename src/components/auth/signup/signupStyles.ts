@@ -13,6 +13,7 @@ export const styles = StyleSheet.create({
     marginTop: 6,
     color: theme.colors.textMuted,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
   },
   bottom: {
     position: "absolute",
@@ -52,6 +53,7 @@ export const styles = StyleSheet.create({
   sectionBadgeText: {
     color: theme.colors.primaryStrong,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   sectionTitle: {
@@ -101,11 +103,13 @@ export const styles = StyleSheet.create({
   checkButtonText: {
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   checkButtonTextVerified: {
     color: theme.colors.primaryStrong,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   passwordRulesRow: {
@@ -123,6 +127,7 @@ export const styles = StyleSheet.create({
   ruleText: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.medium,
   },
   ruleTextPass: {
@@ -183,6 +188,7 @@ export const styles = StyleSheet.create({
   termsAllText: {
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   termsList: {
@@ -208,6 +214,7 @@ export const styles = StyleSheet.create({
   termsItemText: {
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
   },
   termsRequired: {
     color: theme.colors.primaryStrong,
@@ -224,6 +231,7 @@ export const styles = StyleSheet.create({
   termsDetailText: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   checkBadge: {
     borderWidth: 1.5,
@@ -246,10 +254,12 @@ export const styles = StyleSheet.create({
   submitText: {
     color: theme.colors.onPrimary,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   error: {
     color: theme.colors.dangerText,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
   },
 });

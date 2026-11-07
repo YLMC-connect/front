@@ -162,5 +162,6 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontWeight: theme.fontWeight.bold,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
   },
 });

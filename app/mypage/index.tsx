@@ -235,6 +235,7 @@ const styles = StyleSheet.create({
   name: {
     color: theme.colors.text,
     fontSize: theme.typography.heading.fontSize,
+    lineHeight: theme.typography.heading.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   church: {
@@ -250,6 +251,7 @@ const styles = StyleSheet.create({
   editText: {
     color: theme.colors.primaryStrong,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   menuCard: {
@@ -273,6 +275,7 @@ const styles = StyleSheet.create({
     flex: 1,
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.medium,
   },
   dangerText: {
@@ -284,5 +287,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
 });

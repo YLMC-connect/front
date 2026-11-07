@@ -120,6 +120,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.layout.screenX,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   stack: {
     paddingHorizontal: theme.layout.screenX,
@@ -138,10 +139,12 @@ const styles = StyleSheet.create({
     marginTop: 6,
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   meta: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
 });

@@ -427,6 +427,7 @@ const styles = StyleSheet.create({
   },
   signupCardText: {
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
   },
   signupLink: {
     paddingVertical: 4,
@@ -435,6 +436,7 @@ const styles = StyleSheet.create({
   signupLinkText: {
     color: theme.colors.primaryStrong,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
 });

@@ -208,6 +208,7 @@ const styles = StyleSheet.create({
   deleteAction: {
     color: theme.colors.dangerText,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   body: {
@@ -225,6 +226,7 @@ const styles = StyleSheet.create({
   error: {
     color: theme.colors.dangerText,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     paddingHorizontal: 22,
     paddingBottom: 12,
   },

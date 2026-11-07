@@ -354,6 +354,7 @@ const styles = StyleSheet.create({
   saveText: {
     color: theme.colors.primary,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   saveMuted: {
@@ -382,6 +383,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   readonlyHint: {
@@ -397,6 +399,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.typography.label.fontWeight,
   },
   input: {
@@ -419,6 +422,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   passwordFields: {

@@ -297,6 +297,7 @@ const styles = StyleSheet.create({
     marginTop: 9,
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   desc: {

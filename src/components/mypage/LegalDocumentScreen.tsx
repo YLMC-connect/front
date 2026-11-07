@@ -102,6 +102,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   section: {
     marginBottom: 22,
@@ -110,6 +111,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   text: {

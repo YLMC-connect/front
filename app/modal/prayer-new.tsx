@@ -229,5 +229,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     color: theme.colors.dangerText,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
 });

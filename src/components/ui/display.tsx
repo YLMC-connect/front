@@ -387,7 +387,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
   },
-  coverLabelText: { fontSize: 13, fontWeight: "800" },
+  coverLabelText: {
+    ...theme.typography.label,
+    fontWeight: theme.fontWeight.bold,
+  },
   chip: {
     minHeight: theme.size.chipHeight,
     paddingHorizontal: 14,

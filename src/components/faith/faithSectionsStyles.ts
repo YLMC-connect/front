@@ -25,6 +25,7 @@ export const styles = StyleSheet.create({
   segmentText: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   segmentTextOn: {
@@ -124,6 +125,7 @@ export const styles = StyleSheet.create({
   },
   roomActionText: {
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   dayBadge: {
@@ -248,11 +250,13 @@ export const styles = StyleSheet.create({
   metricLabel: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   metricValue: {
     marginTop: 3,
     color: theme.colors.text,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   courseCard: {
@@ -284,6 +288,7 @@ export const styles = StyleSheet.create({
     marginTop: 7,
     color: theme.colors.primaryStrong,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   openCourseActionRow: {
@@ -306,6 +311,7 @@ export const styles = StyleSheet.create({
   courseFooterHint: {
     flex: 1,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     color: theme.colors.textMuted,
   },
 });

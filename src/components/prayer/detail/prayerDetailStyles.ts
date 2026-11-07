@@ -52,6 +52,7 @@ export const styles = StyleSheet.create({
   sectionTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   prayerCard: {
@@ -71,11 +72,13 @@ export const styles = StyleSheet.create({
   authorName: {
     color: theme.colors.text,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   dot: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   chipRow: {
     flexDirection: "row",
@@ -85,6 +88,7 @@ export const styles = StyleSheet.create({
   prayerTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   prayerText: {
@@ -107,6 +111,7 @@ export const styles = StyleSheet.create({
   answerLabel: {
     color: theme.colors.primaryStrong,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   answerText: {
@@ -122,6 +127,7 @@ export const styles = StyleSheet.create({
   smallMuted: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   completeHint: {
@@ -129,6 +135,7 @@ export const styles = StyleSheet.create({
     textAlign: "center",
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   pillAction: {
     flexDirection: "row",
@@ -145,6 +152,7 @@ export const styles = StyleSheet.create({
   pillActionText: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   pillActionTextActive: {
@@ -189,6 +197,7 @@ export const styles = StyleSheet.create({
   statusTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.heading.fontSize,
+    lineHeight: theme.typography.heading.lineHeight,
     fontWeight: "900",
   },
   stats: {
@@ -209,11 +218,13 @@ export const styles = StyleSheet.create({
   statLabel: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   statValue: {
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   statusListHead: {
@@ -224,6 +235,7 @@ export const styles = StyleSheet.create({
   statusListTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: "900",
   },
   pendingHead: {
@@ -244,6 +256,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   empty: {
@@ -262,6 +275,7 @@ export const styles = StyleSheet.create({
   emptyTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   emptyDesc: {

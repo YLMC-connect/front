@@ -213,6 +213,7 @@ export default function MarketNewModal() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View>
             <Section
+              card
               label="사진"
               required
               hint={
@@ -255,7 +256,23 @@ export default function MarketNewModal() {
               </ScrollView>
             </Section>
 
-            <Section label="카테고리" required>
+            <Section
+              card
+              label="제목"
+              required
+              hint={`${values.title.length}/30`}
+            >
+              <FormInput
+                style={styles.cardField}
+                accessibilityLabel="나눔 제목"
+                value={values.title}
+                onChangeText={(title) => update("title", title)}
+                maxLength={30}
+                placeholder="제목을 입력해주세요 (최대 30자)"
+              />
+            </Section>
+
+            <Section card label="카테고리" required>
               <View style={styles.chips}>
                 {categories.map((category) => {
                   const selected = values.category === category.key;
@@ -282,17 +299,7 @@ export default function MarketNewModal() {
               </View>
             </Section>
 
-            <Section label="제목" required hint={`${values.title.length}/30`}>
-              <FormInput
-                accessibilityLabel="나눔 제목"
-                value={values.title}
-                onChangeText={(title) => update("title", title)}
-                maxLength={30}
-                placeholder="제목을 입력해주세요 (최대 30자)"
-              />
-            </Section>
-
-            <Section label="물품 상태" required>
+            <Section card label="물품 상태" required>
               <View style={styles.conditionList}>
                 {conditions.map((condition) => (
                   <RadioRow
@@ -306,11 +313,13 @@ export default function MarketNewModal() {
             </Section>
 
             <Section
+              card
               label="상세 설명"
               required
               hint={`${values.description.length}/500`}
             >
               <FormInput
+                style={styles.cardField}
                 accessibilityLabel="나눔 상세 설명"
                 multiline
                 value={values.description}
@@ -323,8 +332,9 @@ export default function MarketNewModal() {
               />
             </Section>
 
-            <Section label="수령 장소" required>
+            <Section card label="수령 장소" required>
               <FormInput
+                style={styles.cardField}
                 accessibilityLabel="나눔 수령 장소"
                 value={values.location}
                 onChangeText={(location) => update("location", location)}
@@ -382,9 +392,9 @@ const styles = StyleSheet.create({
     paddingTop: theme.layout.screenX,
   },
   body: { paddingBottom: 112 },
+  cardField: { marginHorizontal: 0 },
   photoRow: {
     gap: theme.spacing[2],
-    paddingHorizontal: theme.layout.screenX,
   },
   chips: {
     flexDirection: "row",
@@ -392,7 +402,6 @@ const styles = StyleSheet.create({
     columnGap: theme.spacing[2],
     // 위아래로 늘린 누르는 곳(6)이 윗줄과 겹치지 않게 줄 간격을 12로 둔다.
     rowGap: theme.spacing[3],
-    paddingHorizontal: theme.layout.screenX,
   },
   // 디자인 시스템 칩: 높이 32, 안쪽 0×14, 12/500, radius-full.
   chip: {
@@ -411,6 +420,7 @@ const styles = StyleSheet.create({
   chipText: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.medium,
   },
   chipTextOn: {
@@ -419,7 +429,6 @@ const styles = StyleSheet.create({
   },
   conditionList: {
     gap: theme.spacing[2],
-    paddingHorizontal: theme.layout.screenX,
   },
   infoBox: {
     marginHorizontal: theme.layout.screenX,
@@ -430,6 +439,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     color: theme.colors.dangerText,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   footer: {
     position: "absolute",

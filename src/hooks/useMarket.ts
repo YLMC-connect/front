@@ -173,6 +173,7 @@ export function useMarketDetail(id: string) {
   return useQuery({
     queryKey: queryKeys.market.detail(id),
     queryFn: () => fetchMarketDetail(id),
+    enabled: Boolean(id),
   });
 }
 

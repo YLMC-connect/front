@@ -71,10 +71,14 @@ export function MotionPressable({
     );
   };
 
-  const motionStyle =
+  // Reanimated 의 AnimatedPressable 은 함수 style 을 버린다(배열로 평탄화하면 함수가 무시됨).
+  // 눌림 상태를 직접 들고 함수를 미리 풀어 일반 style 로 넘긴다.
+  const [pressed, setPressed] = useState(false);
+  const resolvedStyle =
     typeof style === "function"
-      ? (state: PressableStateCallbackType) => [style(state), animatedStyle]
-      : [style, animatedStyle];
+      ? style({ pressed } as PressableStateCallbackType)
+      : style;
+  const motionStyle = [resolvedStyle, animatedStyle];
 
   return (
     <AnimatedPressable
@@ -82,10 +86,12 @@ export function MotionPressable({
       disabled={disabled}
       onPressIn={(event) => {
         if (!disabled) updateScale(pressedScale);
+        setPressed(true);
         onPressIn?.(event);
       }}
       onPressOut={(event) => {
         if (!disabled) updateScale(1);
+        setPressed(false);
         onPressOut?.(event);
       }}
       style={motionStyle}

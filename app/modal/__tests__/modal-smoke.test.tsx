@@ -157,9 +157,8 @@ describe("modal smoke screens", () => {
   });
 
   it("fills the market edit modal with the real post, not sample values", async () => {
-    jest
-      .mocked(useLocalSearchParams)
-      .mockReturnValue({ id: "42", designVariant: "edit" } as never);
+    // 릴리스 빌드처럼 designVariant 없이 id 만 넘어와도 수정 화면이어야 한다
+    jest.mocked(useLocalSearchParams).mockReturnValue({ id: "42" } as never);
     jest.spyOn(marketService, "fetchMarketDetail").mockResolvedValue({
       id: "42",
       thumbSeed: 1,
@@ -188,7 +187,12 @@ describe("modal smoke screens", () => {
     expect(screen.getByLabelText("나눔 상세 설명").props.value).toBe(
       "한 번 입은 패딩입니다.",
     );
-    expect(screen.getByText("사진 1/5")).toBeTruthy();
+    expect(screen.getByText("나눔 수정")).toBeTruthy();
+    // 수정 API 가 사진을 받지 않아 사진은 보기만 한다
+    expect(screen.getByText("사진은 수정할 수 없어요")).toBeTruthy();
+    expect(screen.getByTestId("market-photo-0")).toBeTruthy();
+    expect(screen.queryByTestId("market-photo-add")).toBeNull();
+    expect(screen.queryByLabelText("사진 1 삭제")).toBeNull();
     expect(
       screen.queryByDisplayValue("아이 장난감 정리하면서 나눔합니다"),
     ).toBeNull();

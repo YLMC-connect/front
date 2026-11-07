@@ -735,6 +735,33 @@ describe("v1 tab smoke screens", () => {
     jest.mocked(useLocalSearchParams).mockReturnValue({});
   });
 
+  it("keeps loading pages when the sharing filter has no match yet", async () => {
+    const item = (id: string, status: MarketOverviewItem["status"]) => ({
+      id,
+      thumbSeed: 0,
+      title: `나눔 ${id}`,
+      authorName: "김은혜",
+      createdLabel: "방금 전",
+      status,
+      category: "book" as const,
+      isMine: false,
+    });
+    const fetchPage = jest
+      .spyOn(marketService, "fetchMarketOverviewPage")
+      .mockImplementation(async (params) =>
+        params?.lastId == null
+          ? { items: [item("9", "done")], hasNext: true, nextCursor: 9 }
+          : { items: [item("8", "sharing")], hasNext: false, nextCursor: null },
+      );
+    renderWithClient(<MarketScreen />);
+
+    expect(await screen.findByText("나눔 8")).toBeTruthy();
+    expect(fetchPage).toHaveBeenLastCalledWith({
+      lastId: 9,
+      category: undefined,
+    });
+  });
+
   it("shows only owned posts in the my market segment", async () => {
     jest.mocked(useLocalSearchParams).mockReturnValue({ status: "mine" });
     renderWithClient(<MarketScreen />);

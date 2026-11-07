@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.borderButton,
     paddingHorizontal: 14,
   },
   chipOn: {

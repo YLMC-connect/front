@@ -7,7 +7,7 @@ const flat = (testID: string) =>
   StyleSheet.flatten(screen.getByTestId(testID).props.style);
 
 describe("Checkbox", () => {
-  it("draws a 22px box with a 1.5px borderStrong edge and a full-row 44 touch area", () => {
+  it("draws a 22px box with a 1.5px borderButton edge and a full-row 44 touch area", () => {
     render(<Checkbox testID="save-id" checked={false} label="아이디 저장" />);
 
     expect(flat("save-id")).toMatchObject({
@@ -20,7 +20,7 @@ describe("Checkbox", () => {
       height: 22,
       borderRadius: 6,
       borderWidth: 1.5,
-      borderColor: theme.colors.borderStrong,
+      borderColor: theme.colors.borderButton,
     });
     expect(flat("save-id-mark-fill")).toMatchObject({
       backgroundColor: theme.colors.primary,
@@ -127,7 +127,7 @@ describe("RadioRow", () => {
       minHeight: 54,
       borderRadius: theme.radius.sm,
       borderWidth: 1,
-      borderColor: theme.colors.border,
+      borderColor: theme.colors.borderButton,
       backgroundColor: theme.colors.surface,
     });
     expect(flat("day-mon-selected-layer")).toMatchObject({ opacity: 0 });

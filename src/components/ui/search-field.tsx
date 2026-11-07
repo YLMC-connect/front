@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     gap: theme.spacing["2"],
     borderRadius: theme.radius.sm,
     borderWidth: 1,
-    borderColor: theme.colors.borderStrong,
+    borderColor: theme.colors.borderButton,
     backgroundColor: theme.colors.surface,
   },
   containerFocused: {

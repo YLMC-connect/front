@@ -23,7 +23,7 @@ describe("SearchField", () => {
       outlineWidth: 0,
     });
     expect(StyleSheet.flatten(container.props.style)).toMatchObject({
-      borderColor: theme.colors.borderStrong,
+      borderColor: theme.colors.borderButton,
       borderRadius: theme.radius.sm,
     });
 
@@ -36,7 +36,7 @@ describe("SearchField", () => {
 
     fireEvent(input, "blur");
     expect(StyleSheet.flatten(container.props.style)).toMatchObject({
-      borderColor: theme.colors.borderStrong,
+      borderColor: theme.colors.borderButton,
     });
   });
 });

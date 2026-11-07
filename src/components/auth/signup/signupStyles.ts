@@ -227,7 +227,7 @@ export const styles = StyleSheet.create({
   },
   checkBadge: {
     borderWidth: 1.5,
-    borderColor: theme.colors.borderStrong,
+    borderColor: theme.colors.borderButton,
     backgroundColor: theme.colors.surface,
     alignItems: "center",
     justifyContent: "center",

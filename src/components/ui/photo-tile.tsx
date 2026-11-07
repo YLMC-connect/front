@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surfaceSubtle,
     borderWidth: 1,
     borderStyle: "dashed",
-    borderColor: theme.colors.borderStrong,
+    borderColor: theme.colors.borderButton,
   },
   photo: {
     backgroundColor: theme.colors.thumb2,

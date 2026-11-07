@@ -36,7 +36,7 @@ const inputSurfaceStyles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     borderRadius: theme.radius.sm,
     borderWidth: 1,
-    borderColor: theme.colors.borderStrong,
+    borderColor: theme.colors.borderButton,
   },
   borderReadOnly: { borderColor: theme.colors.border },
   borderError: { borderColor: theme.colors.dangerText },
@@ -68,7 +68,7 @@ const inputSurfaceStyles = StyleSheet.create({
 /**
  * 입력창 겉모양 하나(디자인 시스템 Input). TextField·Textarea·ModalFormTextInput·AuthInput 이 함께 쓴다.
  * 테두리·포커스 고리는 겹쳐 그리는 층이라 상태가 바뀌어도 안쪽 글자 자리가 움직이지 않는다.
- * - 기본: surface + 1px borderStrong, radius.sm, 안쪽 16
+ * - 기본: surface + 1px borderButton(버튼과 같은 테두리), radius.sm, 안쪽 16
  * - 포커스: 2px primary + 바깥 3px primarySubtle 고리 (오류일 때는 2px dangerText)
  * - 오류: dangerText 테두리
  * - 읽기 전용: surfaceSubtle + border
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
     minHeight: 104,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.borderStrong,
+    borderColor: theme.colors.borderButton,
     borderStyle: "dashed",
     alignItems: "center",
     justifyContent: "center",

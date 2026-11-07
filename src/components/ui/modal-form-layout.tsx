@@ -1,13 +1,12 @@
 import { useState, type ReactNode } from "react";
 import {
   StyleSheet,
-  Text,
-  TextInput,
   type TextInputProps,
   type TextStyle,
   View,
   type ViewStyle,
 } from "react-native";
+import { Text, TextInput } from "@/components/ui/text";
 import { theme } from "../../constants/theme";
 import { InputErrorText, InputSurface, inputTextStyles } from "./inputs";
 

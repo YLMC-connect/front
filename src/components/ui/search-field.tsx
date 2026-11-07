@@ -1,6 +1,7 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useState } from "react";
-import { StyleSheet, TextInput, type TextInputProps, View } from "react-native";
+import { StyleSheet, type TextInputProps, View } from "react-native";
+import { TextInput } from "@/components/ui/text";
 import { theme } from "../../constants/theme";
 
 export const SEARCH_FIELD_STICKY_HEIGHT = 56;

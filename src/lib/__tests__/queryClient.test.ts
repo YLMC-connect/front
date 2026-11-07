@@ -1,6 +1,8 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClient } from "@tanstack/react-query";
 import { ApiError } from "../apiClient";
 import {
+  clearQueryCache,
   queryClient,
   shouldPersistQuery,
   shouldRetryQuery,
@@ -143,5 +145,17 @@ describe("queryClient error reporting", () => {
       "group",
       "kick",
     ]);
+  });
+});
+
+describe("clearQueryCache", () => {
+  it("메모리 캐시와 기기에 저장된 캐시를 모두 지운다", async () => {
+    queryClient.setQueryData(queryKeys.member.me(), { id: "u1" });
+    await AsyncStorage.setItem("REACT_QUERY_OFFLINE_CACHE", "{}");
+
+    await clearQueryCache();
+
+    expect(queryClient.getQueryCache().getAll()).toHaveLength(0);
+    expect(await AsyncStorage.getItem("REACT_QUERY_OFFLINE_CACHE")).toBeNull();
   });
 });

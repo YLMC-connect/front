@@ -7,9 +7,9 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
+import { Text } from "@/components/ui/text";
 import Animated, {
   Easing,
   FadeIn,

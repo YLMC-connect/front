@@ -23,6 +23,8 @@ type AuthSessionManagerOptions = {
   adapter: AuthAdapter;
   tokenStore: AuthTokenStore;
   state: AuthStateWriter;
+  /** 이전 사용자의 화면 데이터(쿼리 캐시·기기 저장분)를 지운다. 세션이 끝나거나 새로 시작될 때 부른다. */
+  clearUserData: () => Promise<void>;
 };
 
 function isUnauthorized(error: unknown) {
@@ -38,6 +40,7 @@ export function createAuthSessionManager({
   adapter,
   tokenStore,
   state,
+  clearUserData,
 }: AuthSessionManagerOptions) {
   let refreshPromise: Promise<AuthSession> | null = null;
 
@@ -52,12 +55,16 @@ export function createAuthSessionManager({
       await tokenStore.clear();
     } finally {
       state.setAnonymous();
+      await clearUserData().catch(() => undefined);
     }
   };
 
   const startSession = async (sessionPromise: Promise<AuthSession>) => {
     try {
-      return await persistSession(await sessionPromise);
+      const session = await sessionPromise;
+      // 다른 사용자가 로그인해도 이전 사용자의 데이터가 보이지 않게 새 세션 시작 전에 비운다.
+      await clearUserData().catch(() => undefined);
+      return await persistSession(session);
     } catch (error) {
       await logout().catch(() => undefined);
       throw error;

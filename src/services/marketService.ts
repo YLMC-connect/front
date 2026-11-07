@@ -31,6 +31,7 @@ export interface MarketDataSource {
   getOverviewPage?(params?: {
     lastId?: number | null;
     size?: number;
+    category?: Exclude<MarketCategory, "all">;
   }): Promise<MarketOverviewPage>;
   getMyOverviewPage?(params?: {
     lastId?: number | null;
@@ -50,7 +51,11 @@ export interface MarketDataSource {
 export function createMarketService(dataSource: MarketDataSource) {
   return {
     fetchOverview: () => dataSource.getOverview(),
-    fetchOverviewPage: (params?: { lastId?: number | null; size?: number }) => {
+    fetchOverviewPage: (params?: {
+      lastId?: number | null;
+      size?: number;
+      category?: Exclude<MarketCategory, "all">;
+    }) => {
       if (dataSource.getOverviewPage) {
         return dataSource.getOverviewPage(params);
       }

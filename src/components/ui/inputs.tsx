@@ -8,11 +8,10 @@ import {
   ScrollView,
   StyleSheet,
   type StyleProp,
-  Text,
-  TextInput,
   View,
   type ViewStyle,
 } from "react-native";
+import { Text, TextInput } from "@/components/ui/text";
 import { theme } from "../../constants/theme";
 import { AppText } from "./app-text";
 import { MotionEnter } from "./motion";

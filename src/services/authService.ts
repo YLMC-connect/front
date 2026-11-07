@@ -1,6 +1,7 @@
 import { authAdapter } from "./authAdapter";
 import { createAuthSessionManager } from "./authSessionService";
 import { configureAuthRecovery } from "../lib/authRecovery";
+import { clearQueryCache } from "../lib/queryClient";
 import { secureTokenStore } from "../lib/secureStore";
 import { useAuthStore } from "../store/authStore";
 import type {
@@ -24,6 +25,7 @@ const sessionManager = createAuthSessionManager({
     setAnonymous: () => useAuthStore.getState().setAnonymous(),
     setUnavailable: () => useAuthStore.getState().setUnavailable(),
   },
+  clearUserData: clearQueryCache,
 });
 
 export async function login(input: LoginInput): Promise<AuthSession> {

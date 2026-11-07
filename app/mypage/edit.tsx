@@ -6,10 +6,10 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 import { formatPhoneNumber } from "../../src/components/auth/signup/signupForm";
+import { Text } from "@/components/ui/text";
 import { Screen } from "../../src/components/layout/Screen";
 import { Avatar, TopBar } from "../../src/components/ui";
 import { ModalFormTextInput } from "../../src/components/ui/modal-form-layout";

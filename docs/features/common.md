@@ -85,7 +85,7 @@
 - **도메인 목록은 `.task-flow.conf`** — `home` 포함. INDEX 표는 이 목록 + Issues 라벨.
 - **공유용 mock 웹은 공식 제품이 아님** — `export:web:mock` 정적 export. 검증 기준은 Expo Dev Client. (코드는 별도 PR)
 - **API client `format: "json"` 은 opt-in** — 기본은 `{ code, message, data }`에서 `data`만 반환. login/refresh도 이 envelope를 쓴다.
-- **본문 글꼴 Pretendard / 아이콘 Solar** — 화면이 글꼴·아이콘 세트를 직접 고르지 않음.
+- **본문 글꼴 Pretendard / 아이콘 Solar** — 화면이 글꼴·아이콘 세트를 직접 고르지 않음. 글자는 `AppText` 나 `@/components/ui/text` 의 `Text`·`TextInput` 으로 그린다. 이 둘이 굵기(fontWeight)에 맞는 Pretendard 파일을 고른다. react-native `Text`·`TextInput` 을 바로 쓰면 시스템 글꼴이 된다.
 - **UI 톤은 조용한 깔끔함** — 제목 bold, 카드 hairline, ZIP 픽셀 맞춤보다 톤 일관성.
 - **화면 상단 `safe area + 20px`** — 나눔 상세 이미지 overlay는 예외이며, 등록 바텀 모달(presentation: "modal")은 safe area 대신 좌우 여백(screenX=20px)과 동일한 상단 여백을 모달 자체에 적용.
 - **작성 입력은 `ModalFormTextInput` 소유** — 화면은 값·제약만.

@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
@@ -48,7 +49,6 @@ export default function MarketScreen() {
     status?: string;
   }>();
   const variant = readDesignVariant(params.designVariant);
-  const overview = useMarketOverview();
   const isEmpty = variant === "empty";
   const routeStatus =
     params.status === "all" ||
@@ -75,12 +75,12 @@ export default function MarketScreen() {
       });
     },
   );
-  const mine = useMyMarketOverview(
+  const categoryFilter =
     category === "all"
       ? undefined
-      : (category as Exclude<MarketCategory, "all">),
-    activeStatus === "mine",
-  );
+      : (category as Exclude<MarketCategory, "all">);
+  const overview = useMarketOverview(categoryFilter);
+  const mine = useMyMarketOverview(categoryFilter, activeStatus === "mine");
   const list = activeStatus === "mine" ? mine : overview;
   const isError = variant === "network-error" || list.isError;
   const sourceItems = list.data?.items ?? [];
@@ -98,7 +98,18 @@ export default function MarketScreen() {
       : statusPosts.filter(
           (post) => category === "all" || post.category === category,
         );
-  const isLoading = list.isPending && !isError && !isEmpty;
+  // "나눔중"(나눔중+예약중)은 서버 상태값 하나로 거를 수 없어 화면에서 거른다.
+  // 받은 페이지에 맞는 글이 없으면 다음 페이지를 이어 받아 빈 화면을 잘못 띄우지 않는다
+  const needsMore =
+    !isError &&
+    !isEmpty &&
+    !list.isPending &&
+    visiblePosts.length === 0 &&
+    list.hasNextPage;
+  useEffect(() => {
+    if (needsMore && !list.isFetchingNextPage) void list.fetchNextPage();
+  }, [needsMore, list]);
+  const isLoading = (list.isPending || needsMore) && !isError && !isEmpty;
 
   return (
     <StickyHeaderScreen
@@ -184,7 +195,7 @@ export default function MarketScreen() {
             ))}
           </ShareList>
         )}
-        {list.isFetchingNextPage ? (
+        {list.isFetchingNextPage && !isLoading ? (
           <View style={styles.footerLoader}>
             <ActivityIndicator color={theme.colors.primary} />
           </View>

@@ -491,8 +491,9 @@ describe("v1 tab smoke screens", () => {
           id: "prayer-overview-room-thu-pm",
           weekday: "thu",
           period: "afternoon",
-          memberCount: 19,
+          memberCount: 0,
           status: "pending",
+          applicationId: "app-9",
         },
       ],
       requests: [
@@ -1296,7 +1297,9 @@ describe("v1 tab smoke screens", () => {
   it("renders the prayer detail screen in empty state", () => {
     renderWithClient(<PrayerDetailScreen />);
 
-    expect(screen.getByText("월요일 오전 기도방")).toBeTruthy();
+    expect(screen.getByText("기도방")).toBeTruthy();
+    expect(screen.queryByText("월요일 오전 기도방")).toBeNull();
+    expect(screen.queryByText("참여중")).toBeNull();
     expect(screen.getByText("기도할 제목이 없어요")).toBeTruthy();
     expect(
       screen.getByText("새 기도제목이 승인되면 이곳에 표시됩니다."),
@@ -1443,7 +1446,12 @@ describe("v1 tab smoke screens", () => {
 
     expect(await screen.findByText("화요일 오후 기도방")).toBeTruthy();
     expect(screen.getByText("긴급 기도제목")).toBeTruthy();
-    expect(screen.getByText("오늘 기도 완료")).toBeTruthy();
+    expect(screen.getByText("이번 주 기도 완료")).toBeTruthy();
+    expect(screen.getByText("이번 주 완료 3명 / 전체 4명")).toBeTruthy();
+    expect(screen.getByText("긴급 1건")).toBeTruthy();
+    expect(screen.getAllByText("10월 28일").length).toBeGreaterThan(0);
+    expect(screen.queryByText("오늘")).toBeNull();
+    expect(screen.getByText("화")).toBeTruthy();
     expect(screen.getByText("75%")).toBeTruthy();
 
     // Toggle prayer completion
@@ -1489,8 +1497,8 @@ describe("v1 tab smoke screens", () => {
     jest
       .spyOn(prayerService, "fetchPrayerCohortStatus")
       .mockResolvedValueOnce(completedStatus);
-    fireEvent.press(screen.getByText("오늘 기도 완료"));
-    expect(await screen.findByText("오늘 기도 완료됨")).toBeTruthy();
+    fireEvent.press(screen.getByText("이번 주 기도 완료"));
+    expect(await screen.findByText("이번 주 기도 완료됨")).toBeTruthy();
 
     // Switch to answers tab
     fireEvent.press(screen.getByRole("tab", { name: "응답" }));
@@ -1508,6 +1516,78 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("김은혜")).toBeTruthy();
     expect(screen.getByText("아직 완료 전")).toBeTruthy();
     expect(screen.getByText("한수연")).toBeTruthy();
+
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
+  });
+
+  it("reads the day from a monday room name and blocks completion when canComplete is false", async () => {
+    jest.mocked(useLocalSearchParams).mockReturnValue({ id: "1" });
+    jest.spyOn(prayerService, "fetchPrayerCohortStatus").mockResolvedValue({
+      cohortId: 1,
+      cohortName: "월요일 오전 기도방",
+      weekStartDate: null,
+      scheduledDate: null,
+      myCompleted: false,
+      canComplete: false,
+      completedCount: 0,
+      notCompletedCount: 1,
+      totalMembers: 1,
+      completionRate: 0,
+      completed: [],
+      notCompleted: [],
+    });
+    jest.spyOn(prayerService, "fetchPrayerTopicBoard").mockResolvedValue({
+      emergency: [],
+      recentAnswers: [
+        {
+          id: 3,
+          categoryId: 3,
+          categoryName: "직장",
+          title: "응답 본문 없음",
+          content: "내용",
+          status: "ANSWERED",
+          rejectReason: null,
+          writerName: null,
+          mine: false,
+          emergency: false,
+          emergencyEndAt: null,
+          answerContent: null,
+          answeredAt: null,
+          createdAt: null,
+        },
+      ],
+      ongoing: [
+        {
+          id: 2,
+          categoryId: 2,
+          categoryName: "진로",
+          title: "새로운 자리 적응",
+          content: "진행 중인 기도제목입니다.",
+          status: "OPEN",
+          rejectReason: null,
+          writerName: "박성도",
+          mine: false,
+          emergency: false,
+          emergencyEndAt: null,
+          answerContent: null,
+          answeredAt: null,
+          createdAt: null,
+        },
+      ],
+    });
+
+    renderWithClient(<PrayerDetailScreen />);
+
+    expect(await screen.findByText("월요일 오전 기도방")).toBeTruthy();
+    expect(screen.getByText("월")).toBeTruthy();
+    expect(screen.queryByText("일")).toBeNull();
+    expect(screen.getByTestId("prayer-detail-complete-hint")).toBeTruthy();
+    expect(
+      screen.getByTestId("prayer-detail-complete").props.accessibilityState
+        ?.disabled,
+    ).toBe(true);
+    expect(screen.queryByText("진행 중")).toBeNull();
+    expect(screen.queryByText("기도에 응답해 주셨습니다.")).toBeNull();
 
     jest.mocked(useLocalSearchParams).mockReturnValue({});
   });
@@ -1537,7 +1617,9 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<PrayerScreen />);
     await screen.findByText("내 기도방");
 
-    expect(screen.getAllByText("기도방 보기")).toHaveLength(2);
+    expect(screen.getAllByText("기도방 보기")).toHaveLength(1);
+    expect(screen.getByText("이번 주 기도 진행")).toBeTruthy();
+    expect(screen.getByText("승인 대기")).toBeTruthy();
     expect(
       screen.getByTestId("prayer-room-prayer-overview-room-mon-am-action"),
     ).toBeTruthy();
@@ -1551,6 +1633,16 @@ describe("v1 tab smoke screens", () => {
     expect(router.push).toHaveBeenCalledWith("/prayer/apply");
     fireEvent.press(screen.getByLabelText("내 기도제목 전체보기"));
     expect(router.push).toHaveBeenCalledWith("/prayer/request");
+
+    const cancelSpy = jest
+      .spyOn(prayerService, "cancelPrayerApplication")
+      .mockResolvedValueOnce(undefined);
+    fireEvent.press(screen.getByLabelText("참여 신청 취소"));
+    expect(router.push).not.toHaveBeenCalledWith(
+      "/prayer/prayer-overview-room-thu-pm",
+    );
+    fireEvent.press(await screen.findByText("취소하기"));
+    await waitFor(() => expect(cancelSpy).toHaveBeenCalledWith("app-9"));
 
     const requestCard = screen.getByTestId(
       "prayer-request-card-prayer-overview-request-1",
@@ -1587,6 +1679,50 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("내 기도제목")).toBeTruthy();
     expect(screen.getByText("기도제목은 승인 후 공개됩니다")).toBeTruthy();
     expect(screen.getByText("응답완료 요청하기")).toBeTruthy();
+  });
+
+  it("sends the typed answer content when requesting an answer", async () => {
+    jest.spyOn(prayerService, "fetchMyPrayerTopics").mockResolvedValue([
+      {
+        id: 7,
+        categoryId: 1,
+        categoryName: "건강",
+        title: "어머니 회복",
+        content: "수술이 잘 끝나기를",
+        status: "OPEN",
+        rejectReason: null,
+        writerName: null,
+        mine: true,
+        emergency: false,
+        emergencyEndAt: null,
+        answerContent: null,
+        answeredAt: null,
+        createdAt: null,
+      },
+    ]);
+    const answerSpy = jest
+      .spyOn(prayerService, "requestPrayerTopicAnswer")
+      .mockResolvedValueOnce(undefined);
+    const alertSpy = jest.spyOn(Alert, "alert");
+    renderWithClient(<PrayerRequestScreenRoute />);
+
+    fireEvent.press(await screen.findByText("어머니 회복"));
+    expect(
+      screen.getByTestId("prayer-request").props.accessibilityState?.disabled,
+    ).toBe(true);
+    fireEvent.changeText(
+      screen.getByLabelText("응답 내용"),
+      "  수술이 잘 끝났습니다  ",
+    );
+    fireEvent.press(screen.getByTestId("prayer-request"));
+    const buttons = alertSpy.mock.calls.at(-1)?.[2] ?? [];
+    buttons.find((b) => b.text === "요청하기")?.onPress?.();
+
+    await waitFor(() =>
+      expect(answerSpy).toHaveBeenCalledWith("7", {
+        answerContent: "수술이 잘 끝났습니다",
+      }),
+    );
   });
 
   it("renders the life study detail screen", async () => {

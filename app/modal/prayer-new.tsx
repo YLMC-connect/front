@@ -1,4 +1,3 @@
-import { RadioRow } from "@/components/ui/checkbox";
 import { InfoBox } from "@/components/ui/info-box";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
@@ -26,15 +25,10 @@ import {
   usePrayerCategories,
 } from "../../src/hooks/usePrayers";
 
-const visibilityTabs = [
-  { key: "named", label: "이름 표시" },
-  { key: "anonymous", label: "익명" },
-] as const;
-
+// 익명 작성은 등록 API(categoryId·title·content)에 필드가 없어 선택지를 두지 않는다.
 type FormValues = {
   title: string;
   content: string;
-  visibility: (typeof visibilityTabs)[number]["key"];
 };
 
 export default function PrayerNewModal() {
@@ -43,12 +37,14 @@ export default function PrayerNewModal() {
   const createTopicApi = useCreatePrayerTopicApi();
   const categoriesQuery = usePrayerCategories();
   const categories = categoriesQuery.data ?? [];
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number>(1);
+  const [pickedCategoryId, setPickedCategoryId] = useState<number | null>(null);
+  // 고르기 전에는 불러온 첫 카테고리가 선택된 것으로 보이고, 그대로 전송된다.
+  const selectedCategoryId =
+    categories.find((c) => c.id === pickedCategoryId)?.id ?? categories[0]?.id;
 
   const [values, setValues] = useState<FormValues>({
     title: "",
     content: "",
-    visibility: "named",
   });
   const [error, setError] = useState<string>();
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
@@ -56,9 +52,7 @@ export default function PrayerNewModal() {
   const isSubmitting = createTopicApi.isPending;
 
   const isDirty =
-    values.title.trim().length > 0 ||
-    values.content.trim().length > 0 ||
-    values.visibility !== "named";
+    values.title.trim().length > 0 || values.content.trim().length > 0;
 
   const close = () => {
     if (isDirty) {
@@ -79,6 +73,13 @@ export default function PrayerNewModal() {
       return;
     }
 
+    if (selectedCategoryId == null) {
+      setError("카테고리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+      void categoriesQuery.refetch();
+      return;
+    }
+    const categoryId = selectedCategoryId;
+
     const onComplete = () => {
       if (roomId) {
         router.replace({
@@ -97,12 +98,6 @@ export default function PrayerNewModal() {
           : "기도제목을 등록하지 못했습니다.",
       );
     };
-
-    const categoryId =
-      categories.length > 0
-        ? (categories.find((c) => c.id === selectedCategoryId)?.id ??
-          categories[0].id)
-        : selectedCategoryId;
 
     createTopicApi.mutate(
       {
@@ -145,32 +140,12 @@ export default function PrayerNewModal() {
                     label: category.categoryName,
                   }))}
                   active={String(selectedCategoryId)}
-                  onChange={(key) => setSelectedCategoryId(Number(key))}
+                  onChange={(key) => setPickedCategoryId(Number(key))}
                   testIDPrefix="prayer-form-category"
                   wrap
                 />
               </Section>
             ) : null}
-
-            <Section label="작성자 표시" required>
-              <View style={styles.optionRow}>
-                {visibilityTabs.map((option) => (
-                  <RadioRow
-                    key={option.key}
-                    label={option.label}
-                    onPress={() => {
-                      setError(undefined);
-                      setValues((current) => ({
-                        ...current,
-                        visibility: option.key,
-                      }));
-                    }}
-                    selected={values.visibility === option.key}
-                    style={styles.option}
-                  />
-                ))}
-              </View>
-            </Section>
 
             <Section label="제목" required hint={`${values.title.length}/30`}>
               <FormInput
@@ -245,14 +220,6 @@ const styles = StyleSheet.create({
     paddingTop: theme.layout.screenX,
   },
   body: { paddingBottom: 112 },
-  optionRow: {
-    flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: theme.layout.screenX,
-  },
-  option: {
-    flex: 1,
-  },
   infoBox: {
     marginHorizontal: theme.layout.screenX,
     marginTop: 22,

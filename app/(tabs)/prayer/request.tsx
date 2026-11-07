@@ -15,6 +15,8 @@ import {
   Badge,
   Empty,
   FloatingBottomBar,
+  ModalFormSection,
+  ModalFormTextInput,
   MotionEnter,
   motionStaggerDelay,
   TopBar,
@@ -47,6 +49,7 @@ const topicStatusLabel: Record<
 export default function PrayerRequestScreenRoute() {
   const requestAnswerMutation = useRequestPrayerTopicAnswer();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [answerContent, setAnswerContent] = useState("");
 
   const topics = useQuery({
     queryKey: ["prayer", "my-topics", "request-screen"],
@@ -81,6 +84,9 @@ export default function PrayerRequestScreenRoute() {
       return;
     }
 
+    const answer = answerContent.trim();
+    if (!answer) return;
+
     Alert.alert(
       "기도 응답완료 요청",
       `'${selectedItem.title}' 기도제목의 응답완료를 요청하시겠습니까?`,
@@ -92,7 +98,7 @@ export default function PrayerRequestScreenRoute() {
             requestAnswerMutation.mutate(
               {
                 topicId: selectedItem.id,
-                input: { answerContent: "기도에 응답해 주셨습니다." },
+                input: { answerContent: answer },
               },
               {
                 onSuccess: () => {
@@ -101,6 +107,7 @@ export default function PrayerRequestScreenRoute() {
                     "기도 응답완료 요청이 접수되었습니다.",
                   );
                   setSelectedId(null);
+                  setAnswerContent("");
                 },
                 onError: (err) => {
                   Alert.alert(
@@ -200,10 +207,35 @@ export default function PrayerRequestScreenRoute() {
               </MotionEnter>
             ))}
           </View>
+
+          {selectedItem?.canRequestAnswer ? (
+            <View style={styles.answerSection}>
+              <ModalFormSection
+                label="응답 내용"
+                required
+                hint={`${answerContent.length}/500`}
+              >
+                <ModalFormTextInput
+                  accessibilityLabel="응답 내용"
+                  multiline
+                  maxLength={500}
+                  onChangeText={setAnswerContent}
+                  placeholder="어떻게 기도에 응답받으셨는지 나눠주세요"
+                  testID="prayer-request-answer"
+                  textAlignVertical="top"
+                  value={answerContent}
+                />
+              </ModalFormSection>
+            </View>
+          ) : null}
         </ScrollView>
 
         <FloatingBottomBar
-          disabled={!selectedItem || requestAnswerMutation.isPending}
+          disabled={
+            !selectedItem ||
+            (selectedItem.canRequestAnswer && !answerContent.trim()) ||
+            requestAnswerMutation.isPending
+          }
           label="응답완료 요청하기"
           loading={requestAnswerMutation.isPending}
           onPress={handleRequestAnswer}
@@ -236,6 +268,9 @@ const styles = StyleSheet.create({
   },
   stackEmpty: {
     justifyContent: "center",
+  },
+  answerSection: {
+    marginHorizontal: -18,
   },
   card: {
     borderRadius: theme.radius.md,

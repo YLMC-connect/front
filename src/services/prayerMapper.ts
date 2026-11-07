@@ -408,15 +408,86 @@ function cohortToOverviewRoom(
   };
 }
 
-/** 내 기도방·내 기도제목은 API 행으로만 만든다. 역할이 없거나 일·토는 뺀다. */
+/** 승인 대기(PENDING) 신청만 기도방 행으로 만든다. 값 형식이 다르면 뺀다. */
+function applicationToOverviewRoom(
+  application: PrayerApplicationDto,
+): PrayerOverviewRoom | null {
+  if (application.status !== "PENDING") return null;
+  const applicationId = readInteger(application.id);
+  const cohortId = readInteger(application.cohortId);
+  const yoil = readInteger(application.yoil);
+  const weekday = yoil == null ? undefined : weekdayFromYoil(yoil);
+  const period =
+    typeof application.timeSlot === "string"
+      ? periodFromTimeSlot(application.timeSlot)
+      : undefined;
+  if (applicationId == null || cohortId == null || !weekday || !period) {
+    return null;
+  }
+  return {
+    id: String(cohortId),
+    title:
+      typeof application.cohortName === "string" && application.cohortName
+        ? application.cohortName
+        : undefined,
+    weekday,
+    period,
+    memberCount: 0,
+    status: "pending",
+    applicationId: String(applicationId),
+  };
+}
+
+/** 서버 날짜(`YYYY-MM-DD...`)를 "M월 D일"로 바꾼다. 형식이 다르면 undefined. */
+export function formatPrayerDate(value: string | null | undefined) {
+  const match = value ? /^\d{4}-(\d{2})-(\d{2})/.exec(value) : null;
+  if (!match) return undefined;
+  return `${Number(match[1])}월 ${Number(match[2])}일`;
+}
+
+const ENGLISH_DAYS: readonly [RegExp, string][] = [
+  [/\bmon/, "월"],
+  [/\btue/, "화"],
+  [/\bwed/, "수"],
+  [/\bthu/, "목"],
+  [/\bfri/, "금"],
+  [/\bsat/, "토"],
+  [/\bsun/, "일"],
+];
+
+/** 상태 응답에 요일·시간대 필드가 없어 기도방 이름에서 읽는다. 못 읽으면 빈 값. */
+export function parsePrayerRoomDayPeriod(name?: string): {
+  day: string;
+  period: string;
+} {
+  const text = (name ?? "").toLowerCase();
+  const korean = /([월화수목금토일])요일/.exec(text);
+  const day =
+    korean?.[1] ?? ENGLISH_DAYS.find(([pattern]) => pattern.test(text))?.[1];
+
+  let period = "";
+  if (/오후|저녁|\bpm\b/.test(text)) period = "오후";
+  else if (/오전|아침|새벽|\bam\b/.test(text)) period = "오전";
+  return { day: day ?? "", period };
+}
+
+/**
+ * 내 기도방·내 기도제목은 API 행으로만 만든다. 역할이 없거나 일·토는 뺀다.
+ * 승인 대기 신청은 이미 참여 중인 기도방이 아니면 `pending` 행으로 붙인다.
+ */
 export function buildPrayerOverview(
   cohorts: readonly PrayerCohortDto[],
   topics: readonly PrayerTopicDto[],
+  applications: readonly PrayerApplicationDto[] = [],
 ): PrayerOverview {
   const rooms = new Map<string, PrayerOverviewRoom>();
   for (const cohort of cohorts) {
     const room = cohortToOverviewRoom(cohort);
     if (room) rooms.set(room.id, room);
+  }
+  for (const application of applications) {
+    const room = applicationToOverviewRoom(application);
+    if (room && !rooms.has(room.id)) rooms.set(room.id, room);
   }
   return {
     rooms: [...rooms.values()],

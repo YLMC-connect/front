@@ -2,6 +2,8 @@ import { ApiError } from "../../lib/apiClient";
 import type { PrayerCohortDto, PrayerTopicDto } from "../../types/prayerApi";
 import {
   buildPrayerOverview,
+  formatPrayerDate,
+  parsePrayerRoomDayPeriod,
   readPrayerApplications,
   readPrayerCategories,
   readPrayerCohortDetail,
@@ -99,6 +101,69 @@ describe("prayerMapper", () => {
           description: "수술이 잘 끝나기를",
         },
       ],
+    });
+  });
+
+  it("adds pending applications as pending rooms unless already joined", () => {
+    const application = {
+      id: 31,
+      cohortId: 22,
+      cohortName: "목요일 오후 기도방",
+      yoil: 4,
+      timeSlot: "PM",
+      applicantName: null,
+      applicantPhone: null,
+      applyMemo: null,
+      status: "PENDING",
+      rejectReason: null,
+      createdAt: null,
+      processedAt: null,
+    };
+    const mapped = buildPrayerOverview(
+      [cohort],
+      [],
+      [
+        application,
+        { ...application, id: 32, cohortId: 15 },
+        { ...application, id: 33, cohortId: 23, status: "APPROVED" },
+        { ...application, id: 34, cohortId: 24, yoil: 6 },
+      ],
+    );
+
+    expect(mapped.rooms.map((room) => [room.id, room.status])).toEqual([
+      ["15", "joined"],
+      ["22", "pending"],
+    ]);
+    expect(mapped.rooms[1]).toEqual({
+      id: "22",
+      title: "목요일 오후 기도방",
+      weekday: "thu",
+      period: "afternoon",
+      memberCount: 0,
+      status: "pending",
+      applicationId: "31",
+    });
+  });
+
+  it("formats server dates and reads day/period from a room name", () => {
+    expect(formatPrayerDate("2026-10-28T09:00:00")).toBe("10월 28일");
+    expect(formatPrayerDate("2026-01-05")).toBe("1월 5일");
+    expect(formatPrayerDate(null)).toBeUndefined();
+    expect(parsePrayerRoomDayPeriod("월요일 오전 기도방")).toEqual({
+      day: "월",
+      period: "오전",
+    });
+    expect(parsePrayerRoomDayPeriod("일요일 저녁 기도방")).toEqual({
+      day: "일",
+      period: "오후",
+    });
+    expect(parsePrayerRoomDayPeriod("Fri PM")).toEqual({
+      day: "금",
+      period: "오후",
+    });
+    expect(parsePrayerRoomDayPeriod(undefined)).toEqual({
+      day: "",
+      period: "",
     });
   });
 

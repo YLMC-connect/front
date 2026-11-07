@@ -57,6 +57,8 @@ export interface PrayerOverviewRoom {
   completedCount?: number;
   participationRate?: number;
   status: PrayerOverviewRoomStatus;
+  /** 승인 대기 행의 참여 신청 ID. 신청 취소에 쓴다. */
+  applicationId?: string;
 }
 
 export interface PrayerRequestSummary {

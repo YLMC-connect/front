@@ -121,7 +121,40 @@ describe("httpPrayerDataSource", () => {
     expect(pathsOf(request)).toEqual([
       "/api/prayer/cohorts/my",
       "/api/prayer/topics/my",
+      "/api/prayer/applications/my",
     ]);
+  });
+
+  it("shows my pending application as a pending room", async () => {
+    const { request, dataSource } = setup();
+    request
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        {
+          id: 31,
+          cohortId: 16,
+          cohortName: "목요일 오후 기도방",
+          yoil: 4,
+          timeSlot: "PM",
+          status: "PENDING",
+        },
+      ]);
+
+    await expect(dataSource.getOverview()).resolves.toEqual({
+      rooms: [
+        {
+          id: "16",
+          title: "목요일 오후 기도방",
+          weekday: "thu",
+          period: "afternoon",
+          memberCount: 0,
+          status: "pending",
+          applicationId: "31",
+        },
+      ],
+      requests: [],
+    });
   });
 
   it("returns empty lists when the member has no cohorts or topics", async () => {

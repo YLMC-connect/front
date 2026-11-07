@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../lib/queryKeys";
 import {
+  cancelPrayerApplication,
   cancelPrayerCohortCompletion,
   completePrayerCohort,
   createPrayerApplication,
   createPrayerTopicRequest,
+  fetchMyPrayerHistory,
   fetchPrayerCategories,
   fetchPrayerOverview,
   requestPrayerTopicAnswer,
@@ -57,6 +59,27 @@ export function useCreatePrayerApplication() {
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.prayer.all });
     },
+  });
+}
+
+/** 승인 대기 참여 신청 취소 mutation */
+export function useCancelPrayerApplication() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (applicationId: string) =>
+      cancelPrayerApplication(applicationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.prayer.all });
+    },
+  });
+}
+
+/** 내 중보기도 활동 이력 (현재 + 지난 활동) */
+export function useMyPrayerHistory() {
+  return useQuery({
+    queryKey: [...queryKeys.prayer.all, "my-history"],
+    queryFn: fetchMyPrayerHistory,
   });
 }
 

@@ -31,12 +31,15 @@ export function FilterChips<T extends string>({
   onChange,
   style,
   testIDPrefix,
+  wrap = false,
 }: {
   items: readonly { key: T; label: string }[];
   active: T;
   onChange: (key: T) => void;
   style?: StyleProp<ViewStyle>;
   testIDPrefix?: string;
+  /** 입력 화면용: 가로 스크롤 대신 여러 줄로 줄바꿈해 모든 선택지를 한눈에 보인다. 움직이는 표시 막대 없이 고른 칩만 칠한다. */
+  wrap?: boolean;
 }) {
   const reduceMotion = useReducedMotion();
   const [layouts, setLayouts] = useState<Partial<Record<T, FilterChipLayout>>>(
@@ -74,6 +77,41 @@ export function FilterChips<T extends string>({
     width: indicatorWidth.value,
     transform: [{ translateX: indicatorX.value }],
   }));
+
+  if (wrap) {
+    return (
+      <View
+        style={[styles.content, styles.wrapTrack, style]}
+        testID={testIDPrefix ? `${testIDPrefix}-track` : undefined}
+      >
+        {items.map((item) => {
+          const selected = item.key === active;
+          return (
+            <MotionPressable
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
+              hitSlop={{
+                top: FILTER_CHIP_HIT_SLOP,
+                bottom: FILTER_CHIP_HIT_SLOP,
+              }}
+              key={item.key}
+              onPress={() => {
+                if (!selected) onChange(item.key);
+              }}
+              style={[styles.chip, selected ? styles.chipSelected : null]}
+              testID={testIDPrefix ? `${testIDPrefix}-${item.key}` : undefined}
+            >
+              <Text
+                style={[styles.text, selected ? styles.textSelected : null]}
+              >
+                {item.label}
+              </Text>
+            </MotionPressable>
+          );
+        })}
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -173,6 +211,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignSelf: "flex-start",
     gap: theme.spacing[2],
+  },
+  wrapTrack: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    columnGap: theme.spacing[2],
   },
   surface: {
     position: "absolute",

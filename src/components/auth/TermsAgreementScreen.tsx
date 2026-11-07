@@ -18,6 +18,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Screen } from "../layout/Screen";
 import {
+  CheckboxMark,
   ErrorState,
   FLOATING_BOTTOM_BAR_INSET,
   FloatingBottomBar,
@@ -94,7 +95,7 @@ export function TermsAgreementScreen({
               onPress={toggleAll}
               style={[styles.allRow, allOn ? styles.allRowOn : null]}
             >
-              <CheckCircle on={allOn} big />
+              <CheckboxMark checked={allOn} />
               <Text style={styles.allText}>전체 동의하기</Text>
             </Pressable>
 
@@ -114,7 +115,7 @@ export function TermsAgreementScreen({
                     hitSlop={{ top: 12, bottom: 12 }}
                     style={styles.rowCheck}
                   >
-                    <CheckCircle on={agreed[term.key]} />
+                    <CheckboxMark checked={agreed[term.key]} />
                     <Text style={styles.rowLabel}>
                       <Text
                         style={
@@ -159,28 +160,6 @@ export function TermsAgreementScreen({
         <TermsSheet termKey={sheet} onClose={() => setSheet(null)} />
       </View>
     </Screen>
-  );
-}
-
-function CheckCircle({ on, big = false }: { on: boolean; big?: boolean }) {
-  const size = big ? 24 : 20;
-
-  return (
-    <View
-      style={[
-        styles.check,
-        { width: size, height: size, borderRadius: size / 2 },
-        on ? styles.checkOn : null,
-      ]}
-    >
-      {on ? (
-        <AppIcon
-          name="check"
-          size={size * 0.66}
-          color={theme.colors.onPrimary}
-        />
-      ) : null}
-    </View>
   );
 }
 
@@ -375,16 +354,6 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
     textDecorationLine: "underline",
-  },
-  check: {
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1.5,
-    borderColor: theme.colors.borderStrong,
-  },
-  checkOn: {
-    borderWidth: 0,
-    backgroundColor: theme.colors.primary,
   },
   sheetLayer: {
     ...StyleSheet.absoluteFill,

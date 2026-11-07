@@ -245,8 +245,8 @@ export default function GroupNewModal() {
                 items={categories}
                 active={values.category}
                 onChange={(category) => update("category", category)}
-                style={styles.chipScroll}
                 testIDPrefix="group-form-category"
+                wrap
               />
             </Section>
 
@@ -521,9 +521,6 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.layout.screenX,
     marginTop: 10,
     marginBottom: 8,
-  },
-  chipScroll: {
-    flexGrow: 0,
   },
   quickPresetScroll: {
     flexGrow: 0,

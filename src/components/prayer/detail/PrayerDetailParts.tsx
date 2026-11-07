@@ -243,7 +243,11 @@ export function PrayerItem({
         </View>
 
         <View style={styles.chipRow}>
-          {item.urgent ? <Badge tone="danger">긴급</Badge> : null}
+          {item.urgent ? (
+            <Badge tone="danger" icon="warning-amber">
+              긴급
+            </Badge>
+          ) : null}
           <Badge tone={item.urgent ? "warning" : "info"}>{item.category}</Badge>
         </View>
       </View>
@@ -307,7 +311,12 @@ export function PersonRow({
     <View style={styles.personRow}>
       <Avatar name={name} size={30} />
       <Text style={styles.personName}>{name}</Text>
-      <Badge tone={done ? "info" : "neutral"}>{done ? "완료" : "대기"}</Badge>
+      <Badge
+        tone={done ? "info" : "neutral"}
+        icon={done ? "check" : "schedule"}
+      >
+        {done ? "완료" : "대기"}
+      </Badge>
     </View>
   );
 }

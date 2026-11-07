@@ -3,6 +3,8 @@ import { useState } from "react";
 import {
   Alert,
   Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,7 +13,12 @@ import {
 import { formatPhoneNumber } from "../../src/components/auth/signup/signupForm";
 import { Text } from "@/components/ui/text";
 import { Screen } from "../../src/components/layout/Screen";
-import { Avatar, TopBar } from "../../src/components/ui";
+import {
+  Avatar,
+  FLOATING_BOTTOM_BAR_INSET,
+  FloatingBottomBar,
+  TopBar,
+} from "../../src/components/ui";
 import { ModalFormTextInput } from "../../src/components/ui/modal-form-layout";
 import { theme } from "../../src/constants/theme";
 import {
@@ -214,30 +221,11 @@ export default function EditProfileScreen() {
 
   return (
     <Screen scroll={false} padded={false}>
-      <View style={styles.root}>
-        <TopBar
-          title="프로필 수정"
-          close
-          onBack={() => router.back()}
-          right={
-            <Pressable
-              accessibilityRole="button"
-              disabled={!hasChange || isSaving}
-              hitSlop={{ top: 7, bottom: 7 }}
-              onPress={() => void handleSave()}
-              style={styles.saveButton}
-            >
-              <Text
-                style={[
-                  styles.saveText,
-                  (!hasChange || isSaving) && styles.saveMuted,
-                ]}
-              >
-                저장
-              </Text>
-            </Pressable>
-          }
-        />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.root}
+      >
+        <TopBar title="프로필 수정" close onBack={() => router.back()} />
         <ScrollView
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
@@ -334,7 +322,14 @@ export default function EditProfileScreen() {
             </View>
           </Pressable>
         </ScrollView>
-      </View>
+        <FloatingBottomBar
+          label="저장하기"
+          disabled={!hasChange}
+          loading={isSaving}
+          onPress={() => void handleSave()}
+          testID="profile-edit-save"
+        />
+      </KeyboardAvoidingView>
     </Screen>
   );
 }
@@ -345,20 +340,7 @@ const styles = StyleSheet.create({
   },
   body: {
     paddingHorizontal: 18,
-    paddingBottom: 28,
-  },
-  saveButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-  },
-  saveText: {
-    color: theme.colors.primary,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-  },
-  saveMuted: {
-    color: theme.colors.textDisabled,
+    paddingBottom: FLOATING_BOTTOM_BAR_INSET,
   },
   profileCard: {
     borderRadius: theme.radius.md,

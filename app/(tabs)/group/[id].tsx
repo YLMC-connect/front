@@ -20,6 +20,8 @@ import {
   DetailAction,
   DetailMiniAction,
   ErrorState,
+  FLOATING_BOTTOM_BAR_INSET,
+  FloatingBottomBar,
   Skeleton,
   TopBar,
 } from "../../../src/components/ui";
@@ -128,7 +130,10 @@ export default function GroupDetailScreen() {
       <View style={styles.root}>
         <TopBar title="소모임" back onBack={() => router.back()} />
         <ScrollView
-          contentContainerStyle={styles.body}
+          contentContainerStyle={[
+            styles.body,
+            isMember || isNonMember ? styles.bodyWithBottomBar : null,
+          ]}
           refreshControl={
             <RefreshControl
               refreshing={detail.isRefetching}
@@ -186,8 +191,8 @@ export default function GroupDetailScreen() {
             </View>
           </View>
 
-          <View style={styles.actionWrap}>
-            {isLeader ? (
+          {isLeader ? (
+            <View style={styles.actionWrap}>
               <Card style={styles.actionCard}>
                 <DetailAction
                   icon="edit"
@@ -220,38 +225,8 @@ export default function GroupDetailScreen() {
                   onPress={() => setShowDeleteConfirm(true)}
                 />
               </Card>
-            ) : isMember ? (
-              <Button
-                testID="group-leave-button"
-                variant="outline"
-                size="lg"
-                accessibilityLabel="탈퇴하기"
-                disabled={membershipBusy}
-                onPress={() => {
-                  if (variant) return;
-                  setShowLeaveConfirm(true);
-                }}
-              >
-                탈퇴하기
-              </Button>
-            ) : isNonMember ? (
-              <Button
-                testID="group-join-button"
-                size="lg"
-                accessibilityLabel={
-                  isClosed ? "모집이 마감됐어요" : "참여 신청하기"
-                }
-                disabled={isClosed}
-                loading={membershipBusy}
-                onPress={() => {
-                  if (variant || isClosed) return;
-                  joinGroupMutation.mutate();
-                }}
-              >
-                {isClosed ? "모집이 마감됐어요" : "참여 신청하기"}
-              </Button>
-            ) : null}
-          </View>
+            </View>
+          ) : null}
 
           <SectionTitle title={`멤버 ${group.members.length}명`} />
           <ScrollView
@@ -329,12 +304,47 @@ export default function GroupDetailScreen() {
         {deleteNotice.isError ? (
           <Text style={styles.noticeError}>공지 삭제에 실패했습니다.</Text>
         ) : null}
-        {membershipError ? (
-          <Text style={styles.noticeError}>
-            {membershipError instanceof Error
-              ? membershipError.message
-              : "소모임 참여 상태를 바꾸지 못했습니다."}
-          </Text>
+        {isMember || isNonMember ? (
+          <FloatingBottomBar testID="group-detail-bottom-bar">
+            {membershipError ? (
+              <Text style={styles.membershipError}>
+                {membershipError instanceof Error
+                  ? membershipError.message
+                  : "소모임 참여 상태를 바꾸지 못했습니다."}
+              </Text>
+            ) : null}
+            {isMember ? (
+              <Button
+                testID="group-leave-button"
+                variant="outline"
+                size="lg"
+                accessibilityLabel="탈퇴하기"
+                disabled={membershipBusy}
+                onPress={() => {
+                  if (variant) return;
+                  setShowLeaveConfirm(true);
+                }}
+              >
+                탈퇴하기
+              </Button>
+            ) : (
+              <Button
+                testID="group-join-button"
+                size="lg"
+                accessibilityLabel={
+                  isClosed ? "모집이 마감됐어요" : "참여 신청하기"
+                }
+                disabled={isClosed}
+                loading={membershipBusy}
+                onPress={() => {
+                  if (variant || isClosed) return;
+                  joinGroupMutation.mutate();
+                }}
+              >
+                {isClosed ? "모집이 마감됐어요" : "참여 신청하기"}
+              </Button>
+            )}
+          </FloatingBottomBar>
         ) : null}
         <ConfirmDialog
           visible={showLeaveConfirm}
@@ -427,6 +437,16 @@ const styles = StyleSheet.create({
   },
   body: {
     paddingBottom: 24,
+  },
+  bodyWithBottomBar: {
+    paddingBottom: FLOATING_BOTTOM_BAR_INSET,
+  },
+  membershipError: {
+    marginBottom: theme.spacing[2],
+    textAlign: "center",
+    color: theme.colors.dangerText,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   header: {
     paddingHorizontal: theme.layout.screenX,

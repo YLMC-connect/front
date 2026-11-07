@@ -11,7 +11,8 @@
 ## ✅ 완료
 
 - 나눔 목록 무한스크롤 및 당겨서 새로고침(Pull-to-Refresh) — `useMarketOverview`를 TanStack `useInfiniteQuery` 기반으로 전환하여 `getOverviewPage` 커서 페이징과 하단 로딩 스피너를 연동하고, `StickyHeaderScreen` 및 상세 화면 스크롤에 `RefreshControl`을 연결하여 상단 당김 새로고침 지원.
-- 나눔 게시글 수정 API 연동 — `PUT /api/share/{id}` 엔드포인트를 `httpMarketDataSource`, `marketService`, `useUpdateMarketPost` mutation 훅과 `app/modal/market-new.tsx` 수정 화면에 연결하여 제목·내용·카테고리·물품 상태를 서버와 동기화 수정 화면은 상세 조회 결과로 제목·내용·카테고리·물품 상태·사진을 채우고(수령 장소는 서버가 내려주지 않아 빈칸), 예시 값은 id 없는 디자인 미리보기에서만 쓴다.
+- 나눔 게시글 수정 API 연동 — `PUT /api/share/{id}` 엔드포인트를 `httpMarketDataSource`, `marketService`, `useUpdateMarketPost` mutation 훅과 `app/modal/market-new.tsx` 수정 화면에 연결하여 제목·내용·카테고리·물품 상태를 서버와 동기화 수정 화면은 상세 조회 결과로 제목·내용·카테고리·물품 상태·사진을 채우고(수령 장소는 서버가 내려주지 않아 빈칸), 예시 값은 id 없는 디자인 미리보기에서만 쓴다. 수정 여부는 `id` 파라미터로 정한다(`designVariant` 는 릴리스 빌드에서 읽히지 않음). 수정 API 가 사진을 받지 않아 수정 화면의 사진은 보기만 한다(추가·삭제 없음, "사진은 수정할 수 없어요").
+- 나눔 목록 필터 — 카테고리는 `GET /api/share` 의 `categoryCode` 로 서버에서 거르고 카테고리별로 목록 캐시를 둔다. `나눔중`(나눔중+예약중)은 서버 상태값 하나로 거를 수 없어 화면에서 거르며, 받은 페이지에 맞는 글이 없으면 다음 페이지를 이어 받는다.
 - 나눔 HTTP data source — 라이브 `GET/POST /api/share`, 상세·댓글 CUD, 삭제를 `httpMarketDataSource`로 연결. 상태/카테고리/물품상태는 `GET /api/common-codes?groupCode=`에서 관측한 값만 매핑. 목록 `authorName`·장소·이미지 업로드 URL·신고 enum은 없어 목록 작성자는 `authorId`, 장소는 요청에서 제외, 신고는 HTTP로 보내지 않음. development 기본값은 HTTP
 - 나눔 작성 폼 구획·상단 여백·포커스 통일 — 사진부터 수령 장소까지 이어지는 8px 회색 section divider를 제거해 하나의 폼 흐름으로 정리하고, 홈·나눔·동행·삶공부와 같은 기기 safe area + 상단 20px 기준을 적용했으며 제목·설명·장소 입력을 소모임 개설과 같은 공통 `ModalFormTextInput`의 primary 2px 포커스로 통일하면서 입력·등록 동작은 유지
 - 나눔 탐색 control·FAB 비율 보정 — 상태 세그먼트와 카테고리 필터의 full pill을 유지한 채 시각 높이를 낮추고 44px 터치 범위를 보존했으며 `나눔하기` FAB를 46px로 축소해 하단 탭과 위계를 분리

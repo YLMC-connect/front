@@ -85,13 +85,14 @@ export default function MarketNewModal() {
     id?: string;
   }>();
   const variant = readDesignVariant(params.designVariant) ?? "create";
-  const isEdit = variant === "edit";
+  // 수정 여부는 id 로 정한다. designVariant 는 릴리스 빌드에서 읽히지 않는다
+  const editId = params.id;
+  const isEdit = Boolean(editId) || variant === "edit";
   // 실제 글 수정은 서버의 글 내용으로 채운다. 디자인 미리보기(id 없음)만 예시 값을 쓴다
-  const editId = isEdit ? params.id : undefined;
   const detailQuery = useMarketDetail(editId ?? "");
   const detail = editId ? detailQuery.data : undefined;
   const useFilledValues =
-    (isEdit && !editId) ||
+    (variant === "edit" && !editId) ||
     variant === "create-filled" ||
     variant === "back-warn" ||
     variant === "limit-toast";
@@ -129,7 +130,8 @@ export default function MarketNewModal() {
     update("images", images);
   };
 
-  const canAddImage = values.images.length < MAX_IMAGES;
+  // 나눔 수정 API(PUT /api/share/{id})는 사진을 받지 않아 수정 화면에선 사진을 바꿀 수 없다
+  const canAddImage = !isEdit && values.images.length < MAX_IMAGES;
 
   const pickImages = async () => {
     if (!canAddImage) return;
@@ -213,7 +215,11 @@ export default function MarketNewModal() {
             <Section
               label="사진"
               required
-              hint={`사진 ${values.images.length}/${MAX_IMAGES}`}
+              hint={
+                isEdit
+                  ? "사진은 수정할 수 없어요"
+                  : `사진 ${values.images.length}/${MAX_IMAGES}`
+              }
             >
               <ScrollView
                 horizontal
@@ -235,8 +241,13 @@ export default function MarketNewModal() {
                     uri={uri}
                     index={index}
                     cover={index === 0}
-                    onRemove={() =>
-                      setImages(values.images.filter((item) => item !== uri))
+                    onRemove={
+                      isEdit
+                        ? undefined
+                        : () =>
+                            setImages(
+                              values.images.filter((item) => item !== uri),
+                            )
                     }
                     testID={`market-photo-${index}`}
                   />

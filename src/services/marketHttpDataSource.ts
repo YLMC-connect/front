@@ -84,12 +84,18 @@ export function createHttpMarketDataSource({
     async getOverviewPage({
       lastId,
       size = 20,
+      category,
     }: {
       lastId?: number | null;
       size?: number;
+      category?: Exclude<MarketCategory, "all">;
     } = {}) {
       const query = new URLSearchParams({ size: String(size) });
       if (lastId != null) query.set("lastId", String(lastId));
+      if (category) {
+        const categoryCode = toShareCategoryCode(category);
+        if (categoryCode) query.set("categoryCode", categoryCode);
+      }
       const data = await client.request<ShareListResponseDto>(
         `/api/share?${query.toString()}`,
       );

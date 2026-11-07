@@ -62,6 +62,17 @@ describe("httpMarketDataSource", () => {
     expect(request).toHaveBeenCalledWith("/api/share?size=50");
   });
 
+  it("sends the category filter to the share list API", async () => {
+    const { request, dataSource } = setup();
+    request.mockResolvedValue({ content: [], hasNext: false });
+
+    await dataSource.getOverviewPage?.({ category: "book", lastId: 12 });
+
+    expect(request).toHaveBeenCalledWith(
+      "/api/share?size=20&lastId=12&categoryCode=BOOK_STATIONERY",
+    );
+  });
+
   it("loads my shares from /api/share/my and marks them as mine", async () => {
     const { request, dataSource } = setup();
     request.mockResolvedValue({

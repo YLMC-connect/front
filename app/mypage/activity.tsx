@@ -216,6 +216,7 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   body: {
     flexGrow: 1,
@@ -235,6 +236,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   commentText: {
     color: theme.colors.text,
@@ -255,6 +257,7 @@ const styles = StyleSheet.create({
     flex: 1,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   emptyWrap: {
     paddingHorizontal: 14,

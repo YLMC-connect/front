@@ -310,6 +310,7 @@ const styles = StyleSheet.create({
   allText: {
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   list: {
@@ -353,6 +354,7 @@ const styles = StyleSheet.create({
   detailText: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     textDecorationLine: "underline",
   },
   sheetLayer: {
@@ -411,6 +413,7 @@ const styles = StyleSheet.create({
   closeText: {
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   sheetBody: {
@@ -422,6 +425,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   fullText: {
     color: theme.colors.text,

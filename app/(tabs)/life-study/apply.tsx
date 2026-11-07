@@ -322,6 +322,7 @@ const styles = StyleSheet.create({
   courseTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   courseMeta: {
@@ -347,6 +348,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   input: {
@@ -362,6 +364,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     color: theme.colors.dangerText,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   bottom: {
@@ -386,6 +389,7 @@ const styles = StyleSheet.create({
   submitText: {
     color: theme.colors.onPrimary,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
 });

@@ -85,8 +85,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   actionText: {
+    ...theme.typography.label,
     color: theme.colors.text,
-    fontSize: 13.5,
     fontWeight: theme.fontWeight.semibold,
   },
   dangerText: {
@@ -100,6 +100,7 @@ const styles = StyleSheet.create({
   miniActionText: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
 });

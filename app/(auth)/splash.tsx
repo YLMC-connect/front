@@ -92,12 +92,14 @@ const styles = StyleSheet.create({
     marginTop: 22,
     color: theme.colors.onPrimary,
     fontSize: theme.typography.title.fontSize,
+    lineHeight: theme.typography.title.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   subtitle: {
     marginTop: 8,
     color: theme.colors.onPrimary,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.medium,
   },
   dots: {

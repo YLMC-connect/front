@@ -456,6 +456,7 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.medium,
   },
   tabLabelFocused: {

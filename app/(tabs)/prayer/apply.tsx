@@ -216,6 +216,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: theme.colors.text,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   optionStack: {
@@ -239,12 +240,14 @@ const styles = StyleSheet.create({
   cardTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   fieldLabel: {
     marginBottom: 6,
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.typography.label.fontWeight,
   },
   input: {
@@ -266,6 +269,7 @@ const styles = StyleSheet.create({
     flex: 1,
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   waitingText: {

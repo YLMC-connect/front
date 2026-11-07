@@ -32,6 +32,7 @@ export const styles = StyleSheet.create({
   caption: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   title: {
@@ -56,6 +57,7 @@ export const styles = StyleSheet.create({
     marginBottom: 1,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   infoRow: {
@@ -66,11 +68,13 @@ export const styles = StyleSheet.create({
   infoLabel: {
     color: theme.colors.text,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   infoValue: {
     flex: 1,
     color: theme.colors.text,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.bold,
     textAlign: "right",
   },
@@ -84,12 +88,14 @@ export const styles = StyleSheet.create({
   sectionTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   sectionSubtitle: {
     marginTop: 4,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   stack: {
     marginTop: 12,
@@ -133,6 +139,7 @@ export const styles = StyleSheet.create({
     marginTop: 2,
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   nextClass: {
@@ -146,6 +153,7 @@ export const styles = StyleSheet.create({
     marginTop: 3,
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   scheduleRow: {
@@ -162,6 +170,7 @@ export const styles = StyleSheet.create({
     width: 48,
     color: theme.colors.primaryStrong,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   rowText: {
@@ -171,6 +180,7 @@ export const styles = StyleSheet.create({
   rowTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   assignmentCard: {
@@ -184,6 +194,7 @@ export const styles = StyleSheet.create({
     marginTop: 3,
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   bottomBar: {
@@ -220,6 +231,7 @@ export const styles = StyleSheet.create({
   weekNumber: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   weekNumberOn: {
@@ -228,6 +240,7 @@ export const styles = StyleSheet.create({
   curriculumTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.medium,
   },
   doneText: {
@@ -242,6 +255,7 @@ export const styles = StyleSheet.create({
   subSectionTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
     marginBottom: 8,
   },

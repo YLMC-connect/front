@@ -117,6 +117,7 @@ const styles = StyleSheet.create({
   blockedTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.heading.fontSize,
+    lineHeight: theme.typography.heading.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   blockedText: {
@@ -150,6 +151,7 @@ const styles = StyleSheet.create({
   avatarText: {
     color: theme.colors.onPrimary,
     fontSize: theme.typography.display.fontSize,
+    lineHeight: theme.typography.display.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   avatarTextWithdrawn: {
@@ -159,6 +161,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
     color: theme.colors.text,
     fontSize: theme.typography.title.fontSize,
+    lineHeight: theme.typography.title.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   nameWithdrawn: {
@@ -168,20 +171,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
-  },
-  blockButton: {
-    height: 52,
-    borderRadius: theme.radius.full,
-    borderWidth: 1,
-    borderColor: theme.colors.borderButton,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  blockButtonText: {
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    fontWeight: theme.fontWeight.semibold,
+    lineHeight: theme.typography.caption.lineHeight,
   },
 });

@@ -73,6 +73,7 @@ export const styles = StyleSheet.create({
   backText: {
     color: theme.colors.text,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   doneOverlay: {
@@ -85,6 +86,7 @@ export const styles = StyleSheet.create({
     top: "45%",
     color: theme.colors.onPrimary,
     fontSize: theme.typography.display.fontSize,
+    lineHeight: theme.typography.display.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   dots: {
@@ -119,6 +121,7 @@ export const styles = StyleSheet.create({
   centerBadgeText: {
     color: theme.colors.warningText,
     fontSize: theme.typography.title.fontSize,
+    lineHeight: theme.typography.title.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   banner: {
@@ -150,6 +153,7 @@ export const styles = StyleSheet.create({
   bannerTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   bannerTitleWarn: {
@@ -159,6 +163,7 @@ export const styles = StyleSheet.create({
     marginTop: 2,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   bannerTextWarn: {
     color: theme.colors.warningText,
@@ -179,12 +184,14 @@ export const styles = StyleSheet.create({
   authorName: {
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   meta: {
     marginTop: 2,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   article: {
     paddingHorizontal: 22,
@@ -227,11 +234,13 @@ export const styles = StyleSheet.create({
     paddingVertical: 8,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   deletedComment: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontStyle: "italic",
   },
   commentActions: {
@@ -272,6 +281,7 @@ export const styles = StyleSheet.create({
   cancelEditText: {
     color: theme.colors.text,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   commentError: {
@@ -280,6 +290,7 @@ export const styles = StyleSheet.create({
     bottom: 82,
     color: theme.colors.dangerText,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   commentInput: {
     flex: 1,
@@ -310,6 +321,7 @@ export const styles = StyleSheet.create({
   exceptionTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   exceptionText: {

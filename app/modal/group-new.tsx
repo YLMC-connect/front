@@ -509,6 +509,7 @@ const styles = StyleSheet.create({
   capacityUnit: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
   },
   inlineError: {
     marginHorizontal: theme.layout.screenX,
@@ -537,6 +538,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     color: theme.colors.dangerText,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   footer: {
     position: "absolute",

@@ -423,6 +423,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     color: theme.colors.dangerText,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   body: {
     paddingBottom: 24,
@@ -447,6 +448,7 @@ const styles = StyleSheet.create({
   memberMetaText: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.semibold,
   },
   memberCount: {
@@ -469,11 +471,13 @@ const styles = StyleSheet.create({
   leaderLabel: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   leaderName: {
     marginTop: 2,
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   actionWrap: {
@@ -492,6 +496,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   memberRail: {
@@ -521,6 +526,7 @@ const styles = StyleSheet.create({
     maxWidth: 56,
     color: theme.colors.text,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.semibold,
     textAlign: "center",
   },
@@ -542,11 +548,13 @@ const styles = StyleSheet.create({
     flex: 1,
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   editedText: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   noticePreview: {
     marginTop: 6,
@@ -558,6 +566,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   noticeActions: {
     marginTop: 8,
@@ -577,6 +586,7 @@ const styles = StyleSheet.create({
   exceptionTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   exceptionText: {

@@ -135,6 +135,7 @@ const styles = StyleSheet.create({
   },
   codeBadgeText: {
     fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.bold,
     color: theme.colors.primaryStrong,
     letterSpacing: 0.6,

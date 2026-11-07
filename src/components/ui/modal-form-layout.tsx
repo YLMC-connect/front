@@ -10,20 +10,26 @@ import { Text, TextInput } from "@/components/ui/text";
 import { theme } from "../../constants/theme";
 import { InputErrorText, InputSurface, inputTextStyles } from "./inputs";
 
+/**
+ * 폼 한 칸(라벨 + 입력). `card` 면 디자인 시스템 Card(흰 바탕·shadow.sm·radius.md·안쪽 16)에 담는다.
+ * 카드 안 내용은 좌우 여백 없이 카드 안쪽 16 에 맞춘다.
+ */
 export function ModalFormSection({
   label,
   required = false,
   hint,
+  card = false,
   children,
 }: {
   label: string;
   required?: boolean;
   hint?: string;
+  card?: boolean;
   children: ReactNode;
 }) {
   return (
-    <View style={styles.section}>
-      <View style={styles.sectionHead}>
+    <View style={card ? styles.sectionCard : styles.section}>
+      <View style={[styles.sectionHead, card ? styles.sectionHeadCard : null]}>
         <Text style={styles.sectionLabel}>
           {label}
           {required ? <Text style={styles.required}> *</Text> : null}
@@ -147,6 +153,14 @@ const styles = StyleSheet.create({
   section: {
     paddingVertical: 16,
   },
+  sectionCard: {
+    marginHorizontal: theme.layout.screenX,
+    marginBottom: theme.spacing["4"],
+    padding: theme.spacing["4"],
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.surface,
+    ...theme.shadow.sm,
+  },
   sectionHead: {
     minHeight: 22,
     flexDirection: "row",
@@ -154,6 +168,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 22,
     marginBottom: theme.spacing["2"],
+  },
+  sectionHeadCard: {
+    paddingHorizontal: 0,
+    marginBottom: theme.spacing["3"],
   },
   sectionLabel: {
     ...theme.typography.label,

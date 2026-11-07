@@ -1687,6 +1687,36 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("수강 신청하기")).toBeTruthy();
   });
 
+  it("starts the life study apply form empty and requires a faith year choice", async () => {
+    jest
+      .mocked(useLocalSearchParams)
+      .mockReturnValue({ cohortId: "life-overview-open-1" });
+    const apply = jest.spyOn(lifeStudyService, "applyLifeStudyCohort");
+    renderWithClient(<LifeStudyApplyScreenRoute />);
+
+    expect(await screen.findByText("생명의 삶")).toBeTruthy();
+    expect(screen.queryByDisplayValue("1988")).toBeNull();
+    fireEvent.changeText(screen.getByPlaceholderText("예: 1988"), "1994");
+    fireEvent.changeText(
+      screen.getByPlaceholderText("예) 4부 청장년부"),
+      "4부 청장년부",
+    );
+    fireEvent.press(screen.getByTestId("life-study-apply"));
+
+    expect(await screen.findByText("신앙 연차를 선택해주세요.")).toBeTruthy();
+    expect(apply).not.toHaveBeenCalled();
+  });
+
+  it("does not apply to another cohort when the requested cohort is not open", async () => {
+    jest
+      .mocked(useLocalSearchParams)
+      .mockReturnValue({ cohortId: "closed-cohort" });
+    renderWithClient(<LifeStudyApplyScreenRoute />);
+
+    expect(await screen.findByText("신청할 수 없는 과정이에요")).toBeTruthy();
+    expect(screen.queryByTestId("life-study-apply")).toBeNull();
+  });
+
   it("renders the life study history screen", async () => {
     renderWithClient(<LifeStudyHistoryScreen />);
 
@@ -1751,6 +1781,33 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("활동 내역")).toBeTruthy();
     expect(screen.getByText("나눔 게시글")).toBeTruthy();
     expect(await screen.findByText("유아용 카시트 나눔해요")).toBeTruthy();
+  });
+
+  it("shows an error with retry instead of an empty list when activity fails", async () => {
+    jest
+      .spyOn(mypageService, "fetchMyPageActivityPosts")
+      .mockRejectedValueOnce(new Error("INVALID_RESPONSE"));
+    renderWithClient(<ActivityScreen />);
+
+    expect(
+      await screen.findByText(
+        "활동 내역을 불러오지 못했어요. 다시 시도해주세요.",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText("작성한 게시글이 없어요")).toBeNull();
+
+    fireEvent.press(screen.getByText("다시 시도"));
+    expect(await screen.findByText("유아용 카시트 나눔해요")).toBeTruthy();
+  });
+
+  it("adds hyphens to the phone number while typing on profile edit", () => {
+    renderWithClient(<EditProfileScreen />);
+
+    fireEvent.changeText(
+      screen.getByPlaceholderText("010-XXXX-XXXX"),
+      "01012345678",
+    );
+    expect(screen.getByDisplayValue("010-1234-5678")).toBeTruthy();
   });
 
   it("renders the user profile screen", () => {

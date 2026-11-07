@@ -39,18 +39,20 @@ export default function LifeStudyApplyScreenRoute() {
   const { data: member } = useMemberMe();
   const { data: overview, isPending } = useLifeStudyOverview();
 
-  const openCohort =
-    overview?.openCourses.find(
-      (c) =>
-        (params.cohortId &&
-          (c.cohortId === params.cohortId ||
-            String(c.id) === params.cohortId)) ||
-        (params.courseId && String(c.id) === params.courseId),
-    ) ?? overview?.openCourses[0];
-  const cohortId =
-    openCohort?.cohortId ||
-    params.cohortId ||
-    (openCohort ? String(openCohort.id) : "");
+  const hasRequestedCourse = Boolean(params.cohortId || params.courseId);
+  // 요청한 기수가 신청 가능 목록에 없으면 다른 기수로 대신 신청하지 않는다.
+  const openCohort = hasRequestedCourse
+    ? overview?.openCourses.find(
+        (c) =>
+          (params.cohortId &&
+            (c.cohortId === params.cohortId ||
+              String(c.id) === params.cohortId)) ||
+          (params.courseId && String(c.id) === params.courseId),
+      )
+    : overview?.openCourses[0];
+  const cohortId = openCohort
+    ? openCohort.cohortId || String(openCohort.id)
+    : "";
   const courseTitle = openCohort?.title || params.courseTitle || "삶공부 과정";
   const weekCount = openCohort?.weekCount || 13;
   const courseMetaParts = [
@@ -68,17 +70,15 @@ export default function LifeStudyApplyScreenRoute() {
     openCohort?.capacity != null
       ? `${openCohort.enrolledCount ?? 0} / ${openCohort.capacity}명`
       : "-";
-  const hasNoOpenCourse =
-    !isPending && overview != null && !openCohort && !params.cohortId;
+  const hasNoOpenCourse = !isPending && !openCohort;
 
   const memberName = member?.name || "사용자";
   const memberPhone = member?.phone || "010-1234-5678";
 
-  const [userYear, setUserYear] = useState("1988");
+  const [userYear, setUserYear] = useState("");
   const [userPart, setUserPart] = useState("");
-  const [faithYearIndex, setFaithYearIndex] = useState(3);
-  const [memo, setMemo] = useState("");
-  const [promiseAgreed, setPromiseAgreed] = useState(true);
+  const [faithYearIndex, setFaithYearIndex] = useState<number | null>(null);
+  const [promiseAgreed, setPromiseAgreed] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   const applyMutation = useApplyLifeStudyCohort();
@@ -97,6 +97,10 @@ export default function LifeStudyApplyScreenRoute() {
     const trimmedPart = userPart.trim();
     if (!trimmedPart) {
       setFormError("소속 부서를 입력해주세요 (예: 4부 청장년부).");
+      return;
+    }
+    if (faithYearIndex == null) {
+      setFormError("신앙 연차를 선택해주세요.");
       return;
     }
     if (!promiseAgreed) {
@@ -132,7 +136,11 @@ export default function LifeStudyApplyScreenRoute() {
           <View style={styles.emptyWrap}>
             <Empty
               icon="book-open-page-variant-outline"
-              title="지금 신청 가능한 과정이 없어요"
+              title={
+                hasRequestedCourse
+                  ? "신청할 수 없는 과정이에요"
+                  : "지금 신청 가능한 과정이 없어요"
+              }
               description="모집 기간 중인 삶공부 과정만 신청할 수 있습니다."
             />
           </View>
@@ -209,17 +217,6 @@ export default function LifeStudyApplyScreenRoute() {
                         />
                       ))}
                     </View>
-                  </View>
-
-                  <View>
-                    <Text style={styles.label}>신청 동기</Text>
-                    <ModalFormTextInput
-                      multiline
-                      placeholder="신청하시는 이유를 자유롭게 적어주세요"
-                      style={styles.textarea}
-                      value={memo}
-                      onChangeText={setMemo}
-                    />
                   </View>
 
                   <Checkbox
@@ -353,9 +350,6 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.bold,
   },
   input: {
-    marginHorizontal: 0,
-  },
-  textarea: {
     marginHorizontal: 0,
   },
   options: {

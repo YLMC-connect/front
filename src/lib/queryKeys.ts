@@ -40,6 +40,10 @@ export const queryKeys = {
     all: ["member"] as const,
     me: () => [...queryKeys.member.all, "me"] as const,
   },
+  mypage: {
+    all: ["mypage"] as const,
+    activity: () => [...queryKeys.mypage.all, "activity"] as const,
+  },
   siteContent: {
     all: ["siteContent"] as const,
     terms: (type: string) =>

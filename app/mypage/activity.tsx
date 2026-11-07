@@ -1,13 +1,27 @@
 import { AppIcon } from "@/components/ui/app-icon";
+import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { Screen } from "../../src/components/layout/Screen";
 import { StaggerItem } from "../../src/components/mypage/StaggerItem";
-import { Badge, Empty, TopBar, UnderlineTabs } from "../../src/components/ui";
+import {
+  Badge,
+  Empty,
+  ErrorState,
+  TopBar,
+  UnderlineTabs,
+} from "../../src/components/ui";
 import { ListRow } from "../../src/components/ui/list-row";
 import { theme } from "../../src/constants/theme";
 import { readDesignVariant } from "../../src/lib/designVariant";
+import { queryKeys } from "../../src/lib/queryKeys";
 import type {
   MyPageActivityComment,
   MyPageActivityGroup,
@@ -48,30 +62,25 @@ export default function ActivityScreen() {
   const [activeTab, setActiveTab] = useState<ActivityTab>(
     isDesignEmpty ? "posts" : initialVariant,
   );
-  const [posts, setPosts] = useState<readonly MyPageActivityPost[]>([]);
-  const [comments, setComments] = useState<readonly MyPageActivityComment[]>(
-    [],
-  );
-  const [groups, setGroups] = useState<readonly MyPageActivityGroup[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    void Promise.all([
-      fetchMyPageActivityPosts(),
-      fetchMyPageActivityComments(),
-      fetchMyPageActivityGroups(),
-    ])
-      .then(([nextPosts, nextComments, nextGroups]) => {
-        if (cancelled) return;
-        setPosts(nextPosts.items);
-        setComments(nextComments.items);
-        setGroups(nextGroups.items);
-      })
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: queryKeys.mypage.activity(),
+    queryFn: async () => {
+      const [nextPosts, nextComments, nextGroups] = await Promise.all([
+        fetchMyPageActivityPosts(),
+        fetchMyPageActivityComments(),
+        fetchMyPageActivityGroups(),
+      ]);
+      return {
+        posts: nextPosts.items,
+        comments: nextComments.items,
+        groups: nextGroups.items,
+      };
+    },
+    enabled: !isDesignEmpty,
+  });
+  const posts: readonly MyPageActivityPost[] = data?.posts ?? [];
+  const comments: readonly MyPageActivityComment[] = data?.comments ?? [];
+  const groups: readonly MyPageActivityGroup[] = data?.groups ?? [];
 
   return (
     <Screen scroll={false} padded={false}>
@@ -92,6 +101,15 @@ export default function ActivityScreen() {
               description={
                 "나눔 게시글, 댓글, 소모임 참여가\n이곳에 모여서 쉽게 살펴볼 수 있어요."
               }
+            />
+          ) : isLoading ? (
+            <View style={styles.emptyWrap}>
+              <ActivityIndicator color={theme.colors.primary} />
+            </View>
+          ) : isError && !data ? (
+            <ErrorState
+              message="활동 내역을 불러오지 못했어요. 다시 시도해주세요."
+              onRetry={() => void refetch()}
             />
           ) : activeTab === "posts" ? (
             posts.length === 0 ? (

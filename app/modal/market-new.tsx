@@ -1,6 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   Keyboard,
@@ -28,11 +28,12 @@ import { MARKET_CATEGORIES } from "../../src/constants/domainOptions";
 import { theme } from "../../src/constants/theme";
 import {
   useCreateMarketPost,
+  useMarketDetail,
   useUpdateMarketPost,
 } from "../../src/hooks/useMarket";
 import { readDesignVariant } from "../../src/lib/designVariant";
 import { prepareImageForUpload } from "../../src/lib/resizeImage";
-import type { MarketInput } from "../../src/types/market";
+import type { MarketDetail, MarketInput } from "../../src/types/market";
 
 const categories = MARKET_CATEGORIES.slice(1) as readonly {
   key: MarketInput["category"];
@@ -62,6 +63,21 @@ const emptyValues: MarketInput = {
   location: "",
 };
 
+/** 수정할 글의 상세 응답을 입력값으로 바꾼다. 위치는 서버가 내려주지 않아 비워 둔다. */
+function valuesFromDetail(detail: MarketDetail): MarketInput {
+  const category =
+    categories.find((item) => item.label === detail.categoryLabel)?.key ??
+    "etc";
+  return {
+    images: detail.images ?? [],
+    category,
+    title: detail.title,
+    condition: detail.conditionLabel || emptyValues.condition,
+    description: detail.content,
+    location: "",
+  };
+}
+
 export default function MarketNewModal() {
   const router = useRouter();
   const params = useLocalSearchParams<{
@@ -70,16 +86,28 @@ export default function MarketNewModal() {
   }>();
   const variant = readDesignVariant(params.designVariant) ?? "create";
   const isEdit = variant === "edit";
+  // 실제 글 수정은 서버의 글 내용으로 채운다. 디자인 미리보기(id 없음)만 예시 값을 쓴다
+  const editId = isEdit ? params.id : undefined;
+  const detailQuery = useMarketDetail(editId ?? "");
+  const detail = editId ? detailQuery.data : undefined;
   const useFilledValues =
-    isEdit ||
+    (isEdit && !editId) ||
     variant === "create-filled" ||
     variant === "back-warn" ||
     variant === "limit-toast";
-  const initialValues = useMemo<MarketInput>(
-    () => (useFilledValues ? filledValues : emptyValues),
-    [useFilledValues],
+  // 상세가 도착한 첫 값만 쓴다. 다시 불러와도 입력 중인 내용을 덮지 않게 한다
+  const [loadedValues, setLoadedValues] = useState<MarketInput | undefined>(
+    () => (detail ? valuesFromDetail(detail) : undefined),
   );
+  const initialValues =
+    loadedValues ?? (useFilledValues ? filledValues : emptyValues);
   const [values, setValues] = useState(initialValues);
+  if (detail && !loadedValues) {
+    // 상세가 늦게 도착한 경우: 렌더 중에 한 번 맞춘다(effect 없이)
+    const next = valuesFromDetail(detail);
+    setLoadedValues(next);
+    setValues(next);
+  }
   const [error, setError] = useState<string>();
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
   const createPost = useCreateMarketPost();

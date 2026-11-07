@@ -1,5 +1,5 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { Keyboard, StyleSheet } from "react-native";
 import GroupNewModal from "../group-new";
@@ -34,6 +34,7 @@ describe("modal smoke screens", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useRouter).mockReturnValue(router as never);
+    jest.mocked(useLocalSearchParams).mockReturnValue({} as never);
     jest.spyOn(Keyboard, "dismiss");
     jest.spyOn(prayerService, "fetchPrayerCategories").mockResolvedValue([]);
   });
@@ -152,6 +153,55 @@ describe("modal smoke screens", () => {
       expect(router.replace).toHaveBeenCalledWith(
         expect.stringMatching(/^\/market\/mock-market-/),
       ),
+    );
+  });
+
+  it("fills the market edit modal with the real post, not sample values", async () => {
+    jest
+      .mocked(useLocalSearchParams)
+      .mockReturnValue({ id: "42", designVariant: "edit" } as never);
+    jest.spyOn(marketService, "fetchMarketDetail").mockResolvedValue({
+      id: "42",
+      thumbSeed: 1,
+      images: ["https://example.com/share/42.jpg"],
+      title: "겨울 패딩 나눔",
+      content: "한 번 입은 패딩입니다.",
+      categoryLabel: "의류·잡화",
+      conditionLabel: "새것",
+      status: "sharing",
+      authorName: "김은혜",
+      createdLabel: "방금 전",
+      isMine: true,
+      comments: [],
+    });
+    const update = jest
+      .spyOn(marketService, "updateMarketPost")
+      .mockResolvedValue({} as never);
+
+    renderWithClient(<MarketNewModal />);
+
+    await waitFor(() =>
+      expect(screen.getByLabelText("나눔 제목").props.value).toBe(
+        "겨울 패딩 나눔",
+      ),
+    );
+    expect(screen.getByLabelText("나눔 상세 설명").props.value).toBe(
+      "한 번 입은 패딩입니다.",
+    );
+    expect(screen.getByText("사진 1/5")).toBeTruthy();
+    expect(
+      screen.queryByDisplayValue("아이 장난감 정리하면서 나눔합니다"),
+    ).toBeNull();
+
+    fireEvent.press(screen.getByText("변경사항 저장"));
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledWith({
+        marketId: "42",
+        title: "겨울 패딩 나눔",
+        description: "한 번 입은 패딩입니다.",
+        category: "cloth",
+        condition: "새것",
+      }),
     );
   });
 

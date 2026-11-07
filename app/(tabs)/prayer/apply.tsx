@@ -46,10 +46,17 @@ export default function PrayerApplyScreenRoute() {
   const [memo, setMemo] = useState("");
   const createApplication = useCreatePrayerApplication();
   const selectedLabel = `${dayNames[selectedDay]} ${selectedTime} 기도방`;
-  const memberName = member?.name || "사용자";
-  const memberPhone = member?.phone || "010-1234-5678";
+  const memberName = member?.name ?? "";
+  const memberPhone = member?.phone ?? "";
 
   const handleSubmit = () => {
+    if (!memberName || !memberPhone) {
+      Alert.alert(
+        "신청자 정보 없음",
+        "이름 또는 전화번호를 불러오지 못했어요. 잠시 후 다시 시도하거나 마이페이지에서 전화번호를 등록해주세요.",
+      );
+      return;
+    }
     createApplication.mutate(
       {
         yoil: dayToYoil[selectedDay],
@@ -130,8 +137,11 @@ export default function PrayerApplyScreenRoute() {
 
               <View style={styles.card}>
                 <Text style={styles.cardTitle}>신청자 정보</Text>
-                <Field label="이름" value={memberName} />
-                <Field label="연락처" value={memberPhone} />
+                <Field label="이름" value={memberName || "-"} />
+                <Field
+                  label="연락처"
+                  value={memberPhone || "등록된 전화번호 없음"}
+                />
                 <View>
                   <Text style={styles.fieldLabel}>신청 메모</Text>
                   <ModalFormTextInput

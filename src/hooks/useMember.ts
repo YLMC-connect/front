@@ -23,7 +23,8 @@ export function useMemberMe() {
     queryKey: queryKeys.member.me(),
     queryFn: getCurrentMember,
     enabled: isLoggedIn,
-    initialData: currentUser ?? undefined,
+    // 로그인 응답의 회원 정보(id·이름·역할)는 자리 표시로만 쓰고, 전화번호 등은 /me 로 바로 받아온다.
+    placeholderData: currentUser ?? undefined,
     staleTime: 1000 * 60 * 5,
   });
 }

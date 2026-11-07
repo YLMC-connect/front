@@ -52,9 +52,15 @@ function setup() {
     setAnonymous: jest.fn(),
     setUnavailable: jest.fn(),
   };
-  const manager = createAuthSessionManager({ adapter, tokenStore, state });
+  const clearUserData = jest.fn().mockResolvedValue(undefined);
+  const manager = createAuthSessionManager({
+    adapter,
+    tokenStore,
+    state,
+    clearUserData,
+  });
 
-  return { adapter, tokenStore, state, manager };
+  return { adapter, tokenStore, state, clearUserData, manager };
 }
 
 describe("authSessionService", () => {
@@ -163,5 +169,42 @@ describe("authSessionService", () => {
 
     expect(tokenStore.clear).toHaveBeenCalledTimes(1);
     expect(state.setAnonymous).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears previous user data on logout", async () => {
+    const { state, clearUserData, manager } = setup();
+
+    await manager.logout();
+
+    expect(state.setAnonymous).toHaveBeenCalledTimes(1);
+    expect(clearUserData).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears user data when refresh fails and the session ends", async () => {
+    const { adapter, clearUserData, manager } = setup();
+    adapter.refresh.mockRejectedValue(new Error("expired refresh token"));
+
+    await expect(manager.refresh()).rejects.toThrow("expired refresh token");
+
+    expect(clearUserData).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears previous user data before a new login is authenticated", async () => {
+    const { state, clearUserData, manager } = setup();
+
+    await manager.login({ id: "admin", password: "admin" });
+
+    expect(clearUserData).toHaveBeenCalledTimes(1);
+    expect(clearUserData.mock.invocationCallOrder[0]).toBeLessThan(
+      state.setAuthenticated.mock.invocationCallOrder[0],
+    );
+  });
+
+  it("keeps user data on a successful refresh", async () => {
+    const { clearUserData, manager } = setup();
+
+    await manager.refresh();
+
+    expect(clearUserData).not.toHaveBeenCalled();
   });
 });

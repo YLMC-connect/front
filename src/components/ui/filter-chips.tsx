@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     bottom: FILTER_CHIP_HIT_SLOP,
     borderRadius: theme.radius.full,
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.borderButton,
     backgroundColor: theme.colors.surface,
   },
   indicator: {
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: theme.radius.full,
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.borderButton,
     backgroundColor: theme.colors.surface,
   },
   chipReady: {

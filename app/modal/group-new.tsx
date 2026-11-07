@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.borderButton,
     alignItems: "center",
     justifyContent: "center",
   },

@@ -72,6 +72,7 @@ jest.mock("expo-router", () => {
       isFocused: () => true,
     })),
     usePathname: jest.fn(() => "/"),
+    useScrollToTop: jest.fn(),
     Stack,
   };
 });

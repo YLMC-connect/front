@@ -1,5 +1,5 @@
 import { BlurTargetView } from "expo-blur";
-import { useNavigation } from "expo-router";
+import { useNavigation, useScrollToTop } from "expo-router";
 import {
   useEffect,
   useRef,
@@ -110,6 +110,8 @@ export function StickyHeaderScreen({
   const navigation = useNavigation();
   const localScrollRef = useRef<ScrollView | null>(null);
   const effectiveScrollRef = scrollRef ?? localScrollRef;
+  // 이미 보고 있는 탭을 다시 누르면 맨 위로 올린다.
+  useScrollToTop(effectiveScrollRef);
   const localBlurTarget = useRef<View | null>(null);
   const sharedBlurTarget = useTabBlurTarget();
   const blurTarget = sharedBlurTarget ?? localBlurTarget;

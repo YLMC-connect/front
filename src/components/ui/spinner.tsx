@@ -66,13 +66,17 @@ export function Spinner({
 
 /**
  * 당겨서 새로고침 표시(디자인 시스템 `.ylmc-refresh`). 스피너 24 아래에
- * "새로고침하는 중" 12/600 `text-muted`(간격 8). 당기는 동안은 멈춘 스피너만 보인다.
+ * "새로고침하는 중" 12/600 `text-muted`(간격 8). 당기는 동안은 스피너만 보이고,
+ * 새로고침할 만큼 당겼으면(`spinning`) 잡고 있는 동안에도 계속 돈다.
  */
 export function RefreshIndicator({
   refreshing = true,
+  spinning = refreshing,
   testID,
 }: {
   refreshing?: boolean;
+  /** 스피너가 도는지. 기본은 `refreshing` 과 같다. */
+  spinning?: boolean;
   testID?: string;
 }) {
   return (
@@ -83,7 +87,7 @@ export function RefreshIndicator({
       style={styles.refresh}
       testID={testID}
     >
-      <Spinner animating={refreshing} />
+      <Spinner animating={spinning} />
       <Text style={[styles.label, refreshing ? null : styles.labelHidden]}>
         새로고침하는 중
       </Text>

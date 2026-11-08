@@ -53,8 +53,8 @@ export type StickyControlsHideMode = "direction" | "past-inset" | "never";
 
 /** 디자인 시스템 PullToRefresh: 64px 이상 당겼다 놓으면 새로고침. */
 const PULL_TO_REFRESH_DISTANCE = 64;
-/** 새로고침 표시를 보여 주는 최소 시간. 응답이 빨라도 스피너와 문구가 보이게. */
-const PULL_REFRESH_MIN_MS = 600;
+/** 새로고침 표시를 보여 주는 최소 시간. 응답이 빨라도 스피너가 한 바퀴(0.8초)는 돌게. */
+const PULL_REFRESH_MIN_MS = 800;
 
 export function StickyHeaderScreen({
   title,
@@ -446,7 +446,16 @@ function PullRefreshLayer({
       pointerEvents="none"
       style={[styles.refreshIndicatorBar, { top }, animatedStyle]}
     >
-      <RefreshIndicator refreshing={refreshing || exiting} testID={testID} />
+      <RefreshIndicator
+        refreshing={refreshing || exiting}
+        // 새로고침할 만큼 당겼으면 놓기 전부터 돌고, 놓으면 그 각도에서 이어서 돈다.
+        spinning={
+          refreshing ||
+          exiting ||
+          (dragging && pullDistance >= PULL_TO_REFRESH_DISTANCE)
+        }
+        testID={testID}
+      />
     </Animated.View>
   );
 }

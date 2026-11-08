@@ -10,6 +10,7 @@ import type {
   MarketInput,
   MarketPostTarget,
   MarketReportInput,
+  MarketStatusUpdateInput,
   MarketUpdateInput,
 } from "../types/market";
 
@@ -42,6 +43,7 @@ export interface MarketDataSource {
   createPost(input: MarketInput): Promise<MarketDetail>;
   updatePost(input: MarketUpdateInput): Promise<MarketDetail>;
   deletePost(input: MarketPostTarget): Promise<void>;
+  updateStatus(input: MarketStatusUpdateInput): Promise<void>;
   createComment(input: MarketCommentInput): Promise<MarketDetailComment>;
   updateComment(input: MarketCommentUpdateInput): Promise<MarketDetailComment>;
   deleteComment(input: MarketCommentTarget): Promise<void>;
@@ -120,6 +122,8 @@ export function createMarketService(dataSource: MarketDataSource) {
       return dataSource.updatePost(normalized);
     },
     deletePost: (input: MarketPostTarget) => dataSource.deletePost(input),
+    updateStatus: (input: MarketStatusUpdateInput) =>
+      dataSource.updateStatus(input),
     createComment: (input: MarketCommentInput) => {
       const content = input.content.trim();
       if (!content) throw new Error("댓글 내용을 입력해주세요.");
@@ -154,6 +158,7 @@ export const fetchMarketDetail = marketService.fetchDetail;
 export const createMarketPost = marketService.createPost;
 export const updateMarketPost = marketService.updatePost;
 export const deleteMarketPost = marketService.deletePost;
+export const updateMarketStatus = marketService.updateStatus;
 export const createMarketComment = marketService.createComment;
 export const updateMarketComment = marketService.updateComment;
 export const deleteMarketComment = marketService.deleteComment;

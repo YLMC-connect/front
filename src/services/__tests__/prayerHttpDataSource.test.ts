@@ -61,6 +61,8 @@ const member = {
 const status = {
   cohortId: 15,
   cohortName: "월요일 오전 기도방",
+  yoil: 1,
+  timeSlot: "AM",
   weekStartDate: "2026-10-04",
   scheduledDate: "2026-10-05",
   totalMembers: 2,

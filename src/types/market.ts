@@ -85,6 +85,10 @@ export interface MarketPostTarget {
   marketId: string;
 }
 
+export interface MarketStatusUpdateInput extends MarketPostTarget {
+  status: MarketStatus;
+}
+
 export interface MarketCommentUpdateInput extends MarketCommentTarget {
   content: string;
 }

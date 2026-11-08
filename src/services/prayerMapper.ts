@@ -239,6 +239,8 @@ export function readPrayerCohortStatus(
   return {
     cohortId: requireInteger(data, "cohortId", data),
     cohortName: requireString(data, "cohortName", data),
+    yoil: optionalInteger(data, "yoil"),
+    timeSlot: optionalString(data, "timeSlot"),
     weekStartDate: optionalString(data, "weekStartDate"),
     scheduledDate: optionalString(data, "scheduledDate"),
     totalMembers: requireInteger(data, "totalMembers", data),
@@ -445,30 +447,16 @@ export function formatPrayerDate(value: string | null | undefined) {
   return `${Number(match[1])}월 ${Number(match[2])}일`;
 }
 
-const ENGLISH_DAYS: readonly [RegExp, string][] = [
-  [/\bmon/, "월"],
-  [/\btue/, "화"],
-  [/\bwed/, "수"],
-  [/\bthu/, "목"],
-  [/\bfri/, "금"],
-  [/\bsat/, "토"],
-  [/\bsun/, "일"],
-];
+const YOIL_LABELS = ["일", "월", "화", "수", "목", "금", "토"] as const;
 
-/** 상태 응답에 요일·시간대 필드가 없어 기도방 이름에서 읽는다. 못 읽으면 빈 값. */
-export function parsePrayerRoomDayPeriod(name?: string): {
-  day: string;
-  period: string;
-} {
-  const text = (name ?? "").toLowerCase();
-  const korean = /([월화수목금토일])요일/.exec(text);
-  const day =
-    korean?.[1] ?? ENGLISH_DAYS.find(([pattern]) => pattern.test(text))?.[1];
-
-  let period = "";
-  if (/오후|저녁|\bpm\b/.test(text)) period = "오후";
-  else if (/오전|아침|새벽|\bam\b/.test(text)) period = "오전";
-  return { day: day ?? "", period };
+/** 서버 요일(0=일 … 6=토)·시간대(AM/PM)를 화면 글자로 바꾼다. 값이 없거나 범위 밖이면 빈 글자. */
+export function formatPrayerRoomDayPeriod(
+  yoil: number | null | undefined,
+  timeSlot: string | null | undefined,
+): { day: string; period: string } {
+  const day = yoil == null ? "" : (YOIL_LABELS[yoil] ?? "");
+  const period = timeSlot === "AM" ? "오전" : timeSlot === "PM" ? "오후" : "";
+  return { day, period };
 }
 
 /**

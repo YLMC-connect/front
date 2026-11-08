@@ -3,6 +3,7 @@ import { queryKeys } from "../lib/queryKeys";
 import {
   applyLifeStudyCohort,
   fetchLifeStudyCohortDetail,
+  fetchLifeStudyCourseLessons,
   fetchLifeStudyCourses,
   fetchLifeStudyOverview,
 } from "../services/lifeStudyService";
@@ -29,6 +30,15 @@ export function useLifeStudyCohortDetail(cohortId?: string) {
     queryFn: () =>
       cohortId ? fetchLifeStudyCohortDetail(cohortId) : Promise.resolve(null),
     enabled: Boolean(cohortId),
+  });
+}
+
+export function useLifeStudyCourseLessons(courseId?: string) {
+  return useQuery({
+    queryKey: queryKeys.lifeStudy.courseLessons(courseId ?? ""),
+    queryFn: () =>
+      courseId ? fetchLifeStudyCourseLessons(courseId) : Promise.resolve(null),
+    enabled: Boolean(courseId),
   });
 }
 

@@ -14,6 +14,12 @@ const SHARE_STATUS_TO_DOMAIN = {
   COMPLETED: "done",
 } as const satisfies Record<string, MarketStatus>;
 
+const DOMAIN_STATUS_TO_SHARE = {
+  sharing: "AVAILABLE",
+  reserved: "RESERVED",
+  done: "COMPLETED",
+} as const satisfies Record<MarketStatus, keyof typeof SHARE_STATUS_TO_DOMAIN>;
+
 const SHARE_CATEGORY_TO_DOMAIN = {
   CLOTHING_ACC: "cloth",
   APPLIANCE_FURNITURE: "home",
@@ -124,6 +130,10 @@ export function formatShareCreatedLabel(
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days}일 전`;
   return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}`;
+}
+
+export function toShareStatus(status: MarketStatus) {
+  return DOMAIN_STATUS_TO_SHARE[status];
 }
 
 export function toShareCategoryCode(category: Exclude<MarketCategory, "all">) {

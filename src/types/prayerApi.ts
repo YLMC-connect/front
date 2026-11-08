@@ -47,6 +47,10 @@ export interface PrayerCompletionMemberDto {
 export interface PrayerCohortStatusDto {
   cohortId: number;
   cohortName: string;
+  /** 0=일 … 6=토. 없으면 null. */
+  yoil: number | null;
+  /** "AM" / "PM". 없으면 null. */
+  timeSlot: string | null;
   weekStartDate: string | null;
   scheduledDate: string | null;
   totalMembers: number;

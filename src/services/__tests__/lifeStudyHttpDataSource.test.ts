@@ -217,6 +217,26 @@ describe("httpLifeStudyDataSource", () => {
     ]);
   });
 
+  it("reads the weekly curriculum from the course detail API", async () => {
+    const { request, dataSource } = setup();
+    request.mockResolvedValue({
+      id: 3,
+      name: "생명의 삶",
+      weekCount: 2,
+      lessons: [
+        { id: 11, lessonName: "구원의 확신", orderNum: 1, weekNo: 1 },
+        { id: 12, lessonName: "기도의 삶", orderNum: 2, weekNo: 2 },
+        { id: "bad", lessonName: "형식이 다른 행" },
+      ],
+    });
+
+    await expect(dataSource.getCourseLessons?.("3")).resolves.toEqual([
+      { id: 11, lessonName: "구원의 확신", orderNum: 1 },
+      { id: 12, lessonName: "기도의 삶", orderNum: 2 },
+    ]);
+    expect(request).toHaveBeenCalledWith("/api/life-study/3");
+  });
+
   it("calls the class list endpoint and copies weekCount only", async () => {
     const course = { ...baseOverviewCourse };
     const { request, dataSource } = setup();

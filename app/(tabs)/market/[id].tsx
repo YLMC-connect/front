@@ -29,6 +29,7 @@ import {
   Avatar,
   Badge,
   ConfirmDialog,
+  RadioSheet,
   DetailAction,
   ErrorState,
   ImageViewer,
@@ -44,10 +45,14 @@ import {
   useDeleteMarketComment,
   useDeleteMarketPost,
   useMarketDetail,
+  useUpdateMarketStatus,
   useUpdateMarketComment,
 } from "../../../src/hooks/useMarket";
 import { readDesignVariant } from "../../../src/lib/designVariant";
-import type { MarketDetailComment } from "../../../src/types/market";
+import type {
+  MarketDetailComment,
+  MarketStatus,
+} from "../../../src/types/market";
 import {
   CarouselDot,
   CarouselSlide,
@@ -56,6 +61,12 @@ import {
   StatusBanner,
 } from "../../../src/components/market/detail/MarketDetailParts";
 import { styles } from "../../../src/components/market/detail/marketDetailStyles";
+
+const STATUS_OPTIONS: readonly { value: MarketStatus; label: string }[] = [
+  { value: "sharing", label: "나눔중" },
+  { value: "reserved", label: "예약중" },
+  { value: "done", label: "나눔완료" },
+];
 
 export default function MarketDetailScreen() {
   const params = useLocalSearchParams<{
@@ -69,6 +80,9 @@ export default function MarketDetailScreen() {
   const updateComment = useUpdateMarketComment(id);
   const deleteComment = useDeleteMarketComment(id);
   const deletePost = useDeleteMarketPost(id);
+  const updateStatus = useUpdateMarketStatus(id);
+  // 상태 변경 시트에서 고른 값. null 이면 시트가 닫혀 있다.
+  const [statusDraft, setStatusDraft] = useState<MarketStatus | null>(null);
   const [comment, setComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [showDelete, setShowDelete] = useState(variant === "delete-confirm");
@@ -206,6 +220,23 @@ export default function MarketDetailScreen() {
   };
   const onDeletePost = () => {
     setShowDelete(true);
+  };
+  const onConfirmStatus = () => {
+    if (!statusDraft || statusDraft === status) {
+      setStatusDraft(null);
+      return;
+    }
+    updateStatus.mutate(statusDraft, {
+      onSuccess: () => setStatusDraft(null),
+      onError: (error) => {
+        Alert.alert(
+          "상태 변경 실패",
+          error instanceof Error
+            ? error.message
+            : "상태를 바꾸지 못했어요. 다시 시도해주세요.",
+        );
+      },
+    });
   };
   const onConfirmDeletePost = () => {
     deletePost.mutate(undefined, {
@@ -427,16 +458,29 @@ export default function MarketDetailScreen() {
                       danger
                       onPress={onDeletePost}
                     />
-                    <DetailAction icon="sync-alt" label="상태 변경" />
+                    <DetailAction
+                      testID="market-change-status"
+                      icon="sync-alt"
+                      label="상태 변경"
+                      onPress={() => setStatusDraft(status)}
+                    />
                   </>
                 ) : (
-                  <DetailAction
-                    testID="market-delete-post"
-                    icon="delete-outline"
-                    label="삭제"
-                    danger
-                    onPress={onDeletePost}
-                  />
+                  <>
+                    <DetailAction
+                      testID="market-delete-post"
+                      icon="delete-outline"
+                      label="삭제"
+                      danger
+                      onPress={onDeletePost}
+                    />
+                    <DetailAction
+                      testID="market-change-status"
+                      icon="sync-alt"
+                      label="상태 변경"
+                      onPress={() => setStatusDraft(status)}
+                    />
+                  </>
                 )}
               </View>
             ) : null}
@@ -531,6 +575,22 @@ export default function MarketDetailScreen() {
         deleteComment.isError ? (
           <Text style={styles.commentError}>댓글 처리에 실패했습니다.</Text>
         ) : null}
+        <RadioSheet
+          visible={statusDraft !== null}
+          title="나눔 상태 변경"
+          options={STATUS_OPTIONS.map((option) => ({
+            ...option,
+            disabled: option.value === status,
+          }))}
+          value={statusDraft ?? status}
+          onValueChange={(value) => setStatusDraft(value as MarketStatus)}
+          confirmText="변경"
+          confirmDisabled={
+            updateStatus.isPending || !statusDraft || statusDraft === status
+          }
+          onClose={() => setStatusDraft(null)}
+          onConfirm={onConfirmStatus}
+        />
         <ConfirmDialog
           visible={showDelete}
           title="게시글을 삭제하시겠습니까?"

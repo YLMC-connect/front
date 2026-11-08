@@ -31,6 +31,7 @@ import {
 import { theme } from "../../../src/constants/theme";
 import {
   useLifeStudyCohortDetail,
+  useLifeStudyCourseLessons,
   useLifeStudyOverview,
 } from "../../../src/hooks/useLifeStudyCourses";
 import { readDesignVariant } from "../../../src/lib/designVariant";
@@ -59,6 +60,9 @@ function LiveLifeStudyDetail({
   const cohortDetailQuery = useLifeStudyCohortDetail(activeCohortId);
   const cohortDetail = cohortDetailQuery.data;
   const isAlreadyApplied = Boolean(cohortDetail?.applied);
+  // 커리큘럼은 과정 단위 API 로 받는다. 모집 중인 기수가 없어도 보인다.
+  const courseLessonsQuery = useLifeStudyCourseLessons(course?.id);
+  const lessons = courseLessonsQuery.data ?? cohortDetail?.lessons ?? [];
 
   return (
     <Screen scroll={false} padded={false}>
@@ -184,15 +188,14 @@ function LiveLifeStudyDetail({
                 <View
                   style={[
                     styles.sectionMargin,
-                    !(cohortDetail?.lessons && cohortDetail.lessons.length > 0)
-                      ? styles.sectionMarginFill
+                    lessons.length === 0 ? styles.sectionMarginFill
                       : null,
                   ]}
                 >
                   <Text style={styles.subSectionTitle}>커리큘럼</Text>
-                  {cohortDetail?.lessons && cohortDetail.lessons.length > 0 ? (
+                  {lessons.length > 0 ? (
                     <Card style={styles.infoCard}>
-                      {cohortDetail.lessons.map((lesson, index) => (
+                      {lessons.map((lesson, index) => (
                         <MotionEnter
                           key={lesson.id}
                           mode="fadeUp"
@@ -200,7 +203,7 @@ function LiveLifeStudyDetail({
                           delay={motionStaggerDelay(index)}
                           style={[
                             styles.curriculumRow,
-                            index < cohortDetail.lessons.length - 1
+                            index < lessons.length - 1
                               ? styles.rowBorder
                               : null,
                           ]}
@@ -221,10 +224,10 @@ function LiveLifeStudyDetail({
                         </MotionEnter>
                       ))}
                     </Card>
-                  ) : cohortDetailQuery.isError ? (
+                  ) : courseLessonsQuery.isError ? (
                     <ErrorState
                       message="커리큘럼을 불러오지 못했어요. 다시 시도해주세요."
-                      onRetry={() => void cohortDetailQuery.refetch()}
+                      onRetry={() => void courseLessonsQuery.refetch()}
                     />
                   ) : (
                     <Empty

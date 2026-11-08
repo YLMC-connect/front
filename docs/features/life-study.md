@@ -86,7 +86,7 @@
   - overview `kind`, `instructorName`, `summary`, `applicationPeriod`, `capacity`, `enrolledCount`, `status`, `target`. 목록 화면 과정에는 `cohortId`가 없어 `weekCount`를 수업일 목록과 연결하지 않는다. `totalClassCount`는 휴강 제외 정규 수업 횟수라 주 수로 보지 않는다.
   - `LifeStudyCourse`의 `description`, `instructor`, `schedule`, `location`, `status`, `sessions`, `currentSession`, `capacity`, `enrolledCount`, `isEnrolled`, `curriculum`. `attendCount`는 출석 횟수라 `currentSession`이 아니다.
   - `LifeStudyHistory`의 `id`, `enrolledAt`, `completedSessions`, `certificateIssued`. 수료증 필드가 없고 `attendCount`를 수강 회차로 보지 않는다. 과정 ID가 맞지 않는 수료 행은 새 이력으로 만들지 않는다. ID가 둘이면 어느 기수인지 단정하지 않고 mock을 유지한다.
-  - mock이거나 route id·`designVariant`가 있을 때의 상세 디자인 문구(팀장·교재·커리큘럼·공지·숙제). http이고 id만 있으면 overview 과정의 이름·상태와, 값이 있는 강사·소개·주 수만 그린다. `classes[]` 원소와 출석부 하위 필드는 그리지 않는다.
+  - mock이거나 route id·`designVariant`가 있을 때의 상세 디자인 문구(팀장·교재·커리큘럼·공지·숙제). http이고 id만 있으면 overview 과정의 이름·상태와, 값이 있는 강사·소개·주 수만 그린다. 커리큘럼은 과정 상세 `GET /api/life-study/{id}` 의 `lessons[]`(주차 = `weekNo`)로 그려서 모집 중인 기수가 없어도 보인다(#199). 주차별 날짜·완료 여부는 API에 없다. `classes[]` 원소와 출석부 하위 필드는 그리지 않는다.
   - mock일 때의 수강 내역 디자인 문구(신청중·수강 중·대기·수료 뱃지). http이면 본인 수료 행의 이름과 `completedAt`만 그린다.
   - 수료 명단의 `userName`, `userPhone`, `attendCount`, `absentCount`, `cohortNumber`. 학생 이름은 강사가 아니고 명단용 view model이 없다.
 - (2026-09-16) **삶공부 관리자 UI의 역할 경계는 `MANAGER_LIFESTUDY` 또는 `ADMIN`이다** — 공통 권한 판별은 두 역할만 삶공부 관리 도메인에 허용한다. 현재 모바일 삶공부는 사용자용 화면만 제공하며, 실제 관리자 API의 403 강제와 관리자 화면은 후속 서버 계약 작업으로 분리한다. Issue #128.

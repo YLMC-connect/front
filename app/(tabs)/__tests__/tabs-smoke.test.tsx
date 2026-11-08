@@ -1379,6 +1379,8 @@ describe("v1 tab smoke screens", () => {
     jest.spyOn(prayerService, "fetchPrayerCohortStatus").mockResolvedValueOnce({
       cohortId: 1,
       cohortName: "화요일 오후 기도방",
+      yoil: 2,
+      timeSlot: "PM",
       weekStartDate: "2026-10-26",
       scheduledDate: "2026-10-27",
       myCompleted: false,
@@ -1486,6 +1488,8 @@ describe("v1 tab smoke screens", () => {
     const completedStatus = {
       cohortId: 1,
       cohortName: "화요일 오후 기도방",
+      yoil: 2,
+      timeSlot: "PM",
       weekStartDate: "2026-10-26",
       scheduledDate: "2026-10-27",
       myCompleted: true,
@@ -1553,6 +1557,8 @@ describe("v1 tab smoke screens", () => {
     jest.spyOn(prayerService, "fetchPrayerCohortStatus").mockResolvedValue({
       cohortId: 1,
       cohortName: "월요일 오전 기도방",
+      yoil: 1,
+      timeSlot: "AM",
       weekStartDate: null,
       scheduledDate: null,
       myCompleted: false,

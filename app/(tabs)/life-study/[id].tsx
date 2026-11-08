@@ -188,8 +188,7 @@ function LiveLifeStudyDetail({
                 <View
                   style={[
                     styles.sectionMargin,
-                    lessons.length === 0 ? styles.sectionMarginFill
-                      : null,
+                    lessons.length === 0 ? styles.sectionMarginFill : null,
                   ]}
                 >
                   <Text style={styles.subSectionTitle}>커리큘럼</Text>

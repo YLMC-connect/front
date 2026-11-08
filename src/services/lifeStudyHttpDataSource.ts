@@ -130,9 +130,7 @@ export function createHttpLifeStudyDataSource({
     },
 
     async getCourseLessons(courseId) {
-      const data = await client.request<unknown>(
-        `/api/life-study/${courseId}`,
-      );
+      const data = await client.request<unknown>(`/api/life-study/${courseId}`);
       return tryReadLifeStudyCourseLessons(data);
     },
 

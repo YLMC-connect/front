@@ -51,6 +51,9 @@ const SHOW_SCROLL_DISTANCE = 4;
  */
 export type StickyControlsHideMode = "direction" | "past-inset" | "never";
 
+/** 디자인 시스템 PullToRefresh: 64px 이상 당겼다 놓으면 새로고침. */
+const PULL_TO_REFRESH_DISTANCE = 64;
+
 export function StickyHeaderScreen({
   title,
   subtitle,
@@ -124,6 +127,8 @@ export function StickyHeaderScreen({
       setIsPullRefreshing(false);
     }
   }
+  // 위로 더 당긴 거리(px). 당기는 동안 RefreshIndicator 를 보여 주는 데 쓴다.
+  const [pullDistance, setPullDistance] = useState(0);
   const lastScrollY = useRef(0);
   const downwardDistance = useRef(0);
   const upwardDistance = useRef(0);
@@ -187,6 +192,10 @@ export function StickyHeaderScreen({
   }
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (onRefresh) {
+      const pull = Math.round(Math.max(-event.nativeEvent.contentOffset.y, 0));
+      if (pull !== pullDistance) setPullDistance(pull);
+    }
     const offsetY = Math.max(event.nativeEvent.contentOffset.y, 0);
     if (shouldHandleScroll && !shouldHandleScroll()) {
       lastScrollY.current = offsetY;
@@ -296,12 +305,25 @@ export function StickyHeaderScreen({
             </Pressable>
           </ScrollView>
         </BlurTargetView>
-        {refreshing && (hasStickyControls || isPullRefreshing) ? (
+        {(refreshing && isPullRefreshing) || pullDistance > 0 ? (
           <View
             pointerEvents="none"
-            style={[styles.refreshIndicatorBar, { top: totalTopPadding + 4 }]}
+            style={[
+              styles.refreshIndicatorBar,
+              {
+                top: totalTopPadding,
+                // 당기는 동안은 64px 에 닿을수록 진해지고, 새로고침 중에는 그대로 보인다.
+                opacity:
+                  refreshing && isPullRefreshing
+                    ? 1
+                    : Math.min(pullDistance / PULL_TO_REFRESH_DISTANCE, 1),
+              },
+            ]}
           >
-            <RefreshIndicator testID={`${testID}-refresh-indicator`} />
+            <RefreshIndicator
+              refreshing={Boolean(refreshing && isPullRefreshing)}
+              testID={`${testID}-refresh-indicator`}
+            />
           </View>
         ) : null}
         {hasStickyControls ? (

@@ -355,7 +355,7 @@ export default function GroupScreen() {
             description="소모임을 개설하거나 관심 있는 모임에 참여해보세요."
           />
         ) : (
-          <View style={styles.myListWrap}>
+          <View testID="group-list">
             {groups.map((group, index) => (
               <StaggerItem key={group.id} index={index}>
                 <CompanionCard

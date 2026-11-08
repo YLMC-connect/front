@@ -21,12 +21,19 @@ const SPINNER_TURN = 800;
  * 디자인 시스템 PullToRefresh 스피너. `primary-subtle` 고리 위에 `primary` 한 조각이 돈다.
  * 동작 줄이기 설정이면 멈춘 모습으로 둔다.
  */
-export function Spinner({ testID }: { testID?: string }) {
+export function Spinner({
+  animating = true,
+  testID,
+}: {
+  /** false 면 돌지 않고 멈춘 모습(당기는 중). */
+  animating?: boolean;
+  testID?: string;
+}) {
   const reduceMotion = useReducedMotion();
   const rotation = useSharedValue(0);
 
   useEffect(() => {
-    if (reduceMotion) {
+    if (reduceMotion || !animating) {
       cancelAnimation(rotation);
       rotation.set(0);
       return;
@@ -38,7 +45,7 @@ export function Spinner({ testID }: { testID?: string }) {
       ),
     );
     return () => cancelAnimation(rotation);
-  }, [reduceMotion, rotation]);
+  }, [animating, reduceMotion, rotation]);
 
   const arcStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${rotation.value}deg` }],
@@ -57,18 +64,27 @@ export function Spinner({ testID }: { testID?: string }) {
   );
 }
 
-/** 당겨서 새로고침하는 동안 목록 맨 위에 두는 줄: 스피너 + "새로고침하는 중". */
-export function RefreshIndicator({ testID }: { testID?: string }) {
+/**
+ * 당겨서 새로고침 표시. 당기는 동안은 멈춘 스피너만, 놓아서 새로고침이 시작되면
+ * 스피너가 돌고 "새로고침하는 중"이 붙는다.
+ */
+export function RefreshIndicator({
+  refreshing = true,
+  testID,
+}: {
+  refreshing?: boolean;
+  testID?: string;
+}) {
   return (
     <View
-      accessible
-      accessibilityLabel="새로고침하는 중"
+      accessible={refreshing}
+      accessibilityLabel={refreshing ? "새로고침하는 중" : undefined}
       accessibilityLiveRegion="polite"
       style={styles.row}
       testID={testID}
     >
-      <Spinner />
-      <Text style={styles.label}>새로고침하는 중</Text>
+      <Spinner animating={refreshing} />
+      {refreshing ? <Text style={styles.label}>새로고침하는 중</Text> : null}
     </View>
   );
 }

@@ -75,6 +75,11 @@ describe("RefreshIndicator · LoadMoreFooter", () => {
     expect(screen.getByText("새로고침하는 중")).toBeTruthy();
   });
 
+  it("shows only the still spinner while pulling", () => {
+    render(<RefreshIndicator refreshing={false} />);
+    expect(screen.queryByText("새로고침하는 중")).toBeNull();
+  });
+
   it("shows retry on error, end text when there is no more", () => {
     const onRetry = jest.fn();
     const { rerender } = render(

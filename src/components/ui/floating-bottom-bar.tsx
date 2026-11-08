@@ -80,12 +80,8 @@ export function FloatingBottomBar({
         tintOpacity={0}
       />
       <LinearGradient
-        colors={[
-          "rgba(246,247,249,0)",
-          "rgba(246,247,249,0.88)",
-          "rgba(246,247,249,1)",
-        ]}
-        locations={[0, 0.3, 0.45]}
+        colors={["rgba(246,247,249,0)", theme.colors.bg]}
+        locations={[0, 0.45]}
         pointerEvents="none"
         style={StyleSheet.absoluteFill}
         testID={testID ? `${testID}-gradient` : undefined}

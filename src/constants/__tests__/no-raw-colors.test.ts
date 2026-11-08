@@ -34,8 +34,8 @@ const ALLOWED: Record<string, { count: number; reason: string }> = {
     reason: "VisualCover 장식 팔레트",
   },
   "src/components/ui/floating-bottom-bar.tsx": {
-    count: 3,
-    reason: "bg 반투명 그라데이션",
+    count: 1,
+    reason: "bg 투명 끝점(그라데이션)",
   },
   "src/components/ui/navigation.tsx": {
     count: 2,

@@ -1,6 +1,6 @@
 import { fireEvent, screen } from "@testing-library/react-native";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
-import { router, usePathname } from "expo-router";
+import { usePathname } from "expo-router";
 import { AppTabBar } from "../_layout";
 import { renderWithClient } from "../../../src/test/renderWithClient";
 
@@ -19,6 +19,7 @@ const rootRoutes = [
 
 function renderTabBar(index: number, pathname: string) {
   const navigate = jest.fn();
+  const emit = jest.fn(() => ({ defaultPrevented: false }));
   jest.mocked(usePathname).mockReturnValue(pathname);
 
   const routes = rootRoutes.map((route) => ({
@@ -39,15 +40,15 @@ function renderTabBar(index: number, pathname: string) {
   const props = {
     state: { index, routes },
     descriptors,
-    navigation: { navigate },
+    navigation: { navigate, emit },
   } as unknown as BottomTabBarProps;
 
   const view = renderWithClient(<AppTabBar {...props} />);
-  return { navigate, unmount: view.unmount };
+  return { navigate, emit, unmount: view.unmount };
 }
 
 describe("root tab bar", () => {
-  it("does not reopen the market, group, prayer, or life-study tab already on screen", () => {
+  it("sends tabPress (scroll to top) but does not reopen a tab already on screen", () => {
     const cases = [
       { index: 1, pathname: "/market", testID: "tab-market" },
       { index: 2, pathname: "/group", testID: "tab-group" },
@@ -56,19 +57,25 @@ describe("root tab bar", () => {
     ] as const;
 
     for (const item of cases) {
-      const { navigate, unmount } = renderTabBar(item.index, item.pathname);
+      const { navigate, emit, unmount } = renderTabBar(
+        item.index,
+        item.pathname,
+      );
       fireEvent.press(screen.getByTestId(item.testID));
+      expect(emit).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "tabPress" }),
+      );
       expect(navigate).not.toHaveBeenCalled();
       unmount();
     }
   });
 
-  it("opens a different root tab and resets its stack via router.replace", () => {
-    const { unmount } = renderTabBar(1, "/market");
+  it("opens a different root tab keeping its previous state", () => {
+    const { navigate, unmount } = renderTabBar(1, "/market");
 
     fireEvent.press(screen.getByTestId("tab-prayer"));
 
-    expect(router.replace).toHaveBeenCalledWith("/prayer");
+    expect(navigate).toHaveBeenCalledWith("prayer", undefined);
     unmount();
   });
 

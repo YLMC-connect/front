@@ -1,7 +1,7 @@
 import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, Tabs, usePathname } from "expo-router";
+import { Tabs, usePathname } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { type LayoutChangeEvent, StyleSheet, View } from "react-native";
 import { Text } from "@/components/ui/text";
@@ -147,7 +147,6 @@ export function AppTabBar({
       state={state}
       descriptors={descriptors}
       navigation={navigation}
-      pathname={effectivePathname}
       routes={routes}
       visible={visible}
     />
@@ -158,11 +157,9 @@ function VisibleTabBar({
   state,
   descriptors,
   navigation,
-  pathname,
   routes,
   visible,
 }: Pick<BottomTabBarProps, "state" | "descriptors" | "navigation"> & {
-  pathname: string;
   routes: TabRoute[];
   visible: boolean;
 }) {
@@ -314,10 +311,15 @@ function VisibleTabBar({
                   });
                 }}
                 onPress={() => {
-                  const tab = findRootTab(route.name);
-                  if (!tab) return;
-                  if (pathname === tab.href) return;
-                  router.replace(tab.href);
+                  // 기본 탭 바와 같은 흐름: tabPress 를 보내면 이미 보고 있는 탭은
+                  // 맨 위로 스크롤(useScrollToTop)되고, 다른 탭은 떠날 때 상태 그대로 연다.
+                  const event = navigation.emit({
+                    type: "tabPress",
+                    target: route.key,
+                    canPreventDefault: true,
+                  });
+                  if (focused || event.defaultPrevented) return;
+                  navigation.navigate(route.name, route.params);
                 }}
               />
             );

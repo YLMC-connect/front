@@ -20,7 +20,7 @@
 - 당겨서 새로고침(Pull-to-Refresh) 스피너는 사용자가 직접 화면을 손으로 끌어내렸을 때만 표시되며, 탭 전환·화면 진입·백그라운드 쿼리 갱신 시에는 새로고침 모션이 노출되지 않는다 (`StickyHeaderScreen`, `Screen`의 `isPullRefreshing` 제어)
 - 화면 상단은 `safe area + 20px`. 이미지 hero overlay는 예외이며, 등록 바텀 모달(presentation: "modal")은 safe area 대신 좌우 여백(screenX=20px)과 동일한 상단 여백 적용
 - 루트 탭은 glass sticky 헤더 + `StickyHeaderScreen`. 기본 숨김은 아래 12px / 위 4px(`direction`). 화면 오버레이(`overlay`)는 `ScreenHeader` 상위 레이어로 배치되어 플로팅 메뉴 backdrop이 헤더까지 온전히 덮는다
-- 화면 하단 고정 액션 바 공통화 — `FloatingBottomBar` 및 `FLOATING_BOTTOM_BAR_INSET = 130`. 배경 그라데이션(`LinearGradient` 0~1 투명도)과 Safe Area 바닥 인셋(`Math.max(insets.bottom, 24)`)을 자동 계산하며 회원가입/신청/모달/약관/탈퇴 등 하단 CTA 액션 바를 일원화
+- 화면 하단 고정 액션 바 공통화 — `FloatingBottomBar` 및 `FLOATING_BOTTOM_BAR_INSET = 130`. 배경은 디자인 시스템 `.ylmc-fbb` 대로 그라데이션만(`LinearGradient` 투명→bg, 바 높이 0~45%, 흐림 없음)과 Safe Area 바닥 인셋(`Math.max(insets.bottom, 24)`)을 자동 계산하며 회원가입/신청/모달/약관/탈퇴 등 하단 CTA 액션 바를 일원화
 - 작성 입력은 공통 `ModalFormTextInput`(primary 2px 포커스). 검색은 `SearchField`
 - 숨긴 웹 route의 `0×0` layout은 탭·필터 geometry로 쓰지 않음
 - API client는 기본 `{ code, message, data }` envelope. 비envelope 성공만 `format: "json"`

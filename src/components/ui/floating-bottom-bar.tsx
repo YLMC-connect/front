@@ -4,7 +4,6 @@ import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { theme } from "../../constants/theme";
 import { Button } from "./buttons";
-import { GlassBackdrop } from "./glass-backdrop";
 
 export const FLOATING_BOTTOM_BAR_INSET = 130;
 
@@ -39,7 +38,7 @@ export interface FloatingBottomBarProps {
 
 /**
  * 상세·작성 화면 아래에 고정되는 주 버튼 자리.
- * 안쪽 24/20/32(안전 영역이 더 크면 안전 영역), 바탕은 bg 그라데이션 + 흐림.
+ * 안쪽 24/20/32(안전 영역이 더 크면 안전 영역), 바탕은 bg 그라데이션(흐림 없음, 디자인 시스템 `.ylmc-fbb`).
  */
 export function FloatingBottomBar({
   label,
@@ -74,11 +73,6 @@ export function FloatingBottomBar({
       style={[styles.container, { paddingBottom: bottomInset }, style]}
       testID={testID ? `${testID}-container` : undefined}
     >
-      <GlassBackdrop
-        intensity={12}
-        testID={`${testID ?? "floating-bottom-bar"}-glass`}
-        tintOpacity={0}
-      />
       <LinearGradient
         colors={["rgba(246,247,249,0)", theme.colors.bg]}
         locations={[0, 0.45]}

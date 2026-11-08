@@ -3,7 +3,7 @@ import type { PrayerCohortDto, PrayerTopicDto } from "../../types/prayerApi";
 import {
   buildPrayerOverview,
   formatPrayerDate,
-  parsePrayerRoomDayPeriod,
+  formatPrayerRoomDayPeriod,
   readPrayerApplications,
   readPrayerCategories,
   readPrayerCohortDetail,
@@ -145,23 +145,27 @@ describe("prayerMapper", () => {
     });
   });
 
-  it("formats server dates and reads day/period from a room name", () => {
+  it("formats server dates and day/period from server yoil/timeSlot", () => {
     expect(formatPrayerDate("2026-10-28T09:00:00")).toBe("10월 28일");
     expect(formatPrayerDate("2026-01-05")).toBe("1월 5일");
     expect(formatPrayerDate(null)).toBeUndefined();
-    expect(parsePrayerRoomDayPeriod("월요일 오전 기도방")).toEqual({
+    expect(formatPrayerRoomDayPeriod(1, "AM")).toEqual({
       day: "월",
       period: "오전",
     });
-    expect(parsePrayerRoomDayPeriod("일요일 저녁 기도방")).toEqual({
+    expect(formatPrayerRoomDayPeriod(0, "PM")).toEqual({
       day: "일",
       period: "오후",
     });
-    expect(parsePrayerRoomDayPeriod("Fri PM")).toEqual({
-      day: "금",
+    expect(formatPrayerRoomDayPeriod(6, "PM")).toEqual({
+      day: "토",
       period: "오후",
     });
-    expect(parsePrayerRoomDayPeriod(undefined)).toEqual({
+    expect(formatPrayerRoomDayPeriod(null, null)).toEqual({
+      day: "",
+      period: "",
+    });
+    expect(formatPrayerRoomDayPeriod(9, "XX")).toEqual({
       day: "",
       period: "",
     });

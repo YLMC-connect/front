@@ -167,7 +167,7 @@
 
 ## 미결 / 추적
 
-- 프런트 HTTP 목록/상세/작성/삭제/댓글은 라이브 관측으로 연결됨. 남은 문서 공백은 목록 `authorName`/`images`/`keyword`, 장소, 신고 enum, 상태 변경, 오류 코드. `isMine`은 `authorId === 현재 사용자`로 계산. 단일 출처는 Issue #19이며 `test:api:contract:market`은 38건 실패를 유지한다.
+- 프런트 HTTP 목록/상세/작성/삭제/댓글은 라이브 관측으로 연결됨. 남은 문서 공백은 목록 `authorName`/`images`/`keyword`, 장소, 신고 enum, 오류 코드. 상태 변경은 작성자용 `PUT /api/share/{id}/status`(AVAILABLE/RESERVED/COMPLETED)로 상세의 "상태 변경" 시트에서 바꾼다(#247). `isMine`은 `authorId === 현재 사용자`로 계산. 단일 출처는 Issue #19이며 `test:api:contract:market`은 38건 실패를 유지한다.
 - 신고 처리 후 블라인드/관리자 큐 정책은 API/운영 정책 확정 후 반영.
 
 ## 의존성

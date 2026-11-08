@@ -258,6 +258,18 @@ describe("httpMarketDataSource", () => {
     );
   });
 
+  it("sends the author status change with the server status value", async () => {
+    const { request, dataSource } = setup();
+    request.mockResolvedValue(1);
+
+    await dataSource.updateStatus({ marketId: "1", status: "reserved" });
+
+    expect(request).toHaveBeenCalledWith("/api/share/1/status", {
+      method: "PUT",
+      body: JSON.stringify({ status: "RESERVED" }),
+    });
+  });
+
   it("does not invent report reason codes", async () => {
     const { dataSource } = setup();
     await expect(

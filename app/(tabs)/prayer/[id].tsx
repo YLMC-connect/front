@@ -22,7 +22,7 @@ import {
 } from "../../../src/services/prayerService";
 import {
   formatPrayerDate,
-  parsePrayerRoomDayPeriod,
+  formatPrayerRoomDayPeriod,
 } from "../../../src/services/prayerMapper";
 import {
   AnswersPanel,
@@ -90,7 +90,7 @@ export default function PrayerDetailScreen() {
   const statusFailed = statusQuery.isError && !room;
 
   const roomTitle = room?.cohortName || "기도방";
-  const { day, period } = parsePrayerRoomDayPeriod(room?.cohortName);
+  const { day, period } = formatPrayerRoomDayPeriod(room?.yoil, room?.timeSlot);
   // 서버가 이번 주에 완료할 수 없다고 하면 버튼을 막는다(null 은 막지 않는다).
   const completionBlocked = isHttp && room?.canComplete === false;
 

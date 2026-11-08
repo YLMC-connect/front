@@ -360,30 +360,43 @@ export function tryReadLifeStudyCohortDetail(
   const baseList = tryReadLifeStudyCohortList([data]);
   if (baseList.length === 0) return null;
   const base = baseList[0];
-  const lessons: LifeStudyLessonDto[] = [];
-  if (Array.isArray(data.lessons)) {
-    for (const item of data.lessons) {
-      if (
-        isRecord(item) &&
-        typeof item.id === "number" &&
-        typeof item.lessonName === "string"
-      ) {
-        lessons.push({
-          id: item.id,
-          lessonName: item.lessonName,
-          orderNum:
-            typeof item.orderNum === "number"
-              ? item.orderNum
-              : lessons.length + 1,
-        });
-      }
-    }
-  }
   return {
     ...base,
     applied: typeof data.applied === "boolean" ? data.applied : false,
-    lessons,
+    lessons: readLessons(data.lessons),
   };
+}
+
+function readLessons(value: unknown): LifeStudyLessonDto[] {
+  const lessons: LifeStudyLessonDto[] = [];
+  if (!Array.isArray(value)) return lessons;
+  for (const item of value) {
+    if (
+      isRecord(item) &&
+      typeof item.id === "number" &&
+      typeof item.lessonName === "string"
+    ) {
+      lessons.push({
+        id: item.id,
+        lessonName: item.lessonName,
+        orderNum:
+          typeof item.weekNo === "number"
+            ? item.weekNo
+            : typeof item.orderNum === "number"
+              ? item.orderNum
+              : lessons.length + 1,
+      });
+    }
+  }
+  return lessons;
+}
+
+/** 과정 상세(`GET /api/life-study/{id}`)에서 주차별 커리큘럼만 읽는다. 형식이 다르면 null. */
+export function tryReadLifeStudyCourseLessons(
+  data: unknown,
+): LifeStudyLessonDto[] | null {
+  if (!isRecord(data)) return null;
+  return readLessons(data.lessons);
 }
 
 export type LifeStudyOverviewSource =

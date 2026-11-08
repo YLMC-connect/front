@@ -9,6 +9,7 @@ import {
   mapShareDetail,
   mapShareOverviewItem,
   toShareCategoryCode,
+  toShareStatus,
   toShareItemStatus,
 } from "./marketMapper";
 import type { MarketCategory } from "../types/market";
@@ -194,6 +195,13 @@ export function createHttpMarketDataSource({
     async deletePost(input) {
       await client.request(`/api/share/${input.marketId}`, {
         method: "DELETE",
+      });
+    },
+
+    async updateStatus(input) {
+      await client.request(`/api/share/${input.marketId}/status`, {
+        method: "PUT",
+        body: JSON.stringify({ status: toShareStatus(input.status) }),
       });
     },
 

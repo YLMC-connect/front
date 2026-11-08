@@ -19,12 +19,14 @@ import {
   reportMarketContent,
   updateMarketComment,
   updateMarketPost,
+  updateMarketStatus,
 } from "../services/marketService";
 import type {
   MarketCategory,
   MarketDetail,
   MarketInput,
   MarketReportInput,
+  MarketStatus,
   MarketUpdateInput,
 } from "../types/market";
 
@@ -105,6 +107,23 @@ export function useUpdateMarketPost(marketId: string) {
       queryClient.setQueryData<MarketDetail>(
         queryKeys.market.detail(marketId),
         detail,
+      );
+      queryClient.invalidateQueries({ queryKey: queryKeys.market.overview() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.market.mine() });
+    },
+  });
+}
+
+export function useUpdateMarketStatus(marketId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (status: MarketStatus) =>
+      updateMarketStatus({ marketId, status }),
+    onSuccess: (_, status) => {
+      queryClient.setQueryData<MarketDetail>(
+        queryKeys.market.detail(marketId),
+        (detail) => (detail ? { ...detail, status } : detail),
       );
       queryClient.invalidateQueries({ queryKey: queryKeys.market.overview() });
       queryClient.invalidateQueries({ queryKey: queryKeys.market.mine() });

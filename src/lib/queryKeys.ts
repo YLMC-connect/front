@@ -26,6 +26,8 @@ export const queryKeys = {
       [...queryKeys.lifeStudy.all, "overview", "http-v3"] as const,
     cohortDetail: (cohortId: string) =>
       [...queryKeys.lifeStudy.all, "cohort", cohortId] as const,
+    courseLessons: (courseId: string) =>
+      [...queryKeys.lifeStudy.all, "courseLessons", courseId] as const,
     lists: () => [...queryKeys.lifeStudy.all, "list"] as const,
     list: (filter?: unknown) =>
       [...queryKeys.lifeStudy.lists(), filter ?? "all"] as const,

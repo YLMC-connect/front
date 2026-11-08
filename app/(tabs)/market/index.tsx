@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
   Empty,
@@ -8,6 +8,7 @@ import {
   FilterChips,
   FloatingActionButton,
   ListSkeleton,
+  LoadMoreFooter,
   SegmentedTabs,
 } from "../../../src/components/ui";
 import {
@@ -195,10 +196,20 @@ export default function MarketScreen() {
             ))}
           </ShareList>
         )}
-        {list.isFetchingNextPage && !isLoading ? (
-          <View style={styles.footerLoader}>
-            <ActivityIndicator color={theme.colors.primary} />
-          </View>
+        {!isLoading && !isError && visiblePosts.length > 0 ? (
+          <LoadMoreFooter
+            state={
+              list.isFetchingNextPage
+                ? "loading"
+                : list.isFetchNextPageError
+                  ? "error"
+                  : list.hasNextPage
+                    ? "idle"
+                    : "end"
+            }
+            onRetry={() => void list.fetchNextPage()}
+            testID="market-load-more"
+          />
         ) : null}
       </View>
     </StickyHeaderScreen>
@@ -290,10 +301,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     paddingTop: 56,
     paddingBottom: 60,
-  },
-  footerLoader: {
-    paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });

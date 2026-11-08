@@ -23,6 +23,7 @@ import {
   Inbox,
   Info,
   LogOut,
+  MapPin,
   Megaphone,
   Minus,
   Package,
@@ -44,6 +45,7 @@ import {
   UserMinus,
   UserPlus,
   Users,
+  WifiOff,
   X,
   type LucideIcon,
   type LucideProps,
@@ -87,6 +89,7 @@ const iconMap = {
   "outlined-flag": Flag,
   "person-outline": User,
   "person-remove": UserMinus,
+  place: MapPin,
   play: Play,
   "prayer-apply": UserPlus,
   remove: Minus,
@@ -104,6 +107,7 @@ const iconMap = {
   visibility: Eye,
   "visibility-off": EyeOff,
   "warning-amber": TriangleAlert,
+  "wifi-off": WifiOff,
 } as const satisfies Record<string, LucideIcon>;
 
 export type AppIconName = keyof typeof iconMap;

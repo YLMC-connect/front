@@ -29,6 +29,7 @@ import {
   MotionEnter,
   MotionFadeIn,
   MotionPop,
+  PasswordStrength,
   TopBar,
 } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
@@ -894,6 +895,10 @@ export default function SignupScreen() {
                     }}
                     hasError={isPwError || Boolean(errors.password)}
                   />
+
+                  {values.password.length > 0 ? (
+                    <PasswordStrength password={values.password} />
+                  ) : null}
 
                   {/* Realtime password criteria feedback */}
                   <View style={styles.passwordRulesRow}>

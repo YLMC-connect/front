@@ -32,38 +32,44 @@
 
 ## 주요 파일
 
-| 경로                                           | 역할                                                          |
-| ---------------------------------------------- | ------------------------------------------------------------- |
-| `AGENTS.md` / `CLAUDE.md`                      | AI 작업 규칙                                                  |
-| `.task-flow.conf`                              | 도메인 목록 단일 출처                                         |
-| `docs/GETTING_STARTED.md`                      | 클론·Dev Client·라이브 API / mock 실행 안내                   |
-| `.env.example`                                 | `EXPO_PUBLIC_API_URL`과 adapter 스위치                        |
-| `docs/INDEX.md`                                | 진입점. 도메인 상태표는 Issues 기반 자동생성                  |
-| `scripts/gen-index.sh`                         | INDEX 상태표 재생성                                           |
-| `docs/MAINTENANCE.md`                          | 문서 드리프트 복구                                            |
-| `src/lib/apiClient.ts`                         | envelope·오류·Authorization                                   |
-| `src/lib/sentry.ts`                            | Sentry 초기화·wrap·응답 형식 오류 보고                        |
-| `src/lib/reportResponseIssue.ts`               | 응답 일부를 버릴 때 알림·목록 항목 단위 해석                  |
-| `src/types/common.ts`                          | 공통 회원·서버 역할 타입                                      |
-| `src/lib/rolePermissions.ts`                   | 관리자 도메인별 역할 접근 판별                                |
-| `src/constants/theme.ts` / `designTokens.json` | 디자인 토큰 (v2)                                              |
-| `src/constants/__tests__/no-raw-colors.test.ts` | 화면 코드에 직접 쓴 색 금지 (허용 목록만)                  |
-| `design-system/tokens.json`                    | 디자인 시스템 토큰 원본 (아티팩트 그대로)                     |
-| `scripts/sync-design-tokens.mjs`               | 원본 → `designTokens.json` 변환                               |
-| `src/components/layout/Screen.tsx`             | 공통 화면 + 상단 inset                                        |
-| `src/components/layout/StickyHeaderScreen.tsx` | 루트 탭 sticky 헤더·필터                                      |
-| `src/components/ui/floating-bottom-bar.tsx`    | FloatingBottomBar 하단 플로팅 액션 바                         |
-| `src/components/ui/buttons.tsx`                | Button, FloatingActionButton 공통 컴포넌트                    |
-| `src/components/ui/display.tsx`                | Card, Badge, Avatar, VisualThumb, VisualCover, Chip           |
-| `src/components/ui/inputs.tsx`                 | TextField, Textarea, ImagePickerField, FormSection            |
-| `src/components/ui/navigation.tsx`             | TopBar, SegmentedTabs, HorizontalChips                        |
-| `src/components/ui/dialog.tsx`                 | ConfirmDialog, BottomSheet, RadioSheet                        |
-| `src/components/ui/feedback.tsx`               | Empty, EmptyState, ErrorState, SuccessState, Toast            |
-| `src/components/ui/motion.tsx`                 | MotionPressable, MotionEnter, MotionPop, AnimatedProgressFill |
-| `src/components/ui/index.tsx`                  | 6개 서브모듈 barrel export                                    |
-| `.github/workflows/ci.yml`                     | PR `npm run validate`                                         |
-| `scripts/check-*-api-contract.mjs`             | Swagger 계약 검사                                             |
-| `scripts/prepare-design-artifacts.mjs` 등      | ZIP 시각 비교. **요청 시에만**                                |
+| 경로                                                                                              | 역할                                                            |
+| ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `AGENTS.md` / `CLAUDE.md`                                                                         | AI 작업 규칙                                                    |
+| `.task-flow.conf`                                                                                 | 도메인 목록 단일 출처                                           |
+| `docs/GETTING_STARTED.md`                                                                         | 클론·Dev Client·라이브 API / mock 실행 안내                     |
+| `.env.example`                                                                                    | `EXPO_PUBLIC_API_URL`과 adapter 스위치                          |
+| `docs/INDEX.md`                                                                                   | 진입점. 도메인 상태표는 Issues 기반 자동생성                    |
+| `scripts/gen-index.sh`                                                                            | INDEX 상태표 재생성                                             |
+| `docs/MAINTENANCE.md`                                                                             | 문서 드리프트 복구                                              |
+| `src/lib/apiClient.ts`                                                                            | envelope·오류·Authorization                                     |
+| `src/lib/sentry.ts`                                                                               | Sentry 초기화·wrap·응답 형식 오류 보고                          |
+| `src/lib/reportResponseIssue.ts`                                                                  | 응답 일부를 버릴 때 알림·목록 항목 단위 해석                    |
+| `src/types/common.ts`                                                                             | 공통 회원·서버 역할 타입                                        |
+| `src/lib/rolePermissions.ts`                                                                      | 관리자 도메인별 역할 접근 판별                                  |
+| `src/constants/theme.ts` / `designTokens.json`                                                    | 디자인 토큰 (v2)                                                |
+| `src/constants/__tests__/no-raw-colors.test.ts`                                                   | 화면 코드에 직접 쓴 색 금지 (허용 목록만)                       |
+| `design-system/tokens.json`                                                                       | 디자인 시스템 토큰 원본 (아티팩트 그대로)                       |
+| `scripts/sync-design-tokens.mjs`                                                                  | 원본 → `designTokens.json` 변환                                 |
+| `src/components/layout/Screen.tsx`                                                                | 공통 화면 + 상단 inset                                          |
+| `src/components/layout/StickyHeaderScreen.tsx`                                                    | 루트 탭 sticky 헤더·필터                                        |
+| `src/components/ui/floating-bottom-bar.tsx`                                                       | FloatingBottomBar 하단 플로팅 액션 바                           |
+| `src/components/ui/buttons.tsx`                                                                   | Button, FloatingActionButton 공통 컴포넌트                      |
+| `src/components/ui/display.tsx`                                                                   | Card, Badge, Avatar, VisualThumb, VisualCover, Chip             |
+| `src/components/ui/inputs.tsx`                                                                    | TextField, Textarea, ImagePickerField, FormSection              |
+| `src/components/ui/navigation.tsx`                                                                | TopBar, SegmentedTabs, HorizontalChips                          |
+| `src/components/ui/dialog.tsx`                                                                    | ConfirmDialog, BottomSheet, RadioSheet                          |
+| `src/components/ui/feedback.tsx`                                                                  | Empty, EmptyState, ErrorState, SuccessState, Toast              |
+| `src/components/ui/motion.tsx`                                                                    | MotionPressable, MotionEnter, MotionPop, AnimatedProgressFill   |
+| `src/components/ui/spinner.tsx`                                                                   | Spinner, RefreshIndicator(목록 당겨서 새로고침), LoadMoreFooter |
+| `src/components/ui/offline-banner.tsx`                                                            | OfflineBanner, useIsOnline (react-query onlineManager)          |
+| `src/components/ui/info-row.tsx`                                                                  | PlaceCard 정보 줄 (나눔 상세 수령 장소)                         |
+| `src/components/ui/password-strength.tsx`                                                         | PasswordStrength (회원가입 비밀번호)                            |
+| `src/components/ui/image-viewer.tsx`                                                              | ImageViewer 전체 화면 사진 보기 (나눔 상세)                     |
+| `src/components/ui/{switch,notification-item,date-picker,avatar-group,tooltip,chart,stepper}.tsx` | 디자인 시스템 부품. 아직 쓰는 화면 없음                         |
+| `src/components/ui/index.tsx`                                                                     | 6개 서브모듈 barrel export                                      |
+| `.github/workflows/ci.yml`                                                                        | PR `npm run validate`                                           |
+| `scripts/check-*-api-contract.mjs`                                                                | Swagger 계약 검사                                               |
+| `scripts/prepare-design-artifacts.mjs` 등                                                         | ZIP 시각 비교. **요청 시에만**                                  |
 
 홈 루트 화면 지도는 [home.md](home.md).
 
@@ -72,6 +78,8 @@
 [../../PLAN.md](../../PLAN.md) “🗃 데이터 타입 설계 > 공통” 참조. `ApiResponse<T>` 는 `src/types/api.ts`.
 
 ## 결정 사항 (지금 유효한 것만)
+
+- **디자인 시스템 컴포넌트 40개는 모두 `src/components/ui` 에 있다.** 목록 화면(StickyHeaderScreen)은 당겨서 새로고침 때 기본 스피너를 숨기고 `RefreshIndicator`(스피너 + "새로고침하는 중")를, 인터넷이 끊기면 맨 위에 `OfflineBanner` 를 띄운다. 나눔·동행 목록 끝은 `LoadMoreFooter`(불러오는 중·다시 시도·마지막 글). Switch·NotificationItem·DatePicker·AvatarGroup·Tooltip·Chart(막대)·Stepper(단계 표시)는 쓸 화면이 생기면 가져다 쓴다.
 
 - **공통 Empty 컴포넌트 표준화 (FAQ 기준 통일 스펙)** — 빈 목록/데이터 부재 상태를 위한 `Empty` 공통 컴포넌트(`src/components/ui/feedback.tsx`)를 FAQ 화면 기준으로 통일. 84px 큰 원형 배경(`surface2`), 42px 큰 아이콘(`inkHint`), `cardTitle` 볼드 제목 및 `caption` 설명 문구로 구성하며 상하 정중앙 배치(`flex: 1`, `justifyContent: "center"`)를 유지하고 일체의 CTA 버튼을 배제. 약관, 개인정보처리방침, FAQ, 차단 목록, 내 활동, 나눔, 소모임, 기도, 삶공부 전반에 일관되게 적용.
 - **화면 전환 배경색 고정 및 전 하위 Stack 우측 슬라이드(`slide_from_right`) 모션 일원화** — 루트 `<Tabs>`와 각 하위 Stack(`market`, `group`, `prayer`, `life-study`, `mypage`)에 `sceneStyle` / `contentStyle: { backgroundColor: theme.colors.bg }` 및 `animation: "slide_from_right"`를 일괄 지정해 화면 전환 시 흰색 플래시를 방지하고, iOS 및 Android 전 기기에서 모든 상세 진입/퇴장이 일관된 우측 슬라이드로 동작하도록 통일. 상세 진입 시 `AppTabBar`는 `180ms` 페이드·슬라이드(`translateY`)로 부드럽게 숨겨지도록 개선.

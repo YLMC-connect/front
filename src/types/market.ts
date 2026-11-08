@@ -107,6 +107,8 @@ export interface MarketDetail {
   content: string;
   categoryLabel: string;
   conditionLabel: string;
+  /** 수령 장소. 서버가 아직 내려주지 않아 비어 있다(이슈 295). */
+  location?: string;
   status: MarketStatus;
   authorName: string;
   createdLabel: string;

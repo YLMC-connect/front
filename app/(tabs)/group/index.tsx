@@ -15,7 +15,6 @@ import {
   useState,
 } from "react";
 import {
-  ActivityIndicator,
   Platform,
   Pressable,
   ScrollView,
@@ -32,6 +31,7 @@ import {
   FilterChips,
   FloatingActionButton,
   ListSkeleton,
+  LoadMoreFooter,
   MotionEnter,
   SegmentedTabs,
 } from "../../../src/components/ui";
@@ -367,10 +367,21 @@ export default function GroupScreen() {
             ))}
           </View>
         )}
-        {section === "groups" && overview.isFetchingNextPage ? (
-          <View style={styles.footerLoader}>
-            <ActivityIndicator color={theme.colors.primary} />
-          </View>
+        {section === "groups" && !isLoading && !isError && groups.length > 0 ? (
+          <LoadMoreFooter
+            state={
+              overview.isFetchingNextPage
+                ? "loading"
+                : overview.isFetchNextPageError
+                  ? "error"
+                  : overview.hasNextPage
+                    ? "idle"
+                    : "end"
+            }
+            endText="마지막 소모임이에요"
+            onRetry={() => void overview.fetchNextPage()}
+            testID="group-load-more"
+          />
         ) : null}
       </View>
     </StickyHeaderScreen>
@@ -530,10 +541,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     paddingTop: 32,
     paddingBottom: 100,
-  },
-  footerLoader: {
-    paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });

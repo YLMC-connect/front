@@ -8,7 +8,6 @@ import {
   type RefObject,
 } from "react";
 import {
-  ActivityIndicator,
   Keyboard,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -36,6 +35,8 @@ import {
   useScreenHeaderHeight,
 } from "../ui/screen-header";
 import { GlassBackdrop } from "../ui/glass-backdrop";
+import { OfflineBanner } from "../ui/offline-banner";
+import { RefreshIndicator } from "../ui/spinner";
 import { theme } from "../../constants/theme";
 import { Screen } from "./Screen";
 
@@ -266,8 +267,10 @@ export function StickyHeaderScreen({
                 <RefreshControl
                   refreshing={Boolean(refreshing && isPullRefreshing)}
                   onRefresh={handlePullRefresh}
-                  tintColor={theme.colors.primary}
-                  colors={[theme.colors.primary]}
+                  // 기본 스피너는 숨기고 디자인 시스템 RefreshIndicator 를 위에 띄운다.
+                  tintColor="transparent"
+                  colors={["transparent"]}
+                  progressBackgroundColor="transparent"
                   progressViewOffset={totalTopPadding + 10}
                 />
               ) : undefined
@@ -288,16 +291,17 @@ export function StickyHeaderScreen({
               onPress={Keyboard.dismiss}
               style={styles.scrollInner}
             >
+              <OfflineBanner testID={`${testID}-offline-banner`} />
               {children}
             </Pressable>
           </ScrollView>
         </BlurTargetView>
-        {hasStickyControls && refreshing ? (
+        {refreshing && (hasStickyControls || isPullRefreshing) ? (
           <View
             pointerEvents="none"
             style={[styles.refreshIndicatorBar, { top: totalTopPadding + 4 }]}
           >
-            <ActivityIndicator size="small" color={theme.colors.primary} />
+            <RefreshIndicator testID={`${testID}-refresh-indicator`} />
           </View>
         ) : null}
         {hasStickyControls ? (
@@ -430,7 +434,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    height: 32,
     alignItems: "center",
     justifyContent: "center",
     zIndex: 15,

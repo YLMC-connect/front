@@ -209,6 +209,7 @@ export function mapShareDetail(
     ] ?? "";
 
   const images = readShareImageUrls(data);
+  const location = readString(data.location);
 
   return {
     id: mappedId,
@@ -218,6 +219,7 @@ export function mapShareDetail(
     content,
     categoryLabel: CATEGORY_LABEL[mappedCategory],
     conditionLabel: condition,
+    ...(location ? { location } : {}),
     status: mappedStatus,
     authorName: authorName ?? mappedAuthorId,
     createdLabel: formatShareCreatedLabel(mappedCreatedAt, now),

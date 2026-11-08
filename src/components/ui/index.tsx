@@ -86,3 +86,24 @@ export {
   SuccessState,
   Toast,
 } from "./feedback";
+export { AvatarGroup } from "./avatar-group";
+export { BarChart, type ChartDatum, groupChartData } from "./chart";
+export { Calendar, DatePickerSheet, monthGrid } from "./date-picker";
+export { ImageViewer } from "./image-viewer";
+export { PlaceCard } from "./info-row";
+export { NotificationItem } from "./notification-item";
+export { OfflineBanner, useIsOnline } from "./offline-banner";
+export {
+  PasswordStrength,
+  type PasswordStrengthLevel,
+  passwordStrengthOf,
+} from "./password-strength";
+export {
+  LoadMoreFooter,
+  type LoadMoreState,
+  RefreshIndicator,
+  Spinner,
+} from "./spinner";
+export { Stepper } from "./stepper";
+export { SwitchRow, SwitchTrack } from "./switch";
+export { Tooltip } from "./tooltip";

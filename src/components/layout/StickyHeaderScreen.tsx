@@ -332,26 +332,14 @@ export function StickyHeaderScreen({
             </Pressable>
           </ScrollView>
         </BlurTargetView>
-        {isPullRefreshVisible || (isDragging && pullDistance > 0) ? (
-          <View
-            pointerEvents="none"
-            style={[
-              styles.refreshIndicatorBar,
-              {
-                top: totalTopPadding,
-                // 당기는 동안은 64px 에 닿을수록 진해지고, 새로고침 중에는 그대로 보인다.
-                opacity: isPullRefreshVisible
-                  ? 1
-                  : Math.min(pullDistance / PULL_TO_REFRESH_DISTANCE, 1),
-              },
-            ]}
-          >
-            <RefreshIndicator
-              progress={pullDistance / PULL_TO_REFRESH_DISTANCE}
-              refreshing={isPullRefreshVisible}
-              testID={`${testID}-refresh-indicator`}
-            />
-          </View>
+        {onRefresh ? (
+          <PullRefreshLayer
+            dragging={isDragging}
+            pullDistance={pullDistance}
+            refreshing={isPullRefreshVisible}
+            testID={`${testID}-refresh-indicator`}
+            top={totalTopPadding}
+          />
         ) : null}
         {hasStickyControls ? (
           <StickyControlsLayer
@@ -386,6 +374,80 @@ export function StickyHeaderScreen({
         ) : null}
       </View>
     </Screen>
+  );
+}
+
+/** 새로고침 표시가 다 내려왔을 때 sticky 영역 아래 여백. */
+const PULL_INDICATOR_REST = theme.spacing["2"];
+/** 숨었을 때 sticky 영역 뒤로 올라가 있는 거리(표시 높이 정도). */
+const PULL_INDICATOR_HIDE = 56;
+
+/**
+ * 디자인 시스템 PullToRefresh 움직임: 당기는 만큼 스피너가 sticky 영역 아래에서 내려오고,
+ * 놓으면 0.8초 주기로 돌다가 끝나면 위로 올라가며 사라진다.
+ */
+function PullRefreshLayer({
+  dragging,
+  pullDistance,
+  refreshing,
+  testID,
+  top,
+}: {
+  dragging: boolean;
+  pullDistance: number;
+  refreshing: boolean;
+  testID: string;
+  top: number;
+}) {
+  const reduceMotion = useReducedMotion();
+  const progress = useSharedValue(0);
+  const exitDuration = theme.motion.duration.base * theme.motion.exitRatio;
+  // 끝난 뒤 위로 사라지는 동안에도 스피너는 계속 돌고 문구도 남긴다.
+  const [exiting, setExiting] = useState(false);
+  const [wasRefreshing, setWasRefreshing] = useState(refreshing);
+  if (refreshing !== wasRefreshing) {
+    setWasRefreshing(refreshing);
+    setExiting(!refreshing);
+  }
+  useEffect(() => {
+    if (!exiting) return;
+    const timer = setTimeout(() => setExiting(false), exitDuration);
+    return () => clearTimeout(timer);
+  }, [exiting, exitDuration]);
+  const target = refreshing
+    ? 1
+    : dragging
+      ? Math.min(pullDistance / PULL_TO_REFRESH_DISTANCE, 1)
+      : 0;
+
+  useEffect(() => {
+    // 당기는 동안은 손가락을 바로 따라가고, 놓은 뒤 사라질 때만 퇴장 시간으로 물러난다.
+    progress.set(
+      dragging || reduceMotion
+        ? target
+        : withTiming(target, {
+            duration: target === 0 ? exitDuration : theme.motion.duration.fast,
+          }),
+    );
+  }, [dragging, exitDuration, progress, reduceMotion, target]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [
+      {
+        translateY:
+          PULL_INDICATOR_REST - PULL_INDICATOR_HIDE * (1 - progress.value),
+      },
+    ],
+  }));
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[styles.refreshIndicatorBar, { top }, animatedStyle]}
+    >
+      <RefreshIndicator refreshing={refreshing || exiting} testID={testID} />
+    </Animated.View>
   );
 }
 

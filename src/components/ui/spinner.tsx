@@ -13,7 +13,7 @@ import { theme } from "../../constants/theme";
 import { Text } from "./text";
 
 const SPINNER_SIZE = 24;
-const SPINNER_STROKE = 3;
+const SPINNER_STROKE = 2.5;
 /** 한 바퀴 도는 시간. */
 const SPINNER_TURN = 800;
 
@@ -23,22 +23,18 @@ const SPINNER_TURN = 800;
  */
 export function Spinner({
   animating = true,
-  angle = 0,
   testID,
 }: {
-  /** false 면 돌지 않고 `angle` 에 멈춘 모습(당기는 중). */
+  /** false 면 돌지 않고 멈춘 모습(당기는 중). 다시 돌 때는 멈춘 각도에서 이어서 돈다. */
   animating?: boolean;
-  /** 멈춰 있을 때의 각도(도). 돌기 시작하면 이 각도에서 이어서 돈다. */
-  angle?: number;
   testID?: string;
 }) {
   const reduceMotion = useReducedMotion();
-  const rotation = useSharedValue(angle);
+  const rotation = useSharedValue(0);
 
   useEffect(() => {
     if (reduceMotion || !animating) {
       cancelAnimation(rotation);
-      rotation.set(angle);
       return;
     }
     const from = rotation.get();
@@ -52,38 +48,31 @@ export function Spinner({
       ),
     );
     return () => cancelAnimation(rotation);
-  }, [animating, angle, reduceMotion, rotation]);
+  }, [animating, reduceMotion, rotation]);
 
   const arcStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${rotation.value}deg` }],
   }));
 
   return (
-    <View
+    <Animated.View
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={styles.spinner}
+      style={[styles.spinner, arcStyle]}
       testID={testID}
-    >
-      <View style={styles.ring} />
-      <Animated.View style={[styles.ring, styles.arc, arcStyle]} />
-    </View>
+    />
   );
 }
 
 /**
- * 당겨서 새로고침 표시. 당기는 동안은 당긴 만큼(`progress`) 스피너가 돌아가 있고,
- * 놓아서 새로고침이 시작되면 그 각도에서 이어서 돌며 "새로고침하는 중"이 붙는다.
- * 스피너는 늘 가운데 같은 자리에 있고 글자는 그 오른쪽에 붙는다.
+ * 당겨서 새로고침 표시(디자인 시스템 `.ylmc-refresh`). 스피너 24 아래에
+ * "새로고침하는 중" 12/600 `text-muted`(간격 8). 당기는 동안은 멈춘 스피너만 보인다.
  */
 export function RefreshIndicator({
   refreshing = true,
-  progress = 1,
   testID,
 }: {
   refreshing?: boolean;
-  /** 당긴 정도 0~1. 멈춘 스피너의 각도를 정한다. */
-  progress?: number;
   testID?: string;
 }) {
   return (
@@ -91,13 +80,13 @@ export function RefreshIndicator({
       accessible={refreshing}
       accessibilityLabel={refreshing ? "새로고침하는 중" : undefined}
       accessibilityLiveRegion="polite"
-      style={styles.row}
+      style={styles.refresh}
       testID={testID}
     >
-      <Spinner animating={refreshing} angle={Math.min(progress, 1) * 270} />
-      {refreshing ? (
-        <Text style={styles.refreshLabel}>새로고침하는 중</Text>
-      ) : null}
+      <Spinner animating={refreshing} />
+      <Text style={[styles.label, refreshing ? null : styles.labelHidden]}>
+        새로고침하는 중
+      </Text>
     </View>
   );
 }
@@ -147,24 +136,15 @@ const styles = StyleSheet.create({
   spinner: {
     width: SPINNER_SIZE,
     height: SPINNER_SIZE,
-  },
-  ring: {
-    ...StyleSheet.absoluteFill,
     borderRadius: SPINNER_SIZE / 2,
     borderWidth: SPINNER_STROKE,
     borderColor: theme.colors.primarySubtle,
-  },
-  arc: {
-    borderColor: "transparent",
     borderTopColor: theme.colors.primary,
   },
-  row: {
-    alignSelf: "stretch",
-    flexDirection: "row",
+  refresh: {
     alignItems: "center",
-    justifyContent: "center",
     gap: theme.spacing["2"],
-    paddingVertical: theme.spacing["3"],
+    paddingVertical: theme.spacing["1"],
   },
   label: {
     ...theme.typography.caption,
@@ -172,14 +152,8 @@ const styles = StyleSheet.create({
     fontWeight: "normal",
     color: theme.colors.textMuted,
   },
-  refreshLabel: {
-    ...theme.typography.caption,
-    position: "absolute",
-    left: "50%",
-    marginLeft: SPINNER_SIZE / 2 + theme.spacing["2"],
-    fontFamily: theme.font.semibold,
-    fontWeight: "normal",
-    color: theme.colors.textMuted,
+  labelHidden: {
+    opacity: 0,
   },
   footer: {
     minHeight: theme.size.buttonHeightSm,

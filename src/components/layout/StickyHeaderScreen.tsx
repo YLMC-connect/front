@@ -53,6 +53,8 @@ export type StickyControlsHideMode = "direction" | "past-inset" | "never";
 
 /** 디자인 시스템 PullToRefresh: 64px 이상 당겼다 놓으면 새로고침. */
 const PULL_TO_REFRESH_DISTANCE = 64;
+/** 새로고침 표시를 보여 주는 최소 시간. 응답이 빨라도 스피너와 문구가 보이게. */
+const PULL_REFRESH_MIN_MS = 600;
 
 export function StickyHeaderScreen({
   title,
@@ -122,15 +124,15 @@ export function StickyHeaderScreen({
   const [seenScrollResetKey, setSeenScrollResetKey] =
     useState(scrollStateResetKey);
   const [isPullRefreshing, setIsPullRefreshing] = useState(false);
-  const [prevRefreshing, setPrevRefreshing] = useState(refreshing);
-  if (refreshing !== prevRefreshing) {
-    setPrevRefreshing(refreshing);
-    if (!refreshing) {
-      setIsPullRefreshing(false);
-    }
+  // 응답이 빨라도 새로고침 표시를 최소 PULL_REFRESH_MIN_MS 동안 보여 준다.
+  const [pullHoldDone, setPullHoldDone] = useState(true);
+  if (isPullRefreshing && pullHoldDone && !refreshing) {
+    setIsPullRefreshing(false);
   }
-  // 위로 더 당긴 거리(px). 당기는 동안 RefreshIndicator 를 보여 주는 데 쓴다.
+  const isPullRefreshVisible = isPullRefreshing;
+  // 위로 더 당긴 거리(px, 4px 단위·64 까지). 당기는 동안 RefreshIndicator 를 보여 주는 데 쓴다.
   const [pullDistance, setPullDistance] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const lastScrollY = useRef(0);
   const downwardDistance = useRef(0);
   const upwardDistance = useRef(0);
@@ -138,9 +140,17 @@ export function StickyHeaderScreen({
   const hideThreshold = Math.max(stickyControlsInset, stickyControlsHeight, 1);
 
   const handlePullRefresh = () => {
+    if (isPullRefreshing) return;
     setIsPullRefreshing(true);
+    setPullHoldDone(false);
     onRefresh?.();
   };
+
+  useEffect(() => {
+    if (pullHoldDone) return;
+    const timer = setTimeout(() => setPullHoldDone(true), PULL_REFRESH_MIN_MS);
+    return () => clearTimeout(timer);
+  }, [pullHoldDone]);
 
   useEffect(() => {
     if (!resetScrollOnFocus) return;
@@ -195,7 +205,11 @@ export function StickyHeaderScreen({
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (onRefresh) {
-      const pull = Math.round(Math.max(-event.nativeEvent.contentOffset.y, 0));
+      // 매 프레임 다시 그리지 않도록 4px 단위로, 다 진해지는 64 까지만 센다.
+      const pull = Math.min(
+        Math.round(Math.max(-event.nativeEvent.contentOffset.y, 0) / 4) * 4,
+        PULL_TO_REFRESH_DISTANCE,
+      );
       if (pull !== pullDistance) setPullDistance(pull);
     }
     const offsetY = Math.max(event.nativeEvent.contentOffset.y, 0);
@@ -276,7 +290,7 @@ export function StickyHeaderScreen({
             refreshControl={
               onRefresh ? (
                 <RefreshControl
-                  refreshing={Boolean(refreshing && isPullRefreshing)}
+                  refreshing={isPullRefreshVisible}
                   onRefresh={handlePullRefresh}
                   // 기본 스피너는 숨기고 디자인 시스템 RefreshIndicator 를 위에 띄운다.
                   tintColor="transparent"
@@ -294,6 +308,17 @@ export function StickyHeaderScreen({
               },
             ]}
             onScroll={handleScroll}
+            // iOS 기본 새로고침은 훨씬 길게 당겨야 시작돼서, 64px 이상 당겼다 놓으면 직접 시작한다.
+            onScrollBeginDrag={() => setIsDragging(true)}
+            onScrollEndDrag={(event) => {
+              setIsDragging(false);
+              if (
+                onRefresh &&
+                -event.nativeEvent.contentOffset.y >= PULL_TO_REFRESH_DISTANCE
+              ) {
+                handlePullRefresh();
+              }
+            }}
             scrollEventThrottle={16}
             testID={`${testID}-scroll`}
           >
@@ -307,7 +332,7 @@ export function StickyHeaderScreen({
             </Pressable>
           </ScrollView>
         </BlurTargetView>
-        {(refreshing && isPullRefreshing) || pullDistance > 0 ? (
+        {isPullRefreshVisible || (isDragging && pullDistance > 0) ? (
           <View
             pointerEvents="none"
             style={[
@@ -315,15 +340,14 @@ export function StickyHeaderScreen({
               {
                 top: totalTopPadding,
                 // 당기는 동안은 64px 에 닿을수록 진해지고, 새로고침 중에는 그대로 보인다.
-                opacity:
-                  refreshing && isPullRefreshing
-                    ? 1
-                    : Math.min(pullDistance / PULL_TO_REFRESH_DISTANCE, 1),
+                opacity: isPullRefreshVisible
+                  ? 1
+                  : Math.min(pullDistance / PULL_TO_REFRESH_DISTANCE, 1),
               },
             ]}
           >
             <RefreshIndicator
-              refreshing={Boolean(refreshing && isPullRefreshing)}
+              refreshing={isPullRefreshVisible}
               testID={`${testID}-refresh-indicator`}
             />
           </View>

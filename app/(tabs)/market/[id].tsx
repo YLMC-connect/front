@@ -31,7 +31,9 @@ import {
   ConfirmDialog,
   DetailAction,
   ErrorState,
+  ImageViewer,
   MotionPressable,
+  PlaceCard,
   Skeleton,
   TopBar,
   VisualThumb,
@@ -79,6 +81,7 @@ export default function MarketDetailScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const [isPastHero, setIsPastHero] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const scrollX = useSharedValue(0);
   const onHeroScroll = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -293,14 +296,19 @@ export default function MarketDetailScreen() {
                       scrollX={scrollX}
                       width={width}
                     >
-                      <Image
-                        accessible
-                        accessibilityRole="image"
+                      <Pressable
+                        accessibilityHint="사진을 크게 봅니다"
                         accessibilityLabel={`${market.title} 사진 ${index + 1}/${images.length}`}
-                        resizeMode="cover"
-                        source={{ uri }}
-                        style={[styles.heroThumb, { width, height: width }]}
-                      />
+                        accessibilityRole="imagebutton"
+                        onPress={() => setViewerIndex(index)}
+                        testID={`market-hero-photo-${index}`}
+                      >
+                        <Image
+                          resizeMode="cover"
+                          source={{ uri }}
+                          style={[styles.heroThumb, { width, height: width }]}
+                        />
+                      </Pressable>
                     </CarouselSlide>
                   ))
                 : [0, 1, 2].map((offset) => (
@@ -392,6 +400,10 @@ export default function MarketDetailScreen() {
               <Text style={styles.title}>{market.title}</Text>
               <Text style={styles.body}>{market.content}</Text>
             </View>
+
+            {market.location ? (
+              <PlaceCard value={market.location} testID="market-place" />
+            ) : null}
 
             {isOwn ? (
               <View style={styles.actions}>
@@ -528,6 +540,14 @@ export default function MarketDetailScreen() {
           onCancel={() => setShowDelete(false)}
           onConfirm={onConfirmDeletePost}
         />
+        {market.images && market.images.length > 0 ? (
+          <ImageViewer
+            visible={viewerIndex !== null}
+            images={market.images}
+            initialIndex={viewerIndex ?? 0}
+            onClose={() => setViewerIndex(null)}
+          />
+        ) : null}
       </View>
     </Screen>
   );

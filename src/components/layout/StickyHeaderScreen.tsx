@@ -347,6 +347,7 @@ export function StickyHeaderScreen({
             ]}
           >
             <RefreshIndicator
+              progress={pullDistance / PULL_TO_REFRESH_DISTANCE}
               refreshing={isPullRefreshVisible}
               testID={`${testID}-refresh-indicator`}
             />

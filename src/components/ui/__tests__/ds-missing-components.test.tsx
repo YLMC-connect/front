@@ -77,7 +77,11 @@ describe("RefreshIndicator · LoadMoreFooter", () => {
 
   it("shows only the still spinner while pulling", () => {
     render(<RefreshIndicator refreshing={false} />);
-    expect(screen.queryByText("새로고침하는 중")).toBeNull();
+    // 자리를 지키도록 문구는 남겨 두고 투명하게 숨긴다.
+    expect(
+      StyleSheet.flatten(screen.getByText("새로고침하는 중").props.style)
+        .opacity,
+    ).toBe(0);
   });
 
   it("shows retry on error, end text when there is no more", () => {

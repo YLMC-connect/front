@@ -23,29 +23,36 @@ const SPINNER_TURN = 800;
  */
 export function Spinner({
   animating = true,
+  angle = 0,
   testID,
 }: {
-  /** false 면 돌지 않고 멈춘 모습(당기는 중). */
+  /** false 면 돌지 않고 `angle` 에 멈춘 모습(당기는 중). */
   animating?: boolean;
+  /** 멈춰 있을 때의 각도(도). 돌기 시작하면 이 각도에서 이어서 돈다. */
+  angle?: number;
   testID?: string;
 }) {
   const reduceMotion = useReducedMotion();
-  const rotation = useSharedValue(0);
+  const rotation = useSharedValue(angle);
 
   useEffect(() => {
     if (reduceMotion || !animating) {
       cancelAnimation(rotation);
-      rotation.set(0);
+      rotation.set(angle);
       return;
     }
+    const from = rotation.get();
     rotation.set(
       withRepeat(
-        withTiming(360, { duration: SPINNER_TURN, easing: Easing.linear }),
+        withTiming(from + 360, {
+          duration: SPINNER_TURN,
+          easing: Easing.linear,
+        }),
         -1,
       ),
     );
     return () => cancelAnimation(rotation);
-  }, [animating, reduceMotion, rotation]);
+  }, [animating, angle, reduceMotion, rotation]);
 
   const arcStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${rotation.value}deg` }],
@@ -65,14 +72,18 @@ export function Spinner({
 }
 
 /**
- * 당겨서 새로고침 표시. 당기는 동안은 멈춘 스피너만, 놓아서 새로고침이 시작되면
- * 스피너가 돌고 "새로고침하는 중"이 붙는다.
+ * 당겨서 새로고침 표시. 당기는 동안은 당긴 만큼(`progress`) 스피너가 돌아가 있고,
+ * 놓아서 새로고침이 시작되면 그 각도에서 이어서 돌며 "새로고침하는 중"이 붙는다.
+ * 스피너는 늘 가운데 같은 자리에 있고 글자는 그 오른쪽에 붙는다.
  */
 export function RefreshIndicator({
   refreshing = true,
+  progress = 1,
   testID,
 }: {
   refreshing?: boolean;
+  /** 당긴 정도 0~1. 멈춘 스피너의 각도를 정한다. */
+  progress?: number;
   testID?: string;
 }) {
   return (
@@ -83,8 +94,10 @@ export function RefreshIndicator({
       style={styles.row}
       testID={testID}
     >
-      <Spinner animating={refreshing} />
-      {refreshing ? <Text style={styles.label}>새로고침하는 중</Text> : null}
+      <Spinner animating={refreshing} angle={Math.min(progress, 1) * 270} />
+      {refreshing ? (
+        <Text style={styles.refreshLabel}>새로고침하는 중</Text>
+      ) : null}
     </View>
   );
 }
@@ -146,6 +159,7 @@ const styles = StyleSheet.create({
     borderTopColor: theme.colors.primary,
   },
   row: {
+    alignSelf: "stretch",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -154,6 +168,15 @@ const styles = StyleSheet.create({
   },
   label: {
     ...theme.typography.caption,
+    fontFamily: theme.font.semibold,
+    fontWeight: "normal",
+    color: theme.colors.textMuted,
+  },
+  refreshLabel: {
+    ...theme.typography.caption,
+    position: "absolute",
+    left: "50%",
+    marginLeft: SPINNER_SIZE / 2 + theme.spacing["2"],
     fontFamily: theme.font.semibold,
     fontWeight: "normal",
     color: theme.colors.textMuted,

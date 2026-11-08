@@ -100,7 +100,8 @@ describe("FloatingBottomBar (디자인 시스템 v2)", () => {
       minHeight: theme.size.buttonHeight,
       backgroundColor: theme.colors.primary,
     });
-    expect(screen.getByTestId("bar-glass-blur")).toBeTruthy();
+    expect(screen.queryByTestId("bar-glass-blur")).toBeNull();
+    expect(screen.getByTestId("bar-gradient")).toBeTruthy();
 
     fireEvent.press(screen.getByTestId("bar"));
     expect(onPress).toHaveBeenCalledTimes(1);

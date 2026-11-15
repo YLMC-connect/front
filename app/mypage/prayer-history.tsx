@@ -1,7 +1,8 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { AppIcon } from "@/components/ui/app-icon";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Screen } from "../../src/components/layout/Screen";
 import {
-  Badge,
   Card,
   Empty,
   ErrorState,
@@ -13,7 +14,7 @@ import { theme } from "../../src/constants/theme";
 import { useMyPrayerHistory } from "../../src/hooks/usePrayers";
 import type { PrayerHistoryItem } from "../../src/types/prayerApi";
 
-/** 목록 첫 진입 때 60ms 간격으로 떠오르는 카드 수(디자인 시스템 motion: 첫 8개). */
+/** 목록 첫 진입 때 60ms 간격으로 떠오르는 줄 수(디자인 시스템 motion: 첫 8개). */
 const LIST_STAGGER_LIMIT = 8;
 
 /** yoil 0(일)~6(토). */
@@ -35,75 +36,124 @@ function historyPeriod(item: PrayerHistoryItem) {
   return `${item.joinedAt ?? ""} ~ ${end}`.trim();
 }
 
+function roleLabel(item: PrayerHistoryItem) {
+  if (item.memberRole === "LEADER") return "팀장";
+  if (item.memberRole === "MEMBER") return "멤버";
+  return undefined;
+}
+
 export default function PrayerHistoryScreen() {
   const history = useMyPrayerHistory();
   const rows = history.data ?? [];
+  const current = rows.filter((item) => item.active);
+  const past = rows.filter((item) => !item.active);
+  const roomCount = new Set(rows.map((item) => item.cohortId)).size;
 
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
-        <TopBar title="중보기도 활동 이력" back />
+        <TopBar title="중보기도 활동" back />
         <ScrollView contentContainerStyle={styles.body}>
           {history.isPending ? (
-            <Text style={styles.sectionMeta}>서버에서 불러오는 중입니다.</Text>
+            <Text style={styles.sectionMeta}>불러오는 중이에요.</Text>
           ) : null}
           {history.isError ? (
             <ErrorState
-              message="활동 이력을 불러오지 못했어요. 다시 시도해주세요."
+              message="활동 이력을 불러오지 못했어요. 다시 시도해 주세요."
               onRetry={() => void history.refetch()}
             />
           ) : null}
           {!history.isPending && !history.isError && rows.length === 0 ? (
             <Empty
               icon="hands-pray"
-              title="중보기도 활동 이력이 없어요"
-              description="기도방에 참여하면 활동 기간이 여기에 표시돼요."
+              title="중보기도 활동이 없어요"
+              description="기도방에 참여하면 활동 기간이 여기에 보여요."
               testID="prayer-history-empty"
             />
           ) : null}
           {rows.length > 0 ? (
-            <View style={styles.stack}>
-              {rows.map((item, index) => {
-                const period = historyPeriod(item);
-                return (
-                  <MotionEnter
-                    key={`${item.cohortId}-${item.joinedAt ?? index}`}
-                    mode="fadeUp"
-                    enabled={index < LIST_STAGGER_LIMIT}
-                    delay={motionStaggerDelay(index)}
-                  >
-                    <Card style={styles.card}>
-                      <View style={styles.badgeRow}>
-                        <Badge tone={item.active ? "info" : "neutral"}>
-                          {item.active ? "활동중" : "종료"}
-                        </Badge>
-                        {item.memberRole ? (
-                          <Badge tone="neutral">
-                            {item.memberRole === "LEADER" ? "팀장" : "멤버"}
-                          </Badge>
-                        ) : null}
-                        {item.cohortYear ? (
-                          <Badge tone="neutral">{`${item.cohortYear}년`}</Badge>
-                        ) : null}
-                      </View>
-                      <Text style={styles.title}>{historyTitle(item)}</Text>
-                      {period ? (
-                        <Text style={styles.meta}>{period}</Text>
-                      ) : null}
-                      {item.leaveReason ? (
-                        <Text style={styles.meta}>
-                          {`종료 사유: ${item.leaveReason}`}
-                        </Text>
-                      ) : null}
-                    </Card>
-                  </MotionEnter>
-                );
-              })}
-            </View>
+            <>
+              {/* 서버가 주는 참여 기록으로 셀 수 있는 값만 보여 준다. */}
+              <Card style={styles.summary}>
+                <Stat value={`${current.length}곳`} label="활동 중" />
+                <View style={styles.statDivider} />
+                <Stat value={`${roomCount}곳`} label="참여 기도방" />
+              </Card>
+              <HistoryGroup title="활동 중" items={current} offset={0} />
+              <HistoryGroup
+                title="지난 기도방"
+                items={past}
+                offset={current.length}
+              />
+            </>
           ) : null}
         </ScrollView>
       </View>
     </Screen>
+  );
+}
+
+function Stat({ value, label }: { value: string; label: string }) {
+  return (
+    <View style={styles.stat}>
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+}
+
+function HistoryGroup({
+  title,
+  items,
+  offset,
+}: {
+  title: string;
+  items: PrayerHistoryItem[];
+  offset: number;
+}) {
+  if (items.length === 0) return null;
+  return (
+    <View>
+      <Text style={styles.groupTitle}>{title}</Text>
+      {items.map((item, index) => {
+        const order = offset + index;
+        const period = historyPeriod(item);
+        const role = roleLabel(item);
+        return (
+          <MotionEnter
+            key={`${item.cohortId}-${item.joinedAt ?? order}`}
+            mode="fadeUp"
+            enabled={order < LIST_STAGGER_LIMIT}
+            delay={motionStaggerDelay(order)}
+          >
+            <View
+              style={[
+                styles.row,
+                index === items.length - 1 ? styles.rowLast : null,
+              ]}
+            >
+              <View style={styles.rowIcon}>
+                <AppIcon
+                  name="hands-pray"
+                  size={18}
+                  color={theme.colors.primaryStrong}
+                />
+              </View>
+              <View style={styles.rowText}>
+                <Text style={styles.rowTitle}>{historyTitle(item)}</Text>
+                {period ? <Text style={styles.rowMeta}>{period}</Text> : null}
+                {item.leaveReason ? (
+                  <Text style={styles.rowMeta}>
+                    {`종료 사유: ${item.leaveReason}`}
+                  </Text>
+                ) : null}
+              </View>
+              {role ? <Text style={styles.rowTrailing}>{role}</Text> : null}
+            </View>
+          </MotionEnter>
+        );
+      })}
+    </View>
   );
 }
 
@@ -113,36 +163,88 @@ const styles = StyleSheet.create({
   },
   body: {
     flexGrow: 1,
-    paddingBottom: 24,
-    gap: 12,
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: theme.spacing["2"],
+    paddingBottom: theme.spacing["8"],
   },
   sectionMeta: {
-    paddingHorizontal: theme.layout.screenX,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
   },
-  stack: {
-    paddingHorizontal: theme.layout.screenX,
-    gap: 16,
-  },
-  card: {
-    gap: 4,
-  },
-  badgeRow: {
+  summary: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    gap: 6,
+    padding: 0,
+    marginBottom: theme.spacing["1"],
   },
-  title: {
-    marginTop: 6,
+  stat: {
+    flex: 1,
+    alignItems: "center",
+    gap: 2,
+    paddingVertical: theme.spacing["4"],
+  },
+  statDivider: {
+    width: 1,
+    marginVertical: theme.spacing["4"],
+    backgroundColor: theme.colors.border,
+  },
+  statValue: {
     color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-    lineHeight: theme.typography.body.lineHeight,
+    fontSize: theme.typography.heading.fontSize,
+    lineHeight: theme.typography.heading.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
-  meta: {
+  statLabel: {
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
+  },
+  groupTitle: {
+    paddingTop: theme.spacing["4"],
+    paddingBottom: theme.spacing["1"],
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: theme.spacing["3"],
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  rowLast: {
+    borderBottomWidth: 0,
+  },
+  rowIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: theme.radius.full,
+    backgroundColor: theme.colors.infoSubtle,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rowText: {
+    flex: 1,
+    minWidth: 0,
+    paddingTop: 1,
+  },
+  rowTitle: {
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  rowMeta: {
+    marginTop: 2,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
+  },
+  rowTrailing: {
+    paddingTop: 2,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,

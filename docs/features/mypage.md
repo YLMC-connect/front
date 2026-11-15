@@ -1,15 +1,16 @@
 # mypage (MY / 성도 프로필)
 
-> 마지막 갱신: 2026-11-03 (런타임 활동 목 어댑터 및 `src/mocks/mypageActivity.ts` 제거) | 담당 Phase: P4/P7 | 기록 성격: 도메인 컨텍스트
+> 마지막 갱신: 2026-11-15 (캔버스 v1.41 마이페이지 정리) | 담당 Phase: P4/P7 | 기록 성격: 도메인 컨텍스트
 
 ## 한 줄 요약
 
-내 프로필, 내 활동, 관심 목록, FAQ/고객센터, 로그아웃/탈퇴 요청 흐름을 제공합니다.
+내 프로필, 내 활동(활동 내역·중보기도 활동·삶공부 수강 내역), 계정(비밀번호 변경·로그아웃), 고객센터(FAQ·약관 · 정책), 프로필 수정 안의 회원 탈퇴 흐름을 제공합니다.
 
 ---
 
 ## ✅ 완료
 
+- 캔버스 v1.41 마이페이지 정리 — 메뉴는 내 활동(활동 내역 `나눔 · 댓글 · 소모임`, 중보기도 활동, 삶공부 수강 내역)·계정(비밀번호 변경, 로그아웃)·고객센터(자주 묻는 질문, 약관 · 정책) 세 묶음이고, 프로필 카드 전체를 누르면 프로필 수정으로 간다. 프로필 수정은 이름(읽기 전용)·연락처·소속 교회(읽기 전용) 흰 카드와 맨 아래 작은 밑줄 `회원 탈퇴` 링크만 두고, 비밀번호 변경은 `/mypage/password` 별도 화면(현재·새·확인 + 강도 막대)으로 나눴다. 탈퇴는 `안내 내용을 모두 확인했어요` 체크 후에만 `탈퇴하기`가 켜지고 마지막 확인 팝업을 한 번 더 띄운다. 약관 · 정책은 이용약관/개인정보 처리방침 탭 한 화면(`/mypage/privacy`는 개인정보 탭으로 연다). 활동 내역 탭 이름 옆에 서버 `totalElements` 개수, 중보기도 활동은 요약(활동 중·참여 기도방) + 활동 중/지난 기도방 목록 행, 삶공부 수강 내역은 `GET /api/mypage/activities/life-studies`의 `ongoing`/`completed`를 수강 중/수료로 나눈 목록 행, FAQ는 조용한 Q 머리 + 카테고리 칩 + `찾는 답이 없나요?` 문의 카드. 차단 사용자 화면(`/mypage/blocked`)과 타 성도 프로필의 차단 상태는 기능이 없어 삭제했다.
 - 마이페이지 루트 Stack 승격 및 이동 모션 일관화 — 마이페이지를 하단 탭(`app/(tabs)/mypage`)에서 루트 Stack(`app/mypage`)으로 승격하여, 홈에서 '내 정보' 진입 시 네이티브 우측 슬라이드(`slide_from_right`) 인/아웃 모션을 적용하고 하단 탭 바 노출 깜빡임 해소. 또한 마이페이지 내 메뉴인 '중보기도 활동 이력'(`app/mypage/prayer-history.tsx`)과 '삶공부 수료'(`app/mypage/life-study-history.tsx`)를 마이페이지 스택 내부 라우트로 래핑하여 탭 점프 없이 모든 서브 메뉴가 동일한 우측 슬라이드 모션으로 열리도록 통일
 - 회원 비밀번호 확인·변경 및 탈퇴 API 연동 — `POST /api/member/verify-password`(비밀번호 확인), `PUT /api/member/password`(비밀번호 변경), `DELETE /api/member/me`(회원 탈퇴)를 `authAdapter`와 `useMember` 훅에 연결하고 `mypage/edit` 및 `mypage/withdraw` 화면에 실시간 반영.
 - 사이트 이용약관/개인정보처리방침 및 FAQ 조회 API 연동 — `GET /api/site-policies/{policyType}`(이용약관: 1, 개인정보처리방침: 2), `GET /api/faqs`(categoryId 필터링)를 `siteContentHttpDataSource` 및 `useSiteContent` 훅에 연결하여 `mypage/terms`, `mypage/privacy`, `mypage/faq`에 동적 데이터 바인딩. FAQ 화면은 하드코딩된 fallback 목데이터를 제거하고 실제 API 데이터 기반 카테고리 필터링과 로딩/Empty 상태 렌더링으로 일원화.
@@ -35,7 +36,6 @@
 - MY 루트 실제 화면 복구 — `DesignSourceScreens` placeholder를 제거하고 Downloads `ScreenMyPage` 기준 프로필 카드, 활동 관리, 고객센터, 계정, 계정 관리 메뉴를 실제 RN route로 반영
 - FAQ 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenFAQ`의 category chip row, Q row, 펼친 답변 box, empty state를 `/mypage/faq` route에 RN으로 직접 반영
 - MY 법적 문서 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenLegal`의 시행일자와 조항별 전문 텍스트 구조를 `/mypage/terms`, `/mypage/privacy` route에 RN으로 직접 반영
-- 차단 사용자 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenBlocked`의 안내 박스, flat row list, 차단 해제 pill, confirm/toast/empty state를 `/mypage/blocked` route에 RN으로 직접 반영
 - 회원 탈퇴 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenWithdraw`의 안내 제목, 주의사항 박스, 정보 카드, fixed danger CTA, 탈퇴 confirm을 `/mypage/withdraw` route에 RN으로 직접 반영
 - 프로필 수정 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenEditProfile`의 읽기 전용 프로필 카드, 연락처 입력, 비밀번호 변경 필드, 오류 상태를 `/mypage/edit` route에 RN으로 직접 반영
 - 활동 내역 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenActivity`의 나눔 게시글/댓글/소모임 tab list와 empty state를 `/mypage/activity` route에 RN으로 직접 반영
@@ -46,27 +46,30 @@
 
 ## 주요 파일 (도메인 파일 지도)
 
-| 경로                                    | 역할                              |
-| --------------------------------------- | --------------------------------- |
-| `app/mypage/_layout.tsx`                | 마이페이지 루트 Stack 레이아웃    |
-| `app/mypage/index.tsx`                  | 홈에서 진입하는 MY·로그아웃 화면  |
-| `app/mypage/edit.tsx`                   | 프로필 수정 연락처/비밀번호 화면  |
-| `app/mypage/activity.tsx`               | 나눔 게시글/댓글/소모임 활동 내역 |
-| `app/mypage/prayer-history.tsx`         | 마이페이지 전용 중보기도 활동 이력 스택 화면 |
-| `app/mypage/life-study-history.tsx`     | 마이페이지 전용 삶공부 수료 내역 스택 화면 |
-| `src/services/mypageService.ts`         | 활동 HTTP 서비스                  |
-| `src/services/mypageHttpDataSource.ts`  | 활동 5종 HTTP data source         |
-| `src/services/mypageMapper.ts`          | Notion DTO → 활동 화면 행         |
-| `src/hooks/useMember.ts`                | 내 정보 조회 및 수정 훅           |
-| `app/mypage/blocked.tsx`                | 차단 사용자 목록과 해제 상태      |
-| `app/mypage/faq.tsx`                    | FAQ 목록과 empty state            |
-| `app/mypage/terms.tsx`                  | 이용약관 전문 문서                |
-| `app/mypage/privacy.tsx`                | 개인정보처리방침 전문 문서        |
-| `app/mypage/withdraw.tsx`               | 회원 탈퇴 안내와 확인             |
-| `app/mypage/user/[id].tsx`              | 타 성도 프로필과 차단 상태        |
-| `src/types/mypage.ts`                   | MY 화면 모델                      |
-| `src/types/mypageApi.ts`                | Notion 필드만 담은 활동 DTO       |
-| `scripts/check-mypage-api-contract.mjs` | 활동 OpenAPI 계약 검사            |
+| 경로                                            | 역할                                      |
+| ----------------------------------------------- | ----------------------------------------- |
+| `app/mypage/_layout.tsx`                        | 마이페이지 루트 Stack 레이아웃            |
+| `app/mypage/index.tsx`                          | 홈에서 진입하는 MY·로그아웃 화면          |
+| `app/mypage/edit.tsx`                           | 프로필 수정(연락처) + 회원 탈퇴 링크      |
+| `app/mypage/password.tsx`                       | 비밀번호 변경(강도 막대)                  |
+| `app/mypage/activity.tsx`                       | 나눔 게시글/댓글/소모임 활동 내역         |
+| `app/mypage/prayer-history.tsx`                 | 중보기도 활동(요약 + 활동 중/지난 기도방) |
+| `app/mypage/life-study-history.tsx`             | 삶공부 수강 내역(수강 중/수료)            |
+| `src/services/mypageService.ts`                 | 활동 HTTP 서비스                          |
+| `src/services/mypageHttpDataSource.ts`          | 활동 5종 HTTP data source                 |
+| `src/services/mypageMapper.ts`                  | Notion DTO → 활동 화면 행                 |
+| `src/hooks/useMember.ts`                        | 내 정보 조회 및 수정 훅                   |
+| `app/mypage/faq.tsx`                            | FAQ 칩·목록·문의 카드                     |
+| `app/mypage/terms.tsx`                          | 약관 · 정책(탭) 진입                      |
+| `app/mypage/privacy.tsx`                        | 약관 · 정책 개인정보 탭으로 진입          |
+| `src/components/mypage/LegalDocumentScreen.tsx` | 이용약관/개인정보 처리방침 탭 화면        |
+| `src/components/mypage/FaqItem.tsx`             | Q 머리가 붙은 FAQ 접는 줄                 |
+| `src/components/mypage/FormField.tsx`           | 흰 카드 입력 칸 이름·안내 줄              |
+| `app/mypage/withdraw.tsx`                       | 회원 탈퇴 안내와 확인                     |
+| `app/mypage/user/[id].tsx`                      | 타 성도 프로필(탈퇴 상태)                 |
+| `src/types/mypage.ts`                           | MY 화면 모델                              |
+| `src/types/mypageApi.ts`                        | Notion 필드만 담은 활동 DTO               |
+| `scripts/check-mypage-api-contract.mjs`         | 활동 OpenAPI 계약 검사                    |
 
 ## 데이터 타입
 
@@ -74,6 +77,8 @@
 
 ## 결정 사항 (최신 위)
 
+- (2026-11-15) **캔버스 v1.41: 서버가 주지 않는 값은 그리지 않는다** — 중보기도 활동의 `이번 달 기도`·`함께 기도한 제목`과 기도 완료·함께 기도 피드, 분할 탭은 받을 API 가 없어 빼고, 참여 기록으로 셀 수 있는 활동 중·참여 기도방만 보인다. 약관 `이전 버전`, FAQ 문의 카드의 전화번호·운영 시간, 비밀번호 변경의 `현재 비밀번호를 잊으셨나요?`(재설정 흐름 없음), 프로필 수정의 소속 교회 선택(변경 API 없음, 읽기 전용), 수강 내역 행의 이동(목적지 미정)도 같은 이유로 두지 않는다.
+- (2026-11-15) **차단 사용자 화면은 기능이 없어 삭제한다** — 차단 API 가 없으므로 `/mypage/blocked`, 타 성도 프로필의 차단 상태와 디자인 경로를 지운다.
 - (2026-11-03) **런타임 활동 목 어댑터(`resolveMyPageAdapterMode`, `mockMyPageDataSource`) 및 `src/mocks/mypageActivity.ts` 제거** — 전 도메인 HTTP 단일화에 따라 활동 내역 화면(`app/mypage/activity.tsx`)의 로컬 목업 폴백과 `"목업 데이터"` 문구를 제거하고 `httpMyPageDataSource`만 사용하도록 정리.
 
 - (2026-10-29) **약관 및 개인정보 처리방침의 fallback 목데이터를 제거하고 실제 API 결과 기반으로 통일한다** — `src/components/mypage/LegalDocumentScreen.tsx`의 하드코딩된 fallback 조항 목록(`defaultSections`) 및 기본 날짜를 제거하고, `useActiveSitePolicy` 조회 결과에 따라 전문 텍스트 및 시행일자를 렌더링하도록 변경. 로딩 인디케이터 및 내용 부재 시 Empty 화면을 처리.
@@ -103,7 +108,6 @@
 - (2026-06-27) **MY 루트는 placeholder가 아니라 실제 RN 화면으로 둔다** — Downloads `ScreenMyPage`를 기준으로 프로필 카드와 메뉴 그룹을 실제 route에 구현하고, 하위 상세 화면은 기존 숨김 reference route로 연결합니다.
 - (2026-06-27) **FAQ는 실제 RN 화면으로 렌더링한다** — Downloads `ScreenFAQ` 구조를 `/mypage/faq` route에 직접 반영합니다. 실제 고객지원 검색/API는 운영 정책 확정 후 연결합니다.
 - (2026-06-27) **법적 문서는 실제 RN 화면으로 렌더링한다** — Downloads `ScreenLegal` 구조를 `/mypage/terms`, `/mypage/privacy` route에 직접 반영합니다.
-- (2026-06-27) **차단 사용자 화면은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenBlocked` 구조를 `/mypage/blocked` route에 직접 반영합니다. 실제 차단 해제 API는 사용자 정책 확정 후 연결합니다.
 - (2026-06-27) **회원 탈퇴 화면은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenWithdraw` 구조를 `/mypage/withdraw` route에 직접 반영합니다. 실제 soft delete API는 정책 확정 후 연결합니다.
 - (2026-06-27) **미사용 MY service/hook 레이어는 제거한다** — 현재 MY 화면은 Downloads 원본을 기준으로 다시 구현할 예정이고 `useMyPage -> myPageService` 호출처가 없어 제거했습니다. 실제 API 연결 시 필요한 query hook만 다시 만듭니다.
 - (2026-05-27) **알림 설정은 ZIP section/card 구조를 따른다** — 알림 설정은 단일 카드 목록이 아니라 ZIP `ScreenNotifSettings`처럼 섹션 제목과 카드 목록을 반복합니다. `거래 채팅` 행은 v2 범위이므로 v1 reference에서는 제외하고, 경고 카드로 대체하지 않습니다.

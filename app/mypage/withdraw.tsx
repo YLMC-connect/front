@@ -1,29 +1,33 @@
+import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Screen } from "../../src/components/layout/Screen";
 import {
+  Card,
+  Checkbox,
   ConfirmDialog,
+  FLOATING_BOTTOM_BAR_INSET,
   FloatingBottomBar,
   TopBar,
 } from "../../src/components/ui";
-import { InfoBox } from "../../src/components/ui/info-box";
 import { theme } from "../../src/constants/theme";
 import { useWithdrawMember } from "../../src/hooks/useMember";
 import { readDesignVariant } from "../../src/lib/designVariant";
 
 const cautions = [
-  "작성한 나눔 게시글·댓글은 익명으로 남습니다",
-  "탈퇴 후 재가입해도 기존 데이터는 복구할 수 없습니다",
-  "탈퇴 즉시 개인정보가 파기됩니다",
-  "소모임장인 경우 가장 먼저 가입한 멤버에게 자동 이관됩니다",
+  "작성한 나눔 글과 댓글은 “탈퇴한 성도”로 남아요",
+  "참여 중인 기도방과 소모임에서 빠져요",
+  "소모임장이라면 가장 먼저 가입한 멤버에게 넘어가요",
+  "다시 가입해도 이전 기록은 되살릴 수 없어요",
 ] as const;
 
 export default function WithdrawScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ designVariant?: string }>();
   const showConfirm = readDesignVariant(params.designVariant) === "confirm";
+  const [agreed, setAgreed] = useState(showConfirm);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const withdrawMutation = useWithdrawMember();
 
@@ -33,38 +37,58 @@ export default function WithdrawScreen() {
       router.replace("/login");
     } catch (error) {
       if (__DEV__) console.warn("[withdraw] 회원 탈퇴 실패", error);
-      Alert.alert(
-        "오류",
-        "탈퇴 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
-      );
+      Alert.alert("오류", "탈퇴하지 못했어요. 잠시 후 다시 시도해 주세요.");
     }
   };
 
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
-        <TopBar title="회원 탈퇴" close onBack={() => router.back()} />
+        <TopBar title="회원 탈퇴" back onBack={() => router.back()} />
         <ScrollView contentContainerStyle={styles.body}>
           <View style={styles.header}>
-            <Text style={styles.title}>정말 떠나시나요?</Text>
+            <Text style={styles.title}>{"탈퇴하기 전에\n확인해 주세요"}</Text>
             <Text style={styles.desc}>
-              탈퇴 전에 아래 안내를 꼭 확인해주세요.
+              계정과 개인정보는 탈퇴 즉시 지워져요.
             </Text>
           </View>
 
-          <InfoBox
-            tone="danger"
-            title="탈퇴 전 안내사항"
-            description={cautions.map((item) => `· ${item}`).join("\n")}
-          />
+          <Card>
+            <View style={styles.cautionHead}>
+              <AppIcon
+                name="warning-amber"
+                size={18}
+                color={theme.colors.dangerText}
+              />
+              <Text style={styles.cautionTitle}>탈퇴하면 이렇게 돼요</Text>
+            </View>
+            <View style={styles.cautionList}>
+              {cautions.map((item) => (
+                <View key={item} style={styles.cautionRow}>
+                  <View style={styles.bullet} />
+                  <Text style={styles.cautionText}>{item}</Text>
+                </View>
+              ))}
+            </View>
+          </Card>
 
-          <Text style={styles.infoText}>
-            계정과 모든 활동 내역이 영구적으로 삭제됩니다. 신중히 결정해주세요.
-          </Text>
+          <Card style={styles.agreeCard}>
+            <Checkbox
+              checked={agreed}
+              onChange={setAgreed}
+              accessibilityLabel="안내 내용을 모두 확인했어요"
+              label={
+                <Text style={styles.agreeText}>
+                  안내 내용을 모두 확인했어요
+                </Text>
+              }
+              testID="withdraw-agree"
+            />
+          </Card>
         </ScrollView>
 
         <FloatingBottomBar
-          disabled={withdrawMutation.isPending}
+          disabled={!agreed || withdrawMutation.isPending}
           label="탈퇴하기"
           loading={withdrawMutation.isPending}
           onPress={() => setConfirmVisible(true)}
@@ -74,8 +98,8 @@ export default function WithdrawScreen() {
 
         <ConfirmDialog
           visible={showConfirm || confirmVisible}
-          title="정말 탈퇴하시겠습니까?"
-          message="이 작업은 되돌릴 수 없으며, 모든 데이터가 즉시 삭제됩니다."
+          title="정말 탈퇴할까요?"
+          message="탈퇴하면 되돌릴 수 없어요."
           confirmText="탈퇴"
           danger
           onCancel={() => {
@@ -101,12 +125,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   body: {
-    paddingHorizontal: 18,
-    paddingBottom: 130,
+    paddingHorizontal: theme.layout.screenX,
+    paddingBottom: FLOATING_BOTTOM_BAR_INSET,
+    gap: theme.spacing["4"],
   },
   header: {
-    paddingTop: 4,
-    paddingBottom: 18,
+    paddingTop: theme.spacing["4"],
+    paddingBottom: theme.spacing["1"],
   },
   title: {
     color: theme.colors.text,
@@ -115,15 +140,52 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.bold,
   },
   desc: {
-    marginTop: 10,
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-    lineHeight: theme.typography.body.lineHeight,
-  },
-  infoText: {
-    marginTop: 18,
+    marginTop: theme.spacing["2"],
     color: theme.colors.textMuted,
     fontSize: theme.typography.label.fontSize,
     lineHeight: theme.typography.label.lineHeight,
+  },
+  cautionHead: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing["2"],
+    marginBottom: theme.spacing["4"],
+  },
+  cautionTitle: {
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
+    fontWeight: theme.fontWeight.bold,
+  },
+  cautionList: {
+    gap: theme.spacing["3"],
+  },
+  cautionRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: theme.spacing["3"],
+  },
+  bullet: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    marginTop: 9,
+    backgroundColor: theme.colors.neutral400,
+  },
+  cautionText: {
+    flex: 1,
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: 22,
+  },
+  agreeCard: {
+    // 체크 줄이 누르는 높이 44 를 가지므로 카드 위아래 여백을 줄여 56 높이를 맞춘다.
+    paddingVertical: 6,
+  },
+  agreeText: {
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
+    fontWeight: theme.fontWeight.semibold,
   },
 });

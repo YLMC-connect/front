@@ -1,51 +1,72 @@
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Screen } from "../layout/Screen";
-import { Empty, ErrorState, TopBar } from "../ui";
+import { Empty, ErrorState, TopBar, UnderlineTabs } from "../ui";
 import { theme } from "../../constants/theme";
 import { useActiveSitePolicy } from "../../hooks/useSiteContent";
 import type { SitePolicyType } from "../../types/siteContentApi";
 
+export type LegalTab = "terms" | "privacy";
+
+const tabs: readonly { key: LegalTab; label: string }[] = [
+  { key: "terms", label: "이용약관" },
+  { key: "privacy", label: "개인정보 처리방침" },
+];
+
+const POLICY_TYPE: Record<LegalTab, SitePolicyType> = {
+  terms: 1,
+  privacy: 2,
+};
+
+const COPY: Record<LegalTab, { error: string; empty: string }> = {
+  terms: {
+    error: "약관을 불러오지 못했어요. 다시 시도해 주세요.",
+    empty: "등록된 약관이 없어요",
+  },
+  privacy: {
+    error: "개인정보 처리방침을 불러오지 못했어요. 다시 시도해 주세요.",
+    empty: "등록된 개인정보 처리방침이 없어요",
+  },
+};
+
+function formatEnforcedAt(dateStr?: string) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  // 시행일은 보조 정보라 형식이 이상하면 표시만 생략한다.
+  if (isNaN(d.getTime())) return null;
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `시행일 ${d.getFullYear()}.${mm}.${dd}`;
+}
+
+/** 약관 · 정책: 이용약관과 개인정보 처리방침을 탭으로 오간다. */
 export function LegalDocumentScreen({
-  title = "이용약관",
-  policyType,
+  initialTab = "terms",
 }: {
-  title?: string;
-  primary?: string;
-  policyType?: SitePolicyType;
+  initialTab?: LegalTab;
 }) {
   const router = useRouter();
-  const resolvedType: SitePolicyType =
-    policyType ?? (title.includes("개인정보") ? 2 : 1);
+  const [tab, setTab] = useState<LegalTab>(initialTab);
   const {
     data: policy,
     isLoading,
     isError,
     refetch,
-  } = useActiveSitePolicy(resolvedType);
-
-  const formatEnforcedAt = (dateStr?: string) => {
-    if (!dateStr) return null;
-    try {
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return null;
-      return `시행일자: ${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
-    } catch {
-      // 의도된 무시: 시행일자는 보조 정보라 형식이 이상하면 표시만 생략한다.
-      return null;
-    }
-  };
+  } = useActiveSitePolicy(POLICY_TYPE[tab]);
 
   const effectiveDateText = formatEnforcedAt(policy?.enforcedAt);
 
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
-        <TopBar
-          title={policy?.title || title}
-          back
-          onBack={() => router.back()}
+        <TopBar title="약관 · 정책" back onBack={() => router.back()} />
+        <UnderlineTabs
+          items={tabs}
+          active={tab}
+          onChange={setTab}
+          testIDPrefix="legal-tabs"
         />
         {isLoading ? (
           <View style={styles.emptyWrap}>
@@ -53,35 +74,20 @@ export function LegalDocumentScreen({
           </View>
         ) : isError && !policy ? (
           <ErrorState
-            message={
-              resolvedType === 2
-                ? "개인정보 처리방침을 불러오지 못했어요. 다시 시도해주세요."
-                : "약관을 불러오지 못했어요. 다시 시도해주세요."
-            }
+            message={COPY[tab].error}
             onRetry={() => void refetch()}
           />
         ) : !policy?.content ? (
-          <Empty
-            icon="help-outline"
-            title={
-              resolvedType === 2
-                ? "등록된 개인정보 처리방침이 없어요"
-                : "등록된 약관이 없어요"
-            }
-            description={
-              resolvedType === 2
-                ? "현재 등록된 개인정보 처리방침 내용이 없습니다."
-                : "현재 등록된 약관 내용이 없습니다."
-            }
-          />
+          <Empty icon="description" title={COPY[tab].empty} />
         ) : (
           <ScrollView contentContainerStyle={styles.body}>
             {effectiveDateText ? (
               <Text style={styles.effective}>{effectiveDateText}</Text>
             ) : null}
-            <View style={styles.section}>
-              <Text style={styles.text}>{policy.content}</Text>
-            </View>
+            {policy.title ? (
+              <Text style={styles.heading}>{policy.title}</Text>
+            ) : null}
+            <Text style={styles.text}>{policy.content}</Text>
           </ScrollView>
         )}
       </View>
@@ -94,30 +100,27 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   body: {
-    paddingHorizontal: 18,
-    paddingTop: 4,
-    paddingBottom: 24,
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: theme.spacing["4"],
+    paddingBottom: theme.spacing["8"],
   },
   effective: {
-    marginBottom: 18,
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
   },
-  section: {
-    marginBottom: 22,
-  },
   heading: {
-    marginBottom: 8,
+    marginTop: theme.spacing["5"],
     color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-    lineHeight: theme.typography.body.lineHeight,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
   text: {
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-    lineHeight: theme.typography.body.lineHeight,
+    marginTop: theme.spacing["2"],
+    color: theme.colors.neutral700,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: 22,
   },
   emptyWrap: {
     flex: 1,

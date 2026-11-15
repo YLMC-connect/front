@@ -101,8 +101,6 @@ export const routeFor = (screen) => {
       return withDesignVariant("/mypage/edit", variant);
     case "ScreenActivity":
       return withDesignVariant("/mypage/activity", variant);
-    case "ScreenBlocked":
-      return withDesignVariant("/mypage/blocked", variant);
     case "ScreenFAQ":
       return withDesignVariant("/mypage/faq", variant);
     case "ScreenTerms2":

@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { Text } from "@/components/ui/text";
-import { Screen, Section } from "../../src/components/layout/Screen";
+import { Screen } from "../../src/components/layout/Screen";
 import { Avatar, Card, ConfirmDialog, TopBar } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { useAuth } from "../../src/hooks/useAuth";
@@ -20,42 +20,51 @@ type IconName = ComponentProps<typeof AppIcon>["name"];
 type MenuItem = {
   label: string;
   icon: IconName;
+  /** 오른쪽 보조 글자(12 text-muted). */
+  meta?: string;
   href?: Href;
   action?: "logout";
-  danger?: boolean;
 };
 
-const activityItems: MenuItem[] = [
-  { label: "내 활동", icon: "history", href: "/mypage/activity" },
+const menuGroups: readonly { title: string; items: MenuItem[] }[] = [
   {
-    label: "중보기도 활동 이력",
-    icon: "hands-pray",
-    href: "/mypage/prayer-history",
+    title: "내 활동",
+    items: [
+      {
+        label: "활동 내역",
+        icon: "history",
+        meta: "나눔 · 댓글 · 소모임",
+        href: "/mypage/activity",
+      },
+      {
+        label: "중보기도 활동",
+        icon: "hands-pray",
+        href: "/mypage/prayer-history",
+      },
+      {
+        label: "삶공부 수강 내역",
+        icon: "menu-book",
+        href: "/mypage/life-study-history",
+      },
+    ],
   },
   {
-    label: "삶공부 수료",
-    icon: "menu-book",
-    href: "/mypage/life-study-history",
+    title: "계정",
+    items: [
+      {
+        label: "비밀번호 변경",
+        icon: "verified-user",
+        href: "/mypage/password",
+      },
+      { label: "로그아웃", icon: "logout", action: "logout" },
+    ],
   },
-];
-
-const supportItems: MenuItem[] = [
-  { label: "FAQ", icon: "help-outline", href: "/mypage/faq" },
-  { label: "약관", icon: "description", href: "/mypage/terms" },
   {
-    label: "개인정보 처리방침",
-    icon: "verified-user",
-    href: "/mypage/privacy",
-  },
-];
-
-const accountItems: MenuItem[] = [
-  { label: "로그아웃", icon: "logout", action: "logout" },
-  {
-    label: "회원탈퇴",
-    icon: "person-remove",
-    href: "/mypage/withdraw",
-    danger: true,
+    title: "고객센터",
+    items: [
+      { label: "자주 묻는 질문", icon: "help-outline", href: "/mypage/faq" },
+      { label: "약관 · 정책", icon: "description", href: "/mypage/terms" },
+    ],
   },
 ];
 
@@ -109,41 +118,40 @@ export default function MyPageScreen() {
             />
           }
         >
-          <Card style={styles.profileCard}>
+          {/* 프로필 줄 전체를 누르면 프로필 수정으로 간다. */}
+          <Card
+            style={styles.profileCard}
+            onPress={() => router.push("/mypage/edit")}
+            accessibilityLabel="프로필 수정"
+            testID="mypage-profile"
+          >
             <Avatar
               name={memberName}
-              size={60}
+              size={56}
               seed={member?.id || memberName}
             />
             <View style={styles.profileText}>
               <Text style={styles.name}>{memberName}</Text>
               <Text style={styles.church}>{churchLabel}</Text>
             </View>
-            <Pressable
-              accessibilityRole="button"
-              hitSlop={{ top: 7, bottom: 7 }}
-              onPress={() => router.push("/mypage/edit")}
-              style={styles.editButton}
-            >
+            <View style={styles.editHint}>
               <Text style={styles.editText}>프로필 수정</Text>
-            </Pressable>
+              <AppIcon
+                name="chevron-right"
+                size={18}
+                color={theme.colors.borderStrong}
+              />
+            </View>
           </Card>
 
-          <MenuSection
-            title="활동 관리"
-            items={activityItems}
-            onPress={handleMenuPress}
-          />
-          <MenuSection
-            title="고객센터"
-            items={supportItems}
-            onPress={handleMenuPress}
-          />
-          <MenuSection
-            title="계정"
-            items={accountItems}
-            onPress={handleMenuPress}
-          />
+          {menuGroups.map((group) => (
+            <MenuSection
+              key={group.title}
+              title={group.title}
+              items={group.items}
+              onPress={handleMenuPress}
+            />
+          ))}
 
           <Text style={styles.version}>v 1.0.2 · 열린문 커넥트</Text>
         </ScrollView>
@@ -168,21 +176,22 @@ function MenuSection({
 }: {
   title: string;
   items: MenuItem[];
-  onPress: (item: MenuItem) => void | Promise<void>;
+  onPress: (item: MenuItem) => void;
 }) {
   return (
-    <Section title={title}>
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
       <Card style={styles.menuCard}>
         {items.map((item, index) => (
           <MenuRow
             key={item.label}
             item={item}
             last={index === items.length - 1}
-            onPress={() => void onPress(item)}
+            onPress={() => onPress(item)}
           />
         ))}
       </Card>
-    </Section>
+    </View>
   );
 }
 
@@ -195,8 +204,6 @@ function MenuRow({
   last: boolean;
   onPress: () => void;
 }) {
-  const color = item.danger ? theme.colors.dangerIcon : theme.colors.text;
-
   return (
     <Pressable
       testID={item.action === "logout" ? "mypage-logout" : undefined}
@@ -204,11 +211,14 @@ function MenuRow({
       onPress={onPress}
       style={[styles.menuRow, last ? styles.menuRowLast : null]}
     >
-      <AppIcon name={item.icon} size={20} color={color} />
-      <Text style={[styles.menuLabel, item.danger ? styles.dangerText : null]}>
-        {item.label}
-      </Text>
-      <AppIcon name="chevron-right" size={20} color={theme.colors.textMuted} />
+      <AppIcon name={item.icon} size={20} color={theme.colors.textMuted} />
+      <Text style={styles.menuLabel}>{item.label}</Text>
+      {item.meta ? <Text style={styles.menuMeta}>{item.meta}</Text> : null}
+      <AppIcon
+        name="chevron-right"
+        size={20}
+        color={theme.colors.borderStrong}
+      />
     </Pressable>
   );
 }
@@ -217,20 +227,20 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   body: {
     paddingHorizontal: theme.layout.screenX,
-    paddingTop: 8,
-    paddingBottom: 28,
-    gap: 16,
+    paddingTop: theme.spacing["2"],
+    paddingBottom: theme.spacing["8"],
+    gap: theme.spacing["5"],
   },
   profileCard: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
-    padding: 18,
+    gap: theme.spacing["4"],
+    paddingLeft: theme.spacing["5"],
   },
   profileText: {
     flex: 1,
     minWidth: 0,
-    gap: 3,
+    gap: 2,
   },
   name: {
     color: theme.colors.text,
@@ -243,13 +253,23 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
   },
-  editButton: {
-    borderRadius: theme.radius.full,
-    paddingHorizontal: 4,
-    paddingVertical: 6,
+  editHint: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
   },
   editText: {
-    color: theme.colors.primaryStrong,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
+    fontWeight: theme.fontWeight.medium,
+  },
+  section: {
+    gap: theme.spacing["2"],
+  },
+  sectionTitle: {
+    paddingHorizontal: theme.spacing["1"],
+    color: theme.colors.textMuted,
     fontSize: theme.typography.label.fontSize,
     lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.semibold,
@@ -262,11 +282,11 @@ const styles = StyleSheet.create({
     minHeight: 54,
     flexDirection: "row",
     alignItems: "center",
-    gap: 14,
+    gap: theme.spacing["4"],
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
-    paddingHorizontal: 18,
-    paddingVertical: 14,
+    paddingHorizontal: theme.spacing["5"],
+    paddingVertical: theme.spacing["4"],
   },
   menuRowLast: {
     borderBottomWidth: 0,
@@ -278,12 +298,13 @@ const styles = StyleSheet.create({
     lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.medium,
   },
-  dangerText: {
-    color: theme.colors.dangerText,
+  menuMeta: {
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   version: {
-    paddingTop: 8,
-    paddingBottom: 8,
+    paddingVertical: theme.spacing["1"],
     textAlign: "center",
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,

@@ -69,6 +69,11 @@ export default function ActivityScreen() {
         posts: nextPosts.items,
         comments: nextComments.items,
         groups: nextGroups.items,
+        counts: {
+          posts: nextPosts.totalElements,
+          comments: nextComments.totalElements,
+          groups: nextGroups.totalElements,
+        } satisfies Record<ActivityTab, number>,
       };
     },
     enabled: !isDesignEmpty,
@@ -76,13 +81,18 @@ export default function ActivityScreen() {
   const posts: readonly MyPageActivityPost[] = data?.posts ?? [];
   const comments: readonly MyPageActivityComment[] = data?.comments ?? [];
   const groups: readonly MyPageActivityGroup[] = data?.groups ?? [];
+  // 탭 이름 옆 개수는 서버가 주는 전체 개수(totalElements)다. 불러오기 전에는 붙이지 않는다.
+  const tabItems = tabs.map((tab) => ({
+    key: tab.key,
+    label: data ? `${tab.label} ${data.counts[tab.key]}` : tab.label,
+  }));
 
   return (
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
         <TopBar title="활동 내역" back onBack={() => router.back()} />
         <UnderlineTabs
-          items={tabs}
+          items={tabItems}
           active={activeTab}
           variant="border"
           onChange={(tab) => setActiveTab(tab as ActivityTab)}

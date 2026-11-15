@@ -25,9 +25,9 @@ import MarketScreen from "../market";
 import MarketDetailScreen from "../market/[id]";
 import MyPageScreen from "../../mypage";
 import ActivityScreen from "../../mypage/activity";
-import BlockedScreen from "../../mypage/blocked";
 import EditProfileScreen from "../../mypage/edit";
 import FaqScreen from "../../mypage/faq";
+import PasswordChangeScreen from "../../mypage/password";
 import MyPageTermsScreen from "../../mypage/terms";
 import UserProfileScreen from "../../mypage/user/[id]";
 import WithdrawScreen from "../../mypage/withdraw";
@@ -1942,8 +1942,11 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<MyPageScreen />);
 
     expect(screen.getByText("마이페이지")).toBeTruthy();
-    expect(screen.getByText("활동 관리")).toBeTruthy();
-    expect(screen.getByText("개인정보 처리방침")).toBeTruthy();
+    expect(screen.getByText("내 활동")).toBeTruthy();
+    expect(screen.getByText("비밀번호 변경")).toBeTruthy();
+    expect(screen.getByText("약관 · 정책")).toBeTruthy();
+    expect(screen.queryByText("회원탈퇴")).toBeNull();
+    expect(screen.queryByText("차단 사용자")).toBeNull();
     fireEvent.press(screen.getByLabelText("뒤로"));
     expect(back).toHaveBeenCalledTimes(1);
   });
@@ -1982,8 +1985,33 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<EditProfileScreen />);
 
     expect(screen.getByText("프로필 수정")).toBeTruthy();
-    expect(screen.getByText("이름과 프로필은 변경할 수 없어요")).toBeTruthy();
+    expect(
+      screen.getByText("이름은 교회 사무실에서 바꿀 수 있어요."),
+    ).toBeTruthy();
+    expect(screen.queryByPlaceholderText("현재 비밀번호")).toBeNull();
+    expect(screen.getByText("회원 탈퇴")).toBeTruthy();
+  });
+
+  it("opens withdraw from the small link on profile edit", () => {
+    const push = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({ push } as never);
+    renderWithClient(<EditProfileScreen />);
+
+    fireEvent.press(screen.getByTestId("profile-edit-withdraw"));
+    expect(push).toHaveBeenCalledWith("/mypage/withdraw");
+  });
+
+  it("renders the password change screen with the strength bar", () => {
+    renderWithClient(<PasswordChangeScreen />);
+
+    expect(screen.getByText("비밀번호 변경")).toBeTruthy();
     expect(screen.getByPlaceholderText("현재 비밀번호")).toBeTruthy();
+    expect(screen.queryByTestId("password-strength")).toBeNull();
+    fireEvent.changeText(
+      screen.getByPlaceholderText("새 비밀번호"),
+      "abc12345",
+    );
+    expect(screen.getByTestId("password-strength")).toBeTruthy();
   });
 
   it("renders the activity screen", async () => {
@@ -1992,6 +2020,8 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("활동 내역")).toBeTruthy();
     expect(screen.getByText("나눔 게시글")).toBeTruthy();
     expect(await screen.findByText("유아용 카시트 나눔해요")).toBeTruthy();
+    expect(screen.getByText("나눔 게시글 1")).toBeTruthy();
+    expect(screen.getByText("댓글 0")).toBeTruthy();
   });
 
   it("shows an error with retry instead of an empty list when activity fails", async () => {
@@ -2066,20 +2096,17 @@ describe("v1 tab smoke screens", () => {
     expect(screen.queryByText("등록된 FAQ가 없어요")).toBeNull();
   });
 
-  it("renders the blocked users screen", () => {
-    renderWithClient(<BlockedScreen />);
-
-    expect(screen.getByText("차단 사용자")).toBeTruthy();
-    expect(screen.getByText("이모씨")).toBeTruthy();
-    expect(screen.getAllByText("차단 해제").length).toBeGreaterThan(0);
-  });
-
   it("renders the withdraw screen", () => {
     renderWithClient(<WithdrawScreen />);
 
     expect(screen.getByText("회원 탈퇴")).toBeTruthy();
-    expect(screen.getByText("정말 떠나시나요?")).toBeTruthy();
+    expect(screen.getByText("탈퇴하면 이렇게 돼요")).toBeTruthy();
     expect(screen.getByText("탈퇴하기")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("mypage-withdraw"));
+    expect(screen.queryByText("정말 탈퇴할까요?")).toBeNull();
+    fireEvent.press(screen.getByTestId("withdraw-agree"));
+    fireEvent.press(screen.getByTestId("mypage-withdraw"));
+    expect(screen.getByText("정말 탈퇴할까요?")).toBeTruthy();
   });
 
   it("renders the legal document screen", async () => {
@@ -2095,8 +2122,10 @@ describe("v1 tab smoke screens", () => {
 
     renderWithClient(<MyPageTermsScreen />);
 
+    expect(screen.getByText("약관 · 정책")).toBeTruthy();
+    expect(screen.getByText("개인정보 처리방침")).toBeTruthy();
     expect(await screen.findByText("서비스 이용약관")).toBeTruthy();
-    expect(screen.getByText("시행일자: 2026년 1월 1일")).toBeTruthy();
+    expect(screen.getByText("시행일 2026.01.01")).toBeTruthy();
     expect(screen.getByText(/제1조 \(목적\)/)).toBeTruthy();
   });
 
@@ -2107,7 +2136,7 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<MyPageTermsScreen />);
 
     expect(
-      await screen.findByText("약관을 불러오지 못했어요. 다시 시도해주세요."),
+      await screen.findByText("약관을 불러오지 못했어요. 다시 시도해 주세요."),
     ).toBeTruthy();
     expect(screen.queryByText("등록된 약관이 없어요")).toBeNull();
   });

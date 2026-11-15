@@ -1,4 +1,3 @@
-import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { Text } from "@/components/ui/text";
@@ -7,52 +6,20 @@ import { TopBar } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 
-type Variant =
-  | "default"
-  | "block-confirm"
-  | "block-toast"
-  | "blocked"
-  | "withdrawn";
+type Variant = "default" | "withdrawn";
 
 function variantOf(value: string | string[] | undefined): Variant {
   const variant = Array.isArray(value) ? value[0] : value;
-  if (
-    variant === "block-confirm" ||
-    variant === "block-toast" ||
-    variant === "blocked" ||
-    variant === "withdrawn"
-  ) {
-    return variant;
-  }
-  return "default";
+  return variant === "withdrawn" ? variant : "default";
 }
 
 export default function UserProfileScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ designVariant?: string }>();
   const variant = variantOf(readDesignVariant(params.designVariant));
-  const isBlockedView = variant === "blocked";
   const isWithdrawn = variant === "withdrawn";
   const name = isWithdrawn ? "알 수 없음" : "박정아";
   const initial = isWithdrawn ? "?" : "정아";
-
-  if (isBlockedView) {
-    return (
-      <Screen scroll={false} padded={false}>
-        <TopBar title="프로필" back onBack={() => router.back()} />
-        <View style={styles.centerBody}>
-          <View style={styles.blockedIcon}>
-            <AppIcon name="block" size={38} color={theme.colors.textMuted} />
-          </View>
-          <Text style={styles.blockedTitle}>확인할 수 없는 프로필입니다</Text>
-          <Text style={styles.blockedText}>
-            차단한 사용자의 프로필은 볼 수 없어요.{"\n"}
-            마이페이지 &gt; 차단 사용자 관리에서 해제할 수 있어요.
-          </Text>
-        </View>
-      </Screen>
-    );
-  }
 
   return (
     <Screen scroll={false} padded={false}>
@@ -96,36 +63,6 @@ const styles = StyleSheet.create({
   },
   body: {
     paddingHorizontal: 24,
-  },
-  centerBody: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 32,
-  },
-  blockedIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 22,
-    borderWidth: 1.5,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surfaceSubtle,
-  },
-  blockedTitle: {
-    color: theme.colors.text,
-    fontSize: theme.typography.heading.fontSize,
-    lineHeight: theme.typography.heading.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-  },
-  blockedText: {
-    marginTop: 10,
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
-    textAlign: "center",
   },
   profileBlock: {
     alignItems: "center",

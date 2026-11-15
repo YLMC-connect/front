@@ -171,6 +171,25 @@ describe("prayerMapper", () => {
     });
   });
 
+  it("shows a pending application even before a cohort is assigned", () => {
+    const overview = buildPrayerOverview(
+      [],
+      [],
+      readPrayerApplications([
+        { id: 31, cohortId: null, yoil: 3, timeSlot: "PM", status: "PENDING" },
+      ]),
+    );
+    expect(overview.rooms).toEqual([
+      expect.objectContaining({
+        id: "application-31",
+        status: "pending",
+        applicationId: "31",
+        weekday: "wed",
+        period: "afternoon",
+      }),
+    ]);
+  });
+
   it("reads named application and category fields without narrowing their values", () => {
     expect(
       readPrayerApplications([

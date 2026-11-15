@@ -152,6 +152,43 @@ describe("httpGroupDataSource", () => {
     });
   });
 
+  it("creates a volunteer when opened from the service tab", async () => {
+    const { request, dataSource } = setup();
+    request.mockImplementation(async (path: string, options) => {
+      if (path === "/api/communion" && options?.method === "POST") return 9;
+      if (path === "/api/communion/9") {
+        return {
+          id: 9,
+          type: "VOLUNTEER",
+          title: "주차 봉사",
+          content: "주일 주차 안내 봉사입니다.",
+          categoryCode: "OTHER",
+          maxParticipants: 5,
+          currentParticipants: 1,
+          status: "RECRUITING",
+          leaderId: "frontprobe",
+          leaderName: "프론트점검",
+          createdAt: "2026-08-13T11:26:07",
+        };
+      }
+      return [];
+    });
+
+    await dataSource.createGroup({
+      name: "주차 봉사",
+      description: "주일 주차 안내 봉사입니다.",
+      category: "etc",
+      maxMembers: 5,
+      kind: "service",
+    });
+
+    const post = request.mock.calls.find(
+      ([path, options]) =>
+        path === "/api/communion" && options?.method === "POST",
+    );
+    expect(JSON.parse(post?.[1].body).type).toBe("VOLUNTEER");
+  });
+
   it("creates a notice from the returned id", async () => {
     const { request, dataSource } = setup();
     request.mockResolvedValue(1);

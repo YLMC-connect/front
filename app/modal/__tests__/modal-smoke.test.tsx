@@ -232,11 +232,14 @@ describe("modal smoke screens", () => {
     );
     fireEvent.press(screen.getAllByText("소모임 개설")[1]);
 
+    // 창을 닫고 목록 위에 상세를 쌓는다(뒤로가기가 목록으로 가게)
     await waitFor(() =>
-      expect(router.replace).toHaveBeenCalledWith(
+      expect(router.push).toHaveBeenCalledWith(
         expect.stringMatching(/^\/group\/mock-group-/),
       ),
     );
+    expect(router.back).toHaveBeenCalled();
+    expect(router.replace).not.toHaveBeenCalled();
   });
 
   it("updates capacity with stepper buttons and quick preset chips", () => {

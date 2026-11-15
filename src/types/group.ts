@@ -44,6 +44,8 @@ export interface GroupInput {
   category: Exclude<GroupCategory, "all">;
   maxMembers: number;
   coverImage?: string;
+  /** 개설 종류. 없으면 소모임. */
+  kind?: "group" | "service";
 }
 
 export interface GroupUpdateInput {

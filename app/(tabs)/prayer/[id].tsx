@@ -2,7 +2,7 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, ScrollView, View } from "react-native";
+import { Alert, RefreshControl, ScrollView, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
@@ -14,6 +14,7 @@ import {
   TopBar,
   UnderlineTabs,
 } from "../../../src/components/ui";
+import { theme } from "../../../src/constants/theme";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 import { useTogglePrayerCompletion } from "../../../src/hooks/usePrayers";
 import {
@@ -76,6 +77,17 @@ export default function PrayerDetailScreen() {
     queryKey: ["prayer", "topic-board"],
     queryFn: fetchPrayerTopicBoard,
   });
+
+  // 당겨서 새로고침: 사람이 당겼을 때만 표시한다(백그라운드 갱신에는 표시하지 않음)
+  const [isPullRefreshing, setIsPullRefreshing] = useState(false);
+  const refreshAll = async () => {
+    setIsPullRefreshing(true);
+    try {
+      await Promise.all([statusQuery.refetch(), boardQuery.refetch()]);
+    } finally {
+      setIsPullRefreshing(false);
+    }
+  };
 
   const room = statusQuery.data;
   const board = boardQuery.data;
@@ -220,6 +232,14 @@ export default function PrayerDetailScreen() {
             styles.body,
             activeTab === "pray" ? styles.bodyWithAction : null,
           ]}
+          refreshControl={
+            <RefreshControl
+              refreshing={isPullRefreshing}
+              onRefresh={() => void refreshAll()}
+              tintColor={theme.colors.primary}
+              colors={[theme.colors.primary]}
+            />
+          }
         >
           {activeTab === "status" && statusFailed ? (
             <ErrorState

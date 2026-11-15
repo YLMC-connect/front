@@ -17,7 +17,6 @@ import {
   FloatingBottomBar,
   ModalFormSection as Section,
   ModalFormTextInput as FormInput,
-  SectionDivider,
   TopBar,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
@@ -130,12 +129,13 @@ export default function GroupNoticesScreenRoute() {
             style={{ flexGrow: 1 }}
           >
             <InfoBox
-              description="소모임 멤버에게만 공개됩니다."
+              description="소모임 멤버에게만 보여요."
               style={styles.noticeBox}
             />
 
-            <Section label="제목" required hint={`${title.length}/30`}>
+            <Section card label="제목" required hint={`${title.length}/30`}>
               <FormInput
+                style={styles.cardField}
                 testID="group-notice-title-input"
                 value={title}
                 onChangeText={setTitle}
@@ -144,9 +144,7 @@ export default function GroupNoticesScreenRoute() {
               />
             </Section>
 
-            <SectionDivider />
-
-            <Section label="내용" required hint={`${body.length}/500`}>
+            <Section card label="내용" required hint={`${body.length}/500`}>
               <FormInput
                 testID="group-notice-content-input"
                 value={body}
@@ -155,20 +153,20 @@ export default function GroupNoticesScreenRoute() {
                 placeholder="공지 내용을 입력해주세요"
                 maxLength={500}
                 textAlignVertical="top"
-                style={styles.textarea}
+                style={[styles.cardField, styles.textarea]}
               />
             </Section>
 
             {createNotice.isError ||
             updateNotice.isError ||
             deleteNotice.isError ? (
-              <Text style={styles.error}>공지 처리에 실패했습니다.</Text>
+              <Text style={styles.error}>공지를 저장하지 못했어요.</Text>
             ) : null}
           </Pressable>
         </ScrollView>
 
         <FloatingBottomBar
-          label={isEdit ? "저장" : "등록"}
+          label={isEdit ? "저장" : "공지 등록"}
           disabled={!isFilled}
           loading={isPending}
           onPress={onSubmit}
@@ -184,8 +182,8 @@ export default function GroupNoticesScreenRoute() {
 
         <ConfirmDialog
           visible={showDelete}
-          title="공지를 삭제하시겠습니까?"
-          message="삭제한 공지는 복구할 수 없어요."
+          title="공지를 삭제할까요?"
+          message="삭제한 공지는 되돌릴 수 없어요."
           confirmText="삭제"
           danger
           onCancel={() => setShowDelete(false)}
@@ -216,8 +214,9 @@ const styles = StyleSheet.create({
   },
   noticeBox: {
     marginHorizontal: theme.layout.screenX,
-    marginTop: 8,
+    marginBottom: theme.spacing[4],
   },
+  cardField: { marginHorizontal: 0 },
   // 공지 본문은 길게 쓰므로 기본 여러 줄 높이(132)보다 넉넉히 둔다.
   textarea: {
     minHeight: 250,

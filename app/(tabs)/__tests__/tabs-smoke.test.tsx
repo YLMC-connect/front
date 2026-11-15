@@ -1181,7 +1181,16 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<GroupDetailScreen />);
 
     expect(await screen.findByText("토요 산악회")).toBeTruthy();
-    expect(screen.getByText("멤버 6명")).toBeTruthy();
+    // 대표 사진 자리 + 흰 시트, 모집중은 진행 중(success) 배지.
+    expect(screen.getByTestId("group-detail-hero")).toBeTruthy();
+    expect(screen.getByTestId("group-detail-sheet")).toBeTruthy();
+    expect(screen.getByText("모집중")).toBeTruthy();
+    // 소모임장·인원은 정보 줄.
+    expect(screen.getByText("인원")).toBeTruthy();
+    // 멤버는 4명까지 아바타, 나머지는 +N 더보기 · 전체보기.
+    expect(screen.getByText("멤버 6")).toBeTruthy();
+    expect(screen.getByText("+2")).toBeTruthy();
+    expect(screen.getByLabelText("멤버 전체보기")).toBeTruthy();
     expect(screen.getByText("공지사항")).toBeTruthy();
   });
 
@@ -1191,7 +1200,7 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("공지 작성")).toBeTruthy();
     expect(screen.getByLabelText("닫기")).toBeTruthy();
     expect(screen.queryByText("닫기")).toBeNull();
-    expect(screen.getByText("소모임 멤버에게만 공개됩니다.")).toBeTruthy();
+    expect(screen.getByText("소모임 멤버에게만 보여요.")).toBeTruthy();
     expect(screen.getByPlaceholderText("공지 제목 (최대 30자)")).toBeTruthy();
   });
 
@@ -1262,7 +1271,7 @@ describe("v1 tab smoke screens", () => {
 
     await screen.findByTestId("group-notice-delete-notice-2");
     fireEvent.press(screen.getByTestId("group-notice-delete-notice-2"));
-    expect(screen.getByText("공지를 삭제하시겠습니까?")).toBeTruthy();
+    expect(screen.getByText("공지를 삭제할까요?")).toBeTruthy();
     fireEvent.press(screen.getAllByText("삭제").at(-1)!);
 
     await waitFor(
@@ -1279,6 +1288,38 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("멤버 관리")).toBeTruthy();
     expect(await screen.findByText("전체 8명")).toBeTruthy();
     expect(screen.getByText("소모임장")).toBeTruthy();
+    expect(screen.getByText("나")).toBeTruthy();
+    // 강퇴 대신 "내보내기" Outline 작은 버튼 + 해요체 확인 창.
+    expect(screen.queryByText("강퇴")).toBeNull();
+    fireEvent.press(screen.getByLabelText("이요셉 내보내기"));
+    expect(screen.getByText("이요셉님을 내보낼까요?")).toBeTruthy();
+    expect(
+      screen.getByText("내보낸 멤버는 다시 신청해야 들어올 수 있어요."),
+    ).toBeTruthy();
+  });
+
+  it("hides member removal for non-leaders opened from view all", async () => {
+    jest.spyOn(groupService, "fetchGroupMembers").mockResolvedValueOnce([
+      {
+        userId: "member-001",
+        userName: "김은혜",
+        joinedLabel: "2026.01",
+        isLeader: true,
+        isMine: false,
+      },
+      {
+        userId: "member-002",
+        userName: "이요셉",
+        joinedLabel: "2026.02",
+        isLeader: false,
+        isMine: true,
+      },
+    ]);
+    renderWithClient(<GroupMembersScreen />);
+
+    expect(await screen.findByText("전체 2명")).toBeTruthy();
+    expect(screen.getByText("멤버")).toBeTruthy();
+    expect(screen.queryByText("내보내기")).toBeNull();
   });
 
   it("renders the group leader transfer screen and selects a member", async () => {

@@ -156,6 +156,7 @@ export function createHttpMarketDataSource({
       form.append("content", input.description);
       form.append("categoryCode", toShareCategoryCode(input.category));
       form.append("itemStatus", itemStatus);
+      form.append("location", input.location);
       // 업로드 직전에 긴 변 1600px·JPEG 0.8 로 줄인다 (실패하면 원본)
       // 한 장씩 차례로 변환한다(동시에 돌리면 느려짐)
       const uploadUris: string[] = [];
@@ -180,14 +181,45 @@ export function createHttpMarketDataSource({
         throw new Error("물품 상태를 확인할 수 없습니다.");
       }
 
+      // 남은 사진 중 서버 사진은 id 로 유지하고, 새로 고른 사진만 올린다.
+      // keepImageIds 에 없는 서버 사진은 서버가 지운다.
+      const idByUrl = new Map(
+        input.existingImages.map((image) => [image.url, image.id]),
+      );
+      const keepImageIds = input.images
+        .map((uri) => idByUrl.get(uri))
+        .filter((id): id is string => Boolean(id));
+      const newUris = input.images.filter((uri) => !idByUrl.has(uri));
+      const fields = {
+        title: input.title,
+        content: input.description,
+        categoryCode: toShareCategoryCode(input.category),
+        itemStatus,
+        location: input.location,
+      };
+
+      if (newUris.length === 0) {
+        await client.request(`/api/share/${input.marketId}`, {
+          method: "PUT",
+          body: JSON.stringify({
+            ...fields,
+            keepImageIds: keepImageIds.map(Number),
+          }),
+        });
+        return getDetail(input.marketId);
+      }
+
+      const form = new FormData();
+      Object.entries(fields).forEach(([key, value]) => form.append(key, value));
+      keepImageIds.forEach((id) => form.append("keepImageIds", id));
+      const uploadUris: string[] = [];
+      for (const uri of newUris) {
+        uploadUris.push(await resizeImageForUpload(uri));
+      }
+      uploadUris.forEach((uri, index) => appendShareImage(form, uri, index));
       await client.request(`/api/share/${input.marketId}`, {
         method: "PUT",
-        body: JSON.stringify({
-          title: input.title,
-          content: input.description,
-          categoryCode: toShareCategoryCode(input.category),
-          itemStatus,
-        }),
+        body: form,
       });
       return getDetail(input.marketId);
     },

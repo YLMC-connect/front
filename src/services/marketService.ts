@@ -109,6 +109,7 @@ export function createMarketService(dataSource: MarketDataSource) {
         ...input,
         title: input.title.trim(),
         description: input.description.trim(),
+        location: input.location.trim(),
       };
       if (!normalized.title || normalized.title.length > 50) {
         throw new Error("제목은 1~50자로 입력해주세요.");
@@ -118,6 +119,10 @@ export function createMarketService(dataSource: MarketDataSource) {
         normalized.description.length > 500
       ) {
         throw new Error("상세 설명은 5~500자로 입력해주세요.");
+      }
+      if (!normalized.location) throw new Error("수령 장소를 입력해주세요.");
+      if (normalized.images.length < 1) {
+        throw new Error("사진을 1장 이상 추가해주세요.");
       }
       return dataSource.updatePost(normalized);
     },

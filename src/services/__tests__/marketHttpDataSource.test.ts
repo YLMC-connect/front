@@ -203,6 +203,8 @@ describe("httpMarketDataSource", () => {
           content: "수정된 나눔 설명글입니다.",
           categoryCode: "BABY_KIDS",
           itemStatus: "USED",
+          location: "교회 1층 로비",
+          keepImageIds: [8],
         });
         return null;
       }
@@ -229,6 +231,12 @@ describe("httpMarketDataSource", () => {
         description: "수정된 나눔 설명글입니다.",
         category: "baby",
         condition: "사용감 있음",
+        location: "교회 1층 로비",
+        images: ["https://img/8.jpg"],
+        existingImages: [
+          { id: "8", url: "https://img/8.jpg" },
+          { id: "9", url: "https://img/9.jpg" },
+        ],
       }),
     ).resolves.toMatchObject({
       id: "1",
@@ -236,6 +244,47 @@ describe("httpMarketDataSource", () => {
       content: "수정된 나눔 설명글입니다.",
       isMine: true,
     });
+  });
+
+  it("uploads newly picked photos as multipart with kept image ids", async () => {
+    const { request, dataSource } = setup();
+    let sent: FormData | undefined;
+    request.mockImplementation(async (path: string, options) => {
+      if (path === "/api/share/1" && options?.method === "PUT") {
+        sent = options.body as FormData;
+        return null;
+      }
+      if (path === "/api/share/1") {
+        return {
+          id: 1,
+          title: "제목",
+          content: "내용입니다",
+          status: "AVAILABLE",
+          categoryCode: "BABY_KIDS",
+          itemStatus: "USED",
+          location: "로비",
+          authorId: "frontprobe",
+          createdAt: "2026-08-13T10:37:37",
+        };
+      }
+      return [];
+    });
+
+    await dataSource.updatePost({
+      marketId: "1",
+      title: "제목",
+      description: "내용입니다",
+      category: "baby",
+      condition: "사용감 있음",
+      location: "로비",
+      images: ["https://img/8.jpg", "file:///new.jpg"],
+      existingImages: [{ id: "8", url: "https://img/8.jpg" }],
+    });
+
+    expect(sent).toBeInstanceOf(FormData);
+    expect(sent?.getAll("keepImageIds")).toEqual(["8"]);
+    expect(sent?.get("location")).toBe("로비");
+    expect(sent?.getAll("images")).toHaveLength(1);
   });
 
   it("creates a comment from the returned id", async () => {

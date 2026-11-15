@@ -158,6 +158,8 @@ describe("modal smoke screens", () => {
       id: "42",
       thumbSeed: 1,
       images: ["https://example.com/share/42.jpg"],
+      imageItems: [{ id: "7", url: "https://example.com/share/42.jpg" }],
+      location: "교회 1층 로비",
       title: "겨울 패딩 나눔",
       content: "한 번 입은 패딩입니다.",
       categoryLabel: "의류·잡화",
@@ -183,11 +185,10 @@ describe("modal smoke screens", () => {
       "한 번 입은 패딩입니다.",
     );
     expect(screen.getByText("나눔 수정")).toBeTruthy();
-    // 수정 API 가 사진을 받지 않아 사진은 보기만 한다
-    expect(screen.getByText("사진은 수정할 수 없어요")).toBeTruthy();
+    // 수정에서도 사진을 더하거나 뺄 수 있다
     expect(screen.getByTestId("market-photo-0")).toBeTruthy();
-    expect(screen.queryByTestId("market-photo-add")).toBeNull();
-    expect(screen.queryByLabelText("사진 1 삭제")).toBeNull();
+    expect(screen.getByTestId("market-photo-add")).toBeTruthy();
+    expect(screen.getByDisplayValue("교회 1층 로비")).toBeTruthy();
     expect(
       screen.queryByDisplayValue("아이 장난감 정리하면서 나눔합니다"),
     ).toBeNull();
@@ -200,6 +201,9 @@ describe("modal smoke screens", () => {
         description: "한 번 입은 패딩입니다.",
         category: "cloth",
         condition: "새것",
+        location: "교회 1층 로비",
+        images: ["https://example.com/share/42.jpg"],
+        existingImages: [{ id: "7", url: "https://example.com/share/42.jpg" }],
       }),
     );
   });

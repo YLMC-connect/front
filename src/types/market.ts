@@ -43,6 +43,16 @@ export interface MarketUpdateInput {
   description: string;
   category: Exclude<MarketCategory, "all">;
   condition: string;
+  location: string;
+  /** 화면에 남은 사진 순서. 서버 사진 URL 과 새로 고른 기기 사진 URI 가 섞여 있다. */
+  images: string[];
+  /** 수정 전 서버 사진(id·URL). 남은 사진 중 여기에 있는 것은 유지, 나머지는 새로 올린다. */
+  existingImages: MarketImage[];
+}
+
+export interface MarketImage {
+  id: string;
+  url: string;
 }
 
 export interface MarketOverviewItem {
@@ -111,8 +121,10 @@ export interface MarketDetail {
   content: string;
   categoryLabel: string;
   conditionLabel: string;
-  /** 수령 장소. 서버가 아직 내려주지 않아 비어 있다(이슈 295). */
+  /** 수령 장소. 옛 글은 비어 있을 수 있다. */
   location?: string;
+  /** 서버 사진 id·URL (수정 시 유지할 사진을 고르는 데 쓴다). */
+  imageItems?: MarketImage[];
   status: MarketStatus;
   authorName: string;
   createdLabel: string;

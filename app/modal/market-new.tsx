@@ -63,7 +63,7 @@ const emptyValues: MarketInput = {
   location: "",
 };
 
-/** 수정할 글의 상세 응답을 입력값으로 바꾼다. 위치는 서버가 내려주지 않아 비워 둔다. */
+/** 수정할 글의 상세 응답을 입력값으로 바꾼다. */
 function valuesFromDetail(detail: MarketDetail): MarketInput {
   const category =
     categories.find((item) => item.label === detail.categoryLabel)?.key ??
@@ -74,7 +74,7 @@ function valuesFromDetail(detail: MarketDetail): MarketInput {
     title: detail.title,
     condition: detail.conditionLabel || emptyValues.condition,
     description: detail.content,
-    location: "",
+    location: detail.location ?? "",
   };
 }
 
@@ -125,13 +125,14 @@ export default function MarketNewModal() {
   };
 
   const setImages = (images: string[]) => {
-    // 고르자마자 업로드용 축소를 시작해 등록 시 기다리지 않게 한다
-    images.forEach(prepareImageForUpload);
+    // 고르자마자 업로드용 축소를 시작해 등록 시 기다리지 않게 한다(서버 사진은 제외)
+    images
+      .filter((uri) => !/^https?:/.test(uri))
+      .forEach(prepareImageForUpload);
     update("images", images);
   };
 
-  // 나눔 수정 API(PUT /api/share/{id})는 사진을 받지 않아 수정 화면에선 사진을 바꿀 수 없다
-  const canAddImage = !isEdit && values.images.length < MAX_IMAGES;
+  const canAddImage = values.images.length < MAX_IMAGES;
 
   const pickImages = async () => {
     if (!canAddImage) return;
@@ -175,6 +176,9 @@ export default function MarketNewModal() {
           description: values.description,
           category: values.category,
           condition: values.condition,
+          location: values.location,
+          images: values.images,
+          existingImages: detail?.imageItems ?? [],
         });
         router.replace(`/market/${params.id}`);
       } else {
@@ -216,11 +220,7 @@ export default function MarketNewModal() {
               card
               label="사진"
               required
-              hint={
-                isEdit
-                  ? "사진은 수정할 수 없어요"
-                  : `사진 ${values.images.length}/${MAX_IMAGES}`
-              }
+              hint={`사진 ${values.images.length}/${MAX_IMAGES}`}
             >
               <ScrollView
                 horizontal
@@ -242,13 +242,8 @@ export default function MarketNewModal() {
                     uri={uri}
                     index={index}
                     cover={index === 0}
-                    onRemove={
-                      isEdit
-                        ? undefined
-                        : () =>
-                            setImages(
-                              values.images.filter((item) => item !== uri),
-                            )
+                    onRemove={() =>
+                      setImages(values.images.filter((item) => item !== uri))
                     }
                     testID={`market-photo-${index}`}
                   />

@@ -94,6 +94,21 @@ function resolveImageUrl(raw: string): string {
   return raw;
 }
 
+/** 상세 응답의 사진을 id·URL 로 읽는다. id 가 없는 사진은 뺀다. */
+function readShareImageItems(
+  data: Record<string, unknown>,
+): { id: string; url: string }[] {
+  if (!Array.isArray(data.images)) return [];
+  const items: { id: string; url: string }[] = [];
+  for (const item of data.images) {
+    if (!isRecord(item)) continue;
+    const id = readId(item.id);
+    const url = readString(item.imageUrl) ?? readString(item.url);
+    if (id && url) items.push({ id, url: resolveImageUrl(url) });
+  }
+  return items;
+}
+
 function readShareImageUrls(data: Record<string, unknown>): string[] {
   const urls: string[] = [];
   if (Array.isArray(data.images)) {
@@ -219,12 +234,14 @@ export function mapShareDetail(
     ] ?? "";
 
   const images = readShareImageUrls(data);
+  const imageItems = readShareImageItems(data);
   const location = readString(data.location);
 
   return {
     id: mappedId,
     thumbSeed: Number.parseInt(mappedId, 10) || 0,
     ...(images.length > 0 ? { images } : {}),
+    ...(imageItems.length > 0 ? { imageItems } : {}),
     title: mappedTitle,
     content,
     categoryLabel: CATEGORY_LABEL[mappedCategory],

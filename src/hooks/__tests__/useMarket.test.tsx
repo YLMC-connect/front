@@ -6,6 +6,7 @@ import type {
   MarketDetail,
   MarketDetailComment,
   MarketInput,
+  MarketUpdateInput,
   MarketOverviewItem,
 } from "../../types/market";
 import {
@@ -70,6 +71,10 @@ const input = {
   title: "책 나눔",
   content: "내용",
 } as unknown as MarketInput;
+const updateInput = {
+  ...input,
+  existingImages: [],
+} as unknown as Omit<MarketUpdateInput, "marketId">;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -121,10 +126,10 @@ describe("useUpdateMarketPost", () => {
     );
     queryClient.setQueryData(queryKeys.market.detail("10"), detail());
 
-    await act(() => result.current.mutateAsync(input));
+    await act(() => result.current.mutateAsync(updateInput));
 
     expect(service.updateMarketPost).toHaveBeenCalledWith({
-      ...input,
+      ...updateInput,
       marketId: "10",
     });
     expect(queryClient.getQueryData(queryKeys.market.detail("10"))).toEqual(
@@ -145,7 +150,9 @@ describe("useUpdateMarketPost", () => {
     queryClient.setQueryData(queryKeys.market.detail("10"), original);
 
     await act(async () => {
-      await expect(result.current.mutateAsync(input)).rejects.toThrow("403");
+      await expect(result.current.mutateAsync(updateInput)).rejects.toThrow(
+        "403",
+      );
     });
 
     expect(queryClient.getQueryData(queryKeys.market.detail("10"))).toEqual(

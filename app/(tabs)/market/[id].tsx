@@ -119,24 +119,18 @@ export default function MarketDetailScreen() {
     }
   };
 
-  if (variant === "deleted" || variant === "blocked") {
+  if (variant === "deleted") {
     return (
       <Screen>
         <View style={styles.exception}>
           <AppIcon
-            name={variant === "deleted" ? "inventory-2" : "block"}
+            name="inventory-2"
             size={42}
             color={theme.colors.textMuted}
           />
-          <Text style={styles.exceptionTitle}>
-            {variant === "deleted"
-              ? "없는 게시글이에요"
-              : "확인할 수 없는 게시글이에요"}
-          </Text>
+          <Text style={styles.exceptionTitle}>없는 게시글이에요</Text>
           <Text style={styles.exceptionText}>
-            {variant === "deleted"
-              ? "삭제되었거나 더 이상 접근할 수 없는 게시글이에요."
-              : "차단한 사용자의 게시글은 볼 수 없어요."}
+            삭제되었거나 더 이상 접근할 수 없는 게시글이에요.
           </Text>
         </View>
       </Screen>

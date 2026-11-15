@@ -93,6 +93,8 @@
 
 ## 결정 사항 (최신 위)
 
+- **배지 색은 뜻으로 고른다(캔버스 v1.40)** — 나눔 상세 맨 앞 상태 배지는 나눔중 success(초록) · 예약중 warning · 나눔완료 neutral, 그 뒤 카테고리 info · 물품 상태 neutral. 작성·수정 화면 칩은 흰 카드 위 회색(`surface-subtle`, 고르면 `primary-subtle`).
+
 - (2026-11-06) **나눔 사진은 업로드 직전 긴 변 1600px·JPEG 품질 0.8 로 줄여 올린다** — `httpMarketDataSource.createPost` 가 `resizeImageForUpload`(`expo-image-manipulator`)로 사진마다 변환한 uri 를 `expo-file-system` `File` 로 FormData 에 넣는다. 1600px 이하 사진은 크기를 두고 JPEG 로만 저장하며, 변환에 실패하면 원본을 올린다. 피커(`ImagePickerField`)는 `mediaTypes: ["images"]` 에 quality 기본값(1)이라 압축은 이 한 번뿐이다.
 
 - (2026-11-05) **내 나눔은 `GET /api/share/my`로 조회한다** — 나눔 탭 `내 나눔`은 전체 목록의 `isMine` 필터 대신 커서(`lastId`, `size`)와 선택 카테고리(`categoryCode`)를 이 엔드포인트로 보낸다. 상태 필터는 보내지 않아 나눔중·예약중·나눔완료를 함께 본다. 응답은 본인 글만 오므로 화면 모델 `isMine`은 true다. Issue #195.

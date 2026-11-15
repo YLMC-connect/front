@@ -834,7 +834,7 @@ describe("v1 tab smoke screens", () => {
     expect(await screen.findByText("나눔 상세")).toBeTruthy();
     fireEvent.press(screen.getByLabelText("뒤로"));
     expect(back).toHaveBeenCalledTimes(1);
-    expect(screen.getByText("불러오지 못했습니다")).toBeTruthy();
+    expect(screen.getByText("불러오지 못했어요")).toBeTruthy();
     expect(screen.getByText("나눔 정보를 다시 불러와주세요.")).toBeTruthy();
     expect(screen.getByText("다시 시도")).toBeTruthy();
     expect(
@@ -957,12 +957,12 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<MarketDetailScreen />);
 
     await screen.findByTestId("market-comment-delete-comment-4");
-    const deletedBefore = screen.getAllByText("삭제된 댓글입니다").length;
+    const deletedBefore = screen.getAllByText("삭제된 댓글이에요").length;
     fireEvent.press(screen.getByTestId("market-comment-delete-comment-4"));
 
     await waitFor(
       () =>
-        expect(screen.getAllByText("삭제된 댓글입니다")).toHaveLength(
+        expect(screen.getAllByText("삭제된 댓글이에요")).toHaveLength(
           deletedBefore + 1,
         ),
       { timeout: 5000 },
@@ -978,7 +978,7 @@ describe("v1 tab smoke screens", () => {
 
     await screen.findByTestId("market-delete-post");
     fireEvent.press(screen.getByTestId("market-delete-post"));
-    expect(screen.getByText("게시글을 삭제하시겠습니까?")).toBeTruthy();
+    expect(screen.getByText("나눔 글을 삭제할까요?")).toBeTruthy();
     fireEvent.press(screen.getAllByText("삭제").at(-1)!);
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith("/market"), {
@@ -1371,7 +1371,7 @@ describe("v1 tab smoke screens", () => {
     expect(screen.queryByText("참여중")).toBeNull();
     expect(screen.getByText("기도할 제목이 없어요")).toBeTruthy();
     expect(
-      screen.getByText("새 기도제목이 승인되면 이곳에 표시됩니다."),
+      screen.getByText("새 기도제목이 승인되면 여기에 보여요."),
     ).toBeTruthy();
 
     // Switch to answers tab
@@ -1716,7 +1716,9 @@ describe("v1 tab smoke screens", () => {
     expect(router.push).not.toHaveBeenCalledWith(
       "/prayer/prayer-overview-room-thu-pm",
     );
-    fireEvent.press(await screen.findByText("취소하기"));
+    // 카드 글자와 확인 창 버튼이 같은 "신청 취소"라 마지막(확인 창 버튼)을 누른다.
+    const cancelTexts = await screen.findAllByText("신청 취소");
+    fireEvent.press(cancelTexts[cancelTexts.length - 1]);
     await waitFor(() => expect(cancelSpy).toHaveBeenCalledWith("app-9"));
 
     const requestCard = screen.getByTestId(
@@ -1752,7 +1754,7 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<PrayerRequestScreenRoute />);
 
     expect(screen.getByText("내 기도제목")).toBeTruthy();
-    expect(screen.getByText("기도제목은 승인 후 공개됩니다")).toBeTruthy();
+    expect(screen.getByText("기도제목은 승인 후 공개돼요")).toBeTruthy();
     expect(screen.getByText("응답완료 요청하기")).toBeTruthy();
   });
 

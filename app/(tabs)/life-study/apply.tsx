@@ -86,7 +86,7 @@ export default function LifeStudyApplyScreenRoute() {
   const handleSubmit = async () => {
     setFormError(null);
     if (!cohortId) {
-      setFormError("현재 신청 가능한 삶공부 기수가 없습니다.");
+      setFormError("지금 신청 가능한 삶공부 기수가 없어요.");
       return;
     }
     const trimmedYear = userYear.trim();
@@ -117,12 +117,14 @@ export default function LifeStudyApplyScreenRoute() {
           userPart: trimmedPart,
         },
       });
-      Alert.alert("수강 신청 완료", "삶공부 수강 신청이 완료되었습니다.", [
+      Alert.alert("수강 신청 완료", "수강 신청했어요.", [
         { text: "확인", onPress: () => router.back() },
       ]);
     } catch (err: unknown) {
       const message =
-        err instanceof Error ? err.message : "수강신청 중 오류가 발생했습니다.";
+        err instanceof Error
+          ? err.message
+          : "수강 신청하지 못했어요. 다시 시도해주세요.";
       setFormError(message);
       Alert.alert("수강 신청 실패", message);
     }
@@ -141,7 +143,7 @@ export default function LifeStudyApplyScreenRoute() {
                   ? "신청할 수 없는 과정이에요"
                   : "지금 신청 가능한 과정이 없어요"
               }
-              description="모집 기간 중인 삶공부 과정만 신청할 수 있습니다."
+              description="모집 기간 중인 삶공부 과정만 신청할 수 있어요."
             />
           </View>
         ) : (

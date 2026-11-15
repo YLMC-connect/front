@@ -41,7 +41,7 @@ export function AppText({
   variant?: AppTextVariant;
   tone?: AppTextTone;
   /** 역할의 기본 굵기를 바꿀 때. 카드 제목은 `variant="body" weight="semibold"`. */
-  weight?: Exclude<keyof typeof theme.fontWeight, "extrabold">;
+  weight?: keyof typeof theme.fontWeight;
   style?: StyleProp<TextStyle>;
 }) {
   const role = theme.typography[variant];

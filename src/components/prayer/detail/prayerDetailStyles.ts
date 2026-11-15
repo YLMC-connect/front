@@ -198,7 +198,7 @@ export const styles = StyleSheet.create({
     color: theme.colors.text,
     fontSize: theme.typography.heading.fontSize,
     lineHeight: theme.typography.heading.lineHeight,
-    fontWeight: "900",
+    fontWeight: theme.fontWeight.bold,
   },
   stats: {
     flexDirection: "row",
@@ -236,7 +236,7 @@ export const styles = StyleSheet.create({
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
     lineHeight: theme.typography.label.lineHeight,
-    fontWeight: "900",
+    fontWeight: theme.fontWeight.bold,
   },
   pendingHead: {
     marginTop: 14,

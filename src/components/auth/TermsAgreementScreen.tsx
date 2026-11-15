@@ -267,7 +267,7 @@ export function TermsSheet({
               <Text style={styles.effectiveDate}>{effectiveDateText}</Text>
             ) : null}
             <Text style={styles.fullText}>
-              {sheetContent || "등록된 약관 내용이 없습니다."}
+              {sheetContent || "등록된 약관 내용이 없어요."}
             </Text>
           </ScrollView>
         )}

@@ -12,7 +12,7 @@ describe("NotFoundScreen", () => {
     renderWithClient(<NotFoundScreen />);
 
     expect(screen.getByTestId("not-found-empty")).toBeTruthy();
-    expect(screen.getByText("404 NOT FOUND")).toBeTruthy();
+    expect(screen.getByText("404")).toBeTruthy();
     expect(screen.getByText("페이지를 찾을 수 없어요")).toBeTruthy();
 
     const homeButton = screen.getByTestId("not-found-home-button");

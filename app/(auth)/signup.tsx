@@ -201,7 +201,7 @@ export default function SignupScreen() {
     if (target === "email" && !emailPattern.test(value)) {
       setErrors((current) => ({
         ...current,
-        email: "이메일 형식이 올바르지 않습니다.",
+        email: "이메일 형식이 올바르지 않아요.",
       }));
       return;
     }
@@ -280,10 +280,10 @@ export default function SignupScreen() {
   const onSubmit = () => {
     const nextErrors = validateSignup(values);
     if (isDefault && currentIdAvailability !== true) {
-      nextErrors.id = "아이디 중복 확인이 필요합니다.";
+      nextErrors.id = "아이디 중복 확인을 해 주세요.";
     }
     if (isDefault && currentEmailAvailability !== true) {
-      nextErrors.email = "이메일 중복 확인이 필요합니다.";
+      nextErrors.email = "이메일 중복 확인을 해 주세요.";
     }
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
@@ -308,14 +308,14 @@ export default function SignupScreen() {
     ? getApiErrorMessage(
         checkAvailability.error,
         authApiErrorMessages,
-        "중복 확인에 실패했습니다. 잠시 후 다시 시도해주세요.",
+        "중복 확인을 하지 못했어요. 잠시 후 다시 시도해주세요.",
       )
     : undefined;
   const idErrorMessage =
     errors.id ??
     (lastAvailabilityTarget === "id" ? availabilityErrorMessage : undefined) ??
     (currentIdAvailability === false || variant === "id-dup"
-      ? "이미 사용 중인 아이디입니다"
+      ? "이미 사용 중인 아이디예요"
       : undefined);
   const emailErrorMessage =
     errors.email ??
@@ -323,10 +323,10 @@ export default function SignupScreen() {
       ? availabilityErrorMessage
       : undefined) ??
     (currentEmailAvailability === false
-      ? "이미 사용 중인 이메일입니다"
+      ? "이미 사용 중인 이메일이에요"
       : undefined);
   const passwordErrorMessage = isPwError
-    ? "비밀번호는 8자 이상, 영문·숫자를 모두 포함해야 합니다"
+    ? "비밀번호는 8자 이상, 영문·숫자를 모두 넣어 주세요"
     : errors.password;
 
   // Realtime password criteria
@@ -360,7 +360,7 @@ export default function SignupScreen() {
   const phoneErrorMessage = isPhoneError
     ? "연락처는 010-XXXX-XXXX 형식으로 입력해주세요"
     : isPhoneDup
-      ? "이미 가입된 연락처입니다"
+      ? "이미 가입된 연락처예요"
       : errors.phone;
 
   const trimmedEmail = values.email.trim();
@@ -773,7 +773,7 @@ export default function SignupScreen() {
                             tone="success"
                             style={styles.successHint}
                           >
-                            사용 가능한 이메일입니다
+                            사용할 수 있는 이메일이에요
                           </AppText>
                         </View>
                       </MotionPop>
@@ -852,7 +852,7 @@ export default function SignupScreen() {
                           tone="success"
                           style={styles.successHint}
                         >
-                          사용 가능한 아이디입니다
+                          사용할 수 있는 아이디예요
                         </AppText>
                       </View>
                     </MotionPop>
@@ -955,7 +955,7 @@ export default function SignupScreen() {
                   {getApiErrorMessage(
                     signup.error,
                     authApiErrorMessages,
-                    "회원가입에 실패했습니다. 입력 정보를 확인해주세요.",
+                    "회원가입을 하지 못했어요. 입력 정보를 확인해주세요.",
                   )}
                 </Text>
               </MotionFadeIn>

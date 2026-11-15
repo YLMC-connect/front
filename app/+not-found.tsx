@@ -25,40 +25,27 @@ export default function NotFoundScreen() {
 
         <MotionEnter mode="fadeUp" style={styles.contentWrap}>
           <View style={styles.content} testID="not-found-empty">
-            {/* 404 Status Pill */}
-            <View style={styles.codeBadge}>
-              <View style={styles.codeBadgeDot} />
-              <Text style={styles.codeBadgeText}>404 NOT FOUND</Text>
+            <Text style={styles.code}>404</Text>
+
+            <View style={styles.illustration}>
+              <AppIcon
+                name="search-off"
+                size={36}
+                color={theme.colors.primaryStrong}
+              />
             </View>
 
-            {/* Visual Icon Illustration */}
-            <View style={styles.iconGraphicWrapper}>
-              <View style={styles.outerGlowCircle} />
-              <View style={styles.middleCircle}>
-                <View style={styles.innerCircle}>
-                  <AppIcon
-                    name="search-off"
-                    size={36}
-                    color={theme.colors.primary}
-                  />
-                </View>
-              </View>
-            </View>
-
-            {/* Headline & Description */}
             <View style={styles.textBlock}>
               <Text style={styles.title}>페이지를 찾을 수 없어요</Text>
               <Text style={styles.description}>
-                주소가 잘못 입력되었거나{"\n"}
-                페이지가 이동 또는 삭제되었을 수 있습니다.
+                주소가 잘못됐거나{"\n"}
+                페이지가 옮겨졌거나 삭제됐을 수 있어요
               </Text>
             </View>
 
-            {/* Quick Hint Card */}
             <View style={styles.tipCard}>
-              <AppIcon name="info" size={16} color={theme.colors.textMuted} />
               <Text style={styles.tipText}>
-                입력하신 주소를 다시 확인하시거나 홈으로 이동해주세요.
+                주소를 다시 확인하거나 홈으로 이동해 주세요
               </Text>
             </View>
           </View>
@@ -115,67 +102,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.layout.screenX,
     paddingBottom: theme.spacing[6],
   },
-  codeBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
+  code: {
+    marginBottom: theme.spacing[3],
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
+    fontWeight: theme.fontWeight.semibold,
+    color: theme.colors.textMuted,
+  },
+  // 빈 상태 일러스트 규격: 84 원, primary-subtle 바탕, primary-strong 아이콘.
+  illustration: {
+    width: 84,
+    height: 84,
     borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primarySubtle,
-    borderWidth: 1,
-    borderColor: theme.colors.primarySubtle,
-    marginBottom: theme.spacing[5],
-  },
-  codeBadgeDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: theme.colors.primary,
-  },
-  codeBadgeText: {
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-    color: theme.colors.primaryStrong,
-    letterSpacing: 0.6,
-  },
-  iconGraphicWrapper: {
-    width: 112,
-    height: 112,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: theme.spacing[5],
-  },
-  outerGlowCircle: {
-    position: "absolute",
-    width: 112,
-    height: 112,
-    borderRadius: 56,
-    backgroundColor: theme.colors.infoSubtle,
-  },
-  middleCircle: {
-    width: 86,
-    height: 86,
-    borderRadius: 43,
-    backgroundColor: theme.colors.primarySubtle,
-    borderWidth: 1,
-    borderColor: theme.colors.primarySubtle,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  innerCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: theme.colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: theme.colors.text,
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 2,
   },
   textBlock: {
     alignItems: "center",
@@ -197,22 +139,18 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   tipCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
     marginTop: theme.spacing[6],
     paddingHorizontal: theme.spacing[4],
     paddingVertical: theme.spacing[3],
     backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
+    ...theme.shadow.sm,
   },
   tipText: {
-    flexShrink: 1,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     color: theme.colors.textMuted,
+    textAlign: "center",
   },
   actionContainer: {
     paddingHorizontal: theme.layout.screenX,

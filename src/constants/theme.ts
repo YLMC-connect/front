@@ -15,7 +15,6 @@ const fontWeight = {
   medium: "500",
   semibold: "600",
   bold: "700",
-  extrabold: "800",
 } as const;
 
 type FontWeight = (typeof fontWeight)[keyof typeof fontWeight];

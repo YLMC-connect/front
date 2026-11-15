@@ -58,9 +58,34 @@ export async function fetchDawnPrayerDetail(
     targetId = list.content?.[0]?.id;
   }
   if (!targetId) {
-    throw new Error("등록된 새벽기도 말씀요약이 없습니다.");
+    throw new Error("등록된 새벽기도 말씀요약이 없어요.");
   }
 
   const detail = await httpHomeDataSource.fetchDailyQtDetail(targetId);
   return mapDailyQtToDawnPrayer(detail, detail.content);
+}
+
+/** 이전·다음 날짜를 찾을 때 훑는 최근 말씀요약 수. */
+const DAWN_NEIGHBOR_PAGE_SIZE = 30;
+
+/**
+ * 이 말씀요약의 바로 이전 날짜·다음 날짜 id. 최근 목록 한 페이지 안에서 날짜순으로 찾고,
+ * 없으면 null 이다(화면은 그쪽 화살표를 비활성으로 둔다).
+ */
+export async function fetchDawnPrayerNeighbors(
+  id: number | string,
+): Promise<{ prevId: number | null; nextId: number | null }> {
+  const list = await httpHomeDataSource.fetchDailyQts({
+    page: 1,
+    size: DAWN_NEIGHBOR_PAGE_SIZE,
+  });
+  const items = [...(list.content ?? [])].sort((a, b) =>
+    a.qtDate.localeCompare(b.qtDate),
+  );
+  const index = items.findIndex((item) => String(item.id) === String(id));
+  if (index < 0) return { prevId: null, nextId: null };
+  return {
+    prevId: items[index - 1]?.id ?? null,
+    nextId: items[index + 1]?.id ?? null,
+  };
 }

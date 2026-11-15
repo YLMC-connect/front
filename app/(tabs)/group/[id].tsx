@@ -1,13 +1,16 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useState, type ComponentProps, type ReactNode } from "react";
 import {
   Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
   View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/text";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
@@ -24,6 +27,7 @@ import {
   FloatingBottomBar,
   Skeleton,
   TopBar,
+  VisualThumb,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import {
@@ -36,8 +40,14 @@ import {
 } from "../../../src/hooks/useGroups";
 import { readDesignVariant } from "../../../src/lib/designVariant";
 
+/** 대표 사진 자리 높이(상태 바 포함). 흰 시트가 아래 24 를 덮는다. */
+const HERO_HEIGHT = 240;
+/** 멤버 줄에 아바타를 몇 명까지 보이고 나머지는 "+N 더보기" 로 묶을지. */
+const MEMBER_PREVIEW_LIMIT = 4;
+
 export default function GroupDetailScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{
     id?: string;
     designVariant?: string;
@@ -56,6 +66,7 @@ export default function GroupDetailScreen() {
   } | null>(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isPastHero, setIsPastHero] = useState(false);
   const isDeleted = variant === "deleted-exception";
   const membershipBusy =
     joinGroupMutation.isPending || leaveGroupMutation.isPending;
@@ -64,6 +75,15 @@ export default function GroupDetailScreen() {
     : leaveGroupMutation.isError
       ? leaveGroupMutation.error
       : null;
+  // 사진이 상단 바 아래로 다 지나가면 흰 글자 헤더를 일반 헤더로 바꾼다.
+  const heroThreshold = Math.max(
+    HERO_HEIGHT - (insets.top + theme.size.topbarHeight),
+    1,
+  );
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const past = event.nativeEvent.contentOffset.y >= heroThreshold;
+    if (past !== isPastHero) setIsPastHero(past);
+  };
 
   if (isDeleted) {
     return (
@@ -75,7 +95,7 @@ export default function GroupDetailScreen() {
             size={42}
             color={theme.colors.textMuted}
           />
-          <Text style={styles.exceptionTitle}>존재하지 않는 소모임입니다</Text>
+          <Text style={styles.exceptionTitle}>존재하지 않는 소모임이에요</Text>
           <Text style={styles.exceptionText}>
             삭제되었거나 더 이상 접근할 수 없는 소모임이에요.
           </Text>
@@ -86,9 +106,9 @@ export default function GroupDetailScreen() {
 
   if (detail.isPending) {
     return (
-      <Screen>
+      <Screen padded={false} applyTopInset={false}>
         <View style={styles.loading}>
-          <Skeleton width="100%" height={220} radius={0} />
+          <Skeleton width="100%" height={HERO_HEIGHT} radius={0} />
           <View style={styles.loadingBody}>
             <Skeleton width="70%" height={26} />
             <Skeleton width="100%" height={76} />
@@ -102,7 +122,7 @@ export default function GroupDetailScreen() {
     return (
       <Screen>
         <ErrorState
-          message="소모임 정보를 다시 불러와주세요."
+          message="소모임 정보를 다시 불러와 주세요."
           onRetry={() => detail.refetch()}
         />
       </Screen>
@@ -124,75 +144,93 @@ export default function GroupDetailScreen() {
     : group.status === "closed";
   const current = group.currentMembers;
   const leaderName = variant && !isLeader ? "한지수" : group.leaderName;
+  const visibleMembers =
+    group.members.length > MEMBER_PREVIEW_LIMIT + 1
+      ? group.members.slice(0, MEMBER_PREVIEW_LIMIT)
+      : group.members;
+  const hiddenMemberCount = group.members.length - visibleMembers.length;
+  const openMembers = () => router.push(`/group/members?id=${id}`);
+  // 상태 색 뜻: 진행 중(모집중) = success, 끝남(모집완료) = neutral.
+  const statusBadge = (
+    <Badge tone={isClosed ? "neutral" : "success"}>
+      {isClosed ? "모집완료" : "모집중"}
+    </Badge>
+  );
 
   return (
-    <Screen scroll={false} padded={false}>
+    <Screen scroll={false} padded={false} applyTopInset={false}>
       <View style={styles.root}>
-        <TopBar title="소모임" back onBack={() => router.back()} />
         <ScrollView
           contentContainerStyle={[
             styles.body,
             isMember || isNonMember ? styles.bodyWithBottomBar : null,
           ]}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
           refreshControl={
             <RefreshControl
               refreshing={detail.isRefetching}
               onRefresh={() => void detail.refetch()}
               tintColor={theme.colors.primary}
               colors={[theme.colors.primary]}
+              progressViewOffset={insets.top + theme.size.topbarHeight}
             />
           }
         >
-          <View style={styles.header}>
-            <View style={styles.chips}>
-              <Badge tone="neutral">{group.categoryLabel}</Badge>
-              {isLeader ? (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={`모집 상태 변경: 현재 ${isClosed ? "모집완료" : "모집중"}`}
-                  disabled={updateStatusMutation.isPending}
-                  hitSlop={{ top: 9, bottom: 9 }}
-                  onPress={() => {
-                    updateStatusMutation.mutate(isClosed ? "open" : "closed");
-                  }}
-                >
-                  <Badge tone={isClosed ? "neutral" : "info"}>
-                    {isClosed ? "모집완료" : "모집중"}
-                  </Badge>
-                </Pressable>
-              ) : (
-                <Badge tone={isClosed ? "neutral" : "info"}>
-                  {isClosed ? "모집완료" : "모집중"}
-                </Badge>
-              )}
-            </View>
-
-            <AppText variant="title">{group.name}</AppText>
-
-            <View style={styles.memberMeta}>
-              <AppIcon name="groups" size={15} color={theme.colors.text} />
-              <Text style={styles.memberMetaText}>
-                현재 <Text style={styles.memberCount}>{current}</Text> / 최대{" "}
-                {group.maxMembers}
-              </Text>
-            </View>
-
-            <AppText variant="body" tone="primary" style={styles.description}>
-              {group.description}
-            </AppText>
-
-            <View style={styles.leaderCard}>
-              <Avatar name={leaderName} size={36} />
-              <View style={styles.leaderText}>
-                <Text style={styles.leaderLabel}>소모임장</Text>
-                <Text style={styles.leaderName}>{leaderName}</Text>
-              </View>
-              <Badge tone="info">소모임장</Badge>
+          {/* 대표 사진 자리. 서버가 사진을 주지 않아 목록 썸네일과 같은 색 바탕 + 아이콘으로 채운다. */}
+          <View style={styles.hero} testID="group-detail-hero">
+            <VisualThumb
+              size={HERO_HEIGHT}
+              seed={Number.parseInt(group.id, 10) || 0}
+              style={styles.heroThumb}
+            />
+            <View pointerEvents="none" style={styles.heroIcon}>
+              <AppIcon name="groups" size={48} color={theme.colors.textMuted} />
             </View>
           </View>
 
-          {isLeader ? (
-            <View style={styles.actionWrap}>
+          <View style={styles.sheet} testID="group-detail-sheet">
+            <View style={styles.header}>
+              <View style={styles.chips}>
+                {isLeader ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`모집 상태 변경: 현재 ${isClosed ? "모집완료" : "모집중"}`}
+                    disabled={updateStatusMutation.isPending}
+                    hitSlop={{ top: 9, bottom: 9 }}
+                    onPress={() => {
+                      updateStatusMutation.mutate(isClosed ? "open" : "closed");
+                    }}
+                  >
+                    {statusBadge}
+                  </Pressable>
+                ) : (
+                  statusBadge
+                )}
+                <Badge tone="info">{group.categoryLabel}</Badge>
+              </View>
+
+              <AppText variant="title">{group.name}</AppText>
+
+              <AppText variant="body" style={styles.description}>
+                {group.description}
+              </AppText>
+            </View>
+
+            <View testID="group-detail-info">
+              <InfoLine icon="star" label="소모임장" first>
+                <Avatar name={leaderName} size={24} />
+                <Text style={styles.infoValue}>{leaderName}</Text>
+              </InfoLine>
+              <InfoLine icon="groups" label="인원">
+                <Text style={styles.infoValue}>
+                  <Text style={styles.memberCount}>{current}</Text> /{" "}
+                  {group.maxMembers}명
+                </Text>
+              </InfoLine>
+            </View>
+
+            {isLeader ? (
               <Card style={styles.actionCard}>
                 <DetailAction
                   icon="edit"
@@ -208,7 +246,7 @@ export default function GroupDetailScreen() {
                 <DetailAction
                   icon="groups"
                   label="멤버"
-                  onPress={() => router.push(`/group/members?id=${id}`)}
+                  onPress={openMembers}
                 />
                 <DetailAction
                   testID="group-transfer-open"
@@ -225,84 +263,126 @@ export default function GroupDetailScreen() {
                   onPress={() => setShowDeleteConfirm(true)}
                 />
               </Card>
-            </View>
-          ) : null}
+            ) : null}
 
-          <SectionTitle title={`멤버 ${group.members.length}명`} />
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.memberRail}
-          >
-            {group.members.map((name, index) => (
-              <View key={name} style={styles.memberItem}>
-                <View>
-                  <Avatar name={name} size={48} />
-                  {index === 0 && name === group.leaderName ? (
-                    <View style={styles.crown}>
-                      <AppIcon
-                        name="star"
-                        size={10}
-                        color={theme.colors.onPrimary}
-                      />
-                    </View>
-                  ) : null}
+            <SectionTitle
+              title="멤버"
+              count={group.members.length}
+              onViewAll={openMembers}
+              testID="group-members-section"
+            />
+            <View style={styles.memberRail}>
+              {visibleMembers.map((name) => (
+                <View key={name} style={styles.memberItem}>
+                  <Avatar name={name} size={44} />
+                  <Text numberOfLines={1} style={styles.memberName}>
+                    {name}
+                  </Text>
                 </View>
-                <Text numberOfLines={1} style={styles.memberName}>
-                  {name}
+              ))}
+              {hiddenMemberCount > 0 ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`멤버 ${hiddenMemberCount}명 더보기`}
+                  onPress={openMembers}
+                  style={styles.memberItem}
+                  testID="group-members-more"
+                >
+                  <View style={styles.moreAvatar}>
+                    <Text style={styles.moreAvatarText}>
+                      +{hiddenMemberCount}
+                    </Text>
+                  </View>
+                  <Text style={styles.moreLabel}>더보기</Text>
+                </Pressable>
+              ) : null}
+            </View>
+
+            <SectionTitle title="공지사항" />
+            {group.notices.length === 0 ? (
+              <View style={styles.noticeEmpty} testID="group-notice-empty">
+                <Text style={styles.noticeEmptyTitle}>아직 공지가 없어요</Text>
+                <Text style={styles.noticeEmptyText}>
+                  소모임장이 공지를 올리면 여기에 보여요
                 </Text>
               </View>
-            ))}
-          </ScrollView>
-
-          <SectionTitle title="공지사항" />
-          <View style={styles.noticeList}>
-            {group.notices.map((notice) => (
-              <Card key={notice.id} style={styles.noticeCard}>
-                <View style={styles.noticeTitleRow}>
-                  <Text style={styles.noticeTitle}>{notice.title}</Text>
-                  {notice.isEdited ? (
-                    <Text style={styles.editedText}>수정됨</Text>
-                  ) : null}
-                </View>
-                <Text numberOfLines={2} style={styles.noticePreview}>
-                  {notice.preview}
-                </Text>
-                <Text style={styles.noticeWhen}>{notice.createdLabel}</Text>
-                {isLeader ? (
-                  <View style={styles.noticeActions}>
-                    <DetailMiniAction
-                      testID={`group-notice-edit-${notice.id}`}
-                      icon="edit"
-                      label="수정"
-                      accessibilityLabel={`${notice.title} 공지 수정`}
-                      onPress={() =>
-                        router.push(
-                          `/group/notices?id=${id}&noticeId=${notice.id}`,
-                        )
-                      }
-                    />
-                    <DetailMiniAction
-                      testID={`group-notice-delete-${notice.id}`}
-                      icon="delete-outline"
-                      label="삭제"
-                      accessibilityLabel={`${notice.title} 공지 삭제`}
-                      danger
-                      onPress={() =>
-                        setDeletingNotice({
-                          id: notice.id,
-                          title: notice.title,
-                        })
-                      }
-                    />
+            ) : (
+              <View style={styles.noticeList}>
+                {group.notices.map((notice, index) => (
+                  <View
+                    key={notice.id}
+                    style={[
+                      styles.noticeItem,
+                      index < group.notices.length - 1
+                        ? styles.noticeDivider
+                        : null,
+                    ]}
+                  >
+                    <View style={styles.noticeTitleRow}>
+                      <Text numberOfLines={1} style={styles.noticeTitle}>
+                        {notice.title}
+                      </Text>
+                      {notice.isEdited ? (
+                        <Text style={styles.editedText}>수정됨</Text>
+                      ) : null}
+                    </View>
+                    <Text numberOfLines={1} style={styles.noticePreview}>
+                      {notice.preview}
+                    </Text>
+                    <Text style={styles.noticeWhen}>{notice.createdLabel}</Text>
+                    {isLeader ? (
+                      <View style={styles.noticeActions}>
+                        <DetailMiniAction
+                          testID={`group-notice-edit-${notice.id}`}
+                          icon="edit"
+                          label="수정"
+                          accessibilityLabel={`${notice.title} 공지 수정`}
+                          onPress={() =>
+                            router.push(
+                              `/group/notices?id=${id}&noticeId=${notice.id}`,
+                            )
+                          }
+                        />
+                        <DetailMiniAction
+                          testID={`group-notice-delete-${notice.id}`}
+                          icon="delete-outline"
+                          label="삭제"
+                          accessibilityLabel={`${notice.title} 공지 삭제`}
+                          danger
+                          onPress={() =>
+                            setDeletingNotice({
+                              id: notice.id,
+                              title: notice.title,
+                            })
+                          }
+                        />
+                      </View>
+                    ) : null}
                   </View>
-                ) : null}
-              </Card>
-            ))}
+                ))}
+              </View>
+            )}
           </View>
         </ScrollView>
+
+        <View
+          testID="group-detail-header"
+          style={[
+            styles.headerBar,
+            { paddingTop: insets.top },
+            isPastHero ? styles.headerBarScrolled : null,
+          ]}
+        >
+          <TopBar
+            title={isPastHero ? "소모임" : ""}
+            back
+            overPhoto={!isPastHero}
+            onBack={() => router.back()}
+          />
+        </View>
+
         {deleteNotice.isError ? (
-          <Text style={styles.noticeError}>공지 삭제에 실패했습니다.</Text>
+          <Text style={styles.noticeError}>공지를 삭제하지 못했어요.</Text>
         ) : null}
         {isMember || isNonMember ? (
           <FloatingBottomBar testID="group-detail-bottom-bar">
@@ -310,7 +390,7 @@ export default function GroupDetailScreen() {
               <Text style={styles.membershipError}>
                 {membershipError instanceof Error
                   ? membershipError.message
-                  : "소모임 참여 상태를 바꾸지 못했습니다."}
+                  : "소모임 참여 상태를 바꾸지 못했어요."}
               </Text>
             ) : null}
             {isMember ? (
@@ -318,14 +398,14 @@ export default function GroupDetailScreen() {
                 testID="group-leave-button"
                 variant="outline"
                 size="lg"
-                accessibilityLabel="탈퇴하기"
+                accessibilityLabel="소모임 나가기"
                 disabled={membershipBusy}
                 onPress={() => {
                   if (variant) return;
                   setShowLeaveConfirm(true);
                 }}
               >
-                탈퇴하기
+                소모임 나가기
               </Button>
             ) : (
               <Button
@@ -348,9 +428,9 @@ export default function GroupDetailScreen() {
         ) : null}
         <ConfirmDialog
           visible={showLeaveConfirm}
-          title="소모임을 탈퇴할까요?"
-          message="탈퇴하면 공지와 일정을 더 이상 받아볼 수 없어요."
-          confirmText="탈퇴"
+          title="소모임에서 나갈까요?"
+          message="나가면 모임 글을 볼 수 없어요."
+          confirmText="나가기"
           danger
           onCancel={() => setShowLeaveConfirm(false)}
           onConfirm={() => {
@@ -362,10 +442,10 @@ export default function GroupDetailScreen() {
         />
         <ConfirmDialog
           visible={Boolean(deletingNotice)}
-          title="공지를 삭제하시겠습니까?"
+          title="공지를 삭제할까요?"
           message={
             deletingNotice
-              ? `“${deletingNotice.title}” 공지는 삭제 후 복구할 수 없어요.`
+              ? `“${deletingNotice.title}” 공지는 삭제하면 되돌릴 수 없어요.`
               : ""
           }
           confirmText="삭제"
@@ -381,8 +461,8 @@ export default function GroupDetailScreen() {
         />
         <ConfirmDialog
           visible={showDeleteConfirm}
-          title="소모임을 삭제하시겠습니까?"
-          message="삭제된 소모임은 복구할 수 없습니다."
+          title="소모임을 삭제할까요?"
+          message="삭제한 소모임은 되돌릴 수 없어요."
           confirmText="삭제"
           danger
           onCancel={() => setShowDeleteConfirm(false)}
@@ -399,22 +479,80 @@ export default function GroupDetailScreen() {
           }}
         />
         {deleteGroupMutation.isError ? (
-          <Text style={styles.noticeError}>소모임 삭제에 실패했습니다.</Text>
+          <Text style={styles.noticeError}>소모임을 삭제하지 못했어요.</Text>
         ) : null}
         {updateStatusMutation.isError ? (
-          <Text style={styles.noticeError}>
-            소모임 모집 상태를 변경하지 못했습니다.
-          </Text>
+          <Text style={styles.noticeError}>모집 상태를 바꾸지 못했어요.</Text>
         ) : null}
       </View>
     </Screen>
   );
 }
 
-function SectionTitle({ title }: { title: string }) {
+/** 섹션 머리: 제목 16/700(+ primary-strong 숫자) · 오른쪽 전체보기 12/600 text-muted. */
+function SectionTitle({
+  title,
+  count,
+  onViewAll,
+  testID,
+}: {
+  title: string;
+  count?: number;
+  onViewAll?: () => void;
+  testID?: string;
+}) {
   return (
-    <View style={styles.sectionTitleWrap}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+    <View style={styles.sectionTitleWrap} testID={testID}>
+      <Text style={styles.sectionTitle}>
+        {title}
+        {count !== undefined ? (
+          <Text style={styles.memberCount}> {count}</Text>
+        ) : null}
+      </Text>
+      {onViewAll ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${title} 전체보기`}
+          hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
+          onPress={onViewAll}
+          style={styles.viewAll}
+          testID={testID ? `${testID}-view-all` : undefined}
+        >
+          <Text style={styles.viewAllText}>전체보기</Text>
+          <AppIcon
+            name="chevron-right"
+            size={16}
+            color={theme.colors.textMuted}
+          />
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+/**
+ * 정보 줄(디자인 시스템 PlaceCard 모양). 공통 PlaceCard 는 값이 글자만이라
+ * 소모임장 아바타·인원 숫자 강조를 담으려고 값 자리를 children 으로 받는다.
+ */
+function InfoLine({
+  icon,
+  label,
+  first = false,
+  children,
+}: {
+  icon: ComponentProps<typeof AppIcon>["name"];
+  label: string;
+  first?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <View
+      accessible
+      style={[styles.infoRow, first ? styles.infoRowFirst : null]}
+    >
+      <AppIcon name={icon} size={18} color={theme.colors.textMuted} />
+      <Text style={styles.infoLabel}>{label}</Text>
+      <View style={styles.infoValueWrap}>{children}</View>
     </View>
   );
 }
@@ -429,14 +567,14 @@ const styles = StyleSheet.create({
     gap: theme.layout.listGap,
   },
   noticeError: {
-    paddingHorizontal: 22,
-    paddingBottom: 10,
+    paddingHorizontal: theme.layout.screenX,
+    paddingBottom: theme.spacing[3],
     color: theme.colors.dangerText,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
   },
   body: {
-    paddingBottom: 24,
+    paddingBottom: theme.spacing[6],
   },
   bodyWithBottomBar: {
     paddingBottom: FLOATING_BOTTOM_BAR_INSET,
@@ -448,116 +586,167 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
   },
+  hero: {
+    height: HERO_HEIGHT,
+    overflow: "hidden",
+  },
+  heroThumb: {
+    width: "100%",
+    height: HERO_HEIGHT,
+    borderRadius: 0,
+  },
+  heroIcon: {
+    ...StyleSheet.absoluteFill,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  // 사진 아래 24 를 덮는 흰 시트(radius-xl 위 모서리 + shadow-sheet).
+  sheet: {
+    flexGrow: 1,
+    marginTop: -theme.spacing[6],
+    paddingTop: theme.spacing[2],
+    paddingBottom: theme.spacing[4],
+    borderTopLeftRadius: theme.radius.xl,
+    borderTopRightRadius: theme.radius.xl,
+    backgroundColor: theme.colors.surface,
+    ...theme.shadow.sheet,
+  },
+  headerBar: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: theme.zIndex.header,
+  },
+  headerBarScrolled: {
+    backgroundColor: theme.colors.bg,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
   header: {
     paddingHorizontal: theme.layout.screenX,
-    paddingTop: theme.spacing[5],
-    paddingBottom: 18,
+    paddingTop: theme.spacing[4],
+    paddingBottom: theme.spacing[4],
   },
   chips: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 12,
+    gap: theme.spacing[2],
+    marginBottom: theme.spacing[3],
   },
-  memberMeta: {
-    marginTop: 10,
+  description: {
+    marginTop: theme.spacing[3],
+  },
+  infoRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: theme.spacing[2],
+    marginHorizontal: theme.layout.screenX,
+    paddingVertical: theme.spacing[3],
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.surfaceSubtle,
   },
-  memberMetaText: {
+  infoRowFirst: {
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.surfaceSubtle,
+  },
+  infoLabel: {
+    ...theme.typography.label,
+    width: 64,
     color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
-    fontWeight: theme.fontWeight.semibold,
+  },
+  infoValueWrap: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing[2],
+  },
+  infoValue: {
+    ...theme.typography.label,
+    fontFamily: theme.font.semibold,
+    fontWeight: "normal",
+    color: theme.colors.text,
   },
   memberCount: {
     color: theme.colors.primaryStrong,
   },
-  description: {
-    marginTop: 14,
-  },
-  leaderCard: {
-    marginTop: 16,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.surfaceSubtle,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  leaderText: { flex: 1 },
-  leaderLabel: {
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
-  },
-  leaderName: {
-    marginTop: 2,
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-  },
-  actionWrap: {
-    paddingHorizontal: 16,
-    paddingBottom: 22,
-  },
   actionCard: {
     flexDirection: "row",
-    padding: 4,
+    marginHorizontal: theme.layout.screenX,
+    marginTop: theme.spacing[4],
+    padding: theme.spacing[1],
   },
   sectionTitleWrap: {
-    paddingHorizontal: 22,
-    paddingTop: 8,
-    paddingBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: theme.spacing[6],
+    paddingBottom: theme.spacing[3],
   },
   sectionTitle: {
+    flex: 1,
     color: theme.colors.text,
     fontSize: theme.typography.body.fontSize,
     lineHeight: theme.typography.body.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
+  viewAll: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+  },
+  viewAllText: {
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
+    fontWeight: theme.fontWeight.semibold,
+  },
   memberRail: {
-    gap: 16,
-    paddingHorizontal: 22,
-    paddingBottom: 12,
+    flexDirection: "row",
+    gap: theme.spacing[3],
+    paddingHorizontal: theme.layout.screenX,
   },
   memberItem: {
     width: 56,
     alignItems: "center",
-    gap: 6,
-  },
-  crown: {
-    position: "absolute",
-    right: -2,
-    bottom: -2,
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 2,
-    borderColor: theme.colors.bg,
-    backgroundColor: theme.colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
+    gap: theme.spacing[2],
   },
   memberName: {
     maxWidth: 56,
-    color: theme.colors.text,
+    color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.semibold,
     textAlign: "center",
   },
-  noticeList: {
-    gap: 10,
-    paddingHorizontal: 22,
-    paddingBottom: 16,
+  moreAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: theme.radius.full,
+    backgroundColor: theme.colors.surfaceSubtle,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  noticeCard: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+  moreAvatarText: {
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  moreLabel: {
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
+  },
+  noticeList: {
+    paddingHorizontal: theme.layout.screenX,
+  },
+  noticeItem: {
+    paddingVertical: theme.spacing[3],
+  },
+  noticeDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.surfaceSubtle,
   },
   noticeTitleRow: {
     flexDirection: "row",
@@ -565,11 +754,11 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   noticeTitle: {
-    flex: 1,
+    flexShrink: 1,
     color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
-    fontWeight: theme.fontWeight.bold,
+    fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
+    fontWeight: theme.fontWeight.semibold,
   },
   editedText: {
     color: theme.colors.textMuted,
@@ -577,24 +766,37 @@ const styles = StyleSheet.create({
     lineHeight: theme.typography.caption.lineHeight,
   },
   noticePreview: {
-    marginTop: 6,
-    color: theme.colors.text,
+    marginTop: 2,
+    color: theme.colors.textMuted,
     fontSize: theme.typography.label.fontSize,
     lineHeight: theme.typography.label.lineHeight,
   },
   noticeWhen: {
-    marginTop: 8,
+    marginTop: theme.spacing[1],
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
   },
   noticeActions: {
-    marginTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-    paddingTop: 10,
+    marginTop: theme.spacing[2],
     flexDirection: "row",
     gap: 14,
+  },
+  noticeEmpty: {
+    paddingHorizontal: theme.layout.screenX,
+    paddingVertical: theme.spacing[3],
+    gap: 2,
+  },
+  noticeEmptyTitle: {
+    color: theme.colors.text,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  noticeEmptyText: {
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
   },
   exception: {
     flex: 1,

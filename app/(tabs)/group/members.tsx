@@ -1,20 +1,20 @@
-import { AppIcon } from "@/components/ui/app-icon";
 import { Radio } from "@/components/ui/checkbox";
 import { InfoBox } from "@/components/ui/info-box";
-import { PersonRow } from "@/components/ui/list-row";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
   View,
+  type StyleProp,
+  type ViewStyle,
 } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
-  Badge,
+  Avatar,
   ConfirmDialog,
   ErrorState,
   FloatingBottomBar,
@@ -61,6 +61,12 @@ export default function GroupMembersScreenRoute() {
   }, []);
 
   const members = membersQuery.data ?? [];
+  // 소모임 상세의 "전체보기" 로 일반 멤버도 들어온다. 내보내기는 소모임장에게만 보인다.
+  // 목록이 오기 전에는 주로 들어오는 소모임장 기준 제목("멤버 관리")을 둔다.
+  const canManage =
+    variant !== "default" ||
+    !membersQuery.data ||
+    members.some((member) => member.isMine && member.isLeader);
   const isTransfer =
     params.mode === "transfer" ||
     variant === "transfer" ||
@@ -73,7 +79,9 @@ export default function GroupMembersScreenRoute() {
     <Screen scroll={false} padded={false}>
       <View style={styles.root}>
         <TopBar
-          title={isTransfer ? "소모임장 이관" : "멤버 관리"}
+          title={
+            isTransfer ? "소모임장 이관" : canManage ? "멤버 관리" : "멤버"
+          }
           back
           onBack={() => router.back()}
         />
@@ -105,6 +113,7 @@ export default function GroupMembersScreenRoute() {
               key={member.userId}
               member={member}
               transfer={isTransfer}
+              canManage={canManage}
               selected={
                 selectedTransferMember?.userId === member.userId ||
                 member.userName === transferTargetName
@@ -127,9 +136,9 @@ export default function GroupMembersScreenRoute() {
 
         <ConfirmDialog
           visible={variant === "kick-confirm" || Boolean(kickingMember)}
-          title={`${variant === "kick-confirm" ? "이수진" : (kickingMember?.userName ?? "")}님을 강퇴하시겠습니까?`}
-          message="강퇴된 멤버는 다시 신청할 수 없어요."
-          confirmText="강퇴"
+          title={`${variant === "kick-confirm" ? "이수진" : (kickingMember?.userName ?? "")}님을 내보낼까요?`}
+          message="내보낸 멤버는 다시 신청해야 들어올 수 있어요."
+          confirmText="내보내기"
           danger
           onCancel={() => {
             if (variant === "kick-confirm") {
@@ -148,14 +157,14 @@ export default function GroupMembersScreenRoute() {
               const name = kickingMember.userName;
               await kickMemberMutation.mutateAsync(kickingMember.userId);
               setKickingMember(null);
-              setToastMessage(`${name}님이 강퇴되었습니다`);
+              setToastMessage(`${name}님을 내보냈어요`);
             } catch (error) {
               setKickingMember(null);
               setToastMessage(
                 getApiErrorMessage(
                   error,
                   communionApiErrorMessages,
-                  "멤버를 강퇴하지 못했습니다.",
+                  "멤버를 내보내지 못했어요.",
                 ),
               );
             }
@@ -210,9 +219,7 @@ export default function GroupMembersScreenRoute() {
         />
         <Toast
           message={
-            variant === "kick-toast"
-              ? "이수진님이 강퇴되었습니다"
-              : toastMessage
+            variant === "kick-toast" ? "이수진님을 내보냈어요" : toastMessage
           }
           offset={28}
         />
@@ -224,6 +231,7 @@ export default function GroupMembersScreenRoute() {
 function MemberRow({
   member,
   transfer,
+  canManage,
   selected,
   last,
   onKick,
@@ -231,30 +239,27 @@ function MemberRow({
 }: {
   member: GroupMemberDetail;
   transfer: boolean;
+  canManage: boolean;
   selected: boolean;
   last: boolean;
   onKick?: () => void;
   onSelect?: () => void;
 }) {
   const candidate = transfer && !member.isLeader;
-  const trailing = (
-    <View style={styles.trailing}>
-      {member.isMine ? <Badge tone="neutral">나</Badge> : null}
-      {member.isLeader ? <Badge tone="info">소모임장</Badge> : null}
-      {!transfer && !member.isLeader ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${member.userName} 강퇴`}
-          hitSlop={{ top: 6, bottom: 6 }}
-          style={styles.kickButton}
-          onPress={onKick}
-        >
-          <AppIcon name="close" size={12} color={theme.colors.dangerText} />
-          <Text style={styles.kickText}>강퇴</Text>
-        </Pressable>
-      ) : null}
-    </View>
-  );
+  // 내보내기: Outline 작은 버튼(높이 32, surface + 1px border-button, 12/600 text).
+  const kickButton =
+    !transfer && canManage && !member.isLeader ? (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${member.userName} 내보내기`}
+        hitSlop={{ top: 6, bottom: 6 }}
+        style={styles.kickButton}
+        onPress={onKick}
+        testID={`member-kick-${member.userId}`}
+      >
+        <Text style={styles.kickText}>내보내기</Text>
+      </Pressable>
+    ) : null;
 
   if (candidate && onSelect) {
     // 소모임장 이관 후보: 줄 전체가 작은 라디오(디자인 시스템 Checkbox radio).
@@ -265,30 +270,62 @@ function MemberRow({
         accessibilityLabel={member.userName}
         testID={`member-transfer-${member.userId}`}
         style={[styles.radioRow, !last ? styles.rowBorder : null]}
-        label={
-          <PersonRow
-            name={member.userName}
-            avatarSeed={member.userName}
-            subtitle={`${member.joinedLabel} 가입`}
-            trailing={trailing}
-            divider={false}
-            style={styles.radioPerson}
-          />
-        }
+        label={<MemberInfo member={member} />}
       />
     );
   }
 
   return (
-    <PersonRow
-      name={member.userName}
-      avatarSeed={member.userName}
-      subtitle={`${member.joinedLabel} 가입`}
-      trailing={trailing}
-      divider={!last}
-      // 이관 화면의 현재 소모임장은 고를 수 없어 흐리게 둔다(opacity-disabled).
-      style={transfer && member.isLeader ? styles.rowDisabled : null}
+    <MemberInfo
+      member={member}
+      trailing={kickButton}
+      style={[
+        styles.memberRow,
+        !last ? styles.rowBorder : null,
+        // 이관 화면의 현재 소모임장은 고를 수 없어 흐리게 둔다(opacity-disabled).
+        transfer && member.isLeader ? styles.rowDisabled : null,
+      ]}
     />
+  );
+}
+
+/** 사람 한 줄: 아바타 40 · 이름 16/600 옆 작은 배지(나·소모임장) · 가입일 12 text-muted. */
+function MemberInfo({
+  member,
+  trailing,
+  style,
+}: {
+  member: GroupMemberDetail;
+  trailing?: ReactNode;
+  style?: StyleProp<ViewStyle>;
+}) {
+  return (
+    <View style={[styles.person, style]}>
+      <Avatar name={member.userName} size={40} seed={member.userName} />
+      <View style={styles.personBody}>
+        <View style={styles.nameLine}>
+          <Text numberOfLines={1} style={styles.name}>
+            {member.userName}
+          </Text>
+          {member.isMine ? (
+            <View style={[styles.tag, styles.tagNeutral]}>
+              <Text style={[styles.tagText, styles.tagTextNeutral]}>나</Text>
+            </View>
+          ) : null}
+          {member.isLeader ? (
+            <View style={[styles.tag, styles.tagLeader]}>
+              <Text style={[styles.tagText, styles.tagTextLeader]}>
+                소모임장
+              </Text>
+            </View>
+          ) : null}
+        </View>
+        <Text numberOfLines={1} style={styles.joined}>
+          {member.joinedLabel} 가입
+        </Text>
+      </View>
+      {trailing}
+    </View>
   );
 }
 
@@ -312,9 +349,8 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   total: {
-    paddingHorizontal: 22,
-    paddingTop: 8,
-    paddingBottom: 6,
+    paddingHorizontal: theme.layout.screenX,
+    paddingVertical: theme.spacing[2],
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
@@ -330,27 +366,72 @@ const styles = StyleSheet.create({
   radioRow: {
     paddingHorizontal: theme.layout.screenX,
   },
-  radioPerson: {
-    paddingHorizontal: 0,
+  memberRow: {
+    marginHorizontal: theme.layout.screenX,
   },
-  trailing: {
+  person: {
+    minHeight: 64,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing[3],
+    paddingVertical: theme.spacing[3],
+  },
+  personBody: {
+    flex: 1,
+    minWidth: 0,
+  },
+  nameLine: {
     flexDirection: "row",
     alignItems: "center",
     gap: theme.spacing[2],
   },
-  kickButton: {
-    minHeight: 32,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.dangerSubtle,
-    paddingHorizontal: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
+  name: {
+    flexShrink: 1,
+    color: theme.colors.text,
+    fontSize: theme.typography.body.fontSize,
+    lineHeight: theme.typography.body.lineHeight,
+    fontWeight: theme.fontWeight.semibold,
   },
-  kickText: {
-    color: theme.colors.dangerText,
+  joined: {
+    color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
-    fontWeight: theme.fontWeight.bold,
+  },
+  // 이름 옆 작은 배지: 모서리 6, 안쪽 0×6, 12/600.
+  tag: {
+    borderRadius: 6,
+    paddingHorizontal: 6,
+  },
+  tagNeutral: {
+    backgroundColor: theme.colors.surfaceSubtle,
+  },
+  tagLeader: {
+    backgroundColor: theme.colors.primarySubtle,
+  },
+  tagText: {
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  tagTextNeutral: {
+    color: theme.colors.neutral700,
+  },
+  tagTextLeader: {
+    color: theme.colors.primaryStrong,
+  },
+  kickButton: {
+    height: theme.size.chipHeight,
+    borderRadius: theme.radius.full,
+    borderWidth: 1,
+    borderColor: theme.colors.borderButton,
+    backgroundColor: theme.colors.surface,
+    paddingHorizontal: theme.spacing[3],
+    justifyContent: "center",
+  },
+  kickText: {
+    color: theme.colors.text,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
+    fontWeight: theme.fontWeight.semibold,
   },
 });

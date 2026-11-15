@@ -13,17 +13,17 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
   View,
+  type StyleProp,
+  type ViewStyle,
 } from "react-native";
 import { Text } from "@/components/ui/text";
 import {
-  AppText,
   ConfirmDialog,
   ErrorState,
-  FilterChips,
   FloatingBottomBar,
   ModalFormSection as Section,
   ModalFormTextInput as FormInput,
-  SectionDivider,
+  MotionPressable,
   TopBar,
 } from "../../src/components/ui";
 import { GROUP_CATEGORIES } from "../../src/constants/domainOptions";
@@ -53,18 +53,58 @@ const CAPACITY_PRESET_ITEMS = CAPACITY_PRESETS.map((preset) => ({
 }));
 
 /**
- * FilterChips 는 고른 값이 칩 목록에 없으면 표시 막대를 마지막 칩에 그대로 둔다.
- * 직접 입력·증감으로 빠른 선택 밖 값이 되면 다시 그려 강조를 지운다.
+ * 입력 카드 안 고르기 칩: 회색(surface-subtle) 알약, 고르면 primary-subtle + primary-strong.
+ * 한 줄로 두고 넘치면 가로로 민다. 고른 값이 목록에 없으면(직접 입력한 정원) 아무 칩도 칠하지 않는다.
  */
-function presetChipsKey(
-  name: string,
-  items: readonly { key: string }[],
-  active: string,
-) {
-  return items.some((item) => item.key === active)
-    ? `${name}-preset`
-    : `${name}-custom`;
+function ChoiceChips<T extends string>({
+  items,
+  active,
+  onChange,
+  style,
+  testIDPrefix,
+}: {
+  items: readonly { key: T; label: string }[];
+  active: string;
+  onChange: (key: T) => void;
+  style?: StyleProp<ViewStyle>;
+  testIDPrefix: string;
+}) {
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={[styles.chipScroll, style]}
+      contentContainerStyle={styles.chipRow}
+      testID={`${testIDPrefix}-scroll`}
+    >
+      {items.map((item) => {
+        const selected = item.key === active;
+        return (
+          <MotionPressable
+            key={item.key}
+            accessibilityRole="button"
+            accessibilityState={{ selected }}
+            hitSlop={CHIP_HIT_SLOP}
+            onPress={() => {
+              if (!selected) onChange(item.key);
+            }}
+            style={[styles.chip, selected ? styles.chipOn : null]}
+            testID={`${testIDPrefix}-${item.key}`}
+          >
+            <Text
+              style={[styles.chipText, selected ? styles.chipTextOn : null]}
+            >
+              {item.label}
+            </Text>
+          </MotionPressable>
+        );
+      })}
+    </ScrollView>
+  );
 }
+
+/** 32 칩 + 위아래 6 → 누르는 곳 44. */
+const CHIP_HIT_SLOP = { top: 6, bottom: 6 };
 
 const filledValues: GroupInput = {
   category: "sport",
@@ -273,36 +313,23 @@ function GroupForm({
               style={styles.infoBox}
             />
 
-            {/* 그룹 1: 기본 정보 */}
-            <View style={styles.groupHeader}>
-              <AppText
-                variant="body"
-                weight="semibold"
-                style={styles.groupTitle}
-              >
-                기본 정보
-              </AppText>
-              <AppText variant="caption" tone="muted">
-                어떤 소모임인지 소개해 주세요
-              </AppText>
-            </View>
-
-            <Section label="카테고리" required>
-              <FilterChips
+            <Section card label="카테고리" required>
+              <ChoiceChips
                 items={categories}
                 active={values.category}
                 onChange={(category) => update("category", category)}
                 testIDPrefix="group-form-category"
-                wrap
               />
             </Section>
 
             <Section
+              card
               label="소모임명"
               required
               hint={`${values.name.length}/20`}
             >
               <FormInput
+                style={styles.cardField}
                 accessibilityLabel="소모임 이름"
                 value={values.name}
                 onChangeText={(name) => update("name", name)}
@@ -312,11 +339,13 @@ function GroupForm({
             </Section>
 
             <Section
+              card
               label="설명"
               required
               hint={`${values.description.length}/200`}
             >
               <FormInput
+                style={styles.cardField}
                 accessibilityLabel="소모임 설명"
                 multiline
                 value={values.description}
@@ -329,23 +358,7 @@ function GroupForm({
               />
             </Section>
 
-            <SectionDivider />
-
-            {/* 그룹 2: 모임 활동 안내 */}
-            <View style={styles.groupHeader}>
-              <AppText
-                variant="body"
-                weight="semibold"
-                style={styles.groupTitle}
-              >
-                활동 및 운영 안내
-              </AppText>
-              <AppText variant="caption" tone="muted">
-                몇 명이 함께 모이나요?
-              </AppText>
-            </View>
-
-            <Section label="최대인원" required hint="2~100명">
+            <Section card label="최대인원" required hint="2~100명">
               <View style={styles.capacityStepperRow}>
                 <Pressable
                   accessibilityRole="button"
@@ -405,12 +418,7 @@ function GroupForm({
                 </Pressable>
               </View>
 
-              <FilterChips
-                key={presetChipsKey(
-                  "capacity",
-                  CAPACITY_PRESET_ITEMS,
-                  String(values.maxMembers),
-                )}
+              <ChoiceChips
                 items={CAPACITY_PRESET_ITEMS}
                 active={String(values.maxMembers)}
                 onChange={(preset) => setCapacityPreset(Number(preset))}
@@ -480,7 +488,37 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    paddingHorizontal: theme.layout.screenX,
+  },
+  cardField: { marginHorizontal: 0 },
+  // 카드 안쪽 16 을 넘어 카드 가장자리까지 밀리게 좌우로 넓힌다.
+  chipScroll: {
+    flexGrow: 0,
+    marginHorizontal: -theme.spacing[4],
+  },
+  chipRow: {
+    gap: theme.spacing[2],
+    paddingHorizontal: theme.spacing[4],
+  },
+  chip: {
+    height: theme.size.chipHeight,
+    justifyContent: "center",
+    borderRadius: theme.radius.full,
+    borderWidth: 1,
+    borderColor: "transparent",
+    backgroundColor: theme.colors.surfaceSubtle,
+    paddingHorizontal: theme.spacing[4],
+  },
+  chipOn: {
+    backgroundColor: theme.colors.primarySubtle,
+  },
+  chipText: {
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  chipTextOn: {
+    color: theme.colors.primaryStrong,
   },
   stepperButton: {
     width: 44,
@@ -512,26 +550,14 @@ const styles = StyleSheet.create({
     lineHeight: theme.typography.label.lineHeight,
   },
   inlineError: {
-    marginHorizontal: theme.layout.screenX,
     marginTop: 8,
-  },
-  groupHeader: {
-    paddingHorizontal: 22,
-    paddingTop: 16,
-    paddingBottom: 4,
-    gap: 3,
-  },
-  groupTitle: {
-    fontWeight: theme.fontWeight.bold,
   },
   infoBox: {
     marginHorizontal: theme.layout.screenX,
-    marginTop: 10,
-    marginBottom: 8,
+    marginBottom: theme.spacing[4],
   },
   quickPresetScroll: {
-    flexGrow: 0,
-    marginTop: theme.spacing[1],
+    marginTop: theme.spacing[3],
   },
   errorText: {
     marginHorizontal: theme.layout.screenX,

@@ -221,7 +221,7 @@ export default function GroupScreen() {
           <Empty
             icon="groups"
             title="참여 중인 소모임이 없어요"
-            description="관심 있는 소모임에 참여해보세요."
+            description="관심 있는 소모임에 참여해 보세요"
           />
         ) : (
           myGroups.map((group, index) => (
@@ -334,7 +334,7 @@ export default function GroupScreen() {
               <Empty
                 icon="groups"
                 title="참여 중인 소모임이 없어요"
-                description="관심 있는 소모임에 참여해보세요."
+                description="관심 있는 소모임에 참여해 보세요"
               />
             ) : (
               myGroups.map((group, index) => (
@@ -427,7 +427,7 @@ function CompanionCard(
       style={[styles.groupCard, closed ? styles.closedCard : null]}
     >
       <View style={styles.cardMetaRow}>
-        <Badge tone={statusMuted ? "neutral" : "info"}>{statusLabel}</Badge>
+        <Badge tone={statusMuted ? "neutral" : "success"}>{statusLabel}</Badge>
         <Badge tone="neutral">{metaLabel}</Badge>
         <View testID={`${testID}-member-count`} style={styles.memberRow}>
           <AppIcon name="groups" size={14} color={theme.colors.textMuted} />

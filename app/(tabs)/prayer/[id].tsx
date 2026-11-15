@@ -165,7 +165,7 @@ export default function PrayerDetailScreen() {
             "기도 완료 실패",
             err instanceof Error
               ? err.message
-              : "기도 완료 처리에 실패했습니다. 다시 시도해주세요.",
+              : "기도 완료를 처리하지 못했어요. 다시 시도해주세요.",
           );
         },
       });
@@ -188,17 +188,13 @@ export default function PrayerDetailScreen() {
               </View>
               <View style={styles.heroMetaCol}>
                 <View style={styles.badges}>
-                  <Badge tone="neutral">{`멤버 ${totalMembers}명`}</Badge>
+                  {/* 배지는 둘만: 참여중 + 긴급. 인원·완료 수는 아래 진행 바에 있다. */}
+                  {room ? <Badge tone="info">참여중</Badge> : null}
                   {urgentItems.length > 0 ? (
                     <Badge
                       tone="warning"
                       icon="warning-amber"
                     >{`긴급 ${urgentItems.length}건`}</Badge>
-                  ) : null}
-                  {isCompleted ? (
-                    <Badge tone="success" icon="check">
-                      이번 주 완료
-                    </Badge>
                   ) : null}
                 </View>
               </View>

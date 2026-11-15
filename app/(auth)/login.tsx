@@ -92,7 +92,7 @@ export default function LoginScreen() {
         "아이디 또는 비밀번호를 확인해주세요.",
       )
     : isError
-      ? "아이디 또는 비밀번호가 올바르지 않습니다"
+      ? "아이디 또는 비밀번호가 맞지 않아요. 다시 확인해 주세요."
       : "";
   // 로그인 실패 때만 입력창을 흔든다(입력 오류는 흔들지 않음). 실패마다 다시 흔들도록 제출 시각을 쓴다.
   const loginFailureTrigger = login.isError
@@ -162,7 +162,7 @@ export default function LoginScreen() {
                   </AppText>
                 </View>
                 <AppText variant="display" style={styles.title}>
-                  {"열린문 커넥트에\n오신 것을 환영합니다"}
+                  {"열린문 커넥트에\n오신 것을 환영해요"}
                 </AppText>
                 <AppText variant="body" tone="primary" style={styles.subtitle}>
                   교회 가족과 함께하는 따뜻한 일상

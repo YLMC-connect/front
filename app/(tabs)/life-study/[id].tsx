@@ -80,7 +80,7 @@ function LiveLifeStudyDetail({
         >
           <View style={styles.hero}>
             {overview.isPending ? (
-              <Text style={styles.desc}>서버에서 불러오는 중입니다.</Text>
+              <Text style={styles.desc}>불러오는 중이에요.</Text>
             ) : null}
             {overview.isError ? (
               <Text style={styles.desc}>과정을 다시 불러와주세요.</Text>
@@ -89,13 +89,13 @@ function LiveLifeStudyDetail({
               <Empty
                 icon="book-open-page-variant-outline"
                 title="등록된 삶공부 과정이 없어요"
-                description="과정 정보를 찾을 수 없습니다."
+                description="과정 정보를 찾을 수 없어요."
               />
             ) : null}
             {course ? (
               <>
                 <View style={styles.badgeRow}>
-                  <Badge tone={openCohort ? "warning" : "neutral"}>
+                  <Badge tone={openCohort ? "success" : "neutral"}>
                     {openCohort
                       ? "신청 가능"
                       : lifeStudyStatusLabel[course.status ?? "pending"]}
@@ -179,7 +179,7 @@ function LiveLifeStudyDetail({
                   <View style={styles.sectionMargin}>
                     <Text style={styles.subSectionTitle}>신청 안내</Text>
                     <InfoBox
-                      title="현재 모집 중인 기수가 없습니다"
+                      title="지금 모집 중인 기수가 없어요"
                       description="다음 기수 개강 일정 및 모집 기간이 확정되면 안내해 드릴게요."
                     />
                   </View>
@@ -232,7 +232,7 @@ function LiveLifeStudyDetail({
                     <Empty
                       icon="book-open-page-variant-outline"
                       title="등록된 커리큘럼이 없어요"
-                      description="개강 시 주차별 강의 커리큘럼이 공개됩니다."
+                      description="개강하면 주차별 강의 커리큘럼이 공개돼요."
                     />
                   )}
                 </View>
@@ -245,7 +245,7 @@ function LiveLifeStudyDetail({
           <FloatingBottomBar
             disabled={isAlreadyApplied}
             label={
-              isAlreadyApplied ? "이미 수강 신청한 과정입니다" : "수강 신청하기"
+              isAlreadyApplied ? "이미 수강 신청한 과정이에요" : "수강 신청하기"
             }
             onPress={() => {
               if (!isAlreadyApplied) {
@@ -304,7 +304,7 @@ export default function LifeStudyDetailScreen() {
         <ScrollView contentContainerStyle={styles.body}>
           <View style={styles.hero}>
             <View style={styles.badgeRow}>
-              <Badge tone={enrolled ? "info" : "warning"}>
+              <Badge tone={enrolled ? "info" : "success"}>
                 {enrolled ? "진행중" : "신청 가능"}
               </Badge>
               <Badge tone="neutral">{enrolled ? "4주차" : "개설 예정"}</Badge>

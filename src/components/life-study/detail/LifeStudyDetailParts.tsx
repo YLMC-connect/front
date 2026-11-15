@@ -65,7 +65,7 @@ export function EnrolledContent() {
 
       <Section
         title="숙제 확인"
-        subtitle="관리자가 확인한 제출 여부만 보여줍니다."
+        subtitle="관리자가 확인한 제출 여부만 보여 줘요."
       >
         {assignments.map((item) => (
           <Card key={item.title} style={styles.assignmentCard}>

@@ -73,7 +73,7 @@ export default function PrayerRequestScreenRoute() {
     if (!selectedItem.canRequestAnswer) {
       Alert.alert(
         "요청 불가",
-        "현재 '공개중'인 기도제목만 응답완료를 요청할 수 있습니다.",
+        "지금 '공개중'인 기도제목만 응답완료를 요청할 수 있어요.",
       );
       return;
     }
@@ -83,7 +83,7 @@ export default function PrayerRequestScreenRoute() {
 
     Alert.alert(
       "기도 응답완료 요청",
-      `'${selectedItem.title}' 기도제목의 응답완료를 요청하시겠습니까?`,
+      `'${selectedItem.title}' 기도제목의 응답완료를 요청할까요?`,
       [
         { text: "취소", style: "cancel" },
         {
@@ -96,10 +96,7 @@ export default function PrayerRequestScreenRoute() {
               },
               {
                 onSuccess: () => {
-                  Alert.alert(
-                    "요청 완료",
-                    "기도 응답완료 요청이 접수되었습니다.",
-                  );
+                  Alert.alert("요청 완료", "응답완료를 요청했어요.");
                   setSelectedId(null);
                   setAnswerContent("");
                 },
@@ -108,7 +105,7 @@ export default function PrayerRequestScreenRoute() {
                     "요청 실패",
                     err instanceof Error
                       ? err.message
-                      : "응답완료 요청에 실패했습니다.",
+                      : "응답완료를 요청하지 못했어요.",
                   );
                 },
               },
@@ -132,8 +129,8 @@ export default function PrayerRequestScreenRoute() {
           ]}
         >
           <InfoBox
-            title="기도제목은 승인 후 공개됩니다"
-            description="이름, 개인정보, 민감 표현을 관리자가 검토한 뒤 중보기도요원에게 보여집니다."
+            title="기도제목은 승인 후 공개돼요"
+            description="이름·개인정보·민감한 표현을 관리자가 검토한 뒤 중보기도요원에게 보여 줘요."
             style={styles.notice}
           />
 
@@ -146,9 +143,7 @@ export default function PrayerRequestScreenRoute() {
             ]}
           >
             {topics.isPending ? (
-              <Text style={styles.desc}>
-                서버에서 기도제목을 불러오는 중입니다.
-              </Text>
+              <Text style={styles.desc}>기도제목을 불러오는 중이에요.</Text>
             ) : null}
             {topics.isError ? (
               <Text style={styles.desc}>기도제목을 다시 불러와주세요.</Text>

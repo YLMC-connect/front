@@ -95,7 +95,7 @@ export default function HomeScreen() {
         ) : overview.isError || !overview.data ? (
           <View style={styles.errorWrap}>
             <ErrorState
-              message="홈 정보를 불러오지 못했습니다. 다시 시도해주세요."
+              message="홈 정보를 불러오지 못했어요. 다시 시도해주세요."
               onRetry={() => overview.refetch()}
             />
           </View>

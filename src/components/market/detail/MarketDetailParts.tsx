@@ -150,7 +150,7 @@ export function CommentsSection({
           testID={`market-comment-${comment.id}`}
         >
           {comment.isDeleted ? (
-            <Text style={styles.deletedComment}>삭제된 댓글입니다</Text>
+            <Text style={styles.deletedComment}>삭제된 댓글이에요</Text>
           ) : (
             <>
               <AppText variant="label" weight="regular">

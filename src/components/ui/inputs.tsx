@@ -310,7 +310,7 @@ export function ImagePickerField({
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
       Alert.alert(
-        "사진 접근 권한이 필요합니다",
+        "사진 접근 권한이 필요해요",
         "사진을 첨부하려면 갤러리 접근을 허용해주세요.",
       );
       return;
@@ -348,7 +348,7 @@ export function ImagePickerField({
         />
         <Text style={styles.imagePickerText}>{label} 추가</Text>
         <Text style={styles.imagePickerHint}>
-          최대 {maxImages}장까지 선택할 수 있습니다.
+          최대 {maxImages}장까지 고를 수 있어요.
         </Text>
       </Pressable>
       {value.length ? (

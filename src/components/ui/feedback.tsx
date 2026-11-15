@@ -64,7 +64,7 @@ export function ErrorState({
         />
       </View>
       <AppText variant="heading" style={styles.stateTitle}>
-        불러오지 못했습니다
+        불러오지 못했어요
       </AppText>
       <AppText variant="label" tone="muted" style={styles.stateText}>
         {message}

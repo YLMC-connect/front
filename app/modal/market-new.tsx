@@ -139,7 +139,7 @@ export default function MarketNewModal() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
       Alert.alert(
-        "사진 접근 권한이 필요합니다",
+        "사진 접근 권한이 필요해요",
         "사진을 첨부하려면 갤러리 접근을 허용해주세요.",
       );
       return;
@@ -186,8 +186,8 @@ export default function MarketNewModal() {
         submitError instanceof Error
           ? submitError.message
           : isEdit
-            ? "나눔을 수정하지 못했습니다."
-            : "나눔을 등록하지 못했습니다.",
+            ? "나눔을 수정하지 못했어요."
+            : "나눔을 등록하지 못했어요.",
       );
     }
   };
@@ -358,7 +358,7 @@ export default function MarketNewModal() {
 
       <FloatingBottomBar
         disabled={isPending}
-        label={isEdit ? "변경사항 저장" : "나눔 등록"}
+        label={isEdit ? "수정 완료" : "나눔 등록"}
         loading={isPending}
         onPress={submit}
         testID="market-new"
@@ -367,7 +367,7 @@ export default function MarketNewModal() {
       <ConfirmDialog
         visible={showCloseConfirm}
         title="작성을 그만둘까요?"
-        message="입력한 내용은 저장되지 않습니다."
+        message="입력한 내용은 저장되지 않아요."
         confirmText="나가기"
         danger
         onCancel={() => setShowCloseConfirm(false)}
@@ -403,15 +403,15 @@ const styles = StyleSheet.create({
     // 위아래로 늘린 누르는 곳(6)이 윗줄과 겹치지 않게 줄 간격을 12로 둔다.
     rowGap: theme.spacing[3],
   },
-  // 디자인 시스템 칩: 높이 32, 안쪽 0×14, 12/500, radius-full.
+  // 입력 화면 칩: 높이 32, 안쪽 0×16, 12/600, radius-full, 흰 카드 위 회색(surface-subtle).
   chip: {
     minHeight: theme.size.chipHeight,
     justifyContent: "center",
     borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.colors.surfaceSubtle,
     borderWidth: 1,
-    borderColor: theme.colors.borderButton,
-    paddingHorizontal: 14,
+    borderColor: "transparent",
+    paddingHorizontal: theme.spacing[4],
   },
   chipOn: {
     backgroundColor: theme.colors.primarySubtle,
@@ -421,11 +421,11 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
-    fontWeight: theme.fontWeight.medium,
+    fontWeight: theme.fontWeight.semibold,
   },
   chipTextOn: {
     color: theme.colors.primaryStrong,
-    fontWeight: theme.fontWeight.semibold,
+    fontWeight: theme.fontWeight.bold,
   },
   conditionList: {
     gap: theme.spacing[2],

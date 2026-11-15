@@ -192,7 +192,7 @@ describe("modal smoke screens", () => {
       screen.queryByDisplayValue("아이 장난감 정리하면서 나눔합니다"),
     ).toBeNull();
 
-    fireEvent.press(screen.getByText("변경사항 저장"));
+    fireEvent.press(screen.getByText("수정 완료"));
     await waitFor(() =>
       expect(update).toHaveBeenCalledWith({
         marketId: "42",

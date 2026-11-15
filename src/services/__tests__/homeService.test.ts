@@ -1,6 +1,10 @@
 import { buildHomeDailyPrayer, resolveHomeWeekday } from "../homeMapper";
 import { httpHomeDataSource } from "../homeHttpDataSource";
-import { fetchDawnPrayerDetail, fetchHomeOverview } from "../homeService";
+import {
+  fetchDawnPrayerDetail,
+  fetchDawnPrayerNeighbors,
+  fetchHomeOverview,
+} from "../homeService";
 
 describe("home service", () => {
   afterEach(() => {
@@ -88,6 +92,41 @@ describe("home service", () => {
     const dawn = await fetchDawnPrayerDetail(20);
     expect(dawn.id).toBe("dawn-20");
     expect(dawn.body).toBe("말씀 본문 요약입니다.");
+  });
+
+  it("finds the previous and next dates around a dawn summary", async () => {
+    const qt = (id: number, qtDate: string) => ({
+      id,
+      title: "",
+      qtDate,
+      bibleText: "",
+      content: null,
+    });
+    jest.spyOn(httpHomeDataSource, "fetchDailyQts").mockResolvedValue({
+      content: [
+        qt(22, "2026-11-05"),
+        qt(21, "2026-11-04"),
+        qt(20, "2026-11-03"),
+      ],
+      totalElements: 3,
+      totalPages: 1,
+      currentPage: 1,
+      size: 30,
+      hasNext: false,
+    });
+
+    await expect(fetchDawnPrayerNeighbors("21")).resolves.toEqual({
+      prevId: 20,
+      nextId: 22,
+    });
+    await expect(fetchDawnPrayerNeighbors(22)).resolves.toEqual({
+      prevId: 21,
+      nextId: null,
+    });
+    await expect(fetchDawnPrayerNeighbors(99)).resolves.toEqual({
+      prevId: null,
+      nextId: null,
+    });
   });
 
   it("returns null for sundaySermon and dawnPrayer when server lists are empty", async () => {

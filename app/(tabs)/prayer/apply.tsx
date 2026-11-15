@@ -67,18 +67,16 @@ export default function PrayerApplyScreenRoute() {
       },
       {
         onSuccess: () => {
-          Alert.alert(
-            "신청 완료",
-            `${selectedLabel} 참여 신청이 접수되었습니다.`,
-            [{ text: "확인", onPress: () => router.back() }],
-          );
+          Alert.alert("신청 완료", `${selectedLabel} 참여를 신청했어요.`, [
+            { text: "확인", onPress: () => router.back() },
+          ]);
         },
         onError: (err) => {
           Alert.alert(
             "신청 실패",
             err instanceof Error
               ? err.message
-              : "기도방 참여 신청에 실패했습니다. 다시 시도해주세요.",
+              : "기도방 참여를 신청하지 못했어요. 다시 시도해주세요.",
           );
         },
       },
@@ -100,7 +98,7 @@ export default function PrayerApplyScreenRoute() {
             style={{ flexGrow: 1 }}
           >
             <InfoBox
-              description="먼저 요일을 고르고, 그 다음 오전/오후 중 하나를 선택합니다. 승인 전에는 기도제목을 볼 수 없습니다."
+              description="요일을 고른 뒤 오전·오후 중 하나를 선택해 주세요. 승인 전에는 기도제목을 볼 수 없어요."
               style={styles.notice}
             />
 
@@ -160,11 +158,11 @@ export default function PrayerApplyScreenRoute() {
                 <View style={styles.waitingHead}>
                   <Badge tone="warning">승인 대기</Badge>
                   <Text style={styles.waitingTitle}>
-                    신청 후 중복 신청은 제한됩니다
+                    한 번 신청하면 다시 신청할 수 없어요
                   </Text>
                 </View>
                 <Text style={styles.waitingText}>
-                  중보기도 관리자가 승인하면 내 기도방에 표시됩니다.
+                  중보기도 관리자가 승인하면 내 기도방에 보여요.
                 </Text>
               </View>
             </View>

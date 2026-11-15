@@ -11,7 +11,6 @@ import {
 import { Text } from "@/components/ui/text";
 import Animated, { FadeInUp, useReducedMotion } from "react-native-reanimated";
 import { theme } from "../../constants/theme";
-import { getGivenName } from "../../lib/koreanName";
 import { MotionPressable } from "./motion";
 
 type IconName = ComponentProps<typeof AppIcon>["name"];
@@ -153,14 +152,10 @@ export function Avatar({
   uri?: string | null;
 }) {
   const reduceMotion = useReducedMotion();
-  const givenName = getGivenName(name) || name.trim() || "?";
+  // 디자인 시스템 Avatar: 이름 첫 글자 하나(김서연 → 김).
+  const initial = name.trim().slice(0, 1) || "?";
   const backgroundColor = avatarColorFor(seed ?? name);
-  const fontSize =
-    givenName.length >= 3
-      ? size * 0.28
-      : givenName.length === 2
-        ? size * 0.34
-        : size * 0.42;
+  const fontSize = size * 0.4;
   return (
     <View
       style={[
@@ -172,7 +167,7 @@ export function Avatar({
         numberOfLines={1}
         style={[styles.avatarText, { fontSize, maxWidth: size * 0.88 }]}
       >
-        {givenName}
+        {initial}
       </Text>
       {uri ? (
         <Image

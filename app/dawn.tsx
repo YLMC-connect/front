@@ -1,15 +1,18 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Screen } from "../src/components/layout/Screen";
+import { AppIcon } from "../src/components/ui/app-icon";
 import {
   AppText,
-  Badge,
   ErrorState,
   ListSkeleton,
   TopBar,
 } from "../src/components/ui";
 import { theme } from "../src/constants/theme";
-import { useDawnPrayerDetail } from "../src/hooks/useHome";
+import {
+  useDawnPrayerDetail,
+  useDawnPrayerNeighbors,
+} from "../src/hooks/useHome";
 
 function splitReaderParagraphs(body: string): string[] {
   if (!body) return [];
@@ -24,6 +27,13 @@ export default function DawnPrayerScreen() {
   const params = useLocalSearchParams<{ id?: string }>();
   const detail = useDawnPrayerDetail(params.id);
   const paragraphs = splitReaderParagraphs(detail.data?.body ?? "");
+  const currentId = detail.data?.id.replace(/^dawn-/, "");
+  const neighbors = useDawnPrayerNeighbors(currentId);
+  const prevId = neighbors.data?.prevId ?? null;
+  const nextId = neighbors.data?.nextId ?? null;
+  const goTo = (id: number | null) => {
+    if (id != null) router.setParams({ id: String(id) });
+  };
 
   return (
     <Screen scroll={false} padded={false} testID="screen-dawn-prayer">
@@ -45,7 +55,7 @@ export default function DawnPrayerScreen() {
       ) : detail.isError || !detail.data ? (
         <View style={styles.errorWrap}>
           <ErrorState
-            message="새벽기도 말씀요약을 불러오지 못했습니다."
+            message="새벽기도 말씀요약을 불러오지 못했어요."
             onRetry={() => detail.refetch()}
           />
         </View>
@@ -54,18 +64,50 @@ export default function DawnPrayerScreen() {
           contentContainerStyle={styles.body}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.heroCard}>
-            <View style={styles.heroBadgeRow}>
-              <Badge tone="info" icon="book-open-page-variant-outline">
-                {detail.data.fullDateLabel ||
-                  detail.data.dateLabel ||
-                  detail.data.timeLabel}
-              </Badge>
-            </View>
-            <AppText variant="title" style={styles.title}>
-              {detail.data.title}
+          <View style={styles.dateNav}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="이전 날짜"
+              accessibilityState={{ disabled: prevId == null }}
+              disabled={prevId == null}
+              onPress={() => goTo(prevId)}
+              style={styles.dateNavButton}
+              testID="dawn-prev-date"
+            >
+              <AppIcon
+                name="chevron-left"
+                size={22}
+                color={
+                  prevId == null ? theme.colors.textDisabled : theme.colors.text
+                }
+              />
+            </Pressable>
+            <AppText variant="label" weight="semibold">
+              {detail.data.fullDateLabel ||
+                detail.data.dateLabel ||
+                detail.data.timeLabel}
             </AppText>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="다음 날짜"
+              accessibilityState={{ disabled: nextId == null }}
+              disabled={nextId == null}
+              onPress={() => goTo(nextId)}
+              style={styles.dateNavButton}
+              testID="dawn-next-date"
+            >
+              <AppIcon
+                name="chevron-right"
+                size={22}
+                color={
+                  nextId == null ? theme.colors.textDisabled : theme.colors.text
+                }
+              />
+            </Pressable>
           </View>
+          <AppText variant="display" style={styles.title}>
+            {detail.data.title}
+          </AppText>
 
           <View style={styles.panel}>
             {paragraphs.length > 0 ? (
@@ -80,7 +122,7 @@ export default function DawnPrayerScreen() {
               ))
             ) : (
               <AppText variant="body" tone="muted" style={styles.bodyText}>
-                등록된 본문 내용이 없습니다.
+                등록된 본문 내용이 없어요.
               </AppText>
             )}
           </View>
@@ -103,28 +145,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.layout.screenX,
     paddingTop: theme.spacing[3],
     paddingBottom: theme.spacing[10],
-    gap: theme.spacing[3],
+    gap: theme.spacing[4],
   },
-  heroCard: {
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surface,
-    padding: theme.spacing[4],
-    gap: theme.spacing[2],
-  },
-  heroBadgeRow: {
+  // 이전·다음 날짜: 양쪽 44 버튼, 가운데 날짜. 버튼 안쪽 여백만큼 바깥으로 뺀다.
+  dateNav: {
+    minHeight: theme.layout.touchTarget,
+    marginHorizontal: -theme.spacing[3],
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+  },
+  dateNavButton: {
+    width: theme.layout.touchTarget,
+    height: theme.layout.touchTarget,
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
-    marginTop: 2,
     color: theme.colors.text,
   },
   panel: {
     borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
+    ...theme.shadow.sm,
     backgroundColor: theme.colors.surface,
     padding: theme.spacing[5],
     gap: theme.spacing[4],

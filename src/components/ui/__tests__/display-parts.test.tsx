@@ -184,11 +184,11 @@ describe("display parts (design system v2)", () => {
 
   it("Avatar layers the photo over the initials when a uri is given", () => {
     const { rerender } = render(<Avatar name="김하늘" />);
-    expect(screen.getByText("하늘")).toBeTruthy();
+    expect(screen.getByText("김")).toBeTruthy();
     expect(screen.queryByTestId("avatar-image")).toBeNull();
 
     rerender(<Avatar name="김하늘" uri="https://example.com/a.jpg" />);
-    expect(screen.getByText("하늘")).toBeTruthy();
+    expect(screen.getByText("김")).toBeTruthy();
     expect(screen.getByTestId("avatar-image")).toBeTruthy();
   });
 });

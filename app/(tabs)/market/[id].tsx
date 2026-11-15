@@ -62,10 +62,18 @@ import {
 } from "../../../src/components/market/detail/MarketDetailParts";
 import { styles } from "../../../src/components/market/detail/marketDetailStyles";
 
-const STATUS_OPTIONS: readonly { value: MarketStatus; label: string }[] = [
-  { value: "sharing", label: "나눔중" },
-  { value: "reserved", label: "예약중" },
-  { value: "done", label: "나눔완료" },
+const STATUS_OPTIONS: readonly {
+  value: MarketStatus;
+  label: string;
+  description: string;
+}[] = [
+  {
+    value: "sharing",
+    label: "나눔중",
+    description: "누구나 댓글로 신청할 수 있어요",
+  },
+  { value: "reserved", label: "예약중", description: "받을 분이 정해졌어요" },
+  { value: "done", label: "나눔완료", description: "나눔이 끝났어요" },
 ];
 
 export default function MarketDetailScreen() {
@@ -111,24 +119,18 @@ export default function MarketDetailScreen() {
     }
   };
 
-  if (variant === "deleted" || variant === "blocked") {
+  if (variant === "deleted") {
     return (
       <Screen>
         <View style={styles.exception}>
           <AppIcon
-            name={variant === "deleted" ? "inventory-2" : "block"}
+            name="inventory-2"
             size={42}
             color={theme.colors.textMuted}
           />
-          <Text style={styles.exceptionTitle}>
-            {variant === "deleted"
-              ? "존재하지 않는 게시글입니다"
-              : "확인할 수 없는 게시글입니다"}
-          </Text>
+          <Text style={styles.exceptionTitle}>없는 게시글이에요</Text>
           <Text style={styles.exceptionText}>
-            {variant === "deleted"
-              ? "삭제되었거나 더 이상 접근할 수 없는 게시글이에요."
-              : "차단한 사용자의 게시글은 볼 수 없어요."}
+            삭제되었거나 더 이상 접근할 수 없는 게시글이에요.
           </Text>
         </View>
       </Screen>
@@ -203,7 +205,7 @@ export default function MarketDetailScreen() {
     setComment(target.content ?? "");
   };
   const onDeleteComment = (target: MarketDetailComment) => {
-    Alert.alert("댓글 삭제", "삭제한 댓글은 복구할 수 없습니다.", [
+    Alert.alert("댓글 삭제", "삭제한 댓글은 되돌릴 수 없어요.", [
       { text: "취소", style: "cancel" },
       {
         text: "삭제",
@@ -401,7 +403,7 @@ export default function MarketDetailScreen() {
           {isReserved ? (
             <StatusBanner
               icon="schedule"
-              title="예약중인 나눔입니다"
+              title="예약중인 나눔이에요"
               text="다른 분과 수령 약속이 진행 중이에요"
               warn
             />
@@ -409,7 +411,7 @@ export default function MarketDetailScreen() {
           {isDone ? (
             <StatusBanner
               icon="check"
-              title="나눔이 완료되었습니다"
+              title="나눔이 끝났어요"
               text="이 게시글은 더 이상 신청할 수 없어요"
             />
           ) : null}
@@ -425,6 +427,12 @@ export default function MarketDetailScreen() {
 
             <View style={styles.article}>
               <View style={styles.chips}>
+                <Badge
+                  tone={isDone ? "neutral" : isReserved ? "warning" : "success"}
+                >
+                  {STATUS_OPTIONS.find((option) => option.value === status)
+                    ?.label ?? "나눔중"}
+                </Badge>
                 <Badge tone="info">{market.categoryLabel}</Badge>
                 <Badge tone="neutral">{market.conditionLabel}</Badge>
               </View>
@@ -573,7 +581,7 @@ export default function MarketDetailScreen() {
         {createComment.isError ||
         updateComment.isError ||
         deleteComment.isError ? (
-          <Text style={styles.commentError}>댓글 처리에 실패했습니다.</Text>
+          <Text style={styles.commentError}>댓글을 처리하지 못했어요.</Text>
         ) : null}
         <RadioSheet
           visible={statusDraft !== null}
@@ -584,7 +592,7 @@ export default function MarketDetailScreen() {
           }))}
           value={statusDraft ?? status}
           onValueChange={(value) => setStatusDraft(value as MarketStatus)}
-          confirmText="변경"
+          confirmText="변경하기"
           confirmDisabled={
             updateStatus.isPending || !statusDraft || statusDraft === status
           }
@@ -593,8 +601,8 @@ export default function MarketDetailScreen() {
         />
         <ConfirmDialog
           visible={showDelete}
-          title="게시글을 삭제하시겠습니까?"
-          message="삭제하면 댓글을 포함한 모든 내용이 사라지며 복구할 수 없어요."
+          title="나눔 글을 삭제할까요?"
+          message="삭제하면 댓글도 함께 사라지고 되돌릴 수 없어요."
           confirmText="삭제"
           danger
           onCancel={() => setShowDelete(false)}

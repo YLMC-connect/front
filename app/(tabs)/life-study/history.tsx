@@ -30,9 +30,7 @@ export default function LifeStudyHistoryScreen() {
         <ScrollView contentContainerStyle={styles.body}>
           <HistorySection title="내 수료 기록">
             {completions.isPending ? (
-              <Text style={styles.sectionMeta}>
-                서버에서 불러오는 중입니다.
-              </Text>
+              <Text style={styles.sectionMeta}>불러오는 중이에요.</Text>
             ) : null}
             {completions.isError ? (
               <Text style={styles.sectionMeta}>

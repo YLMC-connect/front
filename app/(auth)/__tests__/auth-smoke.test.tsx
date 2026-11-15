@@ -135,7 +135,7 @@ describe("auth smoke screens", () => {
     expect(
       await screen.findByText("약관을 불러오지 못했어요. 다시 시도해주세요."),
     ).toBeTruthy();
-    expect(screen.queryByText("등록된 약관 내용이 없습니다.")).toBeNull();
+    expect(screen.queryByText("등록된 약관 내용이 없어요.")).toBeNull();
   });
 
   it("validates login inputs before calling the session service", () => {
@@ -339,7 +339,7 @@ describe("auth smoke screens", () => {
     fireEvent.press(screen.getByTestId("signup-check-id"));
 
     await waitFor(() =>
-      expect(screen.getByText("사용 가능한 아이디입니다")).toBeTruthy(),
+      expect(screen.getByText("사용할 수 있는 아이디예요")).toBeTruthy(),
     );
   });
 
@@ -403,7 +403,7 @@ describe("auth smoke screens", () => {
     fireEvent.press(screen.getByTestId("signup-check-id"));
 
     await waitFor(() =>
-      expect(screen.getByText("이미 사용 중인 아이디입니다")).toBeTruthy(),
+      expect(screen.getByText("이미 사용 중인 아이디예요")).toBeTruthy(),
     );
   });
 
@@ -412,7 +412,7 @@ describe("auth smoke screens", () => {
 
     fireEvent.changeText(screen.getByTestId("signup-id-input"), "newmember");
     fireEvent.press(screen.getByTestId("signup-check-id"));
-    await screen.findByText("사용 가능한 아이디입니다");
+    await screen.findByText("사용할 수 있는 아이디예요");
 
     fireEvent.changeText(
       screen.getByTestId("signup-password-input"),
@@ -435,11 +435,11 @@ describe("auth smoke screens", () => {
       "new-member@example.com",
     );
     fireEvent.press(screen.getByTestId("signup-check-email"));
-    await screen.findByText("사용 가능한 이메일입니다");
+    await screen.findByText("사용할 수 있는 이메일이에요");
     fireEvent.press(screen.getByTestId("signup-terms-all"));
     fireEvent.press(screen.getByTestId("signup-submit"));
 
-    expect(screen.getByText("아이디 중복 확인이 필요합니다.")).toBeTruthy();
+    expect(screen.getByText("아이디 중복 확인을 해 주세요.")).toBeTruthy();
     expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
   });
 
@@ -448,7 +448,7 @@ describe("auth smoke screens", () => {
 
     fireEvent.changeText(screen.getByTestId("signup-id-input"), "newmember");
     fireEvent.press(screen.getByTestId("signup-check-id"));
-    await screen.findByText("사용 가능한 아이디입니다");
+    await screen.findByText("사용할 수 있는 아이디예요");
     fireEvent.changeText(
       screen.getByTestId("signup-password-input"),
       "password1",
@@ -465,7 +465,7 @@ describe("auth smoke screens", () => {
     fireEvent.press(screen.getByTestId("signup-terms-all"));
     fireEvent.press(screen.getByTestId("signup-submit"));
 
-    expect(screen.getByText("이메일 중복 확인이 필요합니다.")).toBeTruthy();
+    expect(screen.getByText("이메일 중복 확인을 해 주세요.")).toBeTruthy();
     expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
   });
 
@@ -474,7 +474,7 @@ describe("auth smoke screens", () => {
 
     fireEvent.changeText(screen.getByTestId("signup-id-input"), "newmember");
     fireEvent.press(screen.getByTestId("signup-check-id"));
-    await screen.findByText("사용 가능한 아이디입니다");
+    await screen.findByText("사용할 수 있는 아이디예요");
     fireEvent.changeText(
       screen.getByTestId("signup-password-input"),
       "password1",
@@ -487,7 +487,7 @@ describe("auth smoke screens", () => {
     fireEvent.press(screen.getByTestId("signup-check-email"));
 
     await waitFor(() =>
-      expect(screen.getByText("이미 사용 중인 이메일입니다")).toBeTruthy(),
+      expect(screen.getByText("이미 사용 중인 이메일이에요")).toBeTruthy(),
     );
   });
 
@@ -496,7 +496,7 @@ describe("auth smoke screens", () => {
 
     fireEvent.changeText(screen.getByTestId("signup-id-input"), "newmember");
     fireEvent.press(screen.getByTestId("signup-check-id"));
-    await screen.findByText("사용 가능한 아이디입니다");
+    await screen.findByText("사용할 수 있는 아이디예요");
     fireEvent.changeText(
       screen.getByTestId("signup-password-input"),
       "password1",
@@ -511,7 +511,7 @@ describe("auth smoke screens", () => {
       "new-member@example.com",
     );
     fireEvent.press(screen.getByTestId("signup-check-email"));
-    await screen.findByText("사용 가능한 이메일입니다");
+    await screen.findByText("사용할 수 있는 이메일이에요");
     fireEvent.press(screen.getByTestId("signup-terms-all"));
     fireEvent.press(screen.getByTestId("signup-submit"));
 
@@ -582,7 +582,7 @@ describe("auth smoke screens", () => {
     // Auto blur availability check on ID
     fireEvent.changeText(screen.getByTestId("signup-id-input"), "newmember");
     fireEvent(screen.getByTestId("signup-id-input"), "blur");
-    await screen.findByText("사용 가능한 아이디입니다");
+    await screen.findByText("사용할 수 있는 아이디예요");
 
     // Complete password to unlock Card 2
     fireEvent.changeText(
@@ -630,7 +630,7 @@ describe("auth smoke screens", () => {
     // Complete Section 1
     fireEvent.changeText(screen.getByTestId("signup-id-input"), "newmember");
     fireEvent.press(screen.getByTestId("signup-check-id"));
-    await screen.findByText("사용 가능한 아이디입니다");
+    await screen.findByText("사용할 수 있는 아이디예요");
     fireEvent.changeText(
       screen.getByTestId("signup-password-input"),
       "password1",

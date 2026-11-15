@@ -98,11 +98,19 @@ export function FilterChips<T extends string>({
               onPress={() => {
                 if (!selected) onChange(item.key);
               }}
-              style={[styles.chip, selected ? styles.chipSelected : null]}
+              style={[
+                styles.chip,
+                styles.wrapChip,
+                selected ? styles.chipSelected : null,
+              ]}
               testID={testIDPrefix ? `${testIDPrefix}-${item.key}` : undefined}
             >
               <Text
-                style={[styles.text, selected ? styles.textSelected : null]}
+                style={[
+                  styles.text,
+                  styles.wrapText,
+                  selected ? styles.wrapTextSelected : null,
+                ]}
               >
                 {item.label}
               </Text>
@@ -247,6 +255,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.borderButton,
     backgroundColor: theme.colors.surface,
+  },
+  // 입력 화면 칩: 흰 카드 위 회색 칩(surface-subtle, 테두리 없음, 안쪽 16, 12/600).
+  wrapChip: {
+    paddingHorizontal: theme.spacing[4],
+    borderColor: "transparent",
+    backgroundColor: theme.colors.surfaceSubtle,
+  },
+  wrapText: {
+    fontWeight: theme.fontWeight.semibold,
+  },
+  wrapTextSelected: {
+    color: theme.colors.primaryStrong,
+    fontWeight: theme.fontWeight.bold,
   },
   chipReady: {
     borderColor: "transparent",

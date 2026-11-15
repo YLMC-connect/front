@@ -46,7 +46,7 @@ export function PrayerContent() {
           "신청 취소 실패",
           err instanceof Error
             ? err.message
-            : "참여 신청을 취소하지 못했습니다. 다시 시도해주세요.",
+            : "참여 신청을 취소하지 못했어요. 다시 시도해주세요.",
         );
       },
     });
@@ -273,9 +273,9 @@ export function PrayerContent() {
 
       <ConfirmDialog
         visible={cancelTarget != null}
-        title="참여 신청을 취소할까요?"
-        message="승인 대기 중인 신청이 취소됩니다."
-        confirmText="취소하기"
+        title="기도방 신청을 취소할까요?"
+        message="다시 신청하면 승인을 기다려야 해요."
+        confirmText="신청 취소"
         cancelText="닫기"
         danger
         onCancel={() => setCancelTarget(null)}

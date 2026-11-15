@@ -423,11 +423,12 @@ function applicationToOverviewRoom(
     typeof application.timeSlot === "string"
       ? periodFromTimeSlot(application.timeSlot)
       : undefined;
-  if (applicationId == null || cohortId == null || !weekday || !period) {
+  if (applicationId == null || !weekday || !period) {
     return null;
   }
   return {
-    id: String(cohortId),
+    // 승인 전에는 기도방이 정해지지 않을 수 있다(cohortId 없음). 그때는 신청 id 로 구분한다
+    id: cohortId == null ? `application-${applicationId}` : String(cohortId),
     title:
       typeof application.cohortName === "string" && application.cohortName
         ? application.cohortName

@@ -180,7 +180,7 @@ export function createHttpGroupDataSource({
       const createdId = await client.request<number>("/api/communion", {
         method: "POST",
         body: JSON.stringify({
-          type: "SMALL_GROUP",
+          type: input.kind === "service" ? "VOLUNTEER" : "SMALL_GROUP",
           title: input.name,
           content: input.description,
           categoryCode,

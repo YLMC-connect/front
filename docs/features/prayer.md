@@ -83,7 +83,7 @@
   - 현황 `canComplete === false` 이면 완료 버튼을 막고 안내 문구를 보인다(null 은 막지 않는다).
   - 등록 모달은 익명 선택지를 두지 않는다. 등록 API에 익명 필드가 없다(#304). 카테고리는 고르기 전 불러온 첫 항목이 선택돼 보이고 그대로 전송되며, 목록이 없으면 등록하지 않는다.
   - 응답완료 요청은 사용자가 쓴 `answerContent`(필수)를 보낸다.
-  - overview 는 `GET /api/prayer/applications/my` 도 읽어 `status === "PENDING"` 이고 참여 중이 아닌 신청을 `pending` 기도방(`applicationId` 포함)으로 붙인다. 승인 대기 카드는 상세로 가지 않고, 누르면 확인 후 `DELETE /api/prayer/applications/{id}` 로 취소한다.
+  - overview 는 `GET /api/prayer/applications/my` 도 읽어 `status === "PENDING"` 이고 참여 중이 아닌 신청을 `pending` 기도방(`applicationId` 포함)으로 붙인다. 승인 대기 카드는 상세로 가지 않고, 누르면 확인 후 `DELETE /api/prayer/applications/{id}` 로 취소한다. 승인 전이라 `cohortId` 가 없는 신청도 `application-{신청 id}` 로 카드를 만든다. 기도방 상세는 당겨서 새로고침으로 현황·기도제목을 다시 받는다.
   - 마이페이지 `중보기도 활동 이력` 은 `GET /api/prayer/me/history` 를 활동중/종료·역할·기간·종료 사유로 그린다.
 
 - (2026-11-03) **런타임 목 어댑터(`resolvePrayerAdapterMode`, `mockPrayerDataSource`), 목 오버레이 매퍼 및 `src/mocks/prayers.ts` 제거** — 전 도메인 HTTP 단일화에 따라 `httpPrayerDataSource`로 일원화하고, 미사용 목 오버레이 헬퍼(`applyPrayerApiToOverview`, `applyCohortsToRooms`, `applyTopicsToTopics`) 및 `"목업 데이터"` 문구를 제거.

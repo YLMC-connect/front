@@ -284,9 +284,15 @@ export default function GroupScreen() {
       stickyControlsHideMode="direction"
       overlay={
         <FloatingActionButton
-          label="소모임 개설"
+          label={section === "service" ? "봉사 개설" : "소모임 개설"}
           icon="add"
-          onPress={() => router.push("/modal/group-new")}
+          onPress={() =>
+            router.push(
+              section === "service"
+                ? { pathname: "/modal/group-new", params: { kind: "service" } }
+                : "/modal/group-new",
+            )
+          }
         />
       }
     >

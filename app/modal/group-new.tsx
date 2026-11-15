@@ -160,9 +160,11 @@ export default function GroupNewModal() {
   const params = useLocalSearchParams<{
     id?: string;
     designVariant?: string;
+    kind?: string;
   }>();
   const variant = readDesignVariant(params.designVariant) ?? "create";
   const existingDetail = useGroupDetail(params.id ?? "");
+  const kind = params.kind === "service" ? "service" : "group";
 
   if (!params.id) {
     return (
@@ -170,6 +172,7 @@ export default function GroupNewModal() {
         variant={variant}
         isEdit={DESIGN_EDIT_VARIANTS.includes(variant)}
         initialValues={designInitialValues(variant)}
+        kind={kind}
       />
     );
   }
@@ -216,12 +219,15 @@ function GroupForm({
   variant,
   isEdit,
   initialValues,
+  kind = "group",
 }: {
   groupId?: string;
   variant: string;
   isEdit: boolean;
   initialValues: GroupInput;
+  kind?: "group" | "service";
 }) {
+  const kindLabel = kind === "service" ? "봉사" : "소모임";
   const router = useRouter();
   const createGroup = useCreateGroup();
   const updateGroupMutation = useUpdateGroup(groupId ?? "");
@@ -272,10 +278,13 @@ function GroupForm({
           category: values.category,
           maxMembers: values.maxMembers,
         });
-        router.replace(`/group/${groupId}`);
+        // 상세에서 연 수정 창이므로 닫으면 상세로 돌아간다
+        router.back();
       } else {
-        const created = await createGroup.mutateAsync(values);
-        router.replace(`/group/${created.id}`);
+        const created = await createGroup.mutateAsync({ ...values, kind });
+        // 창을 닫고 목록 위에 상세를 쌓아야 뒤로가기가 목록으로 간다
+        router.back();
+        router.push(`/group/${created.id}`);
       }
     } catch (submitError) {
       setError(
@@ -283,7 +292,9 @@ function GroupForm({
           ? submitError.message
           : isEdit
             ? "소모임을 수정하지 못했습니다."
-            : "소모임을 개설하지 못했습니다.",
+            : kind === "service"
+              ? "봉사를 개설하지 못했습니다."
+              : "소모임을 개설하지 못했습니다.",
       );
     }
   };
@@ -295,7 +306,7 @@ function GroupForm({
       testID="group-form-screen"
     >
       <TopBar
-        title={isEdit ? "소모임 수정" : "소모임 개설"}
+        title={isEdit ? "소모임 수정" : `${kindLabel} 개설`}
         close
         onBack={close}
         testID="group-form-header"
@@ -451,7 +462,7 @@ function GroupForm({
 
       <FloatingBottomBar
         disabled={isPending}
-        label={isEdit ? "변경사항 저장" : "소모임 개설"}
+        label={isEdit ? "변경사항 저장" : `${kindLabel} 개설`}
         loading={isPending}
         onPress={submit}
         testID="group-new"

@@ -1,196 +1,58 @@
 # group (소모임)
 
-> 마지막 갱신: 2026-11-15 (캔버스 v1.39: 상세 대표 사진 + 흰 시트, 개설·공지 흰 카드, 멤버 "내보내기") | 담당 Phase: P1/P3/P7 | 기록 성격: 도메인 컨텍스트
+> 기록 성격: 도메인 컨텍스트 | 담당 Phase: P1/P3/P7
 
 ## 한 줄 요약
 
-성도가 소모임을 탐색하고 참여하거나 새 모임을 개설할 수 있게 합니다.
+성도가 소모임·봉사를 탐색하고 참여하거나 새 모임을 개설할 수 있게 합니다.
 
----
+## 현재 동작
 
-## ✅ 완료
-
-- 소모임 상세(나눔과 같은 틀) — 위에 대표 사진 자리(240, 서버가 사진을 주지 않아 목록 썸네일과 같은 `thumb` 색 + 사람 아이콘)를 두고, 아래 24 를 덮는 흰 시트(radius-xl·shadow-sheet)에 상태 배지(모집중 success / 모집완료 neutral) → 카테고리(info) → 이름 → 소개를 담는다. 소모임장(아바타 24 + 이름)·인원(`현재 / 최대명`)은 PlaceCard 모양의 정보 줄, 멤버는 아바타 44 를 4명까지 + `+N 더보기`, 섹션 머리 `전체보기`는 멤버 화면으로 간다. 공지는 1px 선으로 나눈 목록(제목 16/600 · 미리보기 한 줄 · 시각)이고 없으면 "아직 공지가 없어요". 헤더는 사진 위에서 흰 글자(`TopBar overPhoto`), 사진을 지나면 일반 헤더로 바뀐다. 소모임장 관리 카드(수정·공지·멤버·이관·삭제)와 모집 상태 배지 눌러 바꾸기는 그대로.
-- 소모임 멤버 화면 — 아바타 40 · 이름 옆 작은 배지(나·소모임장) · 가입일. 소모임장에게만 `내보내기` Outline 작은 버튼(32)이 보이고, 일반 멤버가 상세 `전체보기`로 들어오면 제목이 "멤버"이고 버튼이 없다. 확인 창·토스트·오류 문구는 해요체("○○님을 내보낼까요?", "○○님을 내보냈어요").
-- 소모임 개설 폼 — 소모임 개설/수정 화면(`modal/group-new`)과 공지 작성은 항목마다 흰 카드(`ModalFormSection card`). 카테고리·빠른 정원 칩은 회색(surface-subtle) 알약, 고르면 primary-subtle. 정원 설정용 `[-] / [+]` 스텝 버튼 및 빠른 정원 칩(`4명`, `8명`, `12명`, `20명`). 대표 사진 1장 카드는 서버 개설·수정 API 가 사진을 받지 않아 아직 두지 않는다. 서버가 받지 않는 일정·장소 입력은 두지 않고(Issue #301), 카테고리는 서버 코드가 있는 5개(성경공부·예배/기도모임/취미·문화/운동·건강/기타)만 고른다. 실제 수정(`id`)은 상세를 받아온 뒤 그 값으로 폼을 채우고, 예시 값은 `id` 없는 디자인 미리보기에서만 쓴다.
-- 소모임장 이관 플로우 및 동행 목록 무한스크롤 / 당겨서 새로고침 — 소모임 상세 관리 메뉴에 `이관` 액션을 추가하고 멤버 관리 화면에서 후보 멤버 라디오 선택 및 이관 확인 모달 플로우를 구현. 동행 목록은 `useInfiniteQuery` 기반 `getOverviewPage` 커서 페이징과 하단 로딩 스피너를 연동하고 `StickyHeaderScreen` 및 소모임 상세 스크롤에 `RefreshControl`을 연결하여 상단 당김 새로고침 지원.
-- 동행/소모임 관리(수정/삭제/강퇴/상태변경) API 연동 — `PUT /api/communion/{id}`(소모임 수정), `DELETE /api/communion/{id}`(소모임 삭제), `DELETE /api/communion/{id}/kick/{targetUserId}`(멤버 강퇴), `PUT /api/communion/{id}/status`(모집 상태 변경)를 `httpGroupDataSource`, `groupService`, `useGroups` 훅과 UI 화면(`group/[id]`, `group-new`, `group/members`)에 완전 연동.
-- 동행과 나눔 탭 간 필터-카드 간격 및 리스트 레이아웃 구조 완전 일치 — 동행 화면의 contentContainerStyle과 불필요한 래퍼 뷰(group-scroll-content)를 제거하고, 나눔과 동일하게 ScrollView 직하위 styles.list(gap: 12, paddingBottom: 164) 컨테이너 및 CompanionCard marginHorizontal: 20 구조로 통일. 탭 상호 전환 시 필터-카드 간격(16px) 및 첫 번째 카드 상단 Y 위치를 완벽히 일치시켜 시각적 흔들림 제거
-- 동행 카테고리 필터 stickyControls 통합 및 도킹 구조 제거 — 내 소모임이 독립 세그먼트 탭으로 분리됨에 따라, 소모임 탭 상단의 복잡한 인라인 필터 앵커와 도킹 애니메이션을 제거하고 나눔과 동일하게 상단 stickyControls에 FilterChips를 직접 배치. 필터와 첫 번째 카드 사이 간격을 나눔 기준(16px)으로 일치시킴
-- 동행 HTTP data source — 라이브 목록(`type=SMALL_GROUP|VOLUNTEER`), `/my`, 상세, 멤버, 개설, 공지 CUD, `POST /api/communion/{id}/join`·`DELETE /api/communion/{id}/leave`를 `httpGroupDataSource`로 연결. 상세의 참여/탈퇴 버튼이 같은 경계를 사용. 상태/카테고리/타입은 common-codes 관측값만 매핑. 목록 `content`·일정·장소가 없어 설명/일정은 빈 문자열. 서버에 없는 카테고리(목장·선교·카풀·봉사)는 개설을 거절. `내 모임` 탭은 `/api/communion/my?type=SMALL_GROUP` 전체 결과(`myGroups`)를 쓴다. 봉사 탭의 개설 버튼은 `봉사 개설`로 바뀌고 `/modal/group-new?kind=service` 를 열어 `type=VOLUNTEER` 로 만든다(그 외는 `SMALL_GROUP`). 개설하면 창을 닫고 목록 위에 상세를 쌓아 뒤로가기가 목록으로 가고, 수정은 창만 닫아 상세로 돌아간다. 상세 멤버 목록은 소모임장을 맨 앞에 두고 왕관을 그 사람에게만 그리며, 인원은 모집완료여도 실제 `currentParticipants`를 보인다. development 기본값은 HTTP
-- 동행 상세 복귀 세그먼트·필터 깜빡임 제거 — 숨은 목록에서 들어오는 세그먼트·필터의 `0×0` layout과 카테고리 anchor의 0 크기 측정을 버려 마지막 정상 위치를 유지하고, 430×932 웹에서 상세 뒤로가기 직후부터 250ms까지 세그먼트 189px·필터 49px geometry와 opacity 1이 한 프레임도 무너지지 않음을 확인
-- 동행 상세 복귀 미세 잔상 제거 — 목록·세그먼트·필터를 재생성하지 않고 유지한 채 웹은 카드 입력 이벤트 안에서 기존 ScrollView를 `y=0`으로 맞춘 직후 같은 Stack에 직접 push하고, 네이티브는 push 전환이 끝난 뒤 숨은 목록을 초기화해 복귀 첫 프레임부터 본문 필터만 원래 위치에 표시하면서 일반 200ms Cross Fade·Translate는 유지
-- 소모임 상세·개설 상단 패딩 통일 — 상세는 공통 `Screen`의 `safe area + 20px` 기준을 상속하고 별도 `KeyboardAvoidingView`를 쓰는 개설 modal도 같은 계산식을 적용해 루트 동행 헤더와 시작점을 맞춤
-- 소모임 개설 폼 구획·포커스 통일 — 카테고리부터 모임 장소까지 이어지는 8px 회색 section divider를 제거하고, 소모임명·설명·최대인원·일정·장소 입력을 나눔 등록과 같은 공통 `ModalFormTextInput`으로 전환해 primary 2px 포커스와 기존 입력·개설 동작을 유지
-- 동행 sticky 필터 시간 기반 Cross Fade·Translate — 전체 모임 필터가 anchor를 통과하면 본문과 sticky에 함께 렌더링된 채 200ms 동안 반대 opacity와 ±4px 이동으로 붙고 복귀하며, 중간 시점에 터치·접근성 대상을 교대하고 종료 뒤 sticky 복제본을 제거하면서 기존 숨김·검색·필터 동작은 유지
-- 동행 탐색 control·FAB 비율 보정 — 소모임/봉사 세그먼트와 전체 모임 필터의 full pill을 유지한 채 시각 높이를 낮추고 44px 터치 범위를 보존했으며 `소모임 개설` FAB를 46px로 축소해 하단 탭과 위계를 분리
-- 전체 모임 sticky 전환 직후 메뉴 유지 — 카테고리 필터가 원래 위치에서 세그먼트와 합쳐지는 순간 누적 하강 거리를 초기화해 메뉴를 먼저 보여주고, 이후 추가 12px 하강에서 숨김·4px 상승에서 재표시하며 본문 복귀 동작은 유지
-- 동행 소모임·봉사 카드 통일 — 전체 소모임과 봉사가 같은 화면 전용 `CompanionCard`를 사용해 96px 썸네일·16px padding/radius·1px 경계·동일 shadow와 정보 배치를 공유하고, 봉사 일정·모집 상태·참여 인원·아이콘·연결 상세 이동은 유지
-- 동행 카테고리 필터 범위 분리 — 검색 결과를 먼저 만든 뒤 가입 여부와 카테고리를 각각 계산해 `내 소모임`은 유지하고 `전체 모임`만 선택 카테고리로 변경
-- 동행 플로팅 버튼 행동 문구 명확화 — 대상이 빠진 `개설`을 `소모임 개설`로 바꾸고 기존 `/modal/group-new` 이동·`+` 아이콘·고정 위치를 유지
-- 내 소모임 전체보기 공통화 — 기존 제목 오른쪽 동작을 공통 `SectionHeader`의 `전체보기 + chevron-right`와 44px 터치 영역으로 교체하고 전체 목록 전환 동작은 유지
-- 동행 개설·공지 헤더 공통화 — 소모임 개설·수정 modal과 공지 작성·수정의 화면 이동용 `닫기`를 공통 `chevron-left + 뒤로`로 통일하고, 우측 등록·저장 action과 무관하게 제목을 화면 정중앙에 유지
-- 동행 세그먼트·내 소모임 간격 보정 — 세그먼트 아래 중복된 section margin 12px·header padding 16px을 제거해 430px 웹 실측 간격을 46px에서 18px로 축소하고 카드·sticky geometry는 유지
-- 동행 검색 위치·포커스 보정 — 검색을 제목 바로 아래, 소모임/봉사 세그먼트 위에 표시하고 전체 검색 surface에 단일 focus border를 적용했으며, 스크롤로 메뉴가 숨은 상태에서도 검색 action으로 다시 노출
-- 동행 단계형 sticky 탐색 control — 전체 모임 카테고리 필터가 원래 위치에서 소모임/봉사 세그먼트 아래에 닿을 때 140ms fade로 결합·복귀하고, 결합된 메뉴는 아래 스크롤에서 숨은 뒤 짧은 위 스크롤에서 200ms로 재표시
-- 동행 glass sticky 헤더 — `소모임과 봉사로 함께 걸어가요` 보조 설명을 제목 아래 표시하고 소모임/봉사 세그먼트·카테고리 필터·카드 목록을 하나의 스크롤로 묶어 기본 배경색 기반 blur 타이틀 뒤로 지나가게 적용하며 검색·FAB 위치는 유지
-- 동행 필터·세그먼트 모션·정렬 보정 — 카테고리 선택 배경의 20px 위치 오차를 제거하고 section query를 현재 화면에서 갱신해 `소모임·봉사` indicator 이동을 유지하며 세그먼트의 위·아래 여백을 4px로 통일
-- 동행 카테고리 이동 필터·상세 Stack 적용 — 가변 너비 선택 배경을 200ms로 이동하고 category query를 목록 주소에 보존하며, 상세·공지·멤버 화면을 동행 탭 Stack에 쌓아 뒤로가기 시 같은 필터·목록으로 복귀
-- 동행 전체 모임 카드·탐색 geometry 통일 — 전체 모임을 나눔과 같은 96px 썸네일 가로 카드로 바꾸고 16px padding/radius·1px 경계·동일 shadow를 적용했으며, 세그먼트·카테고리 필터는 44px 높이와 12px 간격으로 맞추고 내 소모임 가로 목록은 유지
-- 동행 목록 카드 형태 복구 — 내 소모임 가로 카드의 기존 크기·cover geometry와 전체 모임의 흰 surface·둥근 경계·12px 간격을 복구하고 검색·필터·전체보기·Skeleton은 유지
-- 동행 목록 디자인 시스템 적용 — 내 소모임은 기존 cover 강조 카드를 유지하고 전체 모임은 border/shadow 반복을 제거한 flat list로 전환했으며 역할형 typography, 20px 여백, Skeleton, 절제된 FAB를 적용
-- 동행 작성·탐색 mock 흐름 연결 — 카테고리/소모임명/설명/최대인원/일정/장소를 실제 입력·검증해 mock service에 저장하고 상세 이동·목록 재조회까지 연결했으며, 소모임/봉사 검색·카테고리 필터·내 소모임 전체보기를 활성화
-- 동행 상세 action·mini action과 개설 폼 section/divider 공통화 — 기존 geometry·공지 관리 동작을 유지하면서 공통 UI 파일로 이동
-- 소모임 목록/상세/개설 화면 구현 — `app/(tabs)/group/index.tsx`, `app/(tabs)/group/[id].tsx`, `app/modal/group-new.tsx`
-- 소모임 타입과 mock 데이터 구현 — `src/types/group.ts`, `src/mocks/groups.ts`
-- 대표 이미지 선택/미리보기 연결 — `GroupInput.coverImage`를 카드/상세 cover에 표시
-- 참여, 탈퇴, 공지 작성, 멤버 목록 mock mutation 구현
-- 검색, 모집/참여/관심 필터, 관심 소모임, 정원 마감 제한, 소모임장 탈퇴 제한, 멤버 내보내기 mock 구현
-- 소모임 카드 cover fallback 디자인 정렬 — 대표 이미지가 없을 때 ZIP prototype 톤의 gradient cover placeholder 적용
-- 소모임 목록 1차 디자인 정렬 — ZIP prototype 기준 접힌 검색, 상태 segmented tabs, category chips, bottom-right 개설 FAB 적용
-- ZIP 원본 소모임 화면 29개 상태 매핑 — 목록/상세/개설/공지/멤버 관리 variant reference 라우트 연결
-- ZIP 110개 visual inventory 재검증에 포함 — 소모임 reference 화면을 Dev Client capture/compare 대상에 유지
-- 소모임 상세/멤버 관리 원본 시각 정렬 — ZIP JSX 기준 상세 header, 리더 카드, 멤버 rail, 공지 list, 강퇴/소모임장 이관 list와 확인 문구를 reference 화면에 반영
-- 소모임 멤버 관리 residual 개선 — ZIP `ScreenGroupMembers` 기준 `뒤로` pill TopBar와 이름 해시 Avatar 팔레트를 반영해 기본 멤버 관리 diff를 `mean=73.43`에서 `13.39`로 낮춤
-- ZIP 소모임 toast 문구 정렬 — 인원 초과/소모임장 탈퇴 제한 toast를 원본 JSX의 짧은 문구로 맞춤
-- 소모임 상세 overlay/section geometry 정렬 — ZIP `ScreenGroupDetail`처럼 body는 내부 ScrollView로 두고 toast/dialog를 fixed overlay로 분리, soft category chip·멤버 horizontal rail·공지 카드·primary/outline action pill을 reference 화면에 반영
-- 소모임 상세 partial visual compare 개선 — `group-detail*` 10개 상태를 Android Dev Client에서 재캡처해 `missing=0` 확인, 대표 residual은 `full-toast 31.63→20.76`, `non-member 23.19→20.81`, `leader 18.72→18.07`, `leader-closed 18.71→18.09`로 감소
-- 소모임 상세 action compact 정렬 — ZIP `ScreenGroupDetail`의 44px inline `ActionBtn` 구조를 반영하고 소모임장 카드 shadow/border를 제거해 `group-detail*` 10개 상태를 재캡처, `missing=0` 확인
-- 소모임 멤버 관리 Toast overlay 정렬 — ZIP `ScreenGroupMembers`처럼 list body와 fixed overlay를 분리해 강퇴 toast가 화면 하단에 표시되도록 재구성, `group-members-kickts 17.86→9.39`로 감소
-- 소모임 상세 typography 정렬 — ZIP `ScreenGroupDetail` inline style 기준으로 title, meta, leader card, member rail, notice title weight를 화면 전용 스타일로 낮춰 `group-detail*` 10개 상태를 재캡처, `missing=0` 확인
-- 소모임 상세 설명문 wrap 정렬 — ZIP `ScreenGroupDetail`의 설명문 줄 감김에 맞춰 화면 전용 description style을 적용하고 47-57 전체를 재캡처, `missing=0` 확인. 대표 residual은 `non-member 19.56→10.18`, `full-toast 19.44→10.38`, `leader 15.96→10.79`, `leader-closed 16.03→10.81`로 감소
-- 소모임 목록 FAB root overlay 정렬 — ZIP fixed FAB 구조에 맞춰 list body ScrollView와 root FAB를 분리하고 43-46번을 재캡처, `group-list 11.61→10.21`, `group-list-mine 11.70→10.28`, empty/error 계열은 6점대까지 낮춤
-- 소모임 목록 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupList`의 내 소모임 가로 카드, 전체 모임 category chip, 모집 상태 카드, root FAB 구조를 `/group` route에 RN으로 직접 반영
-- 소모임 상세 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupDetail`의 정보 header, 리더 카드, 권한별 action, 멤버 rail, 공지 카드 구조를 `/group/[id]` route에 RN으로 직접 반영
-- 소모임 개설 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupCreate`의 close/action topbar, 카테고리 chip, 소모임명/설명/최대인원 section, 안내 박스를 `modal/group-new` route에 RN으로 직접 반영
-- 소모임 공지 작성/수정 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupNotices`의 close topbar, 삭제/등록 action, 공개 안내, 제목/내용 입력 section, 삭제 confirm을 `/group/notices` route에 RN으로 직접 반영
-- 소모임 멤버 관리 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenGroupMembers`의 flat row list, 강퇴 pill, 이관 경고/선택 row, 하단 이관 action, confirm/toast variant를 `/group/members` route에 RN으로 직접 반영
-- 동행 탭 구조 반영 — Downloads `ScreenGroupList`/`ScreenServiceList` 기준으로 `/group`을 `동행` 루트로 두고 내부 `소모임/봉사` segment와 봉사 전용 card list를 추가
-- 동행 API 계약 게이트 추가 — `npm run test:api:contract:group`으로 목록·상세·내 목록·멤버/공지·참여/탈퇴·생성/수정/상태/관리 endpoint와 화면 필수 계약을 자동 검증
-- 동행 조회 데이터 경계 추가 — 목록·봉사·내 목록·상세·멤버 fixture를 화면에서 `mockGroupDataSource`로 이동하고 `useGroupOverview`/`useGroupDetail`/`useGroupMembers` query로 렌더링하며 미사용 중복 mock 목록 제거
-- 소모임 공지 관리 수직 흐름 연결 — 공지 작성·수정·삭제를 `useGroup* → groupService → mockGroupDataSource` 경계와 상세 query cache에 연결하고, 저장 후 해당 소모임 상세로 명시적으로 복귀하도록 구현
-- 소모임 공지 회귀 검증 — 서비스·화면 테스트에서 입력 정규화와 생성/수정/삭제 지속성을 확인하고 Android Maestro에서 작성→수정→삭제를 완주. 공지 디자인 4개 상태 residual은 `create 5.48`, `create-filled/edit 10.76`, `delete-confirm 10.86`
-- 소모임 상세 공지 인라인 삭제 연결 — 공지 카드의 기존 삭제 액션을 같은 `useDeleteGroupNotice` mutation과 확인 대화상자에 연결하고, 상세 cache 즉시 제거·실패 문구·Android Maestro 직접 삭제를 검증
-
-## 주요 파일 (도메인 파일 지도)
-
-| 경로                                           | 역할                                          |
-| ---------------------------------------------- | --------------------------------------------- |
-| `app/(tabs)/group/_layout.tsx`                 | 동행 목록·상세·공지·멤버 중첩 Stack           |
-| `app/(tabs)/group/index.tsx`                   | 동행 탭 루트, 소모임/봉사 segment             |
-| `app/(tabs)/group/[id].tsx`                    | 소모임 상세, 공지 작성·인라인 삭제, 멤버      |
-| `app/(tabs)/group/notices.tsx`                 | 소모임 공지 작성/수정/삭제                    |
-| `app/(tabs)/group/members.tsx`                 | 소모임 멤버 관리와 소모임장 이관              |
-| `app/modal/group-new.tsx`                      | 소모임 개설 모달                              |
-| `src/services/groupService.ts`                 | 동행 조회·참여/탈퇴·이관·공지 CUD HTTP 서비스 |
-| `src/services/groupHttpDataSource.ts`          | 라이브 동행 HTTP data source                  |
-| `src/services/groupMapper.ts`                  | Communion DTO → 화면 모델                     |
-| `src/types/groupApi.ts`                        | 관측된 동행 서버 DTO                          |
-| `src/hooks/useGroups.ts`                       | 동행 조회, 참여/탈퇴, 공지 CUD hook           |
-| `src/components/layout/StickyHeaderScreen.tsx` | sticky scroll guard와 내부 상태 reset 경계    |
-| `src/components/ui/motion.tsx`                 | presence 모션과 즉시 종료 경계                |
-| `src/constants/domainOptions.ts`               | 소모임 카테고리/상태 필터 옵션                |
-| `src/types/group.ts`                           | 소모임 타입                                   |
-| `scripts/check-group-api-contract.mjs`         | 동행 Swagger endpoint·화면/관리 계약 검사     |
+- `/group` 은 하단 `동행` 탭 루트. 세그먼트 `소모임` | `봉사` | `내 모임`, 카테고리 필터·검색·개설 FAB(`소모임 개설` / 봉사 탭에서는 `봉사 개설`).
+- 소모임 목록은 `GET /api/communion?type=SMALL_GROUP&size=&lastId=` 커서 무한 스크롤. 첫 페이지에서만 `type=VOLUNTEER` 목록과 `/api/communion/my?type=VOLUNTEER` 를 함께 읽고, `내 모임` 은 `/api/communion/my?type=SMALL_GROUP` 전체 결과를 쓴다. 목록·상세는 당겨서 새로고침.
+- 상세 `/group/[id]` 는 `GET /api/communion/{id}` + `/members` + `/notices`. 참여 `POST /join`, 탈퇴 `DELETE /leave`. 상세·공지·멤버는 동행 탭 Stack 에 쌓여 뒤로가기 시 같은 필터·목록으로 돌아온다.
+- 개설·수정 `modal/group-new`(`?kind=service` 면 `type=VOLUNTEER`): `POST /api/communion`(JSON), `PUT /api/communion/{id}`. 개설하면 창을 닫고 목록 위에 상세를 쌓고, 수정은 창만 닫는다.
+- 소모임장 관리: 모집 상태 `PUT /{id}/status`, 삭제 `DELETE /{id}`, 내보내기 `DELETE /{id}/kick/{targetUserId}`, 이관 `PUT /{id}/leader`, 공지 CUD `/{id}/notices[/{noticeId}]`.
+- 멤버 화면 `/group/members` 는 상세 `전체보기` 로 일반 멤버도 들어온다. `내보내기`·이관은 소모임장에게만 보인다.
+- `npm run test:api:contract:group` 이 동행 Swagger endpoint 와 화면 필수 계약을 검사한다.
 
 ## 데이터 타입
 
-`Group`은 `coverImage?: string`, `leader`, `members`, `maxMembers`, `schedule`, `status`, `isJoined`, `isFavorite`, `notices`를 포함합니다. 화면 조회 모델 `GroupOverview`/`GroupDetail`/`GroupMemberDetail`은 목록·봉사·권한·멤버·공지 표시값을 포함하며 API DTO mapper의 출력 경계입니다. `GroupDetailNotice`는 수정 폼 재사용을 위한 전체 `content`를 포함하고, 공지 쓰기 경계는 `GroupNoticeInput`/`GroupNoticeUpdateInput`/`GroupNoticeTarget`으로 분리합니다. 모임 관리 경계는 `GroupUpdateInput`, `GroupStatusUpdateInput`, `GroupKickMemberInput`, `GroupTransferLeaderInput`(`newLeaderUserId`)을 사용합니다. 카테고리는 성경공부·예배/기도모임/봉사/취미·문화/운동·건강/목장/선교/카풀/기타를 사용합니다.
+- 화면 모델: `GroupOverview`(groups · services · myGroups), `GroupDetail`, `GroupMemberDetail`, `GroupDetailNotice`(수정 폼용 전체 `content`). 쓰기 입력은 `GroupInput` / `GroupUpdateInput` / `GroupStatusUpdateInput` / `GroupKickMemberInput` / `GroupTransferLeaderInput`(`newLeaderUserId`) / `GroupNotice*Input`.
+- DTO: `src/types/groupApi.ts` 의 `Communion*Dto`.
+- 매핑: 상태 `RECRUITING`→open(모집중), `COMPLETED`→closed(모집완료). 상태 변경도 closed 를 `COMPLETED` 로 보낸다(서버 명세에 `CLOSED` 는 없다). `PENDING`·`CANCELED`·`REJECTED` 는 매핑하지 않는다. 카테고리 `WORSHIP_STUDY`/`PRAYER`/`HOBBY_CULTURE`/`SPORTS_HEALTH`/`OTHER` ↔ bible/pray/hobby/sport/etc.
+- 목록 응답에 본문·일정이 없어 카드 `description`·`schedule` 은 빈 문자열. 봉사 항목은 `linkedGroupId`(자기 id)로 상세에 연결.
+- `isLeader`/`isJoined` 는 `leaderId`·멤버 `userId` 를 `authStore` 현재 사용자와 비교해 만든다. 상세 멤버는 소모임장을 맨 앞에 둔다.
 
-## 결정 사항 (최신 위)
+## 결정 사항 (지금 유효한 것만)
 
-- (2026-11-15) **동행 상세·개설·공지·멤버는 캔버스 v1.39 의 나눔과 같은 틀을 따른다** — 상세는 대표 사진 + 흰 시트 + 정보 줄, 개설·공지는 항목별 흰 카드, 멤버 관리는 "강퇴" 대신 "내보내기". 대표 사진은 communion API 에 이미지 필드가 없어 색 바탕으로 채우고, 개설의 대표 사진 1장 입력은 서버가 받으면 붙인다. 공지 `전체보기`는 공지 목록 화면이 없어 두지 않는다.
+- **서버에 있는 값만 매핑한다** — 서버에 없는 화면 카테고리(목장·선교·카풀·봉사)는 OTHER 로 추측해 보내지 않고 개설·수정을 거절한다. 폼은 서버 코드가 있는 5개만 보인다. (#313)
+- **서버가 저장하지 않는 입력은 폼에 두지 않는다** — 모임 일정·장소는 communion 요청·응답에 없어 개설/수정 폼에서 뺐다. 서버 필드가 생기면 복원한다. (#301)
+- **대표 사진은 색 바탕으로 채운다** — communion API 에 이미지 필드가 없어 상세 대표 사진 자리는 `thumb` 색 + 아이콘, 개설 폼에 사진 입력이 없다. 공지 목록 화면이 없어 공지 `전체보기` 는 두지 않는다.
+- **참여는 즉시 가입이다** — `POST /join` 으로 바로 멤버가 된다. 승인 대기 플로우는 서버가 상태를 주기 전까지 만들지 않는다. (#317)
+- **소모임장은 탈퇴할 수 없다** — 서비스에서 막고 "먼저 이관해주세요" 를 안내한다. 정원이 찼거나 모집완료면 참여를 막는다.
+- **이관은 `PUT /api/communion/{id}/leader`** — 본문은 `newLeaderUserId` 하나. 기존 방장은 일반 멤버로 남고 상세·멤버·목록 쿼리를 다시 읽는다. `COM003`/`COM011`/`COM012` 는 토스트 문구로 보인다. (#197)
+- **입력 제한은 서비스에서 검증한다** — 소모임명 2~20자, 설명 5~200자, 정원 2~100명, 공지 제목 30자·내용 500자.
+- **카테고리 필터는 전체 목록에만 적용** — `내 모임` 은 가입한 모임 전체를 유지한다. 필터·세그먼트는 route query 로 보존해 상세에서 돌아와도 유지된다.
+- **수정 폼은 서버 상세로 채운다** — 예시 값은 `id` 없는 디자인 미리보기에서만 쓴다. 개발 빌드의 `designVariant` 파라미터는 캡처용 상태이며 실제 폼 상태와 섞지 않는다.
 
-- (2026-11-07) **서버가 저장하지 않는 입력은 폼에 두지 않는다** — 모임 일정·장소는 communion 요청·응답에 없어 개설/수정 폼에서 뺐다. 서버 필드가 생기면 복원한다. Issue #301.
+## 미결
 
-- (2026-11-05) **소모임장 이관은 `PUT /api/communion/{id}/leader`로 보낸다** — 요청 본문은 `newLeaderUserId` 하나다. 성공하면 기존 방장은 일반 멤버로 남고, 멤버 화면은 상세·멤버·목록 쿼리를 다시 읽는다. `COM003`, `COM011`, `COM012`는 이관 화면 토스트 문구로 둔다. Issue #197.
+- 소모임 삭제 시 다른 멤버 참여 기록이 남아 있으면 서버 400 (#318)
+- 가입 신청·대기·소모임장 승인 절차 없음 (#317)
+- 카테고리 목록 하드코딩, 서버 목록 필터 없음 (#313)
+- 일정·장소 서버 필드 추가 후 폼 복원 (#301)
 
-- (2026-11-03) **동행 목록 페이지네이션(`getOverviewPage`) 시 첫 페이지 봉사(`type=VOLUNTEER`) API 연동 복구** — `useGroupOverview`가 `getOverviewPage`를 호출할 때 `services: []`로 고정되어 봉사 탭 목록이 비어 있던 문제를 수정하여, 첫 페이지(`lastId == null`) 로드 시 `/api/communion?type=VOLUNTEER` 및 `/api/communion/my?type=VOLUNTEER`를 함께 조회해 `mapCommunionServiceItem`으로 매핑하도록 연결.
+## 코드 위치
 
-- (2026-11-03) **런타임 목 어댑터(`resolveGroupAdapterMode`, `mockGroupDataSource`) 및 `src/mocks/groups.ts` 제거** — 전 도메인 HTTP 단일화에 따라 환경변수 어댑터 분기(`EXPO_PUBLIC_GROUP_ADAPTER`)와 런타임 목데이터를 제거하고 `httpGroupDataSource`만 사용하도록 정리.
+- 화면: `app/(tabs)/group/`, `app/modal/group-new.tsx`
+- 데이터: `src/services/group*`, `src/hooks/useGroups.ts`, `src/types/group*`
+- 오류 문구: `src/constants/apiErrorMessages.ts` (`COM*`)
+- 계약 검사: `scripts/check-group-api-contract.mjs`
 
-- (2026-11-01, 2026-11-15 부분 폐기: 2단계 묶음 제목은 항목별 흰 카드로 대체) **소모임 개설/수정 폼(`modal/group-new`) 2단계 정보 구조화 및 빠른 컨트롤 칩 적용** — '기본 정보(카테고리/소모임명/설명)'와 '활동 및 운영 안내(인원/일정/장소)'로 의미 단위를 그룹화하고, 상단 안내 배너를 서두로 재배치. 정원은 `[-] / [+]` 스텝 버튼과 `4, 8, 12, 20명` 빠른 칩을 추가하고, 일정 및 장소에도 대표 프리셋 칩을 제공해 모바일 터치 편의성을 강화.
+## 의존성 · 관련 ADR
 
-- (2026-10-27) **동행 목록 행은 나눔과 동일하게 외곽 카드 박스 대신 하단 1px 구분선 플랫 리스트로 표시한다** — `groupCard`의 외곽 테두리·배경을 제거하고 `borderBottomWidth: 1`(`theme.colors.line`)과 상하 `16px` 패딩, `minHeight: 120`을 유지한다.
-- (2026-10-15) **동행/소모임 관리(수정/삭제/강퇴/상태변경) API를 HTTP 및 mock 경계에 완전 연동한다** — 방장 권한의 소모임 수정(`PUT /api/communion/{id}`), 소모임 삭제(`DELETE /api/communion/{id}`), 멤버 강퇴(`DELETE /api/communion/{id}/kick/{targetUserId}`), 모집 상태 변경(`PUT /api/communion/{id}/status`)을 `GroupDataSource` 인터페이스 및 `httpGroupDataSource`에 추가하고 `useUpdateGroup`, `useDeleteGroup`, `useKickGroupMember`, `useUpdateGroupStatus` 훅을 통해 화면에 연결합니다.
-- (2026-10-09) **동행 화면의 리스트 및 카드 레이아웃 구조는 나눔과 100% 동일하게 통일한다** — 나눔과 동행 탭을 상호 전환할 때 상단 필터와 첫 번째 카드 사이의 화면상 간격 및 위치가 달라 카드가 위아래로 움직이는 문제를 해결하기 위해, 동행 화면의 contentContainerStyle 및 이중 래퍼 뷰를 제거하고 나눔과 동일한 ScrollView 직하위 styles.list 컨테이너 및 카드 marginHorizontal 방식을 적용합니다. Issue #147.
-- (2026-10-09) **동행의 카테고리 필터는 나눔과 동일하게 상단 stickyControls에 통합한다** — 내 소모임이 세그먼트 탭으로 분리되어 본문 상단 가로 레일이 제거됨에 따라, 스크롤 위치에 따라 필터가 헤더에 도킹되던 복잡한 앵커 구조를 폐기하고 나눔과 동일하게 상단 `stickyControls` 내부에 카테고리 필터를 직접 배치합니다. 이를 통해 필터와 첫 번째 카드 사이 간격(16px) 및 스크롤 감추기/노출 동작을 나눔과 일치시키고 유지보수 복잡성을 대폭 낮춥니다. Issue #145.
-- (2026-10-10) **동행의 내 소모임은 나눔처럼 세그먼트 탭으로 분리하고 라벨을 '내 모임'으로 간결화한다** — 상단 세그먼트를 `소모임` | `봉사` | `내 모임` 3개로 구성하고, `내 모임` 선택 시 참여 중인 소모임 목록을 세로 카드로 표시한다. 기존 소모임 탭 상단의 가로 스크롤 '내 소모임' 레일은 제거해 화면 탐색을 단순화한다. Issue #141, #151.
-- (2026-09-07) **동행 참여는 즉시 가입으로 연결한다** — 라이브 `POST /api/communion/{id}/join`, 탈퇴는 `DELETE /api/communion/{id}/leave`. 화면 문구는 기존 `참여 신청하기`를 유지한다. 승인 대기 플로우는 서버가 별도 상태를 주기 전까지 만들지 않는다. 소모임장 탈퇴는 서비스에서 막고, 강퇴·이관은 아직 HTTP로 보내지 않는다.
-- (2026-08-13) **동행 HTTP는 라이브 관측값과 common-codes만 매핑한다** — 타입 SMALL_GROUP/VOLUNTEER, 상태 RECRUITING/CLOSED, 카테고리 WORSHIP_STUDY/PRAYER/HOBBY_CULTURE/SPORTS_HEALTH/OTHER. 목록에 본문·일정이 없어 카드 설명/일정은 비운다. `/my`는 `type`이 있어야 한다. 생성은 JSON이며 서버가 받지 않는 일정·장소는 보내지 않는다. 서버에 없는 화면 카테고리는 추측해 OTHER로 보내지 않는다. development 기본 adapter는 `http`.
-- (2026-07-17) **동행의 카테고리 도킹 기준은 0 크기 anchor 측정으로 덮어쓰지 않는다** — 상세 push로 목록 route가 숨을 때 발생하는 `width=0` 또는 `height=0` layout은 원래 필터 위치가 아니므로 마지막 정상 anchor를 유지합니다. 공통 세그먼트·필터도 마지막 양수 geometry를 유지해 복귀 첫 프레임에 선택 배경이 0폭에서 다시 측정되는 동시 깜빡임을 막습니다.
-- (2026-07-16, 최종 원인) **상세 복귀 첫 프레임은 목록 subtree를 재생성하지 않고 플랫폼 전환 시점에 맞춰 초기화한다** — 웹 native-stack은 비활성 route를 `display:none`으로 전환하며 숨은 ScrollView의 `scrollTop=0` 측정값은 실제 보존 위치를 뜻하지 않아, 숨긴 뒤의 scroll reset만으로는 복귀 위치를 보장하지 못합니다. 웹은 카드 입력 이벤트 안에서 기존 ScrollView를 `y=0`으로 맞추고 같은 스택에 `[id]` PUSH를 바로 dispatch해 다음 paint 전에 목록을 숨깁니다. Android·iOS는 이전 목록이 push 애니메이션 중 보이므로 사전 이동하지 않고 `transitionEnd(closing=true)` 뒤 초기화합니다. ScrollView·세그먼트·필터 indicator·blur layer는 같은 인스턴스를 유지하고 reset key는 sticky 내부 방향 누적값만 정리합니다. 430x932 웹에서 화면의 뒤로가기와 browser history 뒤로가기 모두 진입 전 `scrollTop=396`, sticky `height=116` 상태에서 복귀 직후와 300ms 뒤 `scrollTop=0`, 본문 필터 `opacity=1`, sticky 복제본 없음, layer `height=60`을 확인했습니다.
-- (2026-07-16) **소모임 상세와 개설 화면은 루트 동행과 같은 상단 기준을 사용한다** — 상세·오류·멤버·공지 화면은 공통 `Screen`의 `top inset + 20px`을 상속하고, `Screen` 밖의 소모임 개설 modal도 같은 계산식을 적용합니다. 화면 내부 section 여백과 기존 `TopBar` geometry는 변경하지 않습니다.
-- (2026-07-16) **소모임 개설 폼은 회색 divider 없이 내부 여백으로 구획하고 공통 작성 입력을 사용한다** — 카테고리·소모임명·설명·최대인원·일정·장소 사이의 8px divider를 제거하되 section padding은 유지합니다. 다섯 입력은 나눔 등록과 같은 `ModalFormTextInput`을 사용해 브라우저 기본 outline 대신 primary 2px 포커스를 표시하고 최대인원만 기존 width·가운데 정렬을 추가합니다.
-- (2026-07-16) **전체 모임 필터 도킹은 200ms 시간 기반 presence Cross Fade + Translate로 실행한다** — 스크롤은 anchor 통과 여부만 결정하고 공통 `useMotionPresence`가 본문 `opacity 1→0`·최대 4px 상승과 sticky `opacity 0→1`·`4→0px` 이동을 실행합니다. 복귀도 같은 progress를 역방향으로 재생한 뒤 sticky 복제본을 제거하며, 중간 시점에 터치·접근성 대상을 교대하고 동작 줄이기에서는 즉시 전환합니다.
-- (2026-07-16, 후속 폐기) **전체 모임 필터는 조건부 FadeIn 대신 12px 스크롤 연동 Cross Fade + Translate로 결합한다** — 12px 구간은 실제 휠·터치 입력 한 번에 진행값이 `0→1`로 건너뛰어 순간 교체처럼 보이므로 시간 기반 presence 전환으로 대체했습니다. anchor 위치와 기존 sticky 숨김·재표시·검색·필터 동작은 유지합니다.
-- (2026-07-15) **동행 탐색 control은 full pill과 44px 터치 범위를 유지하면서 시각 높이만 낮춘다** — 소모임/봉사 세그먼트는 40px track·32px 선택 영역, 전체 모임 필터는 36px surface를 사용하고 상하 hitSlop으로 44px 터치 범위를 보장합니다. `소모임 개설` FAB는 공통 46px geometry를 사용하며 기존 sticky 합류 기준·간격·모션·라우팅은 유지합니다.
-- (2026-07-15) **전체 모임 필터가 sticky로 결합된 순간에는 메뉴를 먼저 표시한다** — 결합 전의 하강 누적값으로 새 `세그먼트 + 필터` 레이어가 즉시 사라지지 않도록 전환 순간 표시 상태와 방향 거리를 초기화합니다. 결합 뒤 추가 12px 하강 숨김, 4px 상승 재표시와 필터의 본문 원위치 복귀 기준은 유지합니다.
-- (2026-07-15) **동행의 전체 소모임과 봉사는 같은 카드 프레임을 사용한다** — 화면 전용 `CompanionCard`가 96px 썸네일, 16px padding/radius, 1px 경계, shadow와 제목·설명·하단 메타 위치를 소유합니다. 소모임은 카테고리·인원, 봉사는 일정·참여 인원과 봉사 아이콘만 주입하며 봉사는 기존 `linkedGroupId` 상세로 이동합니다.
-- (2026-07-15) **동행 카테고리 필터는 `전체 모임`에만 적용한다** — `내 소모임`은 가입한 모임 전체를 유지하고 카테고리 선택으로 줄이지 않습니다. 검색어는 기존처럼 두 영역에 적용하며 `내 소모임 전체보기`, 필터 route query, 상세 이동은 유지합니다.
-- (2026-07-15) **동행 FAB는 `소모임 개설`로 행동과 대상을 함께 표시한다** — 소모임/봉사 세그먼트 어느 위치에서도 작성 대상이 소모임임을 알 수 있게 하고 기존 `/modal/group-new` 이동과 geometry는 유지합니다.
-- (2026-07-14) **내 소모임 전체보기는 공통 섹션 action을 사용한다** — 제목 오른쪽의 기존 동작과 전체 목록 전환은 유지하면서 기도와 같은 `SectionHeader`의 `전체보기 + chevron-right`, 44px 터치 영역, press motion을 공유합니다.
-- (2026-07-14) **소모임 개설·공지 편집은 이전 경로 이동을 `뒤로`로 표시한다** — 개설·수정 modal과 공지 작성·수정은 기존 `router.back()` 및 dirty form 확인을 유지하고, 공통 `TopBar`로 제목 정중앙과 68x44px 뒤로 surface를 공유합니다.
-- (2026-07-14) **동행 첫 콘텐츠는 sticky inset의 기본 간격만 사용한다** — 소모임/봉사 세그먼트 아래 `내 소모임` 영역에는 별도 section margin과 제목 상단 padding을 중복하지 않고, sticky inset이 만드는 18px 간격만 유지합니다. 제목·전체보기·가로 카드 내부와 카테고리 필터 합류 시점은 변경하지 않습니다.
-- (2026-07-14) **동행 검색은 제목과 세그먼트 사이에서 sticky 노출한다** — 검색을 열면 `제목 → 검색 → 소모임/봉사 세그먼트` 순서가 되고, 카테고리 필터는 기존 합류 시점을 유지합니다. 아래 스크롤로 control이 숨었더라도 헤더의 `검색` action을 누르면 검색창과 control을 다시 표시하며 닫으면 기존 방향형 정책으로 복귀합니다.
-- (2026-07-14) **동행 카테고리 필터는 원래 위치에서 세그먼트와 합류한다** — 내 소모임과 전체 모임 제목은 일반 콘텐츠로 스크롤하며, 필터의 전체 콘텐츠 기준 좌표가 세그먼트 하단에 닿을 때만 60px sticky 영역을 116px로 확장합니다. 필터는 같은 좌표에서 140ms fade로 결합·원위치 복귀하고, 결합된 메뉴는 아래 12px에서 숨고 위 4px에서 200ms로 재표시합니다. 동작 줄이기에서는 즉시 전환합니다.
-- (2026-07-14) **동행 세그먼트·카테고리·목록은 glass 타이틀 아래 하나의 스크롤을 사용한다** — 타이틀은 기본 배경색 blur로 고정하고 하단 border 없이 콘텐츠가 뒤를 통과하며 검색 action과 fixed FAB는 기존 위치를 유지합니다.
-- (2026-07-14) **동행 카테고리 indicator는 padding 없는 공통 track 좌표를 사용한다** — 화면 좌우 20px 여백은 ScrollView content로 분리하고 필터와 indicator의 좌표 원점을 일치시켜 선택 배경의 20px 오프셋을 제거합니다.
-- (2026-07-14) **동행 필터·세그먼트 query는 200ms 모션 뒤 갱신한다** — 선택 UI와 목록은 즉시 전환하고 category/section query는 indicator 이동 종료 뒤 `setParams`로 반영해 URL remount가 모션을 끊지 않으며 다른 query를 유지합니다.
-- (2026-07-14) **동행 카테고리는 이동 indicator와 route query를 함께 사용한다** — 44px 가변 너비 필터의 선택 배경은 200ms로 이동하고 `category` query는 현재 목록 route에만 반영해 상세 뒤로가기에서 선택과 결과를 복원하되 별도 방문 이력을 늘리지 않습니다.
-- (2026-07-14) **동행 전체 모임은 나눔과 같은 썸네일 가로 카드 구조를 사용한다** — 96px `VisualThumb`, 16px padding/radius, 1px 경계, 동일 shadow와 12px 간격을 사용하고 제목·모집 상태·설명·카테고리·인원 정보는 오른쪽 영역에 유지합니다. 내 소모임은 기존 214px cover 카드로 구분합니다.
-- (2026-07-14) **동행 탐색 control은 나눔과 같은 geometry를 사용한다** — 소모임/봉사 segment와 카테고리 filter는 44px 높이와 12px 하단 간격을 유지해 인접 영역의 터치와 시각 구획이 겹치지 않게 합니다.
-- (2026-07-12) **동행 전체 모임도 독립 카드로 구분한다** — flat row 전환 후 항목 경계가 약해져 전체 모임에 흰 surface, 16px radius, 옅은 border와 약한 shadow를 복구합니다. 내 소모임 가로 카드는 기존 214px 폭과 78px cover geometry를 사용합니다.
-- (2026-07-12, 2026-07-14 부분 폐기) **동행은 대표 영역과 전체 탐색 영역의 surface 수준을 구분한다** — 전체 모임 flat row는 카드로 복구했고 2026-07-14부터 기존 asset을 추가하지 않은 채 `VisualThumb`를 표시합니다. 내 소모임은 기존 `VisualCover`를 유지합니다.
-
-- (2026-07-12) **동행 개설은 API 계약 전에도 service mutation 경계를 통과한다** — 작성 화면은 `useCreateGroup → createGroup → GroupDataSource`를 사용하고 생성한 모임·상세·멤버를 runtime mock에 함께 유지합니다. 가로 내 소모임 목록은 snap 이동과 실제 전체보기 화면을 제공합니다.
-
-- (2026-07-11) **공지 삭제 진입점은 하나의 mutation 경계를 공유한다** — 편집 화면과 상세 카드의 삭제 UI는 각각 local confirm 상태만 소유하고, 실제 삭제·cache 갱신·mock 지속성은 `useDeleteGroupNotice → groupService → GroupDataSource` 한 경로에서 처리합니다.
-- (2026-07-11) **공지 CUD는 화면과 mock data source 사이의 완결된 수직 경계로 먼저 제공한다** — 제목/내용은 trim 후 필수값과 30/500자 제한을 서비스에서 검증하고, mutation 성공 시 상세 query cache를 갱신합니다. 실제 HTTP 전환은 공지 권한과 오류 코드 계약이 문서화되면 같은 data source 인터페이스에서 수행하며, 캡처용 `designVariant` 상태는 실제 폼 상태와 분리합니다.
-- (2026-07-11) **동행 핵심 흐름은 오류 코드가 문서화되어야 HTTP로 전환한다** — 상세·생성·수정·삭제·상태·참여·탈퇴·강퇴·공지 CUD의 4xx/5xx code가 Swagger에 있어야 권한/정원/상태 오류 문구를 확정할 수 있습니다. 현재 오류 문서 누락 11건을 포함한 전체 누락은 46건입니다.
-- (2026-07-11) **동행 request 계약은 PLAN의 일정·장소와 화면 제한을 함께 검증한다** — 목록·상세·생성·수정에서 일정과 장소를 요구하고 제목 20자, 내용 200자, 정원 2~100명, 공지 30/500자 제약을 확인합니다. 현재 Swagger와 PLAN 사이의 일정·장소 충돌을 포함한 전체 누락은 35건입니다.
-- (2026-07-11) **동행 조회 화면은 계약 확정 전에도 mock data source를 사용한다** — HTTP DTO/enum/권한 mapper 활성화는 기존 24건 계약 gate 뒤로 유지하되, 목록·상세·멤버 화면은 `useGroup* → groupService → mockGroupDataSource`를 소비합니다. 실제 목록·내 목록·멤버 응답은 같은 data source 인터페이스로 교체합니다.
-- (2026-07-10) **동행 디자인 variant와 실제 탐색 상태를 분리한다** — 캡처용 권한·오류·confirm/toast 상태는 development 전용 `designVariant`, 실제 소모임/봉사 segment는 `section` query를 사용합니다. 서버 권한·모집 상태가 연결되면 domain model이 화면 분기를 소유합니다.
-- (2026-07-10) **동행 mapper는 화면·관리 계약 24건 해소 후 활성화한다** — 주요 endpoint는 대부분 존재하지만 목록 `content/schedule`, category/status/keyword 필터, 응답 enum, 화면 입력 제한, 소모임장 이관 endpoint가 부족합니다. `test:api:contract:group` 통과 전에는 기존 mock 화면을 유지하고 강퇴를 이관처럼 사용하는 권한 추측을 금지합니다.
-- (2026-06-27) **동행 탭은 소모임/봉사 segment를 가진다** — Downloads `ScreenGroupList`와 `ScreenServiceList`를 기준으로 `/group`은 하단 `동행` 탭 루트가 되고, 내부에서 `소모임` 목록과 `봉사` 전용 리스트를 전환합니다.
-- (2026-06-27) **미사용 service/hook/card 레이어는 제거한다** — 현재 소모임 화면은 Downloads 원본을 기준으로 다시 구현할 예정이고 `GroupCard`, `groupService`, `useGroups` 호출처가 없어, 실제 API 연결 시 필요한 표면만 다시 만든다.
-- (2026-06-27) **소모임 목록은 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenGroupList` 구조를 `/group` route에 직접 반영합니다. 별도 service/hook은 실제 API 스키마 확정 전까지 만들지 않습니다.
-- (2026-06-27) **소모임 상세는 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenGroupDetail`의 기본 leader/member/non-member 구조를 `/group/[id]` route에 직접 반영합니다. 삭제/탈퇴/신청 confirm과 toast variant는 실제 필요 시 작은 overlay로 추가합니다.
-- (2026-06-27) **소모임 개설은 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenGroupCreate`의 기본 create/create-filled/edit/error 구조를 `modal/group-new` route에 직접 반영합니다. 실제 저장 API는 스키마 확정 전까지 붙이지 않습니다.
-- (2026-06-27) **소모임 공지는 실제 RN 화면으로 렌더링한다** — Downloads `ScreenGroupNotices` 구조를 `/group/notices` route에 직접 반영합니다. 실제 공지 저장/삭제 API는 권한 정책 확정 후 붙입니다.
-- (2026-06-27) **소모임 멤버 관리는 실제 RN 화면으로 렌더링한다** — Downloads `ScreenGroupMembers` 구조를 `/group/members` route에 직접 반영합니다. 강퇴/이관 API는 운영 정책 확정 후 연결합니다.
-- (2026-05-27) **소모임 목록 FAB는 ScrollView 밖 root layer에 둔다** — ZIP `ScreenGroupList`는 list body와 `+ 개설` FAB가 같은 scroll content가 아니라 `Phone` root 기준 absolute layer이므로, reference 화면도 `Screen scroll={false}`와 내부 ScrollView로 분리합니다.
-- (2026-05-27) **소모임 상세 설명문은 화면 전용 text metric을 사용한다** — Android RN 폰트 폭이 ZIP web/Pretendard 렌더보다 넓어 공통 `bodyText`를 쓰면 설명문이 한 줄 더 감기고 리더 카드/CTA/멤버 rail이 아래로 밀립니다. 공통 typography를 흔들지 않고 `ScreenGroupDetail` 설명문에만 `fontSize: 13`, `lineHeight: 22`를 적용해 ZIP 줄 감김과 vertical rhythm을 맞춥니다.
-- (2026-05-27) **소모임 상세 typography는 화면 전용 ZIP weight를 우선한다** — 공통 `cardTitle`/`metaText`는 다른 reference 화면에서도 쓰이므로 변경하지 않고, `ScreenGroupDetail`의 title 800, meta 600, leader name 700, member label 600, notice title 700 weight를 별도 스타일로 번역합니다.
-- (2026-05-27) **소모임 상세 toast/dialog는 ZIP overlay 구조를 따른다** — `Screen` 기본 ScrollView 안에 toast를 두면 원본처럼 fixed bottom overlay로 캡처되지 않으므로, 상세 body만 내부 ScrollView로 두고 toast/dialog는 `Phone` root overlay처럼 분리합니다.
-- (2026-05-27) **멤버 관리 Toast는 list ScrollView 밖 fixed layer에 둔다** — ZIP `ScreenGroupMembers`는 `phone-body` list와 `CheckToast` overlay를 분리하므로, RN reference도 `Screen scroll={false}` + 내부 ScrollView + root Toast 구조로 맞춥니다.
-- (2026-05-27) **소모임장 action card는 compact inline 버튼을 사용한다** — ZIP `ScreenGroupDetail`의 leader action card는 큰 원형 icon tile이 아니라 44px 높이의 inline icon+label `ActionBtn` grid이므로 reference 화면도 같은 구조로 맞춥니다.
-- (2026-05-27) **소모임 상세 CTA는 화면 전용 pill geometry를 사용한다** — 비멤버 참여 신청과 멤버 탈퇴 버튼은 ZIP의 52px full-width pill을 기준으로 하며, 공통 Button 번역 차이가 큰 곳은 화면 전용 style로 맞춥니다.
-- (2026-05-26) **소모임 toast 문구는 ZIP 원본을 따른다** — `full-toast`는 `인원이 꽉 찼습니다`, `leader-leave-toast`는 `소모임장은 탈퇴할 수 없어요. 먼저 이관해주세요`를 기준으로 합니다.
-- (2026-05-25) **멤버 관리 화면은 ZIP flat list 기준으로 유지한다** — 멤버 관리는 카드 묶음이 아니라 full-width row list, 오른쪽 강퇴 pill, 이관 모드 radio row, 하단 fixed action 구조를 따릅니다. 남은 confirm 계열 diff는 list 자체보다 modal overlay와 원본 캡처 프레임 차이로 분리 추적합니다.
-- (2026-05-23, 2026-11-15 폐기: 대표 사진 + 흰 시트로 변경) **소모임 상세는 cover hero 없이 정보 header를 우선한다** — ZIP 원본은 소모임 상세에서 대표 cover보다 카테고리/모집 상태/인원/설명/리더 정보를 먼저 보여주므로 reference 화면도 같은 구조를 따릅니다.
-- (2026-05-23) **소모임장 이관은 별도 list mode로 검증한다** — 멤버 관리는 기본 강퇴 모드와 이관 모드를 분리하고, 이관 모드에서는 경고 배너, radio 선택, 하단 고정 이관 버튼을 표시합니다.
-- (2026-05-23) **소모임 원본 상태는 `variant` 라우트로 검증** — ZIP의 공지/멤버 관리 포함 29개 화면 상태를 모두 접근 가능하게 두고, 실제 권한/API 정책은 mock-first로 유지합니다.
-- (2026-05-23) **소모임 검색은 접힌 상태로 시작** — 나눔 목록과 같은 탐색 패턴을 유지하기 위해 검색 입력은 상단 아이콘으로 펼치고, 개설 액션은 floating FAB로 둡니다.
-- (2026-05-23) **대표 이미지 없음은 시각 placeholder로 처리** — 실제 cover 이미지가 없는 mock/초기 데이터도 목록에서 빈 박스로 보이지 않도록 공통 `VisualCover`를 사용합니다.
-- (2026-05-22) **카풀은 소모임 카테고리로 포함** — Notion MVP 정의에 따라 별도 도메인이 아니라 소모임 카테고리로 처리합니다.
-- (2026-05-22) **멤버 정책은 mock-first** — 최소 2명, 정원 초과 방지, 소모임장 탈퇴 제한을 mock service에서 먼저 검증합니다.
-- (2026-05-22) **공지/멤버 관리는 mock UI까지** — 운영자 권한과 실제 멤버 관리 API는 후속 Phase에서 확정합니다.
-
-## 미결 / 추적
-
-- 프런트 HTTP 목록/상세/개설/멤버/공지/참여/탈퇴/소모임장 이관은 라이브로 연결됨. 남은 공백은 목록 본문·일정·장소(Issue #301), 서버에 없는 카테고리 4개, 삭제 500, 오류 코드. 단일 출처는 Issue #21이며 `test:api:contract:group`은 문서 공백이 있으면 실패한다.
-- 참여는 즉시 가입으로 연결함. 승인 대기가 필요하면 서버 상태를 받은 뒤 화면 문구를 바꿀 것.
-- 공지 작성 권한과 소모임장/관리자 권한 모델 확인 필요.
-- 강제 내보내기 이의 제기/복구 플로우는 실제 API와 운영 정책 확정 후 반영.
-
-## 의존성
-
-- common 도메인의 UI, `queryKeys`, `queryClient`, 이미지 선택 컴포넌트에 의존합니다.
-- auth 도메인의 현재 사용자(`authStore`)에 의존합니다. HTTP `isLeader`/`isMine`/`isJoined`는 `leaderId`·멤버 `userId`와 비교합니다.
-
-## 관련 ADR
-
-- [ADR 0002 — 백엔드 선택 보류 (Mock-first)](../adr/0002-backend-tbd.md)
+- common 의 UI 컴포넌트, `queryKeys`, `queryClient`
+- auth 의 현재 사용자(`authStore`) — 소모임장·가입 여부 판정
 - [ADR 0003 — MVP 범위는 Notion 최신 정의 우선](../adr/0003-mvp-scope-notion-first.md)
 - [ADR 0004 — Notion v1 범위와 Expo Dev Client 기준](../adr/0004-notion-v1-dev-client-scope.md)

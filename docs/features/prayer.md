@@ -1,165 +1,57 @@
 # prayer (중보기도)
 
-> 마지막 갱신: 2026-11-03 (런타임 목 어댑터 및 `src/mocks/prayers.ts` 제거) | 담당 Phase: P5/P7 | 기록 성격: 도메인 컨텍스트
+> 기록 성격: 도메인 컨텍스트 | 담당 Phase: P5/P7
 
 ## 한 줄 요약
 
-성도가 요일별 기도방에 참여하고 기도제목을 등록/확인/응답 기록합니다.
+성도가 요일별 기도방에 참여 신청하고, 기도를 완료 체크하고, 기도제목을 등록·응답 요청합니다.
 
----
+## 현재 동작
 
-## ✅ 완료
-
-- 기도 도메인 전반 공통 Empty FAQ 기준 통일 — 내 기도방/내 기도제목 섹션, 기도방 상세(/prayer/[id])의 기도/응답/현황 탭 빈 상태, 내 기도제목 관리(/prayer/request) 화면에 FAQ 화면 기준(84px 원형 배경, 42px 아이콘, 상하 정중앙 배치, CTA 버튼 배제)의 공통 `<Empty />` 컴포넌트를 일관되게 적용
-- 기도 상세 및 내 기도제목 하드코딩 Mock 제거 및 공통 Empty 연동 — 기도 상세(/prayer/[id])의 더미 기도제목/응답/성도 현황 상수와 내 기도제목(/prayer/request) 화면의 mock 배열을 걷어내고, 실제 서버 쿼리 데이터 기반으로 일원화. 데이터 부재 시 공통 `<Empty />` 상태 뷰 표시
-- 내 기도방 카드 및 기도방 상세 화면 디자인 고도화 — 기도 탭 루트의 내 기도방 카드에 참여율 게이지 바 및 정돈된 요일 배지를 적용하고, 기도방 상세(/prayer/[id])에는 상단 요약 카드(요일/시간 배지, 참여/인원/긴급 배지, 오늘 참여율 게이지), 인터랙티브 언더라인 탭(기도·응답·현황 전환), 성도 아바타와 긴급 칩이 적용된 기도제목 카드, 성도별 완료 상태 배지가 포함된 현황 패널을 일관되게 적용
-- 기도 탭 API 로딩 정상화 및 Nullable 매퍼 안정화 — 서버의 nullable 필드(rejectReason, emergencyEndAt, answerContent, answeredAt, completedAt, description)를 안전하게 파싱하도록 requireNullableString을 적용하고, getOverview에서 Promise.allSettled를 통해 일부 엔드포인트 실패 또는 데이터 부재 시에도 화면 오류 없이 복구
-- 기도 신청·작성 플로팅 메뉴 통합 — 우측 하단에 '중보기도 신청'과 '기도제목 작성'을 토글하는 Speed Dial 플로팅 메뉴를 추가하고, 메뉴 오픈 시 딤처리(backdrop)가 상단 glass 헤더까지 온전히 덮도록 overlay 레이어 zIndex 보정. 본문 내 불필요한 중보기도 신청 카드를 제거해 신청/작성 진입점을 플로팅 메뉴로 일원화
-- 중보기도 사용자 HTTP adapter — development 기본값은 나눔과 같이 http다. 내 기도방·내 기도제목은 mock 행 위에 덮지 않고 `GET /api/prayer/cohorts/my`와 `GET /api/prayer/topics/my`로 만든다. 테스트와 `EXPO_PUBLIC_PRAYER_ADAPTER=mock`은 기존 mock service를 쓴다. 작성 화면의 `createPrayerTopic`은 `categoryId`가 없어 등록 API를 호출하지 않는다
-- 기도 작성 control·FAB 비율 보정 — 작성 화면 세그먼트의 full pill을 유지한 채 40/32px로 낮추고 44px 터치 범위를 보존했으며 루트 `기도제목 작성` FAB를 46px로 축소해 하단 탭과 위계를 분리
-- 기도 루트 카드 이동 의미 구분 — 상세 이동이 없는 내 기도제목 개별 카드는 버튼 역할·이동·화살표를 제거하고, 상세로 이동하는 내 기도방 카드에는 `기도방 보기 + chevron-right`를 명시하며 섹션 전체보기와 기존 경로는 유지
-- 중보기도 신청 아이콘 구분 — 하단 기도 탭의 `Hearts`와 신청 카드의 기존 `HandHeart`가 겹쳐 보이지 않도록 신청 카드만 Solar `UserPlusRounded`로 변경하고 기존 카드 geometry·색상·`/prayer/apply` 이동을 유지
-- 기도 플로팅 버튼 행동 문구 명확화 — 대상명뿐인 `기도제목`을 `기도제목 작성`으로 바꾸고 기존 `/modal/prayer-new` 이동·`+` 아이콘·고정 위치를 유지
-- 내 기도제목 전체보기 배치 통일 — 섹션 아래의 큰 outline 버튼을 제거하고 제목 오른쪽에 공통 `전체보기 + chevron-right` action을 배치하되 기존 `/prayer/request` 이동은 유지
-- 기도 glass sticky 헤더 — 오늘 진행·기도방·기도제목·신청 영역을 하나의 스크롤로 묶고 기본 배경색 기반 blur 타이틀 뒤로 지나가게 적용하며 FAB 위치는 유지
-- 기도 탭 상세 Stack 적용 — 기도방 상세·참여 신청·내 기도제목을 기도 목록 위에 push하고 뒤로가기 시 `/prayer`로 복귀하도록 탭별 중첩 Stack 추가
-- 기도 목록 카드 형태 복구 — 오늘의 기도 진행률은 유지하고 기도방·기도제목을 흰 surface, 둥근 경계, 12px 간격의 독립 카드로 복구
-- 기도 대표 요소·상태 UI 적용 — 참여 중인 방의 완료 인원을 합산한 오늘의 기도 진행 카드와 progress를 추가하고 기도방/기도제목은 flat list, loading은 Skeleton, error는 재시도로 정리
-- 기도 루트 무반응 요소 연결 — 기도방 카드는 상세, 기도제목 전체보기는 요청 목록, 중보기도 신청 카드는 신청 화면으로 이동하고 오류 상태 재시도와 FAB 하단 스크롤 여백을 적용
-- 기도 상세 로컬 badge·underline tab 제거 — 기존 geometry와 선택 상태를 공통 `DetailBadge`·`UnderlineTabs`로 이동
-- 중보기도 목록/상세/등록 화면 구현 — `app/(tabs)/prayer/index.tsx`, `app/(tabs)/prayer/[id].tsx`, `app/modal/prayer-new.tsx`
-- 중보기도 타입, mock 데이터, 기도제목 생성 service, TanStack Query mutation hook 구현 — `src/types/prayer.ts`, `src/mocks/prayers.ts`, `src/services/prayerService.ts`, `src/hooks/usePrayers.ts`
-- 요일 필터, 기도방 참여/나가기, 기도제목 등록, 기도 체크, 응답 기록 mock mutation 구현
-- 중보기도 목록 1차 디자인 정렬 — ZIP prototype 기준 요일 색상 박스, 내 기도모임/다른 기도모임 분리, 기도제목 FAB 적용
-- ZIP 원본 기도방 신청/기도요청 reference 라우트 추가 — `app/(tabs)/prayer/apply.tsx`, `app/(tabs)/prayer/request.tsx`
-- ZIP 110개 visual inventory 재검증에 포함 — 중보기도 reference 화면을 Dev Client capture/compare 대상에 유지
-- 폐기된 ZIP 5탭 정보구조 반영 — 중보기도를 `동행` 탭 기본 segment로 두던 구조는 Downloads preview 기준 `기도` 하단 탭으로 대체
-- ZIP 중보기도 화면 구조 정렬 — ZIP `ScreenPrayerList`, `ScreenPrayerDetail`, `ScreenPrayerRequest` 기준으로 다른 기도모임방 flat row, 상세 underline tab/action pill, 기도요청 목록 카드를 reference 화면에 반영하고 `pray-list 15.12→13.35`, `pray-detail 14.60→12.91`, `pray-request 14.31→10.17`로 낮춤
-- ZIP 중보기도 FAB root overlay 정렬 — 기도 목록/상세/요청 화면의 body ScrollView와 root FAB를 분리하고 72/73/75번을 재캡처해 `pray-list 13.32→12.28`, `pray-detail 12.91→11.84`, `pray-request 10.17→9.34`로 낮춤
-- 기도 목록 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenPrayerList`의 내 기도방, 내 기도제목, 중보기도 신청 구조를 `/prayer` route에 RN으로 직접 반영
-- 폐기된 중보기도 direct route 실제 화면 복구 — `/prayer` 숨김 direct route 결정은 Downloads preview 기준 `기도` 하단 탭으로 대체
-- 기도방 상세 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenPrayerDetail`의 underline tab, 기도제목/응답/현황 card, 하단 기도 완료 action을 `/prayer/[id]` route에 RN으로 직접 반영
-- 기도방 참여 신청 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenPrayerApply`의 요일/시간 선택, 신청자 정보, 승인 대기 안내, 하단 신청 CTA를 `/prayer/apply` route에 RN으로 직접 반영
-- 내 기도제목 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenPrayerRequest`의 승인 안내, 상태 badge list, 선택 row, 응답완료 요청 CTA를 `/prayer/request` route에 RN으로 직접 반영
-- Downloads preview 탭 IA 반영 — `/prayer`를 숨김 route가 아니라 하단 `기도` 탭 루트로 복구
-- 기도 루트 overview 데이터 경계 정리 — 화면 내부 fixture를 `types → mocks → service → TanStack Query hook`으로 이동하고 loading/error 상태 및 서비스 테스트 추가
-
-## 주요 파일 (도메인 파일 지도)
-
-| 경로                                           | 역할                                            |
-| ---------------------------------------------- | ----------------------------------------------- |
-| `app/(tabs)/prayer/_layout.tsx`                | 기도 목록·상세·신청·요청 중첩 Stack             |
-| `app/(tabs)/prayer/index.tsx`                  | Downloads 하단 `기도` 탭 루트                   |
-| `src/components/faith/FaithSectionsScreen.tsx` | 기도 목록 공유 렌더러                           |
-| `src/components/faith/FaithPrayerContent.tsx`  | 기도 목록 본문 |
-| `src/components/faith/FaithParts.tsx`, `faithLabels.ts`, `faithSectionsStyles.ts` | 기도·삶공부 목록 공유 부품·라벨·스타일 |
-| `app/(tabs)/prayer/[id].tsx`                   | 기도방 상세, 기도제목, 응답 기록                |
-| `src/components/prayer/detail/PrayerDetailParts.tsx` | 기도방 상세 탭 패널(기도·응답·현황)·항목 부품 |
-| `src/components/prayer/detail/prayerDetailStyles.ts` | 기도방 상세 스타일 |
-| `app/(tabs)/prayer/apply.tsx`                  | 기도방 참여 신청 요일/시간 선택 화면            |
-| `app/(tabs)/prayer/request.tsx`                | 내 기도제목 요청 상태 목록                      |
-| `app/modal/prayer-new.tsx`                     | 기도제목 등록 모달                              |
-| `app/mypage/prayer-history.tsx`                | 마이페이지 중보기도 활동 이력 (`GET /api/prayer/me/history`) |
-| `src/services/prayerService.ts`                | 중보기도 HTTP 서비스                            |
-| `src/services/prayerHttpDataSource.ts`         | 사용자 `/api/prayer` HTTP data source           |
-| `src/services/prayerMapper.ts`                 | Notion DTO → 기존 view model                    |
-| `src/hooks/usePrayers.ts`                      | 기도 overview·상세·신청·작성 query/mutation 훅  |
-| `src/constants/domainOptions.ts`               | 중보기도 요일 필터 옵션                         |
-| `src/types/prayer.ts`                          | 중보기도 화면 모델                              |
-| `src/types/prayerApi.ts`                       | Notion 필드만 담은 사용자 기도 DTO              |
-| `scripts/check-prayer-api-contract.mjs`        | 사용자 중보기도 OpenAPI 계약 검사               |
+- `/prayer` 는 하단 `기도` 탭 루트. 상세·신청·내 기도제목은 기도 탭 Stack 에 push 되고 뒤로가면 `/prayer` 로 온다.
+- 루트 overview 는 `GET /api/prayer/cohorts/my`·`topics/my`·`applications/my` 를 `Promise.allSettled` 로 함께 받아, 일부가 실패해도 나머지로 그린다 (#185). 이번 주 기도 진행 카드, 내 기도방, 내 기도제목을 보인다.
+- 승인 대기 신청은 `pending` 기도방 카드로 붙는다. 상세로 가지 않고, 누르면 확인 후 `DELETE /api/prayer/applications/{id}` 로 취소한다.
+- 우측 하단 플로팅 메뉴에서 `중보기도 신청`(`/prayer/apply`)과 `기도제목 작성`(`/modal/prayer-new`)으로 간다.
+- 신청 화면은 요일·시간을 골라 `POST /api/prayer/applications`(`yoil`·`timeSlot`).
+- 기도방 상세(`/prayer/[id]`)는 `GET /api/prayer/cohorts/{id}/status` 와 `GET /api/prayer/topics/board` 로 기도·응답·현황 탭을 그린다. 완료 버튼은 `POST`/`DELETE /api/prayer/cohorts/{id}/completion`. 당겨서 새로고침으로 둘 다 다시 받는다.
+- 기도제목 등록은 `GET /api/prayer/categories` 로 카테고리를 받고 `POST /api/prayer/topics`(`categoryId`·`title`·`content`).
+- 내 기도제목(`/prayer/request`)은 `GET /api/prayer/topics/my` 를 상태 배지 목록으로 보이고, 응답완료 요청은 `POST /api/prayer/topics/{id}/answer-request` 에 사용자가 쓴 `answerContent`(필수)를 보낸다.
+- 마이페이지 `중보기도 활동` 은 이 도메인의 `GET /api/prayer/me/history` 를 쓴다.
 
 ## 데이터 타입
 
-`PrayerRoom`은 `weekday`, `leader`, `memberCount`, `isJoined`를 포함합니다. `PrayerTopic`은 `isAnonymous`, `prayerCount`, `hasPrayed`, `isAnswered`, `answer`를 포함합니다. 루트 화면 전용 `PrayerOverview`는 요일방 요약과 내 기도제목 상태 요약을 가지며 API DTO mapper의 출력 모델로 사용합니다. `PrayerCohortDto`, `PrayerCohortStatusDto`, `PrayerCompletionMemberDto`, `PrayerTopicDto`, `PrayerHistoryItem`은 Notion에 적힌 필드만 가집니다. `PrayerApplicationDto`는 이름만 있고 값 타입은 페이지에 없어 `unknown`입니다(없는 이름은 `null`). `PrayerCategoryDto`는 화면이 쓰는 `id`·`categoryName`만 확인합니다. 화면에서 쓰지 않는 DTO 필드는 `null` 을 허용합니다. 기도방 상세 성공 필드는 없어 빈 객체로만 읽습니다. `a / b`로 한 칸에 적힌 이름은 두 필드입니다.
+- 화면 모델은 `PrayerOverview`(`rooms`·`requests`), `PrayerOverviewRoom`, `PrayerRequestSummary`. DTO(`src/types/prayerApi.ts`)는 Notion 에 적힌 필드만 가지며, 화면이 쓰지 않는 nullable 필드는 `null` 을 허용한다. `PrayerApplicationDto` 는 값 타입이 페이지에 없어 `unknown` 으로 읽는다.
+- 기도방 카드: `myRole` 이 `LEADER`/`MEMBER` 이고 `yoil` 1~5, `timeSlot` `AM`/`PM` 인 기수만 만든다. 일·토(0·6)는 `PrayerWeekday` 에 없어 목록에서 빠진다. `cohortName`→제목, `weekCompletedCount`→완료 인원, `completionRate`→참여율.
+- 승인 대기 카드: 신청 `status === "PENDING"` 이고 이미 참여 중인 방이 아닐 때. `cohortId` 가 없으면 id 는 `application-{신청 id}`.
+- 기도제목 상태: `REVIEW`/`OPEN`/`REJECTED`/`ANSWER_REQUESTED`/`ANSWERED`/`HIDDEN` → `reviewing`/`published`/`rejected`/`answerRequested`/`answered`/`hidden`. 설명은 `content`.
+- 상세 요일·시간대는 현황 응답 `yoil`(0=일 … 6=토)·`timeSlot` 으로 표시하고 값이 없으면 비운다 (#307). 날짜는 `createdAt`(응답은 `answeredAt` 우선)을 "M월 D일"로, 없으면 생략한다.
 
-## 결정 사항 (최신 위)
+## 결정 사항 (지금 유효한 것만)
 
-- **기도방 상세 상단 배지는 둘만 둔다(캔버스 v1.40)** — `참여중`(info)과 긴급 기도제목이 있을 때 `긴급 N건`(warning). 인원·완료 수는 아래 진행 바 글자에 있다. 기도제목 등록 화면은 안내 상자를 맨 위에 두고 항목마다 흰 카드, 카테고리 칩은 회색(`FilterChips wrap`).
+- **서버가 준 값만 그린다** — 완료 인원·참여율은 서버 계약상 이번 주 기준이라 문구를 `이번 주` 로 쓴다(오늘 기준 필드 없음). 이번 주 진행 카드의 합산 비율은 새 필드 없이 참여 중 방의 `completedCount/memberCount` 합으로 계산한다.
+- **상세 상단 배지는 `참여중` 과 `긴급 N건` 둘만** — 인원·완료 수는 진행 바 글자에 있다. 불러오기 전·실패 시 제목은 `기도방`, 응답 본문이 없으면 응답 상자를 그리지 않는다.
+- **완료 가능 여부는 서버가 정한다** — 현황 `canComplete === false` 일 때만 완료 버튼을 막고 안내를 보인다(null 은 막지 않는다). 팀장 좋아요(`PRY015`)·멤버 완료(`PRY010`) 제한도 클라이언트 역할로 거르지 않고 서버 오류를 그대로 보인다.
+- **익명 작성 선택지는 두지 않는다** — 등록 API 에 익명 필드가 없다 (#304). 카테고리는 불러온 첫 항목이 기본 선택되고, 목록이 없으면 등록하지 않는다.
+- **이동하는 카드에만 화살표** — 내 기도방 카드는 상세로 가므로 `기도방 보기 >` 를 두고, 내 기도제목 개별 카드는 상세가 없어 정적이다. 목록 이동은 섹션의 `전체보기` 만.
+- **호출 범위** — 사용자 `/api/prayer/*` 만 호출한다. `/api/admin/prayer` 와 `GET /api/mypage/activities/prayers` 는 쓰지 않는다. 기도방 상세 `GET /api/prayer/cohorts/{id}` 는 성공 본문 필드가 Notion 에 없어 화면에 쓰지 않는다 (#135).
+- **상세 디자인 상태는 development 전용** — 완료·empty·현황·응답 캡처는 `designVariant` 쿼리로만 열고 production 에서는 무시한다.
 
-- (2026-11-07) **기도 화면은 서버가 준 값만 그리고, 없는 값은 지어내지 않는다**
-  - 완료 인원·참여율은 서버 계약상 이번 주 기준(`weekCompletedCount`, 현황 DTO "이번 주 현황")이라 목록·상세 문구를 `이번 주`로 쓴다. 오늘 기준 필드는 없다.
-  - 상세 요일·시간대는 현황 응답의 `yoil`(0=일 … 6=토)·`timeSlot`(AM/PM)으로 표시하고, 값이 없으면 비운다(#307). 불러오기 전·실패 시 제목은 `기도방`. `참여중` 배지는 현황 DTO에 참여 여부가 없어 두지 않는다. 기도제목 시각은 `createdAt`(응답은 `answeredAt` 우선)을 "M월 D일"로, 없으면 생략한다(#219). 응답 본문이 없으면 응답 상자를 그리지 않는다. 긴급 배지는 `긴급 N건`.
-  - 현황 `canComplete === false` 이면 완료 버튼을 막고 안내 문구를 보인다(null 은 막지 않는다).
-  - 등록 모달은 익명 선택지를 두지 않는다. 등록 API에 익명 필드가 없다(#304). 카테고리는 고르기 전 불러온 첫 항목이 선택돼 보이고 그대로 전송되며, 목록이 없으면 등록하지 않는다.
-  - 응답완료 요청은 사용자가 쓴 `answerContent`(필수)를 보낸다.
-  - overview 는 `GET /api/prayer/applications/my` 도 읽어 `status === "PENDING"` 이고 참여 중이 아닌 신청을 `pending` 기도방(`applicationId` 포함)으로 붙인다. 승인 대기 카드는 상세로 가지 않고, 누르면 확인 후 `DELETE /api/prayer/applications/{id}` 로 취소한다. 승인 전이라 `cohortId` 가 없는 신청도 `application-{신청 id}` 로 카드를 만든다. 기도방 상세는 당겨서 새로고침으로 현황·기도제목을 다시 받는다.
-  - 마이페이지 `중보기도 활동 이력` 은 `GET /api/prayer/me/history` 를 활동중/종료·역할·기간·종료 사유로 그린다.
+## 미결
 
-- (2026-11-03) **런타임 목 어댑터(`resolvePrayerAdapterMode`, `mockPrayerDataSource`), 목 오버레이 매퍼 및 `src/mocks/prayers.ts` 제거** — 전 도메인 HTTP 단일화에 따라 `httpPrayerDataSource`로 일원화하고, 미사용 목 오버레이 헬퍼(`applyPrayerApiToOverview`, `applyCohortsToRooms`, `applyTopicsToTopics`) 및 `"목업 데이터"` 문구를 제거.
+- 기도방 상세의 기도제목은 기수별이 아닌 전체 게시판(`topics/board`)이다. 기수별 조회 API 대기 (#200).
+- 게시판 응답의 `createdAt` 이 null 로 와 작성 시각을 못 보인다 (#219).
+- 익명 작성은 등록 API 필드 대기 (#304).
+- 일·토 기도방, 비성도 기도 요청, 참여 승인 정책, 푸시 알림·기도 통계는 후속 Phase.
 
-- (2026-10-28) **기도 상세(/prayer/[id]) 및 내 기도제목(/prayer/request) 하드코딩 Mock 제거 및 공통 Empty 연동** — 기도 상세의 더미 기도제목/응답/인원 수치(`defaultUrgent`, `defaultProgress`, `defaultAnswers` 등)와 내 기도제목 화면의 `requests` mock 배열을 완전히 제거하고, 실제 TanStack Query 데이터 기반으로 일원화. 데이터가 없거나 0건일 때 공통 feedback 컴포넌트(`<Empty />`)를 일관되게 표시하도록 정리.
+## 코드 위치
 
-- (2026-10-28) **중보기도 도메인 실 API Mutation 연동 및 캐시 즉시 갱신 적용** — 기도 상세(/prayer/[id])의 ‘오늘 기도 완료’ 버튼에 실제 `POST/DELETE /api/prayer/cohorts/{cohortId}/completion` mutation을 연결하여 완료 인원·달성률·성도 출석 목록이 실시간 갱신되도록 개선. 또한 기도방 참여 신청(/prayer/apply)의 `POST /api/prayer/applications`, 기도제목 등록 모달(/modal/prayer-new)의 `POST /api/prayer/topics` (카테고리 선택 포함), 내 기도제목(/prayer/request)의 `POST /api/prayer/topics/{topicId}/answer-request` (응답완료 요청)을 실제 API와 연결.
+- 화면: `app/(tabs)/prayer/`, `app/modal/prayer-new.tsx`
+- 목록 렌더러: `src/components/faith/` (삶공부와 공유)
+- 상세 부품: `src/components/prayer/detail/`
+- 데이터: `src/services/prayer*`, `src/hooks/usePrayers.ts`, `src/types/prayer*`
+- 계약 검사: `scripts/check-prayer-api-contract.mjs` (`npm run test:api:contract:prayer`, `validate` 에는 없음)
 
-- (2026-10-28) **내 기도방 카드 및 상세 화면(/prayer/[id]) 디자인 통일 및 일관화** — 기존에 분리되어 있던 mock 화면과 HTTP 프로토타입(LivePrayerDetail)을 단일 상세 화면으로 통합하여 모드에 무관하게 일관된 고품질 UI(Hero Summary Card, UnderlineTabs 전환, 성도 아바타, 응답 박스, 성도별 출석 배지)를 제공한다. 루트 내 기도방 카드에는 오늘 참여율 게이지 바를 추가하여 시각적 일관성을 확보한다.
+## 의존성 · 관련 ADR
 
-- (2026-10-27) **기도제목 등록 모달(`modal/prayer-new.tsx`)을 나눔·소모임 작성 모달과 동일한 폼 구조로 통일** — 기존 카드 박스(`FormSection`)와 본문 내 `취소/등록` 2열 버튼을 제거하고, 공통 `ModalFormSection`·`ModalFormTextInput`·안내 박스(`infoBox`)·작성 중단 `ConfirmDialog` 및 하단 반투명 글래스 고정 CTA 바(`기도제목 등록`)로 통일한다.
-
-- (2026-10-15) **기도 DTO의 Nullable 필드 안전 파싱 및 getOverview 병렬 복구 적용** — 실제 서버 응답에서 `rejectReason`, `emergencyEndAt`, `answerContent`, `answeredAt`, `completedAt`이 null로 반환될 때 매퍼 검증 실패(`INVALID_RESPONSE`)가 발생하던 문제를 해결하기 위해 `requireNullableString`을 적용합니다. `getOverview()`는 `Promise.allSettled`를 통해 `cohorts/my`와 `topics/my`를 병렬로 안전하게 수집하여 일부 실패 시에도 화면이 정상 렌더링되도록 합니다. Issue #185.
-- (2026-10-10) **내 기도방 및 내 기도제목 빈 상태에 공통 Empty 컴포넌트 적용** — `data.rooms.length === 0`일 때 "참여 중인 기도방이 없어요 / 중보기도 신청을 통해 기도방에 참여해보세요.", `data.requests.length === 0`일 때 "등록된 기도제목이 없어요 / 기도제목 작성을 통해 기도제목을 나눠보세요." 공통 Empty 컴포넌트를 렌더링하도록 적용. Issue #164.
-- (2026-10-09) **기도 신청 및 작성 액션을 우측 하단 플로팅 메뉴(Speed Dial)로 통합하고 본문 중복 카드를 제거한다** — 기존 본문 하단의 정적 '중보기도 신청' 카드와 '기도제목 작성' 단일 FAB를 우측 하단 토글형 플로팅 메뉴로 통합합니다. 메뉴 토글 시 '중보기도 신청'(`/prayer/apply`) 및 '기도제목 작성'(`/modal/prayer-new`) 항목이 펼쳐지며, 본문 내 불필요한 신청 카드는 제거하여 신청/작성 행위를 하단 우측 플로팅 메뉴에서 일원화합니다.
-- (2026-10-09) **development http에서는 기도 목록 캐시와 상세가 목업 화면과 갈라진다** — overview query key 끝에 adapter mode를 붙여 저장된 목업 응답을 다시 쓰지 않는다. 기도방 카드 제목은 `cohortName`이 있으면 그 이름이고, 없으면 요일·시간이다. `__DEV__`에서 mock일 때만 `목업 데이터`를 표시하고 http일 때는 표시하지 않는다. route id가 있고 `designVariant`가 없으며 adapter가 http이면 상세는 `GET /api/prayer/cohorts/{id}/status`와 `GET /api/prayer/topics/board`만 그린다. 게시판은 기수별이 아니다. 내 기도제목 화면은 `GET /api/prayer/topics/my`의 title·categoryName·content·status를 그린다. id가 없거나 mock이거나 `designVariant`가 있으면 기존 디자인 문구를 유지한다. 신청 화면과 작성 모달 `createPrayerTopic`은 그대로다.
-- (2026-10-09) **중보기도 HTTP는 2026-10-02 사용자 `/api/prayer`만 호출하고 development 기본값은 http다** — 나눔과 같이 `EXPO_PUBLIC_PRAYER_ADAPTER`가 없으면 development는 http, preview·production은 mock이다. `mock`이면 기존 mock overview를 반환한다. `http`의 내 기도방·내 기도제목은 mock 행을 남기지 않는다. 참여 역할이 `LEADER` 또는 `MEMBER`이고 `yoil`이 1~5이며 `timeSlot`이 `AM`/`PM`인 기수만 기도방이 된다. 역할이 없거나 일·토는 목록에서 뺀다. 기도제목 status는 `REVIEW`/`OPEN`/`REJECTED`/`ANSWER_REQUESTED`/`ANSWERED`/`HIDDEN`을 화면 status로 두고, 본문은 `content`다. 호출 경로는 `GET /api/prayer/cohorts/my`, `GET /api/prayer/cohorts/open`, `GET /api/prayer/cohorts/{cohortId}`, `GET /api/prayer/cohorts/{cohortId}/status`, `POST`·`DELETE /api/prayer/cohorts/{cohortId}/completion`, `POST`·`DELETE /api/prayer/completions/{completionId}/like`, `GET /api/prayer/applications/my`, `POST /api/prayer/applications`, `DELETE /api/prayer/applications/{applicationId}`, `GET /api/prayer/me/history`, `GET /api/prayer/categories`, `GET /api/prayer/topics/board`, `GET /api/prayer/topics/my`, `POST /api/prayer/topics`, `PUT`·`DELETE /api/prayer/topics/{topicId}`, `POST /api/prayer/topics/{topicId}/answer-request`다. overview는 my cohorts와 my topics만 읽는다. `/api/admin/prayer`와 `GET /api/mypage/activities/prayers`는 호출하지 않는다. 작성 화면 `createPrayerTopic`은 `categoryId`가 없어 `POST /api/prayer/topics`를 호출하지 않는다. 팀장 좋아요(`PRY015`)와 멤버 완료(`PRY010`)는 서버 오류를 그대로 전달하고 클라이언트 역할로 거르지 않는다. 기도방 상세 성공 본문 필드는 Notion에 없어 `PrayerCohortDto`로 읽지 않는다. 계약 검사는 `npm run test:api:contract:prayer`이며 `npm run validate`에는 넣지 않는다. Issue #135.
-- (2026-10-09) **기존 행에 붙이는 helper는 ID가 같을 때만 Notion 값을 덮어쓴다** — overview 목록은 API 행으로 새로 만든다. helper에서는 새 행을 만들지 않는다. 같은 ID가 `open`과 `my`에 있으면 `my`가 이긴다.
-  - `PrayerOverviewRoom.memberCount` ← `memberCount`, `completedCount` ← `weekCompletedCount`, `participationRate` ← `completionRate`.
-  - `timeSlot` `AM`/`PM`만 `period` `morning`/`afternoon`.
-  - `yoil` 1~5만 `weekday` `mon`~`fri`. 0(일)·6(토)는 `PrayerWeekday`에 없어 mock 요일을 유지한다.
-  - `myRole`이 `LEADER` 또는 `MEMBER`면 overview `status`는 `joined`. null은 승인 대기가 아니므로 `pending`으로 바꾸지 않는다. cohort `status` `ACTIVE`/`CLOSED`는 참여 상태가 아니라 덮어쓰지 않는다.
-  - `PrayerRequestSummary`는 `GET /api/prayer/topics/my`에서 `title`, `categoryName`→`category`를 쓴다. `REVIEW`/`OPEN`/`REJECTED`만 `reviewing`/`published`/`rejected`다. `ANSWER_REQUESTED`/`ANSWERED`/`HIDDEN`은 기존 status에 없어 mock status를 유지한다. `description`은 상태 안내 문구라 `content`·`rejectReason`으로 바꾸지 않는다.
-  - `PrayerRoom`은 `cohortName`→`title`, `description`, `memberCount`를 쓴다. `myRole`이 역할이면 `isJoined` true, null이면 false. `leader`는 회원 객체가 아니라 mock을 유지한다.
-  - `PrayerTopic`은 `title`, `content`, `createdAt`을 쓴다. `status === ANSWERED`일 때만 `isAnswered`와 `answer`←`answerContent`다. 그 외에는 `isAnswered` false이고 `answer`는 비운다. `roomId`, `author`, `isAnonymous`, `prayerCount`, `hasPrayed`는 대응 필드가 없어 mock을 유지한다.
-  - 아래는 대응을 단정할 수 없거나 화면이 view model을 읽지 않아 mock·화면 fixture를 유지한다.
-    - 이번 주 진행 카드의 합산 퍼센트. 방 `completionRate`로 바꾸지 않고 참여 중 방의 `completedCount/memberCount` 합으로 계산한다.
-    - overview에 없는 `cohortYear`, `cohortName`, `startDate`, `endDate`, `myCompleted`, `emergencyCount`.
-    - mock이거나 route id·`designVariant`가 있을 때의 기도방 상세 디자인 문구. http이고 id만 있으면 현황 DTO와 전체 게시판을 직접 그린다. 상대 시각·좋아요 버튼은 그 화면에 없다.
-    - 신청 화면의 요일·시간 선택과 안내 문구. `POST /api/prayer/applications`의 `yoil`·`timeSlot`은 data source에만 있고 화면은 호출하지 않는다. 이름·연락처·메모는 화면 입력이 아니다.
-    - mock일 때의 내 기도제목 디자인 문구와, http에서도 유지하는 승인 안내·응답완료 요청 버튼. 버튼은 API를 호출하지 않는다.
-    - 작성 모달의 `roomId`. 등록 API 필수값은 `categoryId`·`title`·`content`이고 응답은 기도제목 ID다. `POST /api/prayer/topics`는 `createPrayerTopicRequest`만 호출한다.
-    - 좋아요·완료 취소·제목 수정·삭제·응답완료 요청의 성공 본문 필드가 없다.
-- (2026-07-15) **기도 작성 세그먼트와 루트 FAB는 공통의 낮은 비율을 사용한다** — 작성 화면 세그먼트는 full pill을 유지하면서 40px track·32px 선택 영역과 상하 6px hitSlop으로 44px 터치 범위를 보장하고, `기도제목 작성` FAB는 46px 높이·18px 아이콘·13px label을 사용합니다. 기존 작성 경로·모션·접근성은 유지합니다.
-- (2026-07-15) **기도 루트는 이동 가능한 카드에만 행동 문구와 화살표를 표시한다** — 내 기도제목 개별 요약에는 별도 상세가 없으므로 정적 카드로 두고 섹션 `전체보기`만 `/prayer/request`로 이동합니다. 상세가 있는 내 기도방 카드는 `기도방 보기 + chevron-right`를 표시하고 기존 `/prayer/[id]` 이동을 유지합니다.
-- (2026-07-15) **중보기도 신청 카드는 Solar `UserPlusRounded`를 사용한다** — 하단 기도 탭은 `Hearts`, 참여 신청 카드는 사람과 추가 표시가 함께 보이는 `UserPlusRounded`로 역할을 구분합니다.
-- (2026-07-25) **손+하트(`HandHeart` / `volunteer-activism`) 아이콘은 앱에서 제거한다** — 기도 empty·MY 메뉴·동행 봉사 표시는 `hands-pray` 또는 `groups`로 대체합니다.
-- (2026-07-15) **기도 FAB는 `기도제목 작성`으로 실행 행동을 표시한다** — `기도제목`만 표시해 목록·작성 의미가 모호했던 문구를 행동형으로 바꾸되 기존 `/modal/prayer-new` 이동과 geometry는 유지합니다.
-- (2026-07-14) **내 기도제목 전체보기는 섹션 제목 오른쪽에 둔다** — 큰 독립 버튼 대신 공통 `SectionHeader`를 사용해 동행과 같은 `전체보기 + chevron-right`로 표시하고, action은 기존 `/prayer/request` Stack 경로를 그대로 push합니다.
-- (2026-07-14) **기도 루트 콘텐츠는 기본 배경색 glass 타이틀 아래 하나의 스크롤을 사용한다** — 실제 safe-area와 20px 상단 여백을 포함한 공통 sticky blur를 사용하고 하단 border 없이 콘텐츠가 뒤를 통과하며 fixed FAB는 유지합니다.
-- (2026-07-14) **기도 상세·보조 화면은 기도 탭 Stack에 쌓는다** — `/prayer/[id]`, `/prayer/apply`, `/prayer/request`는 기도 목록 위에 push하고 back으로 `/prayer`에 복귀합니다.
-- (2026-07-12, 2026-07-15 상호작용 의미 보완) **기도 루트의 내 기도방·내 기도제목은 카드로 구분한다** — 오늘 진행률 대표 surface 아래에서 흰 surface, 16px radius, 옅은 border와 약한 shadow를 공유합니다. 기도방만 전체 카드가 이동 요소이고 기도제목 요약은 정적 카드로 사용합니다.
-- (2026-07-12) **기도 루트 대표 요소는 오늘 참여 진행이다** — overview의 참여 중 기도방 `completedCount/memberCount`를 합산해 오늘 완료 인원과 비율을 표시하며 새 서버 필드를 만들지 않습니다. 상세 목록의 차분한 icon/color는 유지하고 flat row만 카드 형태로 복구했습니다.
-
-- (2026-07-12, 2026-07-15 기도제목 개별 카드 이동 폐기) **기도 루트의 카드형 affordance는 기존 실제 route로 이동한다** — 기도방·신청과 기도제목 섹션 전체보기만 현재 존재하는 `/prayer/[id]`, `/prayer/apply`, `/prayer/request`로 연결합니다. 별도 상세가 없는 기도제목 개별 요약은 정적 카드로 바꾸고 query 오류는 같은 overview를 refetch합니다.
-
-- (2026-07-10) **기도 상세 디자인 상태는 development 전용이다** — 기도 완료·empty·현황·응답 캡처는 `designVariant`만 사용하고 production에서는 무시합니다. 실제 상태는 mock/API service 결과가 결정합니다.
-- (2026-07-10) **기도 루트는 overview query만 소비한다** — `FaithSectionsScreen`은 fixture를 직접 소유하지 않고 `usePrayerOverview → fetchPrayerOverview → mockPrayerOverview` 경계를 사용합니다. 사용자 API가 생기면 service/mapper만 교체하며 화면 문구와 상태 label은 view model mapping으로 유지합니다.
-- (2026-06-27) **기도는 독립 하단 탭이다** — Downloads `PREVIEW_TAB_ROUTES` 기준으로 `/prayer`는 하단 `기도` 탭 루트입니다. 화면 구현은 기존 기도 목록 renderer를 재사용하되, 내부 `중보기도/삶공부` segment는 노출하지 않습니다.
-- (2026-06-27) **내 기도제목은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenPrayerRequest` 구조를 `/prayer/request` route에 직접 반영합니다. 실제 응답완료 요청 API는 기도제목 상태 전이 정책 확정 후 연결합니다.
-- (2026-06-27) **기도방 참여 신청은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenPrayerApply` 구조를 `/prayer/apply` route에 직접 반영합니다. 실제 신청 API와 중복 신청 제한은 승인 정책 확정 후 연결합니다.
-- (2026-06-27) **현재 호출처 없는 card/query helper는 제거한다** — `PrayerRoomCard`와 미사용 기도방 query/참여/응답 mutation helper는 route 호출처가 없어 제거하고, 현재 작성 모달에서 쓰는 기도제목 생성 mutation만 유지합니다.
-- (2026-06-27) **폐기됨: 동행 기본 segment는 실제 RN 화면으로 렌더링한다** — 최신 Downloads preview 기준으로 중보기도는 `/prayer` 하단 탭입니다.
-- (2026-06-27) **기도방 상세는 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenPrayerDetail`의 기본 기도/응답/현황 구조를 `/prayer/[id]` route에 직접 반영합니다. 팀장 격려/empty 상세 variant는 필요한 시점에 작은 분기만 추가합니다.
-- (2026-05-27) **중보기도 FAB는 ZIP root fixed action으로 둔다** — 기도방 목록/상세/요청의 작성 FAB는 스크롤 본문 안에 포함하지 않고 ZIP `Phone` root layer 기준으로 둡니다. 본문은 내부 ScrollView로 두어 FAB 위치가 tab bar와 독립적으로 유지되게 합니다.
-- (2026-05-27) **기도요청은 ZIP 목록 화면을 따른다** — `/prayer/request` reference는 입력 폼이 아니라 ZIP `ScreenPrayerRequest`처럼 전체/내 요청/응답됨 segmented tabs와 기도 요청 카드 목록, FAB를 표시합니다. 기도 제목 작성 폼은 별도 작성 화면 패턴으로 분리합니다.
-- (2026-05-27) **기도방 상세 tab은 underline 구조를 따른다** — `ScreenPrayerDetail`은 공통 segmented pill이 아니라 ZIP `UnderlineTabs`처럼 하단 선으로 현재 tab을 표시합니다. 카드 안의 `함께 기도`와 `응답완료`도 full button이 아닌 compact pill action으로 둡니다.
-- (2026-05-27) **다른 기도모임방은 flat row list로 둔다** — 중보기도 목록의 미가입 방은 하나의 카드로 묶지 않고 ZIP처럼 full-width flat row와 soft 참여 pill을 사용합니다.
-- (2026-05-25) **폐기됨: 중보기도 루트 진입은 동행 탭 기본 segment로 둔다** — 최신 Downloads preview 기준으로 중보기도는 독립 하단 탭입니다.
-- (2026-05-23) **ZIP 중보기도 보조 화면도 route-accessible** — 기도방 신청과 기도요청 화면을 mock-first reference 라우트로 두고, 실제 승인/비성도 정책은 후속 API 결정에 맡깁니다.
-- (2026-05-23) **기도방 list는 내 방과 참여 가능 방을 분리** — 동일한 요일 필터 안에서 가입 중인 방과 다른 기도모임방을 나눠 보여주며, 작성 액션은 floating FAB로 둡니다.
-- (2026-05-22) **중보기도는 Notion v1 범위** — MVP가 아니라 v1 mock-first 화면/서비스까지 구현합니다.
-- (2026-05-22) **비회원 기도 요청은 후속 처리** — Notion에는 비성도 요청/방 참여 신청이 있으나, 모바일 v1 mock에서는 성도 앱 내부 플로우를 먼저 구현합니다.
-
-## 미결 / 추적
-
-- 기도방 상세 성공 필드, 신청·카테고리 값 타입, 일·토 `PrayerWeekday`, 작성 화면 `categoryId`는 사용자 계약만으로는 화면과 연결하지 못했다. Issue #135.
-- 비성도 기도 요청, 기도방 참여 승인 정책 확인 필요. 익명 작성은 등록 API 필드 대기(#304).
-- 푸시 알림과 기도 통계는 후속 Phase입니다.
-
-## 의존성
-
-- common 도메인의 UI, `queryKeys`, `queryClient`에 의존합니다.
-- auth 도메인의 현재 사용자에 의존합니다.
-
-## 관련 ADR
-
-- [ADR 0002 — 백엔드 선택 보류 (Mock-first)](../adr/0002-backend-tbd.md)
+- common 의 queryClient · queryKeys · UI 컴포넌트, auth 의 현재 사용자(신청 화면 이름·연락처).
 - [ADR 0004 — Notion v1 범위와 Expo Dev Client 기준](../adr/0004-notion-v1-dev-client-scope.md)

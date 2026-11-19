@@ -20,8 +20,8 @@
 | 정보 | SSOT | 거울(허용) | 금지 |
 |---|---|---|---|
 | 남은 일 (지금 못 하는 일) | **GitHub Issues** (label=도메인, milestone=Phase) | — | features 페이지에 진행 상태 기재 |
-| 완료 결과·도메인 결정 | features/&lt;도메인&gt;.md | PR description(요약 1줄) | Issues 에 결과 본문 |
-| 변경 감사 기록 | **PR description** + `git log` | — | features `✅완료` 본문에 일자별 변경 본문 복붙 |
+| 현재 동작·도메인 결정 | features/&lt;도메인&gt;.md | PR description(요약 1줄) | Issues 에 결과 본문 |
+| 변경 감사 기록 | **PR description** + `git log` | — | features 에 날짜별 작업 이력 기록 |
 | Phase 정의·기술 스택·데이터 타입 마스터 | [../PLAN.md](../PLAN.md) | features “데이터 타입” 섹션(요약·참조) | features 가 PLAN 과 다른 정의 보유 |
 | 시스템 전반 결정 | [adr/](adr/) | features “결정 사항” 에 “ADR-000N 참조” | features 가 ADR 과 모순되는 결정 보유 |
 | 도메인 상태·전체 진행률 | [INDEX.md](INDEX.md) **자동생성 영역** (Issues 데이터 기반) | features 헤더의 담당 Phase / 컨텍스트 메타 | INDEX 자동영역 손편집 |
@@ -56,7 +56,7 @@
 bash scripts/gen-index.sh
 git diff --quiet docs/INDEX.md || echo "INDEX 자동영역이 stale — 재생성 필요"
 
-# 4.5 features 주요 파일 vs 실제
+# 4.5 features 코드 위치 vs 실제
 ls docs/features/*.md 2>/dev/null | grep -v _template
 find src -type d -maxdepth 2 2>/dev/null
 
@@ -162,12 +162,12 @@ done
   - ADR 자체가 틀렸다면 → **새 ADR 로 supersede**. 옛 ADR 헤더 상태를 “기각 (Superseded by 000N, YYYY-MM-DD)” 으로 변경. INDEX 의 ADR 목록도 갱신. 사용자 승인 필요.
 - **재발 방지**: 도메인 외 영향이 있는 결정은 처음부터 ADR 로. 모호하면 ADR 로 (사후에 features 로 강등이 반대보다 쉬움).
 
-### 4.5 features “주요 파일” ≠ 실제 파일 트리
+### 4.5 features “코드 위치” ≠ 실제 파일 트리
 
-- **증상**: features/&lt;도메인&gt;.md 의 “주요 파일” 표가 실제 `src/<도메인>/` 트리와 다름 (누락 / 잘못된 경로 / 삭제된 파일).
+- **증상**: features/&lt;도메인&gt;.md 의 “코드 위치” 가 가리키는 폴더·패턴이 실제 트리에 없음.
 - **진실**: 파일 시스템.
-- **복구**: `find src/<도메인> -type f -name '*.ts*'` 로 실제 트리 재추출 → features 표 갱신. 파일 표는 “지도” 역할이므로 모든 파일을 나열할 필요는 없으며 핵심 진입점만.
-- **재발 방지**: 파일 이동·삭제 작업의 작업 단위에 features 갱신 포함.
+- **복구**: 실제 트리를 확인해 폴더·이름 패턴 단위로 고친다. 파일을 하나하나 나열하지 않는다.
+- **재발 방지**: 코드 위치를 폴더·패턴 단위로만 적어 파일 이동에 덜 흔들리게 한다.
 
 ### 4.6 도메인 페이지가 없는데 Issues/PR 에 해당 도메인 작업 존재
 

@@ -7,31 +7,12 @@ import {
   Badge,
   Card,
   Empty,
-  MotionEnter,
   MotionPressable,
-  motionStaggerDelay,
+  StaggerItem,
 } from "../../ui";
 import { ProgressBar } from "../../ui/progress-bar";
 import { theme } from "../../../constants/theme";
 import { styles } from "./prayerDetailStyles";
-
-/** 목록 첫 진입: 처음 8개만 60ms 간격으로 떠오른다. */
-const STAGGER_LIMIT = 8;
-
-function StaggerItem({
-  index,
-  children,
-}: {
-  index: number;
-  children: ReactNode;
-}) {
-  if (index >= STAGGER_LIMIT) return <>{children}</>;
-  return (
-    <MotionEnter mode="fadeUp" delay={motionStaggerDelay(index)}>
-      {children}
-    </MotionEnter>
-  );
-}
 
 export type TabKey = "pray" | "answers" | "status";
 

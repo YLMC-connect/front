@@ -6,15 +6,13 @@ import {
   Card,
   Empty,
   MotionEnter,
+  MOTION_STAGGER_LIMIT,
   motionStaggerDelay,
   TopBar,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import { queryKeys } from "../../../src/lib/queryKeys";
 import { fetchMyLifeStudyCompletions } from "../../../src/services/lifeStudyService";
-
-/** 목록 첫 진입 때 60ms 간격으로 떠오르는 카드 수(디자인 시스템 motion: 첫 8개). */
-const LIST_STAGGER_LIMIT = 8;
 
 export default function LifeStudyHistoryScreen() {
   const completions = useQuery({
@@ -52,7 +50,7 @@ export default function LifeStudyHistoryScreen() {
                   <MotionEnter
                     key={course.id}
                     mode="fadeUp"
-                    enabled={index < LIST_STAGGER_LIMIT}
+                    enabled={index < MOTION_STAGGER_LIMIT}
                     delay={motionStaggerDelay(index)}
                   >
                     <Card style={styles.card}>

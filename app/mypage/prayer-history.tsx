@@ -7,15 +7,13 @@ import {
   Empty,
   ErrorState,
   MotionEnter,
+  MOTION_STAGGER_LIMIT,
   motionStaggerDelay,
   TopBar,
 } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { useMyPrayerHistory } from "../../src/hooks/usePrayers";
 import type { PrayerHistoryItem } from "../../src/types/prayerApi";
-
-/** 목록 첫 진입 때 60ms 간격으로 떠오르는 줄 수(디자인 시스템 motion: 첫 8개). */
-const LIST_STAGGER_LIMIT = 8;
 
 /** yoil 0(일)~6(토). */
 const YOIL_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
@@ -123,7 +121,7 @@ function HistoryGroup({
           <MotionEnter
             key={`${item.cohortId}-${item.joinedAt ?? order}`}
             mode="fadeUp"
-            enabled={order < LIST_STAGGER_LIMIT}
+            enabled={order < MOTION_STAGGER_LIMIT}
             delay={motionStaggerDelay(order)}
           >
             <View

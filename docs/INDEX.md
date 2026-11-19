@@ -4,13 +4,13 @@
 
 ## 어디에 무엇이 있나
 
-| 찾는 것 | 위치 |
-| --- | --- |
-| 남은 일 | GitHub Issues — `gh issue list --label <도메인>` |
-| 변경 이력 | 머지된 PR — `gh pr list --state merged` |
-| 도메인 컨텍스트(현재 동작·데이터 타입·결정 사항·미결) | [features/](features/) — `features/<도메인>.md` |
-| 앱 범위·공통 데이터 타입·정책 | [PLAN.md](../PLAN.md) |
-| 되돌리기 어려운 시스템 결정 | 아래 ADR |
+| 찾는 것                                               | 위치                                             |
+| ----------------------------------------------------- | ------------------------------------------------ |
+| 남은 일                                               | GitHub Issues — `gh issue list --label <도메인>` |
+| 변경 이력                                             | 머지된 PR — `gh pr list --state merged`          |
+| 도메인 컨텍스트(현재 동작·데이터 타입·결정 사항·미결) | [features/](features/) — `features/<도메인>.md`  |
+| 앱 범위·공통 데이터 타입·정책                         | [PLAN.md](../PLAN.md)                            |
+| 되돌리기 어려운 시스템 결정                           | 아래 ADR                                         |
 
 도메인 이름은 [`.task-flow.conf`](../.task-flow.conf) 의 목록을 GitHub 라벨과 `features/` 파일 이름에 똑같이 쓴다. 새 도메인은 [features/\_template.md](features/_template.md) 를 복사해 만든다.
 

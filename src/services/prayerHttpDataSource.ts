@@ -4,7 +4,6 @@ import type {
   PrayerApplicationCreateRequest,
   PrayerTopicWriteRequest,
 } from "../types/prayerApi";
-import type { PrayerDataSource } from "./prayerService";
 import {
   buildPrayerOverview,
   readPrayerApplications,
@@ -26,7 +25,7 @@ export function createHttpPrayerDataSource({
   client = apiClient,
 }: {
   client?: PrayerApiClient;
-} = {}): PrayerDataSource {
+} = {}) {
   return {
     async getOverview() {
       const [cohortsRes, topicsRes, applicationsRes] = await Promise.allSettled(
@@ -54,13 +53,13 @@ export function createHttpPrayerDataSource({
       return buildPrayerOverview(myCohorts, topics, applications);
     },
 
-    async getCohortStatus(cohortId) {
+    async getCohortStatus(cohortId: string) {
       return readPrayerCohortStatus(
         await client.request(`/api/prayer/cohorts/${cohortId}/status`),
       );
     },
 
-    async completeCohort(cohortId) {
+    async completeCohort(cohortId: string) {
       return requirePrayerCohortStatus(
         await client.request(`/api/prayer/cohorts/${cohortId}/completion`, {
           method: "POST",
@@ -68,7 +67,7 @@ export function createHttpPrayerDataSource({
       );
     },
 
-    async cancelCohortCompletion(cohortId) {
+    async cancelCohortCompletion(cohortId: string) {
       return requirePrayerCohortStatus(
         await client.request(`/api/prayer/cohorts/${cohortId}/completion`, {
           method: "DELETE",
@@ -96,7 +95,7 @@ export function createHttpPrayerDataSource({
       );
     },
 
-    async cancelApplication(applicationId) {
+    async cancelApplication(applicationId: string) {
       await client.request(`/api/prayer/applications/${applicationId}`, {
         method: "DELETE",
       });
@@ -135,7 +134,7 @@ export function createHttpPrayerDataSource({
       );
     },
 
-    async requestTopicAnswer(topicId, input: PrayerAnswerRequest) {
+    async requestTopicAnswer(topicId: string, input: PrayerAnswerRequest) {
       await client.request(`/api/prayer/topics/${topicId}/answer-request`, {
         method: "POST",
         body: JSON.stringify({ answerContent: input.answerContent }),

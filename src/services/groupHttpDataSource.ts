@@ -87,34 +87,6 @@ export function createHttpGroupDataSource({
   };
 
   return {
-    async getOverview() {
-      const [groups, services, myGroups, myServices] = await Promise.all([
-        fetchCommunionPages(client, "/api/communion?type=SMALL_GROUP"),
-        fetchCommunionPages(client, "/api/communion?type=VOLUNTEER"),
-        fetchCommunionPages(client, "/api/communion/my?type=SMALL_GROUP"),
-        fetchCommunionPages(client, "/api/communion/my?type=VOLUNTEER"),
-      ]);
-      const joinedIds = new Set(
-        [...myGroups, ...myServices]
-          .map((item) =>
-            item && typeof item === "object" && "id" in item
-              ? String((item as { id: unknown }).id)
-              : "",
-          )
-          .filter(Boolean),
-      );
-      return {
-        groups: groups.flatMap((item) => {
-          const mapped = mapCommunionOverviewItem(item, joinedIds);
-          return mapped ? [mapped] : [];
-        }),
-        services: services.flatMap((item) => {
-          const mapped = mapCommunionServiceItem(item);
-          return mapped ? [mapped] : [];
-        }),
-      };
-    },
-
     async getOverviewPage({
       lastId,
       size = 20,

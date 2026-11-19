@@ -48,7 +48,7 @@ describe("httpMarketDataSource", () => {
       nextCursor: null,
     });
 
-    await expect(dataSource.getOverview()).resolves.toMatchObject({
+    await expect(dataSource.getOverviewPage()).resolves.toMatchObject({
       items: [
         expect.objectContaining({
           id: "1",
@@ -59,14 +59,14 @@ describe("httpMarketDataSource", () => {
         }),
       ],
     });
-    expect(request).toHaveBeenCalledWith("/api/share?size=50");
+    expect(request).toHaveBeenCalledWith("/api/share?size=20");
   });
 
   it("sends the category filter to the share list API", async () => {
     const { request, dataSource } = setup();
     request.mockResolvedValue({ content: [], hasNext: false });
 
-    await dataSource.getOverviewPage?.({ category: "book", lastId: 12 });
+    await dataSource.getOverviewPage({ category: "book", lastId: 12 });
 
     expect(request).toHaveBeenCalledWith(
       "/api/share?size=20&lastId=12&categoryCode=BOOK_STATIONERY",
@@ -91,7 +91,7 @@ describe("httpMarketDataSource", () => {
     });
 
     await expect(
-      dataSource.getMyOverviewPage?.({
+      dataSource.getMyOverviewPage({
         category: "book",
         lastId: 12,
         size: 10,

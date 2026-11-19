@@ -13,7 +13,6 @@ import {
   readMyPageLifeStudyHistory,
   readMyPagePostList,
 } from "./mypageMapper";
-import type { MyPageActivityDataSource } from "./mypageService";
 
 type MyPageApiClient = {
   request<T>(path: string, options?: ApiRequestOptions): Promise<T | null>;
@@ -42,7 +41,7 @@ export function createHttpMyPageDataSource({
   client = apiClient,
 }: {
   client?: MyPageApiClient;
-} = {}): MyPageActivityDataSource {
+} = {}) {
   return {
     async getPosts(query?: MyPageActivityPageQuery) {
       const page = normalizeMyPageActivityQuery(query, MY_PAGE_POST_SORT);

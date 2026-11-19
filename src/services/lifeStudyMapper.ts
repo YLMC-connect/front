@@ -1,4 +1,12 @@
 import {
+  isRecord,
+  optionalInteger,
+  readInteger,
+  requireInteger,
+  requireKey,
+  requireNullableString,
+} from "../lib/parse";
+import {
   invalidResponse as invalid,
   keepValidItems,
   reportResponseIssue,
@@ -19,33 +27,6 @@ import type {
   LifeStudyMyCompletion,
 } from "../types/lifeStudyApi";
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function readInteger(value: unknown) {
-  return typeof value === "number" && Number.isInteger(value) ? value : null;
-}
-
-function requireKey(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  if (!(key in data)) invalid(source, key);
-}
-
-function requireInteger(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  requireKey(data, key, source);
-  const value = readInteger(data[key]);
-  if (value == null) invalid(source, key);
-  return value;
-}
-
 function requireNullableInteger(
   data: Record<string, unknown>,
   key: string,
@@ -56,22 +37,6 @@ function requireNullableInteger(
   const value = readInteger(data[key]);
   if (value == null) invalid(source, key);
   return value;
-}
-
-function requireNullableString(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  requireKey(data, key, source);
-  if (data[key] === null) return null;
-  if (typeof data[key] !== "string") invalid(source, key);
-  return data[key];
-}
-
-/** 화면에서 쓰지 않는 필드. 없거나 형식이 다르면 null. */
-function optionalInteger(data: Record<string, unknown>, key: string) {
-  return readInteger(data[key]);
 }
 
 export function readMyCompletions(data: unknown): LifeStudyMyCompletion[] {

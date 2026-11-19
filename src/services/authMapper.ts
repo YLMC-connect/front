@@ -1,3 +1,4 @@
+import { isRecord, readString } from "../lib/parse";
 import { ApiError } from "../lib/apiClient";
 import type { AuthSession } from "../types/auth";
 import type {
@@ -6,14 +7,6 @@ import type {
   MemberMeResponse,
 } from "../types/authApi";
 import { USER_ROLES, type Member, type UserRole } from "../types/common";
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function readString(value: unknown) {
-  return typeof value === "string" && value.trim() ? value.trim() : null;
-}
 
 function mapMemberRole(role: string | undefined): UserRole {
   const normalizedRole = role?.trim().toUpperCase();

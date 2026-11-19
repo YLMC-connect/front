@@ -176,9 +176,6 @@ describe("v1 tab smoke screens", () => {
       ],
     };
 
-    jest.spyOn(marketService, "fetchMarketOverview").mockResolvedValue({
-      items: marketItems,
-    });
     jest.spyOn(marketService, "fetchMarketOverviewPage").mockResolvedValue({
       items: marketItems,
       hasNext: false,
@@ -356,9 +353,6 @@ describe("v1 tab smoke screens", () => {
       ],
     };
 
-    jest
-      .spyOn(groupService, "fetchGroupOverview")
-      .mockResolvedValue(groupOverviewData);
     jest.spyOn(groupService, "fetchGroupOverviewPage").mockResolvedValue({
       ...groupOverviewData,
       myGroups: groupOverviewData.groups.filter((group) => group.isJoined),

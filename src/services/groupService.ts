@@ -23,8 +23,7 @@ export interface GroupOverviewPage {
 }
 
 export interface GroupDataSource {
-  getOverview(): Promise<GroupOverview>;
-  getOverviewPage?(params?: {
+  getOverviewPage(params?: {
     lastId?: number | null;
     size?: number;
   }): Promise<GroupOverviewPage>;
@@ -59,19 +58,8 @@ function normalizeNoticeInput<T extends GroupNoticeInput>(input: T): T {
 
 export function createGroupService(dataSource: GroupDataSource) {
   return {
-    fetchOverview: () => dataSource.getOverview(),
-    fetchOverviewPage: (params?: { lastId?: number | null; size?: number }) => {
-      if (dataSource.getOverviewPage) {
-        return dataSource.getOverviewPage(params);
-      }
-      return dataSource.getOverview().then((res) => ({
-        groups: res.groups,
-        services: res.services,
-        myGroups: res.groups.filter((group) => group.isJoined),
-        hasNext: false,
-        nextCursor: null,
-      }));
-    },
+    fetchOverviewPage: (params?: { lastId?: number | null; size?: number }) =>
+      dataSource.getOverviewPage(params),
     fetchDetail: (id: string) => dataSource.getDetail(id),
     fetchMembers: (id: string) => dataSource.getMembers(id),
     createGroup: (input: GroupInput) => {
@@ -149,7 +137,6 @@ export function createGroupService(dataSource: GroupDataSource) {
 
 const groupService = createGroupService(httpGroupDataSource);
 
-export const fetchGroupOverview = groupService.fetchOverview;
 export const fetchGroupOverviewPage = groupService.fetchOverviewPage;
 export const fetchGroupDetail = groupService.fetchDetail;
 export const fetchGroupMembers = groupService.fetchMembers;

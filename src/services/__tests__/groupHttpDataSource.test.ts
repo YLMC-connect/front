@@ -76,16 +76,7 @@ describe("httpGroupDataSource", () => {
       return { content: [], hasNext: false, nextCursor: null };
     });
 
-    await expect(dataSource.getOverview()).resolves.toMatchObject({
-      groups: [
-        expect.objectContaining({ id: "1", isJoined: true, category: "hobby" }),
-      ],
-      services: [
-        expect.objectContaining({ id: "2", linkedGroupId: "2", schedule: "" }),
-      ],
-    });
-
-    await expect(dataSource.getOverviewPage?.()).resolves.toMatchObject({
+    await expect(dataSource.getOverviewPage()).resolves.toMatchObject({
       groups: [
         expect.objectContaining({ id: "1", isJoined: true, category: "hobby" }),
       ],

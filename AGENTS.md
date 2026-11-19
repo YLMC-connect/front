@@ -83,7 +83,7 @@ PR 을 올린 에이전트가 끝까지 책임진다. PR 을 열고 나면 `revi
 
 - **로컬에서 매 작업마다 `npm run validate`를 돌려 사용자를 기다리게 하지 않는다.** 평소에는 빠른 검증으로 즉시 응답하고, 전체 검증은 PR CI(GitHub Actions)에 맡긴다. CI 가 실패하면 고쳐서 다시 푸시한다.
 - `package.json` / `package-lock.json` 을 바꿨다면 lockfile 이 CI 와 맞는지 확인한다. 프로젝트 `.npmrc` 가 `legacy-peer-deps=false` 로 고정한다.
-- `test:visual:*`, `test:e2e:smoke`, `validate:full` 은 사용자가 요청하거나 디자인 번역·릴리스를 할 때만 돌린다.
+- Maestro smoke(`maestro test .maestro/smoke.yml`)는 사용자가 요청하거나 릴리스를 할 때만 로컬에서 돌린다.
 
 ### 2. 화면 확인 — 준비는 에이전트, 화면 조작은 사용자
 

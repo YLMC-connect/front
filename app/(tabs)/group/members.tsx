@@ -29,7 +29,6 @@ import {
   useTransferGroupLeader,
 } from "../../../src/hooks/useGroups";
 import { getApiErrorMessage } from "../../../src/lib/apiErrorMessage";
-import { readDesignVariant } from "../../../src/lib/designVariant";
 import type { GroupMemberDetail } from "../../../src/types/group";
 
 export default function GroupMembersScreenRoute() {
@@ -38,10 +37,8 @@ export default function GroupMembersScreenRoute() {
     id?: string;
     groupId?: string;
     mode?: string;
-    designVariant?: string;
   }>();
   const groupId = params.groupId ?? params.id ?? "1";
-  const variant = readDesignVariant(params.designVariant) ?? "default";
   const membersQuery = useGroupMembers(groupId);
   const kickMemberMutation = useKickGroupMember(groupId);
   const transferLeaderMutation = useTransferGroupLeader(groupId);
@@ -64,16 +61,10 @@ export default function GroupMembersScreenRoute() {
   // 소모임 상세의 "전체보기" 로 일반 멤버도 들어온다. 내보내기는 소모임장에게만 보인다.
   // 목록이 오기 전에는 주로 들어오는 소모임장 기준 제목("멤버 관리")을 둔다.
   const canManage =
-    variant !== "default" ||
     !membersQuery.data ||
     members.some((member) => member.isMine && member.isLeader);
-  const isTransfer =
-    params.mode === "transfer" ||
-    variant === "transfer" ||
-    variant === "transfer-confirm";
-  const transferTargetName =
-    selectedTransferMember?.userName ??
-    (variant.startsWith("transfer") ? "박정아" : null);
+  const isTransfer = params.mode === "transfer";
+  const transferTargetName = selectedTransferMember?.userName ?? null;
 
   return (
     <Screen scroll={false} padded={false}>
@@ -114,10 +105,7 @@ export default function GroupMembersScreenRoute() {
               member={member}
               transfer={isTransfer}
               canManage={canManage}
-              selected={
-                selectedTransferMember?.userId === member.userId ||
-                member.userName === transferTargetName
-              }
+              selected={selectedTransferMember?.userId === member.userId}
               last={index === members.length - 1}
               onKick={() => setKickingMember(member)}
               onSelect={() => setSelectedTransferMember(member)}
@@ -135,23 +123,13 @@ export default function GroupMembersScreenRoute() {
         ) : null}
 
         <ConfirmDialog
-          visible={variant === "kick-confirm" || Boolean(kickingMember)}
-          title={`${variant === "kick-confirm" ? "이수진" : (kickingMember?.userName ?? "")}님을 내보낼까요?`}
+          visible={Boolean(kickingMember)}
+          title={`${kickingMember?.userName ?? ""}님을 내보낼까요?`}
           message="내보낸 멤버는 다시 신청해야 들어올 수 있어요."
           confirmText="내보내기"
           danger
-          onCancel={() => {
-            if (variant === "kick-confirm") {
-              router.back();
-            } else {
-              setKickingMember(null);
-            }
-          }}
+          onCancel={() => setKickingMember(null)}
           onConfirm={async () => {
-            if (variant === "kick-confirm") {
-              router.back();
-              return;
-            }
             if (!kickingMember || kickMemberMutation.isPending) return;
             try {
               const name = kickingMember.userName;
@@ -171,22 +149,12 @@ export default function GroupMembersScreenRoute() {
           }}
         />
         <ConfirmDialog
-          visible={variant === "transfer-confirm" || showTransferConfirm}
+          visible={showTransferConfirm}
           title={`${transferTargetName ?? "멤버"}님께 소모임장을 이관할까요?`}
           message="이관 즉시 본인은 일반 멤버로 변경되며 되돌릴 수 없습니다."
           confirmText="이관"
-          onCancel={() => {
-            if (variant === "transfer-confirm") {
-              router.back();
-            } else {
-              setShowTransferConfirm(false);
-            }
-          }}
+          onCancel={() => setShowTransferConfirm(false)}
           onConfirm={() => {
-            if (variant === "transfer-confirm") {
-              router.back();
-              return;
-            }
             if (!selectedTransferMember || transferLeaderMutation.isPending) {
               return;
             }
@@ -217,12 +185,7 @@ export default function GroupMembersScreenRoute() {
               });
           }}
         />
-        <Toast
-          message={
-            variant === "kick-toast" ? "이수진님을 내보냈어요" : toastMessage
-          }
-          offset={28}
-        />
+        <Toast message={toastMessage} offset={28} />
       </View>
     </Screen>
   );

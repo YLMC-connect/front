@@ -29,7 +29,6 @@ import EditProfileScreen from "../../mypage/edit";
 import FaqScreen from "../../mypage/faq";
 import PasswordChangeScreen from "../../mypage/password";
 import MyPageTermsScreen from "../../mypage/terms";
-import UserProfileScreen from "../../mypage/user/[id]";
 import WithdrawScreen from "../../mypage/withdraw";
 import PrayerDetailScreen from "../prayer/[id]";
 import PrayerApplyScreenRoute from "../prayer/apply";
@@ -1802,12 +1801,11 @@ describe("v1 tab smoke screens", () => {
     );
   });
 
-  it("renders the life study detail screen", async () => {
+  it("shows the not-found state instead of sample copy when the route id is missing", async () => {
     renderWithClient(<LifeStudyDetailScreen />);
 
-    expect(await screen.findByText("생명의 삶")).toBeTruthy();
-    expect(screen.getByText("신청 안내")).toBeTruthy();
-    expect(screen.getByText("커리큘럼")).toBeTruthy();
+    expect(await screen.findByText("과정 정보를 찾을 수 없어요.")).toBeTruthy();
+    expect(screen.queryByText("생명의 삶")).toBeNull();
   });
 
   it("shows an error instead of an empty curriculum when the cohort detail fails", async () => {
@@ -2051,13 +2049,6 @@ describe("v1 tab smoke screens", () => {
       "01012345678",
     );
     expect(screen.getByDisplayValue("010-1234-5678")).toBeTruthy();
-  });
-
-  it("renders the user profile screen", () => {
-    renderWithClient(<UserProfileScreen />);
-
-    expect(screen.getByText("프로필")).toBeTruthy();
-    expect(screen.getByText("박정아")).toBeTruthy();
   });
 
   it("renders the FAQ screen", async () => {

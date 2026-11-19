@@ -39,7 +39,6 @@
 - **약관 동의는 기본 미선택** — 필수 약관(이용약관·개인정보)에 모두 동의해야 가입 버튼이 켜진다. 동의 여부는 서버에 보내지 않는다(#201).
 - **가입코드·비밀번호 찾기는 만들지 않는다** — Notion MVP 범위 밖. 로그인 화면에 관련 문구도 두지 않는다.
 - **로그인 묶음 높이는 키보드가 나와도 다시 계산하지 않는다** — 첫 레이아웃 높이를 `minHeight` 로 고정하고, iOS 는 `automaticallyAdjustKeyboardInsets`, Android 는 `adjustResize` 에 맡긴다.
-- **`designVariant` 쿼리는 개발 빌드 캡처용** — `readDesignVariant` 는 `__DEV__` 에서만 값을 읽는다. 실제 오류·pending 상태는 mutation 결과가 단일 출처다.
 
 ## 미결
 

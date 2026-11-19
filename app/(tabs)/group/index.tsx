@@ -14,13 +14,7 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { Platform, ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
@@ -39,7 +33,6 @@ import { theme } from "../../../src/constants/theme";
 import { GROUP_CATEGORIES } from "../../../src/constants/domainOptions";
 import { useGroupOverview } from "../../../src/hooks/useGroups";
 import { useMotionRouteParam } from "../../../src/hooks/useMotionRouteParam";
-import { readDesignVariant } from "../../../src/lib/designVariant";
 import type {
   GroupOverviewItem,
   GroupServiceOverviewItem,
@@ -72,9 +65,7 @@ export default function GroupScreen() {
   const params = useLocalSearchParams<{
     category?: string;
     section?: string;
-    designVariant?: string;
   }>();
-  const variant = readDesignVariant(params.designVariant);
   const overview = useGroupOverview();
   const listScrollRef = useRef<ScrollView | null>(null);
   const detailNavigationSuspended = useRef(false);
@@ -95,7 +86,7 @@ export default function GroupScreen() {
   const routeSection: GroupSection =
     params.section === "service"
       ? "service"
-      : params.section === "mine" || variant === "my-full"
+      : params.section === "mine"
         ? "mine"
         : "groups";
   const routeCategory =
@@ -116,8 +107,7 @@ export default function GroupScreen() {
       });
     },
   );
-  const isMyFull = variant === "my-full";
-  const isError = variant === "network-error" || overview.isError;
+  const isError = overview.isError;
   const groups = (overview.data?.groups ?? []).filter(
     (group) => category === "all" || group.category === category,
   );
@@ -190,53 +180,6 @@ export default function GroupScreen() {
       : section === "mine"
         ? myGroups.length === 0
         : groups.length === 0;
-
-  if (isMyFull) {
-    return (
-      <StickyHeaderScreen
-        contentContainerStyle={styles.fullList}
-        scrollRef={listScrollRef}
-        scrollStateResetKey={scrollStateResetKey}
-        refreshing={overview.isRefetching}
-        onRefresh={() => void overview.refetch()}
-        testID="screen-group"
-        title="내 모임"
-        right={
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="내 모임 닫기"
-            onPress={() => router.back()}
-            style={styles.closeButton}
-            testID="group-my-list-close"
-          >
-            <AppIcon name="close" size={22} color={theme.colors.text} />
-          </Pressable>
-        }
-      >
-        {isLoading ? (
-          <View style={styles.loading}>
-            <ListSkeleton rows={3} thumbnail={false} />
-          </View>
-        ) : myGroups.length === 0 ? (
-          <Empty
-            icon="groups"
-            title="참여 중인 소모임이 없어요"
-            description="관심 있는 소모임에 참여해 보세요"
-          />
-        ) : (
-          myGroups.map((group, index) => (
-            <StaggerItem key={group.id} index={index}>
-              <CompanionCard
-                kind="group"
-                item={group}
-                onPress={() => openGroupDetail(group.id)}
-              />
-            </StaggerItem>
-          ))
-        )}
-      </StickyHeaderScreen>
-    );
-  }
 
   return (
     <StickyHeaderScreen
@@ -474,12 +417,6 @@ function categoryOf(key: string) {
 }
 
 const styles = StyleSheet.create({
-  closeButton: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   segmented: {
     flexShrink: 0,
     height: 40,
@@ -502,9 +439,6 @@ const styles = StyleSheet.create({
   },
   myListWrap: {
     flex: 1,
-  },
-  fullList: {
-    paddingBottom: theme.spacing[6],
   },
   loading: {
     paddingTop: theme.spacing[2],

@@ -15,7 +15,6 @@ import {
 } from "../../src/components/ui";
 import { ListRow } from "../../src/components/ui/list-row";
 import { theme } from "../../src/constants/theme";
-import { readDesignVariant } from "../../src/lib/designVariant";
 import { queryKeys } from "../../src/lib/queryKeys";
 import type {
   MyPageActivityComment,
@@ -36,27 +35,18 @@ const tabs: readonly { key: ActivityTab; label: string }[] = [
   { key: "groups", label: "소모임" },
 ];
 
-function variantOf(value: string | string[] | undefined) {
-  const variant = Array.isArray(value) ? value[0] : value;
-  if (variant === "comments" || variant === "groups" || variant === "empty") {
-    return variant;
+function tabOf(value: string | string[] | undefined): ActivityTab {
+  const tab = Array.isArray(value) ? value[0] : value;
+  if (tab === "comments" || tab === "groups") {
+    return tab;
   }
   return "posts";
 }
 
 export default function ActivityScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{
-    tab?: string;
-    designVariant?: string;
-  }>();
-  const initialVariant = variantOf(
-    readDesignVariant(params.designVariant) ?? params.tab,
-  );
-  const isDesignEmpty = initialVariant === "empty";
-  const [activeTab, setActiveTab] = useState<ActivityTab>(
-    isDesignEmpty ? "posts" : initialVariant,
-  );
+  const params = useLocalSearchParams<{ tab?: string }>();
+  const [activeTab, setActiveTab] = useState<ActivityTab>(tabOf(params.tab));
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.mypage.activity(),
     queryFn: async () => {
@@ -76,7 +66,6 @@ export default function ActivityScreen() {
         } satisfies Record<ActivityTab, number>,
       };
     },
-    enabled: !isDesignEmpty,
   });
   const posts: readonly MyPageActivityPost[] = data?.posts ?? [];
   const comments: readonly MyPageActivityComment[] = data?.comments ?? [];
@@ -99,15 +88,7 @@ export default function ActivityScreen() {
         />
 
         <ScrollView contentContainerStyle={styles.body}>
-          {isDesignEmpty ? (
-            <Empty
-              icon="schedule"
-              title="활동 내역이 없어요"
-              description={
-                "나눔 게시글, 댓글, 소모임 참여가\n이곳에 모여서 쉽게 살펴볼 수 있어요."
-              }
-            />
-          ) : isLoading ? (
+          {isLoading ? (
             <View style={styles.emptyWrap}>
               <ActivityIndicator color={theme.colors.primary} />
             </View>

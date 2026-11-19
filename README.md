@@ -48,7 +48,7 @@ Metro만 먼저 확인하려면:
 npm run start:dev-client -- --port 8081 --localhost
 ```
 
-Codex 기본 샌드박스에서는 위 명령이 `Starting project...` 이후 8081 포트에 바인딩되지 않을 수 있습니다. 샌드박스 밖 로컬 권한으로는 `npm run test:dev-client:smoke`가 `http://localhost:8081/status` 응답까지 확인했습니다. development build가 설치된 iOS/Android 기기에서는 같은 Metro에 연결해 실제 앱 실행을 확인합니다.
+Codex 기본 샌드박스에서는 위 명령이 `Starting project...` 이후 8081 포트에 바인딩되지 않을 수 있습니다. Metro 가 떴는지는 `curl http://localhost:8081/status` 로 확인합니다. development build가 설치된 iOS/Android 기기에서는 같은 Metro에 연결해 실제 앱 실행을 확인합니다.
 
 API origin은 로컬 `.env`의 `EXPO_PUBLIC_API_URL`만 사용합니다. 저장소에 실제 주소를 두지 않습니다. 없으면 앱이 시작되지 않습니다.
 
@@ -64,7 +64,7 @@ npm run validate
 
 `validate`는 `typecheck`, `lint`, `format:check`, `test`를 순서대로 실행합니다. CI도 `npm ci` 후 `npm run validate`를 수행합니다.
 
-OpenAPI 계약 검사와 디자인 라우트 같은 Node 스크립트는 `test:scripts`로 네트워크 없이 검증하며 `validate`에 포함됩니다. 실제 Swagger 상태를 확인하는 도메인별 계약 명령은 백엔드 계약이 미완성인 동안 별도로 실행합니다.
+OpenAPI 계약 검사와 디자인 토큰 동기화 같은 Node 스크립트는 `test:scripts`로 네트워크 없이 검증하며 `validate`에 포함됩니다. 실제 Swagger 상태를 확인하는 도메인별 계약 명령은 백엔드 계약이 미완성인 동안 별도로 실행합니다.
 
 단위/컴포넌트 테스트:
 
@@ -91,53 +91,19 @@ API 오류는 `getApiErrorMessage`가 `ApiError.code`를 도메인 메시지 표
 
 인증 세션은 `authSessionService`가 SecureStore 토큰 저장·앱 시작 복원·동시 401 단일 재발급·재발급 실패 로그아웃을 관리합니다.
 
-Dev Client Metro smoke:
+Maestro E2E smoke (로컬, 선택):
 
 ```bash
-npm run test:dev-client:smoke
+maestro test .maestro/smoke.yml
 ```
 
-이 명령은 `expo start --dev-client --port 8081 --localhost`를 띄우고 `http://localhost:8081/status` 응답을 확인한 뒤 종료합니다.
-
-Maestro E2E smoke:
-
-```bash
-npm run test:e2e:smoke
-```
-
-Maestro smoke는 `com.ylmc.connect.dev` development build가 설치된 iOS Simulator 또는 Android Emulator에서 실행합니다. `test:e2e:smoke`는 Android Emulator 감지 시 로컬 Metro는 `http://localhost:8081/status`, Dev Client URL은 `http://127.0.0.1:8081` + `adb reverse` 기준으로 확인합니다. 그 외 기기는 LAN host를 사용합니다. Android Emulator에서는 스크립트가 ADB로 Dev Client deep link를 먼저 열고, Maestro 플로우가 Dev Client 안내 메뉴를 닫은 뒤 React Native `testID` 기반으로 홈, 나눔, 동행, 기도, 삶공부 5탭 진입을 확인합니다. 다른 host/port가 필요하면 `EXPO_DEV_CLIENT_HOST`, `EXPO_DEV_CLIENT_PORT`, `EXPO_DEV_CLIENT_METRO_URL`, `EXPO_DEV_CLIENT_TARGET_METRO_URL`, `EXPO_DEV_CLIENT_URL` 환경변수로 덮어씁니다.
-
-현재 로컬 환경에는 Maestro CLI `2.6.0`을 Homebrew로 설치했고, Android Emulator `Medium_Phone_API_36.1`에서 `npm run test:e2e:smoke` 통과를 확인했습니다. 새 환경에서는 Java 17+와 Xcode Command Line Tools를 확인한 뒤 다음 중 하나로 Maestro를 설치합니다:
+`com.ylmc.connect.dev` development build가 설치된 iOS Simulator 또는 Android Emulator에서 앱을 Metro에 연결해 둔 뒤 실행합니다. Dev Client 안내 메뉴를 닫고 React Native `testID` 기준으로 주요 탭 진입을 확인합니다. CI 에서는 돌리지 않습니다. 새 환경에서는 Java 17+와 Xcode Command Line Tools를 확인한 뒤 Maestro를 설치합니다:
 
 ```bash
 brew tap mobile-dev-inc/tap
 brew install mobile-dev-inc/tap/maestro
 maestro --version
 ```
-
-기본 로컬·PR 검증:
-
-```bash
-npm run validate
-```
-
-`validate:full`(Dev Client Metro + Maestro)과 `test:visual:*` 는 사용자가 요청하거나 디자인 번역·릴리스를 할 때만 실행합니다. 로컬에 Maestro CLI나 development build가 없으면 E2E 단계는 실패합니다.
-
-무거운 모바일 E2E는 일반 PR CI와 분리되어 있으며, `.github/workflows/e2e-smoke.yml`에서 수동 실행을 기본값으로 둡니다. release/nightly 실행은 `E2E_SMOKE_ENABLED=true` repo variable과 Dev Client 설치가 가능한 전용 러너가 준비된 뒤 활성화합니다.
-
-디자인 캡처/비교:
-
-```bash
-npm run test:visual:prepare
-npm run test:visual:capture
-npm run test:visual:compare
-```
-
-`test:visual:prepare`는 `/Users/mingulee/Downloads/열린문커넥트.zip`에서 110개 JSX 화면 inventory와 원본 PNG를 `/private/tmp/ylmc-golden-screens/2026-05-23` 아래에 재생성합니다. 원본 PNG 렌더링에는 로컬 Chrome/Chromium이 필요하며, inventory/manifest만 빠르게 만들 때는 `YLMC_PREPARE_ORIGINALS=0 npm run test:visual:prepare`를 사용할 수 있습니다.
-
-`test:visual:capture`는 위 inventory를 Android Dev Client route로 열어 앱 스크린샷을 저장합니다. 일부 화면만 다시 찍을 때는 `YLMC_CAPTURE_INDEXES=29,30`처럼 지정할 수 있고, stale route를 줄이려면 `YLMC_CAPTURE_RESET_EACH_ROUTE=1 YLMC_CAPTURE_ROUTE_OPEN_REPEATS=2`를 함께 사용합니다. ZIP 원본 360x720 논리 viewport에 맞춰 비교할 때는 `YLMC_CAPTURE_MATCH_DESIGN_VIEWPORT=1`을 추가합니다. 이 옵션은 캡처 중 Android Emulator를 1080x2160@480으로 임시 조정하고 완료 후 원래 size/density로 복원합니다. 캡처 스크립트는 Android UI hierarchy에서 `Continue`/`Reload`/`DEVELOPMENT SERVERS`가 실제로 보일 때만 해당 node bounds를 사용해 Dev Client 메뉴를 닫습니다. 특수 환경에서 route 이후 메뉴 처리를 생략하려면 `YLMC_CAPTURE_DISMISS_AFTER_ROUTE=0`을 사용할 수 있습니다. `test:visual:compare`는 원본 PNG와 앱 PNG를 비교하되, 원본 PNG가 단색 빈 화면이면 report에 `originalFlat=yes`로 표시합니다. 이런 항목은 pixel diff보다 JSX 소스와 앱 캡처를 직접 비교합니다.
-
-캡처용 화면 상태는 `designVariant` query를 사용하며 development build에서만 해석됩니다. 실제 동행 segment와 MY 활동 탭은 각각 `section`, `tab` query를 사용하므로 production 서버 상태와 디자인 캡처 상태가 섞이지 않습니다.
 
 ## 문서 지도
 

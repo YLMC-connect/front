@@ -27,7 +27,6 @@ import type {
   MarketOverviewItem,
 } from "../../../src/types/market";
 import { useMotionRouteParam } from "../../../src/hooks/useMotionRouteParam";
-import { readDesignVariant } from "../../../src/lib/designVariant";
 import { useScaleHeightForFont } from "../../../src/lib/fontScale";
 
 type MarketSegment = "all" | "sharing" | "mine";
@@ -46,19 +45,14 @@ export default function MarketScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
     category?: string;
-    designVariant?: string;
     status?: string;
   }>();
-  const variant = readDesignVariant(params.designVariant);
-  const isEmpty = variant === "empty";
   const routeStatus =
     params.status === "all" ||
     params.status === "sharing" ||
     params.status === "mine"
       ? params.status
-      : variant === "tab-all"
-        ? "all"
-        : "sharing";
+      : "sharing";
   const routeCategory =
     MARKET_CATEGORIES.find((item) => item.key === params.category)?.key ??
     "all";
@@ -83,16 +77,15 @@ export default function MarketScreen() {
   const overview = useMarketOverview(categoryFilter);
   const mine = useMyMarketOverview(categoryFilter, activeStatus === "mine");
   const list = activeStatus === "mine" ? mine : overview;
-  const isError = variant === "network-error" || list.isError;
+  const isError = list.isError;
   const sourceItems = list.data?.items ?? [];
-  const statusPosts =
-    isError || isEmpty
-      ? []
-      : activeStatus === "sharing"
-        ? sourceItems.filter(
-            (post) => post.status === "sharing" || post.status === "reserved",
-          )
-        : sourceItems;
+  const statusPosts = isError
+    ? []
+    : activeStatus === "sharing"
+      ? sourceItems.filter(
+          (post) => post.status === "sharing" || post.status === "reserved",
+        )
+      : sourceItems;
   const visiblePosts =
     activeStatus === "mine"
       ? statusPosts
@@ -103,14 +96,13 @@ export default function MarketScreen() {
   // 받은 페이지에 맞는 글이 없으면 다음 페이지를 이어 받아 빈 화면을 잘못 띄우지 않는다
   const needsMore =
     !isError &&
-    !isEmpty &&
     !list.isPending &&
     visiblePosts.length === 0 &&
     list.hasNextPage;
   useEffect(() => {
     if (needsMore && !list.isFetchingNextPage) void list.fetchNextPage();
   }, [needsMore, list]);
-  const isLoading = (list.isPending || needsMore) && !isError && !isEmpty;
+  const isLoading = (list.isPending || needsMore) && !isError;
 
   return (
     <StickyHeaderScreen
@@ -172,10 +164,7 @@ export default function MarketScreen() {
             onRetry={() => list.refetch()}
           />
         ) : visiblePosts.length === 0 ? (
-          <MarketEmptyState
-            status={isEmpty ? null : activeStatus}
-            isSearching={false}
-          />
+          <MarketEmptyState status={activeStatus} isSearching={false} />
         ) : (
           <ShareList style={styles.shareList} testID="market-list">
             {visiblePosts.map((post, index) => (
@@ -232,7 +221,7 @@ function MarketEmptyState({
   status,
   isSearching,
 }: {
-  status: MarketSegment | null;
+  status: MarketSegment;
   isSearching?: boolean;
 }) {
   const message = isSearching

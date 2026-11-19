@@ -152,7 +152,7 @@ describe("modal smoke screens", () => {
   });
 
   it("fills the market edit modal with the real post, not sample values", async () => {
-    // 릴리스 빌드처럼 designVariant 없이 id 만 넘어와도 수정 화면이어야 한다
+    // id 가 넘어오면 수정 화면이고, 서버 글 내용으로 채운다
     jest.mocked(useLocalSearchParams).mockReturnValue({ id: "42" } as never);
     jest.spyOn(marketService, "fetchMarketDetail").mockResolvedValue({
       id: "42",

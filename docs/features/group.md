@@ -14,7 +14,7 @@
 - 개설·수정 `modal/group-new`(`?kind=service` 면 `type=VOLUNTEER`): `POST /api/communion`(JSON), `PUT /api/communion/{id}`. 개설하면 창을 닫고 목록 위에 상세를 쌓고, 수정은 창만 닫는다.
 - 소모임장 관리: 모집 상태 `PUT /{id}/status`, 삭제 `DELETE /{id}`, 내보내기 `DELETE /{id}/kick/{targetUserId}`, 이관 `PUT /{id}/leader`, 공지 CUD `/{id}/notices[/{noticeId}]`.
 - 멤버 화면 `/group/members` 는 상세 `전체보기` 로 일반 멤버도 들어온다. `내보내기`·이관은 소모임장에게만 보인다.
-- `npm run test:api:contract:group` 이 동행 Swagger endpoint 와 화면 필수 계약을 검사한다.
+- `npm run test:api:contract -- group` 이 동행 Swagger endpoint 와 화면 필수 계약을 검사한다.
 
 ## 데이터 타입
 
@@ -48,7 +48,7 @@
 - 화면: `app/(tabs)/group/`, `app/modal/group-new.tsx`
 - 데이터: `src/services/group*`, `src/hooks/useGroups.ts`, `src/types/group*`
 - 오류 문구: `src/constants/apiErrorMessages.ts` (`COM*`)
-- 계약 검사: `scripts/check-group-api-contract.mjs`
+- 계약 검사: `scripts/api-contract/group.mjs`
 
 ## 의존성 · 관련 ADR
 

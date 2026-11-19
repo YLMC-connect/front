@@ -216,6 +216,116 @@ export function createOpenApiContract(spec) {
     }
   };
 
+  const responseDataSchema = (path, method) => {
+    const operation = operationAt(path, method);
+    const envelope = resolveSchema(
+      schemaFromContent(operation?.responses?.["200"]?.content),
+    );
+    return resolveSchema(envelope?.properties?.data);
+  };
+
+  const requestSchema = (path, method) =>
+    resolveSchema(
+      schemaFromContent(operationAt(path, method)?.requestBody?.content),
+    );
+
+  const responseErrorText = (path, method) =>
+    Object.entries(operationAt(path, method)?.responses ?? {})
+      .filter(([status]) => /^[45]\d\d$/.test(status))
+      .map(([, response]) => response?.description ?? "")
+      .join(" ");
+
+  const requireRequestFields = (label, path, method, fields) => {
+    requireConcreteRequest(label, path, method);
+    const schema = requestSchema(path, method);
+    for (const field of fields) {
+      if (!schema?.properties?.[field]) {
+        failures.push(`${label} 요청 ${field} 필드가 없습니다.`);
+      }
+      if (
+        !Array.isArray(schema?.required) ||
+        !schema.required.includes(field)
+      ) {
+        failures.push(`${label} 요청 ${field}가 required가 아닙니다.`);
+      }
+    }
+  };
+
+  const requireOptionalRequestFields = (label, path, method, fields) => {
+    const schema = requestSchema(path, method);
+    for (const field of fields) {
+      if (!schema?.properties?.[field]) {
+        failures.push(`${label} 요청 ${field} 필드가 없습니다.`);
+      }
+      if (Array.isArray(schema?.required) && schema.required.includes(field)) {
+        failures.push(`${label} 요청 ${field}는 필수가 아닙니다.`);
+      }
+    }
+  };
+
+  const requireRequestMaxLength = (label, path, method, field, expected) => {
+    const maxLength = requestSchema(path, method)?.properties?.[field]
+      ?.maxLength;
+    if (maxLength !== expected) {
+      failures.push(
+        `${label} 요청 ${field} maxLength가 ${expected}(으)로 명시되지 않았습니다.`,
+      );
+    }
+  };
+
+  const requireDataArrayItemProperties = (label, path, method, fields) => {
+    const data = responseDataSchema(path, method);
+    if (data?.type !== "array") {
+      failures.push(`${label} 200 응답 data가 배열이 아닙니다.`);
+      return;
+    }
+    const itemSchema = resolveSchema(data.items);
+    for (const field of fields) {
+      if (!itemSchema?.properties?.[field]) {
+        failures.push(`${label} 200 응답 data[].${field} 필드가 없습니다.`);
+      }
+    }
+  };
+
+  const requireNestedItemProperties = (
+    label,
+    path,
+    method,
+    property,
+    fields,
+  ) => {
+    const data = responseDataSchema(path, method);
+    const itemSchema = resolveSchema(
+      resolveSchema(data?.properties?.[property])?.items,
+    );
+    for (const field of fields) {
+      if (!itemSchema?.properties?.[field]) {
+        failures.push(
+          `${label} 200 응답 data.${property}[].${field} 필드가 없습니다.`,
+        );
+      }
+    }
+  };
+
+  const requireDataInteger = (label, path, method) => {
+    const data = responseDataSchema(path, method);
+    if (data?.type !== "integer" && data?.type !== "number") {
+      failures.push(`${label} 200 응답 data가 정수가 아닙니다.`);
+    }
+  };
+
+  const requireErrorCodes = (label, path, method, codes) => {
+    requireDocumentedErrorCodes(label, path, method);
+    const descriptions = responseErrorText(path, method);
+    for (const code of codes) {
+      if (!descriptions.includes(code)) {
+        failures.push(
+          `${label} 오류 코드 ${code}가 응답 description에 없습니다.`,
+        );
+      }
+    }
+  };
+
   const findOperationMatching = (predicate) => {
     for (const [path, pathItem] of Object.entries(spec.paths ?? {})) {
       for (const [method, operation] of Object.entries(pathItem)) {
@@ -244,6 +354,9 @@ export function createOpenApiContract(spec) {
     failures,
     operationAt,
     schemaNamed,
+    resolveSchema,
+    responseDataSchema,
+    requestSchema,
     requireOperation,
     requireConcreteRequest,
     requireConcreteSuccess,
@@ -258,6 +371,13 @@ export function createOpenApiContract(spec) {
     requirePublicOperation,
     requireDocumentedErrorCodes,
     requireResolvableSecurity,
+    requireRequestFields,
+    requireOptionalRequestFields,
+    requireRequestMaxLength,
+    requireDataArrayItemProperties,
+    requireNestedItemProperties,
+    requireDataInteger,
+    requireErrorCodes,
     findOperationMatching,
     hasOperationMatching,
     report,

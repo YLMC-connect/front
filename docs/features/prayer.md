@@ -49,7 +49,7 @@
 - 목록 렌더러: `src/components/faith/` (삶공부와 공유)
 - 상세 부품: `src/components/prayer/detail/`
 - 데이터: `src/services/prayer*`, `src/hooks/usePrayers.ts`, `src/types/prayer*`
-- 계약 검사: `scripts/check-prayer-api-contract.mjs` (`npm run test:api:contract:prayer`, `validate` 에는 없음)
+- 계약 검사: `scripts/api-contract/prayer.mjs` (`npm run test:api:contract -- prayer`, `validate` 에는 없음)
 
 ## 의존성 · 관련 ADR
 

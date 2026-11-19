@@ -5,13 +5,13 @@
 
 ## 1. 준비물
 
-| 항목 | 기준 |
-|---|---|
-| Node.js | `^22.13.0` 또는 `^24.3.0` 또는 `>=25.0.0` (`package.json` `engines`). CI는 22.22.0 |
-| npm | Node와 함께 오는 버전 (CI는 npm 10) |
-| Expo Dev Client | Expo Go가 아니라 development build |
-| iOS | Xcode + 시뮬레이터 또는 실기기 |
-| Android | Android Studio + Emulator 또는 실기기, JDK 17+ |
+| 항목            | 기준                                                                               |
+| --------------- | ---------------------------------------------------------------------------------- |
+| Node.js         | `^22.13.0` 또는 `^24.3.0` 또는 `>=25.0.0` (`package.json` `engines`). CI는 22.22.0 |
+| npm             | Node와 함께 오는 버전 (CI는 npm 10)                                                |
+| Expo Dev Client | Expo Go가 아니라 development build                                                 |
+| iOS             | Xcode + 시뮬레이터 또는 실기기                                                     |
+| Android         | Android Studio + Emulator 또는 실기기, JDK 17+                                     |
 
 저장소 클론:
 
@@ -79,7 +79,7 @@ npm run validate
 
 typecheck, lint, prettier, 스크립트 테스트, Jest를 순서대로 돌립니다. PR CI도 이 명령입니다.
 
-계약 검사(`npm run test:api:contract*`)는 Swagger 문서 공백이 있으면 실패하도록 따로 둡니다. 일반 `validate`에는 넣지 않습니다.
+계약 검사(`npm run test:api:contract`, 도메인만 볼 때는 `npm run test:api:contract -- <도메인>`)는 Swagger 문서 공백이 있으면 실패하도록 따로 둡니다. 일반 `validate`에는 넣지 않습니다.
 
 ## 5. 막힐 때
 

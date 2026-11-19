@@ -259,7 +259,6 @@ queryKeys.group.members(id); // ["group", "detail", id, "members"]
 | 단위·컴포넌트   | Jest + React Native Testing Library | `npm test`, 대상 파일 옆 `__tests__/`      |
 | 스크립트        | `node --test`                       | `npm run test:scripts`                     |
 | API 계약        | Swagger/OpenAPI 대조 스크립트       | `npm run test:api:contract*`               |
-| Dev Client 부팅 | Metro `/status` 확인                | `npm run test:dev-client:smoke`            |
 | E2E             | Maestro (`.maestro/smoke.yml`)      | 로컬에서 `maestro test .maestro/smoke.yml` |
 
 - PR CI 는 `npm ci` + `npm run validate`(typecheck · lint · format:check · test:scripts · test). Maestro 는 PR CI 에서 돌리지 않는다 ([ADR 0005](docs/adr/0005-mobile-e2e-maestro-first.md)).

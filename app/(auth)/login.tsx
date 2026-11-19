@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Keyboard,
@@ -21,14 +21,12 @@ import {
   MotionFadeIn,
   MotionPressable,
   MotionShake,
-  Toast,
 } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { authApiErrorMessages } from "../../src/constants/apiErrorMessages";
 import { useAuth } from "../../src/hooks/useAuth";
 import { getApiErrorMessage } from "../../src/lib/apiErrorMessage";
 import { isValidLoginId, sanitizeLoginId } from "../../src/lib/authValidation";
-import { readDesignVariant } from "../../src/lib/designVariant";
 
 type FormValues = {
   id: string;
@@ -50,17 +48,10 @@ function validateLogin(values: FormValues) {
 const SAVED_ID_KEY = "ylmc.saved_login_id";
 
 export default function LoginScreen() {
-  const params = useLocalSearchParams<{ designVariant?: string }>();
-  const variant = readDesignVariant(params.designVariant) ?? "default";
-  const isDefault = variant === "default";
-  const isError = variant === "error";
-  const isLoading = variant === "loading";
-  const isToast = variant === "toast";
-  const enterMotion = isDefault;
   const { login } = useAuth();
   const [values, setValues] = useState<FormValues>({
-    id: isDefault ? "" : "admin",
-    password: isDefault ? "" : "admin",
+    id: "",
+    password: "",
   });
   const [rememberId, setRememberId] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -68,7 +59,6 @@ export default function LoginScreen() {
   const [lockedHeight, setLockedHeight] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!isDefault) return;
     AsyncStorage.getItem(SAVED_ID_KEY)
       .then((savedId) => {
         if (savedId) {
@@ -80,26 +70,20 @@ export default function LoginScreen() {
         }
       })
       .catch(() => undefined);
-  }, [isDefault]);
+  }, []);
 
   const isFilled = values.id.length > 0 && values.password.length > 0;
-  const isSubmitting = login.isPending || isLoading;
-  const isLoginDimmed = !isFilled && isDefault;
+  const isSubmitting = login.isPending;
+  const isLoginDimmed = !isFilled;
   const formErrorMessage = login.error
     ? getApiErrorMessage(
         login.error,
         authApiErrorMessages,
         "아이디 또는 비밀번호를 확인해주세요.",
       )
-    : isError
-      ? "아이디 또는 비밀번호가 맞지 않아요. 다시 확인해 주세요."
-      : "";
+    : "";
   // 로그인 실패 때만 입력창을 흔든다(입력 오류는 흔들지 않음). 실패마다 다시 흔들도록 제출 시각을 쓴다.
-  const loginFailureTrigger = login.isError
-    ? login.submittedAt
-    : isError
-      ? "error"
-      : null;
+  const loginFailureTrigger = login.isError ? login.submittedAt : null;
 
   const onSubmit = () => {
     const nextErrors = validateLogin(values);
@@ -147,11 +131,7 @@ export default function LoginScreen() {
         >
           <View style={styles.mainSection}>
             <View style={styles.hero}>
-              <MotionEnter
-                enabled={enterMotion}
-                mode="fadeUp"
-                style={styles.heroCopy}
-              >
+              <MotionEnter mode="fadeUp" style={styles.heroCopy}>
                 <View style={styles.brandBadge}>
                   <AppText
                     variant="caption"
@@ -170,11 +150,7 @@ export default function LoginScreen() {
               </MotionEnter>
             </View>
 
-            <MotionEnter
-              enabled={enterMotion}
-              mode="fadeUp"
-              style={styles.form}
-            >
+            <MotionEnter mode="fadeUp" style={styles.form}>
               <MotionShake
                 testID="login-fields-shake"
                 trigger={loginFailureTrigger}
@@ -196,7 +172,6 @@ export default function LoginScreen() {
                   }}
                   placeholder="아이디를 입력해주세요"
                   error={errors.id}
-                  hasError={isError}
                 />
                 <AuthField
                   testID="login-password-input"
@@ -210,7 +185,6 @@ export default function LoginScreen() {
                   // 비밀번호 칸은 영문 자판으로 연다(iOS 비밀번호 칸은 한글 조합이 막혀 입력되지 않음)
                   keyboardType="ascii-capable"
                   error={errors.password}
-                  hasError={isError}
                   trailingIcon={
                     passwordVisible ? "visibility" : "visibility-off"
                   }
@@ -251,11 +225,7 @@ export default function LoginScreen() {
             </MotionEnter>
           </View>
 
-          <MotionEnter
-            enabled={enterMotion}
-            mode="fadeUp"
-            style={styles.footerBlock}
-          >
+          <MotionEnter mode="fadeUp" style={styles.footerBlock}>
             <View style={styles.signupCard}>
               <AppText tone="primary" style={styles.signupCardText}>
                 열린문 커넥트가 처음이신가요?
@@ -274,10 +244,6 @@ export default function LoginScreen() {
           </MotionEnter>
         </Pressable>
       </ScrollView>
-      <Toast
-        message={isToast ? "네트워크 연결을 확인해주세요" : ""}
-        icon="sync"
-      />
     </Screen>
   );
 }
@@ -290,7 +256,6 @@ function AuthField({
   placeholder,
   secureTextEntry = false,
   error,
-  hasError = false,
   trailingIcon,
   trailingLabel,
   onTrailingPress,
@@ -305,7 +270,6 @@ function AuthField({
   placeholder?: string;
   secureTextEntry?: boolean;
   error?: string;
-  hasError?: boolean;
   trailingIcon?: "visibility" | "visibility-off";
   trailingLabel?: string;
   onTrailingPress?: () => void;
@@ -324,7 +288,7 @@ function AuthField({
         onChangeText={onChangeText}
         placeholder={placeholder}
         secureTextEntry={secureTextEntry}
-        hasError={hasError || Boolean(error)}
+        hasError={Boolean(error)}
         autoCapitalize={autoCapitalize}
         autoCorrect={autoCorrect}
         keyboardType={keyboardType}

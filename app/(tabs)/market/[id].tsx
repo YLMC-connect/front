@@ -48,7 +48,6 @@ import {
   useUpdateMarketStatus,
   useUpdateMarketComment,
 } from "../../../src/hooks/useMarket";
-import { readDesignVariant } from "../../../src/lib/designVariant";
 import type {
   MarketDetailComment,
   MarketStatus,
@@ -77,12 +76,8 @@ const STATUS_OPTIONS: readonly {
 ];
 
 export default function MarketDetailScreen() {
-  const params = useLocalSearchParams<{
-    id?: string;
-    designVariant?: string;
-  }>();
+  const params = useLocalSearchParams<{ id?: string }>();
   const id = params.id ?? "1";
-  const variant = readDesignVariant(params.designVariant);
   const detail = useMarketDetail(id);
   const createComment = useCreateMarketComment(id);
   const updateComment = useUpdateMarketComment(id);
@@ -93,12 +88,7 @@ export default function MarketDetailScreen() {
   const [statusDraft, setStatusDraft] = useState<MarketStatus | null>(null);
   const [comment, setComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
-  const [showDelete, setShowDelete] = useState(variant === "delete-confirm");
-  const [seenDeleteVariant, setSeenDeleteVariant] = useState(variant);
-  if (variant !== seenDeleteVariant) {
-    setSeenDeleteVariant(variant);
-    setShowDelete(variant === "delete-confirm");
-  }
+  const [showDelete, setShowDelete] = useState(false);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -118,24 +108,6 @@ export default function MarketDetailScreen() {
       setIsPastHero(past);
     }
   };
-
-  if (variant === "deleted") {
-    return (
-      <Screen>
-        <View style={styles.exception}>
-          <AppIcon
-            name="inventory-2"
-            size={42}
-            color={theme.colors.textMuted}
-          />
-          <Text style={styles.exceptionTitle}>없는 게시글이에요</Text>
-          <Text style={styles.exceptionText}>
-            삭제되었거나 더 이상 접근할 수 없는 게시글이에요.
-          </Text>
-        </View>
-      </Screen>
-    );
-  }
 
   if (detail.isPending) {
     return (
@@ -172,18 +144,11 @@ export default function MarketDetailScreen() {
   }
 
   const market = detail.data;
-  const isOwn = variant ? !variant.startsWith("other") : market.isMine;
-  const status =
-    variant === "own-reserved"
-      ? "reserved"
-      : variant === "own-done"
-        ? "done"
-        : market.status;
+  const isOwn = market.isMine;
+  const status = market.status;
   const isReserved = status === "reserved";
   const isDone = status === "done";
-  const authorName = variant?.startsWith("other")
-    ? "박정아"
-    : market.authorName;
+  const authorName = market.authorName;
   const isCommentPending = createComment.isPending || updateComment.isPending;
   const resetCommentComposer = () => {
     setComment("");

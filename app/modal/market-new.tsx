@@ -18,7 +18,6 @@ import {
   ModalFormSection as Section,
   ModalFormTextInput as FormInput,
   MotionPressable,
-  Toast,
   TopBar,
 } from "../../src/components/ui";
 import { RadioRow } from "../../src/components/ui/checkbox";
@@ -31,7 +30,6 @@ import {
   useMarketDetail,
   useUpdateMarketPost,
 } from "../../src/hooks/useMarket";
-import { readDesignVariant } from "../../src/lib/designVariant";
 import { prepareImageForUpload } from "../../src/lib/resizeImage";
 import type { MarketDetail, MarketInput } from "../../src/types/market";
 
@@ -43,16 +41,6 @@ const conditions = ["새것", "사용감 있음", "파손 있음"] as const;
 const MAX_IMAGES = 5;
 /** 32 칩 + 위아래 6 → 누르는 곳 44. */
 const CHIP_HIT_SLOP = { top: 6, bottom: 6 };
-
-const filledValues = {
-  images: ["https://picsum.photos/seed/market-new/240/240"],
-  category: "baby" as const,
-  title: "아이 장난감 정리하면서 나눔합니다",
-  condition: "사용감 있음",
-  description:
-    "아이가 커서 더 이상 쓰지 않는 장난감 정리해요. 토요일 오후 교회 1층 로비에서 수령 가능합니다.",
-  location: "교회 1층 로비",
-};
 
 const emptyValues: MarketInput = {
   images: [],
@@ -80,28 +68,17 @@ function valuesFromDetail(detail: MarketDetail): MarketInput {
 
 export default function MarketNewModal() {
   const router = useRouter();
-  const params = useLocalSearchParams<{
-    designVariant?: string;
-    id?: string;
-  }>();
-  const variant = readDesignVariant(params.designVariant) ?? "create";
-  // 수정 여부는 id 로 정한다. designVariant 는 릴리스 빌드에서 읽히지 않는다
+  const params = useLocalSearchParams<{ id?: string }>();
+  // 수정 여부는 id 로 정하고, 글 내용은 서버의 상세로 채운다
   const editId = params.id;
-  const isEdit = Boolean(editId) || variant === "edit";
-  // 실제 글 수정은 서버의 글 내용으로 채운다. 디자인 미리보기(id 없음)만 예시 값을 쓴다
+  const isEdit = Boolean(editId);
   const detailQuery = useMarketDetail(editId ?? "");
   const detail = editId ? detailQuery.data : undefined;
-  const useFilledValues =
-    (variant === "edit" && !editId) ||
-    variant === "create-filled" ||
-    variant === "back-warn" ||
-    variant === "limit-toast";
   // 상세가 도착한 첫 값만 쓴다. 다시 불러와도 입력 중인 내용을 덮지 않게 한다
   const [loadedValues, setLoadedValues] = useState<MarketInput | undefined>(
     () => (detail ? valuesFromDetail(detail) : undefined),
   );
-  const initialValues =
-    loadedValues ?? (useFilledValues ? filledValues : emptyValues);
+  const initialValues = loadedValues ?? emptyValues;
   const [values, setValues] = useState(initialValues);
   if (detail && !loadedValues) {
     // 상세가 늦게 도착한 경우: 렌더 중에 한 번 맞춘다(effect 없이)
@@ -367,14 +344,6 @@ export default function MarketNewModal() {
         danger
         onCancel={() => setShowCloseConfirm(false)}
         onConfirm={() => router.back()}
-      />
-      <Toast
-        message={
-          variant === "limit-toast"
-            ? "하루에 나눔은 5개까지 등록할 수 있어요"
-            : ""
-        }
-        offset={96}
       />
     </KeyboardAvoidingView>
   );

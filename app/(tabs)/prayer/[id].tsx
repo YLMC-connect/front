@@ -15,7 +15,6 @@ import {
   UnderlineTabs,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
-import { readDesignVariant } from "../../../src/lib/designVariant";
 import { useTogglePrayerCompletion } from "../../../src/hooks/usePrayers";
 import {
   fetchPrayerCohortStatus,
@@ -46,27 +45,14 @@ function routeId(value: string | string[] | undefined) {
 
 export default function PrayerDetailScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{
-    id?: string;
-    designVariant?: string;
-  }>();
+  const params = useLocalSearchParams<{ id?: string }>();
   const id = routeId(params.id);
-  const variant = readDesignVariant(params.designVariant) ?? "pray";
   const [completedOverride, setCompletedOverride] = useState<boolean | null>(
     null,
   );
 
-  const initialTab: TabKey =
-    variant === "status" ||
-    variant === "status-empty" ||
-    variant === "leader-status"
-      ? "status"
-      : variant === "answers" || variant === "answers-empty"
-        ? "answers"
-        : "pray";
-  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
+  const [activeTab, setActiveTab] = useState<TabKey>("pray");
 
-  const isHttp = !params.designVariant;
   const toggleCompletion = useTogglePrayerCompletion(id ?? "1");
   const statusQuery = useQuery({
     queryKey: ["prayer", "cohort-status", id ?? "1"],
@@ -104,11 +90,9 @@ export default function PrayerDetailScreen() {
   const roomTitle = room?.cohortName || "기도방";
   const { day, period } = formatPrayerRoomDayPeriod(room?.yoil, room?.timeSlot);
   // 서버가 이번 주에 완료할 수 없다고 하면 버튼을 막는다(null 은 막지 않는다).
-  const completionBlocked = isHttp && room?.canComplete === false;
+  const completionBlocked = room?.canComplete === false;
 
-  const isCompleted =
-    completedOverride ??
-    (room ? room.myCompleted : variant === "pray-completed");
+  const isCompleted = completedOverride ?? (room ? room.myCompleted : false);
 
   const totalMembers = room?.totalMembers ?? 0;
   const completedCount = room?.completedCount ?? 0;
@@ -160,17 +144,13 @@ export default function PrayerDetailScreen() {
       ? room.notCompleted.map((m) => m.userName)
       : [];
 
-  const isPrayEmpty =
-    variant === "pray-empty" ||
-    (urgentItems.length === 0 && ongoingItems.length === 0);
+  const isPrayEmpty = urgentItems.length === 0 && ongoingItems.length === 0;
   const isStatusEmpty =
-    variant === "status-empty" ||
-    (completedPeople.length === 0 && pendingPeople.length === 0);
-  const isAnswersEmpty =
-    variant === "answers-empty" || answerItems.length === 0;
+    completedPeople.length === 0 && pendingPeople.length === 0;
+  const isAnswersEmpty = answerItems.length === 0;
 
   const handleToggleCompletion = () => {
-    if (isHttp && id) {
+    if (id) {
       toggleCompletion.mutate(Boolean(isCompleted), {
         onError: (err) => {
           Alert.alert(

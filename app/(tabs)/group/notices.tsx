@@ -26,50 +26,26 @@ import {
   useGroupDetail,
   useUpdateGroupNotice,
 } from "../../../src/hooks/useGroups";
-import { readDesignVariant } from "../../../src/lib/designVariant";
-
-const filledTitle = "5월 18일 토요일 모임 안내";
-const filledBody = `이번 주 토요일은 북한산 도선사 코스로 갑니다.
-오전 7시 교회 앞에서 모이며, 등산 시간은 약 4시간 예상해요.
-
-준비물:
-- 등산화, 물 1L 이상
-- 간단한 간식
-- 우산 또는 우비 (오후 비 예보 있음)
-
-문의는 단톡방으로 부탁드려요. 함께 오르며 좋은 시간 보내요!`;
 
 export default function GroupNoticesScreenRoute() {
   const router = useRouter();
   const params = useLocalSearchParams<{
     id?: string;
     noticeId?: string;
-    designVariant?: string;
   }>();
   const groupId = params.id ?? "1";
-  const variant = readDesignVariant(params.designVariant);
-  const isDesignEdit = variant === "edit" || variant === "delete-confirm";
-  const noticeId = params.noticeId ?? (isDesignEdit ? "notice-1" : undefined);
+  const noticeId = params.noticeId;
   const isEdit = Boolean(noticeId);
   const detail = useGroupDetail(groupId);
   const createNotice = useCreateGroupNotice(groupId);
   const updateNotice = useUpdateGroupNotice(groupId);
   const deleteNotice = useDeleteGroupNotice(groupId);
-  const isDesignFilled = isDesignEdit || variant === "create-filled";
-  const [title, setTitle] = useState(isDesignFilled ? filledTitle : "");
-  const [body, setBody] = useState(isDesignFilled ? filledBody : "");
-  const [showDelete, setShowDelete] = useState(variant === "delete-confirm");
-  const [seenVariant, setSeenVariant] = useState(variant);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [showDelete, setShowDelete] = useState(false);
   const [syncedDetail, setSyncedDetail] = useState<typeof detail.data>();
-  if (variant && variant !== seenVariant) {
-    setSeenVariant(variant);
-    const filled = isDesignEdit || variant === "create-filled";
-    setTitle(filled ? filledTitle : "");
-    setBody(filled ? filledBody : "");
-    setShowDelete(variant === "delete-confirm");
-  }
 
-  if (!variant && noticeId && detail.data && detail.data !== syncedDetail) {
+  if (noticeId && detail.data && detail.data !== syncedDetail) {
     setSyncedDetail(detail.data);
     const notice = detail.data.notices.find(({ id }) => id === noticeId);
     if (notice) {

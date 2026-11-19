@@ -32,7 +32,7 @@
 - **개인정보 쿼리는 기기에 저장하지 않는다** — `queryClient.ts` 의 `NON_PERSISTED_QUERY_KEY_PREFIXES`(`member`, `market/mine`, `group/detail`, `prayer/overview`, `lifeStudy/overview`)는 메모리에만 둔다. AsyncStorage 는 암호화가 없기 때문이다. 개인정보 쿼리를 새로 만들면 이 목록에 넣는다.
 - **응답 해석은 화면이 쓰는 필드만 엄격** — mapper 는 화면이 쓰는 필드(id, 제목, 상태, 날짜 등)만 형식을 확인하고 나머지는 `null` 로 읽는다. 목록은 형식이 틀린 항목만 빼고, `reportResponseIssue({ source, reason })` 로 경로·필드 이름만 알린다(값·개인정보 금지). 응답 자체가 배열·객체가 아니면 `INVALID_RESPONSE`.
 - **Sentry 는 배포 빌드에서만** — `__DEV__` 이거나 `EXPO_PUBLIC_SENTRY_DSN` 이 비면 켜지 않는다. 보고에는 쿼리 키 앞 두 조각·HTTP status·code 만 싣고 응답 본문·메시지·개인정보, 네트워크 오류·4xx 는 보내지 않는다. 소스맵 업로드는 아직 끔(`SENTRY_DISABLE_AUTO_UPLOAD=true`, #212).
-- **기본 검증은 `npm run validate`** — visual capture/compare(`test:visual:*`)와 Maestro(`test:e2e:smoke`, `validate:full`)는 사용자가 요청하거나 디자인 번역·릴리스일 때만.
+- **기본 검증은 `npm run validate`** — Maestro smoke(`maestro test .maestro/smoke.yml`)는 로컬에서 필요할 때만 돌리고 CI 에는 없다.
 - **도메인 목록은 `.task-flow.conf`** — GitHub 라벨·`docs/features/` 파일 이름과 같은 이름을 쓴다.
 - **탭 IA 는 홈/나눔/동행/기도/삶공부** — MY 는 홈에서 진입. 보고 있는 탭을 다시 누르면 이동하지 않고 맨 위로 스크롤, 다른 탭은 떠날 때 상태 그대로 연다 (#136).
 - **디자인 토큰은 디자인 시스템 v2 (ADR 0007)** — `design-system/tokens.json` 을 고치고 `node scripts/sync-design-tokens.mjs` 로 `src/constants/designTokens.json` 을 만든다(`test:scripts` 가 어긋남을 잡음). 색은 `theme.colors` v2 이름만, 글자는 `theme.typography` 6단계(display/title/heading/body/label/caption)만, 그림자는 `sm`·`md`·`lg`·`sheet`(+ Fab 전용 `fab`)만. 옛 이름 별칭은 없다.

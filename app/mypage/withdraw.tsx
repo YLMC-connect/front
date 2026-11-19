@@ -1,5 +1,5 @@
 import { AppIcon } from "@/components/ui/app-icon";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "@/components/ui/text";
@@ -14,7 +14,6 @@ import {
 } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { useWithdrawMember } from "../../src/hooks/useMember";
-import { readDesignVariant } from "../../src/lib/designVariant";
 
 const cautions = [
   "작성한 나눔 글과 댓글은 “탈퇴한 성도”로 남아요",
@@ -25,9 +24,7 @@ const cautions = [
 
 export default function WithdrawScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ designVariant?: string }>();
-  const showConfirm = readDesignVariant(params.designVariant) === "confirm";
-  const [agreed, setAgreed] = useState(showConfirm);
+  const [agreed, setAgreed] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const withdrawMutation = useWithdrawMember();
 
@@ -97,22 +94,15 @@ export default function WithdrawScreen() {
         />
 
         <ConfirmDialog
-          visible={showConfirm || confirmVisible}
+          visible={confirmVisible}
           title="정말 탈퇴할까요?"
           message="탈퇴하면 되돌릴 수 없어요."
           confirmText="탈퇴"
           danger
-          onCancel={() => {
-            setConfirmVisible(false);
-            if (showConfirm) router.back();
-          }}
+          onCancel={() => setConfirmVisible(false)}
           onConfirm={() => {
             setConfirmVisible(false);
-            if (showConfirm) {
-              router.back();
-            } else {
-              void handleWithdraw();
-            }
+            void handleWithdraw();
           }}
         />
       </View>

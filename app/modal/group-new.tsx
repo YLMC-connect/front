@@ -1,6 +1,5 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { InfoBox } from "@/components/ui/info-box";
-import { InputErrorText } from "@/components/ui/inputs";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -33,7 +32,6 @@ import {
   useGroupDetail,
   useUpdateGroup,
 } from "../../src/hooks/useGroups";
-import { readDesignVariant } from "../../src/lib/designVariant";
 import { toCommunionCategoryCode } from "../../src/services/groupMapper";
 import type { GroupDetail, GroupInput } from "../../src/types/group";
 
@@ -106,22 +104,12 @@ function ChoiceChips<T extends string>({
 /** 32 칩 + 위아래 6 → 누르는 곳 44. */
 const CHIP_HIT_SLOP = { top: 6, bottom: 6 };
 
-const filledValues: GroupInput = {
-  category: "sport",
-  name: "토요 산악회",
-  description:
-    "매주 토요일 함께 산을 오르며 자연을 느끼고 신앙을 나누는 모임입니다.",
-  maxMembers: 25,
-};
-
 const emptyValues: GroupInput = {
   category: "etc",
   name: "",
   description: "",
   maxMembers: 10,
 };
-
-const DESIGN_EDIT_VARIANTS = ["edit", "range-error", "member-error"];
 
 function toGroupInput(detail: GroupDetail): GroupInput {
   const matchedCategory = GROUP_CATEGORIES.find(
@@ -138,43 +126,17 @@ function toGroupInput(detail: GroupDetail): GroupInput {
   };
 }
 
-/** 디자인 미리보기(id 없음)에서만 예시 값을 쓴다. */
-function designInitialValues(variant: string): GroupInput {
-  const useFilledValues =
-    DESIGN_EDIT_VARIANTS.includes(variant) || variant === "create-filled";
-  return {
-    ...(useFilledValues ? filledValues : emptyValues),
-    maxMembers:
-      variant === "range-error"
-        ? 150
-        : variant === "member-error"
-          ? 15
-          : useFilledValues
-            ? filledValues.maxMembers
-            : emptyValues.maxMembers,
-  };
-}
-
 export default function GroupNewModal() {
   const router = useRouter();
   const params = useLocalSearchParams<{
     id?: string;
-    designVariant?: string;
     kind?: string;
   }>();
-  const variant = readDesignVariant(params.designVariant) ?? "create";
   const existingDetail = useGroupDetail(params.id ?? "");
   const kind = params.kind === "service" ? "service" : "group";
 
   if (!params.id) {
-    return (
-      <GroupForm
-        variant={variant}
-        isEdit={DESIGN_EDIT_VARIANTS.includes(variant)}
-        initialValues={designInitialValues(variant)}
-        kind={kind}
-      />
-    );
+    return <GroupForm isEdit={false} initialValues={emptyValues} kind={kind} />;
   }
 
   // 실제 수정은 소모임 정보가 도착한 뒤에 폼을 채워 그린다.
@@ -207,7 +169,6 @@ export default function GroupNewModal() {
     <GroupForm
       key={params.id}
       groupId={params.id}
-      variant={variant}
       isEdit
       initialValues={toGroupInput(existingDetail.data)}
     />
@@ -216,13 +177,11 @@ export default function GroupNewModal() {
 
 function GroupForm({
   groupId,
-  variant,
   isEdit,
   initialValues,
   kind = "group",
 }: {
   groupId?: string;
-  variant: string;
   isEdit: boolean;
   initialValues: GroupInput;
   kind?: "group" | "service";
@@ -436,19 +395,6 @@ function GroupForm({
                 style={styles.quickPresetScroll}
                 testIDPrefix="group-form-capacity"
               />
-
-              {variant === "range-error" ? (
-                <View style={styles.inlineError}>
-                  <InputErrorText>2~100명 사이로 입력해주세요</InputErrorText>
-                </View>
-              ) : null}
-              {variant === "member-error" ? (
-                <View style={styles.inlineError}>
-                  <InputErrorText>
-                    현재 멤버수(18명)보다 적게 설정할 수 없습니다
-                  </InputErrorText>
-                </View>
-              ) : null}
             </Section>
 
             {error ? (
@@ -559,9 +505,6 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     fontSize: theme.typography.label.fontSize,
     lineHeight: theme.typography.label.lineHeight,
-  },
-  inlineError: {
-    marginTop: 8,
   },
   infoBox: {
     marginHorizontal: theme.layout.screenX,

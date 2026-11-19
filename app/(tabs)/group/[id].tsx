@@ -38,7 +38,6 @@ import {
   useLeaveGroup,
   useUpdateGroupStatus,
 } from "../../../src/hooks/useGroups";
-import { readDesignVariant } from "../../../src/lib/designVariant";
 
 /** 대표 사진 자리 높이(상태 바 포함). 흰 시트가 아래 24 를 덮는다. */
 const HERO_HEIGHT = 240;
@@ -48,12 +47,8 @@ const MEMBER_PREVIEW_LIMIT = 4;
 export default function GroupDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams<{
-    id?: string;
-    designVariant?: string;
-  }>();
+  const params = useLocalSearchParams<{ id?: string }>();
   const id = params.id ?? "1";
-  const variant = readDesignVariant(params.designVariant);
   const detail = useGroupDetail(id);
   const deleteNotice = useDeleteGroupNotice(id);
   const deleteGroupMutation = useDeleteGroup(id);
@@ -67,7 +62,6 @@ export default function GroupDetailScreen() {
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isPastHero, setIsPastHero] = useState(false);
-  const isDeleted = variant === "deleted-exception";
   const membershipBusy =
     joinGroupMutation.isPending || leaveGroupMutation.isPending;
   const membershipError = joinGroupMutation.isError
@@ -84,25 +78,6 @@ export default function GroupDetailScreen() {
     const past = event.nativeEvent.contentOffset.y >= heroThreshold;
     if (past !== isPastHero) setIsPastHero(past);
   };
-
-  if (isDeleted) {
-    return (
-      <Screen>
-        <TopBar title="소모임" back onBack={() => router.back()} />
-        <View style={styles.exception}>
-          <AppIcon
-            name="error-outline"
-            size={42}
-            color={theme.colors.textMuted}
-          />
-          <Text style={styles.exceptionTitle}>존재하지 않는 소모임이에요</Text>
-          <Text style={styles.exceptionText}>
-            삭제되었거나 더 이상 접근할 수 없는 소모임이에요.
-          </Text>
-        </View>
-      </Screen>
-    );
-  }
 
   if (detail.isPending) {
     return (
@@ -130,20 +105,12 @@ export default function GroupDetailScreen() {
   }
 
   const group = detail.data;
-  const isLeader = variant
-    ? variant === "leader" || variant === "leader-closed"
-    : group.isLeader;
-  const isMember = variant
-    ? variant === "member" || variant === "leave-confirm"
-    : group.isJoined && !group.isLeader;
-  const isNonMember = variant
-    ? variant === "non-member" || variant === "non-closed"
-    : !group.isJoined;
-  const isClosed = variant
-    ? variant === "leader-closed" || variant === "non-closed"
-    : group.status === "closed";
+  const isLeader = group.isLeader;
+  const isMember = group.isJoined && !group.isLeader;
+  const isNonMember = !group.isJoined;
+  const isClosed = group.status === "closed";
   const current = group.currentMembers;
-  const leaderName = variant && !isLeader ? "한지수" : group.leaderName;
+  const leaderName = group.leaderName;
   const visibleMembers =
     group.members.length > MEMBER_PREVIEW_LIMIT + 1
       ? group.members.slice(0, MEMBER_PREVIEW_LIMIT)
@@ -400,10 +367,7 @@ export default function GroupDetailScreen() {
                 size="lg"
                 accessibilityLabel="소모임 나가기"
                 disabled={membershipBusy}
-                onPress={() => {
-                  if (variant) return;
-                  setShowLeaveConfirm(true);
-                }}
+                onPress={() => setShowLeaveConfirm(true)}
               >
                 소모임 나가기
               </Button>
@@ -417,7 +381,7 @@ export default function GroupDetailScreen() {
                 disabled={isClosed}
                 loading={membershipBusy}
                 onPress={() => {
-                  if (variant || isClosed) return;
+                  if (isClosed) return;
                   joinGroupMutation.mutate();
                 }}
               >
@@ -797,24 +761,5 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
-  },
-  exception: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    paddingVertical: 120,
-  },
-  exceptionTitle: {
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-    lineHeight: theme.typography.body.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-  },
-  exceptionText: {
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
-    textAlign: "center",
   },
 });

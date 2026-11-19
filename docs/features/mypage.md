@@ -34,11 +34,9 @@
 - **로그아웃 토큰 정리는 auth 가 소유한다** — MY 화면은 저장소 삭제 결과로 분기하지 않고 `/login` 으로만 보낸다.
 - **호출 범위** — 이 도메인은 `/api/mypage/activities/*`·`/api/member/*`·약관/FAQ 만 호출한다. 중보기도 이력은 `GET /api/mypage/activities/prayers` 대신 prayer 도메인의 `GET /api/prayer/me/history` 를 쓴다. `/api/admin` 은 호출하지 않는다 (#137).
 - **약관·FAQ 는 서버 데이터만** — 하드코딩 fallback 조항·질문은 두지 않고, 로딩·빈 상태를 따로 그린다.
-- **디자인 상태는 development 전용** — 활동·FAQ·프로필 수정·탈퇴·타 성도 프로필의 empty/오류 상태 캡처는 `designVariant` 쿼리로만 열고, production 에서는 무시한다(`src/lib/designVariant.ts`).
 
 ## 미결
 
-- 타 성도 프로필(`/mypage/user/[id]`)은 회원 조회 API 가 없어 고정 값으로만 그리고, 진입 경로도 없다.
 - 문의 API·알림 설정·고객지원 운영 정책은 후속 Phase. 디자인 원본이 생기면 화면을 추가한다.
 
 ## 코드 위치

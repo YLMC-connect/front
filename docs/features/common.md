@@ -33,7 +33,7 @@
 - **응답 해석은 화면이 쓰는 필드만 엄격** — mapper 는 화면이 쓰는 필드(id, 제목, 상태, 날짜 등)만 형식을 확인하고 나머지는 `null` 로 읽는다. 목록은 형식이 틀린 항목만 빼고, `reportResponseIssue({ source, reason })` 로 경로·필드 이름만 알린다(값·개인정보 금지). 응답 자체가 배열·객체가 아니면 `INVALID_RESPONSE`.
 - **Sentry 는 배포 빌드에서만** — `__DEV__` 이거나 `EXPO_PUBLIC_SENTRY_DSN` 이 비면 켜지 않는다. 보고에는 쿼리 키 앞 두 조각·HTTP status·code 만 싣고 응답 본문·메시지·개인정보, 네트워크 오류·4xx 는 보내지 않는다. 소스맵 업로드는 아직 끔(`SENTRY_DISABLE_AUTO_UPLOAD=true`, #212).
 - **기본 검증은 `npm run validate`** — visual capture/compare(`test:visual:*`)와 Maestro(`test:e2e:smoke`, `validate:full`)는 사용자가 요청하거나 디자인 번역·릴리스일 때만.
-- **도메인 목록은 `.task-flow.conf`** — `docs/INDEX.md` 상태표는 이 목록 + Issues 라벨로 `scripts/gen-index.sh` 가 만든다.
+- **도메인 목록은 `.task-flow.conf`** — GitHub 라벨·`docs/features/` 파일 이름과 같은 이름을 쓴다.
 - **탭 IA 는 홈/나눔/동행/기도/삶공부** — MY 는 홈에서 진입. 보고 있는 탭을 다시 누르면 이동하지 않고 맨 위로 스크롤, 다른 탭은 떠날 때 상태 그대로 연다 (#136).
 - **디자인 토큰은 디자인 시스템 v2 (ADR 0007)** — `design-system/tokens.json` 을 고치고 `node scripts/sync-design-tokens.mjs` 로 `src/constants/designTokens.json` 을 만든다(`test:scripts` 가 어긋남을 잡음). 색은 `theme.colors` v2 이름만, 글자는 `theme.typography` 6단계(display/title/heading/body/label/caption)만, 그림자는 `sm`·`md`·`lg`·`sheet`(+ Fab 전용 `fab`)만. 옛 이름 별칭은 없다.
 - **화면 코드에 색을 직접 쓰지 않는다** — hex/rgba 를 쓰면 `no-raw-colors` 테스트가 실패한다. 토큰이 없는 반투명 오버레이만 사유와 개수를 적어 허용 목록에 둔다.
@@ -58,8 +58,8 @@
 - 공통 타입: `src/types/api.ts`, `src/types/common.ts`
 - 레이아웃·UI: `src/components/layout/`, `src/components/ui/`
 - 디자인 토큰: `design-system/tokens.json`, `src/constants/` (`theme.ts`, `designTokens.json`), `scripts/sync-design-tokens.mjs`
-- 스크립트·CI: `scripts/check-api-contract.mjs`, `scripts/api-contract/<도메인>.mjs`, `scripts/gen-index.sh`, `.github/workflows/ci.yml`
-- 문서·규칙: `AGENTS.md`, `.task-flow.conf`, `docs/INDEX.md`, `docs/MAINTENANCE.md`
+- 스크립트·CI: `scripts/check-api-contract.mjs`, `scripts/api-contract/<도메인>.mjs`, `.github/workflows/ci.yml`
+- 문서·규칙: `AGENTS.md`, `.task-flow.conf`, `docs/INDEX.md`
 
 ## 의존성 · 관련 ADR
 

@@ -13,7 +13,7 @@ Notion “열린문커넥트” 최신 기획을 기준으로 **MVP + v1 모바�
 [✅ Phase 0 기획] → [✅ Phase 1~5 MVP/v1] → [✅ 전 도메인 API 연결]
 ```
 
-자세한 진행 상태와 도메인별 상태표: [docs/INDEX.md](docs/INDEX.md)
+도메인별 남은 일은 GitHub Issues(`gh issue list --label <도메인>`)에서 봅니다.
 
 ## 실행
 
@@ -142,12 +142,11 @@ npm run test:visual:compare
 ## 문서 지도
 
 - 처음 보는 분: [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) — 클론부터 라이브 API 실행
-- 작업자 5분 진입점: [docs/INDEX.md](docs/INDEX.md) — 도메인 상태표와 Phase
-- 설계 기준 문서: [PLAN.md](PLAN.md) — 기술 스택, 데이터 타입, Phase 정의
-- 진행 작업: GitHub Issues — `gh issue list --state open` (label = 도메인). 기존 항목 보존: [docs/\_archive/TASKS.md](docs/_archive/TASKS.md)
-- 변경 이력: 머지된 PR description — `gh pr list --state merged --limit 30`. 기존 항목 보존: [docs/\_archive/LOG.md](docs/_archive/LOG.md)
+- 문서 지도·ADR 목록: [docs/INDEX.md](docs/INDEX.md)
+- 설계 기준 문서: [PLAN.md](PLAN.md) — 앱 범위, 공통 데이터 타입, 정책
+- 진행 작업: GitHub Issues — `gh issue list --state open` (label = 도메인).
+- 변경 이력: 머지된 PR description — `gh pr list --state merged --limit 30`.
 - AI 작업 규칙: [AGENTS.md](AGENTS.md) — Codex 동작 규약 (`CLAUDE.md` 는 Claude Code 호환본)
-- 유지보수 / 드리프트 복구: [docs/MAINTENANCE.md](docs/MAINTENANCE.md)
 
 ## 기술 스택 (요약)
 

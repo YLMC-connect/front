@@ -1,7 +1,7 @@
 # 처음 실행하기
 
 이 저장소를 받은 사람이 **앱을 띄우고 라이브 API에 붙이는** 최소 안내입니다.
-화면 구조·Phase·AI 작업 규칙은 [INDEX.md](INDEX.md), [README.md](../README.md)를 보세요.
+문서 지도는 [INDEX.md](INDEX.md), AI 작업 규칙은 [AGENTS.md](../AGENTS.md)를 보세요.
 
 ## 1. 준비물
 
@@ -89,4 +89,4 @@ typecheck, lint, prettier, 스크립트 테스트, Jest를 순서대로 돌립�
 - **나눔/동행 목록이 비어 있음** — 라이브 서버에 데이터가 없는 정상 상태일 수 있습니다.
 - **iOS `pod install` 이 `incompatible character encodings` 로 실패** — 프로젝트 경로에 한글 등 영문이 아닌 글자가 있으면 CocoaPods 가 실패합니다. 영문 경로(예: `~/dev/ylmc-front`)로 옮기세요.
 - **Metro가 안 붙음** — 기기와 맥이 같은 네트워크인지, Android Emulator면 `adb reverse tcp:8081 tcp:8081`을 확인하세요.
-- **문서 지도** — 작업자 진입점은 [INDEX.md](INDEX.md), 유지보수는 [MAINTENANCE.md](MAINTENANCE.md).
+- **문서 지도** — [INDEX.md](INDEX.md).

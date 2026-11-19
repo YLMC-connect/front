@@ -34,7 +34,7 @@
 - **출석·수료 권한은 서버가 판단한다** — 출석·수료 수정 API(`team_leader`, `MANAGER_LIFESTUDY`, `ADMIN`)의 권한 오류(`LST013`·`LST017` 등)는 그대로 전달하고 클라이언트 역할로 미리 거르지 않는다. 이 API 들은 service 에만 있고 지금 화면에서 쓰지 않는다.
 - **관리자 역할 경계는 `MANAGER_LIFESTUDY` 또는 `ADMIN`** — 공통 권한 판별에서 두 역할만 삶공부 관리 도메인에 허용한다. 모바일은 사용자용 화면만 두고 `/api/admin` 은 호출하지 않는다. (#128)
 - **디자인 미리보기는 개발 빌드 전용** — 상세는 route id 가 없거나 `designVariant` 가 있을 때만 고정 시안 문구를 그리고, `designVariant` 는 `__DEV__` 에서만 읽는다.
-- **API 계약 검사는 별도 명령** — `npm run test:api:contract:life-study` 로 돌리며 `npm run validate` 에는 넣지 않는다.
+- **API 계약 검사는 별도 명령** — `npm run test:api:contract -- life-study` 로 돌리며 `npm run validate` 에는 넣지 않는다.
 
 ## 미결
 
@@ -45,7 +45,7 @@
 - 화면: `app/(tabs)/life-study/`
 - 목록 렌더러: `src/components/faith/` (기도와 공유), 상세 부품: `src/components/life-study/detail/`
 - 데이터: `src/services/lifeStudy*`, `src/hooks/useLifeStudyCourses.ts`, `src/types/lifeStudy*`
-- 역할 판별: `src/lib/rolePermissions.ts`, 계약 검사: `scripts/check-life-study-api-contract.mjs`
+- 역할 판별: `src/lib/rolePermissions.ts`, 계약 검사: `scripts/api-contract/life-study.mjs`
 
 ## 의존성 · 관련 ADR
 

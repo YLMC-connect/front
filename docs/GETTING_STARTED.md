@@ -79,7 +79,7 @@ npm run validate
 
 typecheck, lint, prettier, 스크립트 테스트, Jest를 순서대로 돌립니다. PR CI도 이 명령입니다.
 
-계약 검사(`npm run test:api:contract*`)는 Swagger 문서 공백이 있으면 실패하도록 따로 둡니다. 일반 `validate`에는 넣지 않습니다.
+계약 검사(`npm run test:api:contract`, 도메인만 볼 때는 `npm run test:api:contract -- <도메인>`)는 Swagger 문서 공백이 있으면 실패하도록 따로 둡니다. 일반 `validate`에는 넣지 않습니다.
 
 ## 5. 막힐 때
 

@@ -49,7 +49,7 @@
 - 화면: `app/(tabs)/market/`, 작성·수정: `app/modal/market-new.tsx`
 - 상세 부품: `src/components/market/detail/`
 - 데이터: `src/services/market*`, `src/hooks/useMarket.ts`, `src/types/market*`
-- 사진 축소: `src/lib/resizeImage.ts`, 계약 검사: `scripts/check-market-api-contract.mjs` (`npm run test:api:contract:market`)
+- 사진 축소: `src/lib/resizeImage.ts`, 계약 검사: `scripts/api-contract/market.mjs` (`npm run test:api:contract -- market`)
 
 ## 의존성 · 관련 ADR
 

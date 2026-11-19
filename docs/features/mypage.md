@@ -47,7 +47,7 @@
 - 공용 부품: `src/components/mypage/`
 - 활동 데이터: `src/services/mypage*`, `src/types/mypage*`
 - 회원·약관·FAQ: `src/services/authAdapter.ts`, `src/hooks/useMember.ts`, `src/services/siteContent*`, `src/hooks/useSiteContent.ts`
-- 계약 검사: `scripts/check-mypage-api-contract.mjs` (`npm run test:api:contract:mypage`, `validate` 에는 없음)
+- 계약 검사: `scripts/api-contract/mypage.mjs` (`npm run test:api:contract -- mypage`, `validate` 에는 없음)
 
 ## 의존성 · 관련 ADR
 

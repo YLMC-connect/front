@@ -16,7 +16,7 @@
 - 하단 고정 CTA 는 `FloatingBottomBar`(그라데이션 배경, Safe Area 바닥 인셋 자동 계산, 본문은 `FLOATING_BOTTOM_BAR_INSET` 만큼 비움)로 통일.
 - React Query 캐시는 AsyncStorage 에 24시간 저장한다. 로그아웃·새 로그인 때 메모리·기기 캐시를 모두 지운다.
 - 오류 리포트는 Sentry. `app/_layout.tsx` 가 `initSentry()` 를 부르고, 서버 응답 형식 오류(`INVALID_RESPONSE`)는 `queryClient` 의 Query/MutationCache `onError` 가 보고한다.
-- PR CI 는 `npm run validate`(typecheck·lint·format·test:scripts·test). 도메인별 Swagger 계약 검사는 `test:api:contract*`.
+- PR CI 는 `npm run validate`(typecheck·lint·format·test:scripts·test). 도메인별 Swagger 계약 검사는 `test:api:contract [-- <도메인>]`.
 
 ## 데이터 타입
 
@@ -58,7 +58,7 @@
 - 공통 타입: `src/types/api.ts`, `src/types/common.ts`
 - 레이아웃·UI: `src/components/layout/`, `src/components/ui/`
 - 디자인 토큰: `design-system/tokens.json`, `src/constants/` (`theme.ts`, `designTokens.json`), `scripts/sync-design-tokens.mjs`
-- 스크립트·CI: `scripts/check-*-api-contract.mjs`, `scripts/gen-index.sh`, `.github/workflows/ci.yml`
+- 스크립트·CI: `scripts/check-api-contract.mjs`, `scripts/api-contract/<도메인>.mjs`, `scripts/gen-index.sh`, `.github/workflows/ci.yml`
 - 문서·규칙: `AGENTS.md`, `.task-flow.conf`, `docs/INDEX.md`, `docs/MAINTENANCE.md`
 
 ## 의존성 · 관련 ADR

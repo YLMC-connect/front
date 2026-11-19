@@ -51,7 +51,7 @@
 - 화면 부품: `src/components/auth/` (`AuthRouteNavigator`, `TermsAgreementScreen`, `auth-input`, `signup/`)
 - 데이터: `src/services/auth*`, `src/hooks/useAuth.ts`, `src/store/authStore.ts`, `src/types/auth*`
 - 토큰·오류: `src/lib/secureStore.ts`, `src/lib/authRecovery.ts`, `src/lib/apiErrorMessage.ts`, `src/constants/apiErrorMessages.ts`
-- 계약 검사: `scripts/check-auth-api-contract.mjs` (`npm run test:api:contract`)
+- 계약 검사: `scripts/api-contract/auth.mjs` (`npm run test:api:contract -- auth`)
 
 ## 의존성 · 관련 ADR
 

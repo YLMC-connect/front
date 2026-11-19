@@ -72,20 +72,20 @@ OpenAPI 계약 검사와 디자인 라우트 같은 Node 스크립트는 `test:s
 npm run test
 npm run test:coverage
 npm run test:api:contract
-npm run test:api:contract:market
-npm run test:api:contract:group
-npm run test:api:contract:mypage
+npm run test:api:contract -- market group
 ```
 
 Jest + React Native Testing Library로 공통 UI, 도메인 옵션, 홈/나눔/동행/기도/삶공부 핵심 화면 렌더링을 확인합니다. 테스트에서는 API 호출을 `jest.setup.ts` 의 테스트 대역으로 바꿉니다.
 
-`test:api:contract`는 OpenAPI 문서의 로그인·토큰 재발급·회원가입·내 정보 성공 DTO, 회원 중복확인 `data.available`, 공개 endpoint/JWT 정의를 확인합니다. 출처는 `YLMC_OPENAPI_URL`, `YLMC_OPENAPI_FILE`, 또는 `EXPO_PUBLIC_API_URL`의 `/v3/api-docs`입니다. 백엔드 계약이 불완전하면 누락 항목을 출력하고 실패하며, 계약 확정 전에는 일반 `validate`와 분리해 실행합니다.
+`test:api:contract`는 `scripts/check-api-contract.mjs`로 도메인별 계약을 확인합니다. 인자가 없으면 전체(auth·market·group·life-study·home·prayer·mypage)를, `--` 뒤에 도메인을 주면 그 도메인만 검사하며 Swagger는 한 번만 받습니다. 도메인별 검사 목록은 `scripts/api-contract/<도메인>.mjs`에 있습니다.
 
-`test:api:contract:market`은 나눔 CRUD·댓글·신고·이미지 업로드 endpoint와 목록/상세/작성 화면에 필요한 작성자명·이미지·검색·장소·enum·상태 변경·제목/본문 길이·사진 5장 계약을 확인합니다. 업로드 경로 이름을 가정하지 않고 operation summary/id로 찾은 뒤 request/200 DTO를 검증합니다. 누락 필드를 임의 fallback으로 감추지 않고 DTO mapper를 활성화하기 전에 실패로 노출합니다.
+`auth`는 OpenAPI 문서의 로그인·토큰 재발급·회원가입·내 정보 성공 DTO, 회원 중복확인 `data.available`, 공개 endpoint/JWT 정의를 확인합니다. 출처는 `YLMC_OPENAPI_URL`, `YLMC_OPENAPI_FILE`, 또는 `EXPO_PUBLIC_API_URL`의 `/v3/api-docs`입니다. 백엔드 계약이 불완전하면 누락 항목을 출력하고 실패하며, 계약 확정 전에는 일반 `validate`와 분리해 실행합니다.
 
-`test:api:contract:group`은 동행 목록·상세·내 목록·멤버/공지·참여/탈퇴·생성/수정/상태/관리 endpoint와 카드 표시 필드, 일정·장소, 필터, enum, 제목/본문·정원 입력 제한, 소모임장 이관 계약을 확인합니다.
+`market`은 나눔 CRUD·댓글·신고·이미지 업로드 endpoint와 목록/상세/작성 화면에 필요한 작성자명·이미지·검색·장소·enum·상태 변경·제목/본문 길이·사진 5장 계약을 확인합니다. 업로드 경로 이름을 가정하지 않고 operation summary/id로 찾은 뒤 request/200 DTO를 검증합니다. 누락 필드를 임의 fallback으로 감추지 않고 DTO mapper를 활성화하기 전에 실패로 노출합니다.
 
-`test:api:contract:mypage`는 2026-10-06 마이페이지 활동 `GET /api/mypage/activities` 5종을 확인합니다. posts·comments·groups는 0-based `page` 요청과 `PageResponse`의 `content`, `totalElements`, `totalPages`, 1-based `currentPage`, `size`, `hasNext`를 확인하고, life-studies·prayers는 페이징 없는 단일 객체를 확인합니다. `npm run validate`에는 넣지 않습니다.
+`group`은 동행 목록·상세·내 목록·멤버/공지·참여/탈퇴·생성/수정/상태/관리 endpoint와 카드 표시 필드, 일정·장소, 필터, enum, 제목/본문·정원 입력 제한, 소모임장 이관 계약을 확인합니다.
+
+`mypage`는 2026-10-06 마이페이지 활동 `GET /api/mypage/activities` 5종을 확인합니다. posts·comments·groups는 0-based `page` 요청과 `PageResponse`의 `content`, `totalElements`, `totalPages`, 1-based `currentPage`, `size`, `hasNext`를 확인하고, life-studies·prayers는 페이징 없는 단일 객체를 확인합니다. `npm run validate`에는 넣지 않습니다.
 
 API 오류는 `getApiErrorMessage`가 `ApiError.code`를 도메인 메시지 표로 변환합니다. 문서화되지 않은 API 코드는 서버 `message`를 그대로 노출하지 않고 화면별 안전한 fallback을 사용하며, 현재 Swagger에 정의된 인증 `MEM001~MEM007`은 `authApiErrorMessages`로 관리합니다. `MEM007`은 비밀번호 8자·영문+숫자 조합 위반입니다.
 

@@ -14,7 +14,7 @@
 - 오늘의 기도는 API 없이 기기 로컬 날짜의 요일(월~일)별 고정 문구로 만든 정적 카드다(누름 동작 없음).
 - 두 API 는 `Promise.allSettled` 로 함께 부르고, 한쪽이 실패하거나 비면 그 카드만 숨긴다. 둘 다 실패해야 오류 화면.
 - 말씀요약 상세 `app/dawn.tsx`(루트 Stack): 날짜 줄 양쪽 이전·다음 버튼은 최근 목록(`GET /api/daily-qt` 30개)에서 날짜순 앞·뒤 글을 찾고, 없으면 비활성.
-- `npm run test:api:contract:home` 이 설교·큐티 OpenAPI 계약을 검사한다.
+- `npm run test:api:contract -- home` 이 설교·큐티 OpenAPI 계약을 검사한다.
 
 ## 데이터 타입
 
@@ -42,7 +42,7 @@
 
 - 화면: `app/(tabs)/index.tsx`, `app/dawn.tsx`
 - 데이터: `src/services/home*`, `src/hooks/useHome.ts`, `src/types/home*`
-- 계약 검사: `scripts/check-home-api-contract.mjs`
+- 계약 검사: `scripts/api-contract/home.mjs`
 
 ## 의존성 · 관련 ADR
 

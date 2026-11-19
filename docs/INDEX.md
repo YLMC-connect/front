@@ -45,7 +45,7 @@
 
 - 남은 일: GitHub Issues (`gh issue list --label <도메인>`)
 - 변경 이력: 머지된 PR (`gh pr list --state merged`)
-- 도메인 컨텍스트: `features/<도메인>.md` 의 **결정 사항 / 미결 / 데이터 타입 / 의존성 / 주요 파일**
+- 도메인 컨텍스트: `features/<도메인>.md` 의 **현재 동작 / 데이터 타입 / 결정 사항 / 미결**
 - PLAN.md 는 데이터 타입·Phase·보안·기술스택에 영향이 있거나 새 도메인에 처음 들어갈 때만
 
 상세 규칙은 [../AGENTS.md](../AGENTS.md). 모든 작업은 브랜치 + PR, CI 는 `npm run validate`.

@@ -1,139 +1,55 @@
 # mypage (MY / 성도 프로필)
 
-> 마지막 갱신: 2026-11-15 (캔버스 v1.41 마이페이지 정리) | 담당 Phase: P4/P7 | 기록 성격: 도메인 컨텍스트
+> 기록 성격: 도메인 컨텍스트 | 담당 Phase: P4/P7
 
 ## 한 줄 요약
 
-내 프로필, 내 활동(활동 내역·중보기도 활동·삶공부 수강 내역), 계정(비밀번호 변경·로그아웃), 고객센터(FAQ·약관 · 정책), 프로필 수정 안의 회원 탈퇴 흐름을 제공합니다.
+내 프로필, 내 활동(활동 내역·중보기도 활동·삶공부 수강 내역), 계정(비밀번호 변경·로그아웃), 고객센터(FAQ·약관 · 정책), 회원 탈퇴를 제공합니다.
 
----
+## 현재 동작
 
-## ✅ 완료
-
-- 캔버스 v1.41 마이페이지 정리 — 메뉴는 내 활동(활동 내역 `나눔 · 댓글 · 소모임`, 중보기도 활동, 삶공부 수강 내역)·계정(비밀번호 변경, 로그아웃)·고객센터(자주 묻는 질문, 약관 · 정책) 세 묶음이고, 프로필 카드 전체를 누르면 프로필 수정으로 간다. 프로필 수정은 이름(읽기 전용)·연락처·소속 교회(읽기 전용) 흰 카드와 맨 아래 작은 밑줄 `회원 탈퇴` 링크만 두고, 비밀번호 변경은 `/mypage/password` 별도 화면(현재·새·확인 + 강도 막대)으로 나눴다. 탈퇴는 `안내 내용을 모두 확인했어요` 체크 후에만 `탈퇴하기`가 켜지고 마지막 확인 팝업을 한 번 더 띄운다. 약관 · 정책은 이용약관/개인정보 처리방침 탭 한 화면(`/mypage/privacy`는 개인정보 탭으로 연다). 활동 내역 탭 이름 옆에 서버 `totalElements` 개수, 중보기도 활동은 요약(활동 중·참여 기도방) + 활동 중/지난 기도방 목록 행, 삶공부 수강 내역은 `GET /api/mypage/activities/life-studies`의 `ongoing`/`completed`를 수강 중/수료로 나눈 목록 행, FAQ는 조용한 Q 머리 + 카테고리 칩 + `찾는 답이 없나요?` 문의 카드. 차단 사용자 화면(`/mypage/blocked`)과 타 성도 프로필의 차단 상태는 기능이 없어 삭제했다.
-- 마이페이지 루트 Stack 승격 및 이동 모션 일관화 — 마이페이지를 하단 탭(`app/(tabs)/mypage`)에서 루트 Stack(`app/mypage`)으로 승격하여, 홈에서 '내 정보' 진입 시 네이티브 우측 슬라이드(`slide_from_right`) 인/아웃 모션을 적용하고 하단 탭 바 노출 깜빡임 해소. 또한 마이페이지 내 메뉴인 '중보기도 활동 이력'(`app/mypage/prayer-history.tsx`)과 '삶공부 수료'(`app/mypage/life-study-history.tsx`)를 마이페이지 스택 내부 라우트로 래핑하여 탭 점프 없이 모든 서브 메뉴가 동일한 우측 슬라이드 모션으로 열리도록 통일
-- 회원 비밀번호 확인·변경 및 탈퇴 API 연동 — `POST /api/member/verify-password`(비밀번호 확인), `PUT /api/member/password`(비밀번호 변경), `DELETE /api/member/me`(회원 탈퇴)를 `authAdapter`와 `useMember` 훅에 연결하고 `mypage/edit` 및 `mypage/withdraw` 화면에 실시간 반영.
-- 사이트 이용약관/개인정보처리방침 및 FAQ 조회 API 연동 — `GET /api/site-policies/{policyType}`(이용약관: 1, 개인정보처리방침: 2), `GET /api/faqs`(categoryId 필터링)를 `siteContentHttpDataSource` 및 `useSiteContent` 훅에 연결하여 `mypage/terms`, `mypage/privacy`, `mypage/faq`에 동적 데이터 바인딩. FAQ 화면은 하드코딩된 fallback 목데이터를 제거하고 실제 API 데이터 기반 카테고리 필터링과 로딩/Empty 상태 렌더링으로 일원화.
-- 내 정보 조회 HTTP 연동 — `/api/member/me` 내 정보 조회 API 연동 및 프로필 카드/수정 화면, 삶공부/중보기도 신청 화면의 하드코딩된 이름/연락처를 현재 로그인 사용자 정보로 바인딩
-- 마이페이지 활동 HTTP adapter — development 기본값은 나눔과 같이 http다. 활동 화면은 `GET /api/mypage/activities`의 나눔 글·댓글·소모임을 보여 준다. 테스트와 `EXPO_PUBLIC_MYPAGE_ADAPTER=mock`은 기존 로컬 목록을 쓴다
-- 홈 진입 MY 뒤로가기 보완 — 하단 탭이 아닌 홈 '내 정보'에서 push되는 `/mypage` 루트에도 공통 `chevron-left + 뒤로`를 표시하고 `router.back()`으로 홈에 복귀하며, Screen의 이중 여백을 제거하고 `theme.layout.screenX`(20px) 기준으로 뒤로 버튼과 본문 컨텐츠 좌우 여백을 일치
-- 공통 TopBar 디자인 시스템 반영 — MY 상세 화면이 역할형 section title·caption subtitle과 44px back target, semantic text 대비를 공통으로 상속
-
-- MY 활동 내역 underline tab 공통화와 메뉴 href 타입 보강 — 기존 탭 geometry·query 이동을 유지하고 `as never` 우회를 제거
-- MY 화면 고도화 — `app/(tabs)/mypage/index.tsx`
-- MY 타입 구현 — `src/types/mypage.ts`
-- 프로필 수정 mock, 내 활동 탭, 관심 목록, FAQ accordion, 로그아웃 확인, 탈퇴 요청 mock 구현
-- MY 화면 1차 디자인 정렬 — ZIP prototype 기준 마이페이지 title, 프로필 카드의 수정 CTA, 활동 관리 섹션명 적용
-- ZIP 원본 MY/성도 프로필 화면 30개 상태 매핑 — 프로필 수정, 활동, 차단, FAQ, 약관/개인정보, 탈퇴, 타 성도 프로필, 관심목록, 알림설정, 고객센터, 문의, 계정 관리 reference 라우트 연결
-- MY 확인 팝업 문구 정렬 — 차단 해제, 회원 탈퇴, 타 성도 차단 확인 다이얼로그의 제목/본문/확인 버튼을 ZIP 원본 JSX 문구와 맞춤
-- MY/성도 프로필 toast 문구 정렬 — 차단 해제/차단 완료 toast를 ZIP 원본 JSX 문구로 맞춤
-- MY 차단/타 성도 프로필 원본 구조 정렬 — ZIP `ScreenBlocked`, `ScreenUserProfile` 기준으로 카드형 wrapper를 제거하고, fixed toast overlay, 차단 안내 박스, flat row list, 104px 프로필 avatar, outline 차단 CTA를 reference 화면에 반영
-- MY 차단/프로필 partial visual compare 개선 — `me-blocked*`, `user*` 8개 상태를 Android Dev Client에서 재캡처해 `missing=0` 확인, 대표 residual은 `user-ts 29.61→4.97`, `me-blocked-ts 26.57→6.13`, `user 3.60`, `user-blocked 3.71`, `me-blocked-em 3.25`로 정렬
-- MY 회원 탈퇴 ZIP 구조 정렬 — ZIP `ScreenWithdraw` 기준 안내 제목/주의사항 header/별도 정보 카드/fixed danger CTA를 reference 화면에 반영하고 `me-withdraw 16.74→8.48`, `me-withdraw-cf 9.08→5.46`으로 낮춤
-- MY 법적 문서 ZIP 구조 정렬 — ZIP `ScreenLegal` 기준 이용약관/개인정보처리방침을 카드 요약이 아니라 시행일자와 조항별 전문 텍스트 화면으로 재구성
-- MY 법적 문서 heading weight 정렬 — ZIP `ScreenLegal`의 조항 제목 weight 700을 반영하고 97/98번을 재캡처해 `me-terms 14.41→14.38`, `me-privacy 15.65→15.61`로 소폭 낮춤
-- 알림 설정 ZIP section/card 구조 정렬 — ZIP `ScreenNotifSettings` 기준으로 단일 카드/경고 문구를 제거하고 전체·중고/나눔·소모임·중보기도·삶공부 섹션 카드와 40x24 switch를 반영해 `notif-settings 14.23→12.32`로 낮춤
-- MY 루트 실제 화면 복구 — `DesignSourceScreens` placeholder를 제거하고 Downloads `ScreenMyPage` 기준 프로필 카드, 활동 관리, 고객센터, 계정, 계정 관리 메뉴를 실제 RN route로 반영
-- FAQ 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenFAQ`의 category chip row, Q row, 펼친 답변 box, empty state를 `/mypage/faq` route에 RN으로 직접 반영
-- MY 법적 문서 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenLegal`의 시행일자와 조항별 전문 텍스트 구조를 `/mypage/terms`, `/mypage/privacy` route에 RN으로 직접 반영
-- 회원 탈퇴 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenWithdraw`의 안내 제목, 주의사항 박스, 정보 카드, fixed danger CTA, 탈퇴 confirm을 `/mypage/withdraw` route에 RN으로 직접 반영
-- 프로필 수정 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenEditProfile`의 읽기 전용 프로필 카드, 연락처 입력, 비밀번호 변경 필드, 오류 상태를 `/mypage/edit` route에 RN으로 직접 반영
-- 활동 내역 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenActivity`의 나눔 게시글/댓글/소모임 tab list와 empty state를 `/mypage/activity` route에 RN으로 직접 반영
-- 타 성도 프로필 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenUserProfile`의 중앙 avatar/name, outline 차단 CTA, blocked/withdrawn/confirm/toast 상태를 `/mypage/user/[id]` route에 RN으로 직접 반영
-- 원본 없는 MY reference route 제거 — Downloads 최신 원본에서 확인되지 않는 관심목록/알림설정/고객센터/문의/계정관리 placeholder route를 삭제하고, 로그아웃은 MY 메뉴에서 직접 처리
-- MY 하단 탭 제거 — Downloads preview 기준 하단 탭에서 MY를 숨기고 홈 상단 `내 정보 보기` 카드에서 `/mypage`로 진입
-- MY 로그아웃 인증 경계 검증 — 홈 프로필 카드→마이페이지→로그아웃→로그인 화면 복귀를 Android Maestro로 완주하고, SecureStore 일부 삭제 실패에도 두 토큰 삭제 시도·익명 상태 전환·로그인 이동을 화면 테스트로 고정
-
-## 주요 파일 (도메인 파일 지도)
-
-| 경로                                            | 역할                                      |
-| ----------------------------------------------- | ----------------------------------------- |
-| `app/mypage/_layout.tsx`                        | 마이페이지 루트 Stack 레이아웃            |
-| `app/mypage/index.tsx`                          | 홈에서 진입하는 MY·로그아웃 화면          |
-| `app/mypage/edit.tsx`                           | 프로필 수정(연락처) + 회원 탈퇴 링크      |
-| `app/mypage/password.tsx`                       | 비밀번호 변경(강도 막대)                  |
-| `app/mypage/activity.tsx`                       | 나눔 게시글/댓글/소모임 활동 내역         |
-| `app/mypage/prayer-history.tsx`                 | 중보기도 활동(요약 + 활동 중/지난 기도방) |
-| `app/mypage/life-study-history.tsx`             | 삶공부 수강 내역(수강 중/수료)            |
-| `src/services/mypageService.ts`                 | 활동 HTTP 서비스                          |
-| `src/services/mypageHttpDataSource.ts`          | 활동 5종 HTTP data source                 |
-| `src/services/mypageMapper.ts`                  | Notion DTO → 활동 화면 행                 |
-| `src/hooks/useMember.ts`                        | 내 정보 조회 및 수정 훅                   |
-| `app/mypage/faq.tsx`                            | FAQ 칩·목록·문의 카드                     |
-| `app/mypage/terms.tsx`                          | 약관 · 정책(탭) 진입                      |
-| `app/mypage/privacy.tsx`                        | 약관 · 정책 개인정보 탭으로 진입          |
-| `src/components/mypage/LegalDocumentScreen.tsx` | 이용약관/개인정보 처리방침 탭 화면        |
-| `src/components/mypage/FaqItem.tsx`             | Q 머리가 붙은 FAQ 접는 줄                 |
-| `src/components/mypage/FormField.tsx`           | 흰 카드 입력 칸 이름·안내 줄              |
-| `app/mypage/withdraw.tsx`                       | 회원 탈퇴 안내와 확인                     |
-| `app/mypage/user/[id].tsx`                      | 타 성도 프로필(탈퇴 상태)                 |
-| `src/types/mypage.ts`                           | MY 화면 모델                              |
-| `src/types/mypageApi.ts`                        | Notion 필드만 담은 활동 DTO               |
-| `scripts/check-mypage-api-contract.mjs`         | 활동 OpenAPI 계약 검사                    |
+- 하단 탭이 아니라 홈의 `내 정보` 카드에서 `/mypage` 루트 Stack 으로 push 되고, 모든 하위 화면도 같은 Stack 에서 우측 슬라이드로 열린다. 루트에도 뒤로가기를 둔다.
+- 메뉴는 내 활동·계정·고객센터 세 묶음. 프로필 카드 전체를 누르면 프로필 수정으로 간다. 내 정보는 `GET /api/member/me`.
+- 프로필 수정(`/mypage/edit`)은 이름·소속 교회 읽기 전용, 연락처만 `PUT /api/member/me` 로 바꾼다. 맨 아래 `회원 탈퇴` 링크.
+- 비밀번호 변경(`/mypage/password`)은 현재·새·확인 입력 후 `PUT /api/member/password`.
+- 회원 탈퇴(`/mypage/withdraw`)는 안내 확인 체크 후에만 버튼이 켜지고, 확인 팝업을 한 번 더 거쳐 `DELETE /api/member/me` 후 `/login` 으로 간다.
+- 활동 내역(`/mypage/activity`)은 `GET /api/mypage/activities/posts`·`comments`·`groups` 를 한꺼번에 받아 나눔·댓글·소모임 탭으로 보이고, 탭 이름 옆에 `totalElements` 를 적는다. 탭 전환은 로컬 상태라 히스토리가 쌓이지 않는다.
+- 중보기도 활동(`/mypage/prayer-history`)은 `GET /api/prayer/me/history` 로 요약(활동 중·참여 기도방)과 활동 중/지난 기도방 목록을 그린다.
+- 삶공부 수강 내역(`/mypage/life-study-history`)은 `GET /api/mypage/activities/life-studies` 의 `ongoing`/`completed` 를 수강 중/수료로 나눈다.
+- FAQ 는 `GET /api/faqs`(카테고리 칩은 응답에서 만든다), 약관 · 정책은 이용약관/개인정보 처리방침 탭 한 화면으로 `GET /api/site-policies/{policyType}`(1=이용약관, 2=개인정보). `/mypage/privacy` 는 개인정보 탭으로 연다.
+- 로그아웃은 확인 다이얼로그 뒤 `useAuth().logout()` 을 부르고, 성공·실패와 관계없이 `/login` 으로 간다 (#191).
 
 ## 데이터 타입
 
-`MyPageData`는 나눔, 소모임, 삶공부, 기도방, 관심 제목, FAQ 목록을 묶어 반환합니다. 활동 화면 행은 `MyPageActivityPost`, `MyPageActivityComment`, `MyPageActivityGroup`입니다. `MyPagePostDto`, `MyPageCommentDto`, `MyPageGroupDto`와 `MyPageActivityPage`는 Notion에 적힌 필드만 가집니다. 요청 `page`는 0부터이고 응답 `currentPage`는 1부터입니다. `MyPageLifeStudyHistoryDto`의 신청·수강·수료 원소는 이름만 있고 값 타입이 없어 `unknown`입니다. `MyPagePrayerHistoryDto`와 `MyPagePrayerActivityItem`은 Notion에 적힌 필드만 가집니다. `a / b`로 한 칸에 적힌 이름은 두 필드입니다.
+- 활동 화면 행은 `MyPageActivityPost`·`MyPageActivityComment`·`MyPageActivityGroup`, DTO(`src/types/mypageApi.ts`)는 Notion 에 적힌 필드만 가진다.
+- 페이지: 요청 `page` 는 0부터, 응답 `currentPage` 는 1부터라 다음 요청 page 는 `currentPage` 다. `currentPage` 가 1 미만이면 잘못된 응답. 기본 `size` 10, 정렬은 글·댓글 `id,desc`, 소모임 `joinedAt,desc`.
+- 나눔 행: `statusName` 을 배지 문구로, `status` `AVAILABLE`/`RESERVED`/`COMPLETED` 를 tone `primary`/`warn`/`mute` 로. 날짜는 `yyyy-MM-dd` → `yyyy.MM.dd`. 댓글 출처는 `shareTitle`, 소모임 인원은 `currentParticipants`.
+- 삶공부 이력 원소는 이름만 있고 값 타입이 없어 `unknown` 으로 읽는다.
 
-## 결정 사항 (최신 위)
+## 결정 사항 (지금 유효한 것만)
 
-- (2026-11-15) **캔버스 v1.41: 서버가 주지 않는 값은 그리지 않는다** — 중보기도 활동의 `이번 달 기도`·`함께 기도한 제목`과 기도 완료·함께 기도 피드, 분할 탭은 받을 API 가 없어 빼고, 참여 기록으로 셀 수 있는 활동 중·참여 기도방만 보인다. 약관 `이전 버전`, FAQ 문의 카드의 전화번호·운영 시간, 비밀번호 변경의 `현재 비밀번호를 잊으셨나요?`(재설정 흐름 없음), 프로필 수정의 소속 교회 선택(변경 API 없음, 읽기 전용), 수강 내역 행의 이동(목적지 미정)도 같은 이유로 두지 않는다.
-- (2026-11-15) **차단 사용자 화면은 기능이 없어 삭제한다** — 차단 API 가 없으므로 `/mypage/blocked`, 타 성도 프로필의 차단 상태와 디자인 경로를 지운다.
-- (2026-11-03) **런타임 활동 목 어댑터(`resolveMyPageAdapterMode`, `mockMyPageDataSource`) 및 `src/mocks/mypageActivity.ts` 제거** — 전 도메인 HTTP 단일화에 따라 활동 내역 화면(`app/mypage/activity.tsx`)의 로컬 목업 폴백과 `"목업 데이터"` 문구를 제거하고 `httpMyPageDataSource`만 사용하도록 정리.
+- **서버가 주지 않는 값은 그리지 않는다** — 중보기도 활동의 이번 달 기도·함께 기도한 제목·피드, 약관 이전 버전, FAQ 문의 카드의 전화번호·운영 시간, `현재 비밀번호를 잊으셨나요?`(재설정 흐름 없음), 소속 교회 변경(API 없음), 수강 내역 행 이동(목적지 미정)은 두지 않는다.
+- **차단 기능은 두지 않는다** — 차단 API 가 없어 차단 사용자 화면과 타 성도 프로필의 차단 상태를 지웠다.
+- **원본 없는 MY 화면은 만들지 않는다** — 관심목록·알림설정·고객센터·1:1 문의·계정관리 화면은 디자인 원본이 없어 두지 않는다. 로그아웃은 별도 화면 없이 메뉴에서 처리한다.
+- **로그아웃 토큰 정리는 auth 가 소유한다** — MY 화면은 저장소 삭제 결과로 분기하지 않고 `/login` 으로만 보낸다.
+- **호출 범위** — 이 도메인은 `/api/mypage/activities/*`·`/api/member/*`·약관/FAQ 만 호출한다. 중보기도 이력은 `GET /api/mypage/activities/prayers` 대신 prayer 도메인의 `GET /api/prayer/me/history` 를 쓴다. `/api/admin` 은 호출하지 않는다 (#137).
+- **약관·FAQ 는 서버 데이터만** — 하드코딩 fallback 조항·질문은 두지 않고, 로딩·빈 상태를 따로 그린다.
+- **디자인 상태는 development 전용** — 활동·FAQ·프로필 수정·탈퇴·타 성도 프로필의 empty/오류 상태 캡처는 `designVariant` 쿼리로만 열고, production 에서는 무시한다(`src/lib/designVariant.ts`).
 
-- (2026-10-29) **약관 및 개인정보 처리방침의 fallback 목데이터를 제거하고 실제 API 결과 기반으로 통일한다** — `src/components/mypage/LegalDocumentScreen.tsx`의 하드코딩된 fallback 조항 목록(`defaultSections`) 및 기본 날짜를 제거하고, `useActiveSitePolicy` 조회 결과에 따라 전문 텍스트 및 시행일자를 렌더링하도록 변경. 로딩 인디케이터 및 내용 부재 시 Empty 화면을 처리.
+## 미결
 
-- (2026-10-29) **FAQ 화면의 fallback 목데이터를 제거하고 실제 API 결과 기반으로 통일한다** — `app/mypage/faq.tsx`의 하드코딩된 fallback 카테고리/질문 배열을 완전히 제거하고, `useFaqs()` 호출 결과에 따라 카테고리 칩 목록 및 질문 필터링을 동적으로 구성하며, 로딩 중 인디케이터 및 질문 부재 시 Empty 화면을 일원화해 처리합니다.
+- 타 성도 프로필(`/mypage/user/[id]`)은 회원 조회 API 가 없어 고정 값으로만 그리고, 진입 경로도 없다.
+- 문의 API·알림 설정·고객지원 운영 정책은 후속 Phase. 디자인 원본이 생기면 화면을 추가한다.
 
-- (2026-10-28) **마이페이지 루트 Stack 승격 및 이동 모션 일관화** — 마이페이지를 하단 탭(`app/(tabs)/mypage`)에서 루트 Stack(`app/mypage`)으로 승격하여, 홈에서 '내 정보' 진입 시 네이티브 우측 슬라이드(`slide_from_right`) 인/아웃 모션을 적용하고 하단 탭 바 노출 깜빡임 해소. 또한 마이페이지 내 메뉴인 '중보기도 활동 이력'(`app/mypage/prayer-history.tsx`)과 '삶공부 수료'(`app/mypage/life-study-history.tsx`)를 마이페이지 스택 내부 라우트로 래핑하여 탭 점프 없이 모든 서브 메뉴가 동일한 우측 슬라이드 모션으로 열리도록 통일.
+## 코드 위치
 
-- (2026-10-27) **로그아웃 시 확인 다이얼로그(`ConfirmDialog`) 적용** — 마이페이지 메뉴에서 로그아웃 선택 시 즉시 세션을 종료하지 않고, '로그아웃 하시겠어요?' 확인 다이얼로그를 띄워 확인 시에만 `useAuth.logout()` 및 로그인 화면(`/login`) 이동을 수행한다. Issue #191.
-- (2026-10-27) **마이페이지 하단 ‘계정’과 ‘계정 관리’ 섹션을 하나의 ‘계정’ 카드로 통합한다** — 1줄짜리 카드로 분리되어 있던 `로그아웃`과 `회원탈퇴`를 단일 `계정` 섹션 카드 안에 2행으로 묶어 하단 카드 구획을 정돈한다.
-- (2026-10-15) **회원 비밀번호 확인/변경, 탈퇴 및 법적 문서/FAQ 조회를 실제 API로 연동한다** — 비밀번호 확인(`POST /api/member/verify-password`), 비밀번호 변경(`PUT /api/member/password`), 회원 탈퇴(`DELETE /api/member/me`)를 `authAdapter`에 추가하고, 사이트 정책(`GET /api/site-policies/{policyType}`)과 FAQ 목록(`GET /api/faqs`)을 `siteContentService`로 연결하여 하드코딩 fixture 대신 서버 데이터를 우선 렌더링하도록 전환합니다.
-- (2026-10-10) **활동 내역 화면 탭 전환 SPA 처리 및 중보기도 활동 이력 링크 보정** — `app/(tabs)/mypage/activity.tsx`의 탭(나눔 게시글/댓글/소모임) 전환 시 `router.push` 대신 `setActiveTab` 로컬 상태로 전환하여 뒤로가기 히스토리 스택 누적을 방지하고, 마이페이지 '중보기도 활동 이력' 메뉴는 fallback으로 열리던 `activity?tab=prayer` 대신 실제 기도제목/상태 관리 화면인 `/prayer/request`로 연결. Issue #175.
-- (2026-10-10) **마이페이지 중첩 Stack 레이아웃 적용으로 하위 페이지 뒤로가기 흐름 정상화** — `app/(tabs)/mypage/_layout.tsx`(`<Stack screenOptions={{ headerShown: false }} />`)을 추가하고, `app/(tabs)/_layout.tsx`의 개별 탭 등록을 `<Tabs.Screen name="mypage" options={{ href: null }} />`로 일원화하여 프로필 수정/활동 내역 등 하위 댑스에서 `router.back()` 실행 시 마이페이지 메인으로 정상 복귀하도록 수정. Issue #169.
-- (2026-10-10) **활동 화면은 development mock일 때만 출처를 표시한다** — `__DEV__`일 때 adapter가 mock이면 `목업 데이터`를 보여 주고, http일 때는 표시하지 않는다. 탭·행·empty 문구는 그대로다.
-- (2026-10-09) **마이페이지 활동 HTTP는 2026-10-06 `GET /api/mypage/activities` 5종만 호출하고 development 기본값은 http다** — 나눔과 같이 `EXPO_PUBLIC_MYPAGE_ADAPTER`가 없으면 development는 http, preview·production은 mock이다. `mock`이면 활동 화면은 기존 로컬 나눔 게시글·댓글·소모임 목록을 보여 준다. `http`이면 그 로컬 목록을 그리지 않는다. `http`일 때 호출하는 경로는 `GET /api/mypage/activities/posts`, `GET /api/mypage/activities/comments`, `GET /api/mypage/activities/groups`, `GET /api/mypage/activities/life-studies`, `GET /api/mypage/activities/prayers`다. posts·comments·groups 요청 `page`는 0부터이고 기본 `size`는 10, 기본 정렬은 글·댓글 `id,desc`, 소모임 `joinedAt,desc`다. 응답 `currentPage`는 1부터라 다음 요청 page는 `currentPage`다. life-studies와 prayers는 쿼리 없는 단일 객체다. `/api/admin`, `/api/life-study`, `/api/prayer`는 호출하지 않는다. 활동 화면의 탭·행·empty 상태는 바꾸지 않고, 삶공부·중보기도 이력은 이 화면에 그리지 않는다. 이 도메인 전용 에러코드는 없다. 계약 검사는 `npm run test:api:contract:mypage`이며 `npm run validate`에는 넣지 않는다. Issue #137.
-- (2026-10-09) **활동 화면 행에는 지금 그리는 값만 올린다** — 나눔은 `statusName`을 배지 문구로, `status` `AVAILABLE`/`RESERVED`/`COMPLETED`를 tone `primary`/`warn`/`mute`로 쓴다. 날짜는 `createdAt`·`joinedAt`의 `yyyy-MM-dd`를 `yyyy.MM.dd`로 바꾼다. 댓글 출처는 `shareTitle`, 소모임 이름은 `title`, 인원은 `currentParticipants`다. `thumbnailUrl`·본문·카테고리·조회수·모임장·봉사 구분은 화면 행에 없다. 삶공부 하위 항목은 이름만 있고 값 타입이 없어 그대로 둔다. 기도 이력은 Notion에 적힌 필드만 읽는다. `currentPage`가 0이면 잘못된 응답이다.
-- (2026-07-15) **MY 루트도 홈에서 push되는 별도 page이므로 뒤로가기를 표시한다** — 하단 탭에서 제거된 `/mypage`는 홈 프로필 카드가 진입점이므로 공통 `TopBar back`으로 직전 홈 화면에 복귀합니다.
-- (2026-07-12) **MY 상세 제목은 공통 TopBar 역할형 typography를 상속한다** — 화면별 로컬 title 크기를 추가하지 않고 공통 sectionTitle/caption과 44px back affordance를 사용합니다.
+- 화면: `app/mypage/`
+- 공용 부품: `src/components/mypage/`
+- 활동 데이터: `src/services/mypage*`, `src/types/mypage*`
+- 회원·약관·FAQ: `src/services/authAdapter.ts`, `src/hooks/useMember.ts`, `src/services/siteContent*`, `src/hooks/useSiteContent.ts`
+- 계약 검사: `scripts/check-mypage-api-contract.mjs` (`npm run test:api:contract:mypage`, `validate` 에는 없음)
 
-- (2026-07-11) **MY 로그아웃은 저장소 정리 결과와 무관하게 로그인 화면으로 이동한다** — 실제 토큰 삭제와 인증 상태 전이는 auth session manager가 소유하고, MY 화면은 성공·실패 모두 `/login`으로 이동합니다. 마이페이지 기본 화면 부분 재캡처 residual은 `mean=12.09`입니다.
-- (2026-07-10) **MY 디자인 상태와 실제 탭 탐색을 분리한다** — 프로필/차단/FAQ/탈퇴 예외 화면은 development 전용 `designVariant`, 활동 내역의 실제 탭 이동은 `tab` query를 사용합니다. production URL로 confirm/toast/empty 상태를 강제하지 않습니다.
-- (2026-06-27) **MY는 홈에서 진입한다** — Downloads preview의 하단 탭은 홈/나눔/동행/기도/삶공부이므로 `MY`는 하단 탭에서 제거하고 홈 프로필 카드 `내 정보 보기`를 `/mypage` 진입점으로 사용합니다.
-- (2026-06-27) **원본 없는 MY reference route는 제거한다** — Downloads 최신 원본에서 독립 화면 함수를 확인할 수 없는 관심목록/알림설정/고객센터/문의/계정관리 placeholder는 유지하지 않습니다. 로그아웃은 별도 화면 없이 MY 메뉴에서 `useAuth.logout()`으로 처리합니다.
-- (2026-06-27) **타 성도 프로필은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenUserProfile` 구조를 `/mypage/user/[id]` route에 직접 반영합니다. 실제 차단 API와 탈퇴 사용자 조회 정책은 사용자 정책 확정 후 연결합니다.
-- (2026-06-27) **활동 내역은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenActivity` 구조를 `/mypage/activity` route에 직접 반영합니다. 실제 사용자 활동 API는 나눔/소모임/댓글 API 확정 후 연결합니다.
-- (2026-06-27) **프로필 수정은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenEditProfile` 구조를 `/mypage/edit` route에 직접 반영합니다. 실제 연락처 중복 확인과 비밀번호 변경 API는 인증/계정 정책 확정 후 연결합니다.
-- (2026-06-27) **MY 루트는 placeholder가 아니라 실제 RN 화면으로 둔다** — Downloads `ScreenMyPage`를 기준으로 프로필 카드와 메뉴 그룹을 실제 route에 구현하고, 하위 상세 화면은 기존 숨김 reference route로 연결합니다.
-- (2026-06-27) **FAQ는 실제 RN 화면으로 렌더링한다** — Downloads `ScreenFAQ` 구조를 `/mypage/faq` route에 직접 반영합니다. 실제 고객지원 검색/API는 운영 정책 확정 후 연결합니다.
-- (2026-06-27) **법적 문서는 실제 RN 화면으로 렌더링한다** — Downloads `ScreenLegal` 구조를 `/mypage/terms`, `/mypage/privacy` route에 직접 반영합니다.
-- (2026-06-27) **회원 탈퇴 화면은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenWithdraw` 구조를 `/mypage/withdraw` route에 직접 반영합니다. 실제 soft delete API는 정책 확정 후 연결합니다.
-- (2026-06-27) **미사용 MY service/hook 레이어는 제거한다** — 현재 MY 화면은 Downloads 원본을 기준으로 다시 구현할 예정이고 `useMyPage -> myPageService` 호출처가 없어 제거했습니다. 실제 API 연결 시 필요한 query hook만 다시 만듭니다.
-- (2026-05-27) **알림 설정은 ZIP section/card 구조를 따른다** — 알림 설정은 단일 카드 목록이 아니라 ZIP `ScreenNotifSettings`처럼 섹션 제목과 카드 목록을 반복합니다. `거래 채팅` 행은 v2 범위이므로 v1 reference에서는 제외하고, 경고 카드로 대체하지 않습니다.
-- (2026-05-27) **법적 문서 조항 제목 weight는 ZIP 700을 따른다** — `ScreenLegal`의 section heading은 800이 아니라 700 weight를 사용하므로, RN reference도 `theme.fontWeight.bold`로 맞춥니다.
-- (2026-05-27) **법적 문서 화면은 ZIP 전문 구조를 따른다** — 이용약관/개인정보처리방침은 현재 앱의 단일 카드 요약이 아니라 ZIP `ScreenLegal`처럼 `TopBar` 아래 시행일자, 조항 제목, 조항 본문을 full document 형태로 렌더링합니다. Pixel residual은 RN/웹 한글 font metric과 실제 status bar 차이를 별도 원인으로 분리합니다.
-- (2026-05-27) **회원 탈퇴는 ZIP bottom-flat CTA 구조를 따른다** — 탈퇴 화면은 일반 `Screen` scroll content 안의 버튼이 아니라 ZIP `ScreenWithdraw`처럼 body 안내 영역과 하단 `bottom-flat` danger CTA를 분리합니다. 주의사항 카드도 icon title, bullet row, 별도 정보 카드를 유지합니다.
-- (2026-05-27) **MY toast 화면은 ZIP fixed overlay 구조를 따른다** — 차단 완료/차단 해제 toast는 화면 ScrollView 내부 요소가 아니라 `Phone` root의 fixed bottom overlay로 두어야 ZIP 하단 위치와 일치합니다.
-- (2026-05-27) **타 성도 프로필은 카드형 wrapper를 쓰지 않는다** — ZIP `ScreenUserProfile`은 full-width 카드가 아니라 중앙 avatar/name과 outline 차단 CTA 구조이므로 reference 화면도 같은 구조로 둡니다.
-- (2026-05-26) **MY toast 문구도 ZIP 원본을 따른다** — 차단 해제 toast는 `차단이 해제되었습니다`, 타 성도 프로필 차단 완료 toast는 `차단되었습니다`를 기준으로 합니다.
-- (2026-05-23) **MY 위험/권한 확인 문구는 ZIP 원본을 따른다** — 탈퇴·차단·차단 해제처럼 사용자 영향이 큰 확인 다이얼로그는 mock 동작보다 원본 UX 문구 일치를 우선합니다.
-- (2026-05-23) **MY 추가 화면도 110개 inventory에 포함** — 관심 목록, 알림 설정, 고객센터, 1:1 문의, 계정 관리를 ZIP JSX 기준 reference 라우트로 추가하고 Dev Client capture/compare 대상에 포함합니다.
-- (2026-05-23) **MY 원본 상태는 숨김 라우트로 모두 보강** — 기본 MY 외 프로필 수정/활동/차단/FAQ/법적 문서/탈퇴/타 성도 프로필 상태를 `variant` 기반 reference 화면으로 둡니다.
-- (2026-05-23) **MY 첫 화면은 프로필 카드 중심** — 인라인 mock 기능은 유지하되, 첫 인상은 ZIP prototype처럼 프로필 카드와 관리 섹션이 먼저 읽히도록 조정합니다.
-- (2026-05-22) **회원 탈퇴는 mock 요청 상태** — 실제 soft delete와 관리자 처리 정책은 API 연결 후 확정합니다.
+## 의존성 · 관련 ADR
 
-## 미결 / 추적
-
-- 휴대폰 중복 확인, 비밀번호 제약, 탈퇴 soft delete API 스키마 확인 필요.
-- 알림 권한, 문의 API, 고객지원 운영 정책은 후속 Phase에서 확정합니다. Downloads에 독립 원본 화면이 생기면 그때 실제 route로 추가합니다.
-
-## 의존성
-
-- auth 도메인의 현재 사용자와 common 도메인의 UI에 의존합니다.
-- market, group, life-study, prayer mock 데이터에 의존합니다.
-
-## 관련 ADR
-
-- [ADR 0002 — 백엔드 선택 보류 (Mock-first)](../adr/0002-backend-tbd.md)
+- auth 의 현재 사용자·로그아웃, prayer 의 내 기도 이력, common 의 queryClient · queryKeys · UI 컴포넌트.
 - [ADR 0004 — Notion v1 범위와 Expo Dev Client 기준](../adr/0004-notion-v1-dev-client-scope.md)

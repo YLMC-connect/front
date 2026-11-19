@@ -1,6 +1,6 @@
 # ADR 0001 — 기술 스택
 
-> 상태: 수락 (Accepted) | 작성일: 2026-05-08 | 관련: [PLAN.md](../../PLAN.md) “🛠 기술 스택” · “⚠️ 버전 호환성 주의사항”
+> 상태: 수락 (Accepted) | 작성일: 2026-05-08 | 관련: [PLAN.md](../../PLAN.md), `package.json`
 
 ## 컨텍스트
 
@@ -13,7 +13,7 @@ YLMC Connect 는 iOS / Android 모두를 지원하는 교회 커뮤니티 앱이
 
 ## 결정
 
-다음 스택을 채택한다. 버전은 [PLAN.md “🛠 기술 스택”](../../PLAN.md) 표가 단일 출처이며 본 ADR 은 “왜” 만 설명한다.
+다음 스택을 채택한다. 버전은 `package.json` 이 단일 출처이며 본 ADR 은 “왜” 만 설명한다.
 
 ### 런타임 · 라우팅
 
@@ -25,7 +25,7 @@ YLMC Connect 는 iOS / Android 모두를 지원하는 교회 커뮤니티 앱이
 
 ### 상태 관리 — 서버 / 클라이언트 명확히 분리
 
-- **서버 상태: TanStack Query 5** — 페칭 · 캐싱 · 재시도 · 백그라운드 동기화의 사실상 표준. RN 에서는 `onlineManager` (NetInfo) + `focusManager` (AppState) 연동 + `query-async-storage-persister` 가 추가로 필요하다 (PLAN.md 의 RN 필수 설정 블록 참조).
+- **서버 상태: TanStack Query 5** — 페칭 · 캐싱 · 재시도 · 백그라운드 동기화의 사실상 표준. RN 에서는 `onlineManager` (NetInfo) + `focusManager` (AppState) 연동 + `query-async-storage-persister` 가 추가로 필요하다 (PLAN.md “TanStack Query 설정” 참조).
 - **클라이언트 상태: Zustand 5** — auth · UI 토글 등 서버와 무관한 상태만 담당. Redux 대비 보일러플레이트 1/10. React 18+ 필수이지만 React 19.2 사용으로 무관.
 - **원칙**: 서버에서 온 데이터를 Zustand 에 복사하지 않는다. 두 곳에 저장하면 동기화 버그가 무한 발생.
 
@@ -97,5 +97,5 @@ YLMC Connect 는 iOS / Android 모두를 지원하는 교회 커뮤니티 앱이
 - 2026-05-08 — 최초 수락. PLAN.md 의 기술 스택 표를 ADR 화하여 “왜” 를 영속화.
 - 2026-05-08 — 스타일 도구 결정 갱신: 보류했던 NativeWind v4 를 채택으로 전환. `theme.ts` 단일 출처 + `tailwind.config.js` import 패턴. 기각 대안에서 “NativeWind 미사용” 과 “tailwind.config 단일 출처(theme.ts 폐기)” 두 안을 모두 기록.
 - 2026-06-27 — 실제 사용처 기준으로 `react-hook-form`, `zod`, `@hookform/resolvers`, `date-fns`를 제거하고 화면별 local validation으로 축소.
-- 2026-10-09 — Expo SDK 57 (React Native 0.86 / React 19.2)로 올린다. iOS scene lifecycle을 켜고, Node 20을 제외한다. `@expo/vector-icons`와 테스트용 `@react-native/jest-preset`은 직접 의존성. 버전 숫자의 단일 출처는 PLAN.md 기술 스택 표.
+- 2026-10-09 — Expo SDK 57 (React Native 0.86 / React 19.2)로 올린다. iOS scene lifecycle을 켜고, Node 20을 제외한다. `@expo/vector-icons`와 테스트용 `@react-native/jest-preset`은 직접 의존성. 버전 숫자의 단일 출처는 `package.json`.
 - 2026-11-07 — 디자인 시스템 v2(ADR 0007)로 아이콘을 lucide `AppIcon` 하나로 통일하고 `@expo/vector-icons` 를 제거한다.

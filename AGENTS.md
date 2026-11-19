@@ -101,7 +101,6 @@ PR 을 올린 에이전트가 끝까지 책임진다. PR 을 열고 나면 `revi
 | 1   | PR description              | PR 을 열거나 갱신할 때. 위 3섹션                                                                                                              |
 | 2   | `docs/features/<도메인>.md` | **결정·API 계약·데이터 타입·미결이 바뀔 때만.** 화면 보정·리팩터링만 한 PR 은 고치지 않는다. 날짜·작업 이력·파일 목록은 적지 않는다(이력은 머지된 PR) |
 | 3   | GitHub Issue                | 지금 못 하는 후속 작업이 생겼을 때 등록. 해결했으면 `Closes #<N>`                                                                             |
-| 4   | `docs/INDEX.md`             | 자동생성 영역은 손편집하지 않는다. Issue 를 열거나 닫은 뒤 PR 을 열 때 `bash scripts/gen-index.sh` 결과를 함께 커밋. Phase / ADR 목록만 수동   |
 
 ## 작업 종료 시 — 조건부
 
@@ -113,7 +112,7 @@ PR 을 올린 에이전트가 끝까지 책임진다. PR 을 열고 나면 `revi
 
 - **ADR (`docs/adr/`)**: 되돌리기 어려움 + 여러 도메인/시스템 영향
 - **features 의 결정 사항**: 도메인 내부 결정. 지금도 유효한 것만 남긴다
-- 모호하면 ADR 로
+- 모호하면 features 결정 사항에 먼저 적고, 여러 도메인으로 번지면 ADR 로 올린다
 
 ---
 
@@ -121,9 +120,9 @@ PR 을 올린 에이전트가 끝까지 책임진다. PR 을 열고 나면 `revi
 
 새 기능 / 데이터 타입 변경 / 정책 변경처럼 **설계가 시작점** 인 변경은 코드 작업과 별개다.
 
-1. **PLAN.md 수정** — 사용자 승인 필수. 끝의 “변경 이력” 에 명세 마일스톤 한 줄
+1. **PLAN.md 수정** — 사용자 승인 필수
 2. **영향 도메인 features 페이지 갱신** — “데이터 타입” + 지금 유효한 “결정 사항”
-3. **GitHub Issues 신규 등록** — 여러 PR 로 나눠 진행할 일만. `gh issue create --label <도메인> --milestone "Phase N" --title "..."`. 새 Phase 가 생기면 PLAN.md 의 Phase 표에 행 추가 + GitHub Milestone 생성
+3. **GitHub Issues 신규 등록** — 여러 PR 로 나눠 진행할 일만. `gh issue create --label <도메인> --title "..."`
 4. **PR** — 위 반영 흐름대로
 
 ---
@@ -144,7 +143,7 @@ PR 을 올린 에이전트가 끝까지 책임진다. PR 을 열고 나면 `revi
 
 ## 설계 기준 문서
 
-[PLAN.md](PLAN.md) — 변경 빈도 낮음. 수정 전 사용자 승인 필수. 평소엔 features 페이지의 “데이터 타입” 섹션이 PLAN.md 의 핵심을 거울처럼 담고 있다.
+[PLAN.md](PLAN.md) — 앱 범위·공통 데이터 타입·정책. 변경 빈도 낮음. 수정 전 사용자 승인 필수.
 
 도메인 목록의 단일 출처는 [`.task-flow.conf`](.task-flow.conf) 다.
 
@@ -153,8 +152,6 @@ PR 을 올린 에이전트가 끝까지 책임진다. PR 을 열고 나면 `revi
 - 변경 이력: `gh pr list --state merged --limit 30` / 본문 `gh pr view <N>`
 - 남은 일: `gh issue list --state open`
 - 도메인 필터: `--label <도메인>` 추가
-
-2026-05-09 이전 문서(TASKS.md, LOG.md 등)는 [docs/\_archive/](docs/_archive/) 에 보존.
 
 ---
 

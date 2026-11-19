@@ -37,7 +37,7 @@ export function useTogglePrayerCompletion(cohortId: string) {
     },
     onSuccess: (updatedStatus) => {
       queryClient.setQueryData(
-        ["prayer", "cohort-status", cohortId],
+        queryKeys.prayer.cohortStatus(cohortId),
         updatedStatus,
       );
       queryClient.invalidateQueries({ queryKey: queryKeys.prayer.all });
@@ -55,7 +55,7 @@ export function useCreatePrayerApplication() {
       createPrayerApplication(input),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["prayer", "my-applications"],
+        queryKey: queryKeys.prayer.myApplications(),
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.prayer.all });
     },
@@ -78,7 +78,7 @@ export function useCancelPrayerApplication() {
 /** 내 중보기도 활동 이력 (현재 + 지난 활동) */
 export function useMyPrayerHistory() {
   return useQuery({
-    queryKey: [...queryKeys.prayer.all, "my-history"],
+    queryKey: queryKeys.prayer.myHistory(),
     queryFn: fetchMyPrayerHistory,
   });
 }
@@ -91,8 +91,10 @@ export function useCreatePrayerTopicApi() {
     mutationFn: (input: PrayerTopicWriteRequest) =>
       createPrayerTopicRequest(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["prayer", "my-topics"] });
-      queryClient.invalidateQueries({ queryKey: ["prayer", "topic-board"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.prayer.myTopics() });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.prayer.topicBoard(),
+      });
       queryClient.invalidateQueries({ queryKey: queryKeys.prayer.all });
     },
   });
@@ -101,7 +103,7 @@ export function useCreatePrayerTopicApi() {
 /** 기도 카테고리 목록 쿼리 */
 export function usePrayerCategories() {
   return useQuery({
-    queryKey: ["prayer", "categories"],
+    queryKey: queryKeys.prayer.categories(),
     queryFn: fetchPrayerCategories,
     staleTime: 1000 * 60 * 10,
   });
@@ -120,8 +122,10 @@ export function useRequestPrayerTopicAnswer() {
       input: PrayerAnswerRequest;
     }) => requestPrayerTopicAnswer(topicId, input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["prayer", "my-topics"] });
-      queryClient.invalidateQueries({ queryKey: ["prayer", "topic-board"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.prayer.myTopics() });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.prayer.topicBoard(),
+      });
       queryClient.invalidateQueries({ queryKey: queryKeys.prayer.all });
     },
   });

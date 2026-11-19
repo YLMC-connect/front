@@ -31,8 +31,8 @@
 - **신청 폼에 동기 입력란이 없다** — API 에 신청 동기 필드가 없어서다.
 - **커리큘럼은 과정 단위 API 로 그린다** — 모집 중인 기수가 없어도 보이도록 `GET /api/life-study/{id}` 의 `lessons[]` 를 쓴다. 주차별 날짜·완료 여부는 API 에 없어 그리지 않는다. (#199)
 - **API 에 없는 값은 지어내지 않는다** — 수업일 `classes[]` 원소, 출석부 하위 필드, 수료증 발급 여부는 계약에 없어 화면·타입에 두지 않는다.
-- **출석·수료 권한은 서버가 판단한다** — 출석·수료 수정 API(`team_leader`, `MANAGER_LIFESTUDY`, `ADMIN`)의 권한 오류(`LST013`·`LST017` 등)는 그대로 전달하고 클라이언트 역할로 미리 거르지 않는다. 이 API 들은 service 에만 있고 지금 화면에서 쓰지 않는다.
-- **관리자 역할 경계는 `MANAGER_LIFESTUDY` 또는 `ADMIN`** — 공통 권한 판별에서 두 역할만 삶공부 관리 도메인에 허용한다. 모바일은 사용자용 화면만 두고 `/api/admin` 은 호출하지 않는다. (#128)
+- **출석·수료 관리 API 는 연결하지 않는다** — 출석부·수료 명단 조회·수정 API(`team_leader`, `MANAGER_LIFESTUDY`, `ADMIN`)는 쓰는 화면이 없어 프런트 코드에 두지 않는다. 연결할 때 권한 오류(`LST013`·`LST017` 등)는 서버가 판단한 그대로 전달하고 클라이언트 역할로 미리 거르지 않는다.
+- **모바일은 사용자용 화면만 둔다** — `/api/admin` 은 호출하지 않는다. (#128)
 - **디자인 미리보기는 개발 빌드 전용** — 상세는 route id 가 없거나 `designVariant` 가 있을 때만 고정 시안 문구를 그리고, `designVariant` 는 `__DEV__` 에서만 읽는다.
 - **API 계약 검사는 별도 명령** — `npm run test:api:contract -- life-study` 로 돌리며 `npm run validate` 에는 넣지 않는다.
 
@@ -45,7 +45,7 @@
 - 화면: `app/(tabs)/life-study/`
 - 목록 렌더러: `src/components/faith/` (기도와 공유), 상세 부품: `src/components/life-study/detail/`
 - 데이터: `src/services/lifeStudy*`, `src/hooks/useLifeStudyCourses.ts`, `src/types/lifeStudy*`
-- 역할 판별: `src/lib/rolePermissions.ts`, 계약 검사: `scripts/api-contract/life-study.mjs`
+- 계약 검사: `scripts/api-contract/life-study.mjs`
 
 ## 의존성 · 관련 ADR
 

@@ -1,22 +1,3 @@
-import type { Group } from "./group";
-import type { LifeStudyCourse } from "./lifeStudy";
-import type { MarketItem } from "./market";
-import type { PrayerRoom } from "./prayer";
-
-export interface MyPageFaq {
-  question: string;
-  answer: string;
-}
-
-export interface MyPageData {
-  marketItems: MarketItem[];
-  groups: Group[];
-  lifeStudyCourses: LifeStudyCourse[];
-  prayerRooms: PrayerRoom[];
-  favoriteTitles: string[];
-  faqs: MyPageFaq[];
-}
-
 export type MyPageActivityTone = "mute" | "primary" | "warn";
 
 /** 활동 화면 나눔 행. 화면이 그리는 값만 둔다. */

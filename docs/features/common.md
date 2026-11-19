@@ -28,7 +28,7 @@
 - **API origin 은 로컬 env 에만** — 실제 호스트를 코드·문서·`.env.example` 에 두지 않는다.
 - **검증 기준은 Expo Dev Client** — Expo Go 아님. 웹(`npm run web`)은 브라우저 CORS 때문에 라이브 API 검증 대상이 아니다.
 - **API client `format: "json"` 은 opt-in** — 기본은 envelope 의 `data` 만 반환. login/refresh 도 같은 envelope 다. envelope 가 없는 성공 응답만 `format: "json"`.
-- **서버 역할은 원본 값으로 보존** — 프런트의 역할 판별(`rolePermissions`)은 메뉴·route 노출용이고 실제 API 인가는 서버가 한다.
+- **서버 역할은 원본 값으로 보존** — 프런트는 지금 역할로 메뉴·route 를 가르지 않는다. 실제 API 인가는 서버가 한다.
 - **개인정보 쿼리는 기기에 저장하지 않는다** — `queryClient.ts` 의 `NON_PERSISTED_QUERY_KEY_PREFIXES`(`member`, `market/mine`, `group/detail`, `prayer/overview`, `lifeStudy/overview`)는 메모리에만 둔다. AsyncStorage 는 암호화가 없기 때문이다. 개인정보 쿼리를 새로 만들면 이 목록에 넣는다.
 - **응답 해석은 화면이 쓰는 필드만 엄격** — mapper 는 화면이 쓰는 필드(id, 제목, 상태, 날짜 등)만 형식을 확인하고 나머지는 `null` 로 읽는다. 목록은 형식이 틀린 항목만 빼고, `reportResponseIssue({ source, reason })` 로 경로·필드 이름만 알린다(값·개인정보 금지). 응답 자체가 배열·객체가 아니면 `INVALID_RESPONSE`.
 - **Sentry 는 배포 빌드에서만** — `__DEV__` 이거나 `EXPO_PUBLIC_SENTRY_DSN` 이 비면 켜지 않는다. 보고에는 쿼리 키 앞 두 조각·HTTP status·code 만 싣고 응답 본문·메시지·개인정보, 네트워크 오류·4xx 는 보내지 않는다. 소스맵 업로드는 아직 끔(`SENTRY_DISABLE_AUTO_UPLOAD=true`, #212).
@@ -54,7 +54,7 @@
 
 ## 코드 위치
 
-- 네트워크·캐시·오류: `src/lib/` (`apiClient`, `queryClient`, `sentry`, `reportResponseIssue`, `rolePermissions`)
+- 네트워크·캐시·오류: `src/lib/` (`apiClient`, `queryClient`, `sentry`, `reportResponseIssue`)
 - 공통 타입: `src/types/api.ts`, `src/types/common.ts`
 - 레이아웃·UI: `src/components/layout/`, `src/components/ui/`
 - 디자인 토큰: `design-system/tokens.json`, `src/constants/` (`theme.ts`, `designTokens.json`), `scripts/sync-design-tokens.mjs`

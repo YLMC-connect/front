@@ -9,17 +9,9 @@ import type {
   MarketOverview,
   MarketInput,
   MarketPostTarget,
-  MarketReportInput,
   MarketStatusUpdateInput,
   MarketUpdateInput,
 } from "../types/market";
-
-export class DuplicateMarketReportError extends Error {
-  constructor() {
-    super("이미 신고한 콘텐츠입니다.");
-    this.name = "DuplicateMarketReportError";
-  }
-}
 
 export interface MarketOverviewPage {
   items: MarketOverview["items"];
@@ -47,7 +39,6 @@ export interface MarketDataSource {
   createComment(input: MarketCommentInput): Promise<MarketDetailComment>;
   updateComment(input: MarketCommentUpdateInput): Promise<MarketDetailComment>;
   deleteComment(input: MarketCommentTarget): Promise<void>;
-  reportContent(input: MarketReportInput): Promise<void>;
 }
 
 export function createMarketService(dataSource: MarketDataSource) {
@@ -141,16 +132,6 @@ export function createMarketService(dataSource: MarketDataSource) {
     },
     deleteComment: (input: MarketCommentTarget) =>
       dataSource.deleteComment(input),
-    reportContent: (input: MarketReportInput) => {
-      const content = input.content?.trim();
-      if (input.reason === "other" && !content) {
-        throw new Error("기타 신고 사유를 입력해주세요.");
-      }
-      return dataSource.reportContent({
-        ...input,
-        content: content || undefined,
-      });
-    },
   };
 }
 
@@ -167,4 +148,3 @@ export const updateMarketStatus = marketService.updateStatus;
 export const createMarketComment = marketService.createComment;
 export const updateMarketComment = marketService.updateComment;
 export const deleteMarketComment = marketService.deleteComment;
-export const reportMarketContent = marketService.reportContent;

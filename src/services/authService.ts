@@ -40,7 +40,7 @@ export async function signup(input: SignupInput): Promise<AuthSession> {
   return sessionManager.signup(input);
 }
 
-export async function refreshSession(): Promise<AuthSession> {
+async function refreshSession(): Promise<AuthSession> {
   return sessionManager.refresh();
 }
 
@@ -59,12 +59,6 @@ export async function updateCurrentMember(input: {
   const member = await authAdapter.updateCurrentMember(input);
   useAuthStore.getState().updateProfile(member);
   return member;
-}
-
-export async function verifyPassword(input: {
-  password: string;
-}): Promise<boolean> {
-  return authAdapter.verifyPassword(input);
 }
 
 export async function changePassword(input: {

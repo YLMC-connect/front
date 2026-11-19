@@ -13,7 +13,6 @@ describe("market and group service boundaries", () => {
       createComment: jest.fn().mockRejectedValue(new Error("not used")),
       updateComment: jest.fn().mockRejectedValue(new Error("not used")),
       deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
-      reportContent: jest.fn().mockRejectedValue(new Error("not used")),
     };
     const service = createMarketService(dataSource);
 
@@ -41,7 +40,6 @@ describe("market and group service boundaries", () => {
       createComment: jest.fn().mockResolvedValue(createdComment),
       updateComment: jest.fn().mockRejectedValue(new Error("not used")),
       deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
-      reportContent: jest.fn().mockRejectedValue(new Error("not used")),
     };
     const service = createMarketService(dataSource);
 
@@ -65,7 +63,6 @@ describe("market and group service boundaries", () => {
       createComment: jest.fn().mockRejectedValue(new Error("not used")),
       updateComment: jest.fn().mockRejectedValue(new Error("not used")),
       deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
-      reportContent: jest.fn().mockRejectedValue(new Error("not used")),
     };
     const service = createMarketService(dataSource);
 
@@ -73,32 +70,6 @@ describe("market and group service boundaries", () => {
       service.createComment({ marketId: "1", content: "   " }),
     ).toThrow("댓글 내용을 입력해주세요.");
     expect(dataSource.createComment).not.toHaveBeenCalled();
-  });
-
-  it("requires details for the other report reason", () => {
-    const dataSource: MarketDataSource = {
-      getOverview: jest.fn().mockRejectedValue(new Error("not used")),
-      getDetail: jest.fn().mockRejectedValue(new Error("not used")),
-      createPost: jest.fn().mockRejectedValue(new Error("not used")),
-      updatePost: jest.fn().mockRejectedValue(new Error("not used")),
-      deletePost: jest.fn().mockRejectedValue(new Error("not used")),
-      updateStatus: jest.fn().mockRejectedValue(new Error("not used")),
-      createComment: jest.fn().mockRejectedValue(new Error("not used")),
-      updateComment: jest.fn().mockRejectedValue(new Error("not used")),
-      deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
-      reportContent: jest.fn().mockRejectedValue(new Error("not used")),
-    };
-    const service = createMarketService(dataSource);
-
-    expect(() =>
-      service.reportContent({
-        targetType: "market",
-        targetId: "1",
-        reason: "other",
-        content: "   ",
-      }),
-    ).toThrow("기타 신고 사유를 입력해주세요.");
-    expect(dataSource.reportContent).not.toHaveBeenCalled();
   });
 
   it("validates market post fields and delegates to the data source", async () => {
@@ -126,7 +97,6 @@ describe("market and group service boundaries", () => {
       createComment: jest.fn().mockRejectedValue(new Error("not used")),
       updateComment: jest.fn().mockRejectedValue(new Error("not used")),
       deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
-      reportContent: jest.fn().mockRejectedValue(new Error("not used")),
     };
     const service = createMarketService(dataSource);
 

@@ -14,7 +14,7 @@
 - 작성자는 상세에서 수정·삭제(`DELETE /api/share/{id}`)와 상태 변경(`PUT /api/share/{id}/status`, 시트에서 나눔중·예약중·나눔완료 선택)을 할 수 있다. (#247)
 - 댓글은 `POST /api/share/{id}/comments`, `PUT`·`DELETE /api/share/comments/{commentId}`. 수정은 하단 입력창을 재사용하고, 삭제는 확인 후 진행한다.
 - 작성은 `POST /api/share` multipart(제목·내용·카테고리·물품 상태·수령 장소·사진), 수정은 `PUT /api/share/{id}`. 수정 화면은 상세 조회 결과로 값을 채우고, 수정 여부는 `id` 파라미터로 정한다.
-- 신고 UI 와 HTTP 신고는 연결돼 있지 않다. `reportContent` 는 서버 사유 코드가 정해지지 않았다는 오류를 던진다.
+- 신고 UI 와 HTTP 신고는 연결돼 있지 않다. 신고 요청 코드도 두지 않는다(아래 미결).
 
 ## 데이터 타입
 

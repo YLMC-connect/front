@@ -2,13 +2,9 @@ import { apiClient, type ApiRequestOptions } from "../lib/apiClient";
 import type { LifeStudyStatus } from "../types/lifeStudy";
 import type { LifeStudyDataSource } from "./lifeStudyService";
 import {
-  applyClassListToOverviewCourse,
-  applyCompletionRosterToCourse,
   buildLifeStudyCourses,
   buildLifeStudyHistories,
   buildLifeStudyOverview,
-  readAttendanceRoster,
-  requireCompletionRoster,
   tryReadLifeStudyCohortDetail,
   tryReadLifeStudyCourseLessons,
 } from "./lifeStudyMapper";
@@ -65,61 +61,6 @@ export function createHttpLifeStudyDataSource({
     async getMyCompletions() {
       const data = await client.request<unknown>("/api/life-study/completions");
       return buildLifeStudyHistories(data);
-    },
-
-    async applyClassesToCourse(cohortId, course) {
-      const data = await client.request<unknown>(
-        `/api/life-study/cohorts/${cohortId}/classes`,
-      );
-      return applyClassListToOverviewCourse(course, data);
-    },
-
-    async getAttendance(classId) {
-      const data = await client.request<unknown>(
-        `/api/life-study/classes/${classId}/attendance`,
-      );
-      return readAttendanceRoster(data);
-    },
-
-    async replaceAttendance(classId, attendedUserIds) {
-      await client.request(`/api/life-study/classes/${classId}/attendance`, {
-        method: "PUT",
-        body: JSON.stringify({ attendedUserIds: [...attendedUserIds] }),
-      });
-    },
-
-    async updateAttendanceUser(classId, input) {
-      await client.request(
-        `/api/life-study/classes/${classId}/attendance/user`,
-        {
-          method: "PUT",
-          body: JSON.stringify({
-            userId: input.userId,
-            attended: input.attended,
-          }),
-        },
-      );
-    },
-
-    async applyRosterToCourse(cohortId, course, currentUserId) {
-      const data = await client.request<unknown>(
-        `/api/life-study/cohorts/${cohortId}/completions`,
-      );
-      return applyCompletionRosterToCourse(course, data, currentUserId);
-    },
-
-    async updateCompletionUser(cohortId, input) {
-      const data = await client.request<unknown>(
-        `/api/life-study/cohorts/${cohortId}/completions/user`,
-        {
-          method: "PUT",
-          body: JSON.stringify({
-            userId: input.userId,
-            completed: input.completed,
-          }),
-        },
-      );
-      return requireCompletionRoster(data);
     },
 
     async getCohortDetail(cohortId) {

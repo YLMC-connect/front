@@ -6,7 +6,6 @@ import {
   formatPrayerRoomDayPeriod,
   readPrayerApplications,
   readPrayerCategories,
-  readPrayerCohortDetail,
   readPrayerCohorts,
   readPrayerCohortStatus,
   readPrayerHistory,
@@ -240,15 +239,7 @@ describe("prayerMapper", () => {
     ]);
   });
 
-  it("drops undocumented cohort detail fields and keeps history rows", () => {
-    expect(
-      readPrayerCohortDetail({
-        id: 15,
-        cohortName: "월요일 오전",
-        memberCount: 40,
-      }),
-    ).toEqual({});
-    expect(readPrayerCohortDetail(null)).toBeNull();
+  it("keeps history rows", () => {
     expect(
       readPrayerHistory([
         {
@@ -317,7 +308,6 @@ describe("prayerMapper", () => {
     expect(() =>
       readPrayerCohortStatus({ ...cohortStatus, totalMembers: "3" }),
     ).toThrow(ApiError);
-    expect(() => readPrayerCohortDetail([])).toThrow(ApiError);
     expect(() => readPrayerTopicBoard({ emergency: [] })).toThrow(ApiError);
     expect(() => requireCreatedId("15")).toThrow(ApiError);
     expect(requireCreatedId(15)).toBe(15);

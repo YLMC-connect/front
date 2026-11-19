@@ -47,14 +47,6 @@ describe("mypageService", () => {
         ongoing: [],
         completed: [],
       }),
-      getPrayers: jest.fn().mockResolvedValue({
-        activeCount: 0,
-        totalPeriod: "",
-        totalPeriodDays: 0,
-        totalRoomCount: 0,
-        currentActivities: [],
-        pastActivities: [],
-      }),
     };
 
     const service = createMyPageService(dataSource);
@@ -64,9 +56,6 @@ describe("mypageService", () => {
     expect(posts.items[0]?.title).toBe("유아용 카시트 나눔해요");
     await expect(service.fetchLifeStudies()).resolves.toMatchObject({
       completionCount: 0,
-    });
-    await expect(service.fetchPrayers()).resolves.toMatchObject({
-      activeCount: 0,
     });
   });
 });

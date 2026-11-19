@@ -5,13 +5,13 @@
 
 ## 1. 준비물
 
-| 항목            | 기준                                                                               |
-| --------------- | ---------------------------------------------------------------------------------- |
-| Node.js         | `^22.13.0` 또는 `^24.3.0` 또는 `>=25.0.0` (`package.json` `engines`). CI는 22.22.0 |
-| npm             | Node와 함께 오는 버전 (CI는 npm 10)                                                |
-| Expo Dev Client | Expo Go가 아니라 development build                                                 |
-| iOS             | Xcode + 시뮬레이터 또는 실기기                                                     |
-| Android         | Android Studio + Emulator 또는 실기기, JDK 17+                                     |
+| 항목 | 기준 |
+|---|---|
+| Node.js | `^22.13.0` 또는 `^24.3.0` 또는 `>=25.0.0` (`package.json` `engines`). CI는 22.22.0 |
+| npm | Node와 함께 오는 버전 (CI는 npm 10) |
+| Expo Dev Client | Expo Go가 아니라 development build |
+| iOS | Xcode + 시뮬레이터 또는 실기기 |
+| Android | Android Studio + Emulator 또는 실기기, JDK 17+ |
 
 저장소 클론:
 

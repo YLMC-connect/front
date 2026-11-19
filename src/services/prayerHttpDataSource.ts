@@ -9,7 +9,6 @@ import {
   buildPrayerOverview,
   readPrayerApplications,
   readPrayerCategories,
-  readPrayerCohortDetail,
   readPrayerCohorts,
   readPrayerCohortStatus,
   readPrayerHistory,
@@ -55,22 +54,6 @@ export function createHttpPrayerDataSource({
       return buildPrayerOverview(myCohorts, topics, applications);
     },
 
-    async getMyCohorts() {
-      return readPrayerCohorts(await client.request("/api/prayer/cohorts/my"));
-    },
-
-    async getOpenCohorts() {
-      return readPrayerCohorts(
-        await client.request("/api/prayer/cohorts/open"),
-      );
-    },
-
-    async getCohort(cohortId) {
-      return readPrayerCohortDetail(
-        await client.request(`/api/prayer/cohorts/${cohortId}`),
-      );
-    },
-
     async getCohortStatus(cohortId) {
       return readPrayerCohortStatus(
         await client.request(`/api/prayer/cohorts/${cohortId}/status`),
@@ -90,24 +73,6 @@ export function createHttpPrayerDataSource({
         await client.request(`/api/prayer/cohorts/${cohortId}/completion`, {
           method: "DELETE",
         }),
-      );
-    },
-
-    async likeCompletion(completionId) {
-      await client.request(`/api/prayer/completions/${completionId}/like`, {
-        method: "POST",
-      });
-    },
-
-    async unlikeCompletion(completionId) {
-      await client.request(`/api/prayer/completions/${completionId}/like`, {
-        method: "DELETE",
-      });
-    },
-
-    async getMyApplications() {
-      return readPrayerApplications(
-        await client.request("/api/prayer/applications/my"),
       );
     },
 
@@ -168,23 +133,6 @@ export function createHttpPrayerDataSource({
           }),
         }),
       );
-    },
-
-    async updateTopic(topicId, input) {
-      await client.request(`/api/prayer/topics/${topicId}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          categoryId: input.categoryId,
-          title: input.title,
-          content: input.content,
-        }),
-      });
-    },
-
-    async deleteTopic(topicId) {
-      await client.request(`/api/prayer/topics/${topicId}`, {
-        method: "DELETE",
-      });
     },
 
     async requestTopicAnswer(topicId, input: PrayerAnswerRequest) {

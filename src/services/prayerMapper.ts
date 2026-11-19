@@ -12,7 +12,6 @@ import type {
 import type {
   PrayerApplicationDto,
   PrayerCategoryDto,
-  PrayerCohortDetail,
   PrayerCohortDto,
   PrayerCohortStatusDto,
   PrayerCompletionMemberDto,
@@ -221,14 +220,6 @@ function readTopic(value: unknown, source: unknown): PrayerTopicDto {
 
 export function readPrayerCohorts(data: unknown): PrayerCohortDto[] {
   return readList(data, "prayer.cohorts", readCohort);
-}
-
-export function readPrayerCohortDetail(
-  data: unknown,
-): PrayerCohortDetail | null {
-  if (data == null) return null;
-  if (!isRecord(data)) invalid(data);
-  return {};
 }
 
 export function readPrayerCohortStatus(

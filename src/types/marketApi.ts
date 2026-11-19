@@ -45,10 +45,3 @@ export interface ShareCommentDto {
   createdAt: string;
   updatedAt?: string;
 }
-
-export interface ShareUpdateRequestDto {
-  title: string;
-  content: string;
-  categoryCode: string;
-  itemStatus: string;
-}

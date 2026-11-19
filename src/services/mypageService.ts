@@ -8,7 +8,6 @@ import type {
   MyPageActivityPageQuery,
   MyPageGroupPageQuery,
   MyPageLifeStudyHistoryDto,
-  MyPagePrayerHistoryDto,
 } from "../types/mypageApi";
 import { httpMyPageDataSource } from "./mypageHttpDataSource";
 
@@ -23,7 +22,6 @@ export interface MyPageActivityDataSource {
     query?: MyPageGroupPageQuery,
   ): Promise<MyPageActivityList<MyPageActivityGroup>>;
   getLifeStudies(): Promise<MyPageLifeStudyHistoryDto>;
-  getPrayers(): Promise<MyPagePrayerHistoryDto>;
 }
 
 export function createMyPageService(dataSource: MyPageActivityDataSource) {
@@ -33,7 +31,6 @@ export function createMyPageService(dataSource: MyPageActivityDataSource) {
       dataSource.getComments(query),
     fetchGroups: (query?: MyPageGroupPageQuery) => dataSource.getGroups(query),
     fetchLifeStudies: () => dataSource.getLifeStudies(),
-    fetchPrayers: () => dataSource.getPrayers(),
   };
 }
 
@@ -43,4 +40,3 @@ export const fetchMyPageActivityPosts = myPageService.fetchPosts;
 export const fetchMyPageActivityComments = myPageService.fetchComments;
 export const fetchMyPageActivityGroups = myPageService.fetchGroups;
 export const fetchMyPageActivityLifeStudies = myPageService.fetchLifeStudies;
-export const fetchMyPageActivityPrayers = myPageService.fetchPrayers;

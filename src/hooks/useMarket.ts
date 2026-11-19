@@ -16,7 +16,6 @@ import {
   fetchMarketOverviewPage,
   fetchMyMarketOverviewPage,
   type MarketOverviewPage,
-  reportMarketContent,
   updateMarketComment,
   updateMarketPost,
   updateMarketStatus,
@@ -25,7 +24,6 @@ import type {
   MarketCategory,
   MarketDetail,
   MarketInput,
-  MarketReportInput,
   MarketStatus,
   MarketUpdateInput,
 } from "../types/market";
@@ -181,12 +179,6 @@ export function useDeleteMarketComment(marketId: string) {
             : detail,
       );
     },
-  });
-}
-
-export function useReportMarketContent() {
-  return useMutation({
-    mutationFn: (input: MarketReportInput) => reportMarketContent(input),
   });
 }
 

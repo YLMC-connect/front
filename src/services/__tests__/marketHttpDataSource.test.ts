@@ -318,15 +318,4 @@ describe("httpMarketDataSource", () => {
       body: JSON.stringify({ status: "RESERVED" }),
     });
   });
-
-  it("does not invent report reason codes", async () => {
-    const { dataSource } = setup();
-    await expect(
-      dataSource.reportContent({
-        targetType: "market",
-        targetId: "1",
-        reason: "abusive",
-      }),
-    ).rejects.toThrow("신고 사유 코드가 서버에 확정되지 않아");
-  });
 });

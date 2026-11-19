@@ -16,7 +16,7 @@
 - 가입은 `POST /api/signup` 후 같은 아이디·비밀번호로 로그인을 이어 불러 세션을 만든다.
 - 약관 [보기] 는 하단 시트(`TermsSheet`)에 `GET /api/site-policies/{policyType}` 본문을 보여 준다(`useActiveSitePolicy`, MY 의 약관 화면과 공유).
 - 인증이 필요한 요청이 401 이면 `apiClient` 가 `POST /api/auth/refresh` 로 토큰을 한 번 재발급받고 다시 보낸다. 재발급이 실패하면 로그아웃한다.
-- 회원 정보 수정·비밀번호 확인/변경·탈퇴(`/api/member/me`, `/api/member/verify-password`, `/api/member/password`)도 같은 `authAdapter` 에 있고 MY 화면이 쓴다.
+- 회원 정보 수정·비밀번호 변경·탈퇴(`/api/member/me`, `/api/member/password`)도 같은 `authAdapter` 에 있고 MY 화면이 쓴다. 비밀번호 확인(`/api/member/verify-password`)은 쓰는 화면이 없어 연결하지 않았다.
 
 ## 데이터 타입
 

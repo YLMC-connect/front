@@ -7,7 +7,6 @@ import {
   readMyPageGroupList,
   readMyPageLifeStudyHistory,
   readMyPagePostList,
-  readMyPagePrayerHistory,
 } from "../mypageMapper";
 
 const pageMeta = {
@@ -216,55 +215,6 @@ describe("mypageMapper", () => {
     expect(history.ongoing[0]).not.toHaveProperty("extra");
     expect(history.completed).toHaveLength(1);
     expect(() => readMyPageLifeStudyHistory(null)).toThrow(ApiError);
-  });
-
-  it("reads prayer history and nulls a weekday outside 0 through 6", () => {
-    const item = {
-      cohortId: 15,
-      cohortName: "2026년 화요일 오전 기도방",
-      cohortYear: 2026,
-      yoil: 2,
-      yoilName: "화",
-      timeSlot: "AM",
-      timeSlotName: "오전",
-      memberRole: "LEADER",
-      memberRoleName: "팀장",
-      joinedAt: "2026-01-04",
-      leftAt: null,
-      period: "2026.01 ~ 현재",
-      leaveReason: null,
-      active: true,
-    };
-
-    expect(
-      readMyPagePrayerHistory({
-        activeCount: 1,
-        totalPeriod: "3개월",
-        totalPeriodDays: 90,
-        totalRoomCount: 2,
-        currentActivities: [item],
-        pastActivities: [
-          { ...item, active: false, leftAt: "2025-12-31", leaveReason: "종료" },
-        ],
-      }).currentActivities[0],
-    ).toMatchObject({ yoil: 2, leftAt: null, leaveReason: null });
-    expect(
-      readMyPagePrayerHistory({
-        currentActivities: [{ ...item, yoil: 7, period: null }],
-        pastActivities: [{ ...item, cohortId: null }],
-      }),
-    ).toMatchObject({
-      activeCount: null,
-      totalPeriod: null,
-      currentActivities: [{ cohortId: 15, yoil: null, period: null }],
-      pastActivities: [],
-    });
-    expect(warn).toHaveBeenCalledWith(
-      "[응답 형식] mypage.prayers.pastActivities[0]: cohortId 형식 오류",
-    );
-    expect(() =>
-      readMyPagePrayerHistory({ currentActivities: [], pastActivities: {} }),
-    ).toThrow(ApiError);
   });
 
   it("reads null or missing fields that no screen uses", () => {

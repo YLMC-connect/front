@@ -63,9 +63,6 @@ export interface PrayerCohortStatusDto {
   notCompleted: PrayerCompletionMemberDto[];
 }
 
-/** 성공 필드 표가 없다. PrayerCohortDto로 단정하지 않는다. */
-export type PrayerCohortDetail = Record<string, never>;
-
 export interface PrayerTopicDto {
   id: number;
   categoryId: number | null;

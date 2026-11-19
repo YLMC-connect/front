@@ -1,6 +1,3 @@
-import type { Comment, Member } from "./common";
-import type { MARKET_REPORT_REASONS } from "../constants/domainOptions";
-
 export type MarketCategory =
   | "all"
   | "cloth"
@@ -12,21 +9,6 @@ export type MarketCategory =
   | "etc";
 
 export type MarketStatus = "sharing" | "reserved" | "done";
-
-export interface MarketItem {
-  id: string;
-  title: string;
-  description: string;
-  category: Exclude<MarketCategory, "all">;
-  status: MarketStatus;
-  images: string[];
-  owner: Member;
-  createdAt: string;
-  condition: string;
-  location: string;
-  comments: Comment[];
-  liked: boolean;
-}
 
 export interface MarketInput {
   title: string;
@@ -101,16 +83,6 @@ export interface MarketStatusUpdateInput extends MarketPostTarget {
 
 export interface MarketCommentUpdateInput extends MarketCommentTarget {
   content: string;
-}
-
-export type MarketReportReason = (typeof MARKET_REPORT_REASONS)[number]["key"];
-export type MarketReportTargetType = "market" | "comment";
-
-export interface MarketReportInput {
-  targetType: MarketReportTargetType;
-  targetId: string;
-  reason: MarketReportReason;
-  content?: string;
 }
 
 export interface MarketDetail {

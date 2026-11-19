@@ -296,12 +296,6 @@ export function createHttpMarketDataSource({
         method: "DELETE",
       });
     },
-
-    async reportContent() {
-      throw new Error(
-        "신고 사유 코드가 서버에 확정되지 않아 접수할 수 없습니다.",
-      );
-    },
   };
 }
 

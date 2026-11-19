@@ -36,7 +36,13 @@ export const queryKeys = {
   prayer: {
     all: ["prayer"] as const,
     overview: () => [...queryKeys.prayer.all, "overview"] as const,
-    detail: (id: string) => [...queryKeys.prayer.all, "detail", id] as const,
+    cohortStatus: (cohortId: string) =>
+      [...queryKeys.prayer.all, "cohort-status", cohortId] as const,
+    myApplications: () => [...queryKeys.prayer.all, "my-applications"] as const,
+    myHistory: () => [...queryKeys.prayer.all, "my-history"] as const,
+    myTopics: () => [...queryKeys.prayer.all, "my-topics"] as const,
+    topicBoard: () => [...queryKeys.prayer.all, "topic-board"] as const,
+    categories: () => [...queryKeys.prayer.all, "categories"] as const,
   },
   member: {
     all: ["member"] as const,
@@ -45,12 +51,5 @@ export const queryKeys = {
   mypage: {
     all: ["mypage"] as const,
     activity: () => [...queryKeys.mypage.all, "activity"] as const,
-  },
-  siteContent: {
-    all: ["siteContent"] as const,
-    terms: (type: string) =>
-      [...queryKeys.siteContent.all, "terms", type] as const,
-    faqs: (category?: string) =>
-      [...queryKeys.siteContent.all, "faqs", category ?? "all"] as const,
   },
 } as const;

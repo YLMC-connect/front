@@ -57,6 +57,20 @@ jobs:
             - 보안(토큰·개인정보 노출, 안전하지 않은 저장)
             - React Native / Expo / TanStack Query 사용상의 문제와 성능
             - 기존 코드와의 중복, 테스트 누락
+            - 디자인 시스템 준수 (아래)
+
+            디자인 시스템 — 기준은 docs/adr/0007-design-system-v2.md, docs/features/common.md:
+            - 공통 컴포넌트는 모두 src/components/ui 에 있다(index.tsx 에서 export).
+              화면·도메인 컴포넌트가 같은 역할의 UI 를 React Native 기본 요소로 새로 만들면 지적하고 대신 쓸 컴포넌트를 알려준다.
+              예: Text → AppText, 직접 만든 버튼(Pressable/TouchableOpacity) → Button·MotionPressable,
+              TextInput → TextField·Textarea, Modal → BottomSheet·ConfirmDialog·RadioSheet,
+              ActivityIndicator → Spinner, 카드 → Card, 배지 → Badge, 칩 → Chip·FilterChips,
+              빈 화면·오류 → Empty·ErrorState, 체크박스·라디오 → Checkbox·Radio, 아이콘 → AppIcon, 하단 고정 버튼 → FloatingBottomBar.
+            - 색·글자 크기·간격·모서리·그림자를 직접 값(#hex, rgba, 숫자 fontSize 등)으로 쓰지 않고
+              src/constants/theme.ts 의 토큰을 쓰는지 본다.
+            - 디자인 시스템에 없는 새 공통 UI 를 화면 안에 만들면 지적한다(디자인 시스템에 먼저 추가하는 것이 규칙).
+            - src/components/ui 안의 컴포넌트 자체를 구현·수정하는 코드는 이 항목에서 제외한다.
+            - 디자인 시스템 지적은 의견이다. 이것만으로 BLOCK 하지 않는다.
 
             확실한 문제만 지적하고, 사소한 취향 차이는 적지 않는다.
             구체적인 줄에 대한 지적은 mcp__github_inline_comment__create_inline_comment 로 인라인 댓글을 남기고,

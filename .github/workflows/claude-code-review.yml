@@ -86,9 +86,10 @@ jobs:
         run: |
           if [ "$REVIEW_OUTCOME" != "success" ]; then
             # 공개 저장소라 전체 실행 로그 대신 마지막 결과 메시지만 남긴다.
+            # 셸이 pipefail 로 돌므로, 원인 추출이 실패해도 체크가 깨지지 않게 `|| true` 로 넘긴다.
             reason=""
             if [ -n "$EXECUTION_FILE" ] && [ -f "$EXECUTION_FILE" ]; then
-              reason=$(jq -r 'if type == "array" then (map(select(.type == "result")) | last | .result // empty) else (.result // empty) end' "$EXECUTION_FILE" 2>/dev/null | head -c 500 | tr '\n' ' ')
+              reason=$(jq -r 'if type == "array" then (map(select(.type == "result")) | last | .result // empty) else (.result // empty) end' "$EXECUTION_FILE" 2>/dev/null | head -c 500 | tr '\n' ' ' || true)
             fi
             echo "::warning::Claude 리뷰 실행이 실패했습니다(한도·인증 오류 등). 병합을 막지 않습니다. 원인: ${reason:-알 수 없음}"
             exit 0

@@ -21,9 +21,6 @@ import {
 } from "./faithLabels";
 import { styles } from "./faithSectionsStyles";
 
-/** 목록 첫 진입 순차 등장: 처음 8개만 60ms 간격으로 떠오른다. */
-export const STAGGER_LIMIT = 8;
-
 export function OverviewLoading() {
   return (
     <View style={styles.overviewState}>

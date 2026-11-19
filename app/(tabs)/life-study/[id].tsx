@@ -16,6 +16,7 @@ import {
   ErrorState,
   FloatingBottomBar,
   MotionEnter,
+  MOTION_STAGGER_LIMIT,
   motionStaggerDelay,
   TopBar,
 } from "../../../src/components/ui";
@@ -24,9 +25,6 @@ import {
   useLifeStudyCourseLessons,
   useLifeStudyOverview,
 } from "../../../src/hooks/useLifeStudyCourses";
-
-/** 목록 첫 진입 때 60ms 간격으로 떠오르는 줄 수(디자인 시스템 motion: 첫 8개). */
-const LIST_STAGGER_LIMIT = 8;
 
 function LiveLifeStudyDetail({
   id,
@@ -187,7 +185,7 @@ function LiveLifeStudyDetail({
                         <MotionEnter
                           key={lesson.id}
                           mode="fadeUp"
-                          enabled={index < LIST_STAGGER_LIMIT}
+                          enabled={index < MOTION_STAGGER_LIMIT}
                           delay={motionStaggerDelay(index)}
                           style={[
                             styles.curriculumRow,

@@ -5,12 +5,12 @@ import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Screen } from "../../src/components/layout/Screen";
 import { FaqItem } from "../../src/components/mypage/FaqItem";
-import { StaggerItem } from "../../src/components/mypage/StaggerItem";
 import {
   Card,
   Empty,
   ErrorState,
   FilterChips,
+  StaggerItem,
   TopBar,
 } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";

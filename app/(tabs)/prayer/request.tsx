@@ -12,6 +12,7 @@ import {
   ModalFormSection,
   ModalFormTextInput,
   MotionEnter,
+  MOTION_STAGGER_LIMIT,
   motionStaggerDelay,
   TopBar,
 } from "../../../src/components/ui";
@@ -24,9 +25,6 @@ import type {
 } from "../../../src/types/prayerApi";
 
 type RequestStatusTone = "info" | "neutral" | "warning" | "danger";
-
-/** 목록 첫 진입: 처음 8개만 60ms 간격으로 떠오른다. */
-const STAGGER_LIMIT = 8;
 
 const topicStatusLabel: Record<
   PrayerTopicStatus,
@@ -158,7 +156,7 @@ export default function PrayerRequestScreenRoute() {
             {rows.map((request, index) => (
               <MotionEnter
                 key={request.id}
-                enabled={index < STAGGER_LIMIT}
+                enabled={index < MOTION_STAGGER_LIMIT}
                 mode="fadeUp"
                 delay={motionStaggerDelay(index)}
               >

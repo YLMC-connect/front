@@ -16,11 +16,12 @@ import {
   ErrorState,
   MotionEnter,
   MotionPressable,
+  MOTION_STAGGER_LIMIT,
   motionStaggerDelay,
   SectionHeader,
 } from "../ui";
 import { ProgressBar } from "../ui/progress-bar";
-import { OverviewLoading, PrayerDayBadge, STAGGER_LIMIT } from "./FaithParts";
+import { OverviewLoading, PrayerDayBadge } from "./FaithParts";
 import {
   periodLabels,
   requestStatusLabels,
@@ -125,7 +126,7 @@ export function PrayerContent() {
               return (
                 <MotionEnter
                   key={room.id}
-                  enabled={index < STAGGER_LIMIT}
+                  enabled={index < MOTION_STAGGER_LIMIT}
                   mode="fadeUp"
                   delay={motionStaggerDelay(index)}
                 >
@@ -234,7 +235,7 @@ export function PrayerContent() {
             data.requests.map((item, index) => (
               <MotionEnter
                 key={item.id}
-                enabled={index < STAGGER_LIMIT}
+                enabled={index < MOTION_STAGGER_LIMIT}
                 mode="fadeUp"
                 delay={motionStaggerDelay(index)}
               >

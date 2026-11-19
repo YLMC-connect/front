@@ -6,14 +6,7 @@ import {
   type NativeStackNavigationProp,
 } from "expo-router";
 import { ListRow } from "@/components/ui/list-row";
-import { motionStaggerDelay } from "@/components/ui/motion";
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
@@ -26,8 +19,8 @@ import {
   FloatingActionButton,
   ListSkeleton,
   LoadMoreFooter,
-  MotionEnter,
   SegmentedTabs,
+  StaggerItem,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import { GROUP_CATEGORIES } from "../../../src/constants/domainOptions";
@@ -48,8 +41,6 @@ const sections: readonly { key: GroupSection; label: string }[] = [
 ];
 
 const GROUP_SEGMENT_STICKY_HEIGHT = 60;
-/** 첫 진입 때 순서대로 떠오르는 행 수(디자인 시스템 ListRow: 처음 8개, 60ms 간격). */
-const STAGGER_LIMIT = 8;
 const GROUP_STICKY_CONTROLS_HEIGHT = 116;
 
 type GroupStackParamList = {
@@ -390,23 +381,6 @@ function CompanionCard(
         </View>
       </View>
     </ListRow>
-  );
-}
-
-/** 목록 첫 진입: 처음 8개 행이 60ms 간격으로 8px 아래에서 떠오른다. */
-function StaggerItem({
-  index,
-  children,
-}: {
-  index: number;
-  children: ReactNode;
-}) {
-  if (index >= STAGGER_LIMIT) return children;
-
-  return (
-    <MotionEnter mode="fadeUp" delay={motionStaggerDelay(index)}>
-      {children}
-    </MotionEnter>
   );
 }
 

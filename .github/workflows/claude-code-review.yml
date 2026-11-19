@@ -9,8 +9,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # main 보호 규칙의 필수 체크다. Claude 가 BLOCK 판정을 내리면 실패해 병합을 막는다.
   review:
-    # 초안 PR 과 fork PR(시크릿 접근 불가)은 건너뛴다.
+    # 초안 PR 과 fork PR(시크릿 접근 불가)은 건너뛴다. 건너뛴 체크는 필수 체크를 통과한 것으로 본다.
     if: >-
       github.event.pull_request.draft == false &&
       github.event.pull_request.head.repo.full_name == github.repository
@@ -23,6 +24,7 @@ jobs:
       id-token: write
     env:
       HAS_CLAUDE_AUTH: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' || secrets.ANTHROPIC_API_KEY != '' }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
     steps:
       - name: Skip when no Claude credential is configured
         if: env.HAS_CLAUDE_AUTH != 'true'
@@ -33,14 +35,19 @@ jobs:
         with:
           fetch-depth: 1
 
-      - uses: anthropics/claude-code-action@v1
+      - id: claude
+        uses: anthropics/claude-code-action@v1
         if: env.HAS_CLAUDE_AUTH == 'true'
+        # 한도 초과·인증 오류 등으로 리뷰 자체가 실패하면 병합을 막지 않는다(아래 판정 단계에서 처리).
+        continue-on-error: true
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ github.token }}
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
+            HEAD SHA: ${{ github.event.pull_request.head.sha }}
 
             이 PR 을 코드 리뷰한다. 저장소 규칙은 AGENTS.md(CLAUDE.md 가 불러옴)를 따른다.
             관련 도메인의 docs/features/<도메인>.md 에서 결정 사항·데이터 타입을 확인하고 어긋나는지 본다.
@@ -54,6 +61,42 @@ jobs:
             확실한 문제만 지적하고, 사소한 취향 차이는 적지 않는다.
             구체적인 줄에 대한 지적은 mcp__github_inline_comment__create_inline_comment 로 인라인 댓글을 남기고,
             전체 요약은 `gh pr comment` 로 한국어 댓글 하나만 남긴다. 문제가 없으면 짧게 그렇다고만 쓴다.
+
+            판정 — 이 판정이 병합 여부를 결정한다:
+            - BLOCK: 병합하면 확실히 문제가 되는 경우에만. 앱 크래시·런타임 오류, 데이터 손실,
+              토큰·개인정보 노출 같은 보안 문제, API 계약과 어긋나 기능이 동작하지 않는 경우.
+            - PASS: 그 외 모두. 개선 제안·스타일·테스트 보강 의견만 있으면 PASS 다.
+            확신이 없으면 PASS 로 하고 의견만 남긴다.
+            요약 댓글의 맨 마지막 줄에 아래 둘 중 하나를 글자 그대로 넣는다(HTML 주석이라 화면에는 안 보인다).
+            <!-- claude-verdict: PASS sha=${{ github.event.pull_request.head.sha }} -->
+            <!-- claude-verdict: BLOCK sha=${{ github.event.pull_request.head.sha }} -->
+            BLOCK 이면 요약 댓글 첫 줄에 "🚫 병합 차단:" 과 함께 이유를 한 줄로 적는다.
           claude_args: >-
             --model claude-opus-5-5
             --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
+
+      - name: Check Claude verdict
+        if: env.HAS_CLAUDE_AUTH == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEW_OUTCOME: ${{ steps.claude.outcome }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ "$REVIEW_OUTCOME" != "success" ]; then
+            echo "::warning::Claude 리뷰 실행이 실패했습니다(한도·인증 오류 등). 병합을 막지 않습니다."
+            exit 0
+          fi
+          # 이 워크플로(github-actions[bot])가 남긴 댓글 중 현재 커밋에 대한 판정만 본다.
+          verdict=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --paginate \
+            --jq '.[] | select(.user.login == "github-actions[bot]") | .body' \
+            | grep -oE "claude-verdict: (PASS|BLOCK) sha=$HEAD_SHA" | tail -n 1 | awk '{print $2}')
+          case "$verdict" in
+            PASS)
+              echo "Claude 리뷰 통과" ;;
+            BLOCK)
+              echo "::error::Claude 리뷰가 병합을 차단했습니다. PR 의 리뷰 댓글을 확인하고 수정 후 다시 푸시하세요."
+              exit 1 ;;
+            *)
+              echo "::warning::Claude 판정을 찾지 못했습니다. 병합을 막지 않습니다." ;;
+          esac

@@ -13,8 +13,6 @@ import type {
 } from "../types/auth";
 import type { Member } from "../types/common";
 
-const delay = (ms = 250) => new Promise((resolve) => setTimeout(resolve, ms));
-
 const sessionManager = createAuthSessionManager({
   adapter: authAdapter,
   tokenStore: secureTokenStore,
@@ -29,19 +27,16 @@ const sessionManager = createAuthSessionManager({
 });
 
 export async function login(input: LoginInput): Promise<AuthSession> {
-  await delay();
   return sessionManager.login(input);
 }
 
 export async function checkMemberAvailability(
   input: MemberDuplicateInput,
 ): Promise<MemberAvailability> {
-  await delay();
   return authAdapter.checkAvailability(input);
 }
 
 export async function signup(input: SignupInput): Promise<AuthSession> {
-  await delay();
   return sessionManager.signup(input);
 }
 

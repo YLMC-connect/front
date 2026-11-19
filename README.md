@@ -5,19 +5,19 @@
 ## 무엇을 만드나
 
 Notion “열린문커넥트” 최신 기획을 기준으로 **MVP + v1 모바일 화면** 을 Expo Dev Client 기반으로 제공합니다.
-현재 범위는 회원가입/로그인 · 홈 · 나눔 · 소모임 · MY · 이미지 선택 · 삶공부 · 중보기도입니다. development에서 인증·나눔·동행은 라이브 API를 쓰고, 사용자 API가 없는 홈·기도·삶공부는 mock입니다.
+현재 범위는 회원가입/로그인 · 홈 · 나눔 · 소모임 · MY · 이미지 선택 · 삶공부 · 중보기도입니다. 모든 화면이 라이브 API(`EXPO_PUBLIC_API_URL`)를 씁니다.
 
 ## 진행 상태
 
 ```
-[✅ Phase 0 기획] → [✅ Phase 1~5 MVP/v1 mock-first] → [🔵 Phase 6 API 연결 준비]
+[✅ Phase 0 기획] → [✅ Phase 1~5 MVP/v1] → [✅ 전 도메인 API 연결]
 ```
 
 자세한 진행 상태와 도메인별 상태표: [docs/INDEX.md](docs/INDEX.md)
 
 ## 실행
 
-저장소를 처음 받은 분은 [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) 를 먼저 보세요. 준비물, Dev Client, 라이브 API / mock 전환, 아직 mock인 화면을 한곳에 모아 두었습니다.
+저장소를 처음 받은 분은 [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) 를 먼저 보세요. 준비물, Dev Client, API 연결, 막힐 때 확인할 것을 한곳에 모아 두었습니다.
 
 ```bash
 npm install
@@ -50,16 +50,10 @@ npm run start:dev-client -- --port 8081 --localhost
 
 Codex 기본 샌드박스에서는 위 명령이 `Starting project...` 이후 8081 포트에 바인딩되지 않을 수 있습니다. 샌드박스 밖 로컬 권한으로는 `npm run test:dev-client:smoke`가 `http://localhost:8081/status` 응답까지 확인했습니다. development build가 설치된 iOS/Android 기기에서는 같은 Metro에 연결해 실제 앱 실행을 확인합니다.
 
-API origin은 로컬 `.env`의 `EXPO_PUBLIC_API_URL`만 사용합니다. 저장소에 실제 주소를 두지 않습니다. HTTP adapter(development 기본)를 켤 때 필수입니다.
+API origin은 로컬 `.env`의 `EXPO_PUBLIC_API_URL`만 사용합니다. 저장소에 실제 주소를 두지 않습니다. 없으면 앱이 시작되지 않습니다.
 
 ```bash
 EXPO_PUBLIC_API_URL=https://example.test npm run start:dev-client
-```
-
-development 빌드의 인증·나눔·동행 adapter 기본값은 실제 HTTP입니다. 단위 테스트와 Maestro mock 계정(`admin`/`admin`)을 쓰려면 덮어씁니다.
-
-```bash
-EXPO_PUBLIC_AUTH_ADAPTER=mock EXPO_PUBLIC_MARKET_ADAPTER=mock EXPO_PUBLIC_GROUP_ADAPTER=mock npm run start:dev-client
 ```
 
 검증 명령:
@@ -83,7 +77,7 @@ npm run test:api:contract:group
 npm run test:api:contract:mypage
 ```
 
-Jest + React Native Testing Library로 공통 UI, 도메인 옵션, 홈/나눔/동행/기도/삶공부 핵심 화면 렌더링을 mock-first 기준으로 확인합니다.
+Jest + React Native Testing Library로 공통 UI, 도메인 옵션, 홈/나눔/동행/기도/삶공부 핵심 화면 렌더링을 확인합니다. 테스트에서는 API 호출을 `jest.setup.ts` 의 테스트 대역으로 바꿉니다.
 
 `test:api:contract`는 OpenAPI 문서의 로그인·토큰 재발급·회원가입·내 정보 성공 DTO, 회원 중복확인 `data.available`, 공개 endpoint/JWT 정의를 확인합니다. 출처는 `YLMC_OPENAPI_URL`, `YLMC_OPENAPI_FILE`, 또는 `EXPO_PUBLIC_API_URL`의 `/v3/api-docs`입니다. 백엔드 계약이 불완전하면 누락 항목을 출력하고 실패하며, 계약 확정 전에는 일반 `validate`와 분리해 실행합니다.
 
@@ -95,7 +89,7 @@ Jest + React Native Testing Library로 공통 UI, 도메인 옵션, 홈/나눔/�
 
 API 오류는 `getApiErrorMessage`가 `ApiError.code`를 도메인 메시지 표로 변환합니다. 문서화되지 않은 API 코드는 서버 `message`를 그대로 노출하지 않고 화면별 안전한 fallback을 사용하며, 현재 Swagger에 정의된 인증 `MEM001~MEM007`은 `authApiErrorMessages`로 관리합니다. `MEM007`은 비밀번호 8자·영문+숫자 조합 위반입니다.
 
-인증 세션은 `authSessionService`가 SecureStore 토큰 저장·앱 시작 복원·동시 401 단일 재발급·재발급 실패 로그아웃을 관리합니다. Swagger 성공 DTO가 확정되기 전에는 mock adapter를 사용하며, HTTP adapter만 교체해 같은 세션 흐름을 유지합니다.
+인증 세션은 `authSessionService`가 SecureStore 토큰 저장·앱 시작 복원·동시 401 단일 재발급·재발급 실패 로그아웃을 관리합니다.
 
 Dev Client Metro smoke:
 

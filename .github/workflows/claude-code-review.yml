@@ -60,12 +60,14 @@ jobs:
             - 디자인 시스템 준수 (아래)
 
             디자인 시스템 — 기준은 docs/adr/0007-design-system-v2.md, docs/features/common.md:
-            - 공통 컴포넌트는 모두 src/components/ui 에 있다(index.tsx 에서 export).
-              화면·도메인 컴포넌트가 같은 역할의 UI 를 React Native 기본 요소로 새로 만들면 지적하고 대신 쓸 컴포넌트를 알려준다.
+            - 공통 컴포넌트는 src/components/ui 에 있다(대부분 index.tsx 에서 export, AppIcon 은 app-icon.tsx).
+              화면·도메인 컴포넌트가 같은 역할의 UI 를 React Native 기본 요소로 새로 만들면 지적하고,
+              대신 쓸 컴포넌트를 알려준다. 추천은 지금 화면들이 실제로 쓰는 것으로 한다(import 를 grep 해 확인).
               예: Text → AppText, 직접 만든 버튼(Pressable/TouchableOpacity) → Button·MotionPressable,
-              TextInput → TextField·Textarea, Modal → BottomSheet·ConfirmDialog·RadioSheet,
-              ActivityIndicator → Spinner, 카드 → Card, 배지 → Badge, 칩 → Chip·FilterChips,
-              빈 화면·오류 → Empty·ErrorState, 체크박스·라디오 → Checkbox·Radio, 아이콘 → AppIcon, 하단 고정 버튼 → FloatingBottomBar.
+              입력창 → ModalFormTextInput, Modal → ConfirmDialog·RadioSheet,
+              ActivityIndicator → RefreshIndicator·LoadMoreFooter, 카드 → Card, 배지 → Badge,
+              칩 → FilterChips, 빈 화면·오류 → Empty·ErrorState, 체크박스·라디오 → Checkbox·Radio,
+              상단 바 → TopBar, 아이콘 → AppIcon, 하단 고정 버튼 → FloatingBottomBar.
             - 색·글자 크기·간격·모서리·그림자를 직접 값(#hex, rgba, 숫자 fontSize 등)으로 쓰지 않고
               src/constants/theme.ts 의 토큰을 쓰는지 본다.
             - 디자인 시스템에 없는 새 공통 UI 를 화면 안에 만들면 지적한다(디자인 시스템에 먼저 추가하는 것이 규칙).

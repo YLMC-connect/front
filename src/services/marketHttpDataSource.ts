@@ -62,26 +62,6 @@ export function createHttpMarketDataSource({
   };
 
   return {
-    async getOverview() {
-      const items = [];
-      let lastId: number | undefined;
-      for (let page = 0; page < 5; page += 1) {
-        const query = new URLSearchParams({ size: "50" });
-        if (lastId != null) query.set("lastId", String(lastId));
-        const data = await client.request<ShareListResponseDto>(
-          `/api/share?${query.toString()}`,
-        );
-        const content = data?.content ?? [];
-        for (const item of content) {
-          const mapped = mapShareOverviewItem(item, currentUserId());
-          if (mapped) items.push(mapped);
-        }
-        if (!data?.hasNext || data.nextCursor == null) break;
-        lastId = data.nextCursor;
-      }
-      return { items };
-    },
-
     async getOverviewPage({
       lastId,
       size = 20,

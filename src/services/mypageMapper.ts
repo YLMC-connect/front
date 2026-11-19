@@ -1,7 +1,15 @@
 import {
-  invalidResponse as invalid,
-  keepValidItems,
-} from "../lib/reportResponseIssue";
+  isRecord,
+  optionalInteger,
+  optionalOneOf,
+  optionalString,
+  readArrayField,
+  requireBoolean,
+  requireInteger,
+  requireOneOf,
+  requireString,
+} from "../lib/parse";
+import { invalidResponse as invalid } from "../lib/reportResponseIssue";
 import type {
   MyPageActivityComment,
   MyPageActivityGroup,
@@ -74,95 +82,6 @@ const COMPLETED_KEYS = [
 export const MY_PAGE_POST_SORT = "id,desc";
 export const MY_PAGE_COMMENT_SORT = "id,desc";
 export const MY_PAGE_GROUP_SORT = "joinedAt,desc";
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function readInteger(value: unknown) {
-  return typeof value === "number" && Number.isInteger(value) ? value : null;
-}
-
-function requireKey(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  if (!(key in data)) invalid(source, key);
-}
-
-function requireInteger(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  requireKey(data, key, source);
-  const value = readInteger(data[key]);
-  if (value == null) invalid(source, key);
-  return value;
-}
-
-function requireString(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  requireKey(data, key, source);
-  if (typeof data[key] !== "string") invalid(source, key);
-  return data[key];
-}
-
-function requireBoolean(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  requireKey(data, key, source);
-  if (typeof data[key] !== "boolean") invalid(source, key);
-  return data[key];
-}
-
-function requireOneOf<T extends string>(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-  allowed: readonly T[],
-): T {
-  const value = requireString(data, key, source);
-  if (!allowed.includes(value as T)) invalid(source, key);
-  return value as T;
-}
-
-/** 화면에서 쓰지 않는 필드. 없거나 형식이 다르면 null. */
-function optionalInteger(data: Record<string, unknown>, key: string) {
-  return readInteger(data[key]);
-}
-
-function optionalString(data: Record<string, unknown>, key: string) {
-  return typeof data[key] === "string" ? data[key] : null;
-}
-
-function optionalOneOf<T extends string>(
-  data: Record<string, unknown>,
-  key: string,
-  allowed: readonly T[],
-): T | null {
-  return allowed.includes(data[key] as T) ? (data[key] as T) : null;
-}
-
-/** 배열이 아니면 응답 오류. 형식이 틀린 항목만 빼고 돌려준다. */
-function readArrayField<T>(
-  data: Record<string, unknown>,
-  key: string,
-  source: string,
-  readItem: (item: unknown, source: unknown) => T,
-): T[] {
-  const items = data[key];
-  if (!Array.isArray(items)) invalid(data, key);
-  return keepValidItems(items, `${source}.${key}`, (item) =>
-    readItem(item, data),
-  );
-}
 
 export function formatMyPageActivityDate(value: string) {
   const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);

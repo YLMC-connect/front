@@ -1,6 +1,6 @@
 import { apiClient, type ApiRequestOptions } from "../lib/apiClient";
 import type { LifeStudyStatus } from "../types/lifeStudy";
-import type { LifeStudyDataSource } from "./lifeStudyService";
+import type { LifeStudyAttendRequest } from "../types/lifeStudyApi";
 import {
   buildLifeStudyCourses,
   buildLifeStudyHistories,
@@ -17,7 +17,7 @@ export function createHttpLifeStudyDataSource({
   client = apiClient,
 }: {
   client?: LifeStudyApiClient;
-} = {}): LifeStudyDataSource {
+} = {}) {
   return {
     async getOverview() {
       const [studiesRes, cohortsRes, completionsRes] = await Promise.allSettled(
@@ -63,19 +63,22 @@ export function createHttpLifeStudyDataSource({
       return buildLifeStudyHistories(data);
     },
 
-    async getCohortDetail(cohortId) {
+    async getCohortDetail(cohortId: string | number) {
       const data = await client.request<unknown>(
         `/api/life-study/cohorts/${cohortId}`,
       );
       return tryReadLifeStudyCohortDetail(data);
     },
 
-    async getCourseLessons(courseId) {
+    async getCourseLessons(courseId: string | number) {
       const data = await client.request<unknown>(`/api/life-study/${courseId}`);
       return tryReadLifeStudyCourseLessons(data);
     },
 
-    async applyCohort(cohortId, input) {
+    async applyCohort(
+      cohortId: string | number,
+      input: LifeStudyAttendRequest,
+    ) {
       const data = await client.request<number>(
         `/api/life-study/cohorts/${cohortId}/attend`,
         {

@@ -20,13 +20,12 @@ export interface MarketOverviewPage {
 }
 
 export interface MarketDataSource {
-  getOverview(): Promise<MarketOverview>;
-  getOverviewPage?(params?: {
+  getOverviewPage(params?: {
     lastId?: number | null;
     size?: number;
     category?: Exclude<MarketCategory, "all">;
   }): Promise<MarketOverviewPage>;
-  getMyOverviewPage?(params?: {
+  getMyOverviewPage(params?: {
     lastId?: number | null;
     size?: number;
     category?: Exclude<MarketCategory, "all">;
@@ -43,35 +42,16 @@ export interface MarketDataSource {
 
 export function createMarketService(dataSource: MarketDataSource) {
   return {
-    fetchOverview: () => dataSource.getOverview(),
     fetchOverviewPage: (params?: {
       lastId?: number | null;
       size?: number;
       category?: Exclude<MarketCategory, "all">;
-    }) => {
-      if (dataSource.getOverviewPage) {
-        return dataSource.getOverviewPage(params);
-      }
-      return dataSource.getOverview().then((res) => ({
-        items: res.items,
-        hasNext: false,
-        nextCursor: null,
-      }));
-    },
+    }) => dataSource.getOverviewPage(params),
     fetchMyOverviewPage: (params?: {
       lastId?: number | null;
       size?: number;
       category?: Exclude<MarketCategory, "all">;
-    }) => {
-      if (dataSource.getMyOverviewPage) {
-        return dataSource.getMyOverviewPage(params);
-      }
-      return dataSource.getOverview().then((res) => ({
-        items: res.items.filter((item) => item.isMine),
-        hasNext: false,
-        nextCursor: null,
-      }));
-    },
+    }) => dataSource.getMyOverviewPage(params),
     fetchDetail: (id: string) => dataSource.getDetail(id),
     createPost: (input: MarketInput) => {
       const normalized = {
@@ -137,7 +117,6 @@ export function createMarketService(dataSource: MarketDataSource) {
 
 const marketService = createMarketService(httpMarketDataSource);
 
-export const fetchMarketOverview = marketService.fetchOverview;
 export const fetchMarketOverviewPage = marketService.fetchOverviewPage;
 export const fetchMyMarketOverviewPage = marketService.fetchMyOverviewPage;
 export const fetchMarketDetail = marketService.fetchDetail;

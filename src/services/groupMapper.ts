@@ -1,4 +1,5 @@
-import { ApiError } from "../lib/apiClient";
+import { isRecord, readId, readString } from "../lib/parse";
+import { invalidResponse as invalid } from "../lib/reportResponseIssue";
 import type {
   GroupCategory,
   GroupDetail,
@@ -47,28 +48,6 @@ const CATEGORY_LABEL = {
   carpool: "카풀",
   etc: "기타",
 } as const;
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function invalid(data: unknown): never {
-  throw new ApiError({
-    code: "INVALID_RESPONSE",
-    message: "서버 응답 형식을 확인할 수 없습니다.",
-    status: 200,
-    data,
-  });
-}
-
-function readString(value: unknown) {
-  return typeof value === "string" && value.trim() ? value.trim() : null;
-}
-
-function readId(value: unknown) {
-  if (typeof value === "number" && Number.isFinite(value)) return String(value);
-  return readString(value);
-}
 
 function readCount(value: unknown) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;

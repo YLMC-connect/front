@@ -17,13 +17,14 @@ import {
   type ShareCardState,
 } from "../../../src/components/ui/share-card";
 import { theme } from "../../../src/constants/theme";
-import { MARKET_CATEGORIES } from "../../../src/constants/domainOptions";
 import {
+  useMarketCategories,
   useMarketOverview,
   useMyMarketOverview,
 } from "../../../src/hooks/useMarket";
 import type {
-  MarketCategory,
+  MarketCategoryCode,
+  MarketCategoryOption,
   MarketOverviewItem,
 } from "../../../src/types/market";
 import { useMotionRouteParam } from "../../../src/hooks/useMotionRouteParam";
@@ -53,9 +54,16 @@ export default function MarketScreen() {
     params.status === "mine"
       ? params.status
       : "sharing";
-  const routeCategory =
-    MARKET_CATEGORIES.find((item) => item.key === params.category)?.key ??
-    "all";
+  const categories = useMarketCategories();
+  // 필터 칩은 "전체" + 서버 카테고리 목록(노출 순서)
+  const categoryChips = [
+    { key: "all", label: "전체" },
+    ...(categories.data ?? []).map((item) => ({
+      key: item.code,
+      label: item.name,
+    })),
+  ];
+  const routeCategory = params.category || "all";
   const [activeStatus, setActiveStatus] = useMotionRouteParam<MarketSegment>(
     routeStatus,
     (status) => {
@@ -71,9 +79,7 @@ export default function MarketScreen() {
     },
   );
   const categoryFilter =
-    category === "all"
-      ? undefined
-      : (category as Exclude<MarketCategory, "all">);
+    category === "all" ? undefined : (category as MarketCategoryCode);
   const overview = useMarketOverview(categoryFilter);
   const mine = useMyMarketOverview(categoryFilter, activeStatus === "mine");
   const list = activeStatus === "mine" ? mine : overview;
@@ -127,7 +133,7 @@ export default function MarketScreen() {
           />
 
           <FilterChips
-            items={MARKET_CATEGORIES}
+            items={categoryChips}
             active={category}
             onChange={setCategory}
             style={[styles.categoryScroll, { height: scaleForFont(44) }]}
@@ -172,7 +178,7 @@ export default function MarketScreen() {
                 key={post.id}
                 title={post.title}
                 state={shareStateOf(post.status)}
-                category={categoryOf(post.category)}
+                category={categoryNameOf(categories.data, post.category)}
                 meta={`${post.authorName} · ${post.createdLabel}`}
                 photo={post.thumbnailUrl}
                 thumbSeed={post.thumbSeed}
@@ -211,10 +217,12 @@ function shareStateOf(status: MarketOverviewItem["status"]): ShareCardState {
   return "open";
 }
 
-function categoryOf(key: string) {
-  return (
-    MARKET_CATEGORIES.find((category) => category.key === key)?.label ?? "기타"
-  );
+/** 서버 목록에 없는 코드(비활성 등)는 이름을 비워 배지를 숨긴다. */
+function categoryNameOf(
+  categories: readonly MarketCategoryOption[] | undefined,
+  code: string,
+) {
+  return categories?.find((category) => category.code === code)?.name;
 }
 
 function MarketEmptyState({

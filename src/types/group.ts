@@ -19,6 +19,12 @@ export interface GroupInput {
   description: string;
   category: Exclude<GroupCategory, "all">;
   maxMembers: number;
+  /** 모임 일정. 선택(빈 글자 가능). */
+  schedule: string;
+  /** 모임 장소. 선택(빈 글자 가능). */
+  location: string;
+  /** 켜면 소모임장이 가입 신청을 승인해야 참여된다. */
+  requiresApproval: boolean;
   coverImage?: string;
   /** 개설 종류. 없으면 소모임. */
   kind?: "group" | "service";
@@ -30,6 +36,9 @@ export interface GroupUpdateInput {
   description: string;
   category: Exclude<GroupCategory, "all">;
   maxMembers: number;
+  schedule: string;
+  location: string;
+  requiresApproval: boolean;
 }
 
 export interface GroupStatusUpdateInput {
@@ -105,15 +114,25 @@ export interface GroupDetail {
   name: string;
   description: string;
   categoryLabel: string;
+  /** 없으면 빈 글자. */
+  schedule: string;
+  /** 없으면 빈 글자. */
+  location: string;
+  requiresApproval: boolean;
   currentMembers: number;
   maxMembers: number;
   status: GroupStatus;
   leaderName: string;
   isLeader: boolean;
   isJoined: boolean;
+  /** 참여가 확정된 멤버 이름. */
   members: string[];
+  /** 가입 승인 대기 멤버. 서버가 소모임장에게만 준다. */
+  pendingMembers: GroupMemberDetail[];
   notices: GroupDetailNotice[];
 }
+
+export type GroupMemberStatus = "approved" | "pending" | "rejected";
 
 export interface GroupMemberDetail {
   userId: string;
@@ -121,4 +140,12 @@ export interface GroupMemberDetail {
   joinedLabel: string;
   isLeader: boolean;
   isMine: boolean;
+  /** 서버 값이 없으면 approved(예전 응답). */
+  status: GroupMemberStatus;
+}
+
+export interface GroupMemberStatusInput {
+  groupId: string;
+  targetUserId: string;
+  status: Exclude<GroupMemberStatus, "pending">;
 }

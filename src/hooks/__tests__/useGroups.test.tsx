@@ -61,6 +61,10 @@ function detail(overrides: Partial<GroupDetail> = {}): GroupDetail {
     name: "성경 읽기",
     description: "설명",
     categoryLabel: "성경",
+    schedule: "",
+    location: "",
+    requiresApproval: false,
+    pendingMembers: [],
     currentMembers: 3,
     maxMembers: 10,
     status: "open",
@@ -88,6 +92,9 @@ describe("useCreateGroup", () => {
     description: "설명",
     category: "bible",
     maxMembers: 10,
+    schedule: "",
+    location: "",
+    requiresApproval: false,
   };
 
   it("성공하면 상세 캐시를 채우고 목록을 무효화한다", async () => {
@@ -173,6 +180,9 @@ describe("useUpdateGroup", () => {
       description: "설명",
       category: "bible" as const,
       maxMembers: 12,
+      schedule: "",
+      location: "",
+      requiresApproval: false,
     };
 
     await act(() => result.current.mutateAsync(input));

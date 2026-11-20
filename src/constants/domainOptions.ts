@@ -1,14 +1,3 @@
-export const MARKET_CATEGORIES = [
-  { key: "all", label: "전체" },
-  { key: "cloth", label: "의류·잡화" },
-  { key: "home", label: "가전·가구" },
-  { key: "book", label: "도서·문구" },
-  { key: "food", label: "식품·생필품" },
-  { key: "baby", label: "유아·아동용품" },
-  { key: "sport", label: "스포츠·취미" },
-  { key: "etc", label: "기타" },
-] as const;
-
 export const MARKET_STATUS_TABS = [
   { key: "all", label: "전체" },
   { key: "sharing", label: "나눔중" },

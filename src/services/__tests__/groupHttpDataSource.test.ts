@@ -141,7 +141,7 @@ describe("httpGroupDataSource", () => {
     ]);
   });
 
-  it("creates a small group without sending schedule or location", async () => {
+  it("creates a small group with schedule, location, and approval (#301 #317)", async () => {
     const { request, dataSource } = setup();
     request.mockImplementation(async (path: string, options) => {
       if (path === "/api/communion" && options?.method === "POST") {
@@ -151,6 +151,9 @@ describe("httpGroupDataSource", () => {
           content: "라이브 계약 확인용 소모임입니다.",
           categoryCode: "HOBBY_CULTURE",
           maxParticipants: 5,
+          schedule: "매주 토요일 오후 2시",
+          location: "비전센터 3층 카페",
+          requiresApproval: true,
         });
         return 1;
       }
@@ -187,6 +190,9 @@ describe("httpGroupDataSource", () => {
         description: "라이브 계약 확인용 소모임입니다.",
         category: "hobby",
         maxMembers: 5,
+        schedule: "매주 토요일 오후 2시",
+        location: "비전센터 3층 카페",
+        requiresApproval: true,
       }),
     ).resolves.toMatchObject({
       id: "1",
@@ -222,6 +228,9 @@ describe("httpGroupDataSource", () => {
       description: "주일 주차 안내 봉사입니다.",
       category: "etc",
       maxMembers: 5,
+      schedule: "",
+      location: "",
+      requiresApproval: false,
       kind: "service",
     });
 
@@ -338,6 +347,9 @@ describe("httpGroupDataSource", () => {
         description: "주일 카풀 모임입니다.",
         category: "carpool",
         maxMembers: 4,
+        schedule: "",
+        location: "",
+        requiresApproval: false,
       }),
     ).rejects.toThrow("이 카테고리는 아직 서버에 없습니다.");
   });
@@ -351,6 +363,10 @@ describe("httpGroupDataSource", () => {
           content: "수정된 설명입니다.",
           categoryCode: "HOBBY_CULTURE",
           maxParticipants: 10,
+          // 수정은 비운 일정도 빈 글자로 보내 지운다
+          schedule: "",
+          location: "교회 로비",
+          requiresApproval: false,
         });
         return null;
       }
@@ -381,6 +397,9 @@ describe("httpGroupDataSource", () => {
       description: "수정된 설명입니다.",
       category: "hobby",
       maxMembers: 10,
+      schedule: "",
+      location: "교회 로비",
+      requiresApproval: false,
     });
     expect(updated).toMatchObject({
       id: "1",
@@ -410,6 +429,33 @@ describe("httpGroupDataSource", () => {
     expect(request).toHaveBeenCalledWith("/api/communion/1/kick/user-2", {
       method: "DELETE",
     });
+  });
+
+  it("approves or rejects a join request with PUT .../members/{userId}/status", async () => {
+    const { request, dataSource } = setup();
+    request.mockResolvedValue(null);
+
+    await dataSource.updateMemberStatus({
+      groupId: "3",
+      targetUserId: "applicant",
+      status: "approved",
+    });
+    await dataSource.updateMemberStatus({
+      groupId: "3",
+      targetUserId: "applicant",
+      status: "rejected",
+    });
+
+    expect(request).toHaveBeenNthCalledWith(
+      1,
+      "/api/communion/3/members/applicant/status",
+      { method: "PUT", body: JSON.stringify({ status: "APPROVED" }) },
+    );
+    expect(request).toHaveBeenNthCalledWith(
+      2,
+      "/api/communion/3/members/applicant/status",
+      { method: "PUT", body: JSON.stringify({ status: "REJECTED" }) },
+    );
   });
 
   it("transfers the leader with PUT /api/communion/{id}/leader", async () => {

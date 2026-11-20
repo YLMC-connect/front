@@ -1,6 +1,7 @@
 import { httpMarketDataSource } from "./marketHttpDataSource";
 import type {
-  MarketCategory,
+  MarketCategoryCode,
+  MarketCategoryOption,
   MarketCommentInput,
   MarketCommentTarget,
   MarketCommentUpdateInput,
@@ -20,15 +21,16 @@ export interface MarketOverviewPage {
 }
 
 export interface MarketDataSource {
+  getCategories(): Promise<MarketCategoryOption[]>;
   getOverviewPage(params?: {
     lastId?: number | null;
     size?: number;
-    category?: Exclude<MarketCategory, "all">;
+    category?: MarketCategoryCode;
   }): Promise<MarketOverviewPage>;
   getMyOverviewPage(params?: {
     lastId?: number | null;
     size?: number;
-    category?: Exclude<MarketCategory, "all">;
+    category?: MarketCategoryCode;
   }): Promise<MarketOverviewPage>;
   getDetail(id: string): Promise<MarketDetail>;
   createPost(input: MarketInput): Promise<MarketDetail>;
@@ -42,15 +44,16 @@ export interface MarketDataSource {
 
 export function createMarketService(dataSource: MarketDataSource) {
   return {
+    fetchCategories: () => dataSource.getCategories(),
     fetchOverviewPage: (params?: {
       lastId?: number | null;
       size?: number;
-      category?: Exclude<MarketCategory, "all">;
+      category?: MarketCategoryCode;
     }) => dataSource.getOverviewPage(params),
     fetchMyOverviewPage: (params?: {
       lastId?: number | null;
       size?: number;
-      category?: Exclude<MarketCategory, "all">;
+      category?: MarketCategoryCode;
     }) => dataSource.getMyOverviewPage(params),
     fetchDetail: (id: string) => dataSource.getDetail(id),
     createPost: (input: MarketInput) => {
@@ -69,6 +72,7 @@ export function createMarketService(dataSource: MarketDataSource) {
       ) {
         throw new Error("상세 설명은 5~500자로 입력해주세요.");
       }
+      if (!normalized.category) throw new Error("카테고리를 골라주세요.");
       if (!normalized.location) throw new Error("수령 장소를 입력해주세요.");
       if (normalized.images.length < 1) {
         throw new Error("사진을 1장 이상 추가해주세요.");
@@ -91,6 +95,7 @@ export function createMarketService(dataSource: MarketDataSource) {
       ) {
         throw new Error("상세 설명은 5~500자로 입력해주세요.");
       }
+      if (!normalized.category) throw new Error("카테고리를 골라주세요.");
       if (!normalized.location) throw new Error("수령 장소를 입력해주세요.");
       if (normalized.images.length < 1) {
         throw new Error("사진을 1장 이상 추가해주세요.");
@@ -117,6 +122,7 @@ export function createMarketService(dataSource: MarketDataSource) {
 
 const marketService = createMarketService(httpMarketDataSource);
 
+export const fetchMarketCategories = marketService.fetchCategories;
 export const fetchMarketOverviewPage = marketService.fetchOverviewPage;
 export const fetchMyMarketOverviewPage = marketService.fetchMyOverviewPage;
 export const fetchMarketDetail = marketService.fetchDetail;

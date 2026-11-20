@@ -45,6 +45,10 @@ async function fetchCommunionPages(client: GroupApiClient, path: string) {
   return items;
 }
 
+function optionalText(key: "schedule" | "location", value: string) {
+  return value ? { [key]: value } : {};
+}
+
 export function createHttpGroupDataSource({
   client = apiClient,
   getCurrentUserId = defaultCurrentUserId,
@@ -163,6 +167,10 @@ export function createHttpGroupDataSource({
           content: input.description,
           categoryCode,
           maxParticipants: input.maxMembers,
+          // 일정·장소는 선택이라 비어 있으면 보내지 않는다
+          ...optionalText("schedule", input.schedule),
+          ...optionalText("location", input.location),
+          requiresApproval: input.requiresApproval,
         }),
       });
       if (createdId == null) {
@@ -183,6 +191,10 @@ export function createHttpGroupDataSource({
           content: input.description,
           categoryCode,
           maxParticipants: input.maxMembers,
+          // 수정은 지운 값도 반영해야 해서 빈 글자 그대로 보낸다
+          schedule: input.schedule,
+          location: input.location,
+          requiresApproval: input.requiresApproval,
         }),
       });
       return getDetail(input.groupId);
@@ -192,6 +204,18 @@ export function createHttpGroupDataSource({
       await client.request(`/api/communion/${id}`, {
         method: "DELETE",
       });
+    },
+
+    async updateMemberStatus(input) {
+      await client.request(
+        `/api/communion/${input.groupId}/members/${input.targetUserId}/status`,
+        {
+          method: "PUT",
+          body: JSON.stringify({
+            status: input.status === "approved" ? "APPROVED" : "REJECTED",
+          }),
+        },
+      );
     },
 
     async kickMember(input) {

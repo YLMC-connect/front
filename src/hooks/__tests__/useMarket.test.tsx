@@ -54,7 +54,7 @@ function detail(overrides: Partial<MarketDetail> = {}): MarketDetail {
     thumbSeed: 1,
     title: "책 나눔",
     content: "내용",
-    categoryLabel: "도서",
+    categoryCode: "BOOK_STATIONERY",
     conditionLabel: "좋음",
     status: "sharing",
     authorName: "작성자",

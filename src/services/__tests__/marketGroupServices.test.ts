@@ -7,6 +7,7 @@ function marketDataSource(
   overrides: Partial<MarketDataSource> = {},
 ): MarketDataSource {
   return {
+    getCategories: notUsed(),
     getOverviewPage: notUsed(),
     getMyOverviewPage: notUsed(),
     getDetail: notUsed(),
@@ -32,6 +33,7 @@ function groupDataSource(
     updateGroup: notUsed(),
     deleteGroup: notUsed(),
     kickMember: notUsed(),
+    updateMemberStatus: notUsed(),
     transferLeader: notUsed(),
     updateGroupStatus: notUsed(),
     joinGroup: notUsed(),

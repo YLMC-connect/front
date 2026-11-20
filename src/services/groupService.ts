@@ -10,6 +10,7 @@ import type {
   GroupUpdateInput,
   GroupStatusUpdateInput,
   GroupKickMemberInput,
+  GroupMemberStatusInput,
   GroupTransferLeaderInput,
 } from "../types/group";
 
@@ -33,6 +34,7 @@ export interface GroupDataSource {
   updateGroup(input: GroupUpdateInput): Promise<GroupDetail>;
   deleteGroup(id: string): Promise<void>;
   kickMember(input: GroupKickMemberInput): Promise<void>;
+  updateMemberStatus(input: GroupMemberStatusInput): Promise<void>;
   transferLeader(input: GroupTransferLeaderInput): Promise<void>;
   updateGroupStatus(input: GroupStatusUpdateInput): Promise<GroupDetail>;
   joinGroup(id: string): Promise<GroupDetail>;
@@ -67,6 +69,8 @@ export function createGroupService(dataSource: GroupDataSource) {
         ...input,
         name: input.name.trim(),
         description: input.description.trim(),
+        schedule: input.schedule.trim(),
+        location: input.location.trim(),
       };
       if (normalized.name.length < 2 || normalized.name.length > 20) {
         throw new Error("소모임명은 2~20자로 입력해주세요.");
@@ -87,6 +91,8 @@ export function createGroupService(dataSource: GroupDataSource) {
         ...input,
         name: input.name.trim(),
         description: input.description.trim(),
+        schedule: input.schedule.trim(),
+        location: input.location.trim(),
       };
       if (normalized.name.length < 2 || normalized.name.length > 20) {
         throw new Error("소모임명은 2~20자로 입력해주세요.");
@@ -104,6 +110,8 @@ export function createGroupService(dataSource: GroupDataSource) {
     },
     deleteGroup: (id: string) => dataSource.deleteGroup(id),
     kickMember: (input: GroupKickMemberInput) => dataSource.kickMember(input),
+    updateMemberStatus: (input: GroupMemberStatusInput) =>
+      dataSource.updateMemberStatus(input),
     transferLeader: (input: GroupTransferLeaderInput) =>
       dataSource.transferLeader(input),
     updateGroupStatus: (input: GroupStatusUpdateInput) =>
@@ -150,6 +158,7 @@ export const createGroup = groupService.createGroup;
 export const updateGroup = groupService.updateGroup;
 export const deleteGroup = groupService.deleteGroup;
 export const kickGroupMember = groupService.kickMember;
+export const updateGroupMemberStatus = groupService.updateMemberStatus;
 export const transferGroupLeader = groupService.transferLeader;
 export const updateGroupStatus = groupService.updateGroupStatus;
 export const joinGroup = groupService.joinGroup;

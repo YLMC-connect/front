@@ -95,7 +95,7 @@ describe("v1 tab smoke screens", () => {
         authorName: "김은혜",
         createdLabel: "10분 전",
         status: "sharing",
-        category: "baby",
+        category: "BABY_KIDS",
         isMine: true,
       },
       {
@@ -105,7 +105,7 @@ describe("v1 tab smoke screens", () => {
         authorName: "이요셉",
         createdLabel: "1시간 전",
         status: "sharing",
-        category: "home",
+        category: "APPLIANCE_FURNITURE",
         isMine: false,
       },
       {
@@ -115,7 +115,7 @@ describe("v1 tab smoke screens", () => {
         authorName: "박한나",
         createdLabel: "2시간 전",
         status: "sharing",
-        category: "book",
+        category: "BOOK_STATIONERY",
         isMine: false,
       },
       {
@@ -125,7 +125,7 @@ describe("v1 tab smoke screens", () => {
         authorName: "최성도",
         createdLabel: "어제",
         status: "reserved",
-        category: "baby",
+        category: "BABY_KIDS",
         isMine: false,
       },
     ];
@@ -134,7 +134,7 @@ describe("v1 tab smoke screens", () => {
       thumbSeed: 0,
       title: "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
       content: "아이가 커서 정리합니다.",
-      categoryLabel: "육아·아동",
+      categoryCode: "BABY_KIDS",
       conditionLabel: "상태 좋음",
       status: "sharing",
       authorName: "김은혜",
@@ -179,6 +179,13 @@ describe("v1 tab smoke screens", () => {
       ],
     };
 
+    jest.spyOn(marketService, "fetchMarketCategories").mockResolvedValue([
+      { code: "CLOTHING_ACC", name: "의류·잡화" },
+      { code: "APPLIANCE_FURNITURE", name: "가전·가구" },
+      { code: "BOOK_STATIONERY", name: "도서·문구" },
+      { code: "BABY_KIDS", name: "유아·아동용품" },
+      { code: "OTHER", name: "기타" },
+    ]);
     jest.spyOn(marketService, "fetchMarketOverviewPage").mockResolvedValue({
       items: marketItems,
       hasNext: false,
@@ -329,6 +336,10 @@ describe("v1 tab smoke screens", () => {
       name: "토요 산악회",
       description: "함께 산을 오르며 교제해요",
       categoryLabel: "취미·문화",
+      schedule: "",
+      location: "",
+      requiresApproval: false,
+      pendingMembers: [],
       currentMembers: 6,
       maxMembers: 12,
       status: "open",
@@ -375,6 +386,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.01",
         isLeader: true,
         isMine: true,
+        status: "approved" as const,
       },
       {
         userId: "member-002",
@@ -382,6 +394,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.02",
         isLeader: false,
         isMine: false,
+        status: "approved" as const,
       },
       {
         userId: "member-003",
@@ -389,6 +402,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.02",
         isLeader: false,
         isMine: false,
+        status: "approved" as const,
       },
       {
         userId: "member-004",
@@ -396,6 +410,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.03",
         isLeader: false,
         isMine: false,
+        status: "approved" as const,
       },
       {
         userId: "member-005",
@@ -403,6 +418,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.03",
         isLeader: false,
         isMine: false,
+        status: "approved" as const,
       },
       {
         userId: "member-006",
@@ -410,6 +426,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.03",
         isLeader: false,
         isMine: false,
+        status: "approved" as const,
       },
       {
         userId: "member-007",
@@ -417,6 +434,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.04",
         isLeader: false,
         isMine: false,
+        status: "approved" as const,
       },
       {
         userId: "member-008",
@@ -424,6 +442,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.04",
         isLeader: false,
         isMine: false,
+        status: "approved" as const,
       },
     ]);
     jest
@@ -688,9 +707,9 @@ describe("v1 tab smoke screens", () => {
     );
 
     // 카드 맨 위 카테고리 줄에도 같은 이름이 있어 필터 칩은 testID 로 고른다.
-    fireEvent.press(screen.getByTestId("market-category-book"));
+    fireEvent.press(screen.getByTestId("market-category-BOOK_STATIONERY"));
     await waitFor(() =>
-      expect(setParams).toHaveBeenCalledWith({ category: "book" }),
+      expect(setParams).toHaveBeenCalledWith({ category: "BOOK_STATIONERY" }),
     );
     expect(screen.getByText("어린이 동화책 30권 묶음 나눔")).toBeTruthy();
     expect(
@@ -717,14 +736,17 @@ describe("v1 tab smoke screens", () => {
   });
 
   it("restores a market category from the list route", async () => {
-    jest.mocked(useLocalSearchParams).mockReturnValue({ category: "book" });
+    jest.mocked(useLocalSearchParams).mockReturnValue({
+      category: "BOOK_STATIONERY",
+    });
     renderWithClient(<MarketScreen />);
 
     expect(
       await screen.findByText("어린이 동화책 30권 묶음 나눔"),
     ).toBeTruthy();
     expect(
-      screen.getByTestId("market-category-book").props.accessibilityState,
+      screen.getByTestId("market-category-BOOK_STATIONERY").props
+        .accessibilityState,
     ).toEqual({ selected: true });
     expect(
       screen.queryByText("아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)"),
@@ -741,7 +763,7 @@ describe("v1 tab smoke screens", () => {
       authorName: "김은혜",
       createdLabel: "방금 전",
       status,
-      category: "book" as const,
+      category: "BOOK_STATIONERY",
       isMine: false,
     });
     const fetchPage = jest
@@ -1190,6 +1212,84 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("공지사항")).toBeTruthy();
   });
 
+  it("shows schedule and location and sends a join request for approval groups", async () => {
+    const approvalGroup: GroupDetail = {
+      id: "1",
+      name: "토요 산악회",
+      description: "함께 산을 오르며 교제해요",
+      categoryLabel: "취미·문화",
+      schedule: "매주 토요일 오전 8시",
+      location: "교회 1층 로비",
+      requiresApproval: true,
+      pendingMembers: [],
+      currentMembers: 6,
+      maxMembers: 12,
+      status: "open",
+      leaderName: "김은혜",
+      isLeader: false,
+      isJoined: false,
+      members: ["김은혜"],
+      notices: [],
+    };
+    jest
+      .spyOn(groupService, "fetchGroupDetail")
+      .mockResolvedValue(approvalGroup);
+    const join = jest
+      .spyOn(groupService, "joinGroup")
+      .mockResolvedValue(approvalGroup);
+    const alert = jest.spyOn(Alert, "alert").mockImplementation(() => {});
+    renderWithClient(<GroupDetailScreen />);
+
+    expect(await screen.findByText("매주 토요일 오전 8시")).toBeTruthy();
+    expect(screen.getByText("교회 1층 로비")).toBeTruthy();
+    fireEvent.press(screen.getByText("가입 신청하기"));
+
+    await waitFor(() => expect(join).toHaveBeenCalledWith("1"));
+    expect(await screen.findByText("승인 대기 중")).toBeTruthy();
+    expect(alert).toHaveBeenCalledWith(
+      "가입 신청 완료",
+      "신청했어요. 소모임장이 승인하면 참여돼요.",
+    );
+  });
+
+  it("lets the leader approve a pending join request from the members screen", async () => {
+    jest.spyOn(groupService, "fetchGroupMembers").mockResolvedValueOnce([
+      {
+        userId: "leader",
+        userName: "김은혜",
+        joinedLabel: "2026.01",
+        isLeader: true,
+        isMine: true,
+        status: "approved" as const,
+      },
+      {
+        userId: "applicant",
+        userName: "박한나",
+        joinedLabel: "방금 전",
+        isLeader: false,
+        isMine: false,
+        status: "pending" as const,
+      },
+    ]);
+    const decide = jest
+      .spyOn(groupService, "updateGroupMemberStatus")
+      .mockResolvedValue(undefined);
+    renderWithClient(<GroupMembersScreen />);
+
+    expect(await screen.findByText("가입 신청 1명")).toBeTruthy();
+    // 대기 신청자는 멤버 수에 넣지 않는다
+    expect(screen.getByText("전체 1명")).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("박한나 가입 승인"));
+
+    await waitFor(() =>
+      expect(decide).toHaveBeenCalledWith({
+        groupId: "1",
+        targetUserId: "applicant",
+        status: "approved",
+      }),
+    );
+  });
+
   it("renders the group notice editor screen", () => {
     renderWithClient(<GroupNoticesScreen />);
 
@@ -1302,6 +1402,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.01",
         isLeader: true,
         isMine: false,
+        status: "approved" as const,
       },
       {
         userId: "member-002",
@@ -1309,6 +1410,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.02",
         isLeader: false,
         isMine: true,
+        status: "approved" as const,
       },
     ]);
     renderWithClient(<GroupMembersScreen />);

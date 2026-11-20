@@ -1,9 +1,9 @@
 import {
   formatShareCreatedLabel,
   mapShareComment,
+  mapShareCategories,
   mapShareDetail,
   mapShareOverviewItem,
-  toShareCategoryCode,
   toShareItemStatus,
 } from "../marketMapper";
 
@@ -44,10 +44,9 @@ describe("marketMapper", () => {
       authorName: "selah",
       createdLabel: "1시간 전",
       status: "sharing",
-      category: "baby",
+      category: "BABY_KIDS",
       isMine: false,
     });
-    expect(toShareCategoryCode("baby")).toBe("BABY_KIDS");
     expect(toShareItemStatus("사용감 있음")).toBe("USED");
   });
 
@@ -55,20 +54,38 @@ describe("marketMapper", () => {
     expect(mapShareOverviewItem(listItem, "selah")?.isMine).toBe(true);
   });
 
-  it("drops list items whose status or category was not observed", () => {
+  it("drops unknown statuses but keeps any server category code (#312)", () => {
     expect(
       mapShareOverviewItem({ ...listItem, status: "UNKNOWN" }, "selah"),
     ).toBeNull();
     expect(
-      mapShareOverviewItem({ ...listItem, categoryCode: "UNKNOWN" }, "selah"),
+      mapShareOverviewItem({ ...listItem, categoryCode: "NEW_CODE" }, "selah")
+        ?.category,
+    ).toBe("NEW_CODE");
+    expect(
+      mapShareOverviewItem({ ...listItem, categoryCode: "" }, "selah"),
     ).toBeNull();
+  });
+
+  it("maps share categories in display order and skips broken rows", () => {
+    expect(
+      mapShareCategories([
+        { id: 2, code: "BOOK", name: "도서", orderNum: 2 },
+        { id: 1, code: "CLOTH", name: " 의류 ", orderNum: 1 },
+        { id: 3, code: "", name: "빈 코드", orderNum: 3 },
+        { id: 4, code: "X", name: null, orderNum: 4 },
+      ]),
+    ).toEqual([
+      { code: "CLOTH", name: "의류" },
+      { code: "BOOK", name: "도서" },
+    ]);
   });
 
   it("maps detail authorName and item status label from the live payload", () => {
     expect(mapShareDetail(detail, [], "selah")).toMatchObject({
       id: "1",
       content: "1년 정도 썼고 상태 좋아요.",
-      categoryLabel: "유아·아동용품",
+      categoryCode: "BABY_KIDS",
       conditionLabel: "사용감 있음",
       authorName: "찬양팀",
       isMine: true,

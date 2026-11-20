@@ -755,6 +755,24 @@ describe("v1 tab smoke screens", () => {
     jest.mocked(useLocalSearchParams).mockReturnValue({});
   });
 
+  it("falls back to all when the route category is not in the server list", async () => {
+    jest.mocked(useLocalSearchParams).mockReturnValue({ category: "GONE" });
+    const fetchPage = jest.spyOn(marketService, "fetchMarketOverviewPage");
+    renderWithClient(<MarketScreen />);
+
+    await waitFor(() =>
+      expect(
+        screen.getByTestId("market-category-all").props.accessibilityState,
+      ).toEqual({ selected: true }),
+    );
+    expect(fetchPage).toHaveBeenLastCalledWith({
+      lastId: undefined,
+      category: undefined,
+    });
+
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
+  });
+
   it("keeps loading pages when the sharing filter has no match yet", async () => {
     const item = (id: string, status: MarketOverviewItem["status"]) => ({
       id,

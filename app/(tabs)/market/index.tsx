@@ -70,7 +70,7 @@ export default function MarketScreen() {
       router.setParams({ status: status === "sharing" ? undefined : status });
     },
   );
-  const [category, setCategory] = useMotionRouteParam(
+  const [selectedCategory, setCategory] = useMotionRouteParam(
     routeCategory,
     (nextCategory) => {
       router.setParams({
@@ -78,6 +78,13 @@ export default function MarketScreen() {
       });
     },
   );
+  // 목록을 받은 뒤 서버에 없는 코드(옛 딥링크 등)면 "전체"로 본다. 활성 칩 없이 걸러지지 않게 한다
+  const category =
+    selectedCategory !== "all" &&
+    categories.data &&
+    !categories.data.some((item) => item.code === selectedCategory)
+      ? "all"
+      : selectedCategory;
   const categoryFilter =
     category === "all" ? undefined : (category as MarketCategoryCode);
   const overview = useMarketOverview(categoryFilter);

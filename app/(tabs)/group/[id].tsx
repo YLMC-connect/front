@@ -26,6 +26,7 @@ import {
   ErrorState,
   FLOATING_BOTTOM_BAR_INSET,
   FloatingBottomBar,
+  MotionPressable,
   Skeleton,
   TopBar,
   VisualThumb,
@@ -232,7 +233,7 @@ export default function GroupDetailScreen() {
             </View>
 
             {isLeader && group.pendingMembers.length > 0 ? (
-              <Pressable
+              <MotionPressable
                 accessibilityRole="button"
                 accessibilityLabel={`가입 신청 ${group.pendingMembers.length}명 확인하기`}
                 onPress={openMembers}
@@ -248,7 +249,7 @@ export default function GroupDetailScreen() {
                   size={18}
                   color={theme.colors.textMuted}
                 />
-              </Pressable>
+              </MotionPressable>
             ) : null}
 
             {isLeader ? (

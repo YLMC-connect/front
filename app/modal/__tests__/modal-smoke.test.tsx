@@ -123,6 +123,15 @@ describe("modal smoke screens", () => {
     expect(countFocusRings()).toBe(1);
   });
 
+  it("shows a loading placeholder while market categories are loading", () => {
+    jest
+      .spyOn(marketService, "fetchMarketCategories")
+      .mockReturnValue(new Promise(() => {}));
+    renderWithClient(<MarketNewModal />);
+
+    expect(screen.getByTestId("market-form-categories-loading")).toBeTruthy();
+  });
+
   it("submits a valid market form and opens the created detail", async () => {
     jest.spyOn(marketService, "createMarketPost").mockResolvedValueOnce({
       id: "mock-market-1",

@@ -31,6 +31,10 @@ import {
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import {
+  groupStatusLabel,
+  groupStatusTone,
+} from "../../../src/services/groupMapper";
+import {
   useDeleteGroup,
   useDeleteGroupNotice,
   useGroupDetail,
@@ -109,6 +113,16 @@ export default function GroupDetailScreen() {
   const isMember = group.isJoined && !group.isLeader;
   const isNonMember = !group.isJoined;
   const isClosed = group.status === "closed";
+  // 승인대기·반려 모임은 참여와 모집 상태 변경을 막는다
+  const isApproved = group.status === "open" || group.status === "closed";
+  const joinBlockedLabel =
+    group.status === "pending"
+      ? "승인 대기 중인 모임이에요"
+      : group.status === "rejected"
+        ? "반려된 모임이에요"
+        : isClosed
+          ? "모집이 마감됐어요"
+          : null;
   const current = group.currentMembers;
   const leaderName = group.leaderName;
   const visibleMembers =
@@ -119,8 +133,8 @@ export default function GroupDetailScreen() {
   const openMembers = () => router.push(`/group/members?id=${id}`);
   // 상태 색 뜻: 진행 중(모집중) = success, 끝남(모집완료) = neutral.
   const statusBadge = (
-    <Badge tone={isClosed ? "neutral" : "success"}>
-      {isClosed ? "모집완료" : "모집중"}
+    <Badge tone={groupStatusTone(group.status)}>
+      {groupStatusLabel(group.status)}
     </Badge>
   );
 
@@ -159,7 +173,7 @@ export default function GroupDetailScreen() {
           <View style={styles.sheet} testID="group-detail-sheet">
             <View style={styles.header}>
               <View style={styles.chips}>
-                {isLeader ? (
+                {isLeader && isApproved ? (
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={`모집 상태 변경: 현재 ${isClosed ? "모집완료" : "모집중"}`}
@@ -375,17 +389,15 @@ export default function GroupDetailScreen() {
               <Button
                 testID="group-join-button"
                 size="lg"
-                accessibilityLabel={
-                  isClosed ? "모집이 마감됐어요" : "참여 신청하기"
-                }
-                disabled={isClosed}
+                accessibilityLabel={joinBlockedLabel ?? "참여 신청하기"}
+                disabled={joinBlockedLabel !== null}
                 loading={membershipBusy}
                 onPress={() => {
-                  if (isClosed) return;
+                  if (joinBlockedLabel) return;
                   joinGroupMutation.mutate();
                 }}
               >
-                {isClosed ? "모집이 마감됐어요" : "참여 신청하기"}
+                {joinBlockedLabel ?? "참여 신청하기"}
               </Button>
             )}
           </FloatingBottomBar>

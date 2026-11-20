@@ -106,7 +106,7 @@ export default function PrayerDetailScreen() {
           title: t.title,
           author: t.writerName || "성도",
           text: t.content,
-          when: formatPrayerDate(t.createdAt),
+          when: formatPrayerDate(t.receivedAt ?? t.createdAt),
           urgent: true,
         }))
       : [];
@@ -118,7 +118,7 @@ export default function PrayerDetailScreen() {
           title: t.title,
           author: t.writerName || "성도",
           text: t.content,
-          when: formatPrayerDate(t.createdAt),
+          when: formatPrayerDate(t.receivedAt ?? t.createdAt),
         }))
       : [];
 
@@ -171,45 +171,11 @@ export default function PrayerDetailScreen() {
       <View style={styles.root}>
         <TopBar title={roomTitle} back onBack={() => router.back()} />
 
-        <View style={styles.heroSection}>
-          <Card style={styles.heroCard}>
-            <View style={styles.heroTopRow}>
-              <View style={styles.dayBadge}>
-                <Text style={styles.dayText}>{day}</Text>
-                <Text style={styles.timeText}>{period}</Text>
-              </View>
-              <View style={styles.heroMetaCol}>
-                <View style={styles.badges}>
-                  {/* 배지는 둘만: 참여중 + 긴급. 인원·완료 수는 아래 진행 바에 있다. */}
-                  {room ? <Badge tone="info">참여중</Badge> : null}
-                  {urgentItems.length > 0 ? (
-                    <Badge
-                      tone="warning"
-                      icon="warning-amber"
-                    >{`긴급 ${urgentItems.length}건`}</Badge>
-                  ) : null}
-                </View>
-              </View>
-            </View>
-
-            <ProgressBar
-              label={`이번 주 완료 ${completedCount}명 / 전체 ${totalMembers}명`}
-              value={completionRate}
-              style={styles.heroProgress}
-              testID="prayer-detail-progress"
-            />
-          </Card>
-        </View>
-
-        <UnderlineTabs
-          items={tabs}
-          active={activeTab}
-          onChange={setActiveTab}
-        />
-
+        {/* 요약 카드는 함께 올라가고, 탭 줄(자식 1번)만 위에 고정한다 (BUG-32) */}
         <ScrollView
+          stickyHeaderIndices={[1]}
           contentContainerStyle={[
-            styles.body,
+            styles.scrollContent,
             activeTab === "pray" ? styles.bodyWithAction : null,
           ]}
           refreshControl={
@@ -220,35 +186,76 @@ export default function PrayerDetailScreen() {
               colors={[theme.colors.primary]}
             />
           }
+          testID="prayer-detail-scroll"
         >
-          {activeTab === "status" && statusFailed ? (
-            <ErrorState
-              message="기도 현황을 불러오지 못했어요. 다시 시도해주세요."
-              onRetry={() => void statusQuery.refetch()}
+          <View style={styles.heroSection}>
+            <Card style={styles.heroCard}>
+              <View style={styles.heroTopRow}>
+                <View style={styles.dayBadge}>
+                  <Text style={styles.dayText}>{day}</Text>
+                  <Text style={styles.timeText}>{period}</Text>
+                </View>
+                <View style={styles.heroMetaCol}>
+                  <View style={styles.badges}>
+                    {/* 배지는 둘만: 참여중 + 긴급. 인원·완료 수는 아래 진행 바에 있다. */}
+                    {room ? <Badge tone="info">참여중</Badge> : null}
+                    {urgentItems.length > 0 ? (
+                      <Badge
+                        tone="warning"
+                        icon="warning-amber"
+                      >{`긴급 ${urgentItems.length}건`}</Badge>
+                    ) : null}
+                  </View>
+                </View>
+              </View>
+
+              <ProgressBar
+                label={`이번 주 완료 ${completedCount}명 / 전체 ${totalMembers}명`}
+                value={completionRate}
+                style={styles.heroProgress}
+                testID="prayer-detail-progress"
+              />
+            </Card>
+          </View>
+
+          <View style={styles.stickyTabs} testID="prayer-detail-tabs">
+            <UnderlineTabs
+              items={tabs}
+              active={activeTab}
+              onChange={setActiveTab}
             />
-          ) : activeTab === "status" ? (
-            <StatusPanel
-              empty={isStatusEmpty}
-              completedCount={completedCount}
-              pendingCount={pendingCount}
-              completionRate={completionRate}
-              completedPeople={completedPeople}
-              pendingPeople={pendingPeople}
-              day={day}
-              period={period}
-            />
-          ) : boardError ? (
-            boardError
-          ) : activeTab === "answers" ? (
-            <AnswersPanel empty={isAnswersEmpty} items={answerItems} />
-          ) : (
-            <PrayerPanel
-              empty={isPrayEmpty}
-              urgent={urgentItems}
-              progress={ongoingItems}
-              answers={answerItems}
-            />
-          )}
+          </View>
+
+          <View style={styles.body}>
+            {activeTab === "status" && statusFailed ? (
+              <ErrorState
+                message="기도 현황을 불러오지 못했어요. 다시 시도해주세요."
+                onRetry={() => void statusQuery.refetch()}
+              />
+            ) : activeTab === "status" ? (
+              <StatusPanel
+                empty={isStatusEmpty}
+                completedCount={completedCount}
+                pendingCount={pendingCount}
+                completionRate={completionRate}
+                completedPeople={completedPeople}
+                pendingPeople={pendingPeople}
+                day={day}
+                period={period}
+              />
+            ) : boardError ? (
+              boardError
+            ) : activeTab === "answers" ? (
+              <AnswersPanel empty={isAnswersEmpty} items={answerItems} />
+            ) : (
+              <PrayerPanel
+                empty={isPrayEmpty}
+                urgent={urgentItems}
+                progress={ongoingItems}
+                answers={answerItems}
+              />
+            )}
+          </View>
         </ScrollView>
 
         {activeTab === "pray" && !isPrayEmpty ? (

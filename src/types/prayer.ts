@@ -1,4 +1,5 @@
-export type PrayerWeekday = "mon" | "tue" | "wed" | "thu" | "fri";
+/** 기도방 요일. 일요기도방은 아직 없어 뺀다 (BUG-34 에서 토요일 추가). */
+export type PrayerWeekday = "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
 
 export type PrayerOverviewRoomStatus = "joined" | "pending";
 export type PrayerRequestStatus =

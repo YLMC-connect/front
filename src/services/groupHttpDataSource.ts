@@ -6,6 +6,7 @@ import {
   mapCommunionMemberList,
   mapCommunionNotice,
   mapCommunionNoticeList,
+  isApprovedGroupStatus,
   mapCommunionOverviewItem,
   mapCommunionServiceItem,
   toCommunionCategoryCode,
@@ -122,7 +123,7 @@ export function createHttpGroupDataSource({
       );
       const groups = (groupsData?.content ?? []).flatMap((item) => {
         const mapped = mapCommunionOverviewItem(item, joinedIds);
-        return mapped ? [mapped] : [];
+        return mapped && isApprovedGroupStatus(mapped.status) ? [mapped] : [];
       });
       const mappedServices = services.flatMap((item) => {
         const mapped = mapCommunionServiceItem(item);
@@ -132,10 +133,15 @@ export function createHttpGroupDataSource({
         const mapped = mapCommunionOverviewItem(item, joinedIds);
         return mapped ? [mapped] : [];
       });
+      // 승인 전·반려된 내 봉사는 봉사 목록에 없으므로 내 모임에서 보인다
+      const pendingMyServices = myServices.flatMap((item) => {
+        const mapped = mapCommunionOverviewItem(item, joinedIds);
+        return mapped && !isApprovedGroupStatus(mapped.status) ? [mapped] : [];
+      });
       return {
         groups,
         services: mappedServices,
-        myGroups: mappedMyGroups,
+        myGroups: [...mappedMyGroups, ...pendingMyServices],
         hasNext: Boolean(groupsData?.hasNext),
         nextCursor: groupsData?.nextCursor ?? null,
       };

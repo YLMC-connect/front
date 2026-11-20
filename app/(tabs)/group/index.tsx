@@ -23,6 +23,10 @@ import {
   StaggerItem,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import {
+  groupStatusLabel,
+  groupStatusTone,
+} from "../../../src/services/groupMapper";
 import { GROUP_CATEGORIES } from "../../../src/constants/domainOptions";
 import { useGroupOverview } from "../../../src/hooks/useGroups";
 import { useMotionRouteParam } from "../../../src/hooks/useMotionRouteParam";
@@ -342,16 +346,21 @@ function CompanionCard(
       },
 ) {
   const isService = props.kind === "service";
-  const closed = props.kind === "group" && props.item.status === "closed";
+  const groupStatus = props.kind === "group" ? props.item.status : null;
+  const closed = groupStatus === "closed" || groupStatus === "rejected";
   const testID = isService
     ? `group-service-card-${props.item.id}`
     : `group-card-${props.item.id}`;
-  const statusLabel = isService
-    ? props.item.statusLabel
-    : closed
-      ? "모집완료"
-      : "모집중";
-  const statusMuted = isService ? props.item.statusLabel !== "모집중" : closed;
+  const statusLabel = groupStatus
+    ? groupStatusLabel(groupStatus)
+    : props.kind === "service"
+      ? props.item.statusLabel
+      : "";
+  const statusTone = groupStatus
+    ? groupStatusTone(groupStatus)
+    : props.kind === "service" && props.item.statusLabel === "모집중"
+      ? "success"
+      : "neutral";
   const metaLabel = isService
     ? props.item.schedule
     : categoryOf(props.item.category);
@@ -367,7 +376,7 @@ function CompanionCard(
       style={[styles.groupCard, closed ? styles.closedCard : null]}
     >
       <View style={styles.cardMetaRow}>
-        <Badge tone={statusMuted ? "neutral" : "success"}>{statusLabel}</Badge>
+        <Badge tone={statusTone}>{statusLabel}</Badge>
         <Badge tone="neutral">{metaLabel}</Badge>
         <View testID={`${testID}-member-count`} style={styles.memberRow}>
           <AppIcon name="groups" size={14} color={theme.colors.textMuted} />

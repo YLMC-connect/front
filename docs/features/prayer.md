@@ -13,7 +13,8 @@
 - 승인 대기 신청은 `pending` 기도방 카드로 붙는다. 상세로 가지 않고, 누르면 확인 후 `DELETE /api/prayer/applications/{id}` 로 취소한다.
 - 우측 하단 플로팅 메뉴에서 `중보기도 신청`(`/prayer/apply`)과 `기도제목 작성`(`/modal/prayer-new`)으로 간다.
 - 신청 화면은 요일·시간을 골라 `POST /api/prayer/applications`(`yoil`·`timeSlot`).
-- 기도방 상세(`/prayer/[id]`)는 `GET /api/prayer/cohorts/{id}/status` 와 `GET /api/prayer/topics/board` 로 기도·응답·현황 탭을 그린다. 완료 버튼은 `POST`/`DELETE /api/prayer/cohorts/{id}/completion`. 당겨서 새로고침으로 둘 다 다시 받는다.
+- 기도방 상세(`/prayer/[id]`)는 `GET /api/prayer/cohorts/{id}/status` 와 `GET /api/prayer/topics/board` 로 기도·응답·현황 탭을 그린다. 완료 버튼은 `POST`/`DELETE /api/prayer/cohorts/{id}/completion`. 당겨서 새로고침으로 둘 다 다시 받는다. 위 요약 카드는 스크롤과 함께 올라가고 탭 줄만 상단에 고정된다.
+- 기도 탭의 진행 중 기도제목은 카테고리 이름순으로 묶어 카테고리마다 소제목(이름·건수)과 구분선을 둔다. 같은 카테고리 안은 서버 순서.
 - 기도제목 등록은 `GET /api/prayer/categories` 로 카테고리를 받고 `POST /api/prayer/topics`(`categoryId`·`title`·`content`).
 - 내 기도제목(`/prayer/request`)은 `GET /api/prayer/topics/my` 를 상태 배지 목록으로 보이고, 응답완료 요청은 `POST /api/prayer/topics/{id}/answer-request` 에 사용자가 쓴 `answerContent`(필수)를 보낸다.
 - 마이페이지 `중보기도 활동` 은 이 도메인의 `GET /api/prayer/me/history` 를 쓴다.
@@ -21,10 +22,10 @@
 ## 데이터 타입
 
 - 화면 모델은 `PrayerOverview`(`rooms`·`requests`), `PrayerOverviewRoom`, `PrayerRequestSummary`. DTO(`src/types/prayerApi.ts`)는 Notion 에 적힌 필드만 가지며, 화면이 쓰지 않는 nullable 필드는 `null` 을 허용한다. `PrayerApplicationDto` 는 값 타입이 페이지에 없어 `unknown` 으로 읽는다.
-- 기도방 카드: `myRole` 이 `LEADER`/`MEMBER` 이고 `yoil` 1~5, `timeSlot` `AM`/`PM` 인 기수만 만든다. 일·토(0·6)는 `PrayerWeekday` 에 없어 목록에서 빠진다. `cohortName`→제목, `weekCompletedCount`→완료 인원, `completionRate`→참여율.
+- 기도방 카드: `myRole` 이 `LEADER`/`MEMBER` 이고 `yoil` 1~6(월~토), `timeSlot` `AM`/`PM` 인 기수만 만든다. 일요일(0)은 `PrayerWeekday` 에 없어 목록에서 빠진다. `cohortName`→제목, `weekCompletedCount`→완료 인원, `completionRate`→참여율.
 - 승인 대기 카드: 신청 `status === "PENDING"` 이고 이미 참여 중인 방이 아닐 때. `cohortId` 가 없으면 id 는 `application-{신청 id}`.
 - 기도제목 상태: `REVIEW`/`OPEN`/`REJECTED`/`ANSWER_REQUESTED`/`ANSWERED`/`HIDDEN` → `reviewing`/`published`/`rejected`/`answerRequested`/`answered`/`hidden`. 설명은 `content`.
-- 상세 요일·시간대는 현황 응답 `yoil`(0=일 … 6=토)·`timeSlot` 으로 표시하고 값이 없으면 비운다 (#307). 날짜는 `createdAt`(응답은 `answeredAt` 우선)을 "M월 D일"로, 없으면 생략한다.
+- 상세 요일·시간대는 현황 응답 `yoil`(0=일 … 6=토)·`timeSlot` 으로 표시하고 값이 없으면 비운다 (#307). 날짜는 접수일 `receivedAt`(없으면 `createdAt`, 응답은 `answeredAt` 우선)을 "M월 D일"로, 없으면 생략한다. 서버는 `receivedAt` 이 없는 옛 데이터도 등록일 날짜로 채워 준다.
 
 ## 결정 사항 (지금 유효한 것만)
 
@@ -38,9 +39,8 @@
 ## 미결
 
 - 기도방 상세의 기도제목은 기수별이 아닌 전체 게시판(`topics/board`)이다. 기수별 조회 API 대기 (#200).
-- 게시판 응답의 `createdAt` 이 null 로 와 작성 시각을 못 보인다 (#219).
 - 익명 작성은 등록 API 필드 대기 (#304).
-- 일·토 기도방, 비성도 기도 요청, 참여 승인 정책, 푸시 알림·기도 통계는 후속 Phase.
+- 일요기도방, 비성도 기도 요청, 참여 승인 정책, 푸시 알림·기도 통계는 후속 Phase.
 
 ## 코드 위치
 

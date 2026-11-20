@@ -89,6 +89,58 @@ describe("httpGroupDataSource", () => {
     });
   });
 
+  it("keeps pending/rejected communions out of public lists and shows them in my groups", async () => {
+    const { request, dataSource } = setup();
+    const item = (id: number, type: string, status: string) => ({
+      id,
+      type,
+      title: `모임 ${id}`,
+      categoryCode: "HOBBY_CULTURE",
+      maxParticipants: 5,
+      currentParticipants: 1,
+      status,
+      leaderName: "프론트점검",
+      createdAt: "2026-11-19T10:00:00",
+    });
+    request.mockImplementation(async (path: string) => {
+      const page = (content: unknown[]) => ({
+        content,
+        hasNext: false,
+        nextCursor: null,
+      });
+      if (
+        path.startsWith("/api/communion?") &&
+        path.includes("type=SMALL_GROUP")
+      ) {
+        return page([
+          item(1, "SMALL_GROUP", "RECRUITING"),
+          item(3, "SMALL_GROUP", "PENDING"),
+        ]);
+      }
+      if (path.startsWith("/api/communion/my?type=SMALL_GROUP")) {
+        return page([
+          item(3, "SMALL_GROUP", "PENDING"),
+          item(4, "SMALL_GROUP", "REJECTED"),
+        ]);
+      }
+      if (path.startsWith("/api/communion/my?type=VOLUNTEER")) {
+        return page([
+          item(5, "VOLUNTEER", "RECRUITING"),
+          item(6, "VOLUNTEER", "PENDING"),
+        ]);
+      }
+      return page([]);
+    });
+
+    const overview = await dataSource.getOverviewPage();
+    expect(overview.groups.map((g) => g.id)).toEqual(["1"]);
+    expect(overview.myGroups.map((g) => [g.id, g.status])).toEqual([
+      ["3", "pending"],
+      ["4", "rejected"],
+      ["6", "pending"],
+    ]);
+  });
+
   it("creates a small group without sending schedule or location", async () => {
     const { request, dataSource } = setup();
     request.mockImplementation(async (path: string, options) => {

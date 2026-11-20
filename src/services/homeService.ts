@@ -1,21 +1,19 @@
 import { httpHomeDataSource } from "./homeHttpDataSource";
 import {
   buildHomeDailyPrayer,
-  buildHomeProgressSteps,
-  buildHomeTodos,
   mapDailyQtToDawnPrayer,
   mapSermonToSundaySermon,
+  toWeekdayTopicNumber,
 } from "./homeMapper";
 import type { HomeDawnPrayer, HomeOverview } from "../types/home";
 
 export async function fetchHomeOverview(
   date: Date = new Date(),
 ): Promise<HomeOverview> {
-  const dailyPrayer = buildHomeDailyPrayer(date);
-
-  const [sermonsRes, qtsRes] = await Promise.allSettled([
+  const [sermonsRes, qtsRes, weekdayRes] = await Promise.allSettled([
     httpHomeDataSource.fetchSermons({ page: 1, size: 1 }),
     httpHomeDataSource.fetchDailyQts({ page: 1, size: 1 }),
+    httpHomeDataSource.fetchWeekdayPrayers(toWeekdayTopicNumber(date)),
   ]);
 
   if (sermonsRes.status === "rejected" && qtsRes.status === "rejected") {
@@ -40,12 +38,16 @@ export async function fetchHomeOverview(
     dawnPrayer = mapDailyQtToDawnPrayer(latestQt, detailContent);
   }
 
+  // 요일별 기도가 실패하거나 비면 카드만 숨긴다
+  const dailyPrayer =
+    weekdayRes.status === "fulfilled"
+      ? buildHomeDailyPrayer(weekdayRes.value, date)
+      : null;
+
   return {
     dailyPrayer,
     dawnPrayer,
     sundaySermon,
-    todos: buildHomeTodos(dailyPrayer, dawnPrayer),
-    progressSteps: buildHomeProgressSteps(),
   };
 }
 

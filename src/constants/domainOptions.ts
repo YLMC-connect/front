@@ -61,4 +61,5 @@ export const PRAYER_WEEKDAY_TABS = [
   { key: "wed", label: "수" },
   { key: "thu", label: "목" },
   { key: "fri", label: "금" },
+  { key: "sat", label: "토" },
 ] as const;

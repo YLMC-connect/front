@@ -2,6 +2,7 @@ import { apiClient } from "../lib/apiClient";
 import type {
   DailyQtResponse,
   PageResponse,
+  PrayerWeekdayTopicResponse,
   SermonResponse,
 } from "../types/homeApi";
 
@@ -22,6 +23,8 @@ export interface HomeDataSource {
     size?: number;
   }): Promise<PageResponse<DailyQtResponse>>;
   fetchDailyQtDetail(id: number | string): Promise<DailyQtResponse>;
+  /** weekday: 1=월 … 7=일 */
+  fetchWeekdayPrayers(weekday: number): Promise<PrayerWeekdayTopicResponse[]>;
 }
 
 const emptyPage = <T>(): PageResponse<T> => ({
@@ -73,6 +76,16 @@ export function createHttpHomeDataSource(
         throw new Error(`큐티(${id}) 정보를 불러올 수 없습니다.`);
       }
       return data;
+    },
+
+    async fetchWeekdayPrayers(
+      weekday: number,
+    ): Promise<PrayerWeekdayTopicResponse[]> {
+      const data = await client.request<unknown>(
+        `/api/prayer/weekday-topics?weekday=${weekday}`,
+        { auth: false, method: "GET" },
+      );
+      return Array.isArray(data) ? (data as PrayerWeekdayTopicResponse[]) : [];
     },
   };
 }

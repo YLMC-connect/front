@@ -68,15 +68,45 @@ export function PrayerPanel({
       ) : null}
       {progress.length > 0 ? (
         <Section title="진행 중 기도제목">
-          {progress.map((item, index) => (
-            <StaggerItem key={item.title} index={index}>
-              <PrayerItem item={item} />
-            </StaggerItem>
+          {groupPrayerItemsByCategory(progress).map((group) => (
+            <View key={group.category} style={styles.categoryGroup}>
+              <View
+                accessibilityRole="header"
+                style={styles.categoryHeader}
+                testID="prayer-category-header"
+              >
+                <Text style={styles.categoryTitle}>{group.category}</Text>
+                <Text style={styles.smallMuted}>{group.items.length}</Text>
+                <View style={styles.categoryLine} />
+              </View>
+              {group.items.map((item, index) => (
+                <StaggerItem key={`${item.title}-${index}`} index={index}>
+                  <PrayerItem item={item} />
+                </StaggerItem>
+              ))}
+            </View>
           ))}
         </Section>
       ) : null}
     </View>
   );
+}
+
+/**
+ * 진행 중 기도제목을 카테고리 이름순으로 묶는다. 같은 카테고리 안에서는 서버 순서를 지킨다.
+ */
+export function groupPrayerItemsByCategory(
+  items: readonly PrayerItemData[],
+): { category: string; items: PrayerItemData[] }[] {
+  const groups = new Map<string, PrayerItemData[]>();
+  for (const item of items) {
+    const list = groups.get(item.category);
+    if (list) list.push(item);
+    else groups.set(item.category, [item]);
+  }
+  return [...groups.entries()]
+    .sort(([a], [b]) => a.localeCompare(b, "ko"))
+    .map(([category, list]) => ({ category, items: list }));
 }
 
 export function AnswersPanel({

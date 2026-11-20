@@ -20,7 +20,7 @@
 
 - 화면 모델: `GroupOverview`(groups · services · myGroups), `GroupDetail`, `GroupMemberDetail`, `GroupDetailNotice`(수정 폼용 전체 `content`). 쓰기 입력은 `GroupInput` / `GroupUpdateInput` / `GroupStatusUpdateInput` / `GroupKickMemberInput` / `GroupTransferLeaderInput`(`newLeaderUserId`) / `GroupNotice*Input`.
 - DTO: `src/types/groupApi.ts` 의 `Communion*Dto`.
-- 매핑: 상태 `RECRUITING`→open(모집중), `COMPLETED`→closed(모집완료). 상태 변경도 closed 를 `COMPLETED` 로 보낸다(서버 명세에 `CLOSED` 는 없다). `PENDING`·`CANCELED`·`REJECTED` 는 매핑하지 않는다. 카테고리 `WORSHIP_STUDY`/`PRAYER`/`HOBBY_CULTURE`/`SPORTS_HEALTH`/`OTHER` ↔ bible/pray/hobby/sport/etc.
+- 매핑: 상태 `RECRUITING`→open(모집중), `COMPLETED`→closed(모집완료), `PENDING`→pending(승인대기), `REJECTED`→rejected(반려). 상태 변경은 open·closed 만 보내고 closed 를 `COMPLETED` 로 보낸다(서버 명세에 `CLOSED` 는 없다). `CANCELED` 는 매핑하지 않는다. 카테고리 `WORSHIP_STUDY`/`PRAYER`/`HOBBY_CULTURE`/`SPORTS_HEALTH`/`OTHER` ↔ bible/pray/hobby/sport/etc.
 - 목록 응답에 본문·일정이 없어 카드 `description`·`schedule` 은 빈 문자열. 봉사 항목은 `linkedGroupId`(자기 id)로 상세에 연결.
 - `isLeader`/`isJoined` 는 `leaderId`·멤버 `userId` 를 `authStore` 현재 사용자와 비교해 만든다. 상세 멤버는 소모임장을 맨 앞에 둔다.
 
@@ -29,6 +29,7 @@
 - **서버에 있는 값만 매핑한다** — 서버에 없는 화면 카테고리(목장·선교·카풀·봉사)는 OTHER 로 추측해 보내지 않고 개설·수정을 거절한다. 폼은 서버 코드가 있는 5개만 보인다. (#313)
 - **서버가 저장하지 않는 입력은 폼에 두지 않는다** — 모임 일정·장소는 communion 요청·응답에 없어 개설/수정 폼에서 뺐다. 서버 필드가 생기면 복원한다. (#301)
 - **대표 사진은 색 바탕으로 채운다** — communion API 에 이미지 필드가 없어 상세 대표 사진 자리는 `thumb` 색 + 아이콘, 개설 폼에 사진 입력이 없다. 공지 목록 화면이 없어 공지 `전체보기` 는 두지 않는다.
+- **승인대기·반려 모임은 내 모임에서만 보인다** — 공개 소모임 목록에서는 빼고, 내 모임에 배지(승인대기 warning·반려 danger)로 보인다. 승인 전·반려된 내 봉사도 봉사 목록에 없으므로 내 모임에 붙인다. 상세에서는 참여와 소모임장의 모집 상태 변경을 막는다.
 - **참여는 즉시 가입이다** — `POST /join` 으로 바로 멤버가 된다. 승인 대기 플로우는 서버가 상태를 주기 전까지 만들지 않는다. (#317)
 - **소모임장은 탈퇴할 수 없다** — 서비스에서 막고 "먼저 이관해주세요" 를 안내한다. 정원이 찼거나 모집완료면 참여를 막는다.
 - **이관은 `PUT /api/communion/{id}/leader`** — 본문은 `newLeaderUserId` 하나. 기존 방장은 일반 멤버로 남고 상세·멤버·목록 쿼리를 다시 읽는다. `COM003`/`COM011`/`COM012` 는 토스트 문구로 보인다. (#197)

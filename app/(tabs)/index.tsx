@@ -372,7 +372,6 @@ const styles = StyleSheet.create({
   dailyMoreRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 2,
     minHeight: theme.layout.touchTarget,
   },
   dailyItemDivider: {

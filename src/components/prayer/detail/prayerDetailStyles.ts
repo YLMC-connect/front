@@ -64,12 +64,6 @@ export const styles = StyleSheet.create({
     gap: 6,
     paddingTop: 4,
   },
-  categoryTitle: {
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
-    fontWeight: theme.fontWeight.semibold,
-  },
   categoryLine: {
     flex: 1,
     height: 1,

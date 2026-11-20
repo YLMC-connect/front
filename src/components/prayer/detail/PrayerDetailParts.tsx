@@ -3,6 +3,7 @@ import { useState, type ReactNode } from "react";
 import { View } from "react-native";
 import { Text } from "@/components/ui/text";
 import {
+  AppText,
   Avatar,
   Badge,
   Card,
@@ -75,8 +76,12 @@ export function PrayerPanel({
                 style={styles.categoryHeader}
                 testID="prayer-category-header"
               >
-                <Text style={styles.categoryTitle}>{group.category}</Text>
-                <Text style={styles.smallMuted}>{group.items.length}</Text>
+                <AppText variant="label" weight="semibold">
+                  {group.category}
+                </AppText>
+                <AppText variant="caption" tone="muted" weight="semibold">
+                  {group.items.length}
+                </AppText>
                 <View style={styles.categoryLine} />
               </View>
               {group.items.map((item, index) => (

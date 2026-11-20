@@ -49,7 +49,8 @@ jobs:
             PR NUMBER: ${{ github.event.pull_request.number }}
             HEAD SHA: ${{ github.event.pull_request.head.sha }}
 
-            이 PR 을 코드 리뷰한다. 저장소 규칙은 AGENTS.md(CLAUDE.md 가 불러옴)를 따른다.
+            이 PR 을 코드 리뷰한다. 저장소 규칙은 AGENTS.md(CLAUDE.md 가 불러옴)에 있다.
+            그중 리뷰 기준은 PR 본문 3섹션과 문서 의무이고, 브랜치·병합·보고 규칙은 PR 작성자용이다.
             관련 도메인의 docs/features/<도메인>.md 에서 결정 사항·데이터 타입을 확인하고 어긋나는지 본다.
 
             중점:
@@ -90,7 +91,7 @@ jobs:
                누르는 영역이 44 보다 작으면 hitSlop 등으로 넓혔는지 본다.
             6. PLAN.md: PLAN.md 가 바뀌었으면 PR 본문에 사용자 승인 근거가 있는지 보고, 없으면 승인을 받았는지 확인하라고 적는다.
 
-            확실한 문제만 지적하고, 사소한 취향 차이는 적지 않는다.
+            위 중점과 두 절에 해당하지 않는 취향 차이(이름 짓기, 줄바꿈 등)는 적지 않는다.
             구체적인 줄에 대한 지적은 mcp__github_inline_comment__create_inline_comment 로 인라인 댓글을 남기고,
             전체 요약은 `gh pr comment` 로 한국어 댓글 하나만 남긴다. 문제가 없으면 짧게 그렇다고만 쓴다.
 

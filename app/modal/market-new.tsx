@@ -19,6 +19,7 @@ import {
   ModalFormSection as Section,
   ModalFormTextInput as FormInput,
   MotionPressable,
+  Skeleton,
   TopBar,
 } from "../../src/components/ui";
 import { RadioRow } from "../../src/components/ui/checkbox";
@@ -242,6 +243,21 @@ export default function MarketNewModal() {
             </Section>
 
             <Section card label="카테고리" required>
+              {categoriesQuery.isPending ? (
+                <View
+                  style={styles.chips}
+                  testID="market-form-categories-loading"
+                >
+                  {[72, 88, 64].map((width) => (
+                    <Skeleton
+                      key={width}
+                      width={width}
+                      height={32}
+                      radius={theme.radius.full}
+                    />
+                  ))}
+                </View>
+              ) : null}
               {categoriesQuery.isError && categories.length === 0 ? (
                 <ErrorState
                   message="카테고리를 불러오지 못했어요."

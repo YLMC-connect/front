@@ -13,7 +13,7 @@
 - 과정 카드를 누르면 `/life-study/[id]` 상세로 push 된다. 신청 가능 과정 카드는 `?cohortId=` 를 함께 넘긴다. 상세·신청 화면은 삶공부 탭 Stack 에 쌓이고 뒤로가기로 목록에 돌아간다.
 - 상세는 기수 상세 `GET /api/life-study/cohorts/{id}` 로 신청 여부(`applied`)를, 과정 상세 `GET /api/life-study/{id}` 의 `lessons[]` 로 커리큘럼을 그린다. 과정이 없거나 커리큘럼이 비면 공통 `<Empty />` 를 보여준다.
 - 모집 중인 기수가 있을 때만 하단 `[수강 신청하기]` 가 보이고, 이미 신청했으면 비활성 상태로 "이미 수강 신청한 과정이에요" 를 보여준다.
-- 수강 신청(`/life-study/apply`)은 `POST /api/life-study/cohorts/{cohortId}/attend` 로 `userYear`·`userFaithYears`·`userPart` 를 보낸다. 생년·신앙 연차·수강 약속은 빈 값/미동의로 시작해 사용자가 직접 고른다.
+- 수강 신청(`/life-study/apply`)은 `POST /api/life-study/cohorts/{cohortId}/attend` 에 빈 바디 `{}` 를 보낸다. 서버에서 `userYear`·`userFaithYears`·`userPart` 가 선택 항목이 되어 앱은 이 입력을 받지 않는다. 화면 입력은 수강 약속 동의 하나이며 미동의로 시작한다.
 - 내 수료 기록은 마이페이지 `/mypage/life-study-history`(mypage 도메인)에서 본다. `/life-study/history` 는 `GET /api/life-study/completions` 의 과정 이름·`completedAt` 만 그리는 화면으로 남아 있으나 진입 링크가 없다.
 
 ## 데이터 타입

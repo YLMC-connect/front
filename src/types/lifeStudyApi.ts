@@ -58,8 +58,9 @@ export interface LifeStudyCohortDetailDto extends LifeStudyCohortDto {
   lessons: LifeStudyLessonDto[];
 }
 
+/** 세 필드 모두 선택(빈 바디 `{}` 가능). 앱 신청 화면은 보내지 않는다. */
 export interface LifeStudyAttendRequest {
-  userYear: string;
-  userFaithYears: string;
-  userPart: string;
+  userYear?: string;
+  userFaithYears?: string;
+  userPart?: string;
 }

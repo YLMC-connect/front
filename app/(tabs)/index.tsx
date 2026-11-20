@@ -36,6 +36,12 @@ export default function HomeScreen() {
   const fullName = currentUser?.name?.trim() || "성도";
   const sundaySermon = overview.data?.sundaySermon ?? null;
   const dawnPrayer = overview.data?.dawnPrayer ?? null;
+  const dailyPrayer = overview.data?.dailyPrayer ?? null;
+  const [expandedPrayerIds, setExpandedPrayerIds] = useState<string[]>([]);
+  const toggleDailyPrayer = (id: string) =>
+    setExpandedPrayerIds((prev) =>
+      prev.includes(id) ? prev.filter((value) => value !== id) : [...prev, id],
+    );
   const sermonMeta = sundaySermon
     ? resolveCategoryAndDate(sundaySermon.timeLabel, sundaySermon.dateLabel)
     : null;
@@ -160,41 +166,91 @@ export default function HomeScreen() {
               </MotionPressable>
             ) : null}
 
-            <View style={styles.dailyCard} testID="home-daily-prayer">
-              <View style={styles.cardHeaderRow}>
-                <View style={styles.dailyCategoryBadge}>
+            {dailyPrayer ? (
+              <View style={styles.dailyCard} testID="home-daily-prayer">
+                <View style={styles.cardHeaderRow}>
+                  <View style={styles.dailyCategoryBadge}>
+                    <AppText
+                      variant="caption"
+                      tone="inverse"
+                      style={styles.dailyCategoryBadgeText}
+                    >
+                      오늘의 기도
+                    </AppText>
+                  </View>
                   <AppText
                     variant="caption"
                     tone="inverse"
-                    style={styles.dailyCategoryBadgeText}
+                    style={styles.dailyDateText}
                   >
-                    오늘의 기도
+                    {dailyPrayer.dateLabel} {dailyPrayer.weekdayLabel}
                   </AppText>
                 </View>
-                <AppText
-                  variant="caption"
-                  tone="inverse"
-                  style={styles.dailyDateText}
-                >
-                  {overview.data.dailyPrayer.dateLabel}{" "}
-                  {overview.data.dailyPrayer.weekdayLabel}
-                </AppText>
+                {dailyPrayer.items.map((item, index) => {
+                  const expanded = expandedPrayerIds.includes(item.id);
+                  const body = (
+                    <>
+                      <AppText
+                        variant="heading"
+                        tone="inverse"
+                        style={styles.dailyTitle}
+                      >
+                        {item.title}
+                      </AppText>
+                      {item.summary ? (
+                        <AppText
+                          variant="body"
+                          tone="inverse"
+                          style={styles.dailySummary}
+                        >
+                          {item.summary}
+                        </AppText>
+                      ) : null}
+                      {item.content && expanded ? (
+                        <AppText
+                          variant="body"
+                          tone="inverse"
+                          style={styles.dailyContent}
+                          testID="home-daily-prayer-content"
+                        >
+                          {item.content}
+                        </AppText>
+                      ) : null}
+                      {item.content ? (
+                        <View style={styles.dailyMoreRow}>
+                          <AppText
+                            variant="caption"
+                            tone="inverse"
+                            style={styles.dailyDateText}
+                          >
+                            {expanded ? "접기" : "기도 내용 보기"}
+                          </AppText>
+                        </View>
+                      ) : null}
+                    </>
+                  );
+                  return (
+                    <View
+                      key={item.id}
+                      style={index > 0 ? styles.dailyItemDivider : null}
+                    >
+                      {item.content ? (
+                        <MotionPressable
+                          accessibilityRole="button"
+                          accessibilityState={{ expanded }}
+                          onPress={() => toggleDailyPrayer(item.id)}
+                          testID={`home-daily-prayer-item-${item.id}`}
+                        >
+                          {body}
+                        </MotionPressable>
+                      ) : (
+                        body
+                      )}
+                    </View>
+                  );
+                })}
               </View>
-              <AppText
-                variant="heading"
-                tone="inverse"
-                style={styles.dailyTitle}
-              >
-                {overview.data.dailyPrayer.title}
-              </AppText>
-              <AppText
-                variant="body"
-                tone="inverse"
-                style={styles.dailySummary}
-              >
-                {overview.data.dailyPrayer.summary}
-              </AppText>
-            </View>
+            ) : null}
 
             {dawnPrayer ? (
               <Card
@@ -309,6 +365,21 @@ const styles = StyleSheet.create({
   },
   dailySummary: {
     opacity: 0.92,
+  },
+  dailyContent: {
+    marginTop: theme.spacing[2],
+  },
+  dailyMoreRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    minHeight: theme.layout.touchTarget,
+  },
+  dailyItemDivider: {
+    marginTop: theme.spacing[4],
+    paddingTop: theme.spacing[4],
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.primaryStrong,
   },
   dawnCard: {
     marginHorizontal: theme.layout.screenX,

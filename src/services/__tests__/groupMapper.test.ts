@@ -45,6 +45,20 @@ describe("groupMapper", () => {
     ).toBeNull();
   });
 
+  it("maps approval statuses PENDING and REJECTED", () => {
+    expect(
+      mapCommunionOverviewItem({ ...listItem, status: "PENDING" }, new Set())
+        ?.status,
+    ).toBe("pending");
+    expect(
+      mapCommunionOverviewItem({ ...listItem, status: "REJECTED" }, new Set())
+        ?.status,
+    ).toBe("rejected");
+    expect(
+      mapCommunionOverviewItem({ ...listItem, status: "CANCELED" }, new Set()),
+    ).toBeNull();
+  });
+
   it("maps volunteer list items without inventing schedule", () => {
     expect(
       mapCommunionServiceItem({

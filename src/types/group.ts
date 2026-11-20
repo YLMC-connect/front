@@ -10,7 +10,9 @@ export type GroupCategory =
   | "carpool"
   | "etc";
 
-export type GroupStatus = "open" | "closed";
+/** pending(승인대기)·rejected(반려)는 서버 승인 절차 상태. 소모임장이 바꿀 수 있는 건 open·closed 뿐이다. */
+export type GroupStatus = "open" | "closed" | "pending" | "rejected";
+export type GroupRecruitStatus = Extract<GroupStatus, "open" | "closed">;
 
 export interface GroupInput {
   name: string;
@@ -32,7 +34,7 @@ export interface GroupUpdateInput {
 
 export interface GroupStatusUpdateInput {
   groupId: string;
-  status: GroupStatus;
+  status: GroupRecruitStatus;
 }
 
 export interface GroupKickMemberInput {

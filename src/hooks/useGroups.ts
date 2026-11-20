@@ -27,7 +27,7 @@ import type {
   GroupInput,
   GroupNoticeInput,
   GroupNoticeUpdateInput,
-  GroupStatus,
+  GroupRecruitStatus,
   GroupUpdateInput,
 } from "../types/group";
 
@@ -247,7 +247,8 @@ export function useTransferGroupLeader(groupId: string) {
 export function useUpdateGroupStatus(groupId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (status: GroupStatus) => updateGroupStatus({ groupId, status }),
+    mutationFn: (status: GroupRecruitStatus) =>
+      updateGroupStatus({ groupId, status }),
     onSuccess: (detail) => {
       queryClient.setQueryData<GroupDetail>(
         queryKeys.group.detail(groupId),

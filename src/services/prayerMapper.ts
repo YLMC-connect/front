@@ -129,6 +129,7 @@ function readTopic(value: unknown, source: unknown): PrayerTopicDto {
     emergencyEndAt: optionalString(value, "emergencyEndAt"),
     answerContent: requireNullableString(value, "answerContent", source),
     answeredAt: optionalString(value, "answeredAt"),
+    receivedAt: optionalString(value, "receivedAt"),
     createdAt: optionalString(value, "createdAt"),
   };
 }
@@ -277,6 +278,8 @@ function weekdayFromYoil(yoil: number): PrayerWeekday | undefined {
       return "thu";
     case 5:
       return "fri";
+    case 6:
+      return "sat";
     default:
       return undefined;
   }
@@ -367,7 +370,7 @@ export function formatPrayerRoomDayPeriod(
 }
 
 /**
- * 내 기도방·내 기도제목은 API 행으로만 만든다. 역할이 없거나 일·토는 뺀다.
+ * 내 기도방·내 기도제목은 API 행으로만 만든다. 역할이 없거나 일요일은 뺀다.
  * 승인 대기 신청은 이미 참여 중인 기도방이 아니면 `pending` 행으로 붙인다.
  */
 export function buildPrayerOverview(

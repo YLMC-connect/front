@@ -175,4 +175,33 @@ describe("market and group service validation", () => {
     await expect(service.joinGroup("6")).rejects.toThrow("모집이 마감됐어요");
     expect(dataSource.joinGroup).not.toHaveBeenCalled();
   });
+
+  it.each([
+    ["pending", "승인 대기 중인 모임이에요"],
+    ["rejected", "반려된 모임이에요"],
+  ] as const)(
+    "rejects joining a %s group before calling the data source",
+    async (status, message) => {
+      const dataSource = groupDataSource({
+        getDetail: jest.fn().mockResolvedValue({
+          id: "7",
+          name: "승인 전 모임",
+          description: "설명",
+          categoryLabel: "취미·문화",
+          currentMembers: 1,
+          maxMembers: 10,
+          status,
+          leaderName: "이민구",
+          isLeader: false,
+          isJoined: false,
+          members: ["이민구"],
+          notices: [],
+        }),
+      });
+      const service = createGroupService(dataSource);
+
+      await expect(service.joinGroup("7")).rejects.toThrow(message);
+      expect(dataSource.joinGroup).not.toHaveBeenCalled();
+    },
+  );
 });

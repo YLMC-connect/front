@@ -44,6 +44,7 @@ const topic = {
   emergencyEndAt: "2026-10-10T00:00:00",
   answerContent: "",
   answeredAt: "2026-10-01T00:00:00",
+  receivedAt: "2026-10-02",
   createdAt: "2026-10-02T01:02:03",
 };
 

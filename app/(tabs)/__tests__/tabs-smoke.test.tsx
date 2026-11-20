@@ -57,12 +57,17 @@ describe("v1 tab smoke screens", () => {
 
     jest.spyOn(homeService, "fetchHomeOverview").mockResolvedValue({
       dailyPrayer: {
-        dateLabel: "4월 16일 목요일",
+        dateLabel: "4월 16일",
         weekday: "thu",
-        weekdayLabel: "목요일의 기도",
-        title: "일터와 가정을 지키는 지혜",
-        summary: "우리의 계획보다 주님의 인도하심을 신뢰하게 하소서.",
-        href: "/prayer",
+        weekdayLabel: "목요일",
+        items: [
+          {
+            id: "1",
+            title: "일터와 가정을 지키는 지혜",
+            summary: "우리의 계획보다 주님의 인도하심을 신뢰하게 하소서.",
+            content: "",
+          },
+        ],
       },
       dawnPrayer: {
         id: "dawn-1",
@@ -80,8 +85,6 @@ describe("v1 tab smoke screens", () => {
         thumbnailUrl: "https://img.youtube.com/vi/1t5SPGmJxsg/hqdefault.jpg",
         videoUrl: "https://www.youtube.com/watch?v=1t5SPGmJxsg",
       },
-      todos: [],
-      progressSteps: [],
     });
 
     const marketItems: MarketOverviewItem[] = [
@@ -1464,6 +1467,7 @@ describe("v1 tab smoke screens", () => {
           emergencyEndAt: null,
           answerContent: null,
           answeredAt: null,
+          receivedAt: null,
           createdAt: "2026-10-28",
         },
       ],
@@ -1482,7 +1486,25 @@ describe("v1 tab smoke screens", () => {
           emergencyEndAt: null,
           answerContent: null,
           answeredAt: null,
+          receivedAt: "2026-10-20",
           createdAt: "2026-10-28",
+        },
+        {
+          id: 4,
+          categoryId: 1,
+          categoryName: "건강",
+          title: "어머니 회복",
+          content: "수술 후 회복을 위해",
+          status: "OPEN",
+          rejectReason: null,
+          writerName: "정성도",
+          mine: false,
+          emergency: false,
+          emergencyEndAt: null,
+          answerContent: null,
+          answeredAt: null,
+          receivedAt: null,
+          createdAt: "2026-10-27",
         },
       ],
       recentAnswers: [
@@ -1501,6 +1523,7 @@ describe("v1 tab smoke screens", () => {
           answerContent:
             "첫 주를 잘 마쳤고 팀 안에서 좋은 도움을 받고 있습니다.",
           answeredAt: "2026-10-28",
+          receivedAt: null,
           createdAt: "2026-10-28",
         },
       ],
@@ -1517,6 +1540,19 @@ describe("v1 tab smoke screens", () => {
     expect(screen.queryByText("오늘")).toBeNull();
     expect(screen.getByText("화")).toBeTruthy();
     expect(screen.getByText("75%")).toBeTruthy();
+
+    // BUG-32: 요약 카드는 함께 올라가고 탭 줄(자식 1번)만 고정
+    expect(
+      screen.getByTestId("prayer-detail-scroll").props.stickyHeaderIndices,
+    ).toEqual([1]);
+    // BUG-31: 진행 중 기도제목은 카테고리 이름순 소제목으로 묶인다
+    expect(
+      screen
+        .getAllByTestId("prayer-category-header")
+        .map((header) => header.props.children[0].props.children),
+    ).toEqual(["건강", "진로"]);
+    // 접수일(receivedAt)이 있으면 등록일 대신 보인다
+    expect(screen.getByText("10월 20일")).toBeTruthy();
 
     // Toggle prayer completion
     const completedStatus = {
@@ -1621,6 +1657,7 @@ describe("v1 tab smoke screens", () => {
           emergencyEndAt: null,
           answerContent: null,
           answeredAt: null,
+          receivedAt: null,
           createdAt: null,
         },
       ],
@@ -1639,6 +1676,7 @@ describe("v1 tab smoke screens", () => {
           emergencyEndAt: null,
           answerContent: null,
           answeredAt: null,
+          receivedAt: null,
           createdAt: null,
         },
       ],
@@ -1767,6 +1805,7 @@ describe("v1 tab smoke screens", () => {
         emergencyEndAt: null,
         answerContent: null,
         answeredAt: null,
+        receivedAt: null,
         createdAt: null,
       },
     ]);
@@ -1884,32 +1923,34 @@ describe("v1 tab smoke screens", () => {
     );
   });
 
-  it("renders the life study apply screen", () => {
+  it("renders the life study apply screen without year, part, or faith inputs", () => {
     renderWithClient(<LifeStudyApplyScreenRoute />);
 
     expect(screen.getByText("수강 신청")).toBeTruthy();
-    expect(screen.getByText("신앙 연차")).toBeTruthy();
     expect(screen.getByText("수강 신청하기")).toBeTruthy();
+    expect(screen.queryByText("생년")).toBeNull();
+    expect(screen.queryByText("소속 부서")).toBeNull();
+    expect(screen.queryByText("신앙 연차")).toBeNull();
   });
 
-  it("starts the life study apply form empty and requires a faith year choice", async () => {
+  it("requires only the promise and applies with an empty body", async () => {
     jest
       .mocked(useLocalSearchParams)
       .mockReturnValue({ cohortId: "life-overview-open-1" });
-    const apply = jest.spyOn(lifeStudyService, "applyLifeStudyCohort");
+    const apply = jest
+      .spyOn(lifeStudyService, "applyLifeStudyCohort")
+      .mockResolvedValue(1);
     renderWithClient(<LifeStudyApplyScreenRoute />);
 
     expect(await screen.findByText("생명의 삶")).toBeTruthy();
-    expect(screen.queryByDisplayValue("1988")).toBeNull();
-    fireEvent.changeText(screen.getByPlaceholderText("예: 1988"), "1994");
-    fireEvent.changeText(
-      screen.getByPlaceholderText("예) 4부 청장년부"),
-      "4부 청장년부",
-    );
     fireEvent.press(screen.getByTestId("life-study-apply"));
-
-    expect(await screen.findByText("신앙 연차를 선택해주세요.")).toBeTruthy();
+    expect(await screen.findByText("수강 약속에 동의해주세요.")).toBeTruthy();
     expect(apply).not.toHaveBeenCalled();
+
+    fireEvent.press(screen.getByText("수강 약속에 동의합니다"));
+    fireEvent.press(screen.getByTestId("life-study-apply"));
+    await waitFor(() => expect(apply).toHaveBeenCalledTimes(1));
+    expect(apply.mock.calls[0]?.[1]).toEqual({});
   });
 
   it("does not apply to another cohort when the requested cohort is not open", async () => {

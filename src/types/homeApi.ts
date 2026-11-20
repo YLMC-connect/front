@@ -20,6 +20,15 @@ export interface DailyQtResponse {
   content: string | null; // 목록에서는 null, 상세에서 HTML
 }
 
+/** GET /api/prayer/weekday-topics 항목. weekday 는 1=월 … 7=일. */
+export interface PrayerWeekdayTopicResponse {
+  id: number;
+  weekday: number;
+  title: string;
+  summary: string | null;
+  content: string | null;
+}
+
 export interface PageResponse<T> {
   content: T[];
   totalElements: number;

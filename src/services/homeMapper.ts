@@ -1,12 +1,15 @@
 import type {
   HomeDailyPrayer,
+  HomeDailyPrayerItem,
   HomeDawnPrayer,
-  HomeProgressStep,
   HomeSundaySermon,
-  HomeTodoItem,
   HomeWeekday,
 } from "../types/home";
-import type { DailyQtResponse, SermonResponse } from "../types/homeApi";
+import type {
+  DailyQtResponse,
+  PrayerWeekdayTopicResponse,
+  SermonResponse,
+} from "../types/homeApi";
 
 const weekdayKeys: HomeWeekday[] = [
   "sun",
@@ -28,47 +31,6 @@ const weekdayLabels: Record<HomeWeekday, string> = {
   sat: "토요일",
 };
 
-export const homeDailyPrayerByWeekday: Record<
-  HomeWeekday,
-  Omit<HomeDailyPrayer, "dateLabel" | "weekday" | "weekdayLabel">
-> = {
-  mon: {
-    title: "가정과 일터에서 믿음의 선택을 하도록 도와주세요.",
-    summary: "한 주를 시작하는 마음으로 가정과 교회를 위해 기도합니다.",
-    href: "/prayer",
-  },
-  tue: {
-    title: "새벽마다 주님을 찾고 말씀을 붙들게 하소서.",
-    summary: "화요일, 조용한 가운데 하루를 주님께 맡깁니다.",
-    href: "/prayer",
-  },
-  wed: {
-    title: "아픈 성도와 회복이 필요한 가정을 돌봐 주세요.",
-    summary: "수요 치유와 회복을 구하며 함께 중보합니다.",
-    href: "/prayer",
-  },
-  thu: {
-    title: "공동체 안에 용서와 화평이 흐르게 하소서.",
-    summary: "목요일, 서로를 위해 중보하는 마음을 품습니다.",
-    href: "/prayer",
-  },
-  fri: {
-    title: "선교지와 다음 세대를 주님의 손에 맡깁니다.",
-    summary: "금요 선교 중보로 세상을 향해 마음을 엽니다.",
-    href: "/prayer",
-  },
-  sat: {
-    title: "안식과 예배를 준비하는 마음을 주소서.",
-    summary: "토요일, 한 주를 돌아보며 예배를 예비합니다.",
-    href: "/prayer",
-  },
-  sun: {
-    title: "예배 가운데 주님을 만나고 새 힘을 얻게 하소서.",
-    summary: "주일, 함께 예배하며 은혜를 구합니다.",
-    href: "/prayer",
-  },
-};
-
 export function resolveHomeWeekday(date: Date = new Date()): HomeWeekday {
   return weekdayKeys[date.getDay()] ?? "mon";
 }
@@ -77,48 +39,43 @@ export function formatHomeDateLabel(date: Date = new Date()): string {
   return `${date.getMonth() + 1}월 ${date.getDate()}일`;
 }
 
-export function buildHomeDailyPrayer(date: Date = new Date()): HomeDailyPrayer {
+/** 서버 요일 번호(1=월 … 7=일). JS 의 getDay(0=일)와 다르다. */
+export function toWeekdayTopicNumber(date: Date = new Date()): number {
+  const day = date.getDay();
+  return day === 0 ? 7 : day;
+}
+
+function mapWeekdayTopic(
+  topic: PrayerWeekdayTopicResponse,
+): HomeDailyPrayerItem | null {
+  const title = typeof topic.title === "string" ? topic.title.trim() : "";
+  if (topic.id == null || !title) return null;
+  return {
+    id: String(topic.id),
+    title,
+    summary: typeof topic.summary === "string" ? topic.summary.trim() : "",
+    content: typeof topic.content === "string" ? topic.content.trim() : "",
+  };
+}
+
+/** 오늘 요일 기도 목록으로 카드를 만든다. 쓸 수 있는 항목이 없으면 null. */
+export function buildHomeDailyPrayer(
+  topics: readonly PrayerWeekdayTopicResponse[],
+  date: Date = new Date(),
+): HomeDailyPrayer | null {
+  const today = toWeekdayTopicNumber(date);
+  const items = topics
+    .filter((topic) => topic.weekday === today)
+    .map(mapWeekdayTopic)
+    .filter((item): item is HomeDailyPrayerItem => item !== null);
+  if (items.length === 0) return null;
   const weekday = resolveHomeWeekday(date);
-  const copy = homeDailyPrayerByWeekday[weekday];
   return {
     dateLabel: formatHomeDateLabel(date),
     weekday,
     weekdayLabel: weekdayLabels[weekday],
-    ...copy,
+    items,
   };
-}
-
-export function buildHomeTodos(
-  daily: HomeDailyPrayer,
-  dawn: HomeDawnPrayer | null,
-): HomeTodoItem[] {
-  const todos: HomeTodoItem[] = [];
-  if (dawn) {
-    todos.push({
-      id: "dawn-word",
-      title: dawn.title,
-      subtitle: dawn.summary,
-      actionLabel: "보기",
-      href: dawn.href,
-      icon: "book-open-page-variant",
-    });
-  }
-  todos.push({
-    id: "daily-prayer",
-    title: "오늘의 기도",
-    subtitle: daily.title,
-    actionLabel: "기도",
-    href: daily.href,
-    icon: "hands-pray",
-  });
-  return todos;
-}
-
-export function buildHomeProgressSteps(): HomeProgressStep[] {
-  return [
-    { id: "dawn-word", label: "말씀" },
-    { id: "daily-prayer", label: "기도" },
-  ];
 }
 
 /**

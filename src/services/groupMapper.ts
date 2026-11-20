@@ -6,6 +6,7 @@ import type {
   GroupDetailNotice,
   GroupMemberDetail,
   GroupOverviewItem,
+  GroupRecruitStatus,
   GroupServiceOverviewItem,
   GroupStatus,
 } from "../types/group";
@@ -13,7 +14,36 @@ const COMMUNION_STATUS_TO_DOMAIN = {
   RECRUITING: "open",
   CLOSED: "closed",
   COMPLETED: "closed",
+  PENDING: "pending",
+  REJECTED: "rejected",
 } as const satisfies Record<string, GroupStatus>;
+
+const GROUP_STATUS_LABEL: Record<GroupStatus, string> = {
+  open: "모집중",
+  closed: "모집완료",
+  pending: "승인대기",
+  rejected: "반려",
+};
+
+/** 배지 글자. */
+export function groupStatusLabel(status: GroupStatus) {
+  return GROUP_STATUS_LABEL[status];
+}
+
+/** 배지 색: 모집중=success, 승인대기=warning, 반려=danger, 모집완료=neutral. */
+export function groupStatusTone(
+  status: GroupStatus,
+): "success" | "warning" | "danger" | "neutral" {
+  if (status === "open") return "success";
+  if (status === "pending") return "warning";
+  if (status === "rejected") return "danger";
+  return "neutral";
+}
+
+/** 승인 전·반려 모임은 공개 목록에 두지 않고 내 모임에서만 보인다. */
+export function isApprovedGroupStatus(status: GroupStatus) {
+  return status === "open" || status === "closed";
+}
 
 const COMMUNION_STATUS_LABEL = {
   RECRUITING: "모집중",
@@ -77,7 +107,7 @@ export function toCommunionCategoryCode(
   ];
 }
 
-export function toCommunionStatus(status: GroupStatus): string {
+export function toCommunionStatus(status: GroupRecruitStatus): string {
   return status === "open" ? "RECRUITING" : "COMPLETED";
 }
 

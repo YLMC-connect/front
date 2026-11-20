@@ -111,6 +111,12 @@ export function createGroupService(dataSource: GroupDataSource) {
     joinGroup: async (id: string) => {
       const detail = await dataSource.getDetail(id);
       if (detail.isJoined) return detail;
+      if (detail.status === "pending") {
+        throw new Error("승인 대기 중인 모임이에요");
+      }
+      if (detail.status === "rejected") {
+        throw new Error("반려된 모임이에요");
+      }
       if (detail.status === "closed") {
         throw new Error("모집이 마감됐어요");
       }

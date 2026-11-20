@@ -1,4 +1,8 @@
-import { buildHomeDailyPrayer, resolveHomeWeekday } from "../homeMapper";
+import {
+  buildHomeDailyPrayer,
+  resolveHomeWeekday,
+  toWeekdayTopicNumber,
+} from "../homeMapper";
 import { httpHomeDataSource } from "../homeHttpDataSource";
 import {
   fetchDawnPrayerDetail,
@@ -16,16 +20,83 @@ describe("home service", () => {
     expect(resolveHomeWeekday(new Date("2026-07-27T12:00:00"))).toBe("mon");
   });
 
-  it("builds daily prayer copy for the given day", () => {
-    const daily = buildHomeDailyPrayer(new Date("2026-07-27T09:00:00"));
-    expect(daily.weekday).toBe("mon");
-    expect(daily.weekdayLabel).toBe("월요일");
-    expect(daily.dateLabel).toBe("7월 27일");
-    expect(daily.title.length).toBeGreaterThan(0);
-    expect(daily.href).toBe("/prayer");
+  it("converts dates to server weekday numbers (1=mon … 7=sun)", () => {
+    expect(toWeekdayTopicNumber(new Date("2026-07-27T12:00:00"))).toBe(1);
+    expect(toWeekdayTopicNumber(new Date("2026-07-25T12:00:00"))).toBe(6);
+    expect(toWeekdayTopicNumber(new Date("2026-07-26T12:00:00"))).toBe(7);
+  });
+
+  it("builds today's weekday prayers in server order and skips other days", () => {
+    const daily = buildHomeDailyPrayer(
+      [
+        {
+          id: 1,
+          weekday: 1,
+          title: " 첫 기도 ",
+          summary: "요약",
+          content: null,
+        },
+        {
+          id: 2,
+          weekday: 2,
+          title: "화요일 기도",
+          summary: null,
+          content: null,
+        },
+        {
+          id: 3,
+          weekday: 1,
+          title: "둘째 기도",
+          summary: null,
+          content: "내용",
+        },
+        { id: 4, weekday: 1, title: " ", summary: null, content: null },
+      ],
+      new Date("2026-07-27T09:00:00"),
+    );
+    expect(daily).toEqual({
+      dateLabel: "7월 27일",
+      weekday: "mon",
+      weekdayLabel: "월요일",
+      items: [
+        { id: "1", title: "첫 기도", summary: "요약", content: "" },
+        { id: "3", title: "둘째 기도", summary: "", content: "내용" },
+      ],
+    });
+  });
+
+  it("returns null when today has no weekday prayer", () => {
+    expect(
+      buildHomeDailyPrayer(
+        [
+          {
+            id: 2,
+            weekday: 2,
+            title: "화요일 기도",
+            summary: null,
+            content: null,
+          },
+        ],
+        new Date("2026-07-27T09:00:00"),
+      ),
+    ).toBeNull();
+    expect(
+      buildHomeDailyPrayer([], new Date("2026-07-27T09:00:00")),
+    ).toBeNull();
   });
 
   it("fetches real sermon and daily-qt data", async () => {
+    const weekdaySpy = jest
+      .spyOn(httpHomeDataSource, "fetchWeekdayPrayers")
+      .mockResolvedValue([
+        {
+          id: 5,
+          weekday: 2,
+          title: "화요일 기도",
+          summary: null,
+          content: null,
+        },
+      ]);
     jest.spyOn(httpHomeDataSource, "fetchSermons").mockResolvedValue({
       content: [
         {
@@ -76,8 +147,10 @@ describe("home service", () => {
     expect(overview.sundaySermon?.thumbnailUrl).toContain("1t5SPGmJxsg");
     expect(overview.dawnPrayer?.id).toBe("dawn-20");
     expect(overview.dawnPrayer?.title).toBe("고린도후서 1:23~2:17");
-    expect(overview.todos).toHaveLength(2);
-    expect(overview.progressSteps).toHaveLength(2);
+    expect(weekdaySpy).toHaveBeenCalledWith(2);
+    expect(overview.dailyPrayer?.items.map((item) => item.title)).toEqual([
+      "화요일 기도",
+    ]);
   });
 
   it("fetches detail and maps html content", async () => {
@@ -129,7 +202,8 @@ describe("home service", () => {
     });
   });
 
-  it("returns null for sundaySermon and dawnPrayer when server lists are empty", async () => {
+  it("returns null for every card when server lists are empty", async () => {
+    jest.spyOn(httpHomeDataSource, "fetchWeekdayPrayers").mockResolvedValue([]);
     jest.spyOn(httpHomeDataSource, "fetchSermons").mockResolvedValue({
       content: [],
       totalElements: 0,
@@ -150,11 +224,11 @@ describe("home service", () => {
     const overview = await fetchHomeOverview(new Date("2026-07-25T09:00:00"));
     expect(overview.sundaySermon).toBeNull();
     expect(overview.dawnPrayer).toBeNull();
-    expect(overview.todos).toHaveLength(1);
-    expect(overview.todos[0]?.id).toBe("daily-prayer");
+    expect(overview.dailyPrayer).toBeNull();
   });
 
   it("throws when both sermon and daily-qt requests fail", async () => {
+    jest.spyOn(httpHomeDataSource, "fetchWeekdayPrayers").mockResolvedValue([]);
     jest
       .spyOn(httpHomeDataSource, "fetchSermons")
       .mockRejectedValue(new Error("Network Error"));

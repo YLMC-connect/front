@@ -1,19 +1,20 @@
-export type MarketCategory =
-  | "all"
-  | "cloth"
-  | "home"
-  | "book"
-  | "food"
-  | "baby"
-  | "sport"
-  | "etc";
+/** 서버 카테고리 코드(`GET /api/share/categories` 의 `code`). 목록은 서버가 정한다. */
+export type MarketCategoryCode = string;
+
+/** 화면에서 고른 카테고리. "all" 은 필터 없음. */
+export type MarketCategory = "all" | MarketCategoryCode;
+
+export interface MarketCategoryOption {
+  code: MarketCategoryCode;
+  name: string;
+}
 
 export type MarketStatus = "sharing" | "reserved" | "done";
 
 export interface MarketInput {
   title: string;
   description: string;
-  category: Exclude<MarketCategory, "all">;
+  category: MarketCategoryCode;
   condition: string;
   location: string;
   images: string[];
@@ -23,7 +24,7 @@ export interface MarketUpdateInput {
   marketId: string;
   title: string;
   description: string;
-  category: Exclude<MarketCategory, "all">;
+  category: MarketCategoryCode;
   condition: string;
   location: string;
   /** 화면에 남은 사진 순서. 서버 사진 URL 과 새로 고른 기기 사진 URI 가 섞여 있다. */
@@ -45,7 +46,7 @@ export interface MarketOverviewItem {
   authorName: string;
   createdLabel: string;
   status: MarketStatus;
-  category: Exclude<MarketCategory, "all">;
+  category: MarketCategoryCode;
   isMine: boolean;
 }
 
@@ -91,7 +92,7 @@ export interface MarketDetail {
   images?: string[];
   title: string;
   content: string;
-  categoryLabel: string;
+  categoryCode: MarketCategoryCode;
   conditionLabel: string;
   /** 수령 장소. 옛 글은 비어 있을 수 있다. */
   location?: string;

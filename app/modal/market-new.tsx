@@ -14,6 +14,7 @@ import {
 import { Text } from "@/components/ui/text";
 import {
   ConfirmDialog,
+  ErrorState,
   FloatingBottomBar,
   ModalFormSection as Section,
   ModalFormTextInput as FormInput,
@@ -23,20 +24,16 @@ import {
 import { RadioRow } from "../../src/components/ui/checkbox";
 import { InfoBox } from "../../src/components/ui/info-box";
 import { PhotoTile } from "../../src/components/ui/photo-tile";
-import { MARKET_CATEGORIES } from "../../src/constants/domainOptions";
 import { theme } from "../../src/constants/theme";
 import {
   useCreateMarketPost,
+  useMarketCategories,
   useMarketDetail,
   useUpdateMarketPost,
 } from "../../src/hooks/useMarket";
 import { prepareImageForUpload } from "../../src/lib/resizeImage";
 import type { MarketDetail, MarketInput } from "../../src/types/market";
 
-const categories = MARKET_CATEGORIES.slice(1) as readonly {
-  key: MarketInput["category"];
-  label: string;
-}[];
 const conditions = ["새것", "사용감 있음", "파손 있음"] as const;
 const MAX_IMAGES = 5;
 /** 32 칩 + 위아래 6 → 누르는 곳 44. */
@@ -44,7 +41,8 @@ const CHIP_HIT_SLOP = { top: 6, bottom: 6 };
 
 const emptyValues: MarketInput = {
   images: [],
-  category: "etc",
+  // 카테고리는 서버 목록에서 사용자가 고른다
+  category: "",
   title: "",
   condition: "사용감 있음",
   description: "",
@@ -53,12 +51,9 @@ const emptyValues: MarketInput = {
 
 /** 수정할 글의 상세 응답을 입력값으로 바꾼다. */
 function valuesFromDetail(detail: MarketDetail): MarketInput {
-  const category =
-    categories.find((item) => item.label === detail.categoryLabel)?.key ??
-    "etc";
   return {
     images: detail.images ?? [],
-    category,
+    category: detail.categoryCode,
     title: detail.title,
     condition: detail.conditionLabel || emptyValues.condition,
     description: detail.content,
@@ -73,6 +68,8 @@ export default function MarketNewModal() {
   const editId = params.id;
   const isEdit = Boolean(editId);
   const detailQuery = useMarketDetail(editId ?? "");
+  const categoriesQuery = useMarketCategories();
+  const categories = categoriesQuery.data ?? [];
   const detail = editId ? detailQuery.data : undefined;
   // 상세가 도착한 첫 값만 쓴다. 다시 불러와도 입력 중인 내용을 덮지 않게 한다
   const [loadedValues, setLoadedValues] = useState<MarketInput | undefined>(
@@ -245,16 +242,22 @@ export default function MarketNewModal() {
             </Section>
 
             <Section card label="카테고리" required>
-              <View style={styles.chips}>
+              {categoriesQuery.isError && categories.length === 0 ? (
+                <ErrorState
+                  message="카테고리를 불러오지 못했어요."
+                  onRetry={() => void categoriesQuery.refetch()}
+                />
+              ) : null}
+              <View style={styles.chips} testID="market-form-categories">
                 {categories.map((category) => {
-                  const selected = values.category === category.key;
+                  const selected = values.category === category.code;
                   return (
                     <MotionPressable
-                      key={category.key}
+                      key={category.code}
                       accessibilityRole="radio"
                       accessibilityState={{ selected }}
                       hitSlop={CHIP_HIT_SLOP}
-                      onPress={() => update("category", category.key)}
+                      onPress={() => update("category", category.code)}
                       style={[styles.chip, selected ? styles.chipOn : null]}
                     >
                       <Text
@@ -263,7 +266,7 @@ export default function MarketNewModal() {
                           selected ? styles.chipTextOn : null,
                         ]}
                       >
-                        {category.label}
+                        {category.name}
                       </Text>
                     </MotionPressable>
                   );

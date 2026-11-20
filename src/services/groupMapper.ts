@@ -5,6 +5,7 @@ import type {
   GroupDetail,
   GroupDetailNotice,
   GroupMemberDetail,
+  GroupMemberStatus,
   GroupOverviewItem,
   GroupRecruitStatus,
   GroupServiceOverviewItem,
@@ -17,6 +18,12 @@ const COMMUNION_STATUS_TO_DOMAIN = {
   PENDING: "pending",
   REJECTED: "rejected",
 } as const satisfies Record<string, GroupStatus>;
+
+const MEMBER_STATUS_TO_DOMAIN: Record<string, GroupMemberStatus> = {
+  PENDING: "pending",
+  APPROVED: "approved",
+  REJECTED: "rejected",
+};
 
 const GROUP_STATUS_LABEL: Record<GroupStatus, string> = {
   open: "모집중",
@@ -176,7 +183,7 @@ export function mapCommunionServiceItem(
     id,
     name,
     description: "",
-    schedule: "",
+    schedule: readString(data.schedule) ?? "",
     currentMembers,
     maxMembers,
     statusLabel,
@@ -228,11 +235,17 @@ export function mapCommunionDetail(
   const mappedCategory = category as Exclude<GroupCategory, "all">;
   const isLeader = Boolean(currentUserId && mappedLeaderId === currentUserId);
 
+  const approvedMembers = members.filter(
+    (member) => member.status === "approved",
+  );
   return {
     id: mappedId,
     name: mappedName,
     description: content,
     categoryLabel: CATEGORY_LABEL[mappedCategory],
+    schedule: readString(data.schedule) ?? "",
+    location: readString(data.location) ?? "",
+    requiresApproval: data.requiresApproval === true,
     currentMembers: currentMembers as number,
     maxMembers: maxMembers as number,
     status: mappedStatus,
@@ -242,12 +255,13 @@ export function mapCommunionDetail(
       isLeader ||
       Boolean(
         currentUserId &&
-        members.some((member) => member.userId === currentUserId),
+        approvedMembers.some((member) => member.userId === currentUserId),
       ),
     // 화면은 첫 멤버에 소모임장 왕관을 그리므로 소모임장을 맨 앞에 둔다.
-    members: [...members]
+    members: [...approvedMembers]
       .sort((a, b) => Number(b.isLeader) - Number(a.isLeader))
       .map((member) => member.userName),
+    pendingMembers: members.filter((member) => member.status === "pending"),
     notices,
   };
 }
@@ -298,6 +312,8 @@ export function mapCommunionMember(
     joinedLabel: formatCommunionCreatedLabel(joinedAt, now),
     isLeader: Boolean(leaderId && userId === leaderId),
     isMine: Boolean(currentUserId && userId === currentUserId),
+    status:
+      MEMBER_STATUS_TO_DOMAIN[readString(data.status) ?? ""] ?? "approved",
   };
 }
 

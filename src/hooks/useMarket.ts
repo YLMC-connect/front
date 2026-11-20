@@ -12,6 +12,7 @@ import {
   createMarketComment,
   deleteMarketComment,
   deleteMarketPost,
+  fetchMarketCategories,
   fetchMarketDetail,
   fetchMarketOverviewPage,
   fetchMyMarketOverviewPage,
@@ -21,14 +22,23 @@ import {
   updateMarketStatus,
 } from "../services/marketService";
 import type {
-  MarketCategory,
+  MarketCategoryCode,
   MarketDetail,
   MarketInput,
   MarketStatus,
   MarketUpdateInput,
 } from "../types/market";
 
-export function useMarketOverview(category?: Exclude<MarketCategory, "all">) {
+/** 서버가 정한 나눔 카테고리 목록(노출 순서). 자주 바뀌지 않아 10분 동안 다시 받지 않는다. */
+export function useMarketCategories() {
+  return useQuery({
+    queryKey: queryKeys.market.categories(),
+    queryFn: fetchMarketCategories,
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
+export function useMarketOverview(category?: MarketCategoryCode) {
   const query = useInfiniteQuery({
     // 카테고리는 서버에서 거른다(categoryCode). 카테고리마다 목록 캐시를 따로 둔다
     queryKey: [...queryKeys.market.overview(), category ?? "all"],
@@ -53,7 +63,7 @@ export function useMarketOverview(category?: Exclude<MarketCategory, "all">) {
 }
 
 export function useMyMarketOverview(
-  category?: Exclude<MarketCategory, "all">,
+  category?: MarketCategoryCode,
   enabled = true,
 ) {
   const query = useInfiniteQuery({

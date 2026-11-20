@@ -2,6 +2,7 @@ import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState, type ComponentProps, type ReactNode } from "react";
 import {
+  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -66,6 +67,8 @@ export default function GroupDetailScreen() {
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isPastHero, setIsPastHero] = useState(false);
+  // 승인이 필요한 모임에 신청한 뒤의 표시. 서버가 신청자에게 대기 상태를 주지 않아 이 화면에서만 기억한다
+  const [approvalRequested, setApprovalRequested] = useState(false);
   const membershipBusy =
     joinGroupMutation.isPending || leaveGroupMutation.isPending;
   const membershipError = joinGroupMutation.isError
@@ -123,6 +126,13 @@ export default function GroupDetailScreen() {
         : isClosed
           ? "모집이 마감됐어요"
           : null;
+  const joinLabel =
+    joinBlockedLabel ??
+    (approvalRequested
+      ? "승인 대기 중"
+      : group.requiresApproval
+        ? "가입 신청하기"
+        : "참여 신청하기");
   const current = group.currentMembers;
   const leaderName = group.leaderName;
   const visibleMembers =
@@ -209,7 +219,37 @@ export default function GroupDetailScreen() {
                   {group.maxMembers}명
                 </Text>
               </InfoLine>
+              {group.schedule ? (
+                <InfoLine icon="schedule" label="일정">
+                  <Text style={styles.infoValue}>{group.schedule}</Text>
+                </InfoLine>
+              ) : null}
+              {group.location ? (
+                <InfoLine icon="place" label="장소">
+                  <Text style={styles.infoValue}>{group.location}</Text>
+                </InfoLine>
+              ) : null}
             </View>
+
+            {isLeader && group.pendingMembers.length > 0 ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`가입 신청 ${group.pendingMembers.length}명 확인하기`}
+                onPress={openMembers}
+                style={styles.pendingBanner}
+                testID="group-pending-members"
+              >
+                <Badge tone="warning">{`가입 신청 ${group.pendingMembers.length}명`}</Badge>
+                <Text style={styles.pendingBannerText}>
+                  승인을 기다리고 있어요
+                </Text>
+                <AppIcon
+                  name="chevron-right"
+                  size={18}
+                  color={theme.colors.textMuted}
+                />
+              </Pressable>
+            ) : null}
 
             {isLeader ? (
               <Card style={styles.actionCard}>
@@ -389,15 +429,26 @@ export default function GroupDetailScreen() {
               <Button
                 testID="group-join-button"
                 size="lg"
-                accessibilityLabel={joinBlockedLabel ?? "참여 신청하기"}
-                disabled={joinBlockedLabel !== null}
+                accessibilityLabel={joinLabel}
+                disabled={joinBlockedLabel !== null || approvalRequested}
                 loading={membershipBusy}
                 onPress={() => {
-                  if (joinBlockedLabel) return;
-                  joinGroupMutation.mutate();
+                  if (joinBlockedLabel || approvalRequested) return;
+                  joinGroupMutation.mutate(undefined, {
+                    onSuccess: (next) => {
+                      // 승인이 필요한 모임은 신청만 되고 아직 멤버가 아니다
+                      if (next.requiresApproval && !next.isJoined) {
+                        setApprovalRequested(true);
+                        Alert.alert(
+                          "가입 신청 완료",
+                          "신청했어요. 소모임장이 승인하면 참여돼요.",
+                        );
+                      }
+                    },
+                  });
                 }}
               >
-                {joinBlockedLabel ?? "참여 신청하기"}
+                {joinLabel}
               </Button>
             )}
           </FloatingBottomBar>
@@ -535,6 +586,23 @@ function InfoLine({
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  pendingBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing[2],
+    minHeight: theme.layout.touchTarget,
+    paddingHorizontal: theme.spacing[4],
+    paddingVertical: theme.spacing[3],
+    marginTop: theme.spacing[4],
+    borderRadius: theme.radius.sm,
+    backgroundColor: theme.colors.warningSubtle,
+  },
+  pendingBannerText: {
+    flex: 1,
+    color: theme.colors.warningText,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
+  },
   loading: {
     flex: 1,
   },

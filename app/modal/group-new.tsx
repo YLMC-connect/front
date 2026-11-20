@@ -16,7 +16,9 @@ import {
   type ViewStyle,
 } from "react-native";
 import { Text } from "@/components/ui/text";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
+  AppText,
   ConfirmDialog,
   ErrorState,
   FloatingBottomBar,
@@ -43,6 +45,18 @@ const categories = GROUP_CATEGORIES.filter(
   key: GroupInput["category"];
   label: string;
 }[];
+
+const SCHEDULE_PRESETS = [
+  "매주 토요일",
+  "매주 주일",
+  "격주 토요일",
+  "평일 저녁",
+] as const;
+const LOCATION_PRESETS = ["교회", "온라인 (Zoom)", "외부 모임"] as const;
+const toChipItems = (labels: readonly string[]) =>
+  labels.map((label) => ({ key: label, label }));
+const SCHEDULE_PRESET_ITEMS = toChipItems(SCHEDULE_PRESETS);
+const LOCATION_PRESET_ITEMS = toChipItems(LOCATION_PRESETS);
 
 const CAPACITY_PRESETS = [4, 8, 12, 20] as const;
 const CAPACITY_PRESET_ITEMS = CAPACITY_PRESETS.map((preset) => ({
@@ -109,6 +123,9 @@ const emptyValues: GroupInput = {
   name: "",
   description: "",
   maxMembers: 10,
+  schedule: "",
+  location: "",
+  requiresApproval: false,
 };
 
 function toGroupInput(detail: GroupDetail): GroupInput {
@@ -123,6 +140,9 @@ function toGroupInput(detail: GroupDetail): GroupInput {
     name: detail.name,
     description: detail.description,
     maxMembers: detail.maxMembers,
+    schedule: detail.schedule,
+    location: detail.location,
+    requiresApproval: detail.requiresApproval,
   };
 }
 
@@ -236,6 +256,9 @@ function GroupForm({
           description: values.description,
           category: values.category,
           maxMembers: values.maxMembers,
+          schedule: values.schedule,
+          location: values.location,
+          requiresApproval: values.requiresApproval,
         });
         // 상세에서 연 수정 창이므로 닫으면 상세로 돌아간다
         router.back();
@@ -394,6 +417,59 @@ function GroupForm({
                 onChange={(preset) => setCapacityPreset(Number(preset))}
                 style={styles.quickPresetScroll}
                 testIDPrefix="group-form-capacity"
+              />
+            </Section>
+
+            <Section card label="모임 일정">
+              <FormInput
+                style={styles.cardField}
+                accessibilityLabel="모임 일정"
+                value={values.schedule}
+                onChangeText={(schedule) => update("schedule", schedule)}
+                placeholder="예: 매주 토요일 오전 10시"
+              />
+              <ChoiceChips
+                items={SCHEDULE_PRESET_ITEMS}
+                active={values.schedule}
+                onChange={(schedule) => update("schedule", schedule)}
+                style={styles.quickPresetScroll}
+                testIDPrefix="group-form-schedule"
+              />
+            </Section>
+
+            <Section card label="모임 장소">
+              <FormInput
+                style={styles.cardField}
+                accessibilityLabel="모임 장소"
+                value={values.location}
+                onChangeText={(location) => update("location", location)}
+                placeholder="예: 교육관 2층"
+              />
+              <ChoiceChips
+                items={LOCATION_PRESET_ITEMS}
+                active={values.location}
+                onChange={(location) => update("location", location)}
+                style={styles.quickPresetScroll}
+                testIDPrefix="group-form-location"
+              />
+            </Section>
+
+            <Section card label="참여 방식">
+              <Checkbox
+                checked={values.requiresApproval}
+                onChange={(next) => update("requiresApproval", next)}
+                accessibilityLabel="가입 승인 받기. 소모임장이 가입 신청을 승인해야 참여돼요."
+                testID="group-form-requires-approval"
+                label={
+                  <>
+                    <AppText variant="body" weight="semibold">
+                      가입 승인 받기
+                    </AppText>
+                    <AppText variant="label" tone="muted">
+                      켜면 소모임장이 가입 신청을 승인해야 참여돼요.
+                    </AppText>
+                  </>
+                }
               />
             </Section>
 

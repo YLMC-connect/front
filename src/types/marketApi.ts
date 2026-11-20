@@ -45,3 +45,11 @@ export interface ShareCommentDto {
   createdAt: string;
   updatedAt?: string;
 }
+
+/** GET /api/share/categories 항목. 노출 순서(orderNum) 오름차순. */
+export interface ShareCategoryDto {
+  id: number;
+  code: string;
+  name: string;
+  orderNum: number | null;
+}

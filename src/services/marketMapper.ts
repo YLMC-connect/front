@@ -2,13 +2,18 @@ import { isRecord, readId, readString } from "../lib/parse";
 import { invalidResponse as invalid } from "../lib/reportResponseIssue";
 import { readApiUrl } from "../lib/apiClient";
 import type {
-  MarketCategory,
+  MarketCategoryCode,
+  MarketCategoryOption,
   MarketDetail,
   MarketDetailComment,
   MarketOverviewItem,
   MarketStatus,
 } from "../types/market";
-import type { ShareCommentDto, ShareDetailDto } from "../types/marketApi";
+import type {
+  ShareCategoryDto,
+  ShareCommentDto,
+  ShareDetailDto,
+} from "../types/marketApi";
 
 const SHARE_STATUS_TO_DOMAIN = {
   AVAILABLE: "sharing",
@@ -22,26 +27,6 @@ const DOMAIN_STATUS_TO_SHARE = {
   done: "COMPLETED",
 } as const satisfies Record<MarketStatus, keyof typeof SHARE_STATUS_TO_DOMAIN>;
 
-const SHARE_CATEGORY_TO_DOMAIN = {
-  CLOTHING_ACC: "cloth",
-  APPLIANCE_FURNITURE: "home",
-  BOOK_STATIONERY: "book",
-  FOOD_DAILY: "food",
-  BABY_KIDS: "baby",
-  SPORTS_HOBBY: "sport",
-  OTHER: "etc",
-} as const satisfies Record<string, Exclude<MarketCategory, "all">>;
-
-const DOMAIN_CATEGORY_TO_SHARE = {
-  cloth: "CLOTHING_ACC",
-  home: "APPLIANCE_FURNITURE",
-  book: "BOOK_STATIONERY",
-  food: "FOOD_DAILY",
-  baby: "BABY_KIDS",
-  sport: "SPORTS_HOBBY",
-  etc: "OTHER",
-} as const;
-
 const SHARE_ITEM_STATUS_LABEL = {
   NEW: "새것",
   USED: "사용감 있음",
@@ -52,16 +37,6 @@ const ITEM_STATUS_TO_SHARE = {
   새것: "NEW",
   "사용감 있음": "USED",
   "파손 있음": "DAMAGED",
-} as const;
-
-const CATEGORY_LABEL = {
-  cloth: "의류·잡화",
-  home: "가전·가구",
-  book: "도서·문구",
-  food: "식품·생필품",
-  baby: "유아·아동용품",
-  sport: "스포츠·취미",
-  etc: "기타",
 } as const;
 
 function resolveImageUrl(raw: string): string {
@@ -131,10 +106,6 @@ export function toShareStatus(status: MarketStatus) {
   return DOMAIN_STATUS_TO_SHARE[status];
 }
 
-export function toShareCategoryCode(category: Exclude<MarketCategory, "all">) {
-  return DOMAIN_CATEGORY_TO_SHARE[category];
-}
-
 export function toShareItemStatus(condition: string) {
   return ITEM_STATUS_TO_SHARE[condition as keyof typeof ITEM_STATUS_TO_SHARE];
 }
@@ -153,10 +124,8 @@ export function mapShareOverviewItem(
     SHARE_STATUS_TO_DOMAIN[
       readString(data.status) as keyof typeof SHARE_STATUS_TO_DOMAIN
     ];
-  const category =
-    SHARE_CATEGORY_TO_DOMAIN[
-      readString(data.categoryCode) as keyof typeof SHARE_CATEGORY_TO_DOMAIN
-    ];
+  // 카테고리는 서버 코드 그대로 둔다. 앱이 모르는 코드여도 글을 버리지 않는다
+  const category = readString(data.categoryCode);
   if (!id || !title || !authorId || !createdAt || !status || !category) {
     return null;
   }
@@ -193,10 +162,8 @@ export function mapShareDetail(
     SHARE_STATUS_TO_DOMAIN[
       readString(data.status) as keyof typeof SHARE_STATUS_TO_DOMAIN
     ];
-  const category =
-    SHARE_CATEGORY_TO_DOMAIN[
-      readString(data.categoryCode) as keyof typeof SHARE_CATEGORY_TO_DOMAIN
-    ];
+  // 카테고리는 서버 코드 그대로 둔다. 앱이 모르는 코드여도 글을 버리지 않는다
+  const category = readString(data.categoryCode);
   if (!id || !title || !authorId || !createdAt || !status || !category) {
     invalid(data);
   }
@@ -206,7 +173,7 @@ export function mapShareDetail(
   const mappedAuthorId = authorId as string;
   const mappedCreatedAt = createdAt as string;
   const mappedStatus = status as MarketStatus;
-  const mappedCategory = category as Exclude<MarketCategory, "all">;
+  const mappedCategory = category as MarketCategoryCode;
   const dto = data as unknown as ShareDetailDto;
   const condition =
     SHARE_ITEM_STATUS_LABEL[
@@ -224,7 +191,7 @@ export function mapShareDetail(
     ...(imageItems.length > 0 ? { imageItems } : {}),
     title: mappedTitle,
     content,
-    categoryLabel: CATEGORY_LABEL[mappedCategory],
+    categoryCode: mappedCategory,
     conditionLabel: condition,
     ...(location ? { location } : {}),
     status: mappedStatus,
@@ -271,4 +238,20 @@ export function mapShareCommentList(
     const comment = mapShareComment(item, currentUserId, now);
     return comment ? [comment] : [];
   });
+}
+
+/** 카테고리 목록을 노출 순서대로. 코드·이름이 없는 항목은 뺀다. */
+export function mapShareCategories(data: unknown): MarketCategoryOption[] {
+  if (!Array.isArray(data)) invalid(data);
+  return (data as ShareCategoryDto[])
+    .filter(
+      (item) =>
+        isRecord(item) &&
+        typeof item.code === "string" &&
+        item.code.trim() !== "" &&
+        typeof item.name === "string" &&
+        item.name.trim() !== "",
+    )
+    .sort((a, b) => (a.orderNum ?? 0) - (b.orderNum ?? 0))
+    .map((item) => ({ code: item.code, name: item.name.trim() }));
 }

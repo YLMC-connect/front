@@ -44,6 +44,7 @@ import {
   useCreateMarketComment,
   useDeleteMarketComment,
   useDeleteMarketPost,
+  useMarketCategories,
   useMarketDetail,
   useUpdateMarketStatus,
   useUpdateMarketComment,
@@ -79,6 +80,7 @@ export default function MarketDetailScreen() {
   const params = useLocalSearchParams<{ id?: string }>();
   const id = params.id ?? "1";
   const detail = useMarketDetail(id);
+  const categories = useMarketCategories();
   const createComment = useCreateMarketComment(id);
   const updateComment = useUpdateMarketComment(id);
   const deleteComment = useDeleteMarketComment(id);
@@ -144,6 +146,10 @@ export default function MarketDetailScreen() {
   }
 
   const market = detail.data;
+  // 이름은 서버 카테고리 목록에서 찾는다. 목록을 못 받으면 배지를 숨긴다
+  const categoryName = market
+    ? categories.data?.find((item) => item.code === market.categoryCode)?.name
+    : undefined;
   const isOwn = market.isMine;
   const status = market.status;
   const isReserved = status === "reserved";
@@ -398,7 +404,9 @@ export default function MarketDetailScreen() {
                   {STATUS_OPTIONS.find((option) => option.value === status)
                     ?.label ?? "나눔중"}
                 </Badge>
-                <Badge tone="info">{market.categoryLabel}</Badge>
+                {categoryName ? (
+                  <Badge tone="info">{categoryName}</Badge>
+                ) : null}
                 <Badge tone="neutral">{market.conditionLabel}</Badge>
               </View>
               <Text style={styles.title}>{market.title}</Text>

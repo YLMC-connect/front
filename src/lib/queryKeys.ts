@@ -7,6 +7,7 @@ export const queryKeys = {
   market: {
     all: ["market"] as const,
     overview: () => [...queryKeys.market.all, "overview"] as const,
+    categories: () => [...queryKeys.market.all, "categories"] as const,
     mine: (category?: string) =>
       category
         ? ([...queryKeys.market.all, "mine", category] as const)

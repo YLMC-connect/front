@@ -30,7 +30,6 @@ describe("groupMapper", () => {
       currentMembers: 1,
       maxMembers: 5,
       status: "open",
-      coverSeed: 1,
       isJoined: true,
     });
     expect(toCommunionCategoryCode("hobby")).toBe("HOBBY_CULTURE");
@@ -116,7 +115,6 @@ describe("groupMapper", () => {
       currentMembers: 1,
       maxMembers: 5,
       statusLabel: "모집중",
-      coverSeed: 2,
       linkedGroupId: "2",
     });
   });

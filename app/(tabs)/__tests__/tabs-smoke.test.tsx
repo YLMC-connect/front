@@ -269,7 +269,6 @@ describe("v1 tab smoke screens", () => {
           currentMembers: 6,
           maxMembers: 12,
           status: "open",
-          coverSeed: 0,
           isJoined: true,
         },
         {
@@ -280,7 +279,6 @@ describe("v1 tab smoke screens", () => {
           currentMembers: 8,
           maxMembers: 10,
           status: "open",
-          coverSeed: 1,
           isJoined: true,
         },
         {
@@ -291,7 +289,6 @@ describe("v1 tab smoke screens", () => {
           currentMembers: 10,
           maxMembers: 15,
           status: "open",
-          coverSeed: 2,
           isJoined: true,
         },
         {
@@ -302,7 +299,6 @@ describe("v1 tab smoke screens", () => {
           currentMembers: 5,
           maxMembers: 20,
           status: "open",
-          coverSeed: 3,
           isJoined: false,
         },
         {
@@ -313,7 +309,6 @@ describe("v1 tab smoke screens", () => {
           currentMembers: 18,
           maxMembers: 24,
           status: "open",
-          coverSeed: 4,
           isJoined: false,
         },
       ],
@@ -327,7 +322,6 @@ describe("v1 tab smoke screens", () => {
           currentMembers: 18,
           maxMembers: 24,
           statusLabel: "모집중",
-          coverSeed: 0,
         },
       ],
     };
@@ -1217,9 +1211,10 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<GroupDetailScreen />);
 
     expect(await screen.findByText("토요 산악회")).toBeTruthy();
-    // 대표 사진 자리 + 흰 시트, 모집중은 진행 중(success) 배지.
-    expect(screen.getByTestId("group-detail-hero")).toBeTruthy();
+    // 동행에는 사진이 없어 대표 사진 자리 없이 상단 바 + 본문. 모집중은 진행 중(success) 배지.
+    expect(screen.queryByTestId("group-detail-hero")).toBeNull();
     expect(screen.getByTestId("group-detail-sheet")).toBeTruthy();
+    expect(screen.getByText("소모임")).toBeTruthy();
     expect(screen.getByText("모집중")).toBeTruthy();
     // 소모임장·인원은 정보 줄.
     expect(screen.getByText("인원")).toBeTruthy();

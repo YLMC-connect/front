@@ -64,7 +64,6 @@ export interface GroupOverviewItem {
   currentMembers: number;
   maxMembers: number;
   status: GroupStatus;
-  coverSeed: number;
   isJoined: boolean;
 }
 
@@ -76,7 +75,6 @@ export interface GroupServiceOverviewItem {
   currentMembers: number;
   maxMembers: number;
   statusLabel: string;
-  coverSeed: number;
   linkedGroupId: string;
 }
 

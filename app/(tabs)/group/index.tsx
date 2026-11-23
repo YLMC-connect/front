@@ -371,8 +371,8 @@ function CompanionCard(
       onPress={props.onPress}
       title={props.item.name}
       meta={props.item.description}
-      thumbnailSeed={props.item.coverSeed}
-      thumbnailIcon={isService ? "groups" : undefined}
+      // 동행에는 사진이 없다(서버에 이미지 필드 없음). 썸네일 자리를 두지 않는다
+      thumbnail={false}
       style={[styles.groupCard, closed ? styles.closedCard : null]}
     >
       <View style={styles.cardMetaRow}>

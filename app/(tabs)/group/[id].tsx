@@ -8,10 +8,7 @@ import {
   ScrollView,
   StyleSheet,
   View,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/text";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
@@ -29,7 +26,6 @@ import {
   MotionPressable,
   Skeleton,
   TopBar,
-  VisualThumb,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import {
@@ -45,14 +41,11 @@ import {
   useUpdateGroupStatus,
 } from "../../../src/hooks/useGroups";
 
-/** 대표 사진 자리 높이(상태 바 포함). 흰 시트가 아래 24 를 덮는다. */
-const HERO_HEIGHT = 240;
 /** 멤버 줄에 아바타를 몇 명까지 보이고 나머지는 "+N 더보기" 로 묶을지. */
 const MEMBER_PREVIEW_LIMIT = 4;
 
 export default function GroupDetailScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id?: string }>();
   const id = params.id ?? "1";
   const detail = useGroupDetail(id);
@@ -67,7 +60,6 @@ export default function GroupDetailScreen() {
   } | null>(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isPastHero, setIsPastHero] = useState(false);
   // 승인이 필요한 모임에 신청한 뒤의 표시. 서버가 신청자에게 대기 상태를 주지 않아 이 화면에서만 기억한다
   const [approvalRequested, setApprovalRequested] = useState(false);
   const membershipBusy =
@@ -77,21 +69,11 @@ export default function GroupDetailScreen() {
     : leaveGroupMutation.isError
       ? leaveGroupMutation.error
       : null;
-  // 사진이 상단 바 아래로 다 지나가면 흰 글자 헤더를 일반 헤더로 바꾼다.
-  const heroThreshold = Math.max(
-    HERO_HEIGHT - (insets.top + theme.size.topbarHeight),
-    1,
-  );
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const past = event.nativeEvent.contentOffset.y >= heroThreshold;
-    if (past !== isPastHero) setIsPastHero(past);
-  };
-
   if (detail.isPending) {
     return (
-      <Screen padded={false} applyTopInset={false}>
+      <Screen padded={false}>
+        <TopBar title="소모임" back onBack={() => router.back()} />
         <View style={styles.loading}>
-          <Skeleton width="100%" height={HERO_HEIGHT} radius={0} />
           <View style={styles.loadingBody}>
             <Skeleton width="70%" height={26} />
             <Skeleton width="100%" height={76} />
@@ -150,37 +132,24 @@ export default function GroupDetailScreen() {
   );
 
   return (
-    <Screen scroll={false} padded={false} applyTopInset={false}>
+    <Screen scroll={false} padded={false}>
       <View style={styles.root}>
+        {/* 동행에는 사진이 없다(서버에 이미지 필드 없음). 대표 사진 자리 없이 일반 상단 바로 둔다. */}
+        <TopBar title="소모임" back onBack={() => router.back()} />
         <ScrollView
           contentContainerStyle={[
             styles.body,
             isMember || isNonMember ? styles.bodyWithBottomBar : null,
           ]}
-          onScroll={handleScroll}
-          scrollEventThrottle={16}
           refreshControl={
             <RefreshControl
               refreshing={detail.isRefetching}
               onRefresh={() => void detail.refetch()}
               tintColor={theme.colors.primary}
               colors={[theme.colors.primary]}
-              progressViewOffset={insets.top + theme.size.topbarHeight}
             />
           }
         >
-          {/* 대표 사진 자리. 서버가 사진을 주지 않아 목록 썸네일과 같은 색 바탕 + 아이콘으로 채운다. */}
-          <View style={styles.hero} testID="group-detail-hero">
-            <VisualThumb
-              size={HERO_HEIGHT}
-              seed={Number.parseInt(group.id, 10) || 0}
-              style={styles.heroThumb}
-            />
-            <View pointerEvents="none" style={styles.heroIcon}>
-              <AppIcon name="groups" size={48} color={theme.colors.textMuted} />
-            </View>
-          </View>
-
           <View style={styles.sheet} testID="group-detail-sheet">
             <View style={styles.header}>
               <View style={styles.chips}>
@@ -386,22 +355,6 @@ export default function GroupDetailScreen() {
             )}
           </View>
         </ScrollView>
-
-        <View
-          testID="group-detail-header"
-          style={[
-            styles.headerBar,
-            { paddingTop: insets.top },
-            isPastHero ? styles.headerBarScrolled : null,
-          ]}
-        >
-          <TopBar
-            title={isPastHero ? "소모임" : ""}
-            back
-            overPhoto={!isPastHero}
-            onBack={() => router.back()}
-          />
-        </View>
 
         {deleteNotice.isError ? (
           <Text style={styles.noticeError}>공지를 삭제하지 못했어요.</Text>
@@ -631,42 +584,11 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
   },
-  hero: {
-    height: HERO_HEIGHT,
-    overflow: "hidden",
-  },
-  heroThumb: {
-    width: "100%",
-    height: HERO_HEIGHT,
-    borderRadius: 0,
-  },
-  heroIcon: {
-    ...StyleSheet.absoluteFill,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  // 사진 아래 24 를 덮는 흰 시트(radius-xl 위 모서리 + shadow-sheet).
   sheet: {
     flexGrow: 1,
-    marginTop: -theme.spacing[6],
     paddingTop: theme.spacing[2],
     paddingBottom: theme.spacing[4],
-    borderTopLeftRadius: theme.radius.xl,
-    borderTopRightRadius: theme.radius.xl,
     backgroundColor: theme.colors.surface,
-    ...theme.shadow.sheet,
-  },
-  headerBar: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: theme.zIndex.header,
-  },
-  headerBarScrolled: {
-    backgroundColor: theme.colors.bg,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
   },
   header: {
     paddingHorizontal: theme.layout.screenX,

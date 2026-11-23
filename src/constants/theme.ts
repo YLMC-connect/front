@@ -95,17 +95,17 @@ const shadow = {
 };
 
 /**
- * 사진 위 헤더 그라데이션(디자인 시스템 guidelines "사진 위 헤더"): 맨 위 60% → 55% 지점 28% → 0%.
- * 높이는 safe-top + topbar-height(56) + space-6(24).
+ * 사진 위 헤더 그라데이션(디자인 시스템 guidelines "사진 위 헤더"): 맨 위 60% → 70% 지점 45% → 0%.
+ * 밝은 사진에서도 "뒤로" 줄이 어둡게 깔리도록 버튼 아래까지 진하게 두고, 높이는 safe-top + 56 + space-12(48).
  */
 const scrim = {
   photoHeader: {
     colors: [
       "rgba(25,31,40,0.6)",
-      "rgba(25,31,40,0.28)",
+      "rgba(25,31,40,0.45)",
       "rgba(25,31,40,0)",
     ] as const,
-    locations: [0, 0.55, 1] as const,
+    locations: [0, 0.7, 1] as const,
   },
 } as const;
 

@@ -879,20 +879,24 @@ describe("v1 tab smoke screens", () => {
     jest.mocked(useLocalSearchParams).mockReturnValue({});
   });
 
-  it("uses a compact vertical gradient on the market detail hero", async () => {
+  it("follows the design-system photo header on the market detail hero", async () => {
     renderWithClient(<MarketDetailScreen />);
     await screen.findByText(
       "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
     );
 
     const scrim = screen.getByTestId("market-hero-scrim");
+    // 디자인 시스템 "사진 위 헤더": 60% → 28% → 0%, 높이 safe-top + 56 + 24
     expect(scrim.props.colors).toEqual([
-      "rgba(25,31,40,0.22)",
-      "rgba(25,31,40,0.10)",
+      "rgba(25,31,40,0.6)",
+      "rgba(25,31,40,0.28)",
       "rgba(25,31,40,0)",
     ]);
-    expect(scrim.props.locations).toEqual([0, 0.52, 1]);
-    expect(StyleSheet.flatten(scrim.props.style)).toMatchObject({ height: 88 });
+    expect(scrim.props.locations).toEqual([0, 0.55, 1]);
+    // 테스트 환경의 safe-top 은 24 라서 24 + 56 + 24
+    expect(StyleSheet.flatten(scrim.props.style)).toMatchObject({
+      height: 24 + 56 + theme.spacing[6],
+    });
     const backStyle = StyleSheet.flatten(
       screen.getByLabelText("뒤로").props.style,
     );
@@ -904,6 +908,10 @@ describe("v1 tab smoke screens", () => {
     expect(backStyle.backgroundColor).toBeUndefined();
     expect(backStyle.shadowOpacity).toBeUndefined();
     expect(backStyle.elevation).toBeUndefined();
+    // 사진 위에서는 뒤로 버튼 글자가 흰색이라 어두운 그라데이션 위에서도 보인다
+    expect(
+      StyleSheet.flatten(screen.getByText("뒤로").props.style),
+    ).toMatchObject({ color: theme.colors.onPrimary });
   });
 
   it("switches sticky header background when scrolling past the market hero image", async () => {
@@ -927,6 +935,10 @@ describe("v1 tab smoke screens", () => {
       borderBottomColor: theme.colors.border,
     });
     expect(screen.getByText("나눔 상세")).toBeTruthy();
+    // 헤더가 bg 로 바뀌면 뒤로 버튼은 글자색
+    expect(
+      StyleSheet.flatten(screen.getByText("뒤로").props.style),
+    ).toMatchObject({ color: theme.colors.text });
 
     fireEvent.scroll(screen.getByTestId("market-detail-scroll"), {
       nativeEvent: { contentOffset: { y: 0 } },

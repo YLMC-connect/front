@@ -112,6 +112,18 @@ describe("display parts (design system v2)", () => {
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 
+  it("ListRow draws the 88 thumbnail slot unless thumbnail is false", () => {
+    const thumbSize = `"width":${theme.layout.listThumb}`;
+    const withThumb = render(<ListRow testID="row" title="나눔 글" />);
+    expect(JSON.stringify(withThumb.toJSON())).toContain(thumbSize);
+    withThumb.unmount();
+
+    const noThumb = render(
+      <ListRow testID="row" title="동행 모임" thumbnail={false} />,
+    );
+    expect(JSON.stringify(noThumb.toJSON())).not.toContain(thumbSize);
+  });
+
   it("ListRow does not dim itself without a caller style", () => {
     render(<ListRow testID="row" title="모집완료 모임" />);
     expect(flat(screen.getByTestId("row")).opacity).toBeUndefined();

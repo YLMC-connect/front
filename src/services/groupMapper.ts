@@ -158,7 +158,6 @@ export function mapCommunionOverviewItem(
     currentMembers,
     maxMembers,
     status,
-    coverSeed: Number.parseInt(id, 10) || 0,
     isJoined: joinedIds.has(id),
   };
 }
@@ -187,7 +186,6 @@ export function mapCommunionServiceItem(
     currentMembers,
     maxMembers,
     statusLabel,
-    coverSeed: Number.parseInt(id, 10) || 0,
     linkedGroupId: id,
   };
 }

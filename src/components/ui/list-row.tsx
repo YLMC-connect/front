@@ -53,7 +53,7 @@ function RowShell({
 }
 
 /**
- * 목록 한 줄(디자인 시스템 ListRow): 썸네일 88(radius-md, 사진 없으면 thumb-1~6),
+ * 목록 한 줄(디자인 시스템 ListRow): 썸네일 88(radius-md, 사진 없으면 thumb-1~6, `thumbnail={false}` 면 없음),
  * 간격 12, 위아래 16, 좌우 20. 제목 16/600, 메타 12/500 text-muted.
  * 내부에서 흐리지 않는다 — 끝난 항목은 부르는 쪽이 style 로 opacity 를 준다.
  */
@@ -63,6 +63,7 @@ export function ListRow({
   thumbnailUri,
   thumbnailSeed = 0,
   thumbnailIcon,
+  thumbnail = true,
   children,
   ...base
 }: RowBaseProps & {
@@ -72,12 +73,14 @@ export function ListRow({
   /** 사진이 없을 때 thumb-1~6 중 고를 번호. */
   thumbnailSeed?: number;
   thumbnailIcon?: AppIconName;
+  /** false 면 썸네일 자리를 그리지 않는다(사진이 없는 목록, 예: 동행). */
+  thumbnail?: boolean;
   /** 메타 아래 덧붙일 내용(배지 줄 등). */
   children?: ReactNode;
 }) {
   return (
     <RowShell {...base} rowStyle={styles.row}>
-      {thumbnailUri ? (
+      {!thumbnail ? null : thumbnailUri ? (
         <Image
           testID="list-row-thumbnail"
           source={{ uri: thumbnailUri }}

@@ -30,6 +30,7 @@ import {
 import { GROUP_CATEGORIES } from "../../../src/constants/domainOptions";
 import { useGroupOverview } from "../../../src/hooks/useGroups";
 import { useMotionRouteParam } from "../../../src/hooks/useMotionRouteParam";
+import { useTabReselect } from "../../../src/hooks/useTabReselect";
 import type {
   GroupOverviewItem,
   GroupServiceOverviewItem,
@@ -102,6 +103,11 @@ export default function GroupScreen() {
       });
     },
   );
+  // 동행 탭을 다시 누르면 세그먼트·카테고리를 기본값(소모임·전체)으로 되돌린다
+  useTabReselect(() => {
+    setSection("groups");
+    setCategory("all");
+  });
   const isError = overview.isError;
   const groups = (overview.data?.groups ?? []).filter(
     (group) => category === "all" || group.category === category,

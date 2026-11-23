@@ -1094,6 +1094,8 @@ describe("v1 tab smoke screens", () => {
       addListener,
       dispatch,
       isFocused: () => true,
+      getState: () => ({ type: "stack" }),
+      getParent: () => undefined,
     } as never);
     jest
       .mocked(useRouter)
@@ -1147,6 +1149,8 @@ describe("v1 tab smoke screens", () => {
         addListener: () => () => undefined,
         dispatch: jest.fn(),
         isFocused: () => true,
+        getState: () => ({ type: "stack" }),
+        getParent: () => undefined,
       } as never);
     }
   });
@@ -1175,6 +1179,8 @@ describe("v1 tab smoke screens", () => {
       addListener: () => () => undefined,
       dispatch,
       isFocused: () => true,
+      getState: () => ({ type: "stack" }),
+      getParent: () => undefined,
     } as never);
     jest.mocked(useRouter).mockReturnValue({ setParams } as never);
     renderWithClient(<GroupScreen />);

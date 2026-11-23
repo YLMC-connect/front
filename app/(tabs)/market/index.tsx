@@ -28,6 +28,7 @@ import type {
   MarketOverviewItem,
 } from "../../../src/types/market";
 import { useMotionRouteParam } from "../../../src/hooks/useMotionRouteParam";
+import { useTabReselect } from "../../../src/hooks/useTabReselect";
 import { useScaleHeightForFont } from "../../../src/lib/fontScale";
 
 type MarketSegment = "all" | "sharing" | "mine";
@@ -87,6 +88,11 @@ export default function MarketScreen() {
       : selectedCategory;
   const categoryFilter =
     category === "all" ? undefined : (category as MarketCategoryCode);
+  // 나눔 탭을 다시 누르면 세그먼트·카테고리를 기본값(나눔중·전체)으로 되돌린다
+  useTabReselect(() => {
+    setActiveStatus("sharing");
+    setCategory("all");
+  });
   const overview = useMarketOverview(categoryFilter);
   const mine = useMyMarketOverview(categoryFilter, activeStatus === "mine");
   const list = activeStatus === "mine" ? mine : overview;

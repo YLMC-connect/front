@@ -70,6 +70,8 @@ jest.mock("expo-router", () => {
     useNavigation: jest.fn(() => ({
       addListener: () => () => undefined,
       isFocused: () => true,
+      getState: () => ({ type: "stack" }),
+      getParent: () => undefined,
     })),
     usePathname: jest.fn(() => "/"),
     useScrollToTop: jest.fn(),

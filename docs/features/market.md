@@ -1,184 +1,60 @@
 # market (나눔)
 
-> 마지막 갱신: 2026-11-03 (런타임 목 어댑터 및 `src/mocks/market.ts` 제거) | 담당 Phase: P1/P2/P7 | 기록 성격: 도메인 컨텍스트
+> 기록 성격: 도메인 컨텍스트 | 담당 Phase: P1/P2/P7
 
 ## 한 줄 요약
 
-성도 간 무료 나눔 글을 등록하고 상태/댓글/신고를 관리합니다.
+성도끼리 물건을 무료로 나누는 글을 올리고, 상태를 바꾸고, 댓글로 이야기합니다.
 
----
+## 현재 동작
 
-## ✅ 완료
-
-- 나눔 목록 무한스크롤 및 당겨서 새로고침(Pull-to-Refresh) — `useMarketOverview`를 TanStack `useInfiniteQuery` 기반으로 전환하여 `getOverviewPage` 커서 페이징과 하단 로딩 스피너를 연동하고, `StickyHeaderScreen` 및 상세 화면 스크롤에 `RefreshControl`을 연결하여 상단 당김 새로고침 지원.
-- 나눔 게시글 수정 API 연동 — `PUT /api/share/{id}` 엔드포인트를 `httpMarketDataSource`, `marketService`, `useUpdateMarketPost` mutation 훅과 `app/modal/market-new.tsx` 수정 화면에 연결하여 제목·내용·카테고리·물품 상태를 서버와 동기화 수정 화면은 상세 조회 결과로 제목·내용·카테고리·물품 상태·사진·수령 장소(`location`)를 채우고, 예시 값은 id 없는 디자인 미리보기에서만 쓴다. 수정 여부는 `id` 파라미터로 정한다(`designVariant` 는 릴리스 빌드에서 읽히지 않음). 등록·수정 모두 수령 장소를 보낸다(#295). 수정 화면에서도 사진을 더하고 뺄 수 있다: 남은 서버 사진은 `keepImageIds`(남은 순서)로 유지하고 목록에 없는 서버 사진은 서버가 지운다. 새로 고른 사진이 있으면 multipart, 없으면 JSON 으로 보낸다(#299).
-- 나눔 목록 필터 — 카테고리는 `GET /api/share` 의 `categoryCode` 로 서버에서 거르고 카테고리별로 목록 캐시를 둔다. `나눔중`(나눔중+예약중)은 서버 상태값 하나로 거를 수 없어 화면에서 거르며, 받은 페이지에 맞는 글이 없으면 다음 페이지를 이어 받는다.
-- 나눔 HTTP data source — 라이브 `GET/POST /api/share`, 상세·댓글 CUD, 삭제를 `httpMarketDataSource`로 연결. 상태/카테고리/물품상태는 `GET /api/common-codes?groupCode=`에서 관측한 값만 매핑. 목록 `authorName`·장소·이미지 업로드 URL·신고 enum은 없어 목록 작성자는 `authorId`, 장소는 요청에서 제외, 신고는 HTTP로 보내지 않음. development 기본값은 HTTP
-- 나눔 작성 폼 구획·상단 여백·포커스 통일 — 사진부터 수령 장소까지 이어지는 8px 회색 section divider를 제거해 하나의 폼 흐름으로 정리하고, 홈·나눔·동행·삶공부와 같은 기기 safe area + 상단 20px 기준을 적용했으며 제목·설명·장소 입력을 소모임 개설과 같은 공통 `ModalFormTextInput`의 primary 2px 포커스로 통일하면서 입력·등록 동작은 유지
-- 나눔 탐색 control·FAB 비율 보정 — 상태 세그먼트와 카테고리 필터의 full pill을 유지한 채 시각 높이를 낮추고 44px 터치 범위를 보존했으며 `나눔하기` FAB를 46px로 축소해 하단 탭과 위계를 분리
-- 나눔 상세 뒤로가기 surface 통일 — 이미지 위 뒤로가기의 흰색 RGBA와 카드 그림자를 제거하고 다른 상세와 같은 `surface2`·1px 경계를 사용하며 68×44px 위치·아이콘·문구·press motion·목록 복귀는 유지
-- 나눔 상세 오류 뒤로가기 — 상세 조회 실패 화면 상단에 공통 `chevron-left + 뒤로` 헤더를 추가해 직전 나눔 목록으로 복귀할 수 있게 하고, 헤더 아래 남은 영역의 중앙 오류 안내와 `다시 시도`는 유지
-- 나눔 플로팅 버튼 행동 문구 명확화 — 일반적인 `글쓰기` 대신 도메인 행동을 직접 설명하는 `나눔하기`를 화면 문구와 접근성 이름에 함께 적용하고 기존 `+` 아이콘·위치·`/modal/market-new` 이동을 유지
-- 나눔 3단 세그먼트·내 나눔 목록 — 상단을 `전체 / 나눔중 / 내 나눔`으로 재구성하고 목록 조회 모델의 `isMine`을 기준으로 내가 올린 물건을 상태와 관계없이 모아 표시하며 기존 카테고리·검색·상태 badge·200ms indicator·상세 Stack을 유지
-- 나눔 작성 헤더 공통화 — 작성·수정 modal의 개별 `닫기` 헤더를 공통 `TopBar`의 `chevron-left + 뒤로`로 교체하고 제목을 430px 웹 화면 중심 `x=215px`에 맞추며 기존 dirty form 확인과 `router.back()` 동작은 유지
-- 나눔 상세 오류 화면 중앙 정렬 — 상세 조회 실패 분기만 비스크롤 전체 높이 컨테이너로 전환해 430×932 웹에서 가용 영역과 안내 묶음 중심을 `y=488px`로 일치시키고 공통 ErrorState·다른 화면 배치는 유지
-- 나눔 상세 hero scrim 보정 — 이미지 상단 단색 어두운 영역을 130px에서 88px로 줄이고 `rgba 0.22 → 0.10 → 0` 세로 그라데이션으로 변경해 뒤로가기 68×44px·상태 overlay·페이지 indicator geometry는 유지
-- 나눔 검색 위치·포커스 보정 — 검색을 제목 바로 아래, 상태 세그먼트·필터 위에 표시하고 전체 검색 surface에 단일 focus border를 적용했으며, 스크롤로 메뉴가 숨은 상태에서도 검색 action으로 다시 노출
-- 나눔 sticky 탐색 control — 상태 세그먼트와 카테고리 필터를 타이틀 아래 같은 glass로 함께 고정하고, 아래 12px 스크롤에서 숨긴 뒤 위 4px에서 200ms로 재표시
-- 나눔 glass sticky 헤더 — `이웃과 물건을 나누며 따뜻함을 전해요` 보조 설명을 제목 아래 표시하고 상태 탭·카테고리 필터·카드 목록을 하나의 스크롤로 묶어 기본 배경색 기반 blur 타이틀 뒤로 지나가게 적용하며 검색·FAB 위치는 유지
-- 나눔 필터·상태 탭 모션·정렬 보정 — 카테고리 선택 배경의 20px 위치 오차를 제거하고 상태 query를 현재 화면에서 갱신해 `전체·나눔중·예약중·나눔완료` indicator 이동을 유지하며 상태 탭의 위·아래 여백을 4px로 통일
-- 나눔 카테고리 이동 필터·상세 Stack 적용 — 가변 너비 선택 배경을 200ms로 이동하고 category query를 목록 주소에 보존하며, 상세를 나눔 탭 Stack에 push해 뒤로가기 시 같은 필터·목록으로 복귀
-- 나눔 상세 뒤로가기 구분성·동행 카드 기준 동기화 — 이미지 위 `아이콘 + 뒤로`의 68x44px 대비 surface에 1px 경계를 추가하고, 나눔의 96px 썸네일·16px padding/radius·경계·shadow를 동행 전체 모임 카드의 공통 기준으로 사용
-- 나눔 목록 카드·댓글 입력 배경 정리 — 상태 탭·카테고리 필터는 44px 터치 높이와 12px 구획 간격을 보장하고, 목록 항목을 흰 surface·옅은 경계·약한 그림자의 독립 카드로 통일해 행 구분선을 제거했으며, 상세 댓글 composer와 입력창은 기존 geometry를 유지한 채 배경만 투명하게 변경
-- 나눔 목록 디자인 시스템 적용 — 화면/카드/보조문구 typography, 20px 화면 여백, 96px 기존 추상 썸네일, Skeleton 로딩, 행동 가능한 empty state와 오류 재시도, 절제된 FAB를 적용
-- 나눔 작성·탐색 mock 흐름 연결 — 사진/카테고리/상태/제목/설명/수령 장소를 실제 입력·검증해 mock service에 저장하고 상세 이동·목록 재조회까지 연결했으며, 목록 카테고리 필터와 제목/작성자 검색을 활성화
-- 나눔 상세 action·mini action과 작성 폼 section/divider 공통화 — 기존 geometry·testID·댓글 CRUD 동작을 유지하면서 공통 UI 파일로 이동
-- 나눔 목록/상세/작성 화면 구현 — `app/(tabs)/market/index.tsx`, `app/(tabs)/market/[id].tsx`, `app/modal/market-new.tsx`
-- 나눔 타입과 mock 데이터 구현 — `src/types/market.ts`, `src/mocks/market.ts`
-- 이미지 선택/미리보기 연결 — `ImagePickerField`에서 선택한 URI를 `MarketInput.images`로 저장하고 목록/상세 썸네일에 표시
-- 상태 변경, 댓글 등록, 신고 접수 mock mutation 구현
-- 검색, 관심 목록, 신고 사유 선택, 활성 나눔 5개 제한, 사진 필수 검증 구현
-- 나눔 목록 1차 디자인 정렬 — ZIP prototype 기준 접힌 검색, 상태 segmented tabs, category chips, compact row list, bottom-right FAB 적용
-- ZIP 원본 나눔 화면 23개 상태 매핑 — 목록/상세/작성 variant를 reference 화면으로 접근 가능하게 연결
-- ZIP 110개 visual inventory 재검증에 포함 — 나눔 reference 화면을 Dev Client capture/compare 대상에 유지
-- 나눔 상세 원본 시각 정렬 — ZIP JSX 기준 정사각형 사진 hero, 예약중/나눔완료 overlay, 상태 안내 배너, 작성자/카테고리/액션 영역을 reference 화면에 반영
-- 나눔 상세 댓글/고정 composer 정렬 — ZIP `ScreenMarketDetail` 기준 댓글 리스트, 수정/삭제/신고 mini action, 하단 glass comment composer, 멀티라인 preview card를 reference 화면에 반영
-- 나눔 상세 partial visual compare 개선 — `market-detail-*` 10개 원본/앱 캡처를 재생성해 `missing=0` 확인, 대표 residual은 `done 42.63→30.38`, `status 35.99→26.25`, `delete 41.43→17.34`, `report-dup-toast 34.04→32.72`로 감소
-- 나눔 상세 toast/viewport 정렬 — ZIP toast 문구와 `offset=106`을 맞추고 디자인 viewport 캡처로 재검증해 `missing=0`, `report-dup-toast 32.72→28.92`, `status 26.25→13.29`, `delete 17.34→11.62`, `done 30.38→20.54`로 감소
-- 나눔 상세 safe-area/sheet geometry 정렬 — ZIP 44px status frame과 bottom action 위치 기준으로 `Screen`을 조정하고 긴 `RadioSheet` compact row를 적용해 `missing=0`, `report 18.50→11.50`, `report-dup-toast 28.92→15.73`, `done 20.54→11.17`, `status 13.29→7.51`로 감소
-- 나눔 작성 원본 구조 정렬 — ZIP `ScreenMarketCreate` 기준으로 close/action topbar, 사진 레일, 7개 카테고리 chip, 제목/물품상태/상세설명 section, 안내 박스, 작성 중단 dialog, 5개 제한 toast를 reference 화면에 반영
-- 나눔 작성 partial visual compare 개선 — `market-create*` 5개 상태를 Android Dev Client에서 재캡처해 `missing=0` 확인, 대표 residual은 `limit-toast 32.50→15.21`, `create 12.56→12.04`, `back-warn 8.76→7.63`, `create-filled/edit 14.21→14.11`로 감소
-- 나눔 목록 ZIP compact row 재정렬 — ZIP `ScreenMarketList` 기준으로 카드 wrapper를 제거하고 full-width row, 86px `Thumb`, divider, 예약/완료 overlay, 8개 카테고리 chip 순서를 reference 화면에 반영
-- 나눔 목록 partial visual compare 개선 — `market-list*` 6개 상태를 Android Dev Client에서 재캡처해 `missing=0` 확인, 대표 residual은 `market-list-all 20.56→15.44`, `market-list 14.24→12.27`, `market-list-reserved 10.80→8.31`, `market-list-done 12.35→7.77`로 감소
-- 나눔 상세 action compact 정렬 재검증 — ZIP `ActionBtn` inline 구조를 공통 reference action에 반영한 뒤 `market-detail*` 정상 상태 10개를 재캡처해 `missing=0` 확인
-- ZIP `Thumb` proportional geometry 재검증 — 공통 `VisualThumb`을 ZIP `Thumb` SVG circle 수식에 맞춘 뒤 나눔 목록/상세/작성/관심 목록 영향 화면을 Android Dev Client에서 재캡처하고 `missing=0` 확인
-- 나눔 목록 FAB root overlay 정렬 — 공통 FAB를 ZIP pill surface로 복구하고 목록 20-25번을 재캡처해 `market-list-all 15.27→13.75`, `market-list 12.15→10.64`, `reserved 8.36→6.79`, `done 7.83→6.31`로 낮춤
-- 나눔 상세 typography/chip/scrim 정렬 — ZIP `ScreenMarketDetail` 기준으로 overlay back, hero scrim, 작성자명, soft chip, 제목/본문 text metric, 예약 배너 색상을 맞추고 26-35번을 재캡처해 `own 14.53→9.31`, `reserved 14.15→9.36`, `other 14.46→9.34`, `composer-multiline 12.75→9.47`, `report-dup-toast 14.76→10.00`로 낮춤
-- 나눔 작성 topbar/chip/control typography 정렬 — ZIP `ScreenMarketCreate` 기준으로 56px topbar rhythm, close pill, action width, chip padding/font, section label/hint/control weight를 맞추고 38-42번을 재캡처해 `limit-toast 14.99→14.62`, `create-filled 14.01→13.69`, `edit 14.01→13.70`으로 낮춤
-- 나눔 목록 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenMarketList`의 상태 탭, 카테고리 칩, 86px thumb row, 예약/완료 overlay, fixed FAB 구조를 `/market` route에 RN으로 직접 반영
-- 나눔 상세 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenMarketDetail`의 정사각형 hero, 상태 overlay/banner, 작성자/칩/본문, 액션 row, 댓글, 하단 composer 구조를 `/market/[id]` route에 RN으로 직접 반영
-- 나눔 작성 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenMarketCreate`의 close/action topbar, 사진 레일, 카테고리 chip, 제목/물품상태/상세설명 section, 안내 박스를 `modal/market-new` route에 RN으로 직접 반영
-- 나눔 API 계약 게이트 추가 — `npm run test:api:contract:market`으로 CRUD·댓글·신고·이미지 업로드 endpoint와 목록/상세 화면 요구 필드를 자동 검증
-- 나눔 조회 데이터 경계 추가 — 목록·상세·댓글 fixture를 화면에서 `mockMarketDataSource`로 이동하고 `useMarketOverview`/`useMarketDetail` query를 통해 렌더링하며 미사용 중복 mock 목록 제거
-- 댓글 CUD 수직 경계 연결 — 상세 composer와 내 댓글 action을 create/update/delete hook → service → `MarketDataSource` mutation으로 연결하고, mock 재조회 유지·Query cache 갱신·수정 취소·삭제 확인과 Android Maestro 등록/수정/삭제 흐름을 검증
-- 댓글 삭제 CI flake 제거 — 1초를 넘을 수 있는 mock mutation 완료 assertion에 5초 제한을 명시하고 대상 테스트 5개 병렬 실행·전체 validate로 안정성 확인
-- 게시글·댓글 신고 수직 경계 연결 — 디자인 기준 8개 사유를 선택 가능한 `RadioSheet`로 복구하고 `useReportMarketContent → marketService → MarketDataSource` mutation, 기타 상세 검증, 중복 신고 도메인 오류·toast를 Android Maestro로 검증
-- 신고 디자인 variant 상태 누수 제거 — route query가 바뀔 때 report sheet/기타 입력/중복 toast를 development 전용 effect로 동기화하고 부분 시각 residual을 `10.73/10.29/13.78`로 확인
-- 나눔 게시글 삭제 수직 경계 연결 — 소유 게시글 삭제를 `useDeleteMarketPost → marketService → MarketDataSource`로 연결하고 상세·목록 mock 지속성, overview/detail query 정리, 삭제 확인 후 목록 복귀를 Android Maestro로 검증
-- 게시글 삭제 확인 디자인/실제 상태 통합 — 실제 삭제와 `delete-confirm` 캡처가 같은 `ConfirmDialog`를 사용하도록 분리하고 원본 문구를 적용해 해당 residual을 `19.52→16.65`로 개선
-
-## 주요 파일 (도메인 파일 지도)
-
-| 경로                                                 | 역할                                                                                    |
-| ---------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `app/(tabs)/market/_layout.tsx`                      | 나눔 목록·상세 중첩 Stack                                                               |
-| `app/(tabs)/market/index.tsx`                        | 나눔 목록, 상태/카테고리 필터                                                           |
-| `app/(tabs)/market/[id].tsx`                         | 나눔 상세, 게시글 삭제, 댓글, 신고                                                      |
-| `src/components/market/detail/MarketDetailParts.tsx` | 나눔 상세 사진·상태 배너·댓글 부품                                                      |
-| `src/components/market/detail/marketDetailStyles.ts` | 나눔 상세 스타일                                                                        |
-| `app/modal/market-new.tsx`                           | 나눔 작성 모달                                                                          |
-| `src/services/marketService.ts`                      | 나눔 조회·내 나눔·게시글 삭제·댓글 CUD·신고 HTTP 서비스                                 |
-| `src/services/marketHttpDataSource.ts`               | 라이브 나눔 HTTP data source                                                            |
-| `src/lib/resizeImage.ts`                             | 업로드 전 사진 축소(긴 변 1600px·JPEG 0.8, 실패 시 원본)                                |
-| `src/services/marketMapper.ts`                       | Share DTO → 화면 모델. 상대 이미지 경로는 `apiClient.readApiUrl()` origin 기준으로 해석 |
-| `src/types/marketApi.ts`                             | 관측된 나눔 서버 DTO                                                                    |
-| `src/hooks/useMarket.ts`                             | 나눔 query와 게시글 삭제·댓글 CUD·신고 mutation hook                                    |
-| `src/constants/domainOptions.ts`                     | 나눔 카테고리/상태/신고 사유 옵션                                                       |
-| `src/types/market.ts`                                | 나눔 타입                                                                               |
-| `scripts/check-market-api-contract.mjs`              | 나눔 Swagger endpoint·화면 요구 필드 검사                                               |
+- 나눔 탭(`/market`)은 `전체 / 나눔중 / 내 나눔` 세그먼트와 카테고리 필터, 무한 스크롤 목록이다. 당겨서 새로고침을 지원하고, 우측 하단 `나눔하기` FAB 로 작성 화면(`/modal/market-new`)에 간다.
+- 목록은 `GET /api/share`(`lastId`·`size` 커서, 선택 시 `categoryCode`), 내 나눔은 `GET /api/share/my` 로 받는다. 카테고리별로 목록 캐시를 따로 둔다.
+- 카테고리 필터 칩·작성 폼 선택지·카드/상세 배지 이름은 `GET /api/share/categories`(노출 순서 `orderNum`)로 그린다. 10분 동안 다시 받지 않는다. 작성은 카테고리를 직접 골라야 한다(기본 선택 없음).
+- 상세(`/market/[id]`)는 나눔 탭 Stack 에 push 되며 `GET /api/share/{id}` 와 `GET /api/share/{id}/comments` 를 함께 부른다. 사진이 여러 장이면 가로로 넘겨 본다.
+- 작성자는 상세에서 수정·삭제(`DELETE /api/share/{id}`)와 상태 변경(`PUT /api/share/{id}/status`, 시트에서 나눔중·예약중·나눔완료 선택)을 할 수 있다. (#247)
+- 댓글은 `POST /api/share/{id}/comments`, `PUT`·`DELETE /api/share/comments/{commentId}`. 수정은 하단 입력창을 재사용하고, 삭제는 확인 후 진행한다.
+- 작성은 `POST /api/share` multipart(제목·내용·카테고리·물품 상태·수령 장소·사진), 수정은 `PUT /api/share/{id}`. 수정 화면은 상세 조회 결과로 값을 채우고, 수정 여부는 `id` 파라미터로 정한다.
+- 신고 UI 와 HTTP 신고는 연결돼 있지 않다. 신고 요청 코드도 두지 않는다(아래 미결).
 
 ## 데이터 타입
 
-`MarketItem`은 `images: string[]`, `status: sharing | reserved | done`, `comments`, `liked`, `condition`, `location`을 포함합니다. 화면 조회 모델 `MarketOverview`/`MarketDetail`은 목록 표시값, 작성자 소유 여부, 댓글 상태를 포함하며 API DTO mapper의 출력 경계입니다. `MarketOverviewItem.isMine`은 공개 목록에서 내 글 표시의 기준입니다. `내 나눔` 탭은 `GET /api/share/my` 결과를 `isMine: true`로 둡니다. 게시글 삭제 대상은 `MarketPostTarget`, 댓글 CUD는 `MarketCommentInput`, `MarketCommentUpdateInput`, `MarketCommentTarget`으로 게시글 ID와 댓글 ID를 구분하고 결과는 목록/상세 제거 또는 `MarketDetailComment` 삭제 tombstone으로 정규화합니다. 신고는 `MarketReportInput`에서 게시글/댓글 대상, 프런트 사유, 선택 상세를 분리하며 서버 enum이 확정되면 HTTP mapper가 코드 변환을 소유합니다. `MarketInput`은 Notion MVP 기준 사진 필수이므로 `images: string[]`를 1장 이상 받습니다.
+- 화면 모델: 목록 `MarketOverviewItem`(`thumbnailUrl?`, `status`, `category`, `authorName`, `isMine`), 상세 `MarketDetail`(`images?`, `imageItems?`, `location?`, `comments`). 작성 입력 `MarketInput`, 수정 입력 `MarketUpdateInput`.
+- 상태 `SHARE_STATUS`: AVAILABLE → `sharing`, RESERVED → `reserved`, COMPLETED → `done`. 물품 상태 `SHARE_ITEM_STATUS`: NEW/USED/DAMAGED → 새것/사용감 있음/파손 있음. 카테고리는 서버 코드(`categoryCode`) 문자열 그대로 쓰고(`MarketCategoryCode`), 이름은 카테고리 목록(`MarketCategoryOption` = `code`·`name`)에서 찾는다. 상세도 `categoryCode` 를 갖는다.
+- 목록 DTO 에는 `authorName`·사진 배열이 없다. 목록 작성자 칸은 `authorId` 를 쓰고, 썸네일 URL 이 없으면 `thumbSeed` 기반 `VisualThumb` 를 그린다. 상세는 `authorName` 이 있으면 쓴다.
+- `isMine` 은 `authorId === 현재 사용자 id`. `GET /api/share/my` 결과는 모두 `isMine: true`.
+- 상대 경로 사진 URL 은 `readApiUrl()` origin 을 붙여 해석한다. DTO 는 `src/types/marketApi.ts`, 화면 모델은 `src/types/market.ts`.
 
-## 결정 사항 (최신 위)
+## 결정 사항 (지금 유효한 것만)
 
-- **배지 색은 뜻으로 고른다(캔버스 v1.40)** — 나눔 상세 맨 앞 상태 배지는 나눔중 success(초록) · 예약중 warning · 나눔완료 neutral, 그 뒤 카테고리 info · 물품 상태 neutral. 작성·수정 화면 칩은 흰 카드 위 회색(`surface-subtle`, 고르면 `primary-subtle`).
+- **카테고리는 서버 목록이 정한다** — 앱이 모르는 코드의 글도 버리지 않고, 목록에 없는 코드(비활성 등)는 이름 배지만 숨긴다. 카테고리 목록을 못 받으면 작성 폼에 다시 시도를 보인다. (#312)
 
-- (2026-11-06) **나눔 사진은 업로드 직전 긴 변 1600px·JPEG 품질 0.8 로 줄여 올린다** — `httpMarketDataSource.createPost` 가 `resizeImageForUpload`(`expo-image-manipulator`)로 사진마다 변환한 uri 를 `expo-file-system` `File` 로 FormData 에 넣는다. 1600px 이하 사진은 크기를 두고 JPEG 로만 저장하며, 변환에 실패하면 원본을 올린다. 피커(`ImagePickerField`)는 `mediaTypes: ["images"]` 에 quality 기본값(1)이라 압축은 이 한 번뿐이다.
+- **`나눔중` 은 나눔중+예약중을 화면에서 거른다** — 서버 상태값 하나로 거를 수 없어서다. 받은 페이지에 맞는 글이 없으면 다음 페이지를 이어 받아 빈 화면을 잘못 띄우지 않는다. 예약중 글은 배지·overlay 로 구분한다.
+- **내 나눔은 `GET /api/share/my` 로 조회한다** — 전체 목록의 `isMine` 필터가 아니라 전용 엔드포인트에 커서와 카테고리만 보낸다. 상태는 보내지 않아 세 상태를 함께 본다. (#195)
+- **수정 시 사진은 `keepImageIds` 로 유지한다** — 남은 서버 사진 id 를 순서대로 보내고, 목록에 없는 서버 사진은 서버가 지운다. 새 사진이 있으면 multipart, 없으면 JSON 으로 보낸다. (#299)
+- **수령 장소(`location`)는 등록·수정 모두 보낸다** (#295)
+- **사진은 업로드 직전 긴 변 1600px·JPEG 0.8 로 줄인다** — `resizeImageForUpload`(`expo-image-manipulator`)로 변환하고 실패하면 원본을 올린다. 피커는 quality 기본값(1)이라 압축은 이 한 번뿐이다.
+- **사진은 1장 이상 필수, 최대 5장** — Notion 운영 정책. 제목 30자, 상세 설명 5~500자.
+- **신고는 HTTP 로 보내지 않는다** — 신고 사유 `reportReasonCode` enum 이 공통 코드·Swagger 에 없어 예시 문자열로 추측하지 않는다. 프런트 사유 key 와 서버 code 는 분리해 두고, enum 이 정해지면 mapper 가 변환한다.
+- **무료 나눔만 다룬다** — 가격·결제는 범위 밖이다.
+- **상세 배지 색은 뜻으로 고른다** — 상태 배지는 나눔중 success · 예약중 warning · 나눔완료 neutral, 그 뒤 카테고리 info · 물품 상태 neutral.
+- **작성·수정 폼만 섹션마다 흰 카드에 담는다** — 순서는 사진 → 제목 → 카테고리 → 물품 상태 → 상세 설명 → 수령 장소. 다른 작성 화면(기도제목·소모임 개설 등)은 카드 없이 둔다.
 
-- (2026-11-05) **내 나눔은 `GET /api/share/my`로 조회한다** — 나눔 탭 `내 나눔`은 전체 목록의 `isMine` 필터 대신 커서(`lastId`, `size`)와 선택 카테고리(`categoryCode`)를 이 엔드포인트로 보낸다. 상태 필터는 보내지 않아 나눔중·예약중·나눔완료를 함께 본다. 응답은 본인 글만 오므로 화면 모델 `isMine`은 true다. Issue #195.
+## 미결
 
-- (2026-11-03) **런타임 목 어댑터(`resolveMarketAdapterMode`, `mockMarketDataSource`) 및 `src/mocks/market.ts` 제거** — 전 도메인 HTTP 단일화에 따라 환경변수 어댑터 분기(`EXPO_PUBLIC_MARKET_ADAPTER`)와 런타임 목데이터를 제거하고 `httpMarketDataSource`만 사용하도록 정리.
+- 사진 업로드 후 이미지 URL 404 — 백엔드 정적 파일 서빙 확인 필요. #217
+- 신고 사유 enum·신고 후 블라인드/관리자 큐 정책이 정해지지 않아 신고를 연결하지 못한다.
 
-- (2026-10-27) **나눔 목록·상세 실제 사진(`thumbnailUrl` / `images`) 바인딩 및 하단 댓글 입력창(Composer) 알약 카드화** — `marketMapper`와 `mockMarketDataSource`에서 서버·작성 이미지 URI 배열을 `MarketOverviewItem.thumbnailUrl` 및 `MarketDetail.images`로 매핑해 실제 사진이 있을 때는 `<Image resizeMode="cover" />`(상세는 가로 스와이프 갤러리 + 페이지 점 인디케이터 연동)를 표시하고 없을 때만 `VisualThumb`을 사용한다. 또한 상세 하단 댓글 입력창의 불필요한 상단 `1px` 실선과 완전 투명 입력 박스를 제거하고, 상단 투명 그라데이션(`LinearGradient`) 위에 흰색 알약형 입력 컨테이너(`composerField`)와 기기 하단 Safe Area(`insets.bottom`) 여백을 적용한다.
-- (2026-10-27) **나눔 상세 대표 이미지(`hero`)를 화면 최상단 상태바 끝까지 확장(`applyTopInset={false}`)** — `Screen`의 기본 상단 패딩을 비활성화해 이미지가 상단 끝까지 빈틈없이 이어지도록 하고, `stickyHeader`와 `heroScrim`에만 기기 `insets.top`을 반영해 `뒤로` 버튼과 스크롤 타이틀이 상태바 아래 안전한 위치에 놓이도록 처리한다.
-- (2026-10-27) **나눔중 세그먼트(`sharing`)에 예약중(`reserved`) 게시글도 함께 노출한다** — 아직 나눔 완료(`done`)되지 않은 진행 중 나눔(`sharing` + `reserved`)을 `나눔중` 탭에서 함께 보여주며, 예약중 게시글은 썸네일 상단 `예약중` 배지로 구분한다.
-- (2026-10-27) **나눔 목록 행은 외곽 카드 박스 대신 하단 1px 구분선 플랫 리스트로 표시하고 카테고리를 메타 줄에 함께 노출한다** — 개별 박스 테두리를 제거하고 `borderBottomWidth: 1`(`theme.colors.line`)과 상하 `16px` 패딩으로 정리하며, 각 행 하단 메타 줄에 `카테고리 · 작성자 · 작성시각`을 함께 표시한다.
-- (2026-10-15) **나눔 게시글 수정(`PUT /api/share/{id}`) API를 HTTP 및 mock 경계에 연동한다** — 나눔 게시글 수정 기능을 `MarketDataSource`, `httpMarketDataSource`, `useUpdateMarketPost` 훅에 연결하고 모달(`app/modal/market-new.tsx`)에서 제목, 설명, 카테고리, 물품 상태를 서버에 전송하도록 구현합니다.
-- (2026-10-10) **나눔 상세 뒤로가기 버튼 영역 sticky 고정 및 사진 영역 이탈 시 배경색/타이틀 전환** — 기존 hero 이미지 내부 absolute 버튼 대신 화면 상단 고정 헤더(`stickyHeader`, 높이 56px)로 분리하여 스크롤 시에도 뒤로가기 버튼이 상단에 유지되도록 하고, 스크롤이 사진 영역(`width - 56px`)을 벗어나면 새벽기도 말씀요약 상단과 동일한 배경색(`theme.colors.bg`), 하단 보더(`theme.colors.line`), "나눔 상세" 타이틀을 갖도록 전환 처리. Issue #167.
-- (2026-08-13) **나눔 HTTP는 라이브 관측값과 common-codes만 매핑한다** — `SHARE_STATUS` AVAILABLE/RESERVED/COMPLETED, `SHARE_CATEGORY` 7개, `SHARE_ITEM_STATUS` NEW/USED/DAMAGED. 목록 DTO에 `authorName`/`images`가 없어 목록 작성자는 `authorId`를 쓰고 썸네일은 기존 `thumbSeed`를 유지한다. 생성은 multipart이며 서버가 받지 않는 `location`은 보내지 않는다. 신고 `reportReasonCode` enum이 공통 코드에 없어 HTTP 신고는 활성화하지 않는다. development 기본 adapter는 `http`.
-- **나눔 작성·수정 폼은 섹션마다 흰 카드에 담는다(캔버스 MarketNew·MarketEdit)** — 순서는 사진 → 제목 → 카테고리 → 물품 상태 → 상세 설명 → 수령 장소. `ModalFormSection card` 가 디자인 시스템 Card(흰 바탕·`shadow.sm`·`radius.md`·안쪽 16, 카드 사이 16)를 그리고, 카드 안 입력·칩·사진 줄은 좌우 여백 없이 카드 안쪽에 맞춘다. 다른 작성 화면(기도제목·소모임 개설 등)은 캔버스대로 카드 없이 둔다. 작성 화면 상단은 다른 화면과 같은 기기 safe area + 20px, 텍스트 입력은 `ModalFormTextInput` 의 primary 2px 포커스를 공유한다.
-- (2026-07-15) **나눔 탐색 control은 full pill과 44px 터치 범위를 유지하면서 시각 높이만 낮춘다** — 상태 세그먼트는 40px track·32px 선택 영역, 카테고리 필터는 36px surface를 사용하고 상하 hitSlop으로 44px 터치 범위를 보장합니다. `나눔하기` FAB는 공통 46px geometry를 사용하며 기존 sticky 높이·간격·모션·라우팅은 유지합니다.
-- (2026-07-15) **나눔 상세의 이미지 위 뒤로가기도 공통 `surface2`를 사용한다** — 이미지 위라는 이유로 사용하던 흰색 RGBA와 카드 그림자 예외를 폐기하고 다른 상세와 같은 `surface2`·1px 경계로 통일합니다. 이미지 상단 scrim과 68×44px geometry·아이콘·문구·press motion은 유지합니다.
-- (2026-07-15) **나눔 상세 조회 실패도 이전 경로로 돌아가는 page로 취급한다** — 공통 `TopBar`의 `chevron-left + 뒤로`와 `router.back()`을 사용해 직전 목록의 필터·스크롤 맥락을 보존하고, 별도 홈 바로가기는 추가하지 않습니다. 기존 오류 안내는 헤더 아래 남은 높이의 중앙에 유지합니다.
-- (2026-07-15) **나눔 FAB는 `나눔하기`를 행동 label로 사용한다** — 일반적인 작성 행위보다 나눔을 시작한다는 목적을 바로 알 수 있게 화면 문구와 접근성 이름을 함께 바꾸고, `+` 아이콘·`/modal/market-new` 이동·고정 위치는 유지합니다.
-- (2026-07-15, 폐기) **나눔 FAB는 `글쓰기`를 행동 label로 유지한다** — 후속 사용자 결정으로 `나눔하기`가 대체했습니다.
-- (2026-07-14) **나눔 상단 탐색은 `전체 / 나눔중 / 내 나눔` 3개로 구성한다** — `전체`는 모든 글, `나눔중`은 `sharing`, `내 나눔`은 `MarketOverviewItem.isMine`인 글을 `sharing/reserved/done` 상태와 관계없이 표시합니다. 예약중·나눔완료는 독립 세그먼트에서 제거하되 카드의 상태 badge/overlay로 계속 구분합니다.
-- (2026-07-14) **나눔 작성·수정 modal도 공통 뒤로가기 헤더를 사용한다** — 화면을 pop하는 기존 `닫기` action은 `뒤로`로 표기하고 공통 `TopBar`의 화면 중앙 제목 geometry를 사용하며, 입력 변경 시 이탈 확인 절차는 그대로 유지합니다.
-- (2026-07-14) **나눔 상세 조회 실패는 화면 가용 높이의 중앙에 배치한다** — 오류 분기는 기본 ScrollView 대신 safe area 아래 전체 높이를 채우는 비스크롤 컨테이너와 `justifyContent: center`를 사용합니다. 공통 ErrorState와 목록·다른 도메인의 embedded 오류 배치는 변경하지 않습니다.
-- (2026-07-14) **나눔 상세 hero의 일반 scrim은 버튼 주변만 짧게 덮는다** — 상단 88px 안에서 `rgba(20,30,18,0.22)`를 시작으로 52% 지점의 0.10을 거쳐 하단 완전 투명으로 전환합니다. 뒤로가기 버튼·hero 높이·페이지 indicator와 예약중/나눔완료 상태 overlay는 별도 geometry로 유지합니다.
-- (2026-07-14) **나눔 검색은 제목과 탐색 control 사이에서 sticky 노출한다** — 검색을 열면 `제목 → 검색 → 상태 세그먼트 → 카테고리` 순서가 되고, 아래 스크롤로 탐색 control이 숨었더라도 헤더의 `검색` action을 누르면 검색창과 control을 다시 표시합니다. 검색을 닫으면 기존 방향형 숨김 정책으로 복귀합니다.
-- (2026-07-14) **나눔 상태·카테고리 control은 처음부터 한 묶음으로 sticky 처리한다** — 116px 영역을 타이틀과 같은 glass로 고정하고 아래 12px 스크롤에서 숨기며 위 4px에서 200ms로 함께 재표시합니다. 최초 렌더·동작 줄이기에서는 불필요한 이동을 실행하지 않습니다.
-- (2026-07-14) **나눔 상태·카테고리·목록은 glass 타이틀 아래 하나의 스크롤을 사용한다** — 타이틀은 기본 배경색 blur로 고정하고 하단 border 없이 콘텐츠가 뒤를 통과하며 검색 action과 fixed FAB는 기존 위치를 유지합니다.
-- (2026-07-14) **나눔 카테고리 indicator는 padding 없는 공통 track 좌표를 사용한다** — 화면 좌우 20px 여백은 ScrollView content로 분리하고 필터와 indicator의 좌표 원점을 일치시켜 선택 배경의 20px 오프셋을 제거합니다.
-- (2026-07-14) **나눔 필터·상태 query는 200ms 모션 뒤 갱신한다** — 선택 UI와 목록은 즉시 전환하고 category/status query는 indicator 이동 종료 뒤 `setParams`로 반영해 URL remount가 모션을 끊지 않으며 다른 query를 유지합니다.
-- (2026-07-14) **나눔 카테고리는 이동 indicator와 route query를 함께 사용한다** — 44px 가변 너비 필터의 선택 배경은 200ms로 이동하고 `category` query는 현재 목록 route에만 반영해 상세 뒤로가기에서 선택과 결과를 복원하되 별도 방문 이력을 늘리지 않습니다.
-- (2026-07-14) **나눔 전체 카드는 동행 전체 모임과 외곽 geometry를 공유한다** — 96px 썸네일, 16px padding/radius, 1px 경계, 동일 shadow와 12px 간격을 공통 기준으로 사용하며 상품 제목·작성자 정보는 나눔 도메인에 맞게 유지합니다.
-- (2026-07-14) **나눔 탐색 구획은 터치 영역을 분리한다** — 상태 탭과 카테고리 필터는 각각 44px 높이를 유지하고 flex 축소를 막으며, 상태 탭-필터-첫 카드와 카드 사이는 12px 간격으로 분리해 인접 터치 영역이 겹치지 않게 합니다. 목록 카드는 흰 surface, 옅은 1px 경계, 둥근 모서리와 약한 그림자를 사용하고 행 divider는 두지 않습니다.
-- (2026-07-14) **댓글 입력 영역은 배경만 투명하게 한다** — 고정 composer와 pill 입력창의 크기·위치·테두리·전송 버튼은 유지하고 배경 alpha만 제거합니다. 이미 투명한 신고 입력과 고정 surface를 쓰는 검색·작성 폼은 변경하지 않습니다.
-- (2026-07-12) **부분 폐기됨: 나눔은 사진 asset 추가 없이 정보 계층만 개선한다** — 기존 `VisualThumb`와 제목·작성자/시간 계층, 이미지 작업 제외 결정은 유지하지만 flat row는 2026-07-14 카드 결정으로 대체합니다. 실제 물품 사진은 업로드/API 계약 작업에서 다룹니다.
+## 코드 위치
 
-- (2026-07-12) **나눔 작성은 API 계약 전에도 service mutation 경계를 통과한다** — 작성 화면은 fixture를 직접 변경하지 않고 `useCreateMarketPost → createMarketPost → MarketDataSource`를 사용합니다. 생성 결과는 runtime mock 목록/상세에 유지하고 실제 API 연결 시 data source/mapper만 교체합니다.
+- 화면: `app/(tabs)/market/`, 작성·수정: `app/modal/market-new.tsx`
+- 상세 부품: `src/components/market/detail/`
+- 데이터: `src/services/market*`, `src/hooks/useMarket.ts`, `src/types/market*`
+- 사진 축소: `src/lib/resizeImage.ts`, 계약 검사: `scripts/api-contract/market.mjs` (`npm run test:api:contract -- market`)
 
-- (2026-07-11) **게시글 삭제는 작성·수정 계약과 분리해 완결된 mock 수직 흐름으로 제공한다** — 삭제는 게시글 ID와 소유권만 필요하므로 data source에서 최종 검증하고, 성공 시 overview에서 제거하고 detail query를 폐기한 뒤 나눔 목록으로 이동합니다. 작성·수정은 위치 입력과 이미지 업로드 계약이 없으므로 일부 필드를 임의로 채우지 않습니다.
-- (2026-07-11) **게시글 삭제 확인은 실제 상태와 디자인 variant가 같은 공통 dialog를 사용한다** — 실제 버튼은 local state를 열고, development 전용 `delete-confirm`은 route query 변화 effect로만 같은 상태를 동기화해 production mutation을 덮지 않습니다.
-- (2026-07-11) **신고 사유는 프런트 도메인 값과 서버 code를 분리한다** — 화면은 디자인 원본의 8개 사유 key를 사용하고, mock data source는 대상 단위 중복만 검증합니다. Swagger의 `targetType/reportReasonCode` enum과 오류 code가 확정되기 전에는 예시 문자열을 HTTP 값으로 추측하지 않으며 계약 gate가 두 enum을 요구합니다.
-- (2026-07-11) **신고 디자인 variant는 query 변화에 맞춰 effect로 동기화한다** — 캡처 스크립트가 같은 상세 컴포넌트에서 route query만 바꾸므로 `report/report-other-input/report-dup-toast` 상태를 development 전용으로 초기화합니다. 실제 신고 mutation은 query가 변하지 않아 이 effect와 독립적입니다.
-- (2026-07-11) **비동기 UI 테스트는 기능 timeout과 assertion timeout을 분리한다** — mock 지연이 CI 병렬 부하에서 Testing Library 기본 제한을 넘을 수 있으므로, 삭제 완료 상태를 확인하는 assertion에만 5초를 허용하고 production mutation 시간은 변경하지 않습니다.
-- (2026-07-11) **댓글 수정은 composer를 재사용하고 삭제는 확인 후 tombstone으로 바꾼다** — 별도 편집 화면 없이 내 댓글 action이 composer의 편집 대상을 설정하며, 삭제는 네이티브 확인 이후 성공할 때만 cache와 mock 저장소를 갱신합니다. 다른 작성자의 댓글 변경은 data source에서도 거부하고 신고는 사유 선택 UI·오류 code 확정 전까지 연결하지 않습니다.
-- (2026-07-11) **댓글 등록은 계약 확정 전에도 완전한 mock 수직 흐름으로 유지한다** — 화면은 data source를 직접 호출하지 않고 hook mutation만 사용하며, service는 공백 댓글을 차단하고 입력을 정규화합니다. 성공 결과는 상세 query cache에 반영하고 mock data source에도 보관해 재조회와 HTTP 교체 시 화면 소비자를 유지합니다.
-- (2026-07-11) **나눔 핵심 흐름은 오류 코드가 문서화되어야 HTTP로 전환한다** — 상세·등록·수정·삭제·댓글 등록/수정/삭제·신고의 4xx/5xx code가 Swagger에 있어야 화면 메시지 표를 확정할 수 있습니다. 신고 enum 누락 2건과 오류 문서 누락 8건을 포함한 전체 누락은 38건입니다.
-- (2026-07-11) **나눔 request 계약은 PLAN의 작성 필드와 화면 제한을 함께 검증한다** — 생성·수정은 제목/내용/카테고리/물품상태/장소를 필수로 요구하고 제목 30자, 내용 500자, 사진 5장과 입력 enum을 확인합니다. 현재 Swagger와 PLAN 사이의 장소 필드 충돌을 포함한 전체 누락은 28건입니다.
-- (2026-07-11) **이미지 업로드도 나눔 계약 gate에 포함한다** — 게시글 `images` 필드만으로는 로컬 URI를 서버 URL로 바꿀 수 없으므로, 경로를 가정하지 않고 이미지/파일 업로드 operation을 찾아 request/200 DTO까지 확인합니다. 현재 누락은 기존 13건에 업로드 endpoint 1건을 더한 14건입니다.
-- (2026-07-11) **나눔 화면은 계약 확정 전에도 mock data source를 사용한다** — HTTP DTO/enum mapper 활성화는 기존 13건 계약 gate 뒤로 유지하되, 목록·상세 화면은 `useMarket* → marketService → mockMarketDataSource`를 소비합니다. 계약 확정 후 화면이 아니라 data source만 교체합니다.
-- (2026-07-10) **나눔 디자인 상태와 API 상태를 분리한다** — 목록 empty/error/status, 상세 권한·예약·완료·예외, 작성 form 상태는 `designVariant`로만 캡처하며 production에서는 무시합니다. 실제 상태는 API mapper와 query/mutation 결과로 결정합니다.
-- (2026-07-10) **나눔 mapper는 화면 필수 계약 13건 해소 후 활성화한다** — 목록의 `authorName/images/keyword`, 상태·카테고리·물품상태 enum, 이미지 필수 정책, 상태 변경 endpoint가 Swagger에 없어 현재 HTTP 전환은 작성자 ID 노출·썸네일 소실·코드 추측을 유발합니다. `test:api:contract:market` 통과 전에는 기존 mock 화면을 유지합니다.
-- (2026-06-27) **미사용 service/hook/card 레이어는 제거한다** — 현재 나눔 화면은 Downloads 원본을 기준으로 다시 구현할 예정이고 `MarketItemCard`, `marketService`, `useMarketItems` 호출처가 없어, 실제 API 연결 시 필요한 표면만 다시 만든다.
-- (2026-06-27) **나눔 목록은 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenMarketList` 구조를 `/market` route에 직접 반영하고, 상태별 variant는 query parameter에서 필요한 범위만 해석합니다. 별도 service/hook은 실제 API 스키마 확정 전까지 만들지 않습니다.
-- (2026-06-27) **나눔 상세는 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenMarketDetail`의 기본 상세 구조를 `/market/[id]` route에 직접 반영합니다. 신고/상태 변경 sheet 같은 예외 variant는 실제 필요 시 작은 overlay로 추가합니다.
-- (2026-06-27) **나눔 작성은 placeholder가 아니라 실제 RN 화면으로 렌더링한다** — Downloads `ScreenMarketCreate`의 기본 작성/입력 완료/edit/limit-toast 구조를 `modal/market-new` route에 직접 반영합니다. 실제 저장 API는 스키마 확정 전까지 붙이지 않습니다.
-- (2026-05-27) **나눔 작성 topbar/control은 ZIP `ScreenMarketCreate` metric을 따른다** — 작성/수정 reference는 ZIP `phone-topbar`의 56px rhythm과 700/600/500 weight 체계를 따르고, chip은 ZIP `.chip`의 12px semibold metric으로 번역합니다.
-- (2026-05-27) **나눔 상세 text/chip은 ZIP 전용 metric을 따른다** — 상세 제목은 공용 `titleText`가 아니라 ZIP `20px/700/1.35`에 맞춘 전용 style을 쓰고, 카테고리/상태 chip도 dark selected chip이 아닌 ZIP `chip soft` 톤으로 렌더링합니다.
-- (2026-05-27) **나눔 목록 FAB는 ZIP fixed root layer를 따른다** — `ScreenMarketList`의 글쓰기 FAB는 list ScrollView 안 요소가 아니라 ZIP `Phone` root의 absolute pill button으로 관리합니다. 공통 `FloatingActionButton`은 정적 surface를 사용해 Android 캡처에서 pill 배경과 위치가 유지되도록 합니다.
-- (2026-05-27) **나눔 thumbnail은 ZIP `Thumb` proportional geometry를 따른다** — 목록 86px thumb, 상세 360px hero, 작성/관심 목록 thumb 모두 같은 공통 `VisualThumb`를 쓰므로, circle 위치/크기/opacity는 ZIP `lib.jsx`의 `Thumb` SVG viewBox 수식을 size 비례로 번역합니다.
-- (2026-05-27, 2026-07-14 폐기) **나눔 목록은 ZIP full-width row를 따른다** — row divider 구조는 사용자 확인에 따라 독립 카드 구조로 대체했습니다. 썸네일과 status overlay는 유지합니다.
-- (2026-05-27) **나눔 상세 action은 ZIP `ActionBtn` inline 구조를 따른다** — 수정/삭제/상태 변경/신고/차단 action은 큰 원형 icon tile이 아니라 ZIP `screens-market.jsx`의 44px transparent inline icon+label button으로 번역합니다.
-- (2026-05-27) **나눔 작성은 ZIP section form 구조를 따른다** — 작성/수정 reference는 카드형 폼이 아니라 ZIP 원본의 상단 `닫기`/등록 action, horizontal photo rail, 8px divider section, 7개 카테고리 chip, 상태 segmented button, 안내 박스를 기준으로 번역합니다.
-- (2026-05-26) **나눔 상세 geometry는 ZIP phone frame 기준으로 본다** — Android native safe-area를 그대로 쓰는 대신 ZIP `phone-status` 44px와 bottom fixed composer 위치를 기준으로 맞춰야 원본 상세의 hero, 작성자, composer 위치가 일치합니다.
-- (2026-05-26) **나눔 상세 toast는 ZIP `CheckToast offset={106}`을 따른다** — 하단 comment composer가 있는 나눔 상세의 중복 신고 toast는 기본 offset이 아니라 ZIP 원본처럼 bottom action area 위에 뜨도록 `offset=106`을 적용하고, 문구도 `이미 신고한 게시글입니다`로 맞춥니다.
-- (2026-05-26, 2026-07-14 부분 폐기) **나눔 상세 reference는 ZIP 고정 comment composer를 따른다** — 하단 고정 위치와 멀티라인 preview card는 유지하지만 glass 배경은 제거해 composer와 입력창 모두 투명하게 표시합니다.
-- (2026-05-26) **나눔 상세 hero는 ZIP `Thumb`를 직접 번역한다** — `VisualCover` 기반 wide cover 대신 ZIP의 정사각 `Thumb size=360 seed=0` 구조를 사용하고, 기본 `Thumb`에는 아이콘을 표시하지 않습니다.
-- (2026-05-23) **나눔 상세는 full-bleed hero를 기준으로 한다** — 상세 reference 화면은 공통 TopBar 카드형 layout보다 ZIP 원본의 사진 hero + overlay back button + status banner 구조를 우선합니다.
-- (2026-05-23) **나눔 원본 상태는 `variant` 라우트로 검증** — 현재 서비스 기반 화면을 유지하되 `?variant=...`가 있으면 ZIP 원본의 목록/상세/작성 상태를 mock-first reference 화면으로 렌더링합니다.
-- (2026-05-23) **목록 검색은 상단 아이콘으로 접기** — ZIP prototype 톤에 맞춰 기본 목록은 상태/카테고리 탐색을 먼저 보이고, 검색 입력은 상단 검색 아이콘으로 펼치되 기존 검색 로직은 유지합니다.
-- (2026-05-23) **나눔 카드 기본형은 compact row** — 목록 화면은 이미지 썸네일, 상태 badge, 제목/위치/시간을 한 줄 흐름으로 읽는 row를 기본으로 하고, 홈 요약 영역은 별도 2열 card grid를 사용합니다.
-- (2026-05-22) **나눔은 무료 나눔만 MVP 포함** — 가격/결제는 MVP에서 제외하고 상태 변경과 댓글만 둡니다.
-- (2026-05-22) **Notion 운영 정책 일부를 mock service에서 검증** — 진행 중인 내 나눔은 최대 5개, 사진은 1장 이상 필수입니다.
-- (2026-05-22) **이미지는 로컬 URI 우선** — 실제 업로드 API가 없으므로 `expo-image-picker` URI를 mock 데이터에 저장해 UI 흐름을 검증합니다.
+## 의존성 · 관련 ADR
 
-## 미결 / 추적
-
-- 프런트 HTTP 목록/상세/작성/삭제/댓글은 라이브 관측으로 연결됨. 남은 문서 공백은 목록 `authorName`/`images`/`keyword`, 장소, 신고 enum, 오류 코드. 상태 변경은 작성자용 `PUT /api/share/{id}/status`(AVAILABLE/RESERVED/COMPLETED)로 상세의 "상태 변경" 시트에서 바꾼다(#247). `isMine`은 `authorId === 현재 사용자`로 계산. 단일 출처는 Issue #19이며 `test:api:contract:market`은 38건 실패를 유지한다.
-- 신고 처리 후 블라인드/관리자 큐 정책은 API/운영 정책 확정 후 반영.
-
-## 의존성
-
-- common 도메인의 UI, `queryKeys`, `queryClient`, 이미지 선택 컴포넌트에 의존합니다.
-- auth 도메인의 현재 사용자(`authStore`)에 의존합니다. HTTP 목록/상세의 `isMine`은 `authorId`와 비교합니다.
-
-## 관련 ADR
-
-- [ADR 0002 — 백엔드 선택 보류 (Mock-first)](../adr/0002-backend-tbd.md)
+- common 의 UI 컴포넌트(이미지 선택 포함), `queryKeys`, `queryClient`, `apiClient`
+- auth 의 현재 사용자(`isMine` 계산)
 - [ADR 0003 — MVP 범위는 Notion 최신 정의 우선](../adr/0003-mvp-scope-notion-first.md)
 - [ADR 0004 — Notion v1 범위와 Expo Dev Client 기준](../adr/0004-notion-v1-dev-client-scope.md)

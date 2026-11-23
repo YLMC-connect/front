@@ -1,37 +1,20 @@
-import type { Comment, Member } from "./common";
-import type { MARKET_REPORT_REASONS } from "../constants/domainOptions";
+/** 서버 카테고리 코드(`GET /api/share/categories` 의 `code`). 목록은 서버가 정한다. */
+export type MarketCategoryCode = string;
 
-export type MarketCategory =
-  | "all"
-  | "cloth"
-  | "home"
-  | "book"
-  | "food"
-  | "baby"
-  | "sport"
-  | "etc";
+/** 화면에서 고른 카테고리. "all" 은 필터 없음. */
+export type MarketCategory = "all" | MarketCategoryCode;
+
+export interface MarketCategoryOption {
+  code: MarketCategoryCode;
+  name: string;
+}
 
 export type MarketStatus = "sharing" | "reserved" | "done";
-
-export interface MarketItem {
-  id: string;
-  title: string;
-  description: string;
-  category: Exclude<MarketCategory, "all">;
-  status: MarketStatus;
-  images: string[];
-  owner: Member;
-  createdAt: string;
-  condition: string;
-  location: string;
-  comments: Comment[];
-  liked: boolean;
-}
 
 export interface MarketInput {
   title: string;
   description: string;
-  category: Exclude<MarketCategory, "all">;
+  category: MarketCategoryCode;
   condition: string;
   location: string;
   images: string[];
@@ -41,7 +24,7 @@ export interface MarketUpdateInput {
   marketId: string;
   title: string;
   description: string;
-  category: Exclude<MarketCategory, "all">;
+  category: MarketCategoryCode;
   condition: string;
   location: string;
   /** 화면에 남은 사진 순서. 서버 사진 URL 과 새로 고른 기기 사진 URI 가 섞여 있다. */
@@ -63,7 +46,7 @@ export interface MarketOverviewItem {
   authorName: string;
   createdLabel: string;
   status: MarketStatus;
-  category: Exclude<MarketCategory, "all">;
+  category: MarketCategoryCode;
   isMine: boolean;
 }
 
@@ -103,23 +86,13 @@ export interface MarketCommentUpdateInput extends MarketCommentTarget {
   content: string;
 }
 
-export type MarketReportReason = (typeof MARKET_REPORT_REASONS)[number]["key"];
-export type MarketReportTargetType = "market" | "comment";
-
-export interface MarketReportInput {
-  targetType: MarketReportTargetType;
-  targetId: string;
-  reason: MarketReportReason;
-  content?: string;
-}
-
 export interface MarketDetail {
   id: string;
   thumbSeed: number;
   images?: string[];
   title: string;
   content: string;
-  categoryLabel: string;
+  categoryCode: MarketCategoryCode;
   conditionLabel: string;
   /** 수령 장소. 옛 글은 비어 있을 수 있다. */
   location?: string;

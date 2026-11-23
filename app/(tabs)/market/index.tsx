@@ -17,17 +17,17 @@ import {
   type ShareCardState,
 } from "../../../src/components/ui/share-card";
 import { theme } from "../../../src/constants/theme";
-import { MARKET_CATEGORIES } from "../../../src/constants/domainOptions";
 import {
+  useMarketCategories,
   useMarketOverview,
   useMyMarketOverview,
 } from "../../../src/hooks/useMarket";
 import type {
-  MarketCategory,
+  MarketCategoryCode,
+  MarketCategoryOption,
   MarketOverviewItem,
 } from "../../../src/types/market";
 import { useMotionRouteParam } from "../../../src/hooks/useMotionRouteParam";
-import { readDesignVariant } from "../../../src/lib/designVariant";
 import { useScaleHeightForFont } from "../../../src/lib/fontScale";
 
 type MarketSegment = "all" | "sharing" | "mine";
@@ -46,29 +46,31 @@ export default function MarketScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
     category?: string;
-    designVariant?: string;
     status?: string;
   }>();
-  const variant = readDesignVariant(params.designVariant);
-  const isEmpty = variant === "empty";
   const routeStatus =
     params.status === "all" ||
     params.status === "sharing" ||
     params.status === "mine"
       ? params.status
-      : variant === "tab-all"
-        ? "all"
-        : "sharing";
-  const routeCategory =
-    MARKET_CATEGORIES.find((item) => item.key === params.category)?.key ??
-    "all";
+      : "sharing";
+  const categories = useMarketCategories();
+  // 필터 칩은 "전체" + 서버 카테고리 목록(노출 순서)
+  const categoryChips = [
+    { key: "all", label: "전체" },
+    ...(categories.data ?? []).map((item) => ({
+      key: item.code,
+      label: item.name,
+    })),
+  ];
+  const routeCategory = params.category || "all";
   const [activeStatus, setActiveStatus] = useMotionRouteParam<MarketSegment>(
     routeStatus,
     (status) => {
       router.setParams({ status: status === "sharing" ? undefined : status });
     },
   );
-  const [category, setCategory] = useMotionRouteParam(
+  const [selectedCategory, setCategory] = useMotionRouteParam(
     routeCategory,
     (nextCategory) => {
       router.setParams({
@@ -76,23 +78,27 @@ export default function MarketScreen() {
       });
     },
   );
+  // 목록을 받은 뒤 서버에 없는 코드(옛 딥링크 등)면 "전체"로 본다. 활성 칩 없이 걸러지지 않게 한다
+  const category =
+    selectedCategory !== "all" &&
+    categories.data &&
+    !categories.data.some((item) => item.code === selectedCategory)
+      ? "all"
+      : selectedCategory;
   const categoryFilter =
-    category === "all"
-      ? undefined
-      : (category as Exclude<MarketCategory, "all">);
+    category === "all" ? undefined : (category as MarketCategoryCode);
   const overview = useMarketOverview(categoryFilter);
   const mine = useMyMarketOverview(categoryFilter, activeStatus === "mine");
   const list = activeStatus === "mine" ? mine : overview;
-  const isError = variant === "network-error" || list.isError;
+  const isError = list.isError;
   const sourceItems = list.data?.items ?? [];
-  const statusPosts =
-    isError || isEmpty
-      ? []
-      : activeStatus === "sharing"
-        ? sourceItems.filter(
-            (post) => post.status === "sharing" || post.status === "reserved",
-          )
-        : sourceItems;
+  const statusPosts = isError
+    ? []
+    : activeStatus === "sharing"
+      ? sourceItems.filter(
+          (post) => post.status === "sharing" || post.status === "reserved",
+        )
+      : sourceItems;
   const visiblePosts =
     activeStatus === "mine"
       ? statusPosts
@@ -103,14 +109,13 @@ export default function MarketScreen() {
   // 받은 페이지에 맞는 글이 없으면 다음 페이지를 이어 받아 빈 화면을 잘못 띄우지 않는다
   const needsMore =
     !isError &&
-    !isEmpty &&
     !list.isPending &&
     visiblePosts.length === 0 &&
     list.hasNextPage;
   useEffect(() => {
     if (needsMore && !list.isFetchingNextPage) void list.fetchNextPage();
   }, [needsMore, list]);
-  const isLoading = (list.isPending || needsMore) && !isError && !isEmpty;
+  const isLoading = (list.isPending || needsMore) && !isError;
 
   return (
     <StickyHeaderScreen
@@ -135,7 +140,7 @@ export default function MarketScreen() {
           />
 
           <FilterChips
-            items={MARKET_CATEGORIES}
+            items={categoryChips}
             active={category}
             onChange={setCategory}
             style={[styles.categoryScroll, { height: scaleForFont(44) }]}
@@ -172,10 +177,7 @@ export default function MarketScreen() {
             onRetry={() => list.refetch()}
           />
         ) : visiblePosts.length === 0 ? (
-          <MarketEmptyState
-            status={isEmpty ? null : activeStatus}
-            isSearching={false}
-          />
+          <MarketEmptyState status={activeStatus} isSearching={false} />
         ) : (
           <ShareList style={styles.shareList} testID="market-list">
             {visiblePosts.map((post, index) => (
@@ -183,7 +185,7 @@ export default function MarketScreen() {
                 key={post.id}
                 title={post.title}
                 state={shareStateOf(post.status)}
-                category={categoryOf(post.category)}
+                category={categoryNameOf(categories.data, post.category)}
                 meta={`${post.authorName} · ${post.createdLabel}`}
                 photo={post.thumbnailUrl}
                 thumbSeed={post.thumbSeed}
@@ -222,17 +224,19 @@ function shareStateOf(status: MarketOverviewItem["status"]): ShareCardState {
   return "open";
 }
 
-function categoryOf(key: string) {
-  return (
-    MARKET_CATEGORIES.find((category) => category.key === key)?.label ?? "기타"
-  );
+/** 서버 목록에 없는 코드(비활성 등)는 이름을 비워 배지를 숨긴다. */
+function categoryNameOf(
+  categories: readonly MarketCategoryOption[] | undefined,
+  code: string,
+) {
+  return categories?.find((category) => category.code === code)?.name;
 }
 
 function MarketEmptyState({
   status,
   isSearching,
 }: {
-  status: MarketSegment | null;
+  status: MarketSegment;
   isSearching?: boolean;
 }) {
   const message = isSearching

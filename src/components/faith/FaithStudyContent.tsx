@@ -6,10 +6,11 @@ import {
   Empty,
   ErrorState,
   MotionEnter,
+  MOTION_STAGGER_LIMIT,
   motionStaggerDelay,
 } from "../ui";
 import { ProgressBar } from "../ui/progress-bar";
-import { CourseCard, OverviewLoading, STAGGER_LIMIT } from "./FaithParts";
+import { CourseCard, OverviewLoading } from "./FaithParts";
 import { styles } from "./faithSectionsStyles";
 
 export function StudyContent() {
@@ -86,7 +87,7 @@ export function StudyContent() {
             openCourses.map((course, index) => (
               <MotionEnter
                 key={course.cohortId ?? course.id}
-                enabled={index < STAGGER_LIMIT}
+                enabled={index < MOTION_STAGGER_LIMIT}
                 mode="fadeUp"
                 delay={motionStaggerDelay(index)}
               >
@@ -124,7 +125,7 @@ export function StudyContent() {
             courses.map((course, index) => (
               <MotionEnter
                 key={course.id}
-                enabled={index < STAGGER_LIMIT}
+                enabled={index < MOTION_STAGGER_LIMIT}
                 mode="fadeUp"
                 delay={motionStaggerDelay(index)}
               >

@@ -2,6 +2,7 @@ import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState, type ComponentProps, type ReactNode } from "react";
 import {
+  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -25,11 +26,16 @@ import {
   ErrorState,
   FLOATING_BOTTOM_BAR_INSET,
   FloatingBottomBar,
+  MotionPressable,
   Skeleton,
   TopBar,
   VisualThumb,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import {
+  groupStatusLabel,
+  groupStatusTone,
+} from "../../../src/services/groupMapper";
 import {
   useDeleteGroup,
   useDeleteGroupNotice,
@@ -38,7 +44,6 @@ import {
   useLeaveGroup,
   useUpdateGroupStatus,
 } from "../../../src/hooks/useGroups";
-import { readDesignVariant } from "../../../src/lib/designVariant";
 
 /** 대표 사진 자리 높이(상태 바 포함). 흰 시트가 아래 24 를 덮는다. */
 const HERO_HEIGHT = 240;
@@ -48,12 +53,8 @@ const MEMBER_PREVIEW_LIMIT = 4;
 export default function GroupDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams<{
-    id?: string;
-    designVariant?: string;
-  }>();
+  const params = useLocalSearchParams<{ id?: string }>();
   const id = params.id ?? "1";
-  const variant = readDesignVariant(params.designVariant);
   const detail = useGroupDetail(id);
   const deleteNotice = useDeleteGroupNotice(id);
   const deleteGroupMutation = useDeleteGroup(id);
@@ -67,7 +68,8 @@ export default function GroupDetailScreen() {
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isPastHero, setIsPastHero] = useState(false);
-  const isDeleted = variant === "deleted-exception";
+  // 승인이 필요한 모임에 신청한 뒤의 표시. 서버가 신청자에게 대기 상태를 주지 않아 이 화면에서만 기억한다
+  const [approvalRequested, setApprovalRequested] = useState(false);
   const membershipBusy =
     joinGroupMutation.isPending || leaveGroupMutation.isPending;
   const membershipError = joinGroupMutation.isError
@@ -84,25 +86,6 @@ export default function GroupDetailScreen() {
     const past = event.nativeEvent.contentOffset.y >= heroThreshold;
     if (past !== isPastHero) setIsPastHero(past);
   };
-
-  if (isDeleted) {
-    return (
-      <Screen>
-        <TopBar title="소모임" back onBack={() => router.back()} />
-        <View style={styles.exception}>
-          <AppIcon
-            name="error-outline"
-            size={42}
-            color={theme.colors.textMuted}
-          />
-          <Text style={styles.exceptionTitle}>존재하지 않는 소모임이에요</Text>
-          <Text style={styles.exceptionText}>
-            삭제되었거나 더 이상 접근할 수 없는 소모임이에요.
-          </Text>
-        </View>
-      </Screen>
-    );
-  }
 
   if (detail.isPending) {
     return (
@@ -130,20 +113,29 @@ export default function GroupDetailScreen() {
   }
 
   const group = detail.data;
-  const isLeader = variant
-    ? variant === "leader" || variant === "leader-closed"
-    : group.isLeader;
-  const isMember = variant
-    ? variant === "member" || variant === "leave-confirm"
-    : group.isJoined && !group.isLeader;
-  const isNonMember = variant
-    ? variant === "non-member" || variant === "non-closed"
-    : !group.isJoined;
-  const isClosed = variant
-    ? variant === "leader-closed" || variant === "non-closed"
-    : group.status === "closed";
+  const isLeader = group.isLeader;
+  const isMember = group.isJoined && !group.isLeader;
+  const isNonMember = !group.isJoined;
+  const isClosed = group.status === "closed";
+  // 승인대기·반려 모임은 참여와 모집 상태 변경을 막는다
+  const isApproved = group.status === "open" || group.status === "closed";
+  const joinBlockedLabel =
+    group.status === "pending"
+      ? "승인 대기 중인 모임이에요"
+      : group.status === "rejected"
+        ? "반려된 모임이에요"
+        : isClosed
+          ? "모집이 마감됐어요"
+          : null;
+  const joinLabel =
+    joinBlockedLabel ??
+    (approvalRequested
+      ? "승인 대기 중"
+      : group.requiresApproval
+        ? "가입 신청하기"
+        : "참여 신청하기");
   const current = group.currentMembers;
-  const leaderName = variant && !isLeader ? "한지수" : group.leaderName;
+  const leaderName = group.leaderName;
   const visibleMembers =
     group.members.length > MEMBER_PREVIEW_LIMIT + 1
       ? group.members.slice(0, MEMBER_PREVIEW_LIMIT)
@@ -152,8 +144,8 @@ export default function GroupDetailScreen() {
   const openMembers = () => router.push(`/group/members?id=${id}`);
   // 상태 색 뜻: 진행 중(모집중) = success, 끝남(모집완료) = neutral.
   const statusBadge = (
-    <Badge tone={isClosed ? "neutral" : "success"}>
-      {isClosed ? "모집완료" : "모집중"}
+    <Badge tone={groupStatusTone(group.status)}>
+      {groupStatusLabel(group.status)}
     </Badge>
   );
 
@@ -192,7 +184,7 @@ export default function GroupDetailScreen() {
           <View style={styles.sheet} testID="group-detail-sheet">
             <View style={styles.header}>
               <View style={styles.chips}>
-                {isLeader ? (
+                {isLeader && isApproved ? (
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={`모집 상태 변경: 현재 ${isClosed ? "모집완료" : "모집중"}`}
@@ -228,7 +220,37 @@ export default function GroupDetailScreen() {
                   {group.maxMembers}명
                 </Text>
               </InfoLine>
+              {group.schedule ? (
+                <InfoLine icon="schedule" label="일정">
+                  <Text style={styles.infoValue}>{group.schedule}</Text>
+                </InfoLine>
+              ) : null}
+              {group.location ? (
+                <InfoLine icon="place" label="장소">
+                  <Text style={styles.infoValue}>{group.location}</Text>
+                </InfoLine>
+              ) : null}
             </View>
+
+            {isLeader && group.pendingMembers.length > 0 ? (
+              <MotionPressable
+                accessibilityRole="button"
+                accessibilityLabel={`가입 신청 ${group.pendingMembers.length}명 확인하기`}
+                onPress={openMembers}
+                style={styles.pendingBanner}
+                testID="group-pending-members"
+              >
+                <Badge tone="warning">{`가입 신청 ${group.pendingMembers.length}명`}</Badge>
+                <Text style={styles.pendingBannerText}>
+                  승인을 기다리고 있어요
+                </Text>
+                <AppIcon
+                  name="chevron-right"
+                  size={18}
+                  color={theme.colors.textMuted}
+                />
+              </MotionPressable>
+            ) : null}
 
             {isLeader ? (
               <Card style={styles.actionCard}>
@@ -400,10 +422,7 @@ export default function GroupDetailScreen() {
                 size="lg"
                 accessibilityLabel="소모임 나가기"
                 disabled={membershipBusy}
-                onPress={() => {
-                  if (variant) return;
-                  setShowLeaveConfirm(true);
-                }}
+                onPress={() => setShowLeaveConfirm(true)}
               >
                 소모임 나가기
               </Button>
@@ -411,17 +430,26 @@ export default function GroupDetailScreen() {
               <Button
                 testID="group-join-button"
                 size="lg"
-                accessibilityLabel={
-                  isClosed ? "모집이 마감됐어요" : "참여 신청하기"
-                }
-                disabled={isClosed}
+                accessibilityLabel={joinLabel}
+                disabled={joinBlockedLabel !== null || approvalRequested}
                 loading={membershipBusy}
                 onPress={() => {
-                  if (variant || isClosed) return;
-                  joinGroupMutation.mutate();
+                  if (joinBlockedLabel || approvalRequested) return;
+                  joinGroupMutation.mutate(undefined, {
+                    onSuccess: (next) => {
+                      // 승인이 필요한 모임은 신청만 되고 아직 멤버가 아니다
+                      if (next.requiresApproval && !next.isJoined) {
+                        setApprovalRequested(true);
+                        Alert.alert(
+                          "가입 신청 완료",
+                          "신청했어요. 소모임장이 승인하면 참여돼요.",
+                        );
+                      }
+                    },
+                  });
                 }}
               >
-                {isClosed ? "모집이 마감됐어요" : "참여 신청하기"}
+                {joinLabel}
               </Button>
             )}
           </FloatingBottomBar>
@@ -559,6 +587,23 @@ function InfoLine({
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  pendingBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing[2],
+    minHeight: theme.layout.touchTarget,
+    paddingHorizontal: theme.spacing[4],
+    paddingVertical: theme.spacing[3],
+    marginTop: theme.spacing[4],
+    borderRadius: theme.radius.sm,
+    backgroundColor: theme.colors.warningSubtle,
+  },
+  pendingBannerText: {
+    flex: 1,
+    color: theme.colors.warningText,
+    fontSize: theme.typography.label.fontSize,
+    lineHeight: theme.typography.label.lineHeight,
+  },
   loading: {
     flex: 1,
   },
@@ -797,24 +842,5 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
-  },
-  exception: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    paddingVertical: 120,
-  },
-  exceptionTitle: {
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-    lineHeight: theme.typography.body.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-  },
-  exceptionText: {
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
-    textAlign: "center",
   },
 });

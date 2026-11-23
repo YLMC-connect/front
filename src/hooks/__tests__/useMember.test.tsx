@@ -7,7 +7,6 @@ import {
   useChangePassword,
   useMemberMe,
   useUpdateMemberMe,
-  useVerifyPassword,
   useWithdrawMember,
 } from "../useMember";
 
@@ -15,7 +14,6 @@ jest.mock("../../services/authService", () => ({
   changePassword: jest.fn(),
   getCurrentMember: jest.fn(),
   updateCurrentMember: jest.fn(),
-  verifyPassword: jest.fn(),
   withdrawMember: jest.fn(),
 }));
 
@@ -110,19 +108,6 @@ describe("useWithdrawMember", () => {
 });
 
 describe("password mutations", () => {
-  it("비밀번호 확인 입력을 그대로 넘기고 실패를 전달한다", async () => {
-    const error = new Error("비밀번호가 일치하지 않습니다.");
-    service.verifyPassword.mockRejectedValue(error);
-    const { result } = renderHookWithClient(() => useVerifyPassword());
-    const input = { password: "pw" } as never;
-
-    await act(async () => {
-      await expect(result.current.mutateAsync(input)).rejects.toBe(error);
-    });
-
-    expect(service.verifyPassword).toHaveBeenCalledWith(input);
-  });
-
   it("비밀번호 변경 입력을 그대로 넘긴다", async () => {
     service.changePassword.mockResolvedValue(undefined as never);
     const { result } = renderHookWithClient(() => useChangePassword());

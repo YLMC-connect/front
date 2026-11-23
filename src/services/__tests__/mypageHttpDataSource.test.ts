@@ -78,38 +78,19 @@ describe("httpMyPageDataSource", () => {
     );
   });
 
-  it("loads life studies and prayers as one object without a page query", async () => {
+  it("loads life studies as one object without a page query", async () => {
     const { request, dataSource } = setup();
-    request.mockImplementation((path: string) => {
-      if (path.endsWith("/life-studies")) {
-        return Promise.resolve({
-          completionCount: 0,
-          applications: [],
-          ongoing: [],
-          completed: [],
-        });
-      }
-      return Promise.resolve({
-        activeCount: 0,
-        totalPeriod: "15일",
-        totalPeriodDays: 15,
-        totalRoomCount: 0,
-        currentActivities: [],
-        pastActivities: [],
-      });
+    request.mockResolvedValue({
+      completionCount: 0,
+      applications: [],
+      ongoing: [],
+      completed: [],
     });
 
     await expect(dataSource.getLifeStudies()).resolves.toMatchObject({
       completionCount: 0,
     });
-    await expect(dataSource.getPrayers()).resolves.toMatchObject({
-      totalPeriod: "15일",
-      totalPeriodDays: 15,
-    });
-    expect(pathsOf(request)).toEqual([
-      "/api/mypage/activities/life-studies",
-      "/api/mypage/activities/prayers",
-    ]);
+    expect(pathsOf(request)).toEqual(["/api/mypage/activities/life-studies"]);
   });
 
   it("does not call admin, life-study, or prayer paths", async () => {

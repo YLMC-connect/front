@@ -177,6 +177,9 @@ export function useMotionPresence(
   return { hideImmediately, mounted, progress, reduceMotion };
 }
 
+/** 목록 첫 진입 때 순서대로 떠오르는 항목 수(디자인 시스템 motion: 처음 8개, 60ms 간격). */
+export const MOTION_STAGGER_LIMIT = 8;
+
 export function motionStaggerDelay(index: number) {
   return index * theme.motion.stagger;
 }
@@ -426,4 +429,20 @@ export function AnimatedProgressFill({
   }));
 
   return <Animated.View testID={testID} style={[style, animatedStyle]} />;
+}
+
+/** 목록 첫 진입: 처음 8개 항목만 60ms 간격으로 8px 아래에서 떠오른다. */
+export function StaggerItem({
+  index,
+  children,
+}: {
+  index: number;
+  children: ReactNode;
+}) {
+  if (index >= MOTION_STAGGER_LIMIT) return <>{children}</>;
+  return (
+    <MotionEnter mode="fadeUp" delay={motionStaggerDelay(index)}>
+      {children}
+    </MotionEnter>
+  );
 }

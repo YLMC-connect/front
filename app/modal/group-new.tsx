@@ -1,6 +1,5 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { InfoBox } from "@/components/ui/info-box";
-import { InputErrorText } from "@/components/ui/inputs";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -17,7 +16,9 @@ import {
   type ViewStyle,
 } from "react-native";
 import { Text } from "@/components/ui/text";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
+  AppText,
   ConfirmDialog,
   ErrorState,
   FloatingBottomBar,
@@ -33,7 +34,6 @@ import {
   useGroupDetail,
   useUpdateGroup,
 } from "../../src/hooks/useGroups";
-import { readDesignVariant } from "../../src/lib/designVariant";
 import { toCommunionCategoryCode } from "../../src/services/groupMapper";
 import type { GroupDetail, GroupInput } from "../../src/types/group";
 
@@ -45,6 +45,18 @@ const categories = GROUP_CATEGORIES.filter(
   key: GroupInput["category"];
   label: string;
 }[];
+
+const SCHEDULE_PRESETS = [
+  "매주 토요일",
+  "매주 주일",
+  "격주 토요일",
+  "평일 저녁",
+] as const;
+const LOCATION_PRESETS = ["교회", "온라인 (Zoom)", "외부 모임"] as const;
+const toChipItems = (labels: readonly string[]) =>
+  labels.map((label) => ({ key: label, label }));
+const SCHEDULE_PRESET_ITEMS = toChipItems(SCHEDULE_PRESETS);
+const LOCATION_PRESET_ITEMS = toChipItems(LOCATION_PRESETS);
 
 const CAPACITY_PRESETS = [4, 8, 12, 20] as const;
 const CAPACITY_PRESET_ITEMS = CAPACITY_PRESETS.map((preset) => ({
@@ -106,22 +118,15 @@ function ChoiceChips<T extends string>({
 /** 32 칩 + 위아래 6 → 누르는 곳 44. */
 const CHIP_HIT_SLOP = { top: 6, bottom: 6 };
 
-const filledValues: GroupInput = {
-  category: "sport",
-  name: "토요 산악회",
-  description:
-    "매주 토요일 함께 산을 오르며 자연을 느끼고 신앙을 나누는 모임입니다.",
-  maxMembers: 25,
-};
-
 const emptyValues: GroupInput = {
   category: "etc",
   name: "",
   description: "",
   maxMembers: 10,
+  schedule: "",
+  location: "",
+  requiresApproval: false,
 };
-
-const DESIGN_EDIT_VARIANTS = ["edit", "range-error", "member-error"];
 
 function toGroupInput(detail: GroupDetail): GroupInput {
   const matchedCategory = GROUP_CATEGORIES.find(
@@ -135,23 +140,9 @@ function toGroupInput(detail: GroupDetail): GroupInput {
     name: detail.name,
     description: detail.description,
     maxMembers: detail.maxMembers,
-  };
-}
-
-/** 디자인 미리보기(id 없음)에서만 예시 값을 쓴다. */
-function designInitialValues(variant: string): GroupInput {
-  const useFilledValues =
-    DESIGN_EDIT_VARIANTS.includes(variant) || variant === "create-filled";
-  return {
-    ...(useFilledValues ? filledValues : emptyValues),
-    maxMembers:
-      variant === "range-error"
-        ? 150
-        : variant === "member-error"
-          ? 15
-          : useFilledValues
-            ? filledValues.maxMembers
-            : emptyValues.maxMembers,
+    schedule: detail.schedule,
+    location: detail.location,
+    requiresApproval: detail.requiresApproval,
   };
 }
 
@@ -159,22 +150,13 @@ export default function GroupNewModal() {
   const router = useRouter();
   const params = useLocalSearchParams<{
     id?: string;
-    designVariant?: string;
     kind?: string;
   }>();
-  const variant = readDesignVariant(params.designVariant) ?? "create";
   const existingDetail = useGroupDetail(params.id ?? "");
   const kind = params.kind === "service" ? "service" : "group";
 
   if (!params.id) {
-    return (
-      <GroupForm
-        variant={variant}
-        isEdit={DESIGN_EDIT_VARIANTS.includes(variant)}
-        initialValues={designInitialValues(variant)}
-        kind={kind}
-      />
-    );
+    return <GroupForm isEdit={false} initialValues={emptyValues} kind={kind} />;
   }
 
   // 실제 수정은 소모임 정보가 도착한 뒤에 폼을 채워 그린다.
@@ -207,7 +189,6 @@ export default function GroupNewModal() {
     <GroupForm
       key={params.id}
       groupId={params.id}
-      variant={variant}
       isEdit
       initialValues={toGroupInput(existingDetail.data)}
     />
@@ -216,13 +197,11 @@ export default function GroupNewModal() {
 
 function GroupForm({
   groupId,
-  variant,
   isEdit,
   initialValues,
   kind = "group",
 }: {
   groupId?: string;
-  variant: string;
   isEdit: boolean;
   initialValues: GroupInput;
   kind?: "group" | "service";
@@ -277,6 +256,9 @@ function GroupForm({
           description: values.description,
           category: values.category,
           maxMembers: values.maxMembers,
+          schedule: values.schedule,
+          location: values.location,
+          requiresApproval: values.requiresApproval,
         });
         // 상세에서 연 수정 창이므로 닫으면 상세로 돌아간다
         router.back();
@@ -436,19 +418,59 @@ function GroupForm({
                 style={styles.quickPresetScroll}
                 testIDPrefix="group-form-capacity"
               />
+            </Section>
 
-              {variant === "range-error" ? (
-                <View style={styles.inlineError}>
-                  <InputErrorText>2~100명 사이로 입력해주세요</InputErrorText>
-                </View>
-              ) : null}
-              {variant === "member-error" ? (
-                <View style={styles.inlineError}>
-                  <InputErrorText>
-                    현재 멤버수(18명)보다 적게 설정할 수 없습니다
-                  </InputErrorText>
-                </View>
-              ) : null}
+            <Section card label="모임 일정">
+              <FormInput
+                style={styles.cardField}
+                accessibilityLabel="모임 일정"
+                value={values.schedule}
+                onChangeText={(schedule) => update("schedule", schedule)}
+                placeholder="예: 매주 토요일 오전 10시"
+              />
+              <ChoiceChips
+                items={SCHEDULE_PRESET_ITEMS}
+                active={values.schedule}
+                onChange={(schedule) => update("schedule", schedule)}
+                style={styles.quickPresetScroll}
+                testIDPrefix="group-form-schedule"
+              />
+            </Section>
+
+            <Section card label="모임 장소">
+              <FormInput
+                style={styles.cardField}
+                accessibilityLabel="모임 장소"
+                value={values.location}
+                onChangeText={(location) => update("location", location)}
+                placeholder="예: 교육관 2층"
+              />
+              <ChoiceChips
+                items={LOCATION_PRESET_ITEMS}
+                active={values.location}
+                onChange={(location) => update("location", location)}
+                style={styles.quickPresetScroll}
+                testIDPrefix="group-form-location"
+              />
+            </Section>
+
+            <Section card label="참여 방식">
+              <Checkbox
+                checked={values.requiresApproval}
+                onChange={(next) => update("requiresApproval", next)}
+                accessibilityLabel="가입 승인 받기. 소모임장이 가입 신청을 승인해야 참여돼요."
+                testID="group-form-requires-approval"
+                label={
+                  <>
+                    <AppText variant="body" weight="semibold">
+                      가입 승인 받기
+                    </AppText>
+                    <AppText variant="label" tone="muted">
+                      켜면 소모임장이 가입 신청을 승인해야 참여돼요.
+                    </AppText>
+                  </>
+                }
+              />
             </Section>
 
             {error ? (
@@ -559,9 +581,6 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     fontSize: theme.typography.label.fontSize,
     lineHeight: theme.typography.label.lineHeight,
-  },
-  inlineError: {
-    marginTop: 8,
   },
   infoBox: {
     marginHorizontal: theme.layout.screenX,

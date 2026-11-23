@@ -92,6 +92,7 @@ export default function LifeStudyApplyScreenRoute() {
     try {
       await applyMutation.mutateAsync({
         cohortId,
+        // 생년·신앙연차·소속부서는 서버에서 선택 항목이 되어 보내지 않는다
         input: {},
       });
       Alert.alert("수강 신청 완료", "수강 신청했어요.", [
@@ -157,8 +158,8 @@ export default function LifeStudyApplyScreenRoute() {
                 />
 
                 <View style={styles.form}>
-                  <Field label="이름" value={memberName} editable={false} />
-                  <Field label="연락처" value={memberPhone} editable={false} />
+                  <Field label="이름" value={memberName} />
+                  <Field label="연락처" value={memberPhone} />
 
                   <Checkbox
                     checked={promiseAgreed}
@@ -199,35 +200,12 @@ export default function LifeStudyApplyScreenRoute() {
   );
 }
 
-function Field({
-  label,
-  value,
-  placeholder,
-  editable = true,
-  onChangeText,
-  keyboardType = "default",
-  maxLength,
-}: {
-  label: string;
-  value?: string;
-  placeholder?: string;
-  editable?: boolean;
-  onChangeText?: (text: string) => void;
-  keyboardType?: "default" | "number-pad";
-  maxLength?: number;
-}) {
+/** 회원 정보에서 채운 읽기 전용 칸. */
+function Field({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
-      <ModalFormTextInput
-        editable={editable}
-        placeholder={placeholder}
-        style={styles.input}
-        value={value}
-        onChangeText={onChangeText}
-        keyboardType={keyboardType}
-        maxLength={maxLength}
-      />
+      <ModalFormTextInput editable={false} style={styles.input} value={value} />
     </View>
   );
 }
@@ -278,10 +256,6 @@ const styles = StyleSheet.create({
   form: {
     gap: 20,
   },
-  twoCols: {
-    flexDirection: "row",
-    gap: 12,
-  },
   field: {
     flex: 1,
   },
@@ -294,9 +268,6 @@ const styles = StyleSheet.create({
   },
   input: {
     marginHorizontal: 0,
-  },
-  options: {
-    gap: 8,
   },
   promise: {
     alignItems: "flex-start",

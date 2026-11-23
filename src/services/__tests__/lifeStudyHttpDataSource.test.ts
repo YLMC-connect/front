@@ -1,42 +1,4 @@
-import { ApiError } from "../../lib/apiClient";
-import type {
-  LifeStudyCourse,
-  LifeStudyOverviewCourse,
-} from "../../types/lifeStudy";
 import { createHttpLifeStudyDataSource } from "../lifeStudyHttpDataSource";
-
-const baseOverviewCourse: LifeStudyOverviewCourse = {
-  id: "life-overview-open-1",
-  title: "생명의 삶",
-  kind: "required",
-  weekCount: 13,
-  instructorName: "박귀원",
-  summary: "신앙의 근본을 바로 세우는 가장 기본 과정",
-  applicationPeriod: "6.24 ~ 7.05",
-  capacity: 24,
-  enrolledCount: 18,
-};
-
-const baseCourse: LifeStudyCourse = {
-  id: "3",
-  title: "경건의 삶",
-  description: "매일의 QT, 기도, 말씀 묵상 습관을 세우는 경건 훈련입니다.",
-  instructor: {
-    id: "member-006",
-    name: "정다윗",
-    role: "USER",
-  },
-  schedule: "매주 목요일 20:00",
-  location: "교육관 202호",
-  status: "completed",
-  sessions: 10,
-  currentSession: 10,
-  capacity: 15,
-  enrolledCount: 15,
-  isEnrolled: true,
-  isCompleted: false,
-  curriculum: [],
-};
 
 const completion = {
   lifeStudyId: 3,
@@ -46,25 +8,6 @@ const completion = {
   attendCount: null,
   totalClassCount: null,
   completedAt: "2026-04-16",
-};
-
-const roster = {
-  cohortId: 15,
-  lifeStudyId: 3,
-  lifeStudyName: "경건의 삶",
-  cohortNumber: 2,
-  totalClassCount: 8,
-  students: [
-    {
-      userId: "user-1",
-      userName: "김성도",
-      userPhone: null,
-      attendCount: 7,
-      absentCount: 1,
-      completed: true,
-      completedAt: "2026-09-30",
-    },
-  ],
 };
 
 function setup(
@@ -235,107 +178,6 @@ describe("httpLifeStudyDataSource", () => {
       { id: 12, lessonName: "기도의 삶", orderNum: 2 },
     ]);
     expect(request).toHaveBeenCalledWith("/api/life-study/3");
-  });
-
-  it("calls the class list endpoint and copies weekCount only", async () => {
-    const course = { ...baseOverviewCourse };
-    const { request, dataSource } = setup();
-    request.mockResolvedValue({
-      cohortId: 15,
-      weekCount: 8,
-      classes: [{ title: "구원의 확신" }],
-    });
-
-    await expect(
-      dataSource.applyClassesToCourse("15", course),
-    ).resolves.toEqual({ ...course, weekCount: 8 });
-    expect(request).toHaveBeenCalledWith("/api/life-study/cohorts/15/classes");
-    expect(course.weekCount).toBe(13);
-  });
-
-  it("calls the attendance roster without reading undocumented fields", async () => {
-    const { request, dataSource } = setup();
-    request.mockResolvedValue({ attendedUserIds: ["user-1"], present: true });
-
-    await expect(dataSource.getAttendance("8")).resolves.toEqual({});
-    expect(request).toHaveBeenCalledWith(
-      "/api/life-study/classes/8/attendance",
-    );
-  });
-
-  it("sends attendance requests with only the Notion fields", async () => {
-    const { request, dataSource } = setup();
-    request.mockResolvedValue(null);
-
-    await dataSource.replaceAttendance("8", ["user-1", "user-2"]);
-    await dataSource.updateAttendanceUser("8", {
-      userId: "user-1",
-      attended: false,
-    });
-
-    expect(request).toHaveBeenNthCalledWith(
-      1,
-      "/api/life-study/classes/8/attendance",
-      {
-        method: "PUT",
-        body: JSON.stringify({ attendedUserIds: ["user-1", "user-2"] }),
-      },
-    );
-    expect(request).toHaveBeenNthCalledWith(
-      2,
-      "/api/life-study/classes/8/attendance/user",
-      {
-        method: "PUT",
-        body: JSON.stringify({ userId: "user-1", attended: false }),
-      },
-    );
-    const paths = pathsOf(request);
-    expect(paths.some((path) => path.startsWith("/api/admin"))).toBe(false);
-    expect(paths.some((path) => path.endsWith("/attend"))).toBe(false);
-    expect(paths.some((path) => path.includes("/api/mypage/"))).toBe(false);
-  });
-
-  it("maps a completion roster onto the matching course", async () => {
-    const base: LifeStudyCourse = { ...baseCourse };
-    const { request, dataSource } = setup();
-    request.mockResolvedValue(roster);
-
-    await expect(
-      dataSource.applyRosterToCourse("15", base, "user-1"),
-    ).resolves.toEqual({ ...base, isCompleted: true });
-    expect(request).toHaveBeenCalledWith(
-      "/api/life-study/cohorts/15/completions",
-    );
-    expect(base.instructor).toBe(baseCourse.instructor);
-    expect(base.sessions).toBe(10);
-  });
-
-  it("sends one user's completion and returns the roster fields Notion lists", async () => {
-    const { request, dataSource } = setup();
-    request.mockResolvedValue({ ...roster, adminNote: "제외" });
-
-    await expect(
-      dataSource.updateCompletionUser("15", {
-        userId: "user-1",
-        completed: true,
-      }),
-    ).resolves.toEqual(roster);
-    expect(request).toHaveBeenCalledWith(
-      "/api/life-study/cohorts/15/completions/user",
-      {
-        method: "PUT",
-        body: JSON.stringify({ userId: "user-1", completed: true }),
-      },
-    );
-  });
-
-  it("rejects a class list that does not match the Notion object", async () => {
-    const { request, dataSource } = setup();
-    request.mockResolvedValue({ cohortId: 15, weekCount: 8 });
-
-    await expect(
-      dataSource.applyClassesToCourse("15", baseOverviewCourse),
-    ).rejects.toBeInstanceOf(ApiError);
   });
 
   it("submits cohort application to /api/life-study/cohorts/{id}/attend", async () => {

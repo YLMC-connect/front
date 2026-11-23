@@ -1,18 +1,9 @@
-import { AppIcon } from "@/components/ui/app-icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Pressable, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Screen } from "../../../src/components/layout/Screen";
+import { InfoRow } from "../../../src/components/life-study/detail/LifeStudyDetailParts";
 import {
-  ApplyInfo,
-  CurriculumRow,
-  EnrolledContent,
-  InfoRow,
-  Section,
-} from "../../../src/components/life-study/detail/LifeStudyDetailParts";
-import {
-  course,
-  curriculum,
   lifeStudyStatusLabel,
   routeId,
 } from "../../../src/components/life-study/detail/lifeStudyDetailData";
@@ -25,19 +16,15 @@ import {
   ErrorState,
   FloatingBottomBar,
   MotionEnter,
+  MOTION_STAGGER_LIMIT,
   motionStaggerDelay,
   TopBar,
 } from "../../../src/components/ui";
-import { theme } from "../../../src/constants/theme";
 import {
   useLifeStudyCohortDetail,
   useLifeStudyCourseLessons,
   useLifeStudyOverview,
 } from "../../../src/hooks/useLifeStudyCourses";
-import { readDesignVariant } from "../../../src/lib/designVariant";
-
-/** 목록 첫 진입 때 60ms 간격으로 떠오르는 줄 수(디자인 시스템 motion: 첫 8개). */
-const LIST_STAGGER_LIMIT = 8;
 
 function LiveLifeStudyDetail({
   id,
@@ -198,7 +185,7 @@ function LiveLifeStudyDetail({
                         <MotionEnter
                           key={lesson.id}
                           mode="fadeUp"
-                          enabled={index < LIST_STAGGER_LIMIT}
+                          enabled={index < MOTION_STAGGER_LIMIT}
                           delay={motionStaggerDelay(index)}
                           style={[
                             styles.curriculumRow,
@@ -268,81 +255,12 @@ function LiveLifeStudyDetail({
 }
 
 export default function LifeStudyDetailScreen() {
-  const router = useRouter();
   const params = useLocalSearchParams<{
     id?: string;
     cohortId?: string;
-    designVariant?: string;
   }>();
   const id = routeId(params.id);
   const cohortIdParam = routeId(params.cohortId);
-  const variant = readDesignVariant(params.designVariant);
-  if (id && !params.designVariant) {
-    return <LiveLifeStudyDetail id={id} cohortIdParam={cohortIdParam} />;
-  }
-  const enrolled = variant === "enrolled";
-
-  return (
-    <Screen scroll={false} padded={false}>
-      <View style={styles.root}>
-        <TopBar
-          title=""
-          back
-          onBack={() => router.back()}
-          right={
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="공유"
-              hitSlop={4}
-              style={styles.iconButton}
-            >
-              <AppIcon name="ios-share" size={21} color={theme.colors.text} />
-            </Pressable>
-          }
-        />
-
-        <ScrollView contentContainerStyle={styles.body}>
-          <View style={styles.hero}>
-            <View style={styles.badgeRow}>
-              <Badge tone={enrolled ? "info" : "success"}>
-                {enrolled ? "진행중" : "신청 가능"}
-              </Badge>
-              <Badge tone="neutral">{enrolled ? "4주차" : "개설 예정"}</Badge>
-              <Text style={styles.caption}>13주 · 매주 수요일 19:30</Text>
-            </View>
-
-            <Text style={styles.title}>{course.name}</Text>
-            <Text style={styles.desc}>{course.desc}</Text>
-
-            <Card style={styles.infoCard}>
-              <Text style={styles.infoTitle}>과정 정보</Text>
-              <InfoRow label="팀장" value={course.leader} />
-              <InfoRow label="교재" value={`${course.name} 교재`} />
-              <InfoRow label="수강 대상" value={course.target} />
-              <InfoRow label="신청 조건" value={course.requirement} />
-              <InfoRow label="다음 추천" value={course.next} primary />
-            </Card>
-          </View>
-
-          {enrolled ? <EnrolledContent /> : <ApplyInfo />}
-
-          <Section title="커리큘럼">
-            {curriculum.map((item, index) => (
-              <CurriculumRow
-                key={item.week}
-                item={item}
-                enrolled={enrolled}
-                last={index === curriculum.length - 1}
-              />
-            ))}
-          </Section>
-        </ScrollView>
-
-        <FloatingBottomBar
-          label={enrolled ? "수강 내역 보기" : "수강 신청"}
-          testID="life-study-detail-bottom-bar"
-        />
-      </View>
-    </Screen>
-  );
+  // id 가 없으면 찾는 과정이 없으므로 "과정 정보를 찾을 수 없어요" 빈 상태가 보인다
+  return <LiveLifeStudyDetail id={id ?? ""} cohortIdParam={cohortIdParam} />;
 }

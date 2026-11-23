@@ -12,9 +12,7 @@ import {
   readMyPageGroupList,
   readMyPageLifeStudyHistory,
   readMyPagePostList,
-  readMyPagePrayerHistory,
 } from "./mypageMapper";
-import type { MyPageActivityDataSource } from "./mypageService";
 
 type MyPageApiClient = {
   request<T>(path: string, options?: ApiRequestOptions): Promise<T | null>;
@@ -24,7 +22,6 @@ const postsPath = "/api/mypage/activities/posts";
 const commentsPath = "/api/mypage/activities/comments";
 const groupsPath = "/api/mypage/activities/groups";
 const lifeStudiesPath = "/api/mypage/activities/life-studies";
-const prayersPath = "/api/mypage/activities/prayers";
 
 function withPageQuery(
   path: string,
@@ -44,7 +41,7 @@ export function createHttpMyPageDataSource({
   client = apiClient,
 }: {
   client?: MyPageApiClient;
-} = {}): MyPageActivityDataSource {
+} = {}) {
   return {
     async getPosts(query?: MyPageActivityPageQuery) {
       const page = normalizeMyPageActivityQuery(query, MY_PAGE_POST_SORT);
@@ -72,12 +69,6 @@ export function createHttpMyPageDataSource({
     async getLifeStudies() {
       return readMyPageLifeStudyHistory(
         await client.request<unknown>(lifeStudiesPath),
-      );
-    },
-
-    async getPrayers() {
-      return readMyPagePrayerHistory(
-        await client.request<unknown>(prayersPath),
       );
     },
   };

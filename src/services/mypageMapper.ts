@@ -1,7 +1,15 @@
 import {
-  invalidResponse as invalid,
-  keepValidItems,
-} from "../lib/reportResponseIssue";
+  isRecord,
+  optionalInteger,
+  optionalOneOf,
+  optionalString,
+  readArrayField,
+  requireBoolean,
+  requireInteger,
+  requireOneOf,
+  requireString,
+} from "../lib/parse";
+import { invalidResponse as invalid } from "../lib/reportResponseIssue";
 import type {
   MyPageActivityComment,
   MyPageActivityGroup,
@@ -23,21 +31,11 @@ import type {
   MyPagePostDto,
   MyPagePostStatus,
   MyPagePostStatusName,
-  MyPagePrayerActivityItem,
-  MyPagePrayerHistoryDto,
-  MyPagePrayerMemberRole,
-  MyPagePrayerMemberRoleName,
-  MyPagePrayerTimeSlot,
-  MyPagePrayerTimeSlotName,
 } from "../types/mypageApi";
 
 const POST_STATUSES = ["AVAILABLE", "RESERVED", "COMPLETED"] as const;
 const POST_STATUS_NAMES = ["나눔중", "예약완료", "나눔완료"] as const;
 const GROUP_TYPES = ["GROUP", "VOLUNTEER"] as const;
-const TIME_SLOTS = ["AM", "PM"] as const;
-const TIME_SLOT_NAMES = ["오전", "오후"] as const;
-const MEMBER_ROLES = ["LEADER", "MEMBER"] as const;
-const MEMBER_ROLE_NAMES = ["팀장", "중보기도요원"] as const;
 
 const POST_TONE: Record<MyPagePostStatus, MyPageActivityTone> = {
   AVAILABLE: "primary",
@@ -84,105 +82,6 @@ const COMPLETED_KEYS = [
 export const MY_PAGE_POST_SORT = "id,desc";
 export const MY_PAGE_COMMENT_SORT = "id,desc";
 export const MY_PAGE_GROUP_SORT = "joinedAt,desc";
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function readInteger(value: unknown) {
-  return typeof value === "number" && Number.isInteger(value) ? value : null;
-}
-
-function requireKey(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  if (!(key in data)) invalid(source, key);
-}
-
-function requireInteger(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  requireKey(data, key, source);
-  const value = readInteger(data[key]);
-  if (value == null) invalid(source, key);
-  return value;
-}
-
-function requireString(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  requireKey(data, key, source);
-  if (typeof data[key] !== "string") invalid(source, key);
-  return data[key];
-}
-
-function requireBoolean(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  requireKey(data, key, source);
-  if (typeof data[key] !== "boolean") invalid(source, key);
-  return data[key];
-}
-
-function requireOneOf<T extends string>(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-  allowed: readonly T[],
-): T {
-  const value = requireString(data, key, source);
-  if (!allowed.includes(value as T)) invalid(source, key);
-  return value as T;
-}
-
-/** 화면에서 쓰지 않는 필드. 없거나 형식이 다르면 null. */
-function optionalInteger(data: Record<string, unknown>, key: string) {
-  return readInteger(data[key]);
-}
-
-function optionalString(data: Record<string, unknown>, key: string) {
-  return typeof data[key] === "string" ? data[key] : null;
-}
-
-function optionalBoolean(data: Record<string, unknown>, key: string) {
-  return typeof data[key] === "boolean" ? data[key] : null;
-}
-
-function optionalOneOf<T extends string>(
-  data: Record<string, unknown>,
-  key: string,
-  allowed: readonly T[],
-): T | null {
-  return allowed.includes(data[key] as T) ? (data[key] as T) : null;
-}
-
-/** 0=일 … 6=토. 범위 밖이면 null. */
-function optionalYoil(data: Record<string, unknown>, key: string) {
-  const value = optionalInteger(data, key);
-  return value != null && value >= 0 && value <= 6 ? value : null;
-}
-
-/** 배열이 아니면 응답 오류. 형식이 틀린 항목만 빼고 돌려준다. */
-function readArrayField<T>(
-  data: Record<string, unknown>,
-  key: string,
-  source: string,
-  readItem: (item: unknown, source: unknown) => T,
-): T[] {
-  const items = data[key];
-  if (!Array.isArray(items)) invalid(data, key);
-  return keepValidItems(items, `${source}.${key}`, (item) =>
-    readItem(item, data),
-  );
-}
 
 export function formatMyPageActivityDate(value: string) {
   const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
@@ -398,67 +297,5 @@ export function readMyPageLifeStudyHistory(
       source,
       namedItemReader(COMPLETED_KEYS),
     ) as MyPageLifeStudyCompleted[],
-  };
-}
-
-function readPrayerActivity(
-  value: unknown,
-  source: unknown,
-): MyPagePrayerActivityItem {
-  if (!isRecord(value)) invalid(source);
-  return {
-    cohortId: requireInteger(value, "cohortId", source),
-    cohortName: optionalString(value, "cohortName"),
-    cohortYear: optionalInteger(value, "cohortYear"),
-    yoil: optionalYoil(value, "yoil"),
-    yoilName: optionalString(value, "yoilName"),
-    timeSlot: optionalOneOf<MyPagePrayerTimeSlot>(
-      value,
-      "timeSlot",
-      TIME_SLOTS,
-    ),
-    timeSlotName: optionalOneOf<MyPagePrayerTimeSlotName>(
-      value,
-      "timeSlotName",
-      TIME_SLOT_NAMES,
-    ),
-    memberRole: optionalOneOf<MyPagePrayerMemberRole>(
-      value,
-      "memberRole",
-      MEMBER_ROLES,
-    ),
-    memberRoleName: optionalOneOf<MyPagePrayerMemberRoleName>(
-      value,
-      "memberRoleName",
-      MEMBER_ROLE_NAMES,
-    ),
-    joinedAt: optionalString(value, "joinedAt"),
-    leftAt: optionalString(value, "leftAt"),
-    period: optionalString(value, "period"),
-    leaveReason: optionalString(value, "leaveReason"),
-    active: optionalBoolean(value, "active"),
-  };
-}
-
-export function readMyPagePrayerHistory(data: unknown): MyPagePrayerHistoryDto {
-  if (!isRecord(data)) invalid(data);
-  const source = "mypage.prayers";
-  return {
-    activeCount: optionalInteger(data, "activeCount"),
-    totalPeriod: optionalString(data, "totalPeriod"),
-    totalPeriodDays: optionalInteger(data, "totalPeriodDays"),
-    totalRoomCount: optionalInteger(data, "totalRoomCount"),
-    currentActivities: readArrayField(
-      data,
-      "currentActivities",
-      source,
-      readPrayerActivity,
-    ),
-    pastActivities: readArrayField(
-      data,
-      "pastActivities",
-      source,
-      readPrayerActivity,
-    ),
   };
 }

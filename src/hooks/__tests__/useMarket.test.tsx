@@ -14,7 +14,6 @@ import {
   useCreateMarketPost,
   useDeleteMarketComment,
   useDeleteMarketPost,
-  useReportMarketContent,
   useUpdateMarketComment,
   useUpdateMarketPost,
 } from "../useMarket";
@@ -26,7 +25,6 @@ jest.mock("../../services/marketService", () => ({
   createMarketComment: jest.fn(),
   updateMarketComment: jest.fn(),
   deleteMarketComment: jest.fn(),
-  reportMarketContent: jest.fn(),
   fetchMarketDetail: jest.fn(),
   fetchMarketOverviewPage: jest.fn(),
   fetchMyMarketOverviewPage: jest.fn(),
@@ -56,7 +54,7 @@ function detail(overrides: Partial<MarketDetail> = {}): MarketDetail {
     thumbSeed: 1,
     title: "책 나눔",
     content: "내용",
-    categoryLabel: "도서",
+    categoryCode: "BOOK_STATIONERY",
     conditionLabel: "좋음",
     status: "sharing",
     authorName: "작성자",
@@ -345,26 +343,5 @@ describe("useDeleteMarketComment", () => {
       queryClient.getQueryData<MarketDetail>(queryKeys.market.detail("10"))
         ?.comments[0],
     ).toEqual(comment("c1"));
-  });
-});
-
-describe("useReportMarketContent", () => {
-  it("신고 입력을 그대로 넘기고 서비스 에러를 전달한다", async () => {
-    const error = new Error("이미 신고한 게시글입니다.");
-    service.reportMarketContent.mockRejectedValue(error);
-    const { result } = renderHookWithClient(() => useReportMarketContent());
-    const report = {
-      targetType: "market",
-      targetId: "10",
-      reason: "SPAM",
-    } as const;
-
-    await act(async () => {
-      await expect(result.current.mutateAsync(report as never)).rejects.toBe(
-        error,
-      );
-    });
-
-    expect(service.reportMarketContent).toHaveBeenCalledWith(report);
   });
 });

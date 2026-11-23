@@ -16,7 +16,6 @@ import type {
   MemberChangePasswordRequest,
   MemberDuplicateResponse,
   MemberMeResponse,
-  MemberVerifyPasswordRequest,
 } from "../types/authApi";
 import type { Member } from "../types/common";
 
@@ -31,7 +30,6 @@ export interface AuthAdapter {
   refresh(refreshToken: string): Promise<AuthSession>;
   getCurrentMember(): Promise<Member>;
   updateCurrentMember(input: { phone: string }): Promise<Member>;
-  verifyPassword(input: MemberVerifyPasswordRequest): Promise<boolean>;
   changePassword(input: MemberChangePasswordRequest): Promise<void>;
   withdraw(): Promise<void>;
 }
@@ -106,14 +104,6 @@ export function createHttpAuthAdapter(
       return mapMemberFromMe(data);
     },
 
-    async verifyPassword(input) {
-      await client.request("/api/member/verify-password", {
-        method: "POST",
-        body: JSON.stringify(input),
-      });
-      return true;
-    },
-
     async changePassword(input) {
       await client.request("/api/member/password", {
         method: "PUT",
@@ -129,5 +119,4 @@ export function createHttpAuthAdapter(
   };
 }
 
-export const httpAuthAdapter = createHttpAuthAdapter();
-export const authAdapter = httpAuthAdapter;
+export const authAdapter = createHttpAuthAdapter();

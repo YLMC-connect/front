@@ -6,6 +6,7 @@ import {
   mapCommunionMemberList,
   mapCommunionNotice,
   mapCommunionNoticeList,
+  isApprovedGroupStatus,
   mapCommunionOverviewItem,
   mapCommunionServiceItem,
   toCommunionCategoryCode,
@@ -42,6 +43,10 @@ async function fetchCommunionPages(client: GroupApiClient, path: string) {
     lastId = data.nextCursor;
   }
   return items;
+}
+
+function optionalText(key: "schedule" | "location", value: string) {
+  return value ? { [key]: value } : {};
 }
 
 export function createHttpGroupDataSource({
@@ -87,34 +92,6 @@ export function createHttpGroupDataSource({
   };
 
   return {
-    async getOverview() {
-      const [groups, services, myGroups, myServices] = await Promise.all([
-        fetchCommunionPages(client, "/api/communion?type=SMALL_GROUP"),
-        fetchCommunionPages(client, "/api/communion?type=VOLUNTEER"),
-        fetchCommunionPages(client, "/api/communion/my?type=SMALL_GROUP"),
-        fetchCommunionPages(client, "/api/communion/my?type=VOLUNTEER"),
-      ]);
-      const joinedIds = new Set(
-        [...myGroups, ...myServices]
-          .map((item) =>
-            item && typeof item === "object" && "id" in item
-              ? String((item as { id: unknown }).id)
-              : "",
-          )
-          .filter(Boolean),
-      );
-      return {
-        groups: groups.flatMap((item) => {
-          const mapped = mapCommunionOverviewItem(item, joinedIds);
-          return mapped ? [mapped] : [];
-        }),
-        services: services.flatMap((item) => {
-          const mapped = mapCommunionServiceItem(item);
-          return mapped ? [mapped] : [];
-        }),
-      };
-    },
-
     async getOverviewPage({
       lastId,
       size = 20,
@@ -150,7 +127,7 @@ export function createHttpGroupDataSource({
       );
       const groups = (groupsData?.content ?? []).flatMap((item) => {
         const mapped = mapCommunionOverviewItem(item, joinedIds);
-        return mapped ? [mapped] : [];
+        return mapped && isApprovedGroupStatus(mapped.status) ? [mapped] : [];
       });
       const mappedServices = services.flatMap((item) => {
         const mapped = mapCommunionServiceItem(item);
@@ -160,10 +137,15 @@ export function createHttpGroupDataSource({
         const mapped = mapCommunionOverviewItem(item, joinedIds);
         return mapped ? [mapped] : [];
       });
+      // 승인 전·반려된 내 봉사는 봉사 목록에 없으므로 내 모임에서 보인다
+      const pendingMyServices = myServices.flatMap((item) => {
+        const mapped = mapCommunionOverviewItem(item, joinedIds);
+        return mapped && !isApprovedGroupStatus(mapped.status) ? [mapped] : [];
+      });
       return {
         groups,
         services: mappedServices,
-        myGroups: mappedMyGroups,
+        myGroups: [...mappedMyGroups, ...pendingMyServices],
         hasNext: Boolean(groupsData?.hasNext),
         nextCursor: groupsData?.nextCursor ?? null,
       };
@@ -185,6 +167,10 @@ export function createHttpGroupDataSource({
           content: input.description,
           categoryCode,
           maxParticipants: input.maxMembers,
+          // 일정·장소는 선택이라 비어 있으면 보내지 않는다
+          ...optionalText("schedule", input.schedule),
+          ...optionalText("location", input.location),
+          requiresApproval: input.requiresApproval,
         }),
       });
       if (createdId == null) {
@@ -205,6 +191,10 @@ export function createHttpGroupDataSource({
           content: input.description,
           categoryCode,
           maxParticipants: input.maxMembers,
+          // 수정은 지운 값도 반영해야 해서 빈 글자 그대로 보낸다
+          schedule: input.schedule,
+          location: input.location,
+          requiresApproval: input.requiresApproval,
         }),
       });
       return getDetail(input.groupId);
@@ -214,6 +204,18 @@ export function createHttpGroupDataSource({
       await client.request(`/api/communion/${id}`, {
         method: "DELETE",
       });
+    },
+
+    async updateMemberStatus(input) {
+      await client.request(
+        `/api/communion/${input.groupId}/members/${input.targetUserId}/status`,
+        {
+          method: "PUT",
+          body: JSON.stringify({
+            status: input.status === "approved" ? "APPROVED" : "REJECTED",
+          }),
+        },
+      );
     },
 
     async kickMember(input) {

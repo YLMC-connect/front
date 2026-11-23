@@ -27,9 +27,9 @@ import {
   useGroupMembers,
   useKickGroupMember,
   useTransferGroupLeader,
+  useUpdateGroupMemberStatus,
 } from "../../../src/hooks/useGroups";
 import { getApiErrorMessage } from "../../../src/lib/apiErrorMessage";
-import { readDesignVariant } from "../../../src/lib/designVariant";
 import type { GroupMemberDetail } from "../../../src/types/group";
 
 export default function GroupMembersScreenRoute() {
@@ -38,13 +38,12 @@ export default function GroupMembersScreenRoute() {
     id?: string;
     groupId?: string;
     mode?: string;
-    designVariant?: string;
   }>();
   const groupId = params.groupId ?? params.id ?? "1";
-  const variant = readDesignVariant(params.designVariant) ?? "default";
   const membersQuery = useGroupMembers(groupId);
   const kickMemberMutation = useKickGroupMember(groupId);
   const transferLeaderMutation = useTransferGroupLeader(groupId);
+  const memberStatusMutation = useUpdateGroupMemberStatus(groupId);
   const [kickingMember, setKickingMember] = useState<GroupMemberDetail | null>(
     null,
   );
@@ -60,20 +59,46 @@ export default function GroupMembersScreenRoute() {
     };
   }, []);
 
-  const members = membersQuery.data ?? [];
+  const allMembers = membersQuery.data ?? [];
+  // 승인 대기 신청은 소모임장에게만 오고, 멤버 목록과 따로 보인다
+  const members = allMembers.filter((member) => member.status === "approved");
+  const pendingMembers = allMembers.filter(
+    (member) => member.status === "pending",
+  );
+  const decide = (member: GroupMemberDetail, approve: boolean) => {
+    if (memberStatusMutation.isPending) return;
+    memberStatusMutation.mutate(
+      {
+        targetUserId: member.userId,
+        status: approve ? "approved" : "rejected",
+      },
+      {
+        onSuccess: () =>
+          setToastMessage(
+            approve
+              ? `${member.userName}님의 가입을 승인했어요`
+              : `${member.userName}님의 가입 신청을 반려했어요`,
+          ),
+        onError: (error) =>
+          setToastMessage(
+            getApiErrorMessage(
+              error,
+              communionApiErrorMessages,
+              approve
+                ? "가입을 승인하지 못했어요."
+                : "가입 신청을 반려하지 못했어요.",
+            ),
+          ),
+      },
+    );
+  };
   // 소모임 상세의 "전체보기" 로 일반 멤버도 들어온다. 내보내기는 소모임장에게만 보인다.
   // 목록이 오기 전에는 주로 들어오는 소모임장 기준 제목("멤버 관리")을 둔다.
   const canManage =
-    variant !== "default" ||
     !membersQuery.data ||
     members.some((member) => member.isMine && member.isLeader);
-  const isTransfer =
-    params.mode === "transfer" ||
-    variant === "transfer" ||
-    variant === "transfer-confirm";
-  const transferTargetName =
-    selectedTransferMember?.userName ??
-    (variant.startsWith("transfer") ? "박정아" : null);
+  const isTransfer = params.mode === "transfer";
+  const transferTargetName = selectedTransferMember?.userName ?? null;
 
   return (
     <Screen scroll={false} padded={false}>
@@ -105,7 +130,56 @@ export default function GroupMembersScreenRoute() {
               style={styles.warningBox}
             />
           ) : (
-            <Text style={styles.total}>전체 {members.length}명</Text>
+            <>
+              {canManage && pendingMembers.length > 0 ? (
+                <View testID="group-pending-section">
+                  <Text style={styles.total}>
+                    가입 신청 {pendingMembers.length}명
+                  </Text>
+                  {pendingMembers.map((member, index) => (
+                    <MemberInfo
+                      key={member.userId}
+                      member={member}
+                      style={[
+                        styles.memberRow,
+                        index < pendingMembers.length - 1
+                          ? styles.rowBorder
+                          : null,
+                      ]}
+                      trailing={
+                        <View style={styles.decisionRow}>
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={`${member.userName} 가입 반려`}
+                            disabled={memberStatusMutation.isPending}
+                            hitSlop={{ top: 6, bottom: 6 }}
+                            onPress={() => decide(member, false)}
+                            style={styles.kickButton}
+                            testID={`member-reject-${member.userId}`}
+                          >
+                            <Text style={styles.kickText}>반려</Text>
+                          </Pressable>
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={`${member.userName} 가입 승인`}
+                            disabled={memberStatusMutation.isPending}
+                            hitSlop={{ top: 6, bottom: 6 }}
+                            onPress={() => decide(member, true)}
+                            style={[styles.kickButton, styles.approveButton]}
+                            testID={`member-approve-${member.userId}`}
+                          >
+                            <Text style={[styles.kickText, styles.approveText]}>
+                              승인
+                            </Text>
+                          </Pressable>
+                        </View>
+                      }
+                    />
+                  ))}
+                </View>
+              ) : null}
+              <Text style={styles.total}>전체 {members.length}명</Text>
+            </>
           )}
 
           {members.map((member, index) => (
@@ -114,10 +188,7 @@ export default function GroupMembersScreenRoute() {
               member={member}
               transfer={isTransfer}
               canManage={canManage}
-              selected={
-                selectedTransferMember?.userId === member.userId ||
-                member.userName === transferTargetName
-              }
+              selected={selectedTransferMember?.userId === member.userId}
               last={index === members.length - 1}
               onKick={() => setKickingMember(member)}
               onSelect={() => setSelectedTransferMember(member)}
@@ -135,23 +206,13 @@ export default function GroupMembersScreenRoute() {
         ) : null}
 
         <ConfirmDialog
-          visible={variant === "kick-confirm" || Boolean(kickingMember)}
-          title={`${variant === "kick-confirm" ? "이수진" : (kickingMember?.userName ?? "")}님을 내보낼까요?`}
+          visible={Boolean(kickingMember)}
+          title={`${kickingMember?.userName ?? ""}님을 내보낼까요?`}
           message="내보낸 멤버는 다시 신청해야 들어올 수 있어요."
           confirmText="내보내기"
           danger
-          onCancel={() => {
-            if (variant === "kick-confirm") {
-              router.back();
-            } else {
-              setKickingMember(null);
-            }
-          }}
+          onCancel={() => setKickingMember(null)}
           onConfirm={async () => {
-            if (variant === "kick-confirm") {
-              router.back();
-              return;
-            }
             if (!kickingMember || kickMemberMutation.isPending) return;
             try {
               const name = kickingMember.userName;
@@ -171,22 +232,12 @@ export default function GroupMembersScreenRoute() {
           }}
         />
         <ConfirmDialog
-          visible={variant === "transfer-confirm" || showTransferConfirm}
+          visible={showTransferConfirm}
           title={`${transferTargetName ?? "멤버"}님께 소모임장을 이관할까요?`}
           message="이관 즉시 본인은 일반 멤버로 변경되며 되돌릴 수 없습니다."
           confirmText="이관"
-          onCancel={() => {
-            if (variant === "transfer-confirm") {
-              router.back();
-            } else {
-              setShowTransferConfirm(false);
-            }
-          }}
+          onCancel={() => setShowTransferConfirm(false)}
           onConfirm={() => {
-            if (variant === "transfer-confirm") {
-              router.back();
-              return;
-            }
             if (!selectedTransferMember || transferLeaderMutation.isPending) {
               return;
             }
@@ -217,12 +268,7 @@ export default function GroupMembersScreenRoute() {
               });
           }}
         />
-        <Toast
-          message={
-            variant === "kick-toast" ? "이수진님을 내보냈어요" : toastMessage
-          }
-          offset={28}
-        />
+        <Toast message={toastMessage} offset={28} />
       </View>
     </Screen>
   );
@@ -427,6 +473,17 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     paddingHorizontal: theme.spacing[3],
     justifyContent: "center",
+  },
+  decisionRow: {
+    flexDirection: "row",
+    gap: theme.spacing[2],
+  },
+  approveButton: {
+    borderColor: theme.colors.primarySubtle,
+    backgroundColor: theme.colors.primarySubtle,
+  },
+  approveText: {
+    color: theme.colors.primaryStrong,
   },
   kickText: {
     color: theme.colors.text,

@@ -44,6 +44,7 @@ const topic = {
   emergencyEndAt: "2026-10-10T00:00:00",
   answerContent: "",
   answeredAt: "2026-10-01T00:00:00",
+  receivedAt: "2026-10-02",
   createdAt: "2026-10-02T01:02:03",
 };
 
@@ -196,14 +197,6 @@ describe("httpPrayerDataSource", () => {
     });
   });
 
-  it("does not read undocumented cohort detail fields", async () => {
-    const { request, dataSource } = setup();
-    request.mockResolvedValue({ id: 15, cohortName: "제외", leader: "김성도" });
-
-    await expect(dataSource.getCohort("15")).resolves.toEqual({});
-    expect(request).toHaveBeenCalledWith("/api/prayer/cohorts/15");
-  });
-
   it("sends completion without a body and returns only status fields", async () => {
     const { request, dataSource } = setup();
     request.mockResolvedValue({ ...status, adminNote: "제외" });
@@ -226,73 +219,20 @@ describe("httpPrayerDataSource", () => {
     );
   });
 
-  it("likes a completion without sending a body", async () => {
-    const { request, dataSource } = setup();
-    request.mockResolvedValue({ liked: true, likeCount: 2 });
-
-    await dataSource.likeCompletion("9");
-    await dataSource.unlikeCompletion("9");
-
-    expect(request).toHaveBeenNthCalledWith(
-      1,
-      "/api/prayer/completions/9/like",
-      { method: "POST" },
-    );
-    expect(request).toHaveBeenNthCalledWith(
-      2,
-      "/api/prayer/completions/9/like",
-      { method: "DELETE" },
-    );
-  });
-
   it("sends an application with only the fields the caller provided", async () => {
     const { request, dataSource } = setup();
-    request
-      .mockResolvedValueOnce([
-        {
-          id: 3,
-          cohortId: 15,
-          cohortName: "월요일 오전",
-          yoil: 1,
-          timeSlot: "AM",
-          applicantName: "김성도",
-          applicantPhone: "010",
-          applyMemo: null,
-          status: "UNKNOWN",
-          rejectReason: null,
-          createdAt: "2026-10-02T00:00:00",
-          processedAt: null,
-        },
-      ])
-      .mockResolvedValueOnce(21)
-      .mockResolvedValueOnce(null);
+    request.mockResolvedValueOnce(21).mockResolvedValueOnce(null);
 
-    await expect(dataSource.getMyApplications()).resolves.toEqual([
-      {
-        id: 3,
-        cohortId: 15,
-        cohortName: "월요일 오전",
-        yoil: 1,
-        timeSlot: "AM",
-        applicantName: "김성도",
-        applicantPhone: "010",
-        applyMemo: null,
-        status: "UNKNOWN",
-        rejectReason: null,
-        createdAt: "2026-10-02T00:00:00",
-        processedAt: null,
-      },
-    ]);
     await expect(
       dataSource.createApplication({ yoil: 1, timeSlot: "AM" }),
     ).resolves.toBe(21);
     await dataSource.cancelApplication("3");
 
-    expect(request).toHaveBeenNthCalledWith(2, "/api/prayer/applications", {
+    expect(request).toHaveBeenNthCalledWith(1, "/api/prayer/applications", {
       method: "POST",
       body: JSON.stringify({ yoil: 1, timeSlot: "AM" }),
     });
-    expect(request).toHaveBeenNthCalledWith(3, "/api/prayer/applications/3", {
+    expect(request).toHaveBeenNthCalledWith(2, "/api/prayer/applications/3", {
       method: "DELETE",
     });
   });
@@ -374,8 +314,6 @@ describe("httpPrayerDataSource", () => {
     };
 
     await expect(dataSource.createTopic(input)).resolves.toBe(12);
-    await dataSource.updateTopic("12", input);
-    await dataSource.deleteTopic("12");
     await dataSource.requestTopicAnswer("12", {
       answerContent: "회복되었습니다",
     });
@@ -384,15 +322,8 @@ describe("httpPrayerDataSource", () => {
       method: "POST",
       body: JSON.stringify(input),
     });
-    expect(request).toHaveBeenNthCalledWith(2, "/api/prayer/topics/12", {
-      method: "PUT",
-      body: JSON.stringify(input),
-    });
-    expect(request).toHaveBeenNthCalledWith(3, "/api/prayer/topics/12", {
-      method: "DELETE",
-    });
     expect(request).toHaveBeenNthCalledWith(
-      4,
+      2,
       "/api/prayer/topics/12/answer-request",
       {
         method: "POST",

@@ -33,7 +33,6 @@ function setup() {
     }),
     getCurrentMember: jest.fn().mockResolvedValue(TEST_USER),
     updateCurrentMember: jest.fn().mockResolvedValue(TEST_USER),
-    verifyPassword: jest.fn().mockResolvedValue(true),
     changePassword: jest.fn().mockResolvedValue(undefined),
     withdraw: jest.fn().mockResolvedValue(undefined),
   };

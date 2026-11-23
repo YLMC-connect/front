@@ -1,6 +1,7 @@
 import {
   mapCommunionDetail,
   mapCommunionMember,
+  mapCommunionMemberList,
   mapCommunionNotice,
   mapCommunionOverviewItem,
   mapCommunionServiceItem,
@@ -45,6 +46,59 @@ describe("groupMapper", () => {
     ).toBeNull();
   });
 
+  it("maps approval statuses PENDING and REJECTED", () => {
+    expect(
+      mapCommunionOverviewItem({ ...listItem, status: "PENDING" }, new Set())
+        ?.status,
+    ).toBe("pending");
+    expect(
+      mapCommunionOverviewItem({ ...listItem, status: "REJECTED" }, new Set())
+        ?.status,
+    ).toBe("rejected");
+    expect(
+      mapCommunionOverviewItem({ ...listItem, status: "CANCELED" }, new Set()),
+    ).toBeNull();
+  });
+
+  it("splits pending join requests from members and reads schedule/location/approval", () => {
+    const member = (userId: string, status?: string) => ({
+      userId,
+      userName: userId,
+      joinedAt: "2026-11-19T10:00:00",
+      ...(status ? { status } : {}),
+    });
+    const members = mapCommunionMemberList(
+      [member("leader"), member("old"), member("waiting", "PENDING")],
+      "leader",
+      "leader",
+    );
+    expect(members.map((m) => [m.userId, m.status])).toEqual([
+      ["leader", "approved"],
+      ["old", "approved"],
+      ["waiting", "pending"],
+    ]);
+    const detail = mapCommunionDetail(
+      {
+        ...listItem,
+        content: "본문",
+        leaderId: "leader",
+        schedule: "매주 토요일",
+        location: "교회",
+        requiresApproval: true,
+      },
+      [],
+      members,
+      "leader",
+    );
+    expect(detail).toMatchObject({
+      schedule: "매주 토요일",
+      location: "교회",
+      requiresApproval: true,
+      members: ["leader", "old"],
+    });
+    expect(detail.pendingMembers.map((m) => m.userId)).toEqual(["waiting"]);
+  });
+
   it("maps volunteer list items without inventing schedule", () => {
     expect(
       mapCommunionServiceItem({
@@ -83,6 +137,7 @@ describe("groupMapper", () => {
             joinedLabel: "방금 전",
             isLeader: true,
             isMine: true,
+            status: "approved" as const,
           },
         ],
         "frontprobe",
@@ -104,6 +159,7 @@ describe("groupMapper", () => {
       joinedLabel: "방금 전",
       isLeader,
       isMine: false,
+      status: "approved" as const,
     });
     expect(
       mapCommunionDetail(

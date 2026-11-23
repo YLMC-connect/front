@@ -15,6 +15,7 @@ export const weekdayLabels: Record<
   wed: { short: "수", long: "수요일" },
   thu: { short: "목", long: "목요일" },
   fri: { short: "금", long: "금요일" },
+  sat: { short: "토", long: "토요일" },
 };
 
 export const periodLabels: Record<PrayerPeriod, string> = {

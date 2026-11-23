@@ -1,131 +1,54 @@
 # life-study (삶공부)
 
-> 마지막 갱신: 2026-11-03 (런타임 목 어댑터 및 `src/mocks/lifeStudy.ts` 제거) | 담당 Phase: P5/P7 | 기록 성격: 도메인 컨텍스트
+> 기록 성격: 도메인 컨텍스트 | 담당 Phase: P5/P7
 
 ## 한 줄 요약
 
-성도가 삶공부 과정을 확인하고 신청/취소하며 수강 이력을 확인합니다.
+성도가 삶공부 과정과 지금 신청 가능한 기수를 확인하고 수강 신청하며, 자신의 수료 기록을 확인합니다.
 
----
+## 현재 동작
 
-## ✅ 완료
-
-- 삶공부 도메인 전반 공통 Empty FAQ 기준 통일 — 개설/전체 과정 섹션, 삶공부 상세(/life-study/[id])의 과정 부재 및 커리큘럼 빈 상태, 수강 내역(/life-study/history) 수료 기록 빈 상태에 FAQ 화면 기준(84px 원형 배경, 42px 아이콘, 상하 정중앙 배치, CTA 버튼 배제)의 공통 `<Empty />` 컴포넌트를 일관되게 적용
-- 삶공부 상세(/life-study/[id]) 미존재 과정 및 커리큘럼 빈 상태에 공통 Empty 연동 — ID에 해당하는 삶공부 과정이 존재하지 않거나 커리큘럼 정보가 아직 등록되지 않은 경우, 화면이 비정상 렌더링되거나 빈 박스로 방치되지 않도록 공통 `<Empty />` 상태 뷰 표시
-- 삶공부 수강신청 HTTP adapter — `POST /api/life-study/cohorts/{id}/attend` 연동. userYear, userFaithYears, userPart 필드를 전달하며 폼 유효성 검증 및 useApplyLifeStudyCohort mutation을 연결. 생년·신앙 연차·수강 약속은 빈 값/미동의로 시작해 사용자가 직접 고르게 하고, API 에 신청 동기 필드가 없어 입력란을 두지 않는다. 요청한 기수가 신청 가능 목록에 없으면 다른 기수로 대신 신청하지 않고 "신청할 수 없는 과정이에요" 를 보여준다
-- 삶공부 수강 신청 FAB 추가 — 기도 탭과의 일관성 및 접근성을 높이기 위해 삶공부 루트 화면 우측 하단에 수강 신청 화면(/life-study/apply)으로 이동하는 플로팅 액션 버튼(FAB)을 추가
-
-- 삶공부 수업·출석·수료 HTTP adapter — development 기본값은 나눔과 같이 http다. 수료 목록은 mock 과정 위에 덮지 않고 `GET /api/life-study/completions` 행으로 만든다. 테스트와 `EXPO_PUBLIC_LIFE_STUDY_ADAPTER=mock`은 기존 mock service를 쓴다
-- 삶공부 검색 위치·포커스 보정 — 검색을 제목 바로 아래 sticky surface로 표시하고 전체 검색 영역에 단일 focus border를 적용했으며, 목록을 내린 상태에서도 헤더 검색 action으로 즉시 노출
-- 삶공부 glass sticky 헤더 — 검색·학습경로·신청 가능·전체 과정 영역을 하나의 스크롤로 묶고 기본 배경색 기반 blur 타이틀 뒤로 지나가게 적용
-- 삶공부 탭 상세 Stack 적용 — 과정 상세·수강 신청·수강 내역을 삶공부 목록 위에 push하고 뒤로가기 시 `/life-study`로 복귀하도록 탭별 중첩 Stack 추가
-- 삶공부 전체 과정 카드 형태 복구 — 학습경로와 신청 가능 과정의 강조는 유지하면서 전체 과정도 흰 surface·둥근 경계·12px 간격의 독립 카드로 복구
-- 삶공부 디자인 시스템 적용 — 학습경로 progress를 대표 요소로 유지하면서 신청 가능 과정만 강조 카드, 전체 과정은 flat list로 구분하고 역할형 typography·Skeleton·검색 empty·오류 재시도를 적용
-- 삶공부 루트 탐색 연결 — 과정명/강사 검색, 검색 결과 없음 상태, 과정 카드 상세 이동, overview 오류 재시도와 하단 탭 위 스크롤 여백을 적용
-- 삶공부 상세 로컬 badge 제거 — 기존 bordered geometry와 tone을 공통 `DetailBadge`로 이동
-- 삶공부 목록/상세 화면 구현 — `app/(tabs)/life-study/index.tsx`, `app/(tabs)/life-study/[id].tsx`
-- 삶공부 타입, mock 데이터, 목록 service, TanStack Query 목록 hook 구현 — `src/types/lifeStudy.ts`, `src/mocks/lifeStudy.ts`, `src/services/lifeStudyService.ts`, `src/hooks/useLifeStudyCourses.ts`
-- 과정 상태 필터, 신청/취소 mutation, 진도/커리큘럼/수강 이력 UI 구현
-- 삶공부 목록 1차 디자인 정렬 — ZIP prototype 기준 신청가능·진행중 카드, progress bar, 마감·수료 row list 적용
-- ZIP 원본 삶공부 신청/수강 내역 reference 라우트 추가 — `app/(tabs)/life-study/apply.tsx`, `app/(tabs)/life-study/history.tsx`
-- ZIP 110개 visual inventory 재검증에 포함 — 삶공부 reference 화면을 Dev Client capture/compare 대상에 유지
-- 폐기된 ZIP 5탭 정보구조 반영 — 삶공부를 `동행` 탭 내부 segment로 두던 구조는 Downloads preview 기준 `삶공부` 하단 탭으로 대체
-- ZIP 삶공부 상세 구조 정렬 — `ScreenStudyDetail` 기준으로 상세 intro, 담당 양육자 soft box, 내 수강 현황, flat curriculum rows, fixed bottom action bar를 재구성
-- ZIP 삶공부 목록 구조 정렬 — `ScreenStudyList` 기준으로 신청가능/진행중 과정 제목·설명 typography를 조정하고, 마감·수료 영역을 카드 wrapper 없는 flat row list로 바꿔 `study-list mean=14.33→11.76`으로 낮춤
-- 삶공부 목록 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenStudyList`의 내 학습경로, 신청 가능한 과정, 전체 과정 구조를 `/life-study` route에 RN으로 직접 반영
-- 폐기된 삶공부 direct route 실제 화면 복구 — `/life-study` 숨김 direct route 결정은 Downloads preview 기준 `삶공부` 하단 탭으로 대체
-- 삶공부 상세 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenStudyDetail`의 과정 정보, 신청 안내, 진행 상태, 수업·출결, 숙제, 커리큘럼, 하단 action 구조를 `/life-study/[id]` route에 RN으로 직접 반영
-- 삶공부 수강 신청 실제 화면 복구 — `DesignSourceScreens` placeholder 대신 Downloads `ScreenStudyApply`의 과정 요약, 신청 정보, 신앙 연차 chip, 수강 약속, 하단 CTA를 `/life-study/apply` route에 RN으로 직접 반영
-- 삶공부 수강 내역 실제 화면 복구 — PrototypeScaffold placeholder 대신 Downloads `ScreenStudyHistory`의 신청중/수강 중/추천 과정/지난 과정/수료 뱃지 섹션을 `/life-study/history` route에 RN으로 직접 반영
-- Downloads preview 탭 IA 반영 — `/life-study`를 숨김 route가 아니라 하단 `삶공부` 탭 루트로 복구
-- 삶공부 루트 overview 데이터 경계 정리 — 화면 내부 fixture를 `types → mocks → service → TanStack Query hook`으로 이동하고 loading/error 상태 및 서비스 테스트 추가
-
-## 주요 파일 (도메인 파일 지도)
-
-| 경로                                                                              | 역할                                                     |
-| --------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| `app/(tabs)/life-study/_layout.tsx`                                               | 삶공부 목록·상세·신청·이력 중첩 Stack                    |
-| `app/(tabs)/life-study/index.tsx`                                                 | Downloads 하단 `삶공부` 탭 루트                          |
-| `src/components/faith/FaithSectionsScreen.tsx`                                    | 삶공부 목록 공유 렌더러                                  |
-| `src/components/faith/FaithStudyContent.tsx`                                      | 삶공부 목록 본문                                         |
-| `src/components/faith/FaithParts.tsx`, `faithLabels.ts`, `faithSectionsStyles.ts` | 기도·삶공부 목록 공유 부품·라벨·스타일                   |
-| `app/(tabs)/life-study/[id].tsx`                                                  | 삶공부 상세, 신청/취소, 진도/커리큘럼                    |
-| `src/components/life-study/detail/LifeStudyDetailParts.tsx`                       | 삶공부 상세 섹션·정보 행·커리큘럼 행 부품                |
-| `src/components/life-study/detail/lifeStudyDetailData.ts`                         | 삶공부 상세 디자인 시안 데이터·상태 라벨·route id 정규화 |
-| `src/components/life-study/detail/lifeStudyDetailStyles.ts`                       | 삶공부 상세 스타일                                       |
-| `app/(tabs)/life-study/apply.tsx`                                                 | 삶공부 수강 신청 입력 화면                               |
-| `app/(tabs)/life-study/history.tsx`                                               | 삶공부 신청/수강/지난 과정 내역 화면                     |
-| `src/services/lifeStudyService.ts`                                                | 삶공부 HTTP 서비스                                       |
-| `src/services/lifeStudyHttpDataSource.ts`                                         | 수업·출석·수료 HTTP data source                          |
-| `src/services/lifeStudyMapper.ts`                                                 | Notion DTO → 기존 view model                             |
-| `src/hooks/useLifeStudyCourses.ts`                                                | 삶공부 목록·overview query hook                          |
-| `src/constants/domainOptions.ts`                                                  | 삶공부 상태 필터 옵션                                    |
-| `src/types/lifeStudy.ts`                                                          | 삶공부 화면 모델                                         |
-| `src/types/lifeStudyApi.ts`                                                       | Notion 필드만 담은 수업·출석·수료 DTO                    |
-| `scripts/check-life-study-api-contract.mjs`                                       | 수업·출석·수료 OpenAPI 계약 검사                         |
+- 하단 `삶공부` 탭 루트(`/life-study`)는 학습경로(필수 과정 진행), 지금 신청 가능한 과정, 전체 과정을 한 스크롤로 보여준다. 당겨서 새로고침을 지원한다.
+- overview 는 `GET /api/life-study`(전체 과정), `GET /api/life-study/cohorts`(신청 가능 기수), `GET /api/life-study/completions`(내 수료)를 함께 불러 합친다. 하나가 실패해도 나머지로 화면을 만든다.
+- 과정 카드를 누르면 `/life-study/[id]` 상세로 push 된다. 신청 가능 과정 카드는 `?cohortId=` 를 함께 넘긴다. 상세·신청 화면은 삶공부 탭 Stack 에 쌓이고 뒤로가기로 목록에 돌아간다.
+- 상세는 기수 상세 `GET /api/life-study/cohorts/{id}` 로 신청 여부(`applied`)를, 과정 상세 `GET /api/life-study/{id}` 의 `lessons[]` 로 커리큘럼을 그린다. 과정이 없거나 커리큘럼이 비면 공통 `<Empty />` 를 보여준다.
+- 모집 중인 기수가 있을 때만 하단 `[수강 신청하기]` 가 보이고, 이미 신청했으면 비활성 상태로 "이미 수강 신청한 과정이에요" 를 보여준다.
+- 수강 신청(`/life-study/apply`)은 `POST /api/life-study/cohorts/{cohortId}/attend` 에 빈 바디 `{}` 를 보낸다. 서버에서 `userYear`·`userFaithYears`·`userPart` 가 선택 항목이 되어 앱은 이 입력을 받지 않는다. 화면 입력은 수강 약속 동의 하나이며 미동의로 시작한다.
+- 내 수료 기록은 마이페이지 `/mypage/life-study-history`(mypage 도메인)에서 본다. `/life-study/history` 는 `GET /api/life-study/completions` 의 과정 이름·`completedAt` 만 그리는 화면으로 남아 있으나 진입 링크가 없다.
 
 ## 데이터 타입
 
-`LifeStudyCourse`는 `status`, `sessions`, `currentSession`, `capacity`, `enrolledCount`, `isEnrolled`, `isCompleted`, `curriculum`을 포함합니다. `LifeStudyHistory`는 수강 회차와 수료증 발급 여부를 포함합니다. 루트 화면 전용 `LifeStudyOverview`는 필수 과정 진행 경로, 신청 가능한 과정, 전체 과정 요약을 가지며 API DTO mapper의 출력 모델로 사용합니다. `LifeStudyClassList`, `LifeStudyAttendanceRoster`, `LifeStudyCompletionRoster`, `LifeStudyMyCompletion`은 Notion에 적힌 필드만 가집니다. `classes[]` 원소와 출석부 하위 필드는 페이지에 없어 타입에 두지 않습니다. `a / b`로 한 칸에 적힌 이름은 두 필드입니다.
+- 화면 모델은 `LifeStudyOverview { path, openCourses, courses }`. 과정 항목은 `LifeStudyOverviewCourse`(`id`, `cohortId?`, `kind: required | optional`, `weekCount`, `status?` 등).
+- 과정 상태 매핑: 전체 과정(`courses`)은 내 수료 기록에 그 과정 ID 의 `completedAt` 이 있으면 `completed`, 없으면 `pending`(화면 "대기")이다. `recommended`("추천")는 신청 가능 기수(`openCourses`)에만 붙는다. 신청 가능 카드는 상태 대신 "신청 기간" 배지를 보인다.
+- 학습경로 `path` 는 `required: true` 과정 수와 그중 수료한 수로 계산하고, 다음 추천은 아직 수료하지 않은 첫 필수 과정이다. 전체 과정 응답이 없으면 비운다.
+- 기수 → 과정 매핑: 신청 가능 과정의 `id` 는 기수의 `lifeStudyId`, `cohortId` 는 기수 `id`. 정원은 `userNum`, 신청 인원은 `appliedCount`, 신청 기간은 `startDate ~ endDate`.
+- `totalClassCount` 는 휴강을 뺀 정규 수업 횟수라 주 수(`weekCount`)로 쓰지 않는다. `attendCount` 는 출석 횟수라 현재 회차·수강 회차로 쓰지 않는다.
+- API DTO 는 `src/types/lifeStudyApi.ts`, 화면 모델은 `src/types/lifeStudy.ts`.
 
-## 결정 사항 (최신 위)
+## 결정 사항 (지금 유효한 것만)
 
-- (2026-11-03) **삶공부 우측 하단 `+ 삶공부 신청` 플로팅 버튼(FAB) 제거 및 ‘지금 신청 가능한 과정’ 기반 신청 단일화** — 과정 구분 없이 단일 신청 화면으로 이동하던 우측 하단 플로팅 버튼(`life-study-apply-fab`)을 제거하고, `GET /api/life-study/cohorts`로 조회된 ‘지금 신청 가능한 과정’ 카드를 통해서만 기수 상세(`GET /api/life-study/cohorts/{id}`) 확인 후 하단 `[수강 신청하기]` 버튼(`POST /api/life-study/cohorts/{cohortId}/attend`)으로 신청하도록 일원화한다. 모집 중인 기수가 없는 과정 상세에서는 신청 버튼을 노출하지 않으며, 이미 신청한 기수(`applied: true`)는 버튼에 신청 완료 상태를 표시한다.
+- **신청은 '지금 신청 가능한 과정'에서만 시작한다** — 과정 구분 없이 신청 화면으로 가던 플로팅 버튼은 없앴다. 요청한 기수가 신청 가능 목록에 없으면 다른 기수로 대신 신청하지 않고 "신청할 수 없는 과정이에요" 를 보인다.
+- **신청 폼에 동기 입력란이 없다** — API 에 신청 동기 필드가 없어서다.
+- **커리큘럼은 과정 단위 API 로 그린다** — 모집 중인 기수가 없어도 보이도록 `GET /api/life-study/{id}` 의 `lessons[]` 를 쓴다. 주차별 날짜·완료 여부는 API 에 없어 그리지 않는다. (#199)
+- **API 에 없는 값은 지어내지 않는다** — 수업일 `classes[]` 원소, 출석부 하위 필드, 수료증 발급 여부는 계약에 없어 화면·타입에 두지 않는다.
+- **출석·수료 관리 API 는 연결하지 않는다** — 출석부·수료 명단 조회·수정 API(`team_leader`, `MANAGER_LIFESTUDY`, `ADMIN`)는 쓰는 화면이 없어 프런트 코드에 두지 않는다. 연결할 때 권한 오류(`LST013`·`LST017` 등)는 서버가 판단한 그대로 전달하고 클라이언트 역할로 미리 거르지 않는다.
+- **모바일은 사용자용 화면만 둔다** — `/api/admin` 은 호출하지 않는다. (#128)
+- **상세는 서버 데이터만** — route id 가 없거나 맞는 과정이 없으면 "과정 정보를 찾을 수 없어요" 빈 상태를 그린다. 고정 시안 문구는 두지 않는다.
+- **API 계약 검사는 별도 명령** — `npm run test:api:contract -- life-study` 로 돌리며 `npm run validate` 에는 넣지 않는다.
 
-- (2026-11-03) **런타임 목 어댑터(`resolveLifeStudyAdapterMode`, `mockLifeStudyDataSource`), 목 오버레이 매퍼 및 `src/mocks/lifeStudy.ts` 제거** — 전 도메인 HTTP 단일화에 따라 `httpLifeStudyDataSource`로 일원화하고, 미사용 목 오버레이 헬퍼(`applyMyCompletionsToOverview`, `applyMyCompletionsToCourses`, `applyMyCompletionsToHistories`), 수강 내역 화면(`app/(tabs)/life-study/history.tsx`)의 죽은 목업 배열/JSX 및 `"목업 데이터"` 문구를 제거.
+## 미결
 
-- (2026-10-28) **삶공부 상세(/life-study/[id]) 미존재 과정 및 커리큘럼 빈 상태에 공통 Empty 연동** — ID에 해당하는 삶공부 과정이 존재하지 않거나 커리큘럼 정보가 아직 등록되지 않은 경우, 화면이 비정상 렌더링되거나 빈 박스로 방치되지 않도록 공통 feedback 컴포넌트(`<Empty />`)를 렌더링하도록 일관화.
+- (없음) — 열린 `life-study` Issue 없음. 수업일 원소·출석부 하위 필드·신청 승인·수료증은 사용자 계약에 없어 서버 계약이 생기면 다시 본다.
 
-- (2026-10-10) **삶공부 전체 과정(GET /api/life-study) 및 신청 가능 기수(GET /api/life-study/cohorts) API 연동** — 어드민 및 백엔드에 개설된 삶공부 목록을 앱에서 온전히 확인할 수 있도록 http 어댑터의 개요 조회 시 전체 과정(`/api/life-study`), 신청 가능 기수(`/api/life-study/cohorts`), 내 수료 내역(`/api/life-study/completions`)을 병합 조회하여 학습 경로·신청 가능 과정·전체 과정 목록을 완전하게 구성. Issue #179.
-- (2026-10-10) **수강 내역 화면(/life-study/history) 좌우 여백을 theme.layout.screenX(20px)로 통일** — 루트 ScrollView 및 섹션 헤더, 안내 문구, 카드 스택, 플랫 리스트, 수료 뱃지 카드의 좌우 여백을 공통 20px로 일치시켜 타이틀과 카드의 시각적 정렬 기준선을 통일. Issue #175.
-- (2026-10-09) **삶공부 화면 우측 하단에 '삶공부 신청' 플로팅 버튼(FAB)을 추가한다** — 기도 탭과의 일관성 및 접근성을 높이기 위해 삶공부 루트 화면 우측 하단에 수강 신청 화면(`/life-study/apply`)으로 바로 이동하는 플로팅 액션 버튼(FAB)을 제공합니다.
-- (2026-10-09) **development http에서는 삶공부 목록 캐시와 상세·수강 내역이 목업 화면과 갈라진다** — 목록·overview query key 끝에 adapter mode를 붙여 저장된 목업 응답을 다시 쓰지 않는다. `__DEV__`에서 mock일 때만 `목업 데이터`를 표시하고 http일 때는 표시하지 않는다. route id가 있고 `designVariant`가 없으며 adapter가 http이면 상세는 overview에 있는 과정 이름·상태와, 값이 있는 강사·소개·주 수만 그린다. 팀장·교재·커리큘럼·공지·숙제는 그리지 않는다. 수강 내역은 본인 수료 행의 이름과 `completedAt`만 그린다. id가 없거나 mock이거나 `designVariant`가 있으면 기존 디자인 문구를 유지한다.
-- (2026-10-09) **삶공부 HTTP는 2026-09-22 이후 사용자 수업·출석·수료만 호출하고 development 기본값은 http다** — 나눔과 같이 `EXPO_PUBLIC_LIFE_STUDY_ADAPTER`가 없으면 development는 http, preview·production은 mock이다. `mock`이면 기존 mock overview·과정 목록을 반환한다. `http`일 때 `GET /api/life-study/completions`로 수료 행을 만들고, 과정 카탈로그에만 있는 학습경로·강사·소개·신청 과정은 비운다. 필수/선택 구분이 응답에 없어 과정 종류는 선택으로 둔다. `totalClassCount`는 주 수가 아니므로 `weekCount`에 쓰지 않고, 과정 `sessions`에만 쓴다. `attendCount`는 `currentSession`이나 수강 회차가 아니다. 추가로 `GET /api/life-study/cohorts/{cohortId}/classes`, `GET`·`PUT /api/life-study/classes/{classId}/attendance`, `PUT .../attendance/user`, `GET`·`PUT /api/life-study/cohorts/{cohortId}/completions`, `PUT .../completions/user`를 호출한다. `/api/admin`, 2026-09-16 이전 `GET /api/life-study`, `GET /api/life-study/cohorts`, `GET /api/life-study/cohorts/{id}`, `POST /api/life-study/cohorts/{id}/attend`, `GET /api/mypage/activities/life-studies`는 호출하지 않는다. 출석·수료 권한(`team_leader`, `MANAGER_LIFESTUDY`, `ADMIN`)과 `LST012`·`LST013`·`LST017`은 서버 오류를 그대로 전달하고 클라이언트 역할로 거르지 않는다. 계약 검사는 `npm run test:api:contract:life-study`이며 `npm run validate`에는 넣지 않는다.
-- (2026-10-09) **수업일·수료 명단을 이미 있는 과정 객체에 붙일 때는 Notion에 있는 값만 덮어쓴다** — HTTP 목록 자체는 수료 행으로 새로 만든다. 과정 ID 문자열이 같을 때만 `lifeStudyName`을 `title`로 쓰고, 본인 수료가 그 ID로 하나뿐이면 `LifeStudyCourse.isCompleted`를 true로 둔다. `completedAt`이 문자열이면 `LifeStudyHistory.completedAt`에 쓰고 null이면 비운다. 수업일 목록의 `weekCount`는 기수를 넘겨 호출한 overview 과정의 `weekCount`에만 쓴다. 수료 명단은 `lifeStudyId`가 과정 `id`와 같고 현재 사용자 `userId`가 한 명일 때만 `completed`를 `isCompleted`에 쓴다. 아래는 Notion 필드가 없거나 대응을 단정할 수 없어 mock을 유지한다.
-  - 학습경로 `completedRequired`, `totalRequired`, `nextRecommendation`, `eligibility`. 수료 건수를 필수 과정 수로 세지 않는다.
-  - overview `kind`, `instructorName`, `summary`, `applicationPeriod`, `capacity`, `enrolledCount`, `status`, `target`. 목록 화면 과정에는 `cohortId`가 없어 `weekCount`를 수업일 목록과 연결하지 않는다. `totalClassCount`는 휴강 제외 정규 수업 횟수라 주 수로 보지 않는다.
-  - `LifeStudyCourse`의 `description`, `instructor`, `schedule`, `location`, `status`, `sessions`, `currentSession`, `capacity`, `enrolledCount`, `isEnrolled`, `curriculum`. `attendCount`는 출석 횟수라 `currentSession`이 아니다.
-  - `LifeStudyHistory`의 `id`, `enrolledAt`, `completedSessions`, `certificateIssued`. 수료증 필드가 없고 `attendCount`를 수강 회차로 보지 않는다. 과정 ID가 맞지 않는 수료 행은 새 이력으로 만들지 않는다. ID가 둘이면 어느 기수인지 단정하지 않고 mock을 유지한다.
-  - mock이거나 route id·`designVariant`가 있을 때의 상세 디자인 문구(팀장·교재·커리큘럼·공지·숙제). http이고 id만 있으면 overview 과정의 이름·상태와, 값이 있는 강사·소개·주 수만 그린다. 커리큘럼은 과정 상세 `GET /api/life-study/{id}` 의 `lessons[]`(주차 = `weekNo`)로 그려서 모집 중인 기수가 없어도 보인다(#199). 주차별 날짜·완료 여부는 API에 없다. `classes[]` 원소와 출석부 하위 필드는 그리지 않는다.
-  - mock일 때의 수강 내역 디자인 문구(신청중·수강 중·대기·수료 뱃지). http이면 본인 수료 행의 이름과 `completedAt`만 그린다.
-  - 수료 명단의 `userName`, `userPhone`, `attendCount`, `absentCount`, `cohortNumber`. 학생 이름은 강사가 아니고 명단용 view model이 없다.
-- (2026-09-16) **삶공부 관리자 UI의 역할 경계는 `MANAGER_LIFESTUDY` 또는 `ADMIN`이다** — 공통 권한 판별은 두 역할만 삶공부 관리 도메인에 허용한다. 현재 모바일 삶공부는 사용자용 화면만 제공하며, 실제 관리자 API의 403 강제와 관리자 화면은 후속 서버 계약 작업으로 분리한다. Issue #128.
-- (2026-07-14) **삶공부 검색은 제목 바로 아래에서 의도적으로 고정 노출한다** — 검색 action을 누르면 현재 목록 스크롤 위치와 관계없이 헤더 아래 검색 surface를 표시하고, 닫으면 검색어와 추가 sticky 높이를 제거합니다. 포커스와 검색/닫기 label은 나눔·동행과 같은 공통 UI를 사용합니다.
-- (2026-07-14) **삶공부 루트 콘텐츠는 기본 배경색 glass 타이틀 아래 하나의 스크롤을 사용한다** — 실제 safe-area와 20px 상단 여백을 포함한 공통 sticky blur를 사용하고 하단 border 없이 검색과 과정 목록이 뒤를 통과합니다.
-- (2026-07-14) **삶공부 상세·보조 화면은 삶공부 탭 Stack에 쌓는다** — `/life-study/[id]`, `/life-study/apply`, `/life-study/history`는 삶공부 목록 위에 push하고 back으로 `/life-study`에 복귀합니다.
-- (2026-07-12) **삶공부 과정은 신청 상태와 관계없이 카드 경계를 유지한다** — 신청 가능한 과정의 상세 정보와 일반 과정의 compact 정보 차이는 유지하되 모든 과정 항목은 흰 surface, 16px radius, 옅은 border와 약한 shadow로 구분합니다.
-- (2026-07-12) **부분 폐기됨: 삶공부는 학습경로와 신청 가능 과정만 강조한다** — 필수 진행률·다음 추천의 대표성은 유지하지만 전체 과정 flat list는 항목 경계가 약해 독립 카드로 복구했습니다.
+## 코드 위치
 
-- (2026-07-12) **삶공부 검색은 overview view model 안에서 수행한다** — API 검색 endpoint를 추측하지 않고 현재 조회된 신청 가능/전체 과정의 제목·강사만 로컬 필터링하며 과정 선택은 기존 `/life-study/[id]` 상세 route로 이동합니다.
+- 화면: `app/(tabs)/life-study/`
+- 목록 렌더러: `src/components/faith/` (기도와 공유), 상세 부품: `src/components/life-study/detail/`
+- 데이터: `src/services/lifeStudy*`, `src/hooks/useLifeStudyCourses.ts`, `src/types/lifeStudy*`
+- 계약 검사: `scripts/api-contract/life-study.mjs`
 
-- (2026-07-10) **삶공부 상세 수강 디자인 상태는 development 전용이다** — 캡처용 enrolled 상태는 `designVariant`로만 열고 production에서는 무시합니다. 실제 수강 여부는 overview/detail service 모델이 결정합니다.
-- (2026-07-10) **삶공부 루트는 overview query만 소비한다** — `FaithSectionsScreen`은 fixture를 직접 소유하지 않고 `useLifeStudyOverview → fetchLifeStudyOverview → mockLifeStudyOverview` 경계를 사용합니다. 사용자 API가 생기면 service/mapper만 교체하며 화면은 동일한 overview 모델을 유지합니다.
-- (2026-06-27) **삶공부는 독립 하단 탭이다** — Downloads `PREVIEW_TAB_ROUTES` 기준으로 `/life-study`는 하단 `삶공부` 탭 루트입니다. 화면 구현은 기존 삶공부 목록 renderer를 재사용하되, 내부 `중보기도/삶공부` segment는 노출하지 않습니다.
-- (2026-06-27) **삶공부 수강 내역은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenStudyHistory` 구조를 `/life-study/history` route에 직접 반영합니다. 실제 수료 뱃지/수료증 데이터는 API 스키마 확정 후 연결합니다.
-- (2026-06-27) **삶공부 수강 신청은 실제 RN 화면으로 렌더링한다** — Downloads `ScreenStudyApply`의 기본 form 구조를 `/life-study/apply` route에 직접 반영합니다. 신청 완료 상태와 실제 신청 API는 상태 전이 정책 확정 후 연결합니다.
-- (2026-06-27) **폐기됨: 삶공부 direct route는 숨김 route** — 최신 Downloads preview 기준으로 `/life-study`는 독립 하단 탭입니다.
-- (2026-06-27) **현재 호출처 없는 card/mutation/detail helper는 제거한다** — `LifeStudyCourseCard`와 미사용 상세/이력/신청 mutation hook은 route 호출처가 없어 제거하고, 현재 `history` route에서 쓰는 목록 query만 유지합니다.
-- (2026-06-27) **폐기됨: 동행 삶공부 segment는 실제 RN 화면으로 렌더링한다** — 최신 Downloads preview 기준으로 삶공부는 `/life-study` 하단 탭입니다.
-- (2026-06-27) **삶공부 상세는 실제 RN 화면으로 렌더링한다** — Downloads `ScreenStudyDetail` 구조를 `/life-study/[id]`에 직접 반영합니다. 별도 상세 query/helper는 실제 API 스키마가 정해질 때 추가합니다.
-- (2026-05-31) **삶공부 목록 마감·수료 영역은 flat row list를 따른다** — ZIP `ScreenStudyList`는 `마감·수료` 섹션을 별도 카드로 감싸지 않고 icon + title/status + term row를 반복하므로, RN reference도 `Card/menuCard` wrapper 대신 화면 전용 flat row style을 사용합니다.
-- (2026-05-27) **삶공부 상세는 ZIP `ScreenStudyDetail` 구조를 따른다** — 공통 `Card`/`Section`으로 감싼 기존 reference 구조 대신 ZIP의 내부 `phone-body` scroll, 8px divider, soft progress panel, flat curriculum rows, glass bottom action bar를 RN 방식으로 번역합니다.
-- (2026-05-25) **폐기됨: 삶공부 루트 진입은 동행 탭 안에 둔다** — 최신 Downloads preview 기준으로 삶공부는 독립 하단 탭입니다.
-- (2026-05-23) **ZIP 삶공부 보조 화면도 route-accessible** — 목록/상세 외 신청 확인과 수강 내역 화면을 별도 reference 라우트로 둡니다.
-- (2026-05-23) **삶공부 list는 진행 카드와 이력 row로 분리** — 상태 필터는 유지하되, 진행/신청 과정은 강조 카드로, 마감·수료 이력은 compact row로 보여줍니다.
-- (2026-05-22) **삶공부는 Notion v1 범위** — MVP가 아니라 v1 mock-first 화면/서비스까지 구현합니다.
-- (2026-05-22) **실제 과정명은 mock/API 데이터** — 문서에 고정하지 않고 service 데이터로 표시합니다.
+## 의존성 · 관련 ADR
 
-## 미결 / 추적
-
-- 수업일 `classes[]` 원소, 출석부 하위 필드, 신청 승인, 수료증 표시는 Notion 사용자 계약에 없다.
-- 관리자 과정 개설/수정은 모바일 v1 범위가 아니며 후속 Phase입니다.
-
-## 의존성
-
-- common 도메인의 UI, `queryKeys`, `queryClient`에 의존합니다.
-- auth 도메인의 현재 사용자 연결은 실제 API 연결 시 필요합니다.
-
-## 관련 ADR
-
-- [ADR 0002 — 백엔드 선택 보류 (Mock-first)](../adr/0002-backend-tbd.md)
+- common 의 UI 컴포넌트, `queryKeys`, `queryClient`, `apiClient`
+- auth 의 역할 판별, mypage 의 수강 내역 화면
 - [ADR 0004 — Notion v1 범위와 Expo Dev Client 기준](../adr/0004-notion-v1-dev-client-scope.md)

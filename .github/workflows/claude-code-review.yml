@@ -1,0 +1,142 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+concurrency:
+  group: claude-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # main 보호 규칙의 필수 체크다. Claude 가 BLOCK 판정을 내리면 실패해 병합을 막는다.
+  review:
+    # 초안 PR 과 fork PR(시크릿 접근 불가)은 건너뛴다. 건너뛴 체크는 필수 체크를 통과한 것으로 본다.
+    if: >-
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+    env:
+      HAS_CLAUDE_AUTH: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' || secrets.ANTHROPIC_API_KEY != '' }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - name: Skip when no Claude credential is configured
+        if: env.HAS_CLAUDE_AUTH != 'true'
+        run: echo "::notice::CLAUDE_CODE_OAUTH_TOKEN 또는 ANTHROPIC_API_KEY 시크릿이 없어 리뷰를 건너뜁니다."
+
+      - uses: actions/checkout@v4
+        if: env.HAS_CLAUDE_AUTH == 'true'
+        with:
+          fetch-depth: 1
+
+      - id: claude
+        uses: anthropics/claude-code-action@v1
+        if: env.HAS_CLAUDE_AUTH == 'true'
+        # 한도 초과·인증 오류 등으로 리뷰 자체가 실패하면 병합을 막지 않는다(아래 판정 단계에서 처리).
+        continue-on-error: true
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ github.token }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+            HEAD SHA: ${{ github.event.pull_request.head.sha }}
+
+            이 PR 을 코드 리뷰한다. 저장소 규칙은 AGENTS.md(CLAUDE.md 가 불러옴)에 있다.
+            그중 리뷰 기준은 PR 본문 3섹션과 문서 의무이고, 브랜치·병합·보고 규칙은 PR 작성자용이다.
+            관련 도메인의 docs/features/<도메인>.md 에서 결정 사항·데이터 타입을 확인하고 어긋나는지 본다.
+
+            중점:
+            - 정확성 버그(런타임 오류, 잘못된 조건, 누락된 에러·로딩 처리, API 계약 불일치)
+            - 보안(토큰·개인정보 노출, 안전하지 않은 저장)
+            - React Native / Expo / TanStack Query 사용상의 문제와 성능
+            - 기존 코드와의 중복, 테스트 누락
+            - 디자인 시스템 준수, 프로젝트 규칙 (아래 두 절)
+
+            디자인 시스템 — 기준은 docs/adr/0007-design-system-v2.md, docs/features/common.md:
+            - 공통 컴포넌트는 src/components/ui 에 있다(대부분 index.tsx 에서 export, AppIcon 은 app-icon.tsx).
+              화면·도메인 컴포넌트가 같은 역할의 UI 를 React Native 기본 요소로 새로 만들면 지적하고,
+              대신 쓸 컴포넌트를 알려준다. 추천은 지금 화면들이 실제로 쓰는 것으로 한다(import 를 grep 해 확인).
+              예: Text → AppText, 직접 만든 버튼(Pressable/TouchableOpacity) → Button·MotionPressable,
+              입력창 → ModalFormTextInput, Modal → ConfirmDialog·RadioSheet,
+              ActivityIndicator → RefreshIndicator·LoadMoreFooter, 카드 → Card, 배지 → Badge,
+              칩 → FilterChips, 빈 화면·오류 → Empty·ErrorState, 체크박스·라디오 → Checkbox·Radio,
+              상단 바 → TopBar, 아이콘 → AppIcon, 하단 고정 버튼 → FloatingBottomBar.
+            - 색·글자 크기·간격·모서리·그림자를 직접 값(#hex, rgba, 숫자 fontSize 등)으로 쓰지 않고
+              src/constants/theme.ts 의 토큰을 쓰는지 본다.
+            - 디자인 시스템에 없는 새 공통 UI 를 화면 안에 만들면 지적한다(디자인 시스템에 먼저 추가하는 것이 규칙).
+            - src/components/ui 안의 컴포넌트 자체를 구현·수정하는 코드는 이 항목에서 제외한다.
+            - 디자인 시스템 지적은 의견이다. 이것만으로 BLOCK 하지 않는다.
+
+            프로젝트 규칙 — 아래는 모두 의견이다. 이것만으로 BLOCK 하지 않는다:
+            1. 문서: 도메인의 결정·API 계약·데이터 타입·미결이 바뀌었는데 docs/features/<도메인>.md 를 안 고쳤으면 지적한다.
+               화면 보정·리팩터링만 한 PR 은 문서를 안 고치는 것이 규칙이므로 지적하지 않는다.
+               반대로 features 문서에 날짜별 작업 이력이나 파일 목록을 쌓으면 지적한다.
+            2. PR 본문: `gh pr view` 로 본문을 읽고 `## 변경` / `## 이유` / `## 확인 방법` 세 섹션이 없거나 비어 있으면
+               요약 댓글에 채워 달라고 적는다(팀원이 직접 올린 PR 도 같다).
+            3. API 계층: 화면(app/)·컴포넌트(src/components/)에서 apiClient 나 fetch 를 직접 부르지 않고
+               src/services/ 의 함수와 src/hooks/ 의 TanStack Query 훅을 거치는지 본다.
+               query key 는 src/lib/queryKeys.ts 에서 만든 것을 쓰는지도 본다.
+            4. 문구: 사용자에게 보이는 문구는 존댓말로 짧게 쓰는지 본다.
+               API 오류는 서버 message 를 그대로 보여 주지 않고 getApiErrorMessage(src/lib/apiErrorMessage.ts)와
+               src/constants/apiErrorMessages.ts 의 표를 거치는지 본다.
+            5. 접근성: 글자 없는 아이콘 버튼에 accessibilityLabel(또는 accessibilityRole 과 이름)이 있는지,
+               누르는 영역이 44 보다 작으면 hitSlop 등으로 넓혔는지 본다.
+            6. PLAN.md: PLAN.md 가 바뀌었으면 PR 본문에 사용자 승인 근거가 있는지 보고, 없으면 승인을 받았는지 확인하라고 적는다.
+
+            위 중점과 두 절에 해당하지 않는 취향 차이(이름 짓기, 줄바꿈 등)는 적지 않는다.
+            구체적인 줄에 대한 지적은 mcp__github_inline_comment__create_inline_comment 로 인라인 댓글을 남기고,
+            전체 요약은 `gh pr comment` 로 한국어 댓글 하나만 남긴다. 문제가 없으면 짧게 그렇다고만 쓴다.
+
+            판정 — 이 판정이 병합 여부를 결정한다:
+            - BLOCK: 병합하면 확실히 문제가 되는 경우에만. 앱 크래시·런타임 오류, 데이터 손실,
+              토큰·개인정보 노출 같은 보안 문제, API 계약과 어긋나 기능이 동작하지 않는 경우.
+            - PASS: 그 외 모두. 개선 제안·스타일·테스트 보강 의견만 있으면 PASS 다.
+            확신이 없으면 PASS 로 하고 의견만 남긴다.
+            요약 댓글의 맨 마지막 줄에 아래 둘 중 하나를 글자 그대로 넣는다(HTML 주석이라 화면에는 안 보인다).
+            <!-- claude-verdict: PASS sha=${{ github.event.pull_request.head.sha }} -->
+            <!-- claude-verdict: BLOCK sha=${{ github.event.pull_request.head.sha }} -->
+            BLOCK 이면 요약 댓글 첫 줄에 "🚫 병합 차단:" 과 함께 이유를 한 줄로 적는다.
+          claude_args: >-
+            --model claude-opus-5-5
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
+
+      - name: Check Claude verdict
+        if: env.HAS_CLAUDE_AUTH == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEW_OUTCOME: ${{ steps.claude.outcome }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+        run: |
+          if [ "$REVIEW_OUTCOME" != "success" ]; then
+            # 공개 저장소라 전체 실행 로그 대신 마지막 결과 메시지만 남긴다.
+            # 셸이 pipefail 로 돌므로, 원인 추출이 실패해도 체크가 깨지지 않게 `|| true` 로 넘긴다.
+            reason=""
+            if [ -n "$EXECUTION_FILE" ] && [ -f "$EXECUTION_FILE" ]; then
+              reason=$(jq -r 'if type == "array" then (map(select(.type == "result")) | last | .result // empty) else (.result // empty) end' "$EXECUTION_FILE" 2>/dev/null | head -c 500 | tr '\n' ' ' || true)
+            fi
+            echo "::warning::Claude 리뷰 실행이 실패했습니다(한도·인증 오류 등). 병합을 막지 않습니다. 원인: ${reason:-알 수 없음}"
+            exit 0
+          fi
+          # 이 워크플로(github-actions[bot])가 남긴 댓글 중 현재 커밋에 대한 판정만 본다.
+          verdict=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --paginate \
+            --jq '.[] | select(.user.login == "github-actions[bot]") | .body' \
+            | grep -oE "claude-verdict: (PASS|BLOCK) sha=$HEAD_SHA" | tail -n 1 | awk '{print $2}')
+          case "$verdict" in
+            PASS)
+              echo "Claude 리뷰 통과" ;;
+            BLOCK)
+              echo "::error::Claude 리뷰가 병합을 차단했습니다. PR 의 리뷰 댓글을 확인하고 수정 후 다시 푸시하세요."
+              exit 1 ;;
+            *)
+              echo "::warning::Claude 판정을 찾지 못했습니다. 병합을 막지 않습니다." ;;
+          esac

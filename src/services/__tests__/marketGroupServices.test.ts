@@ -1,26 +1,51 @@
 import { createGroupService, type GroupDataSource } from "../groupService";
 import { createMarketService, type MarketDataSource } from "../marketService";
 
-describe("market and group service boundaries", () => {
-  it("switches the market data source without changing service consumers", async () => {
-    const dataSource: MarketDataSource = {
-      getOverview: jest.fn().mockResolvedValue({ items: [] }),
-      getDetail: jest.fn().mockRejectedValue(new Error("not used")),
-      createPost: jest.fn().mockRejectedValue(new Error("not used")),
-      updatePost: jest.fn().mockRejectedValue(new Error("not used")),
-      deletePost: jest.fn().mockRejectedValue(new Error("not used")),
-      updateStatus: jest.fn().mockRejectedValue(new Error("not used")),
-      createComment: jest.fn().mockRejectedValue(new Error("not used")),
-      updateComment: jest.fn().mockRejectedValue(new Error("not used")),
-      deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
-      reportContent: jest.fn().mockRejectedValue(new Error("not used")),
-    };
-    const service = createMarketService(dataSource);
+const notUsed = () => jest.fn().mockRejectedValue(new Error("not used"));
 
-    await expect(service.fetchOverview()).resolves.toEqual({ items: [] });
-    expect(dataSource.getOverview).toHaveBeenCalledTimes(1);
-  });
+function marketDataSource(
+  overrides: Partial<MarketDataSource> = {},
+): MarketDataSource {
+  return {
+    getCategories: notUsed(),
+    getOverviewPage: notUsed(),
+    getMyOverviewPage: notUsed(),
+    getDetail: notUsed(),
+    createPost: notUsed(),
+    updatePost: notUsed(),
+    deletePost: notUsed(),
+    updateStatus: notUsed(),
+    createComment: notUsed(),
+    updateComment: notUsed(),
+    deleteComment: notUsed(),
+    ...overrides,
+  };
+}
 
+function groupDataSource(
+  overrides: Partial<GroupDataSource> = {},
+): GroupDataSource {
+  return {
+    getOverviewPage: notUsed(),
+    getDetail: notUsed(),
+    getMembers: notUsed(),
+    createGroup: notUsed(),
+    updateGroup: notUsed(),
+    deleteGroup: notUsed(),
+    kickMember: notUsed(),
+    updateMemberStatus: notUsed(),
+    transferLeader: notUsed(),
+    updateGroupStatus: notUsed(),
+    joinGroup: notUsed(),
+    leaveGroup: notUsed(),
+    createNotice: notUsed(),
+    updateNotice: notUsed(),
+    deleteNotice: notUsed(),
+    ...overrides,
+  };
+}
+
+describe("market and group service validation", () => {
   it("trims and creates a market comment through the data source", async () => {
     const createdComment = {
       id: "comment-new",
@@ -31,18 +56,9 @@ describe("market and group service boundaries", () => {
       isEdited: false,
       isDeleted: false,
     };
-    const dataSource: MarketDataSource = {
-      getOverview: jest.fn().mockRejectedValue(new Error("not used")),
-      getDetail: jest.fn().mockRejectedValue(new Error("not used")),
-      createPost: jest.fn().mockRejectedValue(new Error("not used")),
-      updatePost: jest.fn().mockRejectedValue(new Error("not used")),
-      deletePost: jest.fn().mockRejectedValue(new Error("not used")),
-      updateStatus: jest.fn().mockRejectedValue(new Error("not used")),
+    const dataSource = marketDataSource({
       createComment: jest.fn().mockResolvedValue(createdComment),
-      updateComment: jest.fn().mockRejectedValue(new Error("not used")),
-      deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
-      reportContent: jest.fn().mockRejectedValue(new Error("not used")),
-    };
+    });
     const service = createMarketService(dataSource);
 
     await expect(
@@ -55,50 +71,13 @@ describe("market and group service boundaries", () => {
   });
 
   it("rejects an empty market comment before calling the data source", () => {
-    const dataSource: MarketDataSource = {
-      getOverview: jest.fn().mockRejectedValue(new Error("not used")),
-      getDetail: jest.fn().mockRejectedValue(new Error("not used")),
-      createPost: jest.fn().mockRejectedValue(new Error("not used")),
-      updatePost: jest.fn().mockRejectedValue(new Error("not used")),
-      deletePost: jest.fn().mockRejectedValue(new Error("not used")),
-      updateStatus: jest.fn().mockRejectedValue(new Error("not used")),
-      createComment: jest.fn().mockRejectedValue(new Error("not used")),
-      updateComment: jest.fn().mockRejectedValue(new Error("not used")),
-      deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
-      reportContent: jest.fn().mockRejectedValue(new Error("not used")),
-    };
+    const dataSource = marketDataSource();
     const service = createMarketService(dataSource);
 
     expect(() =>
       service.createComment({ marketId: "1", content: "   " }),
     ).toThrow("댓글 내용을 입력해주세요.");
     expect(dataSource.createComment).not.toHaveBeenCalled();
-  });
-
-  it("requires details for the other report reason", () => {
-    const dataSource: MarketDataSource = {
-      getOverview: jest.fn().mockRejectedValue(new Error("not used")),
-      getDetail: jest.fn().mockRejectedValue(new Error("not used")),
-      createPost: jest.fn().mockRejectedValue(new Error("not used")),
-      updatePost: jest.fn().mockRejectedValue(new Error("not used")),
-      deletePost: jest.fn().mockRejectedValue(new Error("not used")),
-      updateStatus: jest.fn().mockRejectedValue(new Error("not used")),
-      createComment: jest.fn().mockRejectedValue(new Error("not used")),
-      updateComment: jest.fn().mockRejectedValue(new Error("not used")),
-      deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
-      reportContent: jest.fn().mockRejectedValue(new Error("not used")),
-    };
-    const service = createMarketService(dataSource);
-
-    expect(() =>
-      service.reportContent({
-        targetType: "market",
-        targetId: "1",
-        reason: "other",
-        content: "   ",
-      }),
-    ).toThrow("기타 신고 사유를 입력해주세요.");
-    expect(dataSource.reportContent).not.toHaveBeenCalled();
   });
 
   it("validates market post fields and delegates to the data source", async () => {
@@ -116,18 +95,9 @@ describe("market and group service boundaries", () => {
       isMine: true,
       comments: [],
     };
-    const dataSource: MarketDataSource = {
-      getOverview: jest.fn().mockRejectedValue(new Error("not used")),
-      getDetail: jest.fn().mockRejectedValue(new Error("not used")),
+    const dataSource = marketDataSource({
       createPost: jest.fn().mockResolvedValue(createdDetail),
-      updatePost: jest.fn().mockRejectedValue(new Error("not used")),
-      deletePost: jest.fn().mockRejectedValue(new Error("not used")),
-      updateStatus: jest.fn().mockRejectedValue(new Error("not used")),
-      createComment: jest.fn().mockRejectedValue(new Error("not used")),
-      updateComment: jest.fn().mockRejectedValue(new Error("not used")),
-      deleteComment: jest.fn().mockRejectedValue(new Error("not used")),
-      reportContent: jest.fn().mockRejectedValue(new Error("not used")),
-    };
+    });
     const service = createMarketService(dataSource);
 
     await expect(
@@ -151,22 +121,7 @@ describe("market and group service boundaries", () => {
   });
 
   it("rejects an empty group notice before calling the data source", () => {
-    const dataSource: GroupDataSource = {
-      getOverview: jest.fn().mockRejectedValue(new Error("not used")),
-      getDetail: jest.fn().mockRejectedValue(new Error("not used")),
-      getMembers: jest.fn().mockRejectedValue(new Error("not used")),
-      createGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      updateGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      deleteGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      kickMember: jest.fn().mockRejectedValue(new Error("not used")),
-      transferLeader: jest.fn().mockRejectedValue(new Error("not used")),
-      updateGroupStatus: jest.fn().mockRejectedValue(new Error("not used")),
-      joinGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      leaveGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      createNotice: jest.fn().mockRejectedValue(new Error("not used")),
-      updateNotice: jest.fn().mockRejectedValue(new Error("not used")),
-      deleteNotice: jest.fn().mockRejectedValue(new Error("not used")),
-    };
+    const dataSource = groupDataSource();
     const service = createGroupService(dataSource);
 
     expect(() =>
@@ -175,35 +130,8 @@ describe("market and group service boundaries", () => {
     expect(dataSource.createNotice).not.toHaveBeenCalled();
   });
 
-  it("switches the group data source without changing service consumers", async () => {
-    const dataSource: GroupDataSource = {
-      getOverview: jest.fn().mockResolvedValue({ groups: [], services: [] }),
-      getDetail: jest.fn().mockRejectedValue(new Error("not used")),
-      getMembers: jest.fn().mockRejectedValue(new Error("not used")),
-      createGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      updateGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      deleteGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      kickMember: jest.fn().mockRejectedValue(new Error("not used")),
-      transferLeader: jest.fn().mockRejectedValue(new Error("not used")),
-      updateGroupStatus: jest.fn().mockRejectedValue(new Error("not used")),
-      joinGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      leaveGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      createNotice: jest.fn().mockRejectedValue(new Error("not used")),
-      updateNotice: jest.fn().mockRejectedValue(new Error("not used")),
-      deleteNotice: jest.fn().mockRejectedValue(new Error("not used")),
-    };
-    const service = createGroupService(dataSource);
-
-    await expect(service.fetchOverview()).resolves.toEqual({
-      groups: [],
-      services: [],
-    });
-    expect(dataSource.getOverview).toHaveBeenCalledTimes(1);
-  });
-
   it("rejects leaving as the group leader before calling the data source", async () => {
-    const dataSource: GroupDataSource = {
-      getOverview: jest.fn().mockRejectedValue(new Error("not used")),
+    const dataSource = groupDataSource({
       getDetail: jest.fn().mockResolvedValue({
         id: "1",
         name: "리더 모임",
@@ -218,19 +146,7 @@ describe("market and group service boundaries", () => {
         members: ["이민구"],
         notices: [],
       }),
-      getMembers: jest.fn().mockRejectedValue(new Error("not used")),
-      createGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      updateGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      deleteGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      kickMember: jest.fn().mockRejectedValue(new Error("not used")),
-      transferLeader: jest.fn().mockRejectedValue(new Error("not used")),
-      updateGroupStatus: jest.fn().mockRejectedValue(new Error("not used")),
-      joinGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      leaveGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      createNotice: jest.fn().mockRejectedValue(new Error("not used")),
-      updateNotice: jest.fn().mockRejectedValue(new Error("not used")),
-      deleteNotice: jest.fn().mockRejectedValue(new Error("not used")),
-    };
+    });
     const service = createGroupService(dataSource);
 
     await expect(service.leaveGroup("1")).rejects.toThrow(
@@ -240,8 +156,7 @@ describe("market and group service boundaries", () => {
   });
 
   it("rejects joining a closed group before calling the data source", async () => {
-    const dataSource: GroupDataSource = {
-      getOverview: jest.fn().mockRejectedValue(new Error("not used")),
+    const dataSource = groupDataSource({
       getDetail: jest.fn().mockResolvedValue({
         id: "6",
         name: "마감 모임",
@@ -256,22 +171,39 @@ describe("market and group service boundaries", () => {
         members: ["이민구"],
         notices: [],
       }),
-      getMembers: jest.fn().mockRejectedValue(new Error("not used")),
-      createGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      updateGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      deleteGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      kickMember: jest.fn().mockRejectedValue(new Error("not used")),
-      transferLeader: jest.fn().mockRejectedValue(new Error("not used")),
-      updateGroupStatus: jest.fn().mockRejectedValue(new Error("not used")),
-      joinGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      leaveGroup: jest.fn().mockRejectedValue(new Error("not used")),
-      createNotice: jest.fn().mockRejectedValue(new Error("not used")),
-      updateNotice: jest.fn().mockRejectedValue(new Error("not used")),
-      deleteNotice: jest.fn().mockRejectedValue(new Error("not used")),
-    };
+    });
     const service = createGroupService(dataSource);
 
     await expect(service.joinGroup("6")).rejects.toThrow("모집이 마감됐어요");
     expect(dataSource.joinGroup).not.toHaveBeenCalled();
   });
+
+  it.each([
+    ["pending", "승인 대기 중인 모임이에요"],
+    ["rejected", "반려된 모임이에요"],
+  ] as const)(
+    "rejects joining a %s group before calling the data source",
+    async (status, message) => {
+      const dataSource = groupDataSource({
+        getDetail: jest.fn().mockResolvedValue({
+          id: "7",
+          name: "승인 전 모임",
+          description: "설명",
+          categoryLabel: "취미·문화",
+          currentMembers: 1,
+          maxMembers: 10,
+          status,
+          leaderName: "이민구",
+          isLeader: false,
+          isJoined: false,
+          members: ["이민구"],
+          notices: [],
+        }),
+      });
+      const service = createGroupService(dataSource);
+
+      await expect(service.joinGroup("7")).rejects.toThrow(message);
+      expect(dataSource.joinGroup).not.toHaveBeenCalled();
+    },
+  );
 });

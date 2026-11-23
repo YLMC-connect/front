@@ -24,9 +24,11 @@ export {
   MotionPop,
   MotionPressable,
   MotionShake,
+  MOTION_STAGGER_LIMIT,
   motionEasing,
   motionExitDuration,
   motionStaggerDelay,
+  StaggerItem,
 } from "./motion";
 
 export {

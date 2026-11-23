@@ -20,6 +20,7 @@ import {
   leaveGroup,
   updateGroup,
   updateGroupNotice,
+  updateGroupMemberStatus,
   updateGroupStatus,
 } from "../services/groupService";
 import type {
@@ -27,7 +28,8 @@ import type {
   GroupInput,
   GroupNoticeInput,
   GroupNoticeUpdateInput,
-  GroupStatus,
+  GroupMemberStatusInput,
+  GroupRecruitStatus,
   GroupUpdateInput,
 } from "../types/group";
 
@@ -227,6 +229,24 @@ export function useKickGroupMember(groupId: string) {
   });
 }
 
+/** 소모임장이 가입 신청을 승인·반려한다. 상세(인원·대기 목록)와 멤버를 다시 받는다. */
+export function useUpdateGroupMemberStatus(groupId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: Omit<GroupMemberStatusInput, "groupId">) =>
+      updateGroupMemberStatus({ ...input, groupId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.group.detail(groupId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.group.members(groupId),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.group.overview() });
+    },
+  });
+}
+
 export function useTransferGroupLeader(groupId: string) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -247,7 +267,8 @@ export function useTransferGroupLeader(groupId: string) {
 export function useUpdateGroupStatus(groupId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (status: GroupStatus) => updateGroupStatus({ groupId, status }),
+    mutationFn: (status: GroupRecruitStatus) =>
+      updateGroupStatus({ groupId, status }),
     onSuccess: (detail) => {
       queryClient.setQueryData<GroupDetail>(
         queryKeys.group.detail(groupId),

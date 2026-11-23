@@ -63,9 +63,6 @@ export interface PrayerCohortStatusDto {
   notCompleted: PrayerCompletionMemberDto[];
 }
 
-/** 성공 필드 표가 없다. PrayerCohortDto로 단정하지 않는다. */
-export type PrayerCohortDetail = Record<string, never>;
-
 export interface PrayerTopicDto {
   id: number;
   categoryId: number | null;
@@ -81,6 +78,8 @@ export interface PrayerTopicDto {
   emergencyEndAt: string | null;
   answerContent: string | null;
   answeredAt: string | null;
+  /** 접수일(yyyy-MM-dd). 서버가 없으면 등록일로 채워 준다. */
+  receivedAt: string | null;
   createdAt: string | null;
 }
 

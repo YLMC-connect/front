@@ -37,6 +37,13 @@ describe("modal smoke screens", () => {
     jest.mocked(useLocalSearchParams).mockReturnValue({} as never);
     jest.spyOn(Keyboard, "dismiss");
     jest.spyOn(prayerService, "fetchPrayerCategories").mockResolvedValue([]);
+    jest.spyOn(marketService, "fetchMarketCategories").mockResolvedValue([
+      { code: "CLOTHING_ACC", name: "의류·잡화" },
+      { code: "APPLIANCE_FURNITURE", name: "가전·가구" },
+      { code: "BOOK_STATIONERY", name: "도서·문구" },
+      { code: "BABY_KIDS", name: "유아·아동용품" },
+      { code: "OTHER", name: "기타" },
+    ]);
   });
 
   it("renders the market create modal", () => {
@@ -93,9 +100,16 @@ describe("modal smoke screens", () => {
     expect(StyleSheet.flatten(capacityInput.props.style)).toMatchObject({
       height: 48,
     });
-    // 서버가 받지 않는 일정·장소와 서버 코드가 없는 카테고리는 보이지 않는다.
-    expect(screen.queryByLabelText("소모임 일정")).toBeNull();
-    expect(screen.queryByLabelText("소모임 장소")).toBeNull();
+    // 일정·장소는 선택 입력이고, 가입 승인은 기본 꺼짐이다 (#301 #317)
+    expect(screen.getByLabelText("모임 일정").props.value).toBe("");
+    expect(screen.getByLabelText("모임 장소").props.value).toBe("");
+    fireEvent.press(screen.getByText("매주 토요일"));
+    expect(screen.getByLabelText("모임 일정").props.value).toBe("매주 토요일");
+    expect(
+      screen.getByTestId("group-form-requires-approval").props
+        .accessibilityState,
+    ).toMatchObject({ checked: false });
+    // 서버 코드가 없는 카테고리는 보이지 않는다.
     ["봉사", "목장", "선교", "카풀"].forEach((label) =>
       expect(screen.queryByText(label)).toBeNull(),
     );
@@ -109,6 +123,15 @@ describe("modal smoke screens", () => {
     expect(countFocusRings()).toBe(1);
   });
 
+  it("shows a loading placeholder while market categories are loading", () => {
+    jest
+      .spyOn(marketService, "fetchMarketCategories")
+      .mockReturnValue(new Promise(() => {}));
+    renderWithClient(<MarketNewModal />);
+
+    expect(screen.getByTestId("market-form-categories-loading")).toBeTruthy();
+  });
+
   it("submits a valid market form and opens the created detail", async () => {
     jest.spyOn(marketService, "createMarketPost").mockResolvedValueOnce({
       id: "mock-market-1",
@@ -116,7 +139,7 @@ describe("modal smoke screens", () => {
       images: ["file://market.jpg"],
       title: "새 나눔",
       content: "깨끗하게 사용한 물품입니다.",
-      categoryLabel: "생활·주방",
+      categoryCode: "OTHER",
       conditionLabel: "사용감 있음",
       status: "sharing",
       authorName: "김은혜",
@@ -142,6 +165,8 @@ describe("modal smoke screens", () => {
       "깨끗하게 사용한 물품입니다.",
     );
     fireEvent.changeText(screen.getByLabelText("나눔 수령 장소"), "교회 로비");
+    // 카테고리 칩은 서버 목록으로 그린다
+    fireEvent.press(await screen.findByText("기타"));
     fireEvent.press(screen.getAllByText("나눔 등록")[1]);
 
     await waitFor(() =>
@@ -149,10 +174,13 @@ describe("modal smoke screens", () => {
         expect.stringMatching(/^\/market\/mock-market-/),
       ),
     );
+    expect(marketService.createMarketPost).toHaveBeenCalledWith(
+      expect.objectContaining({ category: "OTHER" }),
+    );
   });
 
   it("fills the market edit modal with the real post, not sample values", async () => {
-    // 릴리스 빌드처럼 designVariant 없이 id 만 넘어와도 수정 화면이어야 한다
+    // id 가 넘어오면 수정 화면이고, 서버 글 내용으로 채운다
     jest.mocked(useLocalSearchParams).mockReturnValue({ id: "42" } as never);
     jest.spyOn(marketService, "fetchMarketDetail").mockResolvedValue({
       id: "42",
@@ -162,7 +190,7 @@ describe("modal smoke screens", () => {
       location: "교회 1층 로비",
       title: "겨울 패딩 나눔",
       content: "한 번 입은 패딩입니다.",
-      categoryLabel: "의류·잡화",
+      categoryCode: "CLOTHING_ACC",
       conditionLabel: "새것",
       status: "sharing",
       authorName: "김은혜",
@@ -199,7 +227,7 @@ describe("modal smoke screens", () => {
         marketId: "42",
         title: "겨울 패딩 나눔",
         description: "한 번 입은 패딩입니다.",
-        category: "cloth",
+        category: "CLOTHING_ACC",
         condition: "새것",
         location: "교회 1층 로비",
         images: ["https://example.com/share/42.jpg"],
@@ -214,6 +242,10 @@ describe("modal smoke screens", () => {
       name: "새 소모임",
       description: "함께 말씀을 나누는 모임입니다.",
       categoryLabel: "운동·건강",
+      schedule: "",
+      location: "",
+      requiresApproval: false,
+      pendingMembers: [],
       currentMembers: 1,
       maxMembers: 10,
       status: "open",
@@ -265,6 +297,10 @@ describe("modal smoke screens", () => {
       name: "수요 기도회",
       description: "수요일 저녁에 함께 기도합니다.",
       categoryLabel: "기도모임",
+      schedule: "매주 수요일 저녁 8시",
+      location: "본당 2층",
+      requiresApproval: true,
+      pendingMembers: [],
       currentMembers: 3,
       maxMembers: 12,
       status: "open",
@@ -290,6 +326,10 @@ describe("modal smoke screens", () => {
     );
     expect(screen.getByLabelText("소모임 최대인원").props.value).toBe("12");
     expect(screen.queryByDisplayValue("토요 산악회")).toBeNull();
+    expect(screen.getByLabelText("모임 일정").props.value).toBe(
+      "매주 수요일 저녁 8시",
+    );
+    expect(screen.getByLabelText("모임 장소").props.value).toBe("본당 2층");
 
     fireEvent.press(screen.getByText("변경사항 저장"));
     await waitFor(() =>
@@ -299,6 +339,9 @@ describe("modal smoke screens", () => {
         description: "수요일 저녁에 함께 기도합니다.",
         category: "pray",
         maxMembers: 12,
+        schedule: "매주 수요일 저녁 8시",
+        location: "본당 2층",
+        requiresApproval: true,
       }),
     );
   });

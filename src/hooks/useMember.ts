@@ -4,16 +4,10 @@ import {
   changePassword,
   getCurrentMember,
   updateCurrentMember,
-  verifyPassword,
   withdrawMember,
 } from "../services/authService";
 import { useAuthStore } from "../store/authStore";
-import type {
-  MemberChangePasswordRequest,
-  MemberVerifyPasswordRequest,
-} from "../types/authApi";
-
-export const MEMBER_ME_QUERY_KEY = queryKeys.member.me();
+import type { MemberChangePasswordRequest } from "../types/authApi";
 
 export function useMemberMe() {
   const currentUser = useAuthStore((state) => state.currentUser);
@@ -37,12 +31,6 @@ export function useUpdateMemberMe() {
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKeys.member.me(), updated);
     },
-  });
-}
-
-export function useVerifyPassword() {
-  return useMutation({
-    mutationFn: (input: MemberVerifyPasswordRequest) => verifyPassword(input),
   });
 }
 

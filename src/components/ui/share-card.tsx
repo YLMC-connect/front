@@ -5,7 +5,12 @@ import { Children, Fragment, isValidElement, type ReactNode } from "react";
 import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import { theme } from "../../constants/theme";
 import { AppText } from "./app-text";
-import { MotionEnter, MotionPressable, motionStaggerDelay } from "./motion";
+import {
+  MOTION_STAGGER_LIMIT,
+  MotionEnter,
+  MotionPressable,
+  motionStaggerDelay,
+} from "./motion";
 
 /** 나눔 상태. 나눔중(open)은 표시 없음. */
 export type ShareCardState = "open" | "reserved" | "done";
@@ -15,9 +20,6 @@ const PHOTO_RADIUS = 10;
 const PHOTO_INNER_LINE = "rgba(25,31,40,0.06)";
 /** 사진 위 1/N 알약 바탕. 디자인 시스템에 토큰이 없는 반투명 값. */
 const COUNT_PILL_BG = "rgba(25,31,40,0.6)";
-/** 목록 위쪽 처음 8개만 순서대로 떠오른다. */
-const STAGGER_LIMIT = 8;
-
 const thumbColors = [
   theme.colors.thumb1,
   theme.colors.thumb2,
@@ -208,7 +210,8 @@ export function ShareCard({
     </MotionPressable>
   );
 
-  if (enterIndex === undefined || enterIndex >= STAGGER_LIMIT) return card;
+  if (enterIndex === undefined || enterIndex >= MOTION_STAGGER_LIMIT)
+    return card;
 
   return (
     <MotionEnter mode="fadeUp" delay={motionStaggerDelay(enterIndex)}>

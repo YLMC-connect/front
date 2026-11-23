@@ -1,5 +1,5 @@
 import { AppIcon } from "@/components/ui/app-icon";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -37,7 +37,6 @@ import { authApiErrorMessages } from "../../src/constants/apiErrorMessages";
 import { useAuth } from "../../src/hooks/useAuth";
 import { getApiErrorMessage } from "../../src/lib/apiErrorMessage";
 import { isValidLoginId, sanitizeLoginId } from "../../src/lib/authValidation";
-import { readDesignVariant } from "../../src/lib/designVariant";
 import {
   emailPattern,
   formatPhoneNumber,
@@ -74,15 +73,7 @@ const animateLayout = (reduceMotion: boolean) => {
 };
 
 export default function SignupScreen() {
-  const params = useLocalSearchParams<{ designVariant?: string }>();
   const { checkAvailability, signup } = useAuth();
-  const variant = readDesignVariant(params.designVariant) ?? "default";
-  const isDefault = variant === "default";
-  const enterMotion = isDefault;
-  const isPwError = variant === "pw-error";
-  const isPhoneError = variant === "phone-error";
-  const isPhoneDup = variant === "phone-dup";
-  const isLoading = variant === "loading";
   const reduceMotion = useReducedMotion();
 
   const scrollRef = useRef<ScrollView>(null);
@@ -92,25 +83,14 @@ export default function SignupScreen() {
   const phoneInputRef = useRef<TextInput>(null);
   const emailInputRef = useRef<TextInput>(null);
 
-  const [values, setValues] = useState<FormValues>(
-    isDefault
-      ? {
-          id: "",
-          password: "",
-          passwordConfirm: "",
-          userName: "",
-          phone: "",
-          email: "",
-        }
-      : {
-          id: "admin",
-          password: isPwError ? "1234" : "spring2026!",
-          passwordConfirm: isPwError ? "1234" : "spring2026!",
-          userName: "김은혜",
-          phone: isPhoneError ? "010-2222" : "010-2345-6789",
-          email: "",
-        },
-  );
+  const [values, setValues] = useState<FormValues>({
+    id: "",
+    password: "",
+    passwordConfirm: "",
+    userName: "",
+    phone: "",
+    email: "",
+  });
   const [errors, setErrors] = useState<FormErrors>({});
   const [idAvailability, setIdAvailability] = useState<Availability | null>(
     null,
@@ -279,10 +259,10 @@ export default function SignupScreen() {
 
   const onSubmit = () => {
     const nextErrors = validateSignup(values);
-    if (isDefault && currentIdAvailability !== true) {
+    if (currentIdAvailability !== true) {
       nextErrors.id = "아이디 중복 확인을 해 주세요.";
     }
-    if (isDefault && currentEmailAvailability !== true) {
+    if (currentEmailAvailability !== true) {
       nextErrors.email = "이메일 중복 확인을 해 주세요.";
     }
     setErrors(nextErrors);
@@ -302,7 +282,7 @@ export default function SignupScreen() {
     values.phone &&
     values.email,
   );
-  const isSubmitDisabled = (!allFilled || !allTermsAgreed) && isDefault;
+  const isSubmitDisabled = !allFilled || !allTermsAgreed;
 
   const availabilityErrorMessage = checkAvailability.error
     ? getApiErrorMessage(
@@ -314,9 +294,7 @@ export default function SignupScreen() {
   const idErrorMessage =
     errors.id ??
     (lastAvailabilityTarget === "id" ? availabilityErrorMessage : undefined) ??
-    (currentIdAvailability === false || variant === "id-dup"
-      ? "이미 사용 중인 아이디예요"
-      : undefined);
+    (currentIdAvailability === false ? "이미 사용 중인 아이디예요" : undefined);
   const emailErrorMessage =
     errors.email ??
     (lastAvailabilityTarget === "email"
@@ -325,9 +303,7 @@ export default function SignupScreen() {
     (currentEmailAvailability === false
       ? "이미 사용 중인 이메일이에요"
       : undefined);
-  const passwordErrorMessage = isPwError
-    ? "비밀번호는 8자 이상, 영문·숫자를 모두 넣어 주세요"
-    : errors.password;
+  const passwordErrorMessage = errors.password;
 
   // Realtime password criteria
   const hasMinLength = values.password.length >= 8;
@@ -355,13 +331,8 @@ export default function SignupScreen() {
   const hasPhonePrefix = rawPhoneDigits.startsWith("010");
   const hasPhoneLength =
     rawPhoneDigits.length >= 10 && rawPhoneDigits.length <= 11;
-  const isPhoneValid =
-    hasPhonePrefix && hasPhoneLength && !isPhoneError && !isPhoneDup;
-  const phoneErrorMessage = isPhoneError
-    ? "연락처는 010-XXXX-XXXX 형식으로 입력해주세요"
-    : isPhoneDup
-      ? "이미 가입된 연락처예요"
-      : errors.phone;
+  const isPhoneValid = hasPhonePrefix && hasPhoneLength;
+  const phoneErrorMessage = errors.phone;
 
   const trimmedEmail = values.email.trim();
   const hasValidEmailFormat = emailPattern.test(trimmedEmail);
@@ -376,9 +347,7 @@ export default function SignupScreen() {
     currentEmailAvailability !== false &&
     !errors.userName &&
     !errors.phone &&
-    !errors.email &&
-    !isPhoneError &&
-    !isPhoneDup,
+    !errors.email,
   );
 
   const [unlockedStep, setUnlockedStep] = useState<number>(() => {
@@ -450,28 +419,20 @@ export default function SignupScreen() {
             onPress={Keyboard.dismiss}
             style={{ flexGrow: 1 }}
           >
-            <MotionEnter enabled={enterMotion} mode="fadeUp">
+            <MotionEnter mode="fadeUp">
               <AppText variant="display">정보를 입력해주세요</AppText>
               <Text style={styles.headerSubtitle}>
                 열린문 커넥트의 성도로 함께 소통해요
               </Text>
             </MotionEnter>
 
-            <MotionEnter
-              enabled={enterMotion}
-              mode="fadeUp"
-              style={styles.form}
-            >
+            <MotionEnter mode="fadeUp" style={styles.form}>
               {/* 섹션 3: 약관 동의 (새로 작성할 카드가 위쪽에 추가) */}
               {unlockedStep >= 3 ? (
                 <Animated.View
-                  entering={
-                    enterMotion
-                      ? FadeInDown.duration(380).easing(
-                          Easing.out(Easing.cubic),
-                        )
-                      : undefined
-                  }
+                  entering={FadeInDown.duration(380).easing(
+                    Easing.out(Easing.cubic),
+                  )}
                   layout={LinearTransition.duration(350).easing(
                     Easing.out(Easing.cubic),
                   )}
@@ -572,13 +533,9 @@ export default function SignupScreen() {
               {/* 섹션 2: 성도 정보 (새로 작성할 카드가 위쪽에 추가) */}
               {unlockedStep >= 2 ? (
                 <Animated.View
-                  entering={
-                    enterMotion
-                      ? FadeInDown.duration(380).easing(
-                          Easing.out(Easing.cubic),
-                        )
-                      : undefined
-                  }
+                  entering={FadeInDown.duration(380).easing(
+                    Easing.out(Easing.cubic),
+                  )}
                   layout={LinearTransition.duration(350).easing(
                     Easing.out(Easing.cubic),
                   )}
@@ -893,7 +850,7 @@ export default function SignupScreen() {
                         nameInputRef.current.focus();
                       }
                     }}
-                    hasError={isPwError || Boolean(errors.password)}
+                    hasError={Boolean(errors.password)}
                   />
 
                   {values.password.length > 0 ? (
@@ -942,7 +899,7 @@ export default function SignupScreen() {
                     </View>
                   </View>
 
-                  {isPwError || errors.password ? (
+                  {errors.password ? (
                     <InlineError>{passwordErrorMessage}</InlineError>
                   ) : null}
                 </Field>
@@ -964,9 +921,9 @@ export default function SignupScreen() {
         </ScrollView>
 
         <FloatingBottomBar
-          disabled={isSubmitDisabled || signup.isPending || isLoading}
+          disabled={isSubmitDisabled || signup.isPending}
           label="회원 가입"
-          loading={signup.isPending || isLoading}
+          loading={signup.isPending}
           onPress={onSubmit}
           testID="signup-submit"
         />

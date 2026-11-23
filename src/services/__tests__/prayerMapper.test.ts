@@ -6,7 +6,6 @@ import {
   formatPrayerRoomDayPeriod,
   readPrayerApplications,
   readPrayerCategories,
-  readPrayerCohortDetail,
   readPrayerCohorts,
   readPrayerCohortStatus,
   readPrayerHistory,
@@ -47,6 +46,7 @@ const topic: PrayerTopicDto = {
   emergencyEndAt: "2026-10-10T00:00:00",
   answerContent: "회복되었습니다",
   answeredAt: "2026-10-08T00:00:00",
+  receivedAt: null,
   createdAt: "2026-10-02T01:02:03",
 };
 
@@ -126,7 +126,7 @@ describe("prayerMapper", () => {
         application,
         { ...application, id: 32, cohortId: 15 },
         { ...application, id: 33, cohortId: 23, status: "APPROVED" },
-        { ...application, id: 34, cohortId: 24, yoil: 6 },
+        { ...application, id: 34, cohortId: 24, yoil: 0 },
       ],
     );
 
@@ -143,6 +143,19 @@ describe("prayerMapper", () => {
       status: "pending",
       applicationId: "31",
     });
+  });
+
+  it("includes Saturday rooms but still drops Sunday (BUG-34)", () => {
+    const mapped = buildPrayerOverview(
+      [
+        { ...cohort, id: 40, yoil: 6, cohortName: "토요일 오전 기도방" },
+        { ...cohort, id: 41, yoil: 0, cohortName: "일요일 오전 기도방" },
+      ],
+      [],
+    );
+    expect(mapped.rooms.map((room) => [room.id, room.weekday])).toEqual([
+      ["40", "sat"],
+    ]);
   });
 
   it("formats server dates and day/period from server yoil/timeSlot", () => {
@@ -240,15 +253,7 @@ describe("prayerMapper", () => {
     ]);
   });
 
-  it("drops undocumented cohort detail fields and keeps history rows", () => {
-    expect(
-      readPrayerCohortDetail({
-        id: 15,
-        cohortName: "월요일 오전",
-        memberCount: 40,
-      }),
-    ).toEqual({});
-    expect(readPrayerCohortDetail(null)).toBeNull();
+  it("keeps history rows", () => {
     expect(
       readPrayerHistory([
         {
@@ -317,7 +322,6 @@ describe("prayerMapper", () => {
     expect(() =>
       readPrayerCohortStatus({ ...cohortStatus, totalMembers: "3" }),
     ).toThrow(ApiError);
-    expect(() => readPrayerCohortDetail([])).toThrow(ApiError);
     expect(() => readPrayerTopicBoard({ emergency: [] })).toThrow(ApiError);
     expect(() => requireCreatedId("15")).toThrow(ApiError);
     expect(requireCreatedId(15)).toBe(15);
@@ -340,6 +344,7 @@ describe("prayerMapper", () => {
       emergencyEndAt: null,
       answerContent: null,
       answeredAt: null,
+      receivedAt: null,
       createdAt: "2026-10-15T12:00:00",
     };
     expect(readPrayerTopics([raw])).toEqual([
@@ -382,6 +387,7 @@ describe("prayerMapper", () => {
         mine: null,
         emergency: null,
         answeredAt: null,
+        receivedAt: null,
         createdAt: null,
       },
     ]);

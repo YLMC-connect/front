@@ -7,12 +7,12 @@ import {
   mapShareComment,
   mapShareCommentList,
   mapShareDetail,
+  mapShareCategories,
   mapShareOverviewItem,
-  toShareCategoryCode,
   toShareStatus,
   toShareItemStatus,
 } from "./marketMapper";
-import type { MarketCategory } from "../types/market";
+import type { MarketCategoryCode } from "../types/market";
 import type {
   ShareCommentDto,
   ShareDetailDto,
@@ -62,24 +62,9 @@ export function createHttpMarketDataSource({
   };
 
   return {
-    async getOverview() {
-      const items = [];
-      let lastId: number | undefined;
-      for (let page = 0; page < 5; page += 1) {
-        const query = new URLSearchParams({ size: "50" });
-        if (lastId != null) query.set("lastId", String(lastId));
-        const data = await client.request<ShareListResponseDto>(
-          `/api/share?${query.toString()}`,
-        );
-        const content = data?.content ?? [];
-        for (const item of content) {
-          const mapped = mapShareOverviewItem(item, currentUserId());
-          if (mapped) items.push(mapped);
-        }
-        if (!data?.hasNext || data.nextCursor == null) break;
-        lastId = data.nextCursor;
-      }
-      return { items };
+    async getCategories() {
+      const data = await client.request<unknown>("/api/share/categories");
+      return mapShareCategories(data ?? []);
     },
 
     async getOverviewPage({
@@ -89,14 +74,11 @@ export function createHttpMarketDataSource({
     }: {
       lastId?: number | null;
       size?: number;
-      category?: Exclude<MarketCategory, "all">;
+      category?: MarketCategoryCode;
     } = {}) {
       const query = new URLSearchParams({ size: String(size) });
       if (lastId != null) query.set("lastId", String(lastId));
-      if (category) {
-        const categoryCode = toShareCategoryCode(category);
-        if (categoryCode) query.set("categoryCode", categoryCode);
-      }
+      if (category) query.set("categoryCode", category);
       const data = await client.request<ShareListResponseDto>(
         `/api/share?${query.toString()}`,
       );
@@ -120,14 +102,11 @@ export function createHttpMarketDataSource({
     }: {
       lastId?: number | null;
       size?: number;
-      category?: Exclude<MarketCategory, "all">;
+      category?: MarketCategoryCode;
     } = {}) {
       const query = new URLSearchParams({ size: String(size) });
       if (lastId != null) query.set("lastId", String(lastId));
-      if (category) {
-        const categoryCode = toShareCategoryCode(category);
-        if (categoryCode) query.set("categoryCode", categoryCode);
-      }
+      if (category) query.set("categoryCode", category);
       const data = await client.request<ShareListResponseDto>(
         `/api/share/my?${query.toString()}`,
       );
@@ -154,7 +133,7 @@ export function createHttpMarketDataSource({
       const form = new FormData();
       form.append("title", input.title);
       form.append("content", input.description);
-      form.append("categoryCode", toShareCategoryCode(input.category));
+      form.append("categoryCode", input.category);
       form.append("itemStatus", itemStatus);
       form.append("location", input.location);
       // 업로드 직전에 긴 변 1600px·JPEG 0.8 로 줄인다 (실패하면 원본)
@@ -193,7 +172,7 @@ export function createHttpMarketDataSource({
       const fields = {
         title: input.title,
         content: input.description,
-        categoryCode: toShareCategoryCode(input.category),
+        categoryCode: input.category,
         itemStatus,
         location: input.location,
       };
@@ -295,12 +274,6 @@ export function createHttpMarketDataSource({
       await client.request(`/api/share/comments/${input.commentId}`, {
         method: "DELETE",
       });
-    },
-
-    async reportContent() {
-      throw new Error(
-        "신고 사유 코드가 서버에 확정되지 않아 접수할 수 없습니다.",
-      );
     },
   };
 }

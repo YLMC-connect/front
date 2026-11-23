@@ -1,26 +1,23 @@
 import { AppIcon } from "@/components/ui/app-icon";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Screen } from "../../src/components/layout/Screen";
 import { FaqItem } from "../../src/components/mypage/FaqItem";
-import { StaggerItem } from "../../src/components/mypage/StaggerItem";
 import {
   Card,
   Empty,
   ErrorState,
   FilterChips,
+  StaggerItem,
   TopBar,
 } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
 import { useFaqs } from "../../src/hooks/useSiteContent";
-import { readDesignVariant } from "../../src/lib/designVariant";
 
 export default function FaqScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ designVariant?: string }>();
-  const empty = readDesignVariant(params.designVariant) === "empty";
   const { data: faqCategories, isLoading, isError, refetch } = useFaqs();
 
   const [selectedCategory, setSelectedCategory] = useState("전체");
@@ -43,7 +40,7 @@ export default function FaqScreen() {
   }, [faqCategories, selectedCategory]);
 
   const isTotalEmpty =
-    empty || (!isLoading && (!faqCategories || faqCategories.length === 0));
+    !isLoading && (!faqCategories || faqCategories.length === 0);
 
   return (
     <Screen scroll={false} padded={false}>

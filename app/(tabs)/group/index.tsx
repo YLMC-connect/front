@@ -6,21 +6,8 @@ import {
   type NativeStackNavigationProp,
 } from "expo-router";
 import { ListRow } from "@/components/ui/list-row";
-import { motionStaggerDelay } from "@/components/ui/motion";
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Platform, ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { StickyHeaderScreen } from "../../../src/components/layout/StickyHeaderScreen";
 import {
@@ -32,14 +19,17 @@ import {
   FloatingActionButton,
   ListSkeleton,
   LoadMoreFooter,
-  MotionEnter,
   SegmentedTabs,
+  StaggerItem,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
+import {
+  groupStatusLabel,
+  groupStatusTone,
+} from "../../../src/services/groupMapper";
 import { GROUP_CATEGORIES } from "../../../src/constants/domainOptions";
 import { useGroupOverview } from "../../../src/hooks/useGroups";
 import { useMotionRouteParam } from "../../../src/hooks/useMotionRouteParam";
-import { readDesignVariant } from "../../../src/lib/designVariant";
 import type {
   GroupOverviewItem,
   GroupServiceOverviewItem,
@@ -55,8 +45,6 @@ const sections: readonly { key: GroupSection; label: string }[] = [
 ];
 
 const GROUP_SEGMENT_STICKY_HEIGHT = 60;
-/** 첫 진입 때 순서대로 떠오르는 행 수(디자인 시스템 ListRow: 처음 8개, 60ms 간격). */
-const STAGGER_LIMIT = 8;
 const GROUP_STICKY_CONTROLS_HEIGHT = 116;
 
 type GroupStackParamList = {
@@ -72,9 +60,7 @@ export default function GroupScreen() {
   const params = useLocalSearchParams<{
     category?: string;
     section?: string;
-    designVariant?: string;
   }>();
-  const variant = readDesignVariant(params.designVariant);
   const overview = useGroupOverview();
   const listScrollRef = useRef<ScrollView | null>(null);
   const detailNavigationSuspended = useRef(false);
@@ -95,7 +81,7 @@ export default function GroupScreen() {
   const routeSection: GroupSection =
     params.section === "service"
       ? "service"
-      : params.section === "mine" || variant === "my-full"
+      : params.section === "mine"
         ? "mine"
         : "groups";
   const routeCategory =
@@ -116,8 +102,7 @@ export default function GroupScreen() {
       });
     },
   );
-  const isMyFull = variant === "my-full";
-  const isError = variant === "network-error" || overview.isError;
+  const isError = overview.isError;
   const groups = (overview.data?.groups ?? []).filter(
     (group) => category === "all" || group.category === category,
   );
@@ -190,53 +175,6 @@ export default function GroupScreen() {
       : section === "mine"
         ? myGroups.length === 0
         : groups.length === 0;
-
-  if (isMyFull) {
-    return (
-      <StickyHeaderScreen
-        contentContainerStyle={styles.fullList}
-        scrollRef={listScrollRef}
-        scrollStateResetKey={scrollStateResetKey}
-        refreshing={overview.isRefetching}
-        onRefresh={() => void overview.refetch()}
-        testID="screen-group"
-        title="내 모임"
-        right={
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="내 모임 닫기"
-            onPress={() => router.back()}
-            style={styles.closeButton}
-            testID="group-my-list-close"
-          >
-            <AppIcon name="close" size={22} color={theme.colors.text} />
-          </Pressable>
-        }
-      >
-        {isLoading ? (
-          <View style={styles.loading}>
-            <ListSkeleton rows={3} thumbnail={false} />
-          </View>
-        ) : myGroups.length === 0 ? (
-          <Empty
-            icon="groups"
-            title="참여 중인 소모임이 없어요"
-            description="관심 있는 소모임에 참여해 보세요"
-          />
-        ) : (
-          myGroups.map((group, index) => (
-            <StaggerItem key={group.id} index={index}>
-              <CompanionCard
-                kind="group"
-                item={group}
-                onPress={() => openGroupDetail(group.id)}
-              />
-            </StaggerItem>
-          ))
-        )}
-      </StickyHeaderScreen>
-    );
-  }
 
   return (
     <StickyHeaderScreen
@@ -408,16 +346,21 @@ function CompanionCard(
       },
 ) {
   const isService = props.kind === "service";
-  const closed = props.kind === "group" && props.item.status === "closed";
+  const groupStatus = props.kind === "group" ? props.item.status : null;
+  const closed = groupStatus === "closed" || groupStatus === "rejected";
   const testID = isService
     ? `group-service-card-${props.item.id}`
     : `group-card-${props.item.id}`;
-  const statusLabel = isService
-    ? props.item.statusLabel
-    : closed
-      ? "모집완료"
-      : "모집중";
-  const statusMuted = isService ? props.item.statusLabel !== "모집중" : closed;
+  const statusLabel = groupStatus
+    ? groupStatusLabel(groupStatus)
+    : props.kind === "service"
+      ? props.item.statusLabel
+      : "";
+  const statusTone = groupStatus
+    ? groupStatusTone(groupStatus)
+    : props.kind === "service" && props.item.statusLabel === "모집중"
+      ? "success"
+      : "neutral";
   const metaLabel = isService
     ? props.item.schedule
     : categoryOf(props.item.category);
@@ -433,7 +376,7 @@ function CompanionCard(
       style={[styles.groupCard, closed ? styles.closedCard : null]}
     >
       <View style={styles.cardMetaRow}>
-        <Badge tone={statusMuted ? "neutral" : "success"}>{statusLabel}</Badge>
+        <Badge tone={statusTone}>{statusLabel}</Badge>
         <Badge tone="neutral">{metaLabel}</Badge>
         <View testID={`${testID}-member-count`} style={styles.memberRow}>
           <AppIcon name="groups" size={14} color={theme.colors.textMuted} />
@@ -450,23 +393,6 @@ function CompanionCard(
   );
 }
 
-/** 목록 첫 진입: 처음 8개 행이 60ms 간격으로 8px 아래에서 떠오른다. */
-function StaggerItem({
-  index,
-  children,
-}: {
-  index: number;
-  children: ReactNode;
-}) {
-  if (index >= STAGGER_LIMIT) return children;
-
-  return (
-    <MotionEnter mode="fadeUp" delay={motionStaggerDelay(index)}>
-      {children}
-    </MotionEnter>
-  );
-}
-
 function categoryOf(key: string) {
   return (
     GROUP_CATEGORIES.find((category) => category.key === key)?.label ?? "기타"
@@ -474,12 +400,6 @@ function categoryOf(key: string) {
 }
 
 const styles = StyleSheet.create({
-  closeButton: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   segmented: {
     flexShrink: 0,
     height: 40,
@@ -502,9 +422,6 @@ const styles = StyleSheet.create({
   },
   myListWrap: {
     flex: 1,
-  },
-  fullList: {
-    paddingBottom: theme.spacing[6],
   },
   loading: {
     paddingTop: theme.spacing[2],

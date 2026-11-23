@@ -5,12 +5,6 @@ export const styles = StyleSheet.create({
   root: {
     flex: 1,
   },
-  iconButton: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   body: {
     flexGrow: 1,
     paddingBottom: 100,
@@ -81,121 +75,13 @@ export const styles = StyleSheet.create({
   primaryText: {
     color: theme.colors.primaryStrong,
   },
-  section: {
-    paddingHorizontal: 18,
-    paddingTop: 18,
-  },
-  sectionTitle: {
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-    lineHeight: theme.typography.body.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-  },
-  sectionSubtitle: {
-    marginTop: 4,
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
-  },
-  stack: {
-    marginTop: 12,
-    gap: 10,
-  },
-  noticeCard: {
-    padding: 14,
-    gap: 8,
-  },
-  noticeTitle: {
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-  },
-  divider: {
-    marginTop: 18,
-    height: 8,
-    backgroundColor: theme.colors.bg,
-  },
-  progressCard: {
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.surface,
-    padding: 16,
-    ...theme.shadow.sm,
-  },
-  metricGrid: {
-    flexDirection: "row",
-    gap: 10,
-    marginTop: 14,
-  },
-  metric: {
-    flex: 1,
-    borderRadius: theme.radius.sm,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surfaceSubtle,
-    padding: 10,
-  },
-  metricValue: {
-    marginTop: 2,
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-    lineHeight: theme.typography.body.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-  },
-  nextClass: {
-    borderRadius: theme.radius.sm,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surfaceSubtle,
-    padding: 12,
-  },
-  nextText: {
-    marginTop: 3,
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-    lineHeight: theme.typography.body.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-  },
-  scheduleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingVertical: 11,
-  },
   rowBorder: {
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
   },
-  weekText: {
-    width: 48,
-    color: theme.colors.primaryStrong,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-  },
   rowText: {
     flex: 1,
     minWidth: 0,
-  },
-  rowTitle: {
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-  },
-  assignmentCard: {
-    padding: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 10,
-  },
-  assignmentTitle: {
-    marginTop: 3,
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
-    fontWeight: theme.fontWeight.bold,
   },
   curriculumRow: {
     flexDirection: "row",
@@ -213,29 +99,17 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     flexShrink: 0,
   },
-  weekBadgeDone: {
-    backgroundColor: theme.colors.primarySubtle,
-  },
-  weekBadgeCurrent: {
-    backgroundColor: theme.colors.primary,
-  },
   weekNumber: {
     color: theme.colors.textMuted,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
     fontWeight: theme.fontWeight.bold,
   },
-  weekNumberOn: {
-    color: theme.colors.onPrimary,
-  },
   curriculumTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.label.fontSize,
     lineHeight: theme.typography.label.lineHeight,
     fontWeight: theme.fontWeight.medium,
-  },
-  doneText: {
-    color: theme.colors.textMuted,
   },
   sectionMargin: {
     marginTop: 24,

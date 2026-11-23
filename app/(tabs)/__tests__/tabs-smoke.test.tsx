@@ -29,7 +29,6 @@ import EditProfileScreen from "../../mypage/edit";
 import FaqScreen from "../../mypage/faq";
 import PasswordChangeScreen from "../../mypage/password";
 import MyPageTermsScreen from "../../mypage/terms";
-import UserProfileScreen from "../../mypage/user/[id]";
 import WithdrawScreen from "../../mypage/withdraw";
 import PrayerDetailScreen from "../prayer/[id]";
 import PrayerApplyScreenRoute from "../prayer/apply";
@@ -58,12 +57,17 @@ describe("v1 tab smoke screens", () => {
 
     jest.spyOn(homeService, "fetchHomeOverview").mockResolvedValue({
       dailyPrayer: {
-        dateLabel: "4월 16일 목요일",
+        dateLabel: "4월 16일",
         weekday: "thu",
-        weekdayLabel: "목요일의 기도",
-        title: "일터와 가정을 지키는 지혜",
-        summary: "우리의 계획보다 주님의 인도하심을 신뢰하게 하소서.",
-        href: "/prayer",
+        weekdayLabel: "목요일",
+        items: [
+          {
+            id: "1",
+            title: "일터와 가정을 지키는 지혜",
+            summary: "우리의 계획보다 주님의 인도하심을 신뢰하게 하소서.",
+            content: "",
+          },
+        ],
       },
       dawnPrayer: {
         id: "dawn-1",
@@ -81,8 +85,6 @@ describe("v1 tab smoke screens", () => {
         thumbnailUrl: "https://img.youtube.com/vi/1t5SPGmJxsg/hqdefault.jpg",
         videoUrl: "https://www.youtube.com/watch?v=1t5SPGmJxsg",
       },
-      todos: [],
-      progressSteps: [],
     });
 
     const marketItems: MarketOverviewItem[] = [
@@ -93,7 +95,7 @@ describe("v1 tab smoke screens", () => {
         authorName: "김은혜",
         createdLabel: "10분 전",
         status: "sharing",
-        category: "baby",
+        category: "BABY_KIDS",
         isMine: true,
       },
       {
@@ -103,7 +105,7 @@ describe("v1 tab smoke screens", () => {
         authorName: "이요셉",
         createdLabel: "1시간 전",
         status: "sharing",
-        category: "home",
+        category: "APPLIANCE_FURNITURE",
         isMine: false,
       },
       {
@@ -113,7 +115,7 @@ describe("v1 tab smoke screens", () => {
         authorName: "박한나",
         createdLabel: "2시간 전",
         status: "sharing",
-        category: "book",
+        category: "BOOK_STATIONERY",
         isMine: false,
       },
       {
@@ -123,7 +125,7 @@ describe("v1 tab smoke screens", () => {
         authorName: "최성도",
         createdLabel: "어제",
         status: "reserved",
-        category: "baby",
+        category: "BABY_KIDS",
         isMine: false,
       },
     ];
@@ -132,7 +134,7 @@ describe("v1 tab smoke screens", () => {
       thumbSeed: 0,
       title: "아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)",
       content: "아이가 커서 정리합니다.",
-      categoryLabel: "육아·아동",
+      categoryCode: "BABY_KIDS",
       conditionLabel: "상태 좋음",
       status: "sharing",
       authorName: "김은혜",
@@ -177,9 +179,13 @@ describe("v1 tab smoke screens", () => {
       ],
     };
 
-    jest.spyOn(marketService, "fetchMarketOverview").mockResolvedValue({
-      items: marketItems,
-    });
+    jest.spyOn(marketService, "fetchMarketCategories").mockResolvedValue([
+      { code: "CLOTHING_ACC", name: "의류·잡화" },
+      { code: "APPLIANCE_FURNITURE", name: "가전·가구" },
+      { code: "BOOK_STATIONERY", name: "도서·문구" },
+      { code: "BABY_KIDS", name: "유아·아동용품" },
+      { code: "OTHER", name: "기타" },
+    ]);
     jest.spyOn(marketService, "fetchMarketOverviewPage").mockResolvedValue({
       items: marketItems,
       hasNext: false,
@@ -330,6 +336,10 @@ describe("v1 tab smoke screens", () => {
       name: "토요 산악회",
       description: "함께 산을 오르며 교제해요",
       categoryLabel: "취미·문화",
+      schedule: "",
+      location: "",
+      requiresApproval: false,
+      pendingMembers: [],
       currentMembers: 6,
       maxMembers: 12,
       status: "open",
@@ -357,9 +367,6 @@ describe("v1 tab smoke screens", () => {
       ],
     };
 
-    jest
-      .spyOn(groupService, "fetchGroupOverview")
-      .mockResolvedValue(groupOverviewData);
     jest.spyOn(groupService, "fetchGroupOverviewPage").mockResolvedValue({
       ...groupOverviewData,
       myGroups: groupOverviewData.groups.filter((group) => group.isJoined),
@@ -379,6 +386,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.01",
         isLeader: true,
         isMine: true,
+        status: "approved" as const,
       },
       {
         userId: "member-002",
@@ -386,6 +394,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.02",
         isLeader: false,
         isMine: false,
+        status: "approved" as const,
       },
       {
         userId: "member-003",
@@ -393,6 +402,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.02",
         isLeader: false,
         isMine: false,
+        status: "approved" as const,
       },
       {
         userId: "member-004",
@@ -400,6 +410,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.03",
         isLeader: false,
         isMine: false,
+        status: "approved" as const,
       },
       {
         userId: "member-005",
@@ -407,6 +418,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.03",
         isLeader: false,
         isMine: false,
+        status: "approved" as const,
       },
       {
         userId: "member-006",
@@ -414,6 +426,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.03",
         isLeader: false,
         isMine: false,
+        status: "approved" as const,
       },
       {
         userId: "member-007",
@@ -421,6 +434,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.04",
         isLeader: false,
         isMine: false,
+        status: "approved" as const,
       },
       {
         userId: "member-008",
@@ -428,6 +442,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.04",
         isLeader: false,
         isMine: false,
+        status: "approved" as const,
       },
     ]);
     jest
@@ -692,9 +707,9 @@ describe("v1 tab smoke screens", () => {
     );
 
     // 카드 맨 위 카테고리 줄에도 같은 이름이 있어 필터 칩은 testID 로 고른다.
-    fireEvent.press(screen.getByTestId("market-category-book"));
+    fireEvent.press(screen.getByTestId("market-category-BOOK_STATIONERY"));
     await waitFor(() =>
-      expect(setParams).toHaveBeenCalledWith({ category: "book" }),
+      expect(setParams).toHaveBeenCalledWith({ category: "BOOK_STATIONERY" }),
     );
     expect(screen.getByText("어린이 동화책 30권 묶음 나눔")).toBeTruthy();
     expect(
@@ -721,18 +736,39 @@ describe("v1 tab smoke screens", () => {
   });
 
   it("restores a market category from the list route", async () => {
-    jest.mocked(useLocalSearchParams).mockReturnValue({ category: "book" });
+    jest.mocked(useLocalSearchParams).mockReturnValue({
+      category: "BOOK_STATIONERY",
+    });
     renderWithClient(<MarketScreen />);
 
     expect(
       await screen.findByText("어린이 동화책 30권 묶음 나눔"),
     ).toBeTruthy();
     expect(
-      screen.getByTestId("market-category-book").props.accessibilityState,
+      screen.getByTestId("market-category-BOOK_STATIONERY").props
+        .accessibilityState,
     ).toEqual({ selected: true });
     expect(
       screen.queryByText("아이 장난감 정리하면서 나눔합니다 (블록·인형 30점)"),
     ).toBeNull();
+
+    jest.mocked(useLocalSearchParams).mockReturnValue({});
+  });
+
+  it("falls back to all when the route category is not in the server list", async () => {
+    jest.mocked(useLocalSearchParams).mockReturnValue({ category: "GONE" });
+    const fetchPage = jest.spyOn(marketService, "fetchMarketOverviewPage");
+    renderWithClient(<MarketScreen />);
+
+    await waitFor(() =>
+      expect(
+        screen.getByTestId("market-category-all").props.accessibilityState,
+      ).toEqual({ selected: true }),
+    );
+    expect(fetchPage).toHaveBeenLastCalledWith({
+      lastId: undefined,
+      category: undefined,
+    });
 
     jest.mocked(useLocalSearchParams).mockReturnValue({});
   });
@@ -745,7 +781,7 @@ describe("v1 tab smoke screens", () => {
       authorName: "김은혜",
       createdLabel: "방금 전",
       status,
-      category: "book" as const,
+      category: "BOOK_STATIONERY",
       isMine: false,
     });
     const fetchPage = jest
@@ -1194,6 +1230,84 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("공지사항")).toBeTruthy();
   });
 
+  it("shows schedule and location and sends a join request for approval groups", async () => {
+    const approvalGroup: GroupDetail = {
+      id: "1",
+      name: "토요 산악회",
+      description: "함께 산을 오르며 교제해요",
+      categoryLabel: "취미·문화",
+      schedule: "매주 토요일 오전 8시",
+      location: "교회 1층 로비",
+      requiresApproval: true,
+      pendingMembers: [],
+      currentMembers: 6,
+      maxMembers: 12,
+      status: "open",
+      leaderName: "김은혜",
+      isLeader: false,
+      isJoined: false,
+      members: ["김은혜"],
+      notices: [],
+    };
+    jest
+      .spyOn(groupService, "fetchGroupDetail")
+      .mockResolvedValue(approvalGroup);
+    const join = jest
+      .spyOn(groupService, "joinGroup")
+      .mockResolvedValue(approvalGroup);
+    const alert = jest.spyOn(Alert, "alert").mockImplementation(() => {});
+    renderWithClient(<GroupDetailScreen />);
+
+    expect(await screen.findByText("매주 토요일 오전 8시")).toBeTruthy();
+    expect(screen.getByText("교회 1층 로비")).toBeTruthy();
+    fireEvent.press(screen.getByText("가입 신청하기"));
+
+    await waitFor(() => expect(join).toHaveBeenCalledWith("1"));
+    expect(await screen.findByText("승인 대기 중")).toBeTruthy();
+    expect(alert).toHaveBeenCalledWith(
+      "가입 신청 완료",
+      "신청했어요. 소모임장이 승인하면 참여돼요.",
+    );
+  });
+
+  it("lets the leader approve a pending join request from the members screen", async () => {
+    jest.spyOn(groupService, "fetchGroupMembers").mockResolvedValueOnce([
+      {
+        userId: "leader",
+        userName: "김은혜",
+        joinedLabel: "2026.01",
+        isLeader: true,
+        isMine: true,
+        status: "approved" as const,
+      },
+      {
+        userId: "applicant",
+        userName: "박한나",
+        joinedLabel: "방금 전",
+        isLeader: false,
+        isMine: false,
+        status: "pending" as const,
+      },
+    ]);
+    const decide = jest
+      .spyOn(groupService, "updateGroupMemberStatus")
+      .mockResolvedValue(undefined);
+    renderWithClient(<GroupMembersScreen />);
+
+    expect(await screen.findByText("가입 신청 1명")).toBeTruthy();
+    // 대기 신청자는 멤버 수에 넣지 않는다
+    expect(screen.getByText("전체 1명")).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("박한나 가입 승인"));
+
+    await waitFor(() =>
+      expect(decide).toHaveBeenCalledWith({
+        groupId: "1",
+        targetUserId: "applicant",
+        status: "approved",
+      }),
+    );
+  });
+
   it("renders the group notice editor screen", () => {
     renderWithClient(<GroupNoticesScreen />);
 
@@ -1306,6 +1420,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.01",
         isLeader: true,
         isMine: false,
+        status: "approved" as const,
       },
       {
         userId: "member-002",
@@ -1313,6 +1428,7 @@ describe("v1 tab smoke screens", () => {
         joinedLabel: "2026.02",
         isLeader: false,
         isMine: true,
+        status: "approved" as const,
       },
     ]);
     renderWithClient(<GroupMembersScreen />);
@@ -1471,6 +1587,7 @@ describe("v1 tab smoke screens", () => {
           emergencyEndAt: null,
           answerContent: null,
           answeredAt: null,
+          receivedAt: null,
           createdAt: "2026-10-28",
         },
       ],
@@ -1489,7 +1606,25 @@ describe("v1 tab smoke screens", () => {
           emergencyEndAt: null,
           answerContent: null,
           answeredAt: null,
+          receivedAt: "2026-10-20",
           createdAt: "2026-10-28",
+        },
+        {
+          id: 4,
+          categoryId: 1,
+          categoryName: "건강",
+          title: "어머니 회복",
+          content: "수술 후 회복을 위해",
+          status: "OPEN",
+          rejectReason: null,
+          writerName: "정성도",
+          mine: false,
+          emergency: false,
+          emergencyEndAt: null,
+          answerContent: null,
+          answeredAt: null,
+          receivedAt: null,
+          createdAt: "2026-10-27",
         },
       ],
       recentAnswers: [
@@ -1508,6 +1643,7 @@ describe("v1 tab smoke screens", () => {
           answerContent:
             "첫 주를 잘 마쳤고 팀 안에서 좋은 도움을 받고 있습니다.",
           answeredAt: "2026-10-28",
+          receivedAt: null,
           createdAt: "2026-10-28",
         },
       ],
@@ -1524,6 +1660,19 @@ describe("v1 tab smoke screens", () => {
     expect(screen.queryByText("오늘")).toBeNull();
     expect(screen.getByText("화")).toBeTruthy();
     expect(screen.getByText("75%")).toBeTruthy();
+
+    // BUG-32: 요약 카드는 함께 올라가고 탭 줄(자식 1번)만 고정
+    expect(
+      screen.getByTestId("prayer-detail-scroll").props.stickyHeaderIndices,
+    ).toEqual([1]);
+    // BUG-31: 진행 중 기도제목은 카테고리 이름순 소제목으로 묶인다
+    expect(
+      screen
+        .getAllByTestId("prayer-category-header")
+        .map((header) => header.props.children[0].props.children),
+    ).toEqual(["건강", "진로"]);
+    // 접수일(receivedAt)이 있으면 등록일 대신 보인다
+    expect(screen.getByText("10월 20일")).toBeTruthy();
 
     // Toggle prayer completion
     const completedStatus = {
@@ -1628,6 +1777,7 @@ describe("v1 tab smoke screens", () => {
           emergencyEndAt: null,
           answerContent: null,
           answeredAt: null,
+          receivedAt: null,
           createdAt: null,
         },
       ],
@@ -1646,6 +1796,7 @@ describe("v1 tab smoke screens", () => {
           emergencyEndAt: null,
           answerContent: null,
           answeredAt: null,
+          receivedAt: null,
           createdAt: null,
         },
       ],
@@ -1774,6 +1925,7 @@ describe("v1 tab smoke screens", () => {
         emergencyEndAt: null,
         answerContent: null,
         answeredAt: null,
+        receivedAt: null,
         createdAt: null,
       },
     ]);
@@ -1802,12 +1954,11 @@ describe("v1 tab smoke screens", () => {
     );
   });
 
-  it("renders the life study detail screen", async () => {
+  it("shows the not-found state instead of sample copy when the route id is missing", async () => {
     renderWithClient(<LifeStudyDetailScreen />);
 
-    expect(await screen.findByText("생명의 삶")).toBeTruthy();
-    expect(screen.getByText("신청 안내")).toBeTruthy();
-    expect(screen.getByText("커리큘럼")).toBeTruthy();
+    expect(await screen.findByText("과정 정보를 찾을 수 없어요.")).toBeTruthy();
+    expect(screen.queryByText("생명의 삶")).toBeNull();
   });
 
   it("shows an error instead of an empty curriculum when the cohort detail fails", async () => {
@@ -1892,32 +2043,34 @@ describe("v1 tab smoke screens", () => {
     );
   });
 
-  it("renders the life study apply screen", () => {
+  it("renders the life study apply screen without year, part, or faith inputs", () => {
     renderWithClient(<LifeStudyApplyScreenRoute />);
 
     expect(screen.getByText("수강 신청")).toBeTruthy();
-    expect(screen.getByText("신앙 연차")).toBeTruthy();
     expect(screen.getByText("수강 신청하기")).toBeTruthy();
+    expect(screen.queryByText("생년")).toBeNull();
+    expect(screen.queryByText("소속 부서")).toBeNull();
+    expect(screen.queryByText("신앙 연차")).toBeNull();
   });
 
-  it("starts the life study apply form empty and requires a faith year choice", async () => {
+  it("requires only the promise and applies with an empty body", async () => {
     jest
       .mocked(useLocalSearchParams)
       .mockReturnValue({ cohortId: "life-overview-open-1" });
-    const apply = jest.spyOn(lifeStudyService, "applyLifeStudyCohort");
+    const apply = jest
+      .spyOn(lifeStudyService, "applyLifeStudyCohort")
+      .mockResolvedValue(1);
     renderWithClient(<LifeStudyApplyScreenRoute />);
 
     expect(await screen.findByText("생명의 삶")).toBeTruthy();
-    expect(screen.queryByDisplayValue("1988")).toBeNull();
-    fireEvent.changeText(screen.getByPlaceholderText("예: 1988"), "1994");
-    fireEvent.changeText(
-      screen.getByPlaceholderText("예) 4부 청장년부"),
-      "4부 청장년부",
-    );
     fireEvent.press(screen.getByTestId("life-study-apply"));
-
-    expect(await screen.findByText("신앙 연차를 선택해주세요.")).toBeTruthy();
+    expect(await screen.findByText("수강 약속에 동의해주세요.")).toBeTruthy();
     expect(apply).not.toHaveBeenCalled();
+
+    fireEvent.press(screen.getByText("수강 약속에 동의합니다"));
+    fireEvent.press(screen.getByTestId("life-study-apply"));
+    await waitFor(() => expect(apply).toHaveBeenCalledTimes(1));
+    expect(apply.mock.calls[0]?.[1]).toEqual({});
   });
 
   it("does not apply to another cohort when the requested cohort is not open", async () => {
@@ -2051,13 +2204,6 @@ describe("v1 tab smoke screens", () => {
       "01012345678",
     );
     expect(screen.getByDisplayValue("010-1234-5678")).toBeTruthy();
-  });
-
-  it("renders the user profile screen", () => {
-    renderWithClient(<UserProfileScreen />);
-
-    expect(screen.getByText("프로필")).toBeTruthy();
-    expect(screen.getByText("박정아")).toBeTruthy();
   });
 
   it("renders the FAQ screen", async () => {

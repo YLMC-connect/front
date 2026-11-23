@@ -3,35 +3,17 @@ import { useState, type ReactNode } from "react";
 import { View } from "react-native";
 import { Text } from "@/components/ui/text";
 import {
+  AppText,
   Avatar,
   Badge,
   Card,
   Empty,
-  MotionEnter,
   MotionPressable,
-  motionStaggerDelay,
+  StaggerItem,
 } from "../../ui";
 import { ProgressBar } from "../../ui/progress-bar";
 import { theme } from "../../../constants/theme";
 import { styles } from "./prayerDetailStyles";
-
-/** 목록 첫 진입: 처음 8개만 60ms 간격으로 떠오른다. */
-const STAGGER_LIMIT = 8;
-
-function StaggerItem({
-  index,
-  children,
-}: {
-  index: number;
-  children: ReactNode;
-}) {
-  if (index >= STAGGER_LIMIT) return <>{children}</>;
-  return (
-    <MotionEnter mode="fadeUp" delay={motionStaggerDelay(index)}>
-      {children}
-    </MotionEnter>
-  );
-}
 
 export type TabKey = "pray" | "answers" | "status";
 
@@ -87,15 +69,49 @@ export function PrayerPanel({
       ) : null}
       {progress.length > 0 ? (
         <Section title="진행 중 기도제목">
-          {progress.map((item, index) => (
-            <StaggerItem key={item.title} index={index}>
-              <PrayerItem item={item} />
-            </StaggerItem>
+          {groupPrayerItemsByCategory(progress).map((group) => (
+            <View key={group.category} style={styles.categoryGroup}>
+              <View
+                accessibilityRole="header"
+                style={styles.categoryHeader}
+                testID="prayer-category-header"
+              >
+                <AppText variant="label" weight="semibold">
+                  {group.category}
+                </AppText>
+                <AppText variant="caption" tone="muted" weight="semibold">
+                  {group.items.length}
+                </AppText>
+                <View style={styles.categoryLine} />
+              </View>
+              {group.items.map((item, index) => (
+                <StaggerItem key={`${item.title}-${index}`} index={index}>
+                  <PrayerItem item={item} />
+                </StaggerItem>
+              ))}
+            </View>
           ))}
         </Section>
       ) : null}
     </View>
   );
+}
+
+/**
+ * 진행 중 기도제목을 카테고리 이름순으로 묶는다. 같은 카테고리 안에서는 서버 순서를 지킨다.
+ */
+export function groupPrayerItemsByCategory(
+  items: readonly PrayerItemData[],
+): { category: string; items: PrayerItemData[] }[] {
+  const groups = new Map<string, PrayerItemData[]>();
+  for (const item of items) {
+    const list = groups.get(item.category);
+    if (list) list.push(item);
+    else groups.set(item.category, [item]);
+  }
+  return [...groups.entries()]
+    .sort(([a], [b]) => a.localeCompare(b, "ko"))
+    .map(([category, list]) => ({ category, items: list }));
 }
 
 export function AnswersPanel({

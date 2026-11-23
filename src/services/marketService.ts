@@ -1,6 +1,7 @@
 import { httpMarketDataSource } from "./marketHttpDataSource";
 import type {
-  MarketCategory,
+  MarketCategoryCode,
+  MarketCategoryOption,
   MarketCommentInput,
   MarketCommentTarget,
   MarketCommentUpdateInput,
@@ -9,17 +10,9 @@ import type {
   MarketOverview,
   MarketInput,
   MarketPostTarget,
-  MarketReportInput,
   MarketStatusUpdateInput,
   MarketUpdateInput,
 } from "../types/market";
-
-export class DuplicateMarketReportError extends Error {
-  constructor() {
-    super("이미 신고한 콘텐츠입니다.");
-    this.name = "DuplicateMarketReportError";
-  }
-}
 
 export interface MarketOverviewPage {
   items: MarketOverview["items"];
@@ -28,16 +21,16 @@ export interface MarketOverviewPage {
 }
 
 export interface MarketDataSource {
-  getOverview(): Promise<MarketOverview>;
-  getOverviewPage?(params?: {
+  getCategories(): Promise<MarketCategoryOption[]>;
+  getOverviewPage(params?: {
     lastId?: number | null;
     size?: number;
-    category?: Exclude<MarketCategory, "all">;
+    category?: MarketCategoryCode;
   }): Promise<MarketOverviewPage>;
-  getMyOverviewPage?(params?: {
+  getMyOverviewPage(params?: {
     lastId?: number | null;
     size?: number;
-    category?: Exclude<MarketCategory, "all">;
+    category?: MarketCategoryCode;
   }): Promise<MarketOverviewPage>;
   getDetail(id: string): Promise<MarketDetail>;
   createPost(input: MarketInput): Promise<MarketDetail>;
@@ -47,40 +40,21 @@ export interface MarketDataSource {
   createComment(input: MarketCommentInput): Promise<MarketDetailComment>;
   updateComment(input: MarketCommentUpdateInput): Promise<MarketDetailComment>;
   deleteComment(input: MarketCommentTarget): Promise<void>;
-  reportContent(input: MarketReportInput): Promise<void>;
 }
 
 export function createMarketService(dataSource: MarketDataSource) {
   return {
-    fetchOverview: () => dataSource.getOverview(),
+    fetchCategories: () => dataSource.getCategories(),
     fetchOverviewPage: (params?: {
       lastId?: number | null;
       size?: number;
-      category?: Exclude<MarketCategory, "all">;
-    }) => {
-      if (dataSource.getOverviewPage) {
-        return dataSource.getOverviewPage(params);
-      }
-      return dataSource.getOverview().then((res) => ({
-        items: res.items,
-        hasNext: false,
-        nextCursor: null,
-      }));
-    },
+      category?: MarketCategoryCode;
+    }) => dataSource.getOverviewPage(params),
     fetchMyOverviewPage: (params?: {
       lastId?: number | null;
       size?: number;
-      category?: Exclude<MarketCategory, "all">;
-    }) => {
-      if (dataSource.getMyOverviewPage) {
-        return dataSource.getMyOverviewPage(params);
-      }
-      return dataSource.getOverview().then((res) => ({
-        items: res.items.filter((item) => item.isMine),
-        hasNext: false,
-        nextCursor: null,
-      }));
-    },
+      category?: MarketCategoryCode;
+    }) => dataSource.getMyOverviewPage(params),
     fetchDetail: (id: string) => dataSource.getDetail(id),
     createPost: (input: MarketInput) => {
       const normalized = {
@@ -98,6 +72,7 @@ export function createMarketService(dataSource: MarketDataSource) {
       ) {
         throw new Error("상세 설명은 5~500자로 입력해주세요.");
       }
+      if (!normalized.category) throw new Error("카테고리를 골라주세요.");
       if (!normalized.location) throw new Error("수령 장소를 입력해주세요.");
       if (normalized.images.length < 1) {
         throw new Error("사진을 1장 이상 추가해주세요.");
@@ -120,6 +95,7 @@ export function createMarketService(dataSource: MarketDataSource) {
       ) {
         throw new Error("상세 설명은 5~500자로 입력해주세요.");
       }
+      if (!normalized.category) throw new Error("카테고리를 골라주세요.");
       if (!normalized.location) throw new Error("수령 장소를 입력해주세요.");
       if (normalized.images.length < 1) {
         throw new Error("사진을 1장 이상 추가해주세요.");
@@ -141,22 +117,12 @@ export function createMarketService(dataSource: MarketDataSource) {
     },
     deleteComment: (input: MarketCommentTarget) =>
       dataSource.deleteComment(input),
-    reportContent: (input: MarketReportInput) => {
-      const content = input.content?.trim();
-      if (input.reason === "other" && !content) {
-        throw new Error("기타 신고 사유를 입력해주세요.");
-      }
-      return dataSource.reportContent({
-        ...input,
-        content: content || undefined,
-      });
-    },
   };
 }
 
 const marketService = createMarketService(httpMarketDataSource);
 
-export const fetchMarketOverview = marketService.fetchOverview;
+export const fetchMarketCategories = marketService.fetchCategories;
 export const fetchMarketOverviewPage = marketService.fetchOverviewPage;
 export const fetchMyMarketOverviewPage = marketService.fetchMyOverviewPage;
 export const fetchMarketDetail = marketService.fetchDetail;
@@ -167,4 +133,3 @@ export const updateMarketStatus = marketService.updateStatus;
 export const createMarketComment = marketService.createComment;
 export const updateMarketComment = marketService.updateComment;
 export const deleteMarketComment = marketService.deleteComment;
-export const reportMarketContent = marketService.reportContent;

@@ -248,19 +248,6 @@ describe("httpAuthAdapter", () => {
     });
   });
 
-  it("verifies password through POST /api/member/verify-password", async () => {
-    const { request, adapter } = setup();
-    request.mockResolvedValue(null);
-
-    await expect(
-      adapter.verifyPassword({ password: "secretPassword" }),
-    ).resolves.toBe(true);
-    expect(request).toHaveBeenCalledWith("/api/member/verify-password", {
-      method: "POST",
-      body: JSON.stringify({ password: "secretPassword" }),
-    });
-  });
-
   it("changes password through PUT /api/member/password", async () => {
     const { request, adapter } = setup();
     request.mockResolvedValue(null);

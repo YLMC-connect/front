@@ -31,6 +31,12 @@ export const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 6,
   },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  stickyTabs: {
+    backgroundColor: theme.colors.bg,
+  },
   body: {
     flexGrow: 1,
     paddingHorizontal: 18,
@@ -48,6 +54,20 @@ export const styles = StyleSheet.create({
   },
   section: {
     gap: 10,
+  },
+  categoryGroup: {
+    gap: 10,
+  },
+  categoryHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingTop: 4,
+  },
+  categoryLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: theme.colors.border,
   },
   sectionTitle: {
     color: theme.colors.text,

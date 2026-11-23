@@ -15,7 +15,6 @@ import {
   UnderlineTabs,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
-import { readDesignVariant } from "../../../src/lib/designVariant";
 import { useTogglePrayerCompletion } from "../../../src/hooks/usePrayers";
 import {
   fetchPrayerCohortStatus,
@@ -46,27 +45,14 @@ function routeId(value: string | string[] | undefined) {
 
 export default function PrayerDetailScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{
-    id?: string;
-    designVariant?: string;
-  }>();
+  const params = useLocalSearchParams<{ id?: string }>();
   const id = routeId(params.id);
-  const variant = readDesignVariant(params.designVariant) ?? "pray";
   const [completedOverride, setCompletedOverride] = useState<boolean | null>(
     null,
   );
 
-  const initialTab: TabKey =
-    variant === "status" ||
-    variant === "status-empty" ||
-    variant === "leader-status"
-      ? "status"
-      : variant === "answers" || variant === "answers-empty"
-        ? "answers"
-        : "pray";
-  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
+  const [activeTab, setActiveTab] = useState<TabKey>("pray");
 
-  const isHttp = !params.designVariant;
   const toggleCompletion = useTogglePrayerCompletion(id ?? "1");
   const statusQuery = useQuery({
     queryKey: ["prayer", "cohort-status", id ?? "1"],
@@ -104,11 +90,9 @@ export default function PrayerDetailScreen() {
   const roomTitle = room?.cohortName || "기도방";
   const { day, period } = formatPrayerRoomDayPeriod(room?.yoil, room?.timeSlot);
   // 서버가 이번 주에 완료할 수 없다고 하면 버튼을 막는다(null 은 막지 않는다).
-  const completionBlocked = isHttp && room?.canComplete === false;
+  const completionBlocked = room?.canComplete === false;
 
-  const isCompleted =
-    completedOverride ??
-    (room ? room.myCompleted : variant === "pray-completed");
+  const isCompleted = completedOverride ?? (room ? room.myCompleted : false);
 
   const totalMembers = room?.totalMembers ?? 0;
   const completedCount = room?.completedCount ?? 0;
@@ -122,7 +106,7 @@ export default function PrayerDetailScreen() {
           title: t.title,
           author: t.writerName || "성도",
           text: t.content,
-          when: formatPrayerDate(t.createdAt),
+          when: formatPrayerDate(t.receivedAt ?? t.createdAt),
           urgent: true,
         }))
       : [];
@@ -134,7 +118,7 @@ export default function PrayerDetailScreen() {
           title: t.title,
           author: t.writerName || "성도",
           text: t.content,
-          when: formatPrayerDate(t.createdAt),
+          when: formatPrayerDate(t.receivedAt ?? t.createdAt),
         }))
       : [];
 
@@ -160,17 +144,13 @@ export default function PrayerDetailScreen() {
       ? room.notCompleted.map((m) => m.userName)
       : [];
 
-  const isPrayEmpty =
-    variant === "pray-empty" ||
-    (urgentItems.length === 0 && ongoingItems.length === 0);
+  const isPrayEmpty = urgentItems.length === 0 && ongoingItems.length === 0;
   const isStatusEmpty =
-    variant === "status-empty" ||
-    (completedPeople.length === 0 && pendingPeople.length === 0);
-  const isAnswersEmpty =
-    variant === "answers-empty" || answerItems.length === 0;
+    completedPeople.length === 0 && pendingPeople.length === 0;
+  const isAnswersEmpty = answerItems.length === 0;
 
   const handleToggleCompletion = () => {
-    if (isHttp && id) {
+    if (id) {
       toggleCompletion.mutate(Boolean(isCompleted), {
         onError: (err) => {
           Alert.alert(
@@ -191,45 +171,11 @@ export default function PrayerDetailScreen() {
       <View style={styles.root}>
         <TopBar title={roomTitle} back onBack={() => router.back()} />
 
-        <View style={styles.heroSection}>
-          <Card style={styles.heroCard}>
-            <View style={styles.heroTopRow}>
-              <View style={styles.dayBadge}>
-                <Text style={styles.dayText}>{day}</Text>
-                <Text style={styles.timeText}>{period}</Text>
-              </View>
-              <View style={styles.heroMetaCol}>
-                <View style={styles.badges}>
-                  {/* 배지는 둘만: 참여중 + 긴급. 인원·완료 수는 아래 진행 바에 있다. */}
-                  {room ? <Badge tone="info">참여중</Badge> : null}
-                  {urgentItems.length > 0 ? (
-                    <Badge
-                      tone="warning"
-                      icon="warning-amber"
-                    >{`긴급 ${urgentItems.length}건`}</Badge>
-                  ) : null}
-                </View>
-              </View>
-            </View>
-
-            <ProgressBar
-              label={`이번 주 완료 ${completedCount}명 / 전체 ${totalMembers}명`}
-              value={completionRate}
-              style={styles.heroProgress}
-              testID="prayer-detail-progress"
-            />
-          </Card>
-        </View>
-
-        <UnderlineTabs
-          items={tabs}
-          active={activeTab}
-          onChange={setActiveTab}
-        />
-
+        {/* 요약 카드는 함께 올라가고, 탭 줄(자식 1번)만 위에 고정한다 (BUG-32) */}
         <ScrollView
+          stickyHeaderIndices={[1]}
           contentContainerStyle={[
-            styles.body,
+            styles.scrollContent,
             activeTab === "pray" ? styles.bodyWithAction : null,
           ]}
           refreshControl={
@@ -240,35 +186,76 @@ export default function PrayerDetailScreen() {
               colors={[theme.colors.primary]}
             />
           }
+          testID="prayer-detail-scroll"
         >
-          {activeTab === "status" && statusFailed ? (
-            <ErrorState
-              message="기도 현황을 불러오지 못했어요. 다시 시도해주세요."
-              onRetry={() => void statusQuery.refetch()}
+          <View style={styles.heroSection}>
+            <Card style={styles.heroCard}>
+              <View style={styles.heroTopRow}>
+                <View style={styles.dayBadge}>
+                  <Text style={styles.dayText}>{day}</Text>
+                  <Text style={styles.timeText}>{period}</Text>
+                </View>
+                <View style={styles.heroMetaCol}>
+                  <View style={styles.badges}>
+                    {/* 배지는 둘만: 참여중 + 긴급. 인원·완료 수는 아래 진행 바에 있다. */}
+                    {room ? <Badge tone="info">참여중</Badge> : null}
+                    {urgentItems.length > 0 ? (
+                      <Badge
+                        tone="warning"
+                        icon="warning-amber"
+                      >{`긴급 ${urgentItems.length}건`}</Badge>
+                    ) : null}
+                  </View>
+                </View>
+              </View>
+
+              <ProgressBar
+                label={`이번 주 완료 ${completedCount}명 / 전체 ${totalMembers}명`}
+                value={completionRate}
+                style={styles.heroProgress}
+                testID="prayer-detail-progress"
+              />
+            </Card>
+          </View>
+
+          <View style={styles.stickyTabs} testID="prayer-detail-tabs">
+            <UnderlineTabs
+              items={tabs}
+              active={activeTab}
+              onChange={setActiveTab}
             />
-          ) : activeTab === "status" ? (
-            <StatusPanel
-              empty={isStatusEmpty}
-              completedCount={completedCount}
-              pendingCount={pendingCount}
-              completionRate={completionRate}
-              completedPeople={completedPeople}
-              pendingPeople={pendingPeople}
-              day={day}
-              period={period}
-            />
-          ) : boardError ? (
-            boardError
-          ) : activeTab === "answers" ? (
-            <AnswersPanel empty={isAnswersEmpty} items={answerItems} />
-          ) : (
-            <PrayerPanel
-              empty={isPrayEmpty}
-              urgent={urgentItems}
-              progress={ongoingItems}
-              answers={answerItems}
-            />
-          )}
+          </View>
+
+          <View style={styles.body}>
+            {activeTab === "status" && statusFailed ? (
+              <ErrorState
+                message="기도 현황을 불러오지 못했어요. 다시 시도해주세요."
+                onRetry={() => void statusQuery.refetch()}
+              />
+            ) : activeTab === "status" ? (
+              <StatusPanel
+                empty={isStatusEmpty}
+                completedCount={completedCount}
+                pendingCount={pendingCount}
+                completionRate={completionRate}
+                completedPeople={completedPeople}
+                pendingPeople={pendingPeople}
+                day={day}
+                period={period}
+              />
+            ) : boardError ? (
+              boardError
+            ) : activeTab === "answers" ? (
+              <AnswersPanel empty={isAnswersEmpty} items={answerItems} />
+            ) : (
+              <PrayerPanel
+                empty={isPrayEmpty}
+                urgent={urgentItems}
+                progress={ongoingItems}
+                answers={answerItems}
+              />
+            )}
+          </View>
         </ScrollView>
 
         {activeTab === "pray" && !isPrayEmpty ? (

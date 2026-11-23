@@ -37,50 +37,6 @@ export interface LifeStudyCohortDto {
   officialMokja?: boolean;
 }
 
-export interface LifeStudyClassList {
-  cohortId: number;
-  weekCount: number;
-  /** 원소 필드는 Notion에 없다. */
-  classes: readonly unknown[];
-}
-
-/** 하위 필드명이 Notion에 없다. */
-export type LifeStudyAttendanceRoster = Record<string, never>;
-
-export interface LifeStudyAttendanceUpdateRequest {
-  attendedUserIds: string[];
-}
-
-export interface LifeStudyAttendanceUserRequest {
-  userId: string;
-  attended: boolean;
-}
-
-/** Notion 표의 Student. */
-export interface LifeStudyCompletionStudent {
-  userId: string;
-  userName: string | null;
-  userPhone: string | null;
-  attendCount: number | null;
-  absentCount: number | null;
-  completed: boolean;
-  completedAt: string | null;
-}
-
-export interface LifeStudyCompletionRoster {
-  cohortId: number;
-  lifeStudyId: number;
-  lifeStudyName: string | null;
-  cohortNumber: number | null;
-  totalClassCount: number | null;
-  students: LifeStudyCompletionStudent[];
-}
-
-export interface LifeStudyCompletionUserRequest {
-  userId: string;
-  completed: boolean;
-}
-
 export interface LifeStudyMyCompletion {
   lifeStudyId: number;
   lifeStudyName: string | null;
@@ -102,6 +58,7 @@ export interface LifeStudyCohortDetailDto extends LifeStudyCohortDto {
   lessons: LifeStudyLessonDto[];
 }
 
+/** 세 필드 모두 선택(빈 바디 `{}` 가능). 앱 신청 화면은 보내지 않는다. */
 export interface LifeStudyAttendRequest {
   userYear?: string;
   userFaithYears?: string;

@@ -64,4 +64,23 @@ describe("homeHttpDataSource", () => {
     expect(result.id).toBe(3);
     expect(result.content).toBe("<p>HTML</p>");
   });
+
+  it("fetches weekday prayers without auth and treats a non-list as empty", async () => {
+    const topics = [
+      { id: 1, weekday: 3, title: "수요일 기도", summary: null, content: null },
+    ];
+    const mockRequest = jest
+      .fn()
+      .mockResolvedValueOnce(topics)
+      .mockResolvedValueOnce(null);
+    const client: HomeApiClient = { request: mockRequest };
+    const dataSource = createHttpHomeDataSource(client);
+
+    await expect(dataSource.fetchWeekdayPrayers(3)).resolves.toEqual(topics);
+    expect(mockRequest).toHaveBeenCalledWith(
+      "/api/prayer/weekday-topics?weekday=3",
+      { auth: false, method: "GET" },
+    );
+    await expect(dataSource.fetchWeekdayPrayers(3)).resolves.toEqual([]);
+  });
 });

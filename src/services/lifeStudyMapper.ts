@@ -1,4 +1,12 @@
 import {
+  isRecord,
+  optionalInteger,
+  readInteger,
+  requireInteger,
+  requireKey,
+  requireNullableString,
+} from "../lib/parse";
+import {
   invalidResponse as invalid,
   keepValidItems,
   reportResponseIssue,
@@ -12,47 +20,12 @@ import type {
   LifeStudyPathOverview,
 } from "../types/lifeStudy";
 import type {
-  LifeStudyAttendanceRoster,
-  LifeStudyClassList,
   LifeStudyCohortDetailDto,
   LifeStudyCohortDto,
-  LifeStudyCompletionRoster,
-  LifeStudyCompletionStudent,
   LifeStudyDto,
   LifeStudyLessonDto,
   LifeStudyMyCompletion,
 } from "../types/lifeStudyApi";
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function readInteger(value: unknown) {
-  return typeof value === "number" && Number.isInteger(value) ? value : null;
-}
-
-function readFiniteNumber(value: unknown) {
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
-}
-
-function requireKey(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  if (!(key in data)) invalid(source, key);
-}
-
-function requireInteger(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  requireKey(data, key, source);
-  const value = readInteger(data[key]);
-  if (value == null) invalid(source, key);
-  return value;
-}
 
 function requireNullableInteger(
   data: Record<string, unknown>,
@@ -64,73 +37,6 @@ function requireNullableInteger(
   const value = readInteger(data[key]);
   if (value == null) invalid(source, key);
   return value;
-}
-
-function requireFiniteNumber(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  requireKey(data, key, source);
-  const value = readFiniteNumber(data[key]);
-  if (value == null) invalid(source, key);
-  return value;
-}
-
-function requireString(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  requireKey(data, key, source);
-  if (typeof data[key] !== "string") invalid(source, key);
-  return data[key];
-}
-
-function requireNullableString(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  requireKey(data, key, source);
-  if (data[key] === null) return null;
-  if (typeof data[key] !== "string") invalid(source, key);
-  return data[key];
-}
-
-function requireBoolean(
-  data: Record<string, unknown>,
-  key: string,
-  source: unknown,
-) {
-  requireKey(data, key, source);
-  if (typeof data[key] !== "boolean") invalid(source, key);
-  return data[key];
-}
-
-/** 화면에서 쓰지 않는 필드. 없거나 형식이 다르면 null. */
-function optionalInteger(data: Record<string, unknown>, key: string) {
-  return readInteger(data[key]);
-}
-
-function optionalString(data: Record<string, unknown>, key: string) {
-  return typeof data[key] === "string" ? data[key] : null;
-}
-
-function readStudent(
-  value: unknown,
-  source: unknown,
-): LifeStudyCompletionStudent {
-  if (!isRecord(value)) invalid(source);
-  return {
-    userId: requireString(value, "userId", source),
-    userName: optionalString(value, "userName"),
-    userPhone: optionalString(value, "userPhone"),
-    attendCount: optionalInteger(value, "attendCount"),
-    absentCount: optionalInteger(value, "absentCount"),
-    completed: requireBoolean(value, "completed", source),
-    completedAt: optionalString(value, "completedAt"),
-  };
 }
 
 export function readMyCompletions(data: unknown): LifeStudyMyCompletion[] {
@@ -148,59 +54,6 @@ export function readMyCompletions(data: unknown): LifeStudyMyCompletion[] {
       completedAt: requireNullableString(item, "completedAt", data),
     };
   });
-}
-
-export function readClassList(data: unknown): LifeStudyClassList | null {
-  if (data == null) return null;
-  if (!isRecord(data) || !Array.isArray(data.classes)) invalid(data);
-  return {
-    cohortId: requireInteger(data, "cohortId", data),
-    weekCount: requireFiniteNumber(data, "weekCount", data),
-    classes: [...data.classes],
-  };
-}
-
-export function readAttendanceRoster(
-  data: unknown,
-): LifeStudyAttendanceRoster | null {
-  if (data == null) return null;
-  if (!isRecord(data)) invalid(data);
-  return {};
-}
-
-export function readCompletionRoster(
-  data: unknown,
-): LifeStudyCompletionRoster | null {
-  if (data == null) return null;
-  if (!isRecord(data) || !Array.isArray(data.students)) invalid(data);
-  return {
-    cohortId: requireInteger(data, "cohortId", data),
-    lifeStudyId: requireInteger(data, "lifeStudyId", data),
-    lifeStudyName: requireNullableString(data, "lifeStudyName", data),
-    cohortNumber: optionalInteger(data, "cohortNumber"),
-    totalClassCount: optionalInteger(data, "totalClassCount"),
-    students: keepValidItems(
-      data.students,
-      "lifeStudy.completionRoster.students",
-      (student) => readStudent(student, data),
-    ),
-  };
-}
-
-export function requireCompletionRoster(
-  data: unknown,
-): LifeStudyCompletionRoster {
-  const roster = readCompletionRoster(data);
-  if (!roster) invalid(data);
-  return roster;
-}
-
-function withTitle<T extends { title: string }>(
-  model: T,
-  lifeStudyName: string | null,
-): T {
-  if (lifeStudyName == null) return model;
-  return { ...model, title: lifeStudyName };
 }
 
 const emptyMember: Member = {
@@ -547,29 +400,4 @@ export function buildLifeStudyCourses(data: unknown): LifeStudyCourse[] {
 
 export function buildLifeStudyHistories(data: unknown): LifeStudyHistory[] {
   return readMyCompletions(data).map(historyFromCompletion);
-}
-
-export function applyClassListToOverviewCourse(
-  course: LifeStudyOverviewCourse,
-  data: unknown,
-): LifeStudyOverviewCourse {
-  const list = readClassList(data);
-  if (!list) return { ...course };
-  return { ...course, weekCount: list.weekCount };
-}
-
-export function applyCompletionRosterToCourse(
-  course: LifeStudyCourse,
-  data: unknown,
-  currentUserId: string | null,
-): LifeStudyCourse {
-  const roster = readCompletionRoster(data);
-  if (!roster || String(roster.lifeStudyId) !== course.id) return { ...course };
-  const next = withTitle({ ...course }, roster.lifeStudyName);
-  if (!currentUserId) return next;
-  const mine = roster.students.filter(
-    (student) => student.userId === currentUserId,
-  );
-  if (mine.length !== 1) return next;
-  return { ...next, isCompleted: mine[0].completed };
 }

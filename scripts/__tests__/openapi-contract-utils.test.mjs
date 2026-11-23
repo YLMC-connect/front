@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readdirSync } from "node:fs";
 import test from "node:test";
 import { createOpenApiContract } from "../openapi-contract-utils.mjs";
 
@@ -153,4 +154,35 @@ test("finds a domain operation by metadata without assuming its path", () => {
     ),
     undefined,
   );
+});
+
+test("checks request fields, data shape, and named error codes", () => {
+  const contract = createOpenApiContract(createSpec());
+
+  contract.requireRequestFields("생성", "/items", "post", ["name"]);
+  contract.requireErrorCodes("생성", "/items", "post", ["ITEM001"]);
+  assert.deepEqual(contract.failures, []);
+
+  contract.requireRequestFields("생성", "/items", "post", ["status"]);
+  contract.requireErrorCodes("생성", "/items", "post", ["ITEM002"]);
+  contract.requireDataArrayItemProperties("목록", "/items", "get", ["id"]);
+
+  assert.equal(contract.failures.length, 3);
+  assert.match(contract.failures[0], /status가 required가 아닙니다/);
+  assert.match(contract.failures[1], /ITEM002/);
+  assert.match(contract.failures[2], /배열이 아닙니다/);
+});
+
+test("every domain check list runs against an empty spec", async () => {
+  const dir = new URL("../api-contract/", import.meta.url);
+  const files = readdirSync(dir).filter((file) => file.endsWith(".mjs"));
+  assert.ok(files.length > 0);
+
+  for (const file of files) {
+    const domain = await import(new URL(file, dir));
+    const contract = createOpenApiContract({});
+    domain.check(contract);
+    assert.equal(typeof domain.label, "string", file);
+    assert.ok(contract.failures.length > 0, file);
+  }
 });

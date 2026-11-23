@@ -31,6 +31,20 @@ describe("httpMarketDataSource", () => {
     return { request, dataSource };
   }
 
+  it("loads share categories from /api/share/categories in display order", async () => {
+    const { request, dataSource } = setup();
+    request.mockResolvedValue([
+      { id: 2, code: "BOOK_STATIONERY", name: "도서·문구", orderNum: 2 },
+      { id: 1, code: "CLOTHING_ACC", name: "의류·잡화", orderNum: 1 },
+    ]);
+
+    await expect(dataSource.getCategories()).resolves.toEqual([
+      { code: "CLOTHING_ACC", name: "의류·잡화" },
+      { code: "BOOK_STATIONERY", name: "도서·문구" },
+    ]);
+    expect(request).toHaveBeenCalledWith("/api/share/categories");
+  });
+
   it("maps an authenticated share list page", async () => {
     const { request, dataSource } = setup();
     request.mockResolvedValue({
@@ -48,25 +62,28 @@ describe("httpMarketDataSource", () => {
       nextCursor: null,
     });
 
-    await expect(dataSource.getOverview()).resolves.toMatchObject({
+    await expect(dataSource.getOverviewPage()).resolves.toMatchObject({
       items: [
         expect.objectContaining({
           id: "1",
-          category: "baby",
+          category: "BABY_KIDS",
           status: "sharing",
           authorName: "selah",
           isMine: false,
         }),
       ],
     });
-    expect(request).toHaveBeenCalledWith("/api/share?size=50");
+    expect(request).toHaveBeenCalledWith("/api/share?size=20");
   });
 
   it("sends the category filter to the share list API", async () => {
     const { request, dataSource } = setup();
     request.mockResolvedValue({ content: [], hasNext: false });
 
-    await dataSource.getOverviewPage?.({ category: "book", lastId: 12 });
+    await dataSource.getOverviewPage({
+      category: "BOOK_STATIONERY",
+      lastId: 12,
+    });
 
     expect(request).toHaveBeenCalledWith(
       "/api/share?size=20&lastId=12&categoryCode=BOOK_STATIONERY",
@@ -91,8 +108,8 @@ describe("httpMarketDataSource", () => {
     });
 
     await expect(
-      dataSource.getMyOverviewPage?.({
-        category: "book",
+      dataSource.getMyOverviewPage({
+        category: "BOOK_STATIONERY",
         lastId: 12,
         size: 10,
       }),
@@ -100,7 +117,7 @@ describe("httpMarketDataSource", () => {
       items: [
         expect.objectContaining({
           id: "8",
-          category: "book",
+          category: "BOOK_STATIONERY",
           status: "done",
           isMine: true,
         }),
@@ -182,7 +199,7 @@ describe("httpMarketDataSource", () => {
       dataSource.createPost({
         title: "프론트 점검 나눔",
         description: "라이브 계약 확인용 게시글입니다.",
-        category: "baby",
+        category: "BABY_KIDS",
         condition: "사용감 있음",
         location: "교회 1층 로비",
         images: ["file:///tmp/probe.jpg"],
@@ -229,7 +246,7 @@ describe("httpMarketDataSource", () => {
         marketId: "1",
         title: "수정된 나눔 제목",
         description: "수정된 나눔 설명글입니다.",
-        category: "baby",
+        category: "BABY_KIDS",
         condition: "사용감 있음",
         location: "교회 1층 로비",
         images: ["https://img/8.jpg"],
@@ -274,7 +291,7 @@ describe("httpMarketDataSource", () => {
       marketId: "1",
       title: "제목",
       description: "내용입니다",
-      category: "baby",
+      category: "BABY_KIDS",
       condition: "사용감 있음",
       location: "로비",
       images: ["https://img/8.jpg", "file:///new.jpg"],
@@ -317,16 +334,5 @@ describe("httpMarketDataSource", () => {
       method: "PUT",
       body: JSON.stringify({ status: "RESERVED" }),
     });
-  });
-
-  it("does not invent report reason codes", async () => {
-    const { dataSource } = setup();
-    await expect(
-      dataSource.reportContent({
-        targetType: "market",
-        targetId: "1",
-        reason: "abusive",
-      }),
-    ).rejects.toThrow("신고 사유 코드가 서버에 확정되지 않아");
   });
 });

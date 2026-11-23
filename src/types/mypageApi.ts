@@ -108,38 +108,3 @@ export interface MyPageLifeStudyHistoryDto {
   ongoing: MyPageLifeStudyOngoing[];
   completed: MyPageLifeStudyCompleted[];
 }
-
-export type MyPagePrayerTimeSlot = "AM" | "PM";
-export type MyPagePrayerTimeSlotName = "오전" | "오후";
-export type MyPagePrayerMemberRole = "LEADER" | "MEMBER";
-export type MyPagePrayerMemberRoleName = "팀장" | "중보기도요원";
-
-export interface MyPagePrayerActivityItem {
-  cohortId: number;
-  cohortName: string | null;
-  cohortYear: number | null;
-  /** 0=일 … 6=토. 범위 밖이면 null. */
-  yoil: number | null;
-  yoilName: string | null;
-  timeSlot: MyPagePrayerTimeSlot | null;
-  timeSlotName: MyPagePrayerTimeSlotName | null;
-  memberRole: MyPagePrayerMemberRole | null;
-  memberRoleName: MyPagePrayerMemberRoleName | null;
-  joinedAt: string | null;
-  /** 활동중이면 null. */
-  leftAt: string | null;
-  period: string | null;
-  /** 활동중이면 null. */
-  leaveReason: string | null;
-  active: boolean | null;
-}
-
-/** 화면에서 쓰지 않는 필드는 없거나 형식이 다르면 null 로 읽는다. */
-export interface MyPagePrayerHistoryDto {
-  activeCount: number | null;
-  totalPeriod: string | null;
-  totalPeriodDays: number | null;
-  totalRoomCount: number | null;
-  currentActivities: MyPagePrayerActivityItem[];
-  pastActivities: MyPagePrayerActivityItem[];
-}

@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
@@ -27,19 +27,13 @@ import {
 import { ModalFormTextInput } from "../../src/components/ui/modal-form-layout";
 import { theme } from "../../src/constants/theme";
 import { useMemberMe, useUpdateMemberMe } from "../../src/hooks/useMember";
-import { readDesignVariant } from "../../src/lib/designVariant";
 
 const PHONE_DUP_MESSAGE = "이미 사용 중인 연락처예요";
 
 export default function EditProfileScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ designVariant?: string }>();
   const { data: member } = useMemberMe();
   const updateMember = useUpdateMemberMe();
-
-  const rawVariant = readDesignVariant(params.designVariant);
-  const isMockVariant = rawVariant !== undefined && rawVariant !== "default";
-  const isMockPhoneDup = rawVariant === "phone-dup";
 
   const [phoneInput, setPhoneInput] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
@@ -50,13 +44,8 @@ export default function EditProfileScreen() {
     ? `열린문교회 · ${member.department}`
     : "열린문교회";
 
-  const displayPhone = isMockPhoneDup ? "010-9999-9999" : phone;
-  const shownPhoneError = isMockPhoneDup ? PHONE_DUP_MESSAGE : phoneError;
-
   const hasChange =
-    !isMockVariant &&
-    phone.trim() !== "" &&
-    phone.trim() !== (member?.phone || "");
+    phone.trim() !== "" && phone.trim() !== (member?.phone || "");
 
   const handleSave = async () => {
     if (!hasChange || updateMember.isPending) return;
@@ -113,18 +102,17 @@ export default function EditProfileScreen() {
             <Card>
               <FormFieldLabel required>연락처</FormFieldLabel>
               <ModalFormTextInput
-                editable={!isMockVariant}
-                value={displayPhone}
+                value={phone}
                 onChangeText={(text) => {
                   setPhoneInput(formatPhoneNumber(text));
                   setPhoneError(null);
                 }}
                 placeholder="010-XXXX-XXXX"
                 keyboardType="phone-pad"
-                error={shownPhoneError ?? undefined}
+                error={phoneError ?? undefined}
                 style={styles.input}
               />
-              {shownPhoneError ? null : (
+              {phoneError ? null : (
                 <FormFieldHint>기도방·소모임 연락에만 쓰여요.</FormFieldHint>
               )}
             </Card>

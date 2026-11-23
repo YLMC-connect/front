@@ -10,6 +10,7 @@ import type {
   GroupUpdateInput,
   GroupStatusUpdateInput,
   GroupKickMemberInput,
+  GroupMemberStatusInput,
   GroupTransferLeaderInput,
 } from "../types/group";
 
@@ -23,8 +24,7 @@ export interface GroupOverviewPage {
 }
 
 export interface GroupDataSource {
-  getOverview(): Promise<GroupOverview>;
-  getOverviewPage?(params?: {
+  getOverviewPage(params?: {
     lastId?: number | null;
     size?: number;
   }): Promise<GroupOverviewPage>;
@@ -34,6 +34,7 @@ export interface GroupDataSource {
   updateGroup(input: GroupUpdateInput): Promise<GroupDetail>;
   deleteGroup(id: string): Promise<void>;
   kickMember(input: GroupKickMemberInput): Promise<void>;
+  updateMemberStatus(input: GroupMemberStatusInput): Promise<void>;
   transferLeader(input: GroupTransferLeaderInput): Promise<void>;
   updateGroupStatus(input: GroupStatusUpdateInput): Promise<GroupDetail>;
   joinGroup(id: string): Promise<GroupDetail>;
@@ -59,19 +60,8 @@ function normalizeNoticeInput<T extends GroupNoticeInput>(input: T): T {
 
 export function createGroupService(dataSource: GroupDataSource) {
   return {
-    fetchOverview: () => dataSource.getOverview(),
-    fetchOverviewPage: (params?: { lastId?: number | null; size?: number }) => {
-      if (dataSource.getOverviewPage) {
-        return dataSource.getOverviewPage(params);
-      }
-      return dataSource.getOverview().then((res) => ({
-        groups: res.groups,
-        services: res.services,
-        myGroups: res.groups.filter((group) => group.isJoined),
-        hasNext: false,
-        nextCursor: null,
-      }));
-    },
+    fetchOverviewPage: (params?: { lastId?: number | null; size?: number }) =>
+      dataSource.getOverviewPage(params),
     fetchDetail: (id: string) => dataSource.getDetail(id),
     fetchMembers: (id: string) => dataSource.getMembers(id),
     createGroup: (input: GroupInput) => {
@@ -79,6 +69,8 @@ export function createGroupService(dataSource: GroupDataSource) {
         ...input,
         name: input.name.trim(),
         description: input.description.trim(),
+        schedule: input.schedule.trim(),
+        location: input.location.trim(),
       };
       if (normalized.name.length < 2 || normalized.name.length > 20) {
         throw new Error("소모임명은 2~20자로 입력해주세요.");
@@ -99,6 +91,8 @@ export function createGroupService(dataSource: GroupDataSource) {
         ...input,
         name: input.name.trim(),
         description: input.description.trim(),
+        schedule: input.schedule.trim(),
+        location: input.location.trim(),
       };
       if (normalized.name.length < 2 || normalized.name.length > 20) {
         throw new Error("소모임명은 2~20자로 입력해주세요.");
@@ -116,6 +110,8 @@ export function createGroupService(dataSource: GroupDataSource) {
     },
     deleteGroup: (id: string) => dataSource.deleteGroup(id),
     kickMember: (input: GroupKickMemberInput) => dataSource.kickMember(input),
+    updateMemberStatus: (input: GroupMemberStatusInput) =>
+      dataSource.updateMemberStatus(input),
     transferLeader: (input: GroupTransferLeaderInput) =>
       dataSource.transferLeader(input),
     updateGroupStatus: (input: GroupStatusUpdateInput) =>
@@ -123,6 +119,12 @@ export function createGroupService(dataSource: GroupDataSource) {
     joinGroup: async (id: string) => {
       const detail = await dataSource.getDetail(id);
       if (detail.isJoined) return detail;
+      if (detail.status === "pending") {
+        throw new Error("승인 대기 중인 모임이에요");
+      }
+      if (detail.status === "rejected") {
+        throw new Error("반려된 모임이에요");
+      }
       if (detail.status === "closed") {
         throw new Error("모집이 마감됐어요");
       }
@@ -149,7 +151,6 @@ export function createGroupService(dataSource: GroupDataSource) {
 
 const groupService = createGroupService(httpGroupDataSource);
 
-export const fetchGroupOverview = groupService.fetchOverview;
 export const fetchGroupOverviewPage = groupService.fetchOverviewPage;
 export const fetchGroupDetail = groupService.fetchDetail;
 export const fetchGroupMembers = groupService.fetchMembers;
@@ -157,6 +158,7 @@ export const createGroup = groupService.createGroup;
 export const updateGroup = groupService.updateGroup;
 export const deleteGroup = groupService.deleteGroup;
 export const kickGroupMember = groupService.kickMember;
+export const updateGroupMemberStatus = groupService.updateMemberStatus;
 export const transferGroupLeader = groupService.transferLeader;
 export const updateGroupStatus = groupService.updateGroupStatus;
 export const joinGroup = groupService.joinGroup;

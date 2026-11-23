@@ -1,7 +1,7 @@
 # 처음 실행하기
 
 이 저장소를 받은 사람이 **앱을 띄우고 라이브 API에 붙이는** 최소 안내입니다.
-화면 구조·Phase·AI 작업 규칙은 [INDEX.md](INDEX.md), [README.md](../README.md)를 보세요.
+문서 지도는 [INDEX.md](INDEX.md), AI 작업 규칙은 [AGENTS.md](../AGENTS.md)를 보세요.
 
 ## 1. 준비물
 
@@ -50,8 +50,7 @@ npm run start:dev-client -- --port 8081 --localhost
 
 ## 3. 실제 API 연결
 
-`APP_VARIANT=development`(기본)이면 인증·나눔·동행 adapter는 **HTTP**입니다.
-HTTP를 쓰는 동안 `EXPO_PUBLIC_API_URL`이 없으면 Expo config가 바로 실패합니다.
+모든 도메인이 라이브 API를 씁니다. `EXPO_PUBLIC_API_URL`이 없으면 Expo config가 바로 실패합니다.
 
 ```bash
 cp .env.example .env
@@ -66,34 +65,13 @@ EXPO_PUBLIC_API_URL=https://example.test npm run start:dev-client
 
 환경 변수 이름은 [`.env.example`](../.env.example)에 있습니다. EAS 빌드도 같은 변수를 시크릿/프로필 env로 넣습니다.
 
-라이브 계정으로 로그인하세요. Maestro용 `admin` / `admin`은 **mock adapter 전용**이라 라이브 서버에서는 통하지 않습니다.
+라이브 서버에 가입한 계정으로 로그인하세요.
 
-### 지금 라이브로 붙는 것
+### API 로 보내지 않는 것
 
-| 도메인 | HTTP | 비고 |
-|---|---|---|
-| 인증 | login / refresh / signup / me / 중복확인 | development 기본 |
-| 나눔 | 목록·상세·등록·삭제·댓글 CUD | 목록에 작성자 이름·썸네일 URL이 없으면 ID/placeholder |
-| 동행 | 목록·내 목록·상세·멤버·개설·공지 CUD·**참여/탈퇴** | 일정·장소 필드는 서버가 안 받음 |
+나눔 신고는 서버의 신고 사유 코드가 확정되지 않아 보내지 않습니다.
 
-### 아직 mock인 것
-
-홈 오늘 기도/새벽 말씀, 기도 탭, 삶공부 탭은 사용자 API가 없어 mock service를 씁니다.
-나눔 신고 사유 코드와 나눔 상태 변경은 계약이 비어 있어 HTTP로 보내지 않습니다. 동행 강퇴와 소모임장 이관은 HTTP로 보냅니다.
-
-## 4. Mock으로 돌리기
-
-단위 테스트는 이미 mock adapter입니다 (`jest.setup.ts`).
-앱을 mock 데이터·`admin`/`admin`으로 띄울 때만:
-
-```bash
-EXPO_PUBLIC_AUTH_ADAPTER=mock \
-EXPO_PUBLIC_MARKET_ADAPTER=mock \
-EXPO_PUBLIC_GROUP_ADAPTER=mock \
-npm run start:dev-client
-```
-
-## 5. 검증
+## 4. 검증
 
 ```bash
 npm run validate
@@ -101,14 +79,14 @@ npm run validate
 
 typecheck, lint, prettier, 스크립트 테스트, Jest를 순서대로 돌립니다. PR CI도 이 명령입니다.
 
-계약 검사(`npm run test:api:contract*`)는 Swagger 문서 공백이 있으면 실패하도록 따로 둡니다. 일반 `validate`에는 넣지 않습니다.
+계약 검사(`npm run test:api:contract`, 도메인만 볼 때는 `npm run test:api:contract -- <도메인>`)는 Swagger 문서 공백이 있으면 실패하도록 따로 둡니다. 일반 `validate`에는 넣지 않습니다.
 
-## 6. 막힐 때
+## 5. 막힐 때
 
-- **`EXPO_PUBLIC_API_URL이 필요합니다`** — `.env`에 팀에서 받은 origin이 없습니다. mock만 띄울 때는 `EXPO_PUBLIC_*_ADAPTER=mock`.
+- **`EXPO_PUBLIC_API_URL이 필요합니다`** — `.env`에 팀에서 받은 origin이 없습니다.
 - **웹에서 라이브 API가 안 됨** — 브라우저 CORS. 서버 CORS를 넣지 않는 한 웹은 검증 대상이 아닙니다. Dev Client를 쓰세요.
 - **Expo Go로 열림** — `start:dev-client`와 development build를 쓰세요. bundle id는 `com.ylmc.connect.dev`.
-- **로그인 실패 (`admin`/`admin`)** — 라이브 모드입니다. 실제 가입 계정을 쓰거나 mock adapter로 전환하세요.
-- **나눔/동행 목록이 비어 있음** — 라이브 서버에 데이터가 없는 정상 상태일 수 있습니다. mock로 바꾸면 픽스처가 보입니다.
+- **나눔/동행 목록이 비어 있음** — 라이브 서버에 데이터가 없는 정상 상태일 수 있습니다.
+- **iOS `pod install` 이 `incompatible character encodings` 로 실패** — 프로젝트 경로에 한글 등 영문이 아닌 글자가 있으면 CocoaPods 가 실패합니다. 영문 경로(예: `~/dev/ylmc-front`)로 옮기세요.
 - **Metro가 안 붙음** — 기기와 맥이 같은 네트워크인지, Android Emulator면 `adb reverse tcp:8081 tcp:8081`을 확인하세요.
-- **문서 지도** — 작업자 진입점은 [INDEX.md](INDEX.md), 유지보수는 [MAINTENANCE.md](MAINTENANCE.md).
+- **문서 지도** — [INDEX.md](INDEX.md).

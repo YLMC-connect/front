@@ -14,8 +14,8 @@ const ALLOWED: Record<string, { count: number; reason: string }> = {
   "app/(tabs)/_layout.tsx": { count: 2, reason: "탭바 뒤 흰 그라데이션 띠" },
   "app/(tabs)/index.tsx": { count: 2, reason: "파랑 카드·사진 위 반투명 배지" },
   "app/(tabs)/market/[id].tsx": {
-    count: 6,
-    reason: "사진 위 어두운 그라데이션",
+    count: 3,
+    reason: "댓글 입력 아래 bg 그라데이션",
   },
   "src/components/faith/faithSectionsStyles.ts": {
     count: 1,
@@ -36,10 +36,6 @@ const ALLOWED: Record<string, { count: number; reason: string }> = {
   "src/components/ui/floating-bottom-bar.tsx": {
     count: 1,
     reason: "bg 투명 끝점(그라데이션)",
-  },
-  "src/components/ui/navigation.tsx": {
-    count: 2,
-    reason: "TopBar 사진 위 헤더 어두운 그라데이션",
   },
   "src/components/ui/photo-tile.tsx": {
     count: 1,

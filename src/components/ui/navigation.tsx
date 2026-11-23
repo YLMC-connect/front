@@ -24,7 +24,6 @@ import { MotionPressable } from "./motion";
 const SEGMENT_GAP = 4;
 const SEGMENT_PADDING = 4;
 /** 사진 위 헤더: 위쪽을 60% 어둡게 해 흰 글자가 보이게 한다. 디자인 시스템에 토큰이 없는 그라데이션. */
-const OVER_PHOTO_GRADIENT = ["rgba(25,31,40,0.6)", "rgba(25,31,40,0)"] as const;
 
 export function TopBar({
   title,
@@ -75,7 +74,8 @@ export function TopBar({
     <View testID={testID} style={styles.topBar}>
       {overPhoto ? (
         <LinearGradient
-          colors={OVER_PHOTO_GRADIENT}
+          colors={theme.scrim.photoHeader.colors}
+          locations={theme.scrim.photoHeader.locations}
           pointerEvents="none"
           style={StyleSheet.absoluteFill}
           testID={testID ? `${testID}-gradient` : undefined}

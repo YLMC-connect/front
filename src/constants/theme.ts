@@ -94,6 +94,21 @@ const shadow = {
   },
 };
 
+/**
+ * 사진 위 헤더 그라데이션(디자인 시스템 guidelines "사진 위 헤더"): 맨 위 60% → 55% 지점 28% → 0%.
+ * 높이는 safe-top + topbar-height(56) + space-6(24).
+ */
+const scrim = {
+  photoHeader: {
+    colors: [
+      "rgba(25,31,40,0.6)",
+      "rgba(25,31,40,0.28)",
+      "rgba(25,31,40,0)",
+    ] as const,
+    locations: [0, 0.55, 1] as const,
+  },
+} as const;
+
 export const theme = {
   colors,
   spacing: ds.spacing,
@@ -104,6 +119,7 @@ export const theme = {
   layout,
   motion,
   shadow,
+  scrim,
   size: ds.size,
   zIndex: ds.zIndex,
   opacity: ds.opacity,

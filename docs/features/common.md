@@ -34,7 +34,7 @@
 - **Sentry 는 배포 빌드에서만** — `__DEV__` 이거나 `EXPO_PUBLIC_SENTRY_DSN` 이 비면 켜지 않는다. 보고에는 쿼리 키 앞 두 조각·HTTP status·code 만 싣고 응답 본문·메시지·개인정보, 네트워크 오류·4xx 는 보내지 않는다. 소스맵 업로드는 아직 끔(`SENTRY_DISABLE_AUTO_UPLOAD=true`, #212).
 - **기본 검증은 `npm run validate`** — Maestro smoke(`maestro test .maestro/smoke.yml`)는 로컬에서 필요할 때만 돌리고 CI 에는 없다.
 - **도메인 목록은 `.task-flow.conf`** — GitHub 라벨·`docs/features/` 파일 이름과 같은 이름을 쓴다.
-- **탭 IA 는 홈/나눔/동행/기도/삶공부** — MY 는 홈에서 진입. 보고 있는 탭을 다시 누르면 이동하지 않고 맨 위로 스크롤, 다른 탭은 떠날 때 상태 그대로 연다 (#136).
+- **탭 IA 는 홈/나눔/동행/기도/삶공부** — MY 는 홈에서 진입. 보고 있는 탭을 다시 누르면 이동하지 않고 맨 위로 스크롤하고, 나눔·동행은 세그먼트·카테고리 필터도 기본값(나눔중·전체 / 소모임·전체)으로 되돌린다(`useTabReselect`). 상세 화면에서 누르면 먼저 목록으로 돌아가고, 한 번 더 누르면 초기화된다. 다른 탭은 떠날 때 상태 그대로 연다 (#136).
 - **디자인 토큰은 디자인 시스템 v2 (ADR 0007)** — `design-system/tokens.json` 을 고치고 `node scripts/sync-design-tokens.mjs` 로 `src/constants/designTokens.json` 을 만든다(`test:scripts` 가 어긋남을 잡음). 색은 `theme.colors` v2 이름만, 글자는 `theme.typography` 6단계(display/title/heading/body/label/caption)만, 그림자는 `sm`·`md`·`lg`·`sheet`(+ Fab 전용 `fab`)만. 옛 이름 별칭은 없다.
 - **화면 코드에 색을 직접 쓰지 않는다** — hex/rgba 를 쓰면 `no-raw-colors` 테스트가 실패한다. 토큰이 없는 반투명 오버레이만 사유와 개수를 적어 허용 목록에 둔다.
 - **글꼴·아이콘은 공통 컴포넌트가 고른다** — 글자는 `AppText` 나 `@/components/ui/text` 의 `Text`·`TextInput` 으로 그려야 굵기에 맞는 Pretendard 파일이 쓰인다(react-native `Text` 를 바로 쓰면 시스템 글꼴). 한국어 줄바꿈은 `AppText` 기본값 `lineBreakStrategyIOS="hangul-word"`. 아이콘은 `AppIcon`(Lucide).

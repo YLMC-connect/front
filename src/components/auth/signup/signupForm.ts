@@ -32,6 +32,11 @@ export function phoneDigits(phone: string): string {
   return phone.replace(/\D/g, "");
 }
 
+/** 010 으로 시작하는 10~11자리. */
+export function isValidPhoneDigits(digits: string): boolean {
+  return digits.startsWith("010") && digits.length >= 10 && digits.length <= 11;
+}
+
 export function validateSignup(values: FormValues) {
   const errors: FormErrors = {};
   if (values.id.trim().length < 3) {
@@ -47,8 +52,10 @@ export function validateSignup(values: FormValues) {
   } else if (!/^[가-힣]+$/.test(values.userName.trim())) {
     errors.userName = "이름은 한글만 입력할 수 있어요.";
   }
-  if (phoneDigits(values.phone).length < 10) {
-    errors.phone = "연락처를 입력해주세요.";
+  // 연락처는 서버처럼 선택이다. 적었을 때만 형식을 본다
+  const phone = phoneDigits(values.phone);
+  if (phone.length > 0 && !isValidPhoneDigits(phone)) {
+    errors.phone = "연락처는 010으로 시작하는 10~11자리로 입력해주세요.";
   }
   if (!emailPattern.test(values.email)) {
     errors.email = "이메일을 입력해주세요.";

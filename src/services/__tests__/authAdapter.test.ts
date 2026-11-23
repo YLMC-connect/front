@@ -132,6 +132,36 @@ describe("httpAuthAdapter", () => {
     );
   });
 
+  it("leaves phone out of the signup body when it is empty (optional on the server)", async () => {
+    const { request, adapter } = setup();
+    request.mockImplementation(async (path: string) => {
+      if (path === "/api/signup") return { userStatus: "0" };
+      return {
+        accessToken: "access",
+        refreshToken: "refresh",
+        userId: "ylmc",
+        userName: "열린문",
+        role: "USER",
+      };
+    });
+
+    await adapter.signup({
+      id: "ylmc",
+      password: "secret1234",
+      userName: "열린문",
+      phone: "  ",
+      email: "ylmc@example.com",
+    });
+
+    const body = JSON.parse(String(request.mock.calls[0]?.[1]?.body));
+    expect(body).toEqual({
+      id: "ylmc",
+      password: "secret1234",
+      userName: "열린문",
+      email: "ylmc@example.com",
+    });
+  });
+
   it("refreshes with the refreshToken field observed on the live API", async () => {
     const { request, adapter } = setup();
     request.mockResolvedValue({

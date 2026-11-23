@@ -72,7 +72,8 @@ export function createHttpAuthAdapter(
           id: input.id.trim(),
           password: input.password,
           userName: input.userName.trim(),
-          phone: input.phone.trim(),
+          // 연락처는 선택. 빈 값을 보내면 서버 중복 검사(MEM002)에 걸릴 수 있어 뺀다
+          ...(input.phone.trim() ? { phone: input.phone.trim() } : {}),
           ...(input.email?.trim() ? { email: input.email.trim() } : {}),
         }),
       });

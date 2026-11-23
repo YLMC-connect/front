@@ -918,16 +918,16 @@ describe("v1 tab smoke screens", () => {
     );
 
     const scrim = screen.getByTestId("market-hero-scrim");
-    // 디자인 시스템 "사진 위 헤더": 60% → 28% → 0%, 높이 safe-top + 56 + 24
+    // 디자인 시스템 "사진 위 헤더": 60% → 45% → 0%, 높이 safe-top + 56 + 48
     expect(scrim.props.colors).toEqual([
       "rgba(25,31,40,0.6)",
-      "rgba(25,31,40,0.28)",
+      "rgba(25,31,40,0.45)",
       "rgba(25,31,40,0)",
     ]);
-    expect(scrim.props.locations).toEqual([0, 0.55, 1]);
-    // 테스트 환경의 safe-top 은 24 라서 24 + 56 + 24
+    expect(scrim.props.locations).toEqual([0, 0.7, 1]);
+    // 테스트 환경의 safe-top 은 24 라서 24 + 56 + 48
     expect(StyleSheet.flatten(scrim.props.style)).toMatchObject({
-      height: 24 + 56 + theme.spacing[6],
+      height: 24 + 56 + theme.spacing[12],
     });
     const backStyle = StyleSheet.flatten(
       screen.getByLabelText("뒤로").props.style,

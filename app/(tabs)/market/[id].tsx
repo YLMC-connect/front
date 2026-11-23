@@ -339,7 +339,7 @@ export default function MarketDetailScreen() {
                     </CarouselSlide>
                   ))}
             </Animated.ScrollView>
-            {/* 디자인 시스템 "사진 위 헤더": 위에서 60% → 0% 어두운 그라데이션, 높이 safe-top + 56 + 24 */}
+            {/* 디자인 시스템 "사진 위 헤더": 위 60% → 45% → 0% 어두운 그라데이션. 밝은 사진에서도 뒤로 버튼이 보이게 버튼 아래(safe-top + 56 + 48)까지 */}
             <LinearGradient
               colors={theme.scrim.photoHeader.colors}
               end={{ x: 0.5, y: 1 }}
@@ -348,7 +348,7 @@ export default function MarketDetailScreen() {
               start={{ x: 0.5, y: 0 }}
               style={[
                 styles.heroScrim,
-                { height: insets.top + 56 + theme.spacing[6] },
+                { height: insets.top + 56 + theme.spacing[12] },
               ]}
               testID="market-hero-scrim"
             />

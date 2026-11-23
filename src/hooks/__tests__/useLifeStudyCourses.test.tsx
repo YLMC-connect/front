@@ -30,7 +30,7 @@ describe("useApplyLifeStudyCohort", () => {
     expect(service.applyLifeStudyCohort).toHaveBeenCalledWith(12, input);
     expect(invalidatedKeys()).toEqual([
       queryKeys.lifeStudy.all,
-      [...queryKeys.mypage.all, "life-studies"],
+      queryKeys.mypage.lifeStudies(),
     ]);
   });
 

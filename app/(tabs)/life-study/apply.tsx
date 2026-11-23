@@ -16,12 +16,14 @@ import {
   FloatingBottomBar,
   TopBar,
 } from "../../../src/components/ui";
+import { lifeStudyApiErrorMessages } from "../../../src/constants/apiErrorMessages";
 import { theme } from "../../../src/constants/theme";
 import {
   useApplyLifeStudyCohort,
   useLifeStudyOverview,
 } from "../../../src/hooks/useLifeStudyCourses";
 import { useMemberMe } from "../../../src/hooks/useMember";
+import { getApiErrorMessage } from "../../../src/lib/apiErrorMessage";
 
 export default function LifeStudyApplyScreenRoute() {
   const router = useRouter();
@@ -92,10 +94,11 @@ export default function LifeStudyApplyScreenRoute() {
         input: {},
       });
     } catch (err: unknown) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : "수강 신청하지 못했어요. 다시 시도해주세요.";
+      const message = getApiErrorMessage(
+        err,
+        lifeStudyApiErrorMessages,
+        "수강 신청하지 못했어요. 신청 기간과 정원을 확인하고 다시 시도해주세요.",
+      );
       setFormError(message);
       Alert.alert("수강 신청 실패", message);
       return;

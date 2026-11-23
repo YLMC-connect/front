@@ -263,7 +263,7 @@ function LiveLifeStudyDetail({
         </ScrollView>
 
         {openCohort ? (
-          <FloatingBottomBar testID="life-study-detail-bottom-bar">
+          <FloatingBottomBar>
             {showBarCaption ? (
               <AppText
                 variant="caption"

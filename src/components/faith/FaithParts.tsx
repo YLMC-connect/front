@@ -4,21 +4,15 @@ import { useState } from "react";
 import { Pressable, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { theme } from "../../constants/theme";
-import type { LifeStudyOverviewCourse } from "../../types/lifeStudy";
 import type { PrayerPeriod, PrayerWeekday } from "../../types/prayer";
 import {
   AppText,
-  Badge,
   FloatingActionButton,
   ListSkeleton,
   MotionEnter,
   MotionPressable,
 } from "../ui";
-import {
-  lifeStudyStatusLabels,
-  periodLabels,
-  weekdayLabels,
-} from "./faithLabels";
+import { periodLabels, weekdayLabels } from "./faithLabels";
 import { styles } from "./faithSectionsStyles";
 
 export function OverviewLoading() {
@@ -41,105 +35,6 @@ export function PrayerDayBadge({
       <Text style={styles.dayText}>{weekdayLabels[weekday].short}</Text>
       <Text style={styles.timeText}>{periodLabels[period]}</Text>
     </View>
-  );
-}
-
-export function CourseCard({
-  course,
-  open,
-}: {
-  course: LifeStudyOverviewCourse;
-  open?: boolean;
-}) {
-  const detailHref =
-    open && course.cohortId
-      ? (`/life-study/${course.id}?cohortId=${course.cohortId}` as const)
-      : (`/life-study/${course.id}` as const);
-
-  const targetInfo =
-    course.target ||
-    course.eligibility ||
-    (course.kind === "required" ? "등록교인 누구나" : undefined);
-
-  return (
-    <MotionPressable
-      accessibilityRole="button"
-      onPress={() => router.push(detailHref)}
-      style={styles.courseCard}
-    >
-      <View style={styles.badgeRow}>
-        <Badge tone={open ? "warning" : "neutral"}>
-          {open
-            ? "신청 기간"
-            : lifeStudyStatusLabels[course.status ?? "pending"]}
-        </Badge>
-        <Badge tone="neutral">
-          {course.kind === "required" ? "필수" : "선택"}
-        </Badge>
-        <Text style={styles.mutedText}>
-          {course.weekCount}주 · {course.instructorName}
-        </Text>
-      </View>
-      <AppText variant="heading" style={styles.courseTitle}>
-        {course.title}
-      </AppText>
-      <AppText variant="body" tone="primary" style={styles.courseSummary}>
-        {course.summary}
-      </AppText>
-      {open ? (
-        <>
-          <View style={styles.courseGrid}>
-            <View style={styles.courseMetric}>
-              <Text style={styles.metricLabel}>신청 기간</Text>
-              <Text style={styles.metricValue}>{course.applicationPeriod}</Text>
-            </View>
-            <View style={styles.courseMetric}>
-              <Text style={styles.metricLabel}>정원</Text>
-              <Text style={styles.metricValue}>
-                {course.enrolledCount} / {course.capacity}명
-              </Text>
-            </View>
-          </View>
-          <View style={styles.openCourseActionRow}>
-            <AppText
-              variant="caption"
-              tone="brand"
-              style={styles.openCourseActionText}
-            >
-              수강 신청
-            </AppText>
-            <AppIcon
-              name="chevron-right"
-              size={16}
-              color={theme.colors.primaryStrong}
-            />
-          </View>
-        </>
-      ) : (
-        <>
-          {targetInfo ? (
-            <Text style={styles.targetText}>신청대상: {targetInfo}</Text>
-          ) : null}
-          <View style={styles.courseCardFooter}>
-            <Text style={styles.courseFooterHint}>개강 일정 및 상세 정보</Text>
-            <View style={styles.openCourseActionRow}>
-              <AppText
-                variant="caption"
-                tone="brand"
-                style={styles.openCourseActionText}
-              >
-                과정 확인
-              </AppText>
-              <AppIcon
-                name="chevron-right"
-                size={16}
-                color={theme.colors.primaryStrong}
-              />
-            </View>
-          </View>
-        </>
-      )}
-    </MotionPressable>
   );
 }
 

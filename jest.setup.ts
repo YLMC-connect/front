@@ -56,12 +56,14 @@ jest.mock("expo-router", () => {
       React.createElement(React.Fragment, null, children),
     router: {
       back: jest.fn(),
+      dismissTo: jest.fn(),
       push: jest.fn(),
       replace: jest.fn(),
       setParams: jest.fn(),
     },
     useRouter: jest.fn(() => ({
       back: jest.fn(),
+      dismissTo: jest.fn(),
       push: jest.fn(),
       replace: jest.fn(),
       setParams: jest.fn(),

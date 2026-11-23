@@ -23,7 +23,6 @@ import { MotionPressable } from "./motion";
 
 const SEGMENT_GAP = 4;
 const SEGMENT_PADDING = 4;
-/** 사진 위 헤더: 위쪽을 60% 어둡게 해 흰 글자가 보이게 한다. 디자인 시스템에 토큰이 없는 그라데이션. */
 
 export function TopBar({
   title,

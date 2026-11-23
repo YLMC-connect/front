@@ -7,121 +7,87 @@ export const styles = StyleSheet.create({
   },
   body: {
     flexGrow: 1,
-    paddingBottom: 100,
+    paddingBottom: 160,
   },
   bodyNoBottomBar: {
-    paddingBottom: 24,
+    paddingBottom: theme.spacing[6],
   },
-  hero: {
+  skeleton: {
+    gap: theme.spacing[3],
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: theme.spacing[4],
+  },
+  content: {
     flex: 1,
-    paddingHorizontal: 18,
-    paddingBottom: 18,
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: theme.spacing[2],
   },
   badgeRow: {
     flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  caption: {
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  title: {
-    marginTop: 10,
-    color: theme.colors.text,
-    fontSize: theme.typography.display.fontSize,
-    lineHeight: theme.typography.display.lineHeight,
-    fontWeight: theme.fontWeight.bold,
+    gap: theme.spacing[2],
+    marginBottom: theme.spacing[3],
   },
   desc: {
-    marginTop: 12,
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-    lineHeight: theme.typography.body.lineHeight,
+    marginTop: theme.spacing[2],
   },
-  infoCard: {
-    marginTop: 14,
-    padding: 14,
-    gap: 9,
+  infoLines: {
+    marginTop: theme.spacing[4],
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.surfaceSubtle,
   },
-  infoTitle: {
-    marginBottom: 1,
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-  },
-  infoRow: {
+  infoLine: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 12,
+    alignItems: "center",
+    gap: theme.spacing[2],
+    paddingVertical: theme.spacing[3],
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.surfaceSubtle,
   },
   infoLabel: {
-    color: theme.colors.text,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
+    width: 64,
+    flexShrink: 0,
   },
   infoValue: {
     flex: 1,
-    color: theme.colors.text,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-    textAlign: "right",
+    minWidth: 0,
   },
-  primaryText: {
-    color: theme.colors.primaryStrong,
+  notice: {
+    marginTop: theme.spacing[5],
+  },
+  curriculumHead: {
+    paddingTop: theme.spacing[6],
+  },
+  curriculumTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingBottom: theme.spacing[2],
+  },
+  push: {
+    marginLeft: "auto",
+  },
+  lessonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing[3],
+    paddingVertical: theme.spacing[3],
   },
   rowBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
+    borderBottomColor: theme.colors.surfaceSubtle,
   },
-  rowText: {
-    flex: 1,
-    minWidth: 0,
-  },
-  curriculumRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 4,
-  },
-  weekBadge: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: theme.colors.surfaceSubtle,
-    alignItems: "center",
-    justifyContent: "center",
+  lessonWeek: {
+    width: 44,
     flexShrink: 0,
   },
-  weekNumber: {
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-  },
-  curriculumTitle: {
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
-    fontWeight: theme.fontWeight.medium,
-  },
-  sectionMargin: {
-    marginTop: 24,
-  },
-  sectionMarginFill: {
+  lessonName: {
     flex: 1,
   },
-  subSectionTitle: {
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-    lineHeight: theme.typography.body.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-    marginBottom: 8,
+  sectionFill: {
+    flex: 1,
+  },
+  barCaption: {
+    textAlign: "center",
+    marginTop: -theme.spacing[2],
+    marginBottom: theme.spacing[2],
   },
 });

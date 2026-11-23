@@ -44,6 +44,10 @@ export interface LifeStudyOverviewCourse {
   bookName?: string;
   summary: string;
   applicationPeriod?: string;
+  /** 신청 마감일(기수 `endDate`, YYYY-MM-DD). */
+  applicationEndDate?: string;
+  /** 수업 요일(기수 `yoil`). */
+  yoil?: number;
   lifeStudyDate?: string;
   studyPlace?: string;
   eligibility?: string;

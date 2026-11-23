@@ -52,5 +52,7 @@ export const queryKeys = {
   mypage: {
     all: ["mypage"] as const,
     activity: () => [...queryKeys.mypage.all, "activity"] as const,
+    /** 내 수강 내역. 삶공부 탭 "내 수강"과 마이페이지 수강 내역이 함께 쓴다. */
+    lifeStudies: () => [...queryKeys.mypage.all, "life-studies"] as const,
   },
 } as const;

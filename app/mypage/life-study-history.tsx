@@ -76,7 +76,7 @@ export default function LifeStudyHistoryScreen() {
             <View style={styles.empty} testID="life-study-history-empty">
               <Empty
                 icon="book-open-page-variant-outline"
-                title="수료한 과정이 없어요"
+                title="수강 내역이 없어요"
                 description="지금 신청 가능한 과정을 둘러보세요"
                 style={styles.emptyState}
               />

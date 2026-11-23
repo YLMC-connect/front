@@ -40,5 +40,5 @@ export const requestStatusLabels: Record<PrayerRequestStatus, string> = {
 export const lifeStudyStatusLabels: Record<LifeStudyOverviewStatus, string> = {
   completed: "수료",
   recommended: "추천",
-  pending: "대기",
+  pending: "미수료",
 };

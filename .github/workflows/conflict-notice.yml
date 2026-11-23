@@ -1,0 +1,114 @@
+name: Conflict Notice
+
+# main 과 충돌한 PR 에는 GitHub 가 pull_request 워크플로(CI·Claude 리뷰)를 실행하지 않는다.
+# 그래서 체크가 "실패"가 아니라 "없음"으로 보여 원인을 알기 어렵다. 충돌을 찾으면 안내 댓글을 달고,
+# 충돌이 풀리면 그 댓글을 지운다.
+#
+# pull_request_target 은 충돌이 있어도 실행된다. 대신 base 저장소 권한으로 돌기 때문에
+# PR 코드를 체크아웃하거나 실행하지 않는다. GitHub API 로 병합 가능 여부만 읽고 댓글만 쓴다.
+# 시크릿은 쓰지 않고 기본 GITHUB_TOKEN 만 쓴다.
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+  # main 이 바뀌면 열린 PR 이 새로 충돌할 수 있어 전부 다시 본다.
+  push:
+    branches: [main]
+
+concurrency:
+  group: conflict-notice-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  notice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const MARKER = "<!-- conflict-notice -->";
+            const { owner, repo } = context.repo;
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+            // mergeable 은 GitHub 가 뒤에서 계산해 처음에는 null 일 수 있다. 값이 나올 때까지 잠깐 기다린다.
+            async function readPull(number) {
+              for (let attempt = 0; attempt < 8; attempt += 1) {
+                const { data } = await github.rest.pulls.get({
+                  owner,
+                  repo,
+                  pull_number: number,
+                });
+                if (data.mergeable !== null) return data;
+                await sleep(5000);
+              }
+              core.info(`#${number}: 병합 가능 여부를 아직 계산 중이라 건너뜀`);
+              return null;
+            }
+
+            async function findNotice(number) {
+              const comments = await github.paginate(
+                github.rest.issues.listComments,
+                { owner, repo, issue_number: number, per_page: 100 },
+              );
+              return comments.find(
+                (comment) =>
+                  comment.user?.type === "Bot" && comment.body?.includes(MARKER),
+              );
+            }
+
+            function noticeBody(pull) {
+              return [
+                MARKER,
+                "## main 과 충돌이 있어 CI·Claude 리뷰가 돌지 않습니다",
+                "",
+                `이 PR 은 \`${pull.base.ref}\` 와 충돌(merge conflict) 상태입니다. 충돌이 있으면 GitHub 가 PR 체크를 실행하지 않아, 필수 체크인 \`validate\`(CI)와 \`review\`(Claude 리뷰)가 돌지 않고 병합도 할 수 없습니다.`,
+                "",
+                "### 해결 방법",
+                `1. 최신 \`${pull.base.ref}\` 를 받아 이 브랜치에 합칩니다: \`git fetch origin\` → \`git rebase origin/${pull.base.ref}\` (또는 \`git merge origin/${pull.base.ref}\`)`,
+                "2. 충돌한 파일을 고치고 `npm run typecheck`, `npx jest` 로 확인합니다.",
+                "3. 다시 푸시하면 `validate` 와 Claude `review` 가 자동으로 돕니다.",
+                "",
+                "충돌이 풀리면 이 댓글은 자동으로 지워집니다.",
+              ].join("\n");
+            }
+
+            async function check(number) {
+              const pull = await readPull(number);
+              if (!pull || pull.state !== "open" || pull.draft) return;
+              const conflicted = pull.mergeable === false;
+              const notice = await findNotice(number);
+              if (conflicted && !notice) {
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: number,
+                  body: noticeBody(pull),
+                });
+                core.info(`#${number}: 충돌 안내 댓글을 달았다`);
+              } else if (!conflicted && notice) {
+                await github.rest.issues.deleteComment({
+                  owner,
+                  repo,
+                  comment_id: notice.id,
+                });
+                core.info(`#${number}: 충돌이 풀려 안내 댓글을 지웠다`);
+              }
+            }
+
+            if (context.eventName === "pull_request_target") {
+              await check(context.payload.pull_request.number);
+            } else {
+              const pulls = await github.paginate(github.rest.pulls.list, {
+                owner,
+                repo,
+                state: "open",
+                base: "main",
+                per_page: 100,
+              });
+              for (const pull of pulls) await check(pull.number);
+            }

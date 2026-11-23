@@ -40,6 +40,7 @@ import { isValidLoginId, sanitizeLoginId } from "../../src/lib/authValidation";
 import {
   emailPattern,
   formatPhoneNumber,
+  isValidPhoneDigits,
   phoneDigits,
   type Availability,
   type FormErrors,
@@ -276,11 +277,7 @@ export default function SignupScreen() {
   };
 
   const allFilled = Boolean(
-    values.id &&
-    values.password &&
-    values.userName &&
-    values.phone &&
-    values.email,
+    values.id && values.password && values.userName && values.email,
   );
   const isSubmitDisabled = !allFilled || !allTermsAgreed;
 
@@ -328,10 +325,9 @@ export default function SignupScreen() {
   const nameErrorMessage = errors.userName;
 
   const rawPhoneDigits = phoneDigits(values.phone);
-  const hasPhonePrefix = rawPhoneDigits.startsWith("010");
-  const hasPhoneLength =
-    rawPhoneDigits.length >= 10 && rawPhoneDigits.length <= 11;
-  const isPhoneValid = hasPhonePrefix && hasPhoneLength;
+  const isPhoneValid = isValidPhoneDigits(rawPhoneDigits);
+  // 연락처는 선택: 비워 두거나, 적었다면 형식이 맞아야 다음 단계로 간다
+  const isPhoneOk = rawPhoneDigits.length === 0 || isPhoneValid;
   const phoneErrorMessage = errors.phone;
 
   const trimmedEmail = values.email.trim();
@@ -341,7 +337,7 @@ export default function SignupScreen() {
   const isCard2Complete = Boolean(
     isNameValid &&
     !nameErrorMessage &&
-    isPhoneValid &&
+    isPhoneOk &&
     !phoneErrorMessage &&
     hasValidEmailFormat &&
     currentEmailAvailability !== false &&
@@ -580,7 +576,7 @@ export default function SignupScreen() {
                     <InlineError>{nameErrorMessage}</InlineError>
                   </Field>
 
-                  <Field label="연락처">
+                  <Field label="연락처 (선택)">
                     <SignupInput
                       ref={phoneInputRef}
                       testID="signup-phone-input"

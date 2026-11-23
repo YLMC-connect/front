@@ -103,7 +103,7 @@ export interface LifeStudyCohortDetailDto extends LifeStudyCohortDto {
 }
 
 export interface LifeStudyAttendRequest {
-  userYear: string;
-  userFaithYears: string;
-  userPart: string;
+  userYear?: string;
+  userFaithYears?: string;
+  userPart?: string;
 }

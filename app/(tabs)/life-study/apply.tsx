@@ -1,5 +1,5 @@
 import { AppText } from "@/components/ui/app-text";
-import { Checkbox, RadioRow } from "@/components/ui/checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
 import { InfoBox } from "@/components/ui/info-box";
 import { ModalFormTextInput } from "@/components/ui/modal-form-layout";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -26,8 +26,6 @@ import {
   useLifeStudyOverview,
 } from "../../../src/hooks/useLifeStudyCourses";
 import { useMemberMe } from "../../../src/hooks/useMember";
-
-const faithYears = ["1년 미만", "1-3년", "3-5년", "5-10년", "10년 이상"];
 
 export default function LifeStudyApplyScreenRoute() {
   const router = useRouter();
@@ -75,9 +73,6 @@ export default function LifeStudyApplyScreenRoute() {
   const memberName = member?.name || "사용자";
   const memberPhone = member?.phone || "등록된 전화번호 없음";
 
-  const [userYear, setUserYear] = useState("");
-  const [userPart, setUserPart] = useState("");
-  const [faithYearIndex, setFaithYearIndex] = useState<number | null>(null);
   const [promiseAgreed, setPromiseAgreed] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -89,20 +84,6 @@ export default function LifeStudyApplyScreenRoute() {
       setFormError("지금 신청 가능한 삶공부 기수가 없어요.");
       return;
     }
-    const trimmedYear = userYear.trim();
-    if (!/^\d{4}$/.test(trimmedYear)) {
-      setFormError("생년은 4자리 숫자로 입력해주세요 (예: 1994).");
-      return;
-    }
-    const trimmedPart = userPart.trim();
-    if (!trimmedPart) {
-      setFormError("소속 부서를 입력해주세요 (예: 4부 청장년부).");
-      return;
-    }
-    if (faithYearIndex == null) {
-      setFormError("신앙 연차를 선택해주세요.");
-      return;
-    }
     if (!promiseAgreed) {
       setFormError("수강 약속에 동의해주세요.");
       return;
@@ -111,11 +92,7 @@ export default function LifeStudyApplyScreenRoute() {
     try {
       await applyMutation.mutateAsync({
         cohortId,
-        input: {
-          userYear: trimmedYear,
-          userFaithYears: faithYears[faithYearIndex],
-          userPart: trimmedPart,
-        },
+        input: {},
       });
       Alert.alert("수강 신청 완료", "수강 신청했어요.", [
         { text: "확인", onPress: () => router.back() },
@@ -181,45 +158,7 @@ export default function LifeStudyApplyScreenRoute() {
 
                 <View style={styles.form}>
                   <Field label="이름" value={memberName} editable={false} />
-                  <View style={styles.twoCols}>
-                    <Field
-                      label="연락처"
-                      value={memberPhone}
-                      editable={false}
-                    />
-                    <Field
-                      label="생년"
-                      value={userYear}
-                      onChangeText={setUserYear}
-                      keyboardType="number-pad"
-                      maxLength={4}
-                      placeholder="예: 1988"
-                    />
-                  </View>
-                  <Field
-                    label="소속 부서"
-                    value={userPart}
-                    onChangeText={setUserPart}
-                    placeholder="예) 4부 청장년부"
-                  />
-
-                  <View>
-                    <Text style={styles.label}>신앙 연차</Text>
-                    <View
-                      style={styles.options}
-                      accessibilityRole="radiogroup"
-                      accessibilityLabel="신앙 연차"
-                    >
-                      {faithYears.map((item, index) => (
-                        <RadioRow
-                          key={item}
-                          label={item}
-                          selected={index === faithYearIndex}
-                          onPress={() => setFaithYearIndex(index)}
-                        />
-                      ))}
-                    </View>
-                  </View>
+                  <Field label="연락처" value={memberPhone} editable={false} />
 
                   <Checkbox
                     checked={promiseAgreed}

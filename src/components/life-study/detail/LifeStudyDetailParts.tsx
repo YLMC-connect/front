@@ -1,22 +1,35 @@
+import type { ReactNode } from "react";
 import { View } from "react-native";
-import { Text } from "@/components/ui/text";
+import { theme } from "../../../constants/theme";
+import { AppIcon, type AppIconName } from "../../ui/app-icon";
+import { AppText } from "../../ui/app-text";
 import { styles } from "./lifeStudyDetailStyles";
 
-export function InfoRow({
+/** 상세 정보 한 줄: 아이콘 18 · 라벨(폭 64) 14 muted · 값 14/600. 줄 사이는 구분선. */
+export function InfoLine({
+  icon,
   label,
   value,
-  primary = false,
 }: {
+  icon: AppIconName;
   label: string;
-  value: string;
-  primary?: boolean;
+  value: ReactNode;
 }) {
   return (
-    <View style={styles.infoRow}>
-      <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={[styles.infoValue, primary ? styles.primaryText : null]}>
-        {value}
-      </Text>
+    <View style={styles.infoLine}>
+      <AppIcon name={icon} size={18} color={theme.colors.textMuted} />
+      <AppText variant="label" tone="muted" style={styles.infoLabel}>
+        {label}
+      </AppText>
+      <View style={styles.infoValue}>
+        {typeof value === "string" ? (
+          <AppText variant="label" weight="semibold">
+            {value}
+          </AppText>
+        ) : (
+          value
+        )}
+      </View>
     </View>
   );
 }

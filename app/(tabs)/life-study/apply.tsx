@@ -1,24 +1,20 @@
 import { AppText } from "@/components/ui/app-text";
 import { Checkbox } from "@/components/ui/checkbox";
 import { InfoBox } from "@/components/ui/info-box";
-import { ModalFormTextInput } from "@/components/ui/modal-form-layout";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import {
-  Alert,
-  Keyboard,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
-import { Text } from "@/components/ui/text";
+import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { Screen } from "../../../src/components/layout/Screen";
 import {
+  formatMonthDay,
+  formatPeriod,
+  joinParts,
+} from "../../../src/components/life-study/lifeStudyFormat";
+import {
+  Avatar,
   Empty,
   FloatingBottomBar,
   TopBar,
-  VisualThumb,
 } from "../../../src/components/ui";
 import { theme } from "../../../src/constants/theme";
 import {
@@ -52,26 +48,26 @@ export default function LifeStudyApplyScreenRoute() {
     ? openCohort.cohortId || String(openCohort.id)
     : "";
   const courseTitle = openCohort?.title || params.courseTitle || "삶공부 과정";
-  const weekCount = openCohort?.weekCount || 13;
-  const courseMetaParts = [
-    openCohort?.instructorName ? `강사 ${openCohort.instructorName}` : null,
-    openCohort?.studyPlace || null,
-    `총 ${weekCount}주`,
-  ].filter(Boolean);
-  const courseMeta =
-    courseMetaParts.join(" · ") ||
-    (openCohort?.summary
-      ? `${openCohort.summary} · 총 ${weekCount}주`
-      : `총 ${weekCount}주 과정`);
-  const applicationPeriodLabel = openCohort?.applicationPeriod || "-";
-  const capacityLabel =
+  const weekCount = openCohort?.weekCount ?? 0;
+  const startDate = formatMonthDay(openCohort?.lifeStudyDate);
+  const courseMeta = joinParts([
+    openCohort?.cohortNumber != null ? `${openCohort.cohortNumber}기` : null,
+    startDate ? `${startDate} 개강` : null,
+    weekCount > 0 ? `${weekCount}주` : null,
+  ]);
+  const period = formatPeriod(openCohort?.applicationPeriod);
+  const notice = joinParts([
+    period ? `신청 기간 ${period}` : null,
     openCohort?.capacity != null
-      ? `${openCohort.enrolledCount ?? 0} / ${openCohort.capacity}명`
-      : "-";
+      ? `정원 ${openCohort.enrolledCount ?? 0} / ${openCohort.capacity}명`
+      : null,
+    openCohort?.eligibility ? `조건 ${openCohort.eligibility}` : null,
+  ]);
   const hasNoOpenCourse = !isPending && !openCohort;
 
   const memberName = member?.name || "사용자";
   const memberPhone = member?.phone || "등록된 전화번호 없음";
+  const promiseDetail = `${weekCount > 0 ? `${weekCount}주 과정 중 ` : ""}80% 이상 출석하며, 매주 묵상 과제를 성실히 수행하겠습니다.`;
 
   const [promiseAgreed, setPromiseAgreed] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -95,9 +91,6 @@ export default function LifeStudyApplyScreenRoute() {
         // 생년·신앙연차·소속부서는 서버에서 선택 항목이 되어 보내지 않는다
         input: {},
       });
-      Alert.alert("수강 신청 완료", "수강 신청했어요.", [
-        { text: "확인", onPress: () => router.back() },
-      ]);
     } catch (err: unknown) {
       const message =
         err instanceof Error
@@ -105,7 +98,17 @@ export default function LifeStudyApplyScreenRoute() {
           : "수강 신청하지 못했어요. 다시 시도해주세요.";
       setFormError(message);
       Alert.alert("수강 신청 실패", message);
+      return;
     }
+    // 상세로 돌아가 "수강 신청했어요" 토스트를 보인다
+    router.dismissTo({
+      pathname: "/life-study/[id]",
+      params: {
+        id: openCohort?.id ?? params.courseId ?? "",
+        cohortId,
+        applied: "1",
+      },
+    });
   };
 
   return (
@@ -126,64 +129,69 @@ export default function LifeStudyApplyScreenRoute() {
           </View>
         ) : (
           <>
-            <ScrollView
-              keyboardShouldPersistTaps="handled"
-              keyboardDismissMode="on-drag"
-              contentContainerStyle={[styles.body, { flexGrow: 1 }]}
-            >
-              <Pressable
-                accessible={false}
-                onPress={Keyboard.dismiss}
-                style={{ flexGrow: 1 }}
-              >
-                <View style={styles.summaryCard}>
-                  <VisualThumb size={72} seed={1} icon="menu-book" />
-                  <View style={styles.summaryText}>
-                    <Text style={styles.courseTitle}>{courseTitle}</Text>
-                    <Text style={styles.courseMeta}>{courseMeta}</Text>
+            <ScrollView contentContainerStyle={styles.body}>
+              {notice ? <InfoBox description={notice} /> : null}
+
+              <View style={styles.card} testID="life-study-apply-summary">
+                <AppText variant="body" weight="semibold">
+                  {courseTitle}
+                </AppText>
+                {courseMeta ? (
+                  <AppText variant="caption" tone="muted">
+                    {courseMeta}
+                  </AppText>
+                ) : null}
+              </View>
+
+              <View style={styles.card}>
+                <AppText variant="caption" weight="semibold" tone="muted">
+                  신청자
+                </AppText>
+                <View style={styles.applicant}>
+                  <Avatar
+                    name={memberName}
+                    size={40}
+                    seed={member?.id}
+                    uri={member?.profileImage}
+                  />
+                  <View style={styles.applicantText}>
+                    <AppText variant="label" weight="semibold">
+                      {memberName}
+                    </AppText>
+                    <AppText variant="caption" tone="muted">
+                      {memberPhone}
+                    </AppText>
                   </View>
                 </View>
+                <AppText variant="caption" tone="muted">
+                  바꾸려면 마이페이지 › 프로필 수정에서 바꿔 주세요.
+                </AppText>
+              </View>
 
-                <InfoBox
-                  title={`신청 기간 ${applicationPeriodLabel}`}
-                  description={[
-                    `정원 ${capacityLabel}`,
-                    openCohort?.eligibility
-                      ? `신청 조건: ${openCohort.eligibility}`
-                      : null,
-                  ]
-                    .filter(Boolean)
-                    .join("\n")}
-                  style={styles.infoBox}
+              <View style={styles.card}>
+                <Checkbox
+                  checked={promiseAgreed}
+                  onChange={setPromiseAgreed}
+                  accessibilityLabel={`수강 약속에 동의합니다. ${promiseDetail}`}
+                  style={styles.promise}
+                  label={
+                    <>
+                      <AppText variant="label" weight="semibold">
+                        수강 약속에 동의합니다
+                      </AppText>
+                      <AppText variant="caption" tone="muted">
+                        {promiseDetail}
+                      </AppText>
+                    </>
+                  }
                 />
+              </View>
 
-                <View style={styles.form}>
-                  <Field label="이름" value={memberName} />
-                  <Field label="연락처" value={memberPhone} />
-
-                  <Checkbox
-                    checked={promiseAgreed}
-                    onChange={setPromiseAgreed}
-                    accessibilityLabel={`수강 약속에 동의합니다. ${weekCount}주 과정 중 80% 이상 출석하며, 매주 묵상 과제를 성실히 수행하겠습니다.`}
-                    style={styles.promise}
-                    label={
-                      <>
-                        <AppText variant="body" weight="semibold">
-                          수강 약속에 동의합니다
-                        </AppText>
-                        <AppText variant="label" tone="muted">
-                          {weekCount}주 과정 중 80% 이상 출석하며, 매주 묵상
-                          과제를 성실히 수행하겠습니다.
-                        </AppText>
-                      </>
-                    }
-                  />
-
-                  {formError ? (
-                    <Text style={styles.errorText}>{formError}</Text>
-                  ) : null}
-                </View>
-              </Pressable>
+              {formError ? (
+                <AppText variant="caption" weight="semibold" tone="danger">
+                  {formError}
+                </AppText>
+              ) : null}
             </ScrollView>
 
             <FloatingBottomBar
@@ -200,16 +208,6 @@ export default function LifeStudyApplyScreenRoute() {
   );
 }
 
-/** 회원 정보에서 채운 읽기 전용 칸. */
-function Field({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
-      <ModalFormTextInput editable={false} style={styles.input} value={value} />
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   root: {
     flex: 1,
@@ -220,88 +218,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.layout.screenX,
   },
   body: {
-    paddingHorizontal: 18,
-    paddingTop: 4,
-    paddingBottom: 112,
+    gap: theme.spacing[4],
+    paddingHorizontal: theme.layout.screenX,
+    paddingTop: theme.spacing[1],
+    paddingBottom: 132,
   },
-  summaryCard: {
+  card: {
+    gap: theme.spacing[1],
+    padding: theme.spacing[4],
     borderRadius: theme.radius.md,
     backgroundColor: theme.colors.surface,
-    padding: 16,
-    marginBottom: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
     ...theme.shadow.sm,
   },
-  summaryText: {
+  applicant: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing[3],
+    marginVertical: theme.spacing[2],
+  },
+  applicantText: {
     flex: 1,
     minWidth: 0,
   },
-  courseTitle: {
-    color: theme.colors.text,
-    fontSize: theme.typography.body.fontSize,
-    lineHeight: theme.typography.body.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-  },
-  courseMeta: {
-    marginTop: 4,
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
-  },
-  infoBox: {
-    marginBottom: 20,
-  },
-  form: {
-    gap: 20,
-  },
-  field: {
-    flex: 1,
-  },
-  label: {
-    marginBottom: 8,
-    color: theme.colors.text,
-    fontSize: theme.typography.label.fontSize,
-    lineHeight: theme.typography.label.lineHeight,
-    fontWeight: theme.fontWeight.bold,
-  },
-  input: {
-    marginHorizontal: 0,
-  },
   promise: {
     alignItems: "flex-start",
-  },
-  errorText: {
-    marginTop: 4,
-    color: theme.colors.dangerText,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  bottom: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: theme.layout.screenX,
-    paddingTop: 24,
-    paddingBottom: 24,
-  },
-  submitButton: {
-    height: 52,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  submitButtonDisabled: {
-    opacity: 0.6,
-  },
-  submitText: {
-    color: theme.colors.onPrimary,
-    fontSize: theme.typography.body.fontSize,
-    lineHeight: theme.typography.body.lineHeight,
-    fontWeight: theme.fontWeight.bold,
   },
 });

@@ -7,8 +7,11 @@ import {
   fetchLifeStudyCourses,
   fetchLifeStudyOverview,
 } from "../services/lifeStudyService";
+import { fetchMyPageActivityLifeStudies } from "../services/mypageService";
 import type { LifeStudyStatus } from "../types/lifeStudy";
 import type { LifeStudyAttendRequest } from "../types/lifeStudyApi";
+
+const myLifeStudiesKey = [...queryKeys.mypage.all, "life-studies"] as const;
 
 export function useLifeStudyCourses(filter: LifeStudyStatus = "all") {
   return useQuery({
@@ -21,6 +24,14 @@ export function useLifeStudyOverview() {
   return useQuery({
     queryKey: queryKeys.lifeStudy.overview(),
     queryFn: fetchLifeStudyOverview,
+  });
+}
+
+/** 내 수강(신청 중·수강 중·수료). 마이페이지 수강 내역과 같은 캐시를 쓴다. */
+export function useMyLifeStudies() {
+  return useQuery({
+    queryKey: myLifeStudiesKey,
+    queryFn: fetchMyPageActivityLifeStudies,
   });
 }
 
@@ -54,6 +65,7 @@ export function useApplyLifeStudyCohort() {
     }) => applyLifeStudyCohort(cohortId, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.lifeStudy.all });
+      queryClient.invalidateQueries({ queryKey: myLifeStudiesKey });
     },
   });
 }

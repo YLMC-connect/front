@@ -303,6 +303,8 @@ export function buildLifeStudyOverview(
       bookName: cohort.bookName ?? undefined,
       summary: cohort.studyContent ?? "",
       applicationPeriod: appPeriod,
+      applicationEndDate: cohort.endDate ?? undefined,
+      yoil: cohort.yoil ?? undefined,
       lifeStudyDate: cohort.lifeStudyDate ?? undefined,
       studyPlace: cohort.studyPlace ?? undefined,
       eligibility: cohort.eligibility ?? undefined,

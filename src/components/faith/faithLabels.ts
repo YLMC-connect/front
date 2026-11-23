@@ -1,4 +1,3 @@
-import type { LifeStudyOverviewStatus } from "../../types/lifeStudy";
 import type {
   PrayerOverviewRoomStatus,
   PrayerPeriod,
@@ -35,10 +34,4 @@ export const requestStatusLabels: Record<PrayerRequestStatus, string> = {
   answerRequested: "응답 요청",
   answered: "응답됨",
   hidden: "숨김",
-};
-
-export const lifeStudyStatusLabels: Record<LifeStudyOverviewStatus, string> = {
-  completed: "수료",
-  recommended: "추천",
-  pending: "미수료",
 };

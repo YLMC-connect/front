@@ -19,7 +19,7 @@ beforeEach(() => {
 });
 
 describe("useApplyLifeStudyCohort", () => {
-  it("기수 id 와 입력을 넘기고 삶공부 전체를 무효화한다", async () => {
+  it("기수 id 와 입력을 넘기고 삶공부 전체와 내 수강을 무효화한다", async () => {
     service.applyLifeStudyCohort.mockResolvedValue(undefined as never);
     const { result, invalidatedKeys } = renderHookWithClient(() =>
       useApplyLifeStudyCohort(),
@@ -28,7 +28,10 @@ describe("useApplyLifeStudyCohort", () => {
     await act(() => result.current.mutateAsync({ cohortId: 12, input }));
 
     expect(service.applyLifeStudyCohort).toHaveBeenCalledWith(12, input);
-    expect(invalidatedKeys()).toEqual([queryKeys.lifeStudy.all]);
+    expect(invalidatedKeys()).toEqual([
+      queryKeys.lifeStudy.all,
+      [...queryKeys.mypage.all, "life-studies"],
+    ]);
   });
 
   it("실패하면 에러를 전달하고 캐시를 무효화하지 않는다", async () => {

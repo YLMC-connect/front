@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { router } from "expo-router";
 import {
   ScrollView,
   StyleSheet,
@@ -9,16 +9,22 @@ import {
 import { Text } from "@/components/ui/text";
 import { Screen } from "../../src/components/layout/Screen";
 import {
+  cohortLabel,
+  joinParts,
+  textOf,
+} from "../../src/components/life-study/lifeStudyFormat";
+import {
+  Button,
   Empty,
   ErrorState,
+  ListSkeleton,
   MotionEnter,
   MOTION_STAGGER_LIMIT,
   motionStaggerDelay,
   TopBar,
 } from "../../src/components/ui";
 import { theme } from "../../src/constants/theme";
-import { queryKeys } from "../../src/lib/queryKeys";
-import { fetchMyPageActivityLifeStudies } from "../../src/services/mypageService";
+import { useMyLifeStudies } from "../../src/hooks/useLifeStudyCourses";
 
 type CourseRow = {
   key: string;
@@ -26,33 +32,14 @@ type CourseRow = {
   meta: string;
 };
 
-/** 수강 내역 원소는 값 타입이 정해지지 않아(unknown) 글자·숫자일 때만 쓴다. */
-function textOf(value: unknown): string | undefined {
-  if (typeof value === "string") return value.trim() || undefined;
-  if (typeof value === "number" && Number.isFinite(value)) return String(value);
-  return undefined;
-}
-
-function cohortLabel(value: unknown) {
-  if (typeof value === "number" && Number.isFinite(value)) return `${value}기`;
-  return textOf(value);
-}
-
-function joinMeta(parts: (string | undefined)[]) {
-  return parts.filter(Boolean).join(" · ");
-}
-
 export default function LifeStudyHistoryScreen() {
-  const history = useQuery({
-    queryKey: [...queryKeys.mypage.all, "life-studies"],
-    queryFn: fetchMyPageActivityLifeStudies,
-  });
+  const history = useMyLifeStudies();
 
   const ongoing: CourseRow[] = (history.data?.ongoing ?? []).map(
     (item, index) => ({
       key: `ongoing-${textOf(item.cohortId) ?? index}`,
       name: textOf(item.name) ?? "이름 없는 과정",
-      meta: joinMeta([cohortLabel(item.cohortNumber), textOf(item.period)]),
+      meta: joinParts([cohortLabel(item.cohortNumber), textOf(item.period)]),
     }),
   );
   const completed: CourseRow[] = (history.data?.completed ?? []).map(
@@ -61,7 +48,7 @@ export default function LifeStudyHistoryScreen() {
       return {
         key: `completed-${textOf(item.cohortId) ?? index}`,
         name: textOf(item.name) ?? "이름 없는 과정",
-        meta: joinMeta([
+        meta: joinParts([
           cohortLabel(item.cohortNumber),
           completedAt ? `${completedAt} 수료` : undefined,
         ]),
@@ -77,7 +64,7 @@ export default function LifeStudyHistoryScreen() {
         <TopBar title="수강 내역" back />
         <ScrollView contentContainerStyle={styles.body}>
           {history.isPending ? (
-            <Text style={styles.sectionMeta}>불러오는 중이에요.</Text>
+            <ListSkeleton rows={3} thumbnail={false} />
           ) : null}
           {history.isError ? (
             <ErrorState
@@ -86,12 +73,21 @@ export default function LifeStudyHistoryScreen() {
             />
           ) : null}
           {isEmpty ? (
-            <Empty
-              icon="book-open-page-variant-outline"
-              title="수강 내역이 없어요"
-              description="삶공부 과정을 수강하면 여기에 보여요."
-              testID="life-study-history-empty"
-            />
+            <View style={styles.empty} testID="life-study-history-empty">
+              <Empty
+                icon="book-open-page-variant-outline"
+                title="수료한 과정이 없어요"
+                description="지금 신청 가능한 과정을 둘러보세요"
+                style={styles.emptyState}
+              />
+              <Button
+                variant="secondary"
+                onPress={() => router.push("/life-study")}
+                testID="life-study-history-browse"
+              >
+                과정 보기
+              </Button>
+            </View>
           ) : null}
           {history.isSuccess && !isEmpty ? (
             <>
@@ -192,10 +188,15 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing["2"],
     paddingBottom: theme.spacing["8"],
   },
-  sectionMeta: {
-    color: theme.colors.textMuted,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
+  empty: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingBottom: theme.spacing[8],
+  },
+  emptyState: {
+    flex: 0,
+    paddingBottom: theme.spacing[4],
   },
   groupGap: {
     marginTop: theme.spacing["5"],

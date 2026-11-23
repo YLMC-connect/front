@@ -19,7 +19,6 @@ import GroupNoticesScreen from "../group/notices";
 import HomeScreen from "../index";
 import LifeStudyDetailScreen from "../life-study/[id]";
 import LifeStudyApplyScreenRoute from "../life-study/apply";
-import LifeStudyHistoryScreen from "../life-study/history";
 import LifeStudyScreen from "../life-study";
 import MarketScreen from "../market";
 import MarketDetailScreen from "../market/[id]";
@@ -537,7 +536,10 @@ describe("v1 tab smoke screens", () => {
           weekCount: 13,
           instructorName: "박귀원",
           summary: "신앙의 근본을 바로 세우는 가장 기본 과정",
-          applicationPeriod: "6.24 ~ 7.05",
+          applicationPeriod: "2026-06-24 ~ 2026-07-05",
+          applicationEndDate: "2026-07-05",
+          lifeStudyDate: "2026-07-08",
+          yoil: 3,
           capacity: 24,
           enrolledCount: 18,
         },
@@ -569,6 +571,36 @@ describe("v1 tab smoke screens", () => {
         },
       ]);
 
+    jest
+      .spyOn(mypageService, "fetchMyPageActivityLifeStudies")
+      .mockResolvedValue({
+        completionCount: 1,
+        applications: [
+          {
+            cohortId: 9,
+            lifeStudyId: 4,
+            name: "새가족의 삶",
+            cohortNumber: 3,
+            startDate: "2026-07-08",
+            status: "PENDING",
+            description: null,
+            appliedAt: "2026-06-25",
+          },
+        ],
+        ongoing: [],
+        completed: [
+          {
+            lifeStudyId: 1,
+            name: "말씀통독의 삶",
+            cohortId: 2,
+            cohortNumber: 1,
+            status: "COMPLETED",
+            completedAt: "2026-02-15",
+            attendCount: 12,
+            totalClassCount: 13,
+          },
+        ],
+      });
     jest.spyOn(mypageService, "fetchMyPageActivityPosts").mockResolvedValue({
       items: [
         {
@@ -1997,11 +2029,29 @@ describe("v1 tab smoke screens", () => {
     renderWithClient(<LifeStudyScreen />);
 
     expect(screen.getByText("말씀으로 배우고 삶으로 자라가요")).toBeTruthy();
-    expect(await screen.findByText("내 학습경로")).toBeTruthy();
+    expect(await screen.findByText("필수 과정")).toBeTruthy();
+    expect(screen.getByText("신청 가능")).toBeTruthy();
+    expect(screen.getByText("전체 과정")).toBeTruthy();
+    expect(screen.getByText("내 수강")).toBeTruthy();
+    expect(screen.getByTestId("life-study-path")).toBeTruthy();
+    expect(screen.getByText("신청 07.05까지")).toBeTruthy();
+    expect(screen.queryByText("수강 기준")).toBeNull();
     expect(screen.queryByText("중보기도")).toBeNull();
-    expect(screen.queryByLabelText("삶공부 신청")).toBeNull();
-    expect(screen.getAllByText("수강 신청").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("과정 확인").length).toBeGreaterThan(0);
+  });
+
+  it("switches life study segments to all courses and my courses", async () => {
+    renderWithClient(<LifeStudyScreen />);
+    await screen.findByTestId("life-study-open-list");
+
+    fireEvent.press(screen.getByTestId("life-study-segment-all"));
+    expect(await screen.findByTestId("life-study-all-list")).toBeTruthy();
+    expect(screen.getByText("수료했어요")).toBeTruthy();
+
+    fireEvent.press(screen.getByTestId("life-study-segment-mine"));
+    expect(await screen.findByTestId("life-study-mine-list")).toBeTruthy();
+    expect(screen.getByText("새가족의 삶")).toBeTruthy();
+    expect(screen.getByText("3기 · 07.08 개강")).toBeTruthy();
+    expect(screen.getByText("1기 · 2026-02-15 수료")).toBeTruthy();
   });
 
   it("shows two open cohorts of the same course without a duplicate key warning", async () => {
@@ -2034,7 +2084,7 @@ describe("v1 tab smoke screens", () => {
     const consoleError = jest.spyOn(console, "error");
 
     renderWithClient(<LifeStudyScreen />);
-    await screen.findByText("내 학습경로");
+    await screen.findByTestId("life-study-open-list");
 
     expect(screen.getAllByText("생명의 삶").length).toBeGreaterThanOrEqual(2);
     expect(
@@ -2048,7 +2098,7 @@ describe("v1 tab smoke screens", () => {
   it("opens a life study course", async () => {
     jest.mocked(router.push).mockClear();
     renderWithClient(<LifeStudyScreen />);
-    await screen.findByText("내 학습경로");
+    await screen.findByTestId("life-study-open-list");
 
     fireEvent.press(screen.getAllByText("생명의 삶")[0]);
     expect(router.push).toHaveBeenCalledWith(
@@ -2067,6 +2117,10 @@ describe("v1 tab smoke screens", () => {
   });
 
   it("requires only the promise and applies with an empty body", async () => {
+    jest.mocked(useRouter).mockReturnValue({
+      back: jest.fn(),
+      dismissTo: jest.fn(),
+    } as never);
     jest
       .mocked(useLocalSearchParams)
       .mockReturnValue({ cohortId: "life-overview-open-1" });
@@ -2086,6 +2140,49 @@ describe("v1 tab smoke screens", () => {
     expect(apply.mock.calls[0]?.[1]).toEqual({});
   });
 
+  it("returns to the detail with a toast flag after applying", async () => {
+    const dismissTo = jest.fn();
+    jest.mocked(useRouter).mockReturnValue({
+      back: jest.fn(),
+      dismissTo,
+    } as never);
+    jest
+      .mocked(useLocalSearchParams)
+      .mockReturnValue({ cohortId: "life-overview-open-1" });
+    jest.spyOn(lifeStudyService, "applyLifeStudyCohort").mockResolvedValue(1);
+    renderWithClient(<LifeStudyApplyScreenRoute />);
+
+    expect(
+      await screen.findByText("신청 기간 06.24 ~ 07.05 · 정원 18 / 24명"),
+    ).toBeTruthy();
+    fireEvent.press(screen.getByText("수강 약속에 동의합니다"));
+    fireEvent.press(screen.getByTestId("life-study-apply"));
+
+    await waitFor(() =>
+      expect(dismissTo).toHaveBeenCalledWith({
+        pathname: "/life-study/[id]",
+        params: {
+          id: "life-overview-open-1",
+          cohortId: "life-overview-open-1",
+          applied: "1",
+        },
+      }),
+    );
+  });
+
+  it("shows the deadline, seats and the applied toast on the detail", async () => {
+    jest.mocked(useLocalSearchParams).mockReturnValue({
+      id: "life-overview-open-1",
+      applied: "1",
+    });
+    renderWithClient(<LifeStudyDetailScreen />);
+
+    expect(await screen.findByText("07.08 개강 · 수요일 · 13주")).toBeTruthy();
+    expect(screen.getByTestId("life-study-detail-deadline")).toBeTruthy();
+    expect(screen.getByText("6자리")).toBeTruthy();
+    expect(screen.getByText("수강 신청했어요")).toBeTruthy();
+  });
+
   it("does not apply to another cohort when the requested cohort is not open", async () => {
     jest
       .mocked(useLocalSearchParams)
@@ -2094,14 +2191,6 @@ describe("v1 tab smoke screens", () => {
 
     expect(await screen.findByText("신청할 수 없는 과정이에요")).toBeTruthy();
     expect(screen.queryByTestId("life-study-apply")).toBeNull();
-  });
-
-  it("renders the life study history screen", async () => {
-    renderWithClient(<LifeStudyHistoryScreen />);
-
-    expect(screen.getByText("수강 내역")).toBeTruthy();
-    expect(screen.getByText("내 수료 기록")).toBeTruthy();
-    expect(await screen.findByText("말씀통독의 삶")).toBeTruthy();
   });
 
   it("renders the my page screen", () => {

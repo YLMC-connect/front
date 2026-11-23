@@ -1,6 +1,7 @@
 import { AppIcon } from "@/components/ui/app-icon";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useIsFocused, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -76,13 +77,6 @@ const STATUS_OPTIONS: readonly {
   { value: "done", label: "나눔완료", description: "나눔이 끝났어요" },
 ];
 
-/** 사진 위 헤더 그라데이션(맨 위 60% → 55% 지점 28% → 0%). */
-const PHOTO_HEADER_GRADIENT = [
-  "rgba(25,31,40,0.6)",
-  "rgba(25,31,40,0.28)",
-  "rgba(25,31,40,0)",
-] as const;
-
 export default function MarketDetailScreen() {
   const params = useLocalSearchParams<{ id?: string }>();
   const id = params.id ?? "1";
@@ -111,6 +105,7 @@ export default function MarketDetailScreen() {
   });
   const heroThreshold = Math.max(width - (insets.top + 56), 1);
   const headerTint = isPastHero ? theme.colors.text : theme.colors.onPrimary;
+  const isFocused = useIsFocused();
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = event.nativeEvent.contentOffset.y;
     const past = offsetY >= heroThreshold;
@@ -231,6 +226,8 @@ export default function MarketDetailScreen() {
   return (
     <Screen scroll={false} padded={false} applyTopInset={false}>
       <View style={styles.root}>
+        {/* 사진 위에서는 상태 바도 흰색. 이 화면이 보일 때만 바꾼다(다른 화면은 전역 dark) */}
+        {isFocused ? <StatusBar style={isPastHero ? "dark" : "light"} /> : null}
         <View
           testID="market-detail-sticky-header"
           style={[
@@ -252,7 +249,9 @@ export default function MarketDetailScreen() {
           >
             {/* 사진 위에서는 흰색, 스크롤해 헤더가 bg 로 바뀌면 글자색 */}
             <AppIcon name="chevron-left" size={22} color={headerTint} />
-            <Text style={[styles.backText, { color: headerTint }]}>뒤로</Text>
+            <AppText style={[styles.backText, { color: headerTint }]}>
+              뒤로
+            </AppText>
           </MotionPressable>
           {isPastHero ? (
             <View
@@ -342,9 +341,9 @@ export default function MarketDetailScreen() {
             </Animated.ScrollView>
             {/* 디자인 시스템 "사진 위 헤더": 위에서 60% → 0% 어두운 그라데이션, 높이 safe-top + 56 + 24 */}
             <LinearGradient
-              colors={PHOTO_HEADER_GRADIENT}
+              colors={theme.scrim.photoHeader.colors}
               end={{ x: 0.5, y: 1 }}
-              locations={[0, 0.55, 1]}
+              locations={theme.scrim.photoHeader.locations}
               pointerEvents="none"
               start={{ x: 0.5, y: 0 }}
               style={[

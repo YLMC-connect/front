@@ -312,6 +312,13 @@ export function createHttpGroupDataSource({
       return getDetail(id);
     },
 
+    async cancelApplication(id) {
+      await client.request(`/api/communion/${id}/apply`, {
+        method: "DELETE",
+      });
+      return getDetail(id);
+    },
+
     async leaveGroup(id) {
       await client.request(`/api/communion/${id}/leave`, {
         method: "DELETE",

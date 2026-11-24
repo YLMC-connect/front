@@ -123,6 +123,8 @@ export interface GroupDetail {
   leaderName: string;
   isLeader: boolean;
   isJoined: boolean;
+  /** 내 가입 신청 상태(서버 myMemberStatus). 신청한 적 없거나 비로그인이면 null. */
+  myApplicationStatus: GroupMemberStatus | null;
   /** 참여가 확정된 멤버 이름. */
   members: string[];
   /** 가입 승인 대기 멤버. 서버가 소모임장에게만 준다. */

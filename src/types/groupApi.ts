@@ -33,6 +33,10 @@ export interface CommunionDetailDto {
   requiresApproval?: boolean | null;
   leaderId: string;
   leaderName: string;
+  /** 로그인 사용자의 참여 상태. null 이면 미신청. PENDING·APPROVED·REJECTED */
+  myMemberStatus?: string | null;
+  /** 로그인 사용자가 방장인지 */
+  isLeader?: boolean | null;
   createdAt: string;
   updatedAt?: string;
 }

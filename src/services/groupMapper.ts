@@ -231,7 +231,11 @@ export function mapCommunionDetail(
   const mappedLeaderName = leaderName as string;
   const mappedStatus = status as GroupStatus;
   const mappedCategory = category as Exclude<GroupCategory, "all">;
-  const isLeader = Boolean(currentUserId && mappedLeaderId === currentUserId);
+  const isLeader =
+    data.isLeader === true ||
+    Boolean(currentUserId && mappedLeaderId === currentUserId);
+  const myApplicationStatus =
+    MEMBER_STATUS_TO_DOMAIN[readString(data.myMemberStatus) ?? ""] ?? null;
 
   const approvedMembers = members.filter(
     (member) => member.status === "approved",
@@ -251,6 +255,7 @@ export function mapCommunionDetail(
     isLeader,
     isJoined:
       isLeader ||
+      myApplicationStatus === "approved" ||
       Boolean(
         currentUserId &&
         approvedMembers.some((member) => member.userId === currentUserId),
@@ -259,6 +264,7 @@ export function mapCommunionDetail(
     members: [...approvedMembers]
       .sort((a, b) => Number(b.isLeader) - Number(a.isLeader))
       .map((member) => member.userName),
+    myApplicationStatus,
     pendingMembers: members.filter((member) => member.status === "pending"),
     notices,
   };

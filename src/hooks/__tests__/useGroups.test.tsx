@@ -71,6 +71,7 @@ function detail(overrides: Partial<GroupDetail> = {}): GroupDetail {
     leaderName: "리더",
     isLeader: true,
     isJoined: true,
+    myApplicationStatus: null,
     members: ["리더", "A", "B"],
     notices: [notice("n1"), notice("n2")],
     ...overrides,

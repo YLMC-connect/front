@@ -33,6 +33,7 @@ import {
   groupStatusTone,
 } from "../../../src/services/groupMapper";
 import {
+  useCancelGroupApplication,
   useDeleteGroup,
   useDeleteGroupNotice,
   useGroupDetail,
@@ -54,21 +55,25 @@ export default function GroupDetailScreen() {
   const updateStatusMutation = useUpdateGroupStatus(id);
   const joinGroupMutation = useJoinGroup(id);
   const leaveGroupMutation = useLeaveGroup(id);
+  const cancelApplicationMutation = useCancelGroupApplication(id);
   const [deletingNotice, setDeletingNotice] = useState<{
     id: string;
     title: string;
   } | null>(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  // 승인이 필요한 모임에 신청한 뒤의 표시. 서버가 신청자에게 대기 상태를 주지 않아 이 화면에서만 기억한다
-  const [approvalRequested, setApprovalRequested] = useState(false);
+  const [showCancelApplyConfirm, setShowCancelApplyConfirm] = useState(false);
   const membershipBusy =
-    joinGroupMutation.isPending || leaveGroupMutation.isPending;
+    joinGroupMutation.isPending ||
+    leaveGroupMutation.isPending ||
+    cancelApplicationMutation.isPending;
   const membershipError = joinGroupMutation.isError
     ? joinGroupMutation.error
     : leaveGroupMutation.isError
       ? leaveGroupMutation.error
-      : null;
+      : cancelApplicationMutation.isError
+        ? cancelApplicationMutation.error
+        : null;
   if (detail.isPending) {
     return (
       <Screen padded={false}>
@@ -98,6 +103,9 @@ export default function GroupDetailScreen() {
   const isLeader = group.isLeader;
   const isMember = group.isJoined && !group.isLeader;
   const isNonMember = !group.isJoined;
+  // 내 가입 신청 상태는 서버(myMemberStatus)가 알려 준다. 화면을 다시 열어도 유지된다
+  const isApplicationPending = group.myApplicationStatus === "pending";
+  const isApplicationRejected = group.myApplicationStatus === "rejected";
   const isClosed = group.status === "closed";
   // 승인대기·반려 모임은 참여와 모집 상태 변경을 막는다
   const isApproved = group.status === "open" || group.status === "closed";
@@ -111,8 +119,8 @@ export default function GroupDetailScreen() {
           : null;
   const joinLabel =
     joinBlockedLabel ??
-    (approvalRequested
-      ? "승인 대기 중"
+    (isApplicationRejected
+      ? "다시 신청하기"
       : group.requiresApproval
         ? "가입 신청하기"
         : "참여 신청하기");
@@ -368,6 +376,23 @@ export default function GroupDetailScreen() {
                   : "소모임 참여 상태를 바꾸지 못했어요."}
               </Text>
             ) : null}
+            {isApplicationPending ? (
+              <AppText
+                variant="caption"
+                tone="muted"
+                style={styles.membershipHint}
+              >
+                가입 신청을 보냈어요. 소모임장이 승인하면 참여돼요.
+              </AppText>
+            ) : isApplicationRejected && !joinBlockedLabel ? (
+              <AppText
+                variant="caption"
+                tone="muted"
+                style={styles.membershipHint}
+              >
+                지난 가입 신청이 반려됐어요. 다시 신청할 수 있어요.
+              </AppText>
+            ) : null}
             {isMember ? (
               <Button
                 testID="group-leave-button"
@@ -379,20 +404,30 @@ export default function GroupDetailScreen() {
               >
                 소모임 나가기
               </Button>
+            ) : isApplicationPending ? (
+              <Button
+                testID="group-cancel-application-button"
+                variant="outline"
+                size="lg"
+                accessibilityLabel="가입 신청 취소"
+                loading={membershipBusy}
+                onPress={() => setShowCancelApplyConfirm(true)}
+              >
+                가입 신청 취소
+              </Button>
             ) : (
               <Button
                 testID="group-join-button"
                 size="lg"
                 accessibilityLabel={joinLabel}
-                disabled={joinBlockedLabel !== null || approvalRequested}
+                disabled={joinBlockedLabel !== null}
                 loading={membershipBusy}
                 onPress={() => {
-                  if (joinBlockedLabel || approvalRequested) return;
+                  if (joinBlockedLabel) return;
                   joinGroupMutation.mutate(undefined, {
                     onSuccess: (next) => {
                       // 승인이 필요한 모임은 신청만 되고 아직 멤버가 아니다
                       if (next.requiresApproval && !next.isJoined) {
-                        setApprovalRequested(true);
                         Alert.alert(
                           "가입 신청 완료",
                           "신청했어요. 소모임장이 승인하면 참여돼요.",
@@ -418,6 +453,20 @@ export default function GroupDetailScreen() {
             if (leaveGroupMutation.isPending) return;
             leaveGroupMutation.mutate(undefined, {
               onSettled: () => setShowLeaveConfirm(false),
+            });
+          }}
+        />
+        <ConfirmDialog
+          visible={showCancelApplyConfirm}
+          title="가입 신청을 취소할까요?"
+          message="취소한 뒤에도 다시 신청할 수 있어요."
+          confirmText="신청 취소"
+          cancelText="닫기"
+          onCancel={() => setShowCancelApplyConfirm(false)}
+          onConfirm={() => {
+            if (cancelApplicationMutation.isPending) return;
+            cancelApplicationMutation.mutate(undefined, {
+              onSettled: () => setShowCancelApplyConfirm(false),
             });
           }}
         />
@@ -576,6 +625,10 @@ const styles = StyleSheet.create({
   },
   bodyWithBottomBar: {
     paddingBottom: FLOATING_BOTTOM_BAR_INSET,
+  },
+  membershipHint: {
+    marginBottom: theme.spacing[2],
+    textAlign: "center",
   },
   membershipError: {
     marginBottom: theme.spacing[2],

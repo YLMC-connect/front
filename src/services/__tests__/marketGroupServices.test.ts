@@ -38,6 +38,7 @@ function groupDataSource(
     updateGroupStatus: notUsed(),
     joinGroup: notUsed(),
     leaveGroup: notUsed(),
+    cancelApplication: notUsed(),
     createNotice: notUsed(),
     updateNotice: notUsed(),
     deleteNotice: notUsed(),
@@ -206,4 +207,36 @@ describe("market and group service validation", () => {
       expect(dataSource.joinGroup).not.toHaveBeenCalled();
     },
   );
+
+  it("cancels only a pending application (#350)", async () => {
+    const base = {
+      id: "8",
+      name: "승인제 모임",
+      description: "설명",
+      categoryLabel: "취미·문화",
+      currentMembers: 1,
+      maxMembers: 10,
+      status: "open",
+      leaderName: "이민구",
+      isLeader: false,
+      isJoined: false,
+      members: ["이민구"],
+      notices: [],
+    };
+    const cancelled = { ...base, myApplicationStatus: null };
+    const dataSource = groupDataSource({
+      getDetail: jest
+        .fn()
+        .mockResolvedValueOnce({ ...base, myApplicationStatus: "pending" })
+        .mockResolvedValueOnce(cancelled),
+      cancelApplication: jest.fn().mockResolvedValue(cancelled),
+    });
+    const service = createGroupService(dataSource);
+
+    await expect(service.cancelApplication("8")).resolves.toBe(cancelled);
+    expect(dataSource.cancelApplication).toHaveBeenCalledWith("8");
+
+    await service.cancelApplication("8");
+    expect(dataSource.cancelApplication).toHaveBeenCalledTimes(1);
+  });
 });

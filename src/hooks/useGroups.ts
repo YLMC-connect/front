@@ -18,6 +18,7 @@ import {
   kickGroupMember,
   transferGroupLeader,
   leaveGroup,
+  cancelGroupApplication,
   updateGroup,
   updateGroupNotice,
   updateGroupMemberStatus,
@@ -163,6 +164,14 @@ export function useLeaveGroup(groupId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => leaveGroup(groupId),
+    onSuccess: (detail) => syncGroupMembership(queryClient, detail),
+  });
+}
+
+export function useCancelGroupApplication(groupId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => cancelGroupApplication(groupId),
     onSuccess: (detail) => syncGroupMembership(queryClient, detail),
   });
 }

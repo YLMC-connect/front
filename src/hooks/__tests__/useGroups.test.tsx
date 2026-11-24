@@ -15,6 +15,7 @@ import {
   useJoinGroup,
   useKickGroupMember,
   useLeaveGroup,
+  useCancelGroupApplication,
   useTransferGroupLeader,
   useUpdateGroup,
   useUpdateGroupNotice,
@@ -33,6 +34,7 @@ jest.mock("../../services/groupService", () => ({
   kickGroupMember: jest.fn(),
   transferGroupLeader: jest.fn(),
   leaveGroup: jest.fn(),
+  cancelGroupApplication: jest.fn(),
   updateGroup: jest.fn(),
   updateGroupNotice: jest.fn(),
   updateGroupStatus: jest.fn(),
@@ -151,7 +153,7 @@ describe.each([
     expect(invalidatedKeys()).toEqual(membershipKeys);
   });
 
-  it("실패하면 상세 캐시와 목록을 그대로 둔다", async () => {
+  it("실패하면 캐시 값은 두고 상세만 다시 읽게 한다", async () => {
     service[serviceName].mockRejectedValue(new Error("409"));
     const { result, queryClient, invalidatedKeys } = renderHookWithClient(() =>
       useHook("7"),
@@ -165,7 +167,7 @@ describe.each([
     expect(queryClient.getQueryData(queryKeys.group.detail("7"))).toEqual(
       detail(),
     );
-    expect(invalidatedKeys()).toEqual([]);
+    expect(invalidatedKeys()).toEqual([queryKeys.group.detail("7")]);
   });
 });
 
@@ -399,5 +401,20 @@ describe("group notices", () => {
     expect(
       queryClient.getQueryData(queryKeys.group.detail("7")),
     ).toBeUndefined();
+  });
+});
+
+describe("useCancelGroupApplication", () => {
+  it("실패하면 상세를 다시 읽는다", async () => {
+    service.cancelGroupApplication.mockRejectedValue(new Error("COM017"));
+    const { result, invalidatedKeys } = renderHookWithClient(() =>
+      useCancelGroupApplication("7"),
+    );
+
+    await act(async () => {
+      await expect(result.current.mutateAsync()).rejects.toThrow("COM017");
+    });
+
+    expect(invalidatedKeys()).toEqual([queryKeys.group.detail("7")]);
   });
 });

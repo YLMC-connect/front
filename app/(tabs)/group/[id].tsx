@@ -27,7 +27,9 @@ import {
   Skeleton,
   TopBar,
 } from "../../../src/components/ui";
+import { communionApiErrorMessages } from "../../../src/constants/apiErrorMessages";
 import { theme } from "../../../src/constants/theme";
+import { getApiErrorMessage } from "../../../src/lib/apiErrorMessage";
 import {
   groupStatusLabel,
   groupStatusTone,
@@ -67,13 +69,32 @@ export default function GroupDetailScreen() {
     joinGroupMutation.isPending ||
     leaveGroupMutation.isPending ||
     cancelApplicationMutation.isPending;
+  // 참여·탈퇴·신청 취소 중 마지막으로 실패한 것만 보인다. 서버 문구 대신 코드별 앱 문구를 쓴다
   const membershipError = joinGroupMutation.isError
-    ? joinGroupMutation.error
+    ? getApiErrorMessage(
+        joinGroupMutation.error,
+        communionApiErrorMessages,
+        "소모임에 참여하지 못했어요.",
+      )
     : leaveGroupMutation.isError
-      ? leaveGroupMutation.error
+      ? getApiErrorMessage(
+          leaveGroupMutation.error,
+          communionApiErrorMessages,
+          "소모임에서 나가지 못했어요.",
+        )
       : cancelApplicationMutation.isError
-        ? cancelApplicationMutation.error
+        ? getApiErrorMessage(
+            cancelApplicationMutation.error,
+            communionApiErrorMessages,
+            "가입 신청을 취소하지 못했어요.",
+          )
         : null;
+  // 새 동작을 시작하면 앞서 실패한 다른 동작의 문구를 지운다
+  const resetMembershipErrors = () => {
+    joinGroupMutation.reset();
+    leaveGroupMutation.reset();
+    cancelApplicationMutation.reset();
+  };
   if (detail.isPending) {
     return (
       <Screen padded={false}>
@@ -370,11 +391,7 @@ export default function GroupDetailScreen() {
         {isMember || isNonMember ? (
           <FloatingBottomBar testID="group-detail-bottom-bar">
             {membershipError ? (
-              <Text style={styles.membershipError}>
-                {membershipError instanceof Error
-                  ? membershipError.message
-                  : "소모임 참여 상태를 바꾸지 못했어요."}
-              </Text>
+              <Text style={styles.membershipError}>{membershipError}</Text>
             ) : null}
             {isApplicationPending ? (
               <AppText
@@ -424,6 +441,7 @@ export default function GroupDetailScreen() {
                 loading={membershipBusy}
                 onPress={() => {
                   if (joinBlockedLabel) return;
+                  resetMembershipErrors();
                   joinGroupMutation.mutate(undefined, {
                     onSuccess: (next) => {
                       // 승인이 필요한 모임은 신청만 되고 아직 멤버가 아니다
@@ -451,6 +469,7 @@ export default function GroupDetailScreen() {
           onCancel={() => setShowLeaveConfirm(false)}
           onConfirm={() => {
             if (leaveGroupMutation.isPending) return;
+            resetMembershipErrors();
             leaveGroupMutation.mutate(undefined, {
               onSettled: () => setShowLeaveConfirm(false),
             });
@@ -465,6 +484,7 @@ export default function GroupDetailScreen() {
           onCancel={() => setShowCancelApplyConfirm(false)}
           onConfirm={() => {
             if (cancelApplicationMutation.isPending) return;
+            resetMembershipErrors();
             cancelApplicationMutation.mutate(undefined, {
               onSettled: () => setShowCancelApplyConfirm(false),
             });

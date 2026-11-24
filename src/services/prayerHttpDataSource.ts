@@ -6,6 +6,7 @@ import type {
 } from "../types/prayerApi";
 import {
   buildPrayerOverview,
+  readPrayerAnswerPage,
   readPrayerApplications,
   readPrayerCategories,
   readPrayerCohorts,
@@ -121,6 +122,17 @@ export function createHttpPrayerDataSource({
       return readPrayerTopics(await client.request("/api/prayer/topics/my"));
     },
 
+    async getAnswerPage({
+      lastId,
+      size = 20,
+    }: { lastId?: number; size?: number } = {}) {
+      const query = new URLSearchParams({ size: String(size) });
+      if (lastId != null) query.set("lastId", String(lastId));
+      return readPrayerAnswerPage(
+        await client.request(`/api/prayer/topics/answers?${query}`),
+      );
+    },
+
     async createTopic(input: PrayerTopicWriteRequest) {
       return requireCreatedId(
         await client.request("/api/prayer/topics", {
@@ -129,6 +141,7 @@ export function createHttpPrayerDataSource({
             categoryId: input.categoryId,
             title: input.title,
             content: input.content,
+            anonymous: input.anonymous,
           }),
         }),
       );

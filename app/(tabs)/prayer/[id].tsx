@@ -28,6 +28,7 @@ import {
   AnswersPanel,
   PrayerPanel,
   StatusPanel,
+  toAnswerItem,
   type PrayerItemData,
   type TabKey,
 } from "../../../src/components/prayer/detail/PrayerDetailParts";
@@ -123,16 +124,7 @@ export default function PrayerDetailScreen() {
       : [];
 
   const answerItems: readonly PrayerItemData[] =
-    board?.recentAnswers && board.recentAnswers.length > 0
-      ? board.recentAnswers.map((t) => ({
-          category: t.categoryName || "일반",
-          title: t.title,
-          author: t.writerName || "성도",
-          text: t.content,
-          answer: t.answerContent || undefined,
-          when: formatPrayerDate(t.answeredAt ?? t.createdAt),
-        }))
-      : [];
+    board?.recentAnswers?.map(toAnswerItem) ?? [];
 
   const completedPeople =
     room?.completed && room.completed.length > 0
@@ -246,7 +238,11 @@ export default function PrayerDetailScreen() {
             ) : boardError ? (
               boardError
             ) : activeTab === "answers" ? (
-              <AnswersPanel empty={isAnswersEmpty} items={answerItems} />
+              <AnswersPanel
+                empty={isAnswersEmpty}
+                items={answerItems}
+                onShowAll={() => router.push("/prayer/answers")}
+              />
             ) : (
               <PrayerPanel
                 empty={isPrayEmpty}

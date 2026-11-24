@@ -30,6 +30,7 @@ import PasswordChangeScreen from "../../mypage/password";
 import MyPageTermsScreen from "../../mypage/terms";
 import WithdrawScreen from "../../mypage/withdraw";
 import PrayerDetailScreen from "../prayer/[id]";
+import PrayerAnswersScreen from "../prayer/answers";
 import PrayerApplyScreenRoute from "../prayer/apply";
 import PrayerScreen from "../prayer";
 import PrayerRequestScreenRoute from "../prayer/request";
@@ -1763,6 +1764,11 @@ describe("v1 tab smoke screens", () => {
       ],
     });
 
+    const defaultUseRouter = jest.mocked(useRouter).getMockImplementation();
+    const routerPush = jest.fn();
+    jest
+      .mocked(useRouter)
+      .mockReturnValue({ push: routerPush, back: jest.fn() } as never);
     renderWithClient(<PrayerDetailScreen />);
 
     expect(await screen.findByText("화요일 오후 기도방")).toBeTruthy();
@@ -1844,6 +1850,8 @@ describe("v1 tab smoke screens", () => {
         "첫 주를 잘 마쳤고 팀 안에서 좋은 도움을 받고 있습니다.",
       ),
     ).toBeTruthy();
+    fireEvent.press(screen.getByTestId("prayer-answers-show-all"));
+    expect(routerPush).toHaveBeenCalledWith("/prayer/answers");
 
     // Switch to status tab
     fireEvent.press(screen.getByRole("tab", { name: "현황" }));
@@ -1853,7 +1861,63 @@ describe("v1 tab smoke screens", () => {
     expect(screen.getByText("아직 완료 전")).toBeTruthy();
     expect(screen.getByText("한수연")).toBeTruthy();
 
+    if (defaultUseRouter) {
+      jest.mocked(useRouter).mockImplementation(defaultUseRouter);
+    }
     jest.mocked(useLocalSearchParams).mockReturnValue({});
+  });
+
+  it("lists every answered prayer topic and loads the next page", async () => {
+    const answered = (id: number, title: string) => ({
+      id,
+      categoryId: 1,
+      categoryName: "감사",
+      title,
+      content: `${title} 내용`,
+      status: "ANSWERED" as const,
+      rejectReason: null,
+      writerName: "익명",
+      mine: false,
+      anonymous: true,
+      emergency: false,
+      emergencyEndAt: null,
+      answerContent: `${title} 응답`,
+      answeredAt: "2026-11-20",
+      receivedAt: null,
+      createdAt: "2026-11-01",
+    });
+    const fetchPage = jest
+      .spyOn(prayerService, "fetchPrayerAnswerPage")
+      .mockResolvedValueOnce({
+        content: [answered(9, "첫 응답")],
+        nextCursor: 9,
+        hasNext: true,
+      })
+      .mockResolvedValueOnce({
+        content: [answered(4, "두번째 응답")],
+        nextCursor: null,
+        hasNext: false,
+      });
+    renderWithClient(<PrayerAnswersScreen />);
+
+    expect(await screen.findByText("첫 응답")).toBeTruthy();
+    expect(screen.getByText("기도 응답")).toBeTruthy();
+    expect(screen.getByText("익명")).toBeTruthy();
+    fireEvent(screen.getByTestId("prayer-answers-list"), "onEndReached");
+
+    expect(await screen.findByText("두번째 응답")).toBeTruthy();
+    expect(fetchPage).toHaveBeenNthCalledWith(2, { lastId: 9 });
+  });
+
+  it("shows an empty message when there is no answered prayer topic", async () => {
+    jest
+      .spyOn(prayerService, "fetchPrayerAnswerPage")
+      .mockResolvedValue({ content: [], nextCursor: null, hasNext: false });
+    renderWithClient(<PrayerAnswersScreen />);
+
+    expect(
+      await screen.findByText("응답완료된 기도제목이 없어요"),
+    ).toBeTruthy();
   });
 
   it("reads the day from a monday room name and blocks completion when canComplete is false", async () => {

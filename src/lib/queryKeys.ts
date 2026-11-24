@@ -43,6 +43,7 @@ export const queryKeys = {
     myHistory: () => [...queryKeys.prayer.all, "my-history"] as const,
     myTopics: () => [...queryKeys.prayer.all, "my-topics"] as const,
     topicBoard: () => [...queryKeys.prayer.all, "topic-board"] as const,
+    answers: () => [...queryKeys.prayer.all, "answers"] as const,
     categories: () => [...queryKeys.prayer.all, "categories"] as const,
   },
   member: {

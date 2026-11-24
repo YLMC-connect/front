@@ -10,6 +10,7 @@ import {
   readPrayerCohortStatus,
   readPrayerHistory,
   readPrayerTopicBoard,
+  readPrayerAnswerPage,
   readPrayerTopics,
   requireCreatedId,
 } from "../prayerMapper";
@@ -327,6 +328,20 @@ describe("prayerMapper", () => {
     expect(requireCreatedId(15)).toBe(15);
     expect(readPrayerCohorts(null)).toEqual([]);
     expect(readPrayerHistory(null)).toEqual([]);
+  });
+
+  it("keeps the anonymous flag only when the server sends it (#304)", () => {
+    expect(
+      readPrayerTopics([{ ...topic, writerName: "익명", anonymous: true }])[0],
+    ).toMatchObject({ writerName: "익명", anonymous: true });
+    expect(readPrayerTopics([topic])[0]).not.toHaveProperty("anonymous");
+  });
+
+  it("reads an answered-topic page with its cursor", () => {
+    expect(
+      readPrayerAnswerPage({ content: [topic], nextCursor: 7, hasNext: true }),
+    ).toEqual({ content: [topic], nextCursor: 7, hasNext: true });
+    expect(() => readPrayerAnswerPage({ content: [] })).toThrow(ApiError);
   });
 
   it("safely reads topic with null nullable fields", () => {

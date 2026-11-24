@@ -16,6 +16,9 @@ export const communionApiErrorMessages: ApiErrorMessageMap = {
   COM003: "해당 동행의 방장만 수행할 수 있는 권한입니다.",
   COM011: "해당 유저는 참여 중인 멤버가 아닙니다.",
   COM012: "이미 해당 동행의 방장입니다.",
+  COM014: "이미 가입 신청했어요. 소모임장 승인을 기다려 주세요.",
+  COM016: "가입 신청 내역이 없어요.",
+  COM017: "이미 승인된 멤버예요. 소모임 나가기를 이용해 주세요.",
 };
 
 export const lifeStudyApiErrorMessages: ApiErrorMessageMap = {

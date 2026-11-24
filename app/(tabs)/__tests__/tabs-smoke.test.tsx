@@ -34,6 +34,7 @@ import PrayerApplyScreenRoute from "../prayer/apply";
 import PrayerScreen from "../prayer";
 import PrayerRequestScreenRoute from "../prayer/request";
 import { theme } from "../../../src/constants/theme";
+import { ApiError } from "../../../src/lib/apiClient";
 import { renderWithClient } from "../../../src/test/renderWithClient";
 import * as authService from "../../../src/services/authService";
 import * as groupService from "../../../src/services/groupService";
@@ -1354,6 +1355,49 @@ describe("v1 tab smoke screens", () => {
 
     await waitFor(() => expect(cancel).toHaveBeenCalledWith("1"));
     expect(await screen.findByText("가입 신청하기")).toBeTruthy();
+  });
+
+  it("shows the app message, not the server text, when cancelling fails", async () => {
+    const pendingGroup: GroupDetail = {
+      id: "1",
+      name: "토요 산악회",
+      description: "",
+      categoryLabel: "취미·문화",
+      schedule: "",
+      location: "",
+      requiresApproval: true,
+      pendingMembers: [],
+      myApplicationStatus: "pending",
+      currentMembers: 6,
+      maxMembers: 12,
+      status: "open",
+      leaderName: "김은혜",
+      isLeader: false,
+      isJoined: false,
+      members: ["김은혜"],
+      notices: [],
+    };
+    jest
+      .spyOn(groupService, "fetchGroupDetail")
+      .mockResolvedValue(pendingGroup);
+    jest.spyOn(groupService, "cancelGroupApplication").mockRejectedValue(
+      new ApiError({
+        code: "COM017",
+        message: "server raw message",
+        status: 400,
+      }),
+    );
+    renderWithClient(<GroupDetailScreen />);
+
+    fireEvent.press(await screen.findByText("가입 신청 취소"));
+    fireEvent.press(screen.getByText("신청 취소"));
+
+    expect(
+      await screen.findByText(
+        "이미 승인된 멤버예요. 소모임 나가기를 이용해 주세요.",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText("server raw message")).toBeNull();
   });
 
   it("offers to apply again after a rejected application", async () => {

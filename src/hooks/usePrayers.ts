@@ -1,4 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useMemo } from "react";
 import { queryKeys } from "../lib/queryKeys";
 import {
   cancelPrayerApplication,
@@ -7,6 +13,7 @@ import {
   createPrayerApplication,
   createPrayerTopicRequest,
   fetchMyPrayerHistory,
+  fetchPrayerAnswerPage,
   fetchPrayerCategories,
   fetchPrayerOverview,
   requestPrayerTopicAnswer,
@@ -16,6 +23,24 @@ import type {
   PrayerApplicationCreateRequest,
   PrayerTopicWriteRequest,
 } from "../types/prayerApi";
+
+/** 응답완료 기도제목 전체(최신순). 서버 커서(lastId)로 이어 받는다. */
+export function usePrayerAnswers() {
+  const query = useInfiniteQuery({
+    queryKey: queryKeys.prayer.answers(),
+    queryFn: ({ pageParam }) => fetchPrayerAnswerPage({ lastId: pageParam }),
+    initialPageParam: undefined as number | undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasNext && lastPage.nextCursor != null
+        ? lastPage.nextCursor
+        : undefined,
+  });
+  const items = useMemo(
+    () => query.data?.pages.flatMap((page) => page.content) ?? [],
+    [query.data],
+  );
+  return { ...query, items };
+}
 
 export function usePrayerOverview() {
   return useQuery({

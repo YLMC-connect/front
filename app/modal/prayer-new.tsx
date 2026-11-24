@@ -1,3 +1,4 @@
+import { RadioRow } from "@/components/ui/checkbox";
 import { InfoBox } from "@/components/ui/info-box";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
@@ -25,10 +26,16 @@ import {
   usePrayerCategories,
 } from "../../src/hooks/usePrayers";
 
-// 익명 작성은 등록 API(categoryId·title·content)에 필드가 없어 선택지를 두지 않는다.
+// 익명이면 서버가 기도방·게시판에서 작성자를 "익명" 으로 가린다.
+const visibilityOptions = [
+  { key: "named", label: "이름 표시" },
+  { key: "anonymous", label: "익명" },
+] as const;
+
 type FormValues = {
   title: string;
   content: string;
+  visibility: (typeof visibilityOptions)[number]["key"];
 };
 
 export default function PrayerNewModal() {
@@ -45,6 +52,7 @@ export default function PrayerNewModal() {
   const [values, setValues] = useState<FormValues>({
     title: "",
     content: "",
+    visibility: "named",
   });
   const [error, setError] = useState<string>();
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
@@ -52,7 +60,9 @@ export default function PrayerNewModal() {
   const isSubmitting = createTopicApi.isPending;
 
   const isDirty =
-    values.title.trim().length > 0 || values.content.trim().length > 0;
+    values.title.trim().length > 0 ||
+    values.content.trim().length > 0 ||
+    values.visibility !== "named";
 
   const close = () => {
     if (isDirty) {
@@ -104,6 +114,7 @@ export default function PrayerNewModal() {
         categoryId,
         title: values.title.trim(),
         content: values.content.trim(),
+        anonymous: values.visibility === "anonymous",
       },
       {
         onSuccess: onComplete,
@@ -151,6 +162,27 @@ export default function PrayerNewModal() {
                 />
               </Section>
             ) : null}
+
+            <Section card label="작성자 표시" required>
+              <View style={styles.optionRow}>
+                {visibilityOptions.map((option) => (
+                  <RadioRow
+                    key={option.key}
+                    label={option.label}
+                    selected={values.visibility === option.key}
+                    onPress={() => {
+                      setError(undefined);
+                      setValues((current) => ({
+                        ...current,
+                        visibility: option.key,
+                      }));
+                    }}
+                    style={styles.option}
+                    testID={`prayer-form-visibility-${option.key}`}
+                  />
+                ))}
+              </View>
+            </Section>
 
             <Section
               card
@@ -234,6 +266,8 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[4],
   },
   chipsInCard: { paddingHorizontal: 0 },
+  optionRow: { flexDirection: "row", gap: theme.spacing[2] },
+  option: { flex: 1 },
   cardField: { marginHorizontal: 0 },
   errorText: {
     marginHorizontal: theme.layout.screenX,

@@ -24,6 +24,7 @@ import type {
   PrayerWeekday,
 } from "../types/prayer";
 import type {
+  PrayerAnswerPage,
   PrayerApplicationDto,
   PrayerCategoryDto,
   PrayerCohortDto,
@@ -114,6 +115,7 @@ function readMember(
 
 function readTopic(value: unknown, source: unknown): PrayerTopicDto {
   if (!isRecord(value)) invalid(source);
+  const anonymous = optionalBoolean(value, "anonymous");
   return {
     id: requireInteger(value, "id", source),
     categoryId: optionalInteger(value, "categoryId"),
@@ -125,6 +127,8 @@ function readTopic(value: unknown, source: unknown): PrayerTopicDto {
     // 기도방 화면은 작성자가 없으면 "성도" 로 보여 준다
     writerName: optionalString(value, "writerName"),
     mine: optionalBoolean(value, "mine"),
+    // 익명 여부는 서버가 줄 때만 둔다. 작성자는 서버가 이미 "익명" 으로 가려 준다
+    ...(anonymous != null ? { anonymous } : {}),
     emergency: optionalBoolean(value, "emergency"),
     emergencyEndAt: optionalString(value, "emergencyEndAt"),
     answerContent: requireNullableString(value, "answerContent", source),
@@ -191,6 +195,16 @@ export function readPrayerTopicBoard(data: unknown): PrayerTopicBoard | null {
     emergency: readArrayField(data, "emergency", source, readTopic),
     recentAnswers: readArrayField(data, "recentAnswers", source, readTopic),
     ongoing: readArrayField(data, "ongoing", source, readTopic),
+  };
+}
+
+export function readPrayerAnswerPage(data: unknown): PrayerAnswerPage {
+  if (!isRecord(data)) invalid(data);
+  const source = "prayer.answers";
+  return {
+    content: readArrayField(data, "content", source, readTopic),
+    nextCursor: optionalInteger(data, "nextCursor"),
+    hasNext: requireBoolean(data, "hasNext", source),
   };
 }
 

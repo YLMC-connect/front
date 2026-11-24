@@ -374,6 +374,37 @@ describe("modal smoke screens", () => {
     ).toMatchObject({ paddingTop: theme.layout.screenX });
   });
 
+  it("sends the anonymous choice when a prayer topic is registered (#304)", async () => {
+    jest
+      .spyOn(prayerService, "fetchPrayerCategories")
+      .mockResolvedValue([
+        { id: 3, categoryCode: "HEALTH", categoryName: "건강", orderNum: 1 },
+      ]);
+    const create = jest
+      .spyOn(prayerService, "createPrayerTopicRequest")
+      .mockResolvedValue(21);
+    renderWithClient(<PrayerNewModal />);
+
+    expect(await screen.findByText("건강")).toBeTruthy();
+    expect(screen.getByText("이름 표시")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("prayer-form-visibility-anonymous"));
+    fireEvent.changeText(screen.getByLabelText("기도제목 제목"), "어머니 회복");
+    fireEvent.changeText(
+      screen.getByLabelText("기도 내용"),
+      "수술이 잘 끝나기를 기도해 주세요",
+    );
+    fireEvent.press(screen.getByTestId("prayer-new"));
+
+    await waitFor(() =>
+      expect(create).toHaveBeenCalledWith({
+        categoryId: 3,
+        title: "어머니 회복",
+        content: "수술이 잘 끝나기를 기도해 주세요",
+        anonymous: true,
+      }),
+    );
+  });
+
   it("supports size options in 4px increments and custom height prop on ModalFormTextInput", () => {
     renderWithClient(
       <>

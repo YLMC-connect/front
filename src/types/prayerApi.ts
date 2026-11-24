@@ -74,6 +74,8 @@ export interface PrayerTopicDto {
   /** 없으면 화면에서 "성도". */
   writerName: string | null;
   mine: boolean | null;
+  /** 익명 등록이면 true. 이때 writerName 은 서버가 "익명" 으로 가려 준다. */
+  anonymous?: boolean | null;
   emergency: boolean | null;
   emergencyEndAt: string | null;
   answerContent: string | null;
@@ -139,10 +141,20 @@ export interface PrayerTopicBoard {
   ongoing: PrayerTopicDto[];
 }
 
+/** GET /api/prayer/topics/answers — 응답완료 기도제목 최신순 무한 스크롤. */
+export interface PrayerAnswerPage {
+  content: PrayerTopicDto[];
+  /** 다음 페이지 lastId. 더 없으면 null */
+  nextCursor: number | null;
+  hasNext: boolean;
+}
+
 export interface PrayerTopicWriteRequest {
   categoryId: number;
   title: string;
   content: string;
+  /** 익명 등록 여부. 빼면 서버는 실명으로 저장한다. */
+  anonymous: boolean;
 }
 
 export interface PrayerAnswerRequest {

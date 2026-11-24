@@ -304,13 +304,35 @@ describe("httpPrayerDataSource", () => {
     ]);
   });
 
-  it("writes a topic with category, title, and content only", async () => {
+  it("pages answered topics with the lastId cursor", async () => {
+    const { request, dataSource } = setup();
+    request.mockResolvedValue({
+      content: [],
+      nextCursor: null,
+      hasNext: false,
+    });
+
+    await expect(dataSource.getAnswerPage()).resolves.toEqual({
+      content: [],
+      nextCursor: null,
+      hasNext: false,
+    });
+    await dataSource.getAnswerPage({ lastId: 15 });
+
+    expect(pathsOf(request)).toEqual([
+      "/api/prayer/topics/answers?size=20",
+      "/api/prayer/topics/answers?size=20&lastId=15",
+    ]);
+  });
+
+  it("writes a topic with category, title, content, and anonymous flag", async () => {
     const { request, dataSource } = setup();
     request.mockResolvedValueOnce(12).mockResolvedValue(null);
     const input = {
       categoryId: 2,
       title: "어머니 회복",
       content: "수술이 잘 끝나기를",
+      anonymous: true,
     };
 
     await expect(dataSource.createTopic(input)).resolves.toBe(12);

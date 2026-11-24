@@ -6,6 +6,7 @@ import {
   AppText,
   Avatar,
   Badge,
+  Button,
   Card,
   Empty,
   MotionPressable,
@@ -13,6 +14,8 @@ import {
 } from "../../ui";
 import { ProgressBar } from "../../ui/progress-bar";
 import { theme } from "../../../constants/theme";
+import { formatPrayerDate } from "../../../services/prayerMapper";
+import type { PrayerTopicDto } from "../../../types/prayerApi";
 import { styles } from "./prayerDetailStyles";
 
 export type TabKey = "pray" | "answers" | "status";
@@ -114,12 +117,27 @@ export function groupPrayerItemsByCategory(
     .map(([category, list]) => ({ category, items: list }));
 }
 
+/** 응답완료 기도제목을 응답 카드 값으로. 날짜는 응답일 우선. */
+export function toAnswerItem(topic: PrayerTopicDto): PrayerItemData {
+  return {
+    category: topic.categoryName || "일반",
+    title: topic.title,
+    author: topic.writerName || "성도",
+    text: topic.content,
+    answer: topic.answerContent || undefined,
+    when: formatPrayerDate(topic.answeredAt ?? topic.createdAt),
+  };
+}
+
 export function AnswersPanel({
   empty,
   items,
+  onShowAll,
 }: {
   empty: boolean;
   items: readonly PrayerItemData[];
+  /** 있으면 목록 아래 "응답 전체 보기" 버튼을 둔다. */
+  onShowAll?: () => void;
 }) {
   if (empty || items.length === 0) {
     return (
@@ -138,6 +156,15 @@ export function AnswersPanel({
           <PrayerItem item={item} answer />
         </StaggerItem>
       ))}
+      {onShowAll ? (
+        <Button
+          variant="outline"
+          onPress={onShowAll}
+          testID="prayer-answers-show-all"
+        >
+          응답 전체 보기
+        </Button>
+      ) : null}
     </View>
   );
 }

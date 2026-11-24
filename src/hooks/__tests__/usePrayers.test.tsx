@@ -114,7 +114,12 @@ describe("useCreatePrayerTopicApi", () => {
     const { result, invalidatedKeys } = renderHookWithClient(() =>
       useCreatePrayerTopicApi(),
     );
-    const input = { title: "기도", content: "내용" } as never;
+    const input = {
+      categoryId: 1,
+      title: "기도",
+      content: "내용",
+      anonymous: false,
+    };
 
     await act(() => result.current.mutateAsync(input));
 

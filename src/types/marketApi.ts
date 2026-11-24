@@ -7,6 +7,8 @@ export interface ShareListItemDto {
   authorId: string;
   createdAt: string;
   viewCount?: number;
+  /** 대표(첫 번째) 사진 경로. 사진이 없으면 null */
+  imageUrl?: string | null;
 }
 
 export interface ShareListResponseDto {

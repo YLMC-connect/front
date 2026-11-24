@@ -391,7 +391,13 @@ export default function GroupDetailScreen() {
         {isMember || isNonMember ? (
           <FloatingBottomBar testID="group-detail-bottom-bar">
             {membershipError ? (
-              <Text style={styles.membershipError}>{membershipError}</Text>
+              <AppText
+                variant="caption"
+                tone="danger"
+                style={styles.membershipError}
+              >
+                {membershipError}
+              </AppText>
             ) : null}
             {isApplicationPending ? (
               <AppText
@@ -653,9 +659,6 @@ const styles = StyleSheet.create({
   membershipError: {
     marginBottom: theme.spacing[2],
     textAlign: "center",
-    color: theme.colors.dangerText,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: theme.typography.caption.lineHeight,
   },
   sheet: {
     flexGrow: 1,

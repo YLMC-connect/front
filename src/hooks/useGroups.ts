@@ -157,6 +157,11 @@ export function useJoinGroup(groupId: string) {
   return useMutation({
     mutationFn: () => joinGroup(groupId),
     onSuccess: (detail) => syncGroupMembership(queryClient, detail),
+    // 실패는 대개 서버 상태가 화면과 달라서다(COM014·016·017). 상세를 다시 읽어 버튼을 맞춘다
+    onError: () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.group.detail(groupId),
+      }),
   });
 }
 
@@ -165,6 +170,11 @@ export function useLeaveGroup(groupId: string) {
   return useMutation({
     mutationFn: () => leaveGroup(groupId),
     onSuccess: (detail) => syncGroupMembership(queryClient, detail),
+    // 실패는 대개 서버 상태가 화면과 달라서다(COM014·016·017). 상세를 다시 읽어 버튼을 맞춘다
+    onError: () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.group.detail(groupId),
+      }),
   });
 }
 
@@ -173,6 +183,11 @@ export function useCancelGroupApplication(groupId: string) {
   return useMutation({
     mutationFn: () => cancelGroupApplication(groupId),
     onSuccess: (detail) => syncGroupMembership(queryClient, detail),
+    // 실패는 대개 서버 상태가 화면과 달라서다(COM014·016·017). 상세를 다시 읽어 버튼을 맞춘다
+    onError: () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.group.detail(groupId),
+      }),
   });
 }
 

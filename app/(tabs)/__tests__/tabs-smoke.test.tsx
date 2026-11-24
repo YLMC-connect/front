@@ -333,6 +333,7 @@ describe("v1 tab smoke screens", () => {
       location: "",
       requiresApproval: false,
       pendingMembers: [],
+      myApplicationStatus: null,
       currentMembers: 6,
       maxMembers: 12,
       status: "open",
@@ -1285,6 +1286,7 @@ describe("v1 tab smoke screens", () => {
       location: "교회 1층 로비",
       requiresApproval: true,
       pendingMembers: [],
+      myApplicationStatus: null,
       currentMembers: 6,
       maxMembers: 12,
       status: "open",
@@ -1299,7 +1301,7 @@ describe("v1 tab smoke screens", () => {
       .mockResolvedValue(approvalGroup);
     const join = jest
       .spyOn(groupService, "joinGroup")
-      .mockResolvedValue(approvalGroup);
+      .mockResolvedValue({ ...approvalGroup, myApplicationStatus: "pending" });
     const alert = jest.spyOn(Alert, "alert").mockImplementation(() => {});
     renderWithClient(<GroupDetailScreen />);
 
@@ -1308,11 +1310,78 @@ describe("v1 tab smoke screens", () => {
     fireEvent.press(screen.getByText("가입 신청하기"));
 
     await waitFor(() => expect(join).toHaveBeenCalledWith("1"));
-    expect(await screen.findByText("승인 대기 중")).toBeTruthy();
+    expect(await screen.findByText("가입 신청 취소")).toBeTruthy();
+    expect(
+      screen.getByText("가입 신청을 보냈어요. 소모임장이 승인하면 참여돼요."),
+    ).toBeTruthy();
     expect(alert).toHaveBeenCalledWith(
       "가입 신청 완료",
       "신청했어요. 소모임장이 승인하면 참여돼요.",
     );
+  });
+
+  it("keeps a pending application after reopening and lets the applicant cancel it (#350)", async () => {
+    const pendingGroup: GroupDetail = {
+      id: "1",
+      name: "토요 산악회",
+      description: "함께 산을 오르며 교제해요",
+      categoryLabel: "취미·문화",
+      schedule: "",
+      location: "",
+      requiresApproval: true,
+      pendingMembers: [],
+      myApplicationStatus: "pending",
+      currentMembers: 6,
+      maxMembers: 12,
+      status: "open",
+      leaderName: "김은혜",
+      isLeader: false,
+      isJoined: false,
+      members: ["김은혜"],
+      notices: [],
+    };
+    jest
+      .spyOn(groupService, "fetchGroupDetail")
+      .mockResolvedValue(pendingGroup);
+    const cancel = jest
+      .spyOn(groupService, "cancelGroupApplication")
+      .mockResolvedValue({ ...pendingGroup, myApplicationStatus: null });
+    renderWithClient(<GroupDetailScreen />);
+
+    fireEvent.press(await screen.findByText("가입 신청 취소"));
+    expect(screen.getByText("가입 신청을 취소할까요?")).toBeTruthy();
+    fireEvent.press(screen.getByText("신청 취소"));
+
+    await waitFor(() => expect(cancel).toHaveBeenCalledWith("1"));
+    expect(await screen.findByText("가입 신청하기")).toBeTruthy();
+  });
+
+  it("offers to apply again after a rejected application", async () => {
+    jest.spyOn(groupService, "fetchGroupDetail").mockResolvedValue({
+      id: "1",
+      name: "토요 산악회",
+      description: "",
+      categoryLabel: "취미·문화",
+      schedule: "",
+      location: "",
+      requiresApproval: true,
+      pendingMembers: [],
+      myApplicationStatus: "rejected",
+      currentMembers: 6,
+      maxMembers: 12,
+      status: "open",
+      leaderName: "김은혜",
+      isLeader: false,
+      isJoined: false,
+      members: ["김은혜"],
+      notices: [],
+    });
+    renderWithClient(<GroupDetailScreen />);
+
+    expect(await screen.findByText("다시 신청하기")).toBeTruthy();
+    expect(
+      screen.getByText("지난 가입 신청이 반려됐어요. 다시 신청할 수 있어요."),
+    ).toBeTruthy();
   });
 
   it("lets the leader approve a pending join request from the members screen", async () => {

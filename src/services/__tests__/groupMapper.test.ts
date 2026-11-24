@@ -150,6 +150,33 @@ describe("groupMapper", () => {
     });
   });
 
+  it("reads my application status and leader flag from the detail (#350)", () => {
+    const detail = (extra: Record<string, unknown>) =>
+      mapCommunionDetail(
+        { ...listItem, content: "", leaderId: "leader", ...extra },
+        [],
+        [],
+        "me",
+      );
+
+    expect(detail({ myMemberStatus: "PENDING" })).toMatchObject({
+      myApplicationStatus: "pending",
+      isJoined: false,
+    });
+    expect(detail({ myMemberStatus: "REJECTED" }).myApplicationStatus).toBe(
+      "rejected",
+    );
+    expect(detail({ myMemberStatus: "APPROVED" })).toMatchObject({
+      myApplicationStatus: "approved",
+      isJoined: true,
+    });
+    expect(detail({ myMemberStatus: null }).myApplicationStatus).toBeNull();
+    expect(detail({ isLeader: true })).toMatchObject({
+      isLeader: true,
+      isJoined: true,
+    });
+  });
+
   it("puts the leader first in detail members", () => {
     const member = (userId: string, isLeader: boolean) => ({
       userId,

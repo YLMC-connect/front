@@ -39,6 +39,8 @@ export interface GroupDataSource {
   updateGroupStatus(input: GroupStatusUpdateInput): Promise<GroupDetail>;
   joinGroup(id: string): Promise<GroupDetail>;
   leaveGroup(id: string): Promise<GroupDetail>;
+  /** 승인 대기 중인 내 가입 신청 취소. */
+  cancelApplication(id: string): Promise<GroupDetail>;
   createNotice(
     input: GroupNoticeInput,
   ): Promise<GroupDetail["notices"][number]>;
@@ -119,6 +121,7 @@ export function createGroupService(dataSource: GroupDataSource) {
     joinGroup: async (id: string) => {
       const detail = await dataSource.getDetail(id);
       if (detail.isJoined) return detail;
+      if (detail.myApplicationStatus === "pending") return detail;
       if (detail.status === "pending") {
         throw new Error("승인 대기 중인 모임이에요");
       }
@@ -140,6 +143,11 @@ export function createGroupService(dataSource: GroupDataSource) {
       }
       if (!detail.isJoined) return detail;
       return dataSource.leaveGroup(id);
+    },
+    cancelApplication: async (id: string) => {
+      const detail = await dataSource.getDetail(id);
+      if (detail.myApplicationStatus !== "pending") return detail;
+      return dataSource.cancelApplication(id);
     },
     createNotice: (input: GroupNoticeInput) =>
       dataSource.createNotice(normalizeNoticeInput(input)),
@@ -163,6 +171,7 @@ export const transferGroupLeader = groupService.transferLeader;
 export const updateGroupStatus = groupService.updateGroupStatus;
 export const joinGroup = groupService.joinGroup;
 export const leaveGroup = groupService.leaveGroup;
+export const cancelGroupApplication = groupService.cancelApplication;
 export const createGroupNotice = groupService.createNotice;
 export const updateGroupNotice = groupService.updateNotice;
 export const deleteGroupNotice = groupService.deleteNotice;

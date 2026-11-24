@@ -21,7 +21,7 @@
 
 - 화면 모델: 목록 `MarketOverviewItem`(`thumbnailUrl?`, `status`, `category`, `authorName`, `isMine`), 상세 `MarketDetail`(`images?`, `imageItems?`, `location?`, `comments`). 작성 입력 `MarketInput`, 수정 입력 `MarketUpdateInput`.
 - 상태 `SHARE_STATUS`: AVAILABLE → `sharing`, RESERVED → `reserved`, COMPLETED → `done`. 물품 상태 `SHARE_ITEM_STATUS`: NEW/USED/DAMAGED → 새것/사용감 있음/파손 있음. 카테고리는 서버 코드(`categoryCode`) 문자열 그대로 쓰고(`MarketCategoryCode`), 이름은 카테고리 목록(`MarketCategoryOption` = `code`·`name`)에서 찾는다. 상세도 `categoryCode` 를 갖는다.
-- 목록 DTO 에는 `authorName`·사진 배열이 없다. 목록 작성자 칸은 `authorId` 를 쓰고, 썸네일 URL 이 없으면 `thumbSeed` 기반 `VisualThumb` 를 그린다. 상세는 `authorName` 이 있으면 쓴다.
+- 목록 DTO 에는 `authorName` 이 없고, 사진은 대표 1장만 `imageUrl`(없으면 null)로 온다. 목록 작성자 칸은 `authorId` 를 쓰고, `imageUrl` 을 썸네일로 그리며 없으면 `thumbSeed` 기반 `VisualThumb` 를 그린다. 상세는 `authorName` 이 있으면 쓴다.
 - `isMine` 은 `authorId === 현재 사용자 id`. `GET /api/share/my` 결과는 모두 `isMine: true`.
 - 상대 경로 사진 URL 은 `readApiUrl()` origin 을 붙여 해석한다. DTO 는 `src/types/marketApi.ts`, 화면 모델은 `src/types/market.ts`.
 

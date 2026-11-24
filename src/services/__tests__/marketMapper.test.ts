@@ -113,6 +113,20 @@ describe("marketMapper", () => {
     ]);
   });
 
+  it("uses the list item imageUrl as the card thumbnail (#359)", () => {
+    const now = new Date("2026-07-03T06:11:17");
+    expect(
+      mapShareOverviewItem(
+        { ...listItem, imageUrl: "/images/share/2026/08/a.jpg" },
+        "frontprobe",
+        now,
+      )?.thumbnailUrl,
+    ).toBe("https://api.example.com/images/share/2026/08/a.jpg");
+    expect(
+      mapShareOverviewItem({ ...listItem, imageUrl: null }, "frontprobe", now),
+    ).not.toHaveProperty("thumbnailUrl");
+  });
+
   it("marks a comment edited only when updatedAt differs", () => {
     expect(
       mapShareComment(

@@ -15,11 +15,14 @@ import {
 import { theme } from "../../src/constants/theme";
 import { useWithdrawMember } from "../../src/hooks/useMember";
 
+// 서버는 탈퇴 후 30일 동안 계정을 보관하고(복구용) 그 뒤 개인정보를 파기한다 (개인정보 처리방침 4번)
 const cautions = [
-  "작성한 나눔 글과 댓글은 “탈퇴한 성도”로 남아요",
+  "작성한 나눔 글과 댓글은 30일 뒤 “탈퇴한 성도”로 바뀌어 남아요",
   "참여 중인 기도방과 소모임에서 빠져요",
   "소모임장이라면 가장 먼저 가입한 멤버에게 넘어가요",
-  "다시 가입해도 이전 기록은 되살릴 수 없어요",
+  "30일 안에는 교회에 요청해 계정을 되살릴 수 있어요",
+  "30일 동안은 같은 이메일·연락처로 다시 가입할 수 없어요",
+  "30일이 지나면 계정과 기록을 되살릴 수 없어요",
 ] as const;
 
 export default function WithdrawScreen() {
@@ -46,7 +49,7 @@ export default function WithdrawScreen() {
           <View style={styles.header}>
             <Text style={styles.title}>{"탈퇴하기 전에\n확인해 주세요"}</Text>
             <Text style={styles.desc}>
-              계정과 개인정보는 탈퇴 즉시 지워져요.
+              계정과 개인정보는 탈퇴 30일 뒤에 완전히 지워져요.
             </Text>
           </View>
 
@@ -96,7 +99,7 @@ export default function WithdrawScreen() {
         <ConfirmDialog
           visible={confirmVisible}
           title="정말 탈퇴할까요?"
-          message="탈퇴하면 되돌릴 수 없어요."
+          message="30일이 지나면 되돌릴 수 없어요."
           confirmText="탈퇴"
           danger
           onCancel={() => setConfirmVisible(false)}

@@ -12,7 +12,7 @@
 - 메뉴는 내 활동·계정·고객센터 세 묶음. 프로필 카드 전체를 누르면 프로필 수정으로 간다. 내 정보는 `GET /api/member/me`.
 - 프로필 수정(`/mypage/edit`)은 이름·소속 교회 읽기 전용, 연락처만 `PUT /api/member/me` 로 바꾼다. 맨 아래 `회원 탈퇴` 링크.
 - 비밀번호 변경(`/mypage/password`)은 현재·새·확인 입력 후 `PUT /api/member/password`.
-- 회원 탈퇴(`/mypage/withdraw`)는 안내 확인 체크 후에만 버튼이 켜지고, 확인 팝업을 한 번 더 거쳐 `DELETE /api/member/me` 후 `/login` 으로 간다.
+- 회원 탈퇴(`/mypage/withdraw`)는 안내 확인 체크 후에만 버튼이 켜지고, 확인 팝업을 한 번 더 거쳐 `DELETE /api/member/me` 후 `/login` 으로 간다. 서버는 탈퇴 후 30일 동안 계정을 보관하고(교회에 요청하면 복구) 그 뒤 개인정보를 파기하므로, 안내 문구도 "즉시 삭제"가 아니라 30일 기준으로 쓴다.
 - 활동 내역(`/mypage/activity`)은 `GET /api/mypage/activities/posts`·`comments`·`groups` 를 한꺼번에 받아 나눔·댓글·소모임 탭으로 보이고, 탭 이름 옆에 `totalElements` 를 적는다. 탭 전환은 로컬 상태라 히스토리가 쌓이지 않는다.
 - 중보기도 활동(`/mypage/prayer-history`)은 `GET /api/prayer/me/history` 로 요약(활동 중·참여 기도방)과 활동 중/지난 기도방 목록을 그린다.
 - 삶공부 수강 내역(`/mypage/life-study-history`)은 `GET /api/mypage/activities/life-studies` 의 `ongoing`/`completed` 를 수강 중/수료로 나눈다.
